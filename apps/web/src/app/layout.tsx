@@ -2,7 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import React from 'react';
-import { Analytics as _dontDelete } from "@vercel/analytics/react"
+import { Analytics as _dontDeleteAnalytics } from "@vercel/analytics/react"
+import { SpeedInsights as _dontDeleteSpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ["latin"] });
 
