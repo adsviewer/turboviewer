@@ -54,7 +54,7 @@ export default function Page(): React.JSX.Element {
         </p>
         <div className="fixed bottom-0 left-0 flex items-end justify-center w-full h-48 bg-gradient-to-t from-black via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
           <a
-            className="flex gap-2 p-8 pointer-events-none place-items-center lg:pointer-events-auto lg:p-0"
+            className="flex gap-2 p-8 pointer-events-none place-items-center text-[color:rgb(var(--background-end-rgb))] lg:pointer-events-auto lg:p-0 lg:text-[color:rgb(var(--foreground-rgb))] "
             href="https://vercel.com?utm_source=create-turbo&utm_medium=basic&utm_campaign=create-turbo"
             rel="noopener noreferrer"
             target="_blank"
@@ -62,7 +62,7 @@ export default function Page(): React.JSX.Element {
             By{" "}
             <Image
               alt="Vercel Logo"
-              className="invert"
+              className="invert lg:invert-0 dark:lg:invert"
               height={24}
               priority
               src="/vercel.svg"
@@ -107,7 +107,7 @@ export default function Page(): React.JSX.Element {
           />
           <div className="z-50 flex flex-col items-center justify-center gap-5 px-6 text-center lg:gap-6">
             <svg
-              className="w-[160px] md:w-[200px] fill-white"
+              className="w-[160px] md:w-[200px] fill-[rgb(var(--foreground-rgb))]"
               viewBox="0 0 506 50"
               width={200}
               xmlns="http://www.w3.org/2000/svg"
