@@ -3,17 +3,13 @@
   "display": "Next.js",
   "extends": "./base.json",
   "compilerOptions": {
-    "plugins": [{ "name": "next" }],
     "allowJs": true,
     "declaration": false,
     "declarationMap": false,
     "incremental": true,
     "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "ESNext",
-    "resolveJsonModule": true,
-    "strict": true,
-    "target": "ESNext"
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "plugins": [{ "name": "next" }]
   },
   "include": ["src", "next-env.d.ts"],
   "exclude": ["node_modules"]
