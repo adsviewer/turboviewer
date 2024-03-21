@@ -4,9 +4,6 @@ const prettierrcConfig = {
   semi: true,
   singleQuote: true,
   printWidth: 120,
-  importOrder: ["<THIRD_PARTY_MODULES>", "^@(.*)$", "^[./]"],
-
-  plugins: ['@trivago/prettier-plugin-sort-imports']
 };
 
 export default prettierrcConfig;

@@ -7,21 +7,26 @@
   },
   "scripts": {
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:dev": "prisma migrate dev --create-only",
+    "db:migrate:revert": "npx prisma migrate diff --to-schema-datamodel prisma/schema.prisma --from-schema-datasource prisma/schema.prisma --script > down.sql",
     "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts",
     "format": "prisma format",
     "generate": "prisma generate",
     "lint": "eslint . --max-warnings 0",
     "prebuild": "pnpm run generate",
-    "predev": "pnpm run generate",
+    "predev": "pnpm run generate && pnpm run db:migrate:deploy",
     "studio": "prisma studio",
     "clean": "rm -rf node_modules .turbo",
     "update": "pnpm update --latest && pnpm install"
   },
   "dependencies": {
+    "@pothos/plugin-prisma": "^3.65.0",
     "@prisma/client": "^5.11.0",
-    "@repo/logger": "workspace:*"
+    "@prisma/extension-read-replicas": "^0.3.0",
+    "@repo/logger": "workspace:*",
+    "@repo/utils": "workspace:^",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

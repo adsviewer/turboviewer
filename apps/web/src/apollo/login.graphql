@@ -1,0 +1,49 @@
+mutation login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    token
+    user {
+      ...UserFields
+    }
+  }
+}
+
+mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
+  signup(email: $email, firstName: $firstName, lastName: $lastName, password: $password) {
+    token
+    user {
+      ...UserFields
+    }
+  }
+}
+
+mutation forgetPassword($email: String!) {
+  forgetPassword(email: $email)
+}
+
+mutation resetPassword($token: String!, $password: String!) {
+  resetPassword(token: $token, password: $password) {
+    token
+    user {
+      ...UserFields
+    }
+  }
+}
+
+query me {
+  me {
+    firstName
+    lastName
+    email
+  }
+}
+
+fragment UserFields on User {
+  id
+  firstName
+  lastName
+  email
+  roles {
+    name
+  }
+  organizationId
+}

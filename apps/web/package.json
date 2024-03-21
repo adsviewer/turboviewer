@@ -14,8 +14,11 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "@urql/next": "^1.1.1",
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
+    "graphql": "^16.8.1",
+    "graphql-tag": "^2.12.6",
     "next": "^14.1.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

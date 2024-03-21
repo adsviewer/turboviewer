@@ -37,7 +37,7 @@ module.exports = {
       },
     },
   },
-  ignorePatterns: ["node_modules/", "dist/"],
+  ignorePatterns: ["node_modules/", "dist/", "src/apollo/generated/*.ts"],
   // add rules configurations here
   rules: {
     "import/no-default-export": "off",

@@ -11,9 +11,75 @@ generator client {
   output   = "../.prisma"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
+generator pothos {
+  provider = "prisma-pothos-types"
+}
+
+model Organization {
+  id           String   @id @default(cuid())
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  users        User[]
+  randomString String   @default(cuid())
+
+  @@map("organizations")
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+  id             String          @id @default(cuid())
+  firstName      String          @map("first_name")
+  lastName       String          @map("last_name")
+  email          String          @unique @db.Citext
+  password       String?
+  photo          String?         @map("photo_url")
+  googleId       String?         @unique @map("google_id")
+  roles          UserRole[]
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  organizationId String          @map("organization_id")
+  forgetPassword ForgetPassword?
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+enum RoleEnum {
+  USER
+  ADMIN
+}
+
+model Role {
+  id    String     @id @default(cuid())
+  name  RoleEnum   @unique
+  users UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  roleId    String   @map("role_id")
+  role      Role     @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("user_roles")
+}
+
+model ForgetPassword {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  user      User     @relation(fields: [id], references: [id])
+
+  @@index([createdAt(sort: Desc)])
+  @@map("forget_passwords")
 }
