@@ -1,12 +1,13 @@
-import { prisma, User } from "./client";
+import { logger } from '@repo/logger';
+import { prisma, type User } from './client';
 
 const DEFAULT_USERS = [
   // Add your own user to pre-populate the database with
   {
-    name: "Tim Apple",
-    email: "tim@apple.com",
+    name: 'Tim Apple',
+    email: 'tim@apple.com',
   },
-] satisfies Array<Partial<User>>;
+] satisfies Partial<User>[];
 
 (async () => {
   try {
@@ -14,7 +15,7 @@ const DEFAULT_USERS = [
       DEFAULT_USERS.map((user) =>
         prisma.user.upsert({
           where: {
-            email: user.email!,
+            email: user.email,
           },
           update: {
             ...user,
@@ -26,9 +27,11 @@ const DEFAULT_USERS = [
       ),
     );
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
-})();
+})().catch((e: unknown) => {
+  logger.error(e);
+});
