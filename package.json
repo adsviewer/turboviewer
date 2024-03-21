@@ -7,12 +7,17 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "update": "pnpm update --latest && turbo update && pnpm install",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint-staged": "lint-staged --no-hide-partially-staged",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "eslint": "^8.57.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.12",
     "turbo": "^1.12.5"

@@ -2,7 +2,10 @@
   "name": "@repo/typescript-config",
   "version": "0.0.0",
   "private": true,
-  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf node_modules .turbo",
+    "update": "pnpm update --latest && pnpm install"
+  },
   "publishConfig": {
     "access": "public"
   }
