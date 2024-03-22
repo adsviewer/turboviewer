@@ -1,1 +1,4 @@
+pnpm --filter=server codegen
+git add apps/server/src/schema/generated/*
+git add apps/web/src/apollo/generated/*
 pnpm lint-staged
