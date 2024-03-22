@@ -1,7 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "rootDir": "./src"
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "allowJs": true
   },
-  "extends": "@repo/typescript-config/node.json",
+  "extends": "@repo/typescript-config/base.json",
+  "include": ["src/**.*js", "src/**.ts"]
 }

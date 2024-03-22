@@ -1,6 +1,6 @@
 import { builder } from './builder';
 import './errors';
-import './organization/org-types.ts';
+import './organization/org-types';
 import './user/google-login-operations';
 import './user/user-operations';
 

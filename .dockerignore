@@ -1,0 +1,10 @@
+/.husky/
+/.idea/
+/.git/
+/.github/
+/.vscode/
+
+**/.dist
+**/.next
+**/.turbo
+**/node_modules/

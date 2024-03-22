@@ -2,13 +2,11 @@
   "name": "@repo/logger",
   "version": "1.0.0",
   "private": true,
+  "license": "UNLICENCED",
   "description": "Project Logger",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "type": "module",
-  "files": [
-    "dist/**"
-  ],
   "exports": {
     "javascript": "./dist/index.js",
     "default": "./src/index.ts"
@@ -22,8 +20,6 @@
     "clean": "rm -rf .turbo .next node_modules dist",
     "update": "pnpm update --latest && pnpm install"
   },
-  "author": "",
-  "license": "UNLICENCED",
   "dependencies": {
     "@slack/webhook": "^7.0.2",
     "pino": "^8.19.0",

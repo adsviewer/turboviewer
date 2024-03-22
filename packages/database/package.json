@@ -1,16 +1,22 @@
 {
   "name": "@repo/database",
   "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Project Database",
+  "main": "./src/client.ts",
+  "types": "./src/client.ts",
   "type": "module",
   "exports": {
-    ".": "./src/client.ts"
+    "javascript": "./dist/client.js",
+    "default": "./src/client.ts"
   },
   "scripts": {
+    "build": "tsc",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev --create-only",
     "db:migrate:revert": "npx prisma migrate diff --to-schema-datamodel prisma/schema.prisma --from-schema-datasource prisma/schema.prisma --script > down.sql",
     "db:push": "prisma db push",
-    "db:seed": "tsx src/seed.ts",
     "format": "prisma format",
     "generate": "prisma generate",
     "lint": "eslint . --max-warnings 0",

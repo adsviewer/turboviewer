@@ -9,7 +9,7 @@ import { createJwt } from '../../auth';
 import { PUBLIC_URL } from '../../config';
 import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
 import { sendForgetPasswordEmail, sendSignupEmail } from '../../email';
-import { FireAndForget } from '../../fire-and-forget.ts';
+import { FireAndForget } from '../../fire-and-forget';
 import { builder } from '../builder';
 import { TokenUserDto, UserDto } from './user-types';
 
