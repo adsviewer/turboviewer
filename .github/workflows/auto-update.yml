@@ -1,0 +1,52 @@
+name: Auto-update packages
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Run on the first day of every month
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: pnpm/action-setup@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Update packages
+        run: pnpm update
+
+      - name: Set current date as env variable
+        run: echo "BRANCH_NAME=update-packages-$(date +'%y%m%d')" >> $GITHUB_ENV
+
+      - name: Create branch and push changes
+        run: |
+          git config --global user.email "tech@adsviewer.io"
+          git config --global user.name "Adsviewer Bot"
+          git checkout -b $BRANCH_NAME
+          git add .
+          git commit -m "Auto-update packages" --no-verify
+          git push --set-upstream origin $BRANCH_NAME
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create -B main -H $BRANCH_NAME \
+            --title 'Auto-update packages' \
+            --body 'This pull request updates packages to their latest versions. Make sure that you `pnpm dev` and `pnpm build`, and that you test the changes locally and possible remotely before merging.' \
+            --reviewer trixobird

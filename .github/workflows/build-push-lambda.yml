@@ -1,0 +1,76 @@
+name: Build and push Lambda
+
+on:
+  workflow_call:
+    inputs:
+      aws_region:
+        required: true
+        type: string
+      github_role:
+        required: true
+        type: string
+      organization:
+        required: true
+        type: string
+      lambda_name:
+        required: true
+        type: string
+    secrets:
+      aws_account_id:
+        required: true
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          role-session-name: build-${{ inputs.lambda_name }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: true
+
+      - name: Build server
+        uses: docker/build-push-action@v5
+        with:
+          build-args: lambda=${{ inputs.lambda_name }}
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/local-${{ inputs.lambda_name }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/local-${{ inputs.lambda_name }}:latest
+          context: .
+          file: ./Lambda.Dockerfile
+          platforms: linux/arm64
+          provenance: false
+          cache-from: type=registry,ref=ghcr.io/${{ inputs.organization }}/${{ inputs.lambda_name }}:cache
+          cache-to: type=registry,ref=ghcr.io/${{ inputs.organization }}/${{ inputs.lambda_name }}:cache,mode=max

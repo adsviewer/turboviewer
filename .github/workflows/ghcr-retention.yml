@@ -1,0 +1,28 @@
+name: Delete old container images
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+
+
+jobs:
+  clean-ghcr:
+    name: Delete old unused container images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+      packages: write
+      repository-projects: write
+    steps:
+      - name: Delete containers older than a week
+        uses: snok/container-retention-policy@v2
+        with:
+          image-names: server
+          cut-off: A week ago UTC
+          timestamp-to-use: updated_at
+          account-type: org
+          org-name: adsviewer
+          keep-at-least: 1
+          untagged-only: true
+          token: ${{ secrets.GHCR_TOKEN }}

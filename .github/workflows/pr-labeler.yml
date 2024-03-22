@@ -1,0 +1,18 @@
+name: "Pull Request Labeler"
+on:
+  - pull_request_target
+
+jobs:
+  triage:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: 'Welcome to Adsviewer!\n\nBe sure to review our [pr guidelines](https://github.com/adsviewer/turboviewer/blob/main/.github/pr_guidelines.md)\n\nAnd our [commit guidelines](https://github.com/magpiecollectibles/magpie/blob/main/.github/commit_guidelines.md)'

@@ -1,0 +1,33 @@
+name: Deploy prod
+
+on:
+  workflow_dispatch:
+
+#  push:
+#    branches: [ "main" ]
+#    paths:
+#      - apps/server/**
+#      - packages/**
+#      - infrastructure/**
+#      - .github/workflows/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy_server:
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-deploy-service.yml
+    secrets:
+      aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+    with:
+      aws_region: ${{ vars.AWS_REGION }}
+      environment: prod
+      github_role: prod-github
+      github-organization: adsviewer
+      organization: adsviewer
+      service_name: server

@@ -1,0 +1,36 @@
+automation:
+- changed-files:
+  - any-glob-to-any-file: .github/**/*
+
+documentation:
+- changed-files:
+  - any-glob-to-any-file: '*.md'
+
+infrastructure:
+- changed-files:
+  - any-glob-to-any-file: infrastructure/**/*
+
+server:
+- changed-files:
+  - any-glob-to-any-file: apps/server/**/*
+  - any-glob-to-any-file: packages/logger/**/*
+  - any-glob-to-any-file: packages/config-eslint/**/*
+  - any-glob-to-any-file: packages/database/**/*
+  - any-glob-to-any-file: packages/config-typescript/app.json
+  - any-glob-to-any-file: packages/config-typescript/base.json
+
+web:
+- changed-files:
+  - any-glob-to-any-file: apps/web/**/*
+  - any-glob-to-any-file: packages/logger/**/*
+  - any-glob-to-any-file: packages/ui/**/*
+  - any-glob-to-any-file: packages/config-tailwind/**/*
+  - any-glob-to-any-file: packages/config-eslint/**/*
+  - any-glob-to-any-file: packages/tsconfig/base.json
+  - any-glob-to-any-file: packages/config-typescript/nextjs.json
+
+feature:
+  - head-branch: ['^env', 'env']
+
+release:
+  - base-branch: 'main'

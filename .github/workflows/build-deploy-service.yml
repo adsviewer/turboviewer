@@ -1,0 +1,135 @@
+name: Build service
+
+on:
+  workflow_call:
+    inputs:
+      aws_region:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+      github_role:
+        required: true
+        type: string
+      github-organization:
+        required: true
+        type: string
+      organization:
+        required: true
+        type: string
+      service_name:
+        required: true
+        type: string
+    secrets:
+      aws_account_id:
+        required: true
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          role-session-name: ${{ inputs.environment }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: true
+
+      - name: Build server
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:latest
+          context: .
+          file: ./apps/${{ inputs.service_name }}/Dockerfile
+          platforms: linux/arm64
+          cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache
+          cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache,mode=max
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read
+      packages: write
+
+    needs:
+      - build
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          role-session-name: ${{ inputs.environment }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: true
+
+      - name: Download service task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ inputs.environment }}-${{ inputs.service_name }} \
+          --query taskDefinition --output json | jq -r 'del(
+            .taskDefinitionArn,
+            .requiresAttributes,
+            .compatibilities,
+            .revision,
+            .status,
+            .registeredAt,
+            .registeredBy
+          )' > task-def.json
+
+      - name: Update Amazon ECS task definition for service
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def.json
+          container-name: ${{ inputs.environment }}-${{ inputs.service_name }}
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ github.sha }}
+
+      - name: Deploy Amazon ECS backend service with new service task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ inputs.environment }}-${{ inputs.service_name }}
+          cluster: ${{ inputs.environment }}-${{ inputs.organization }}
+          wait-for-service-stability: true
