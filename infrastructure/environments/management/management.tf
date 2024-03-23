@@ -1,0 +1,37 @@
+locals {
+  organization = "adsviewer"
+}
+
+terraform {
+  cloud {
+    organization = "adsviewer"
+    workspaces {
+      name = "management"
+    }
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.42.0"
+    }
+  }
+
+  required_version = ">= 1.6.6"
+}
+
+provider "aws" {
+  region = var.aws_region
+  default_tags {
+    tags = var.default_tags
+  }
+}
+
+resource "aws_organizations_organization" "org" {
+  aws_service_access_principals = [
+    "cloudtrail.amazonaws.com",
+    "config.amazonaws.com",
+  ]
+
+  feature_set = "ALL"
+}
