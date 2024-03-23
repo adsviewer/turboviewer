@@ -1,5 +1,7 @@
 locals {
-  organization = "adsviewer"
+  organization       = "adsviewer"
+  organization_short = "av"
+  prod_assume_role   = "ProdAdminRoleAssumedByManagement"
 }
 
 terraform {
@@ -27,6 +29,13 @@ provider "aws" {
   }
 }
 
+module "iam" {
+  source = "../../modules/iam"
+
+  environment  = var.environment
+  organization = local.organization
+}
+
 resource "aws_organizations_organization" "org" {
   aws_service_access_principals = [
     "cloudtrail.amazonaws.com",
@@ -35,3 +44,9 @@ resource "aws_organizations_organization" "org" {
 
   feature_set = "ALL"
 }
+
+#resource "aws_organizations_account" "prod" {
+#  name  = "production account"
+#  email = "prod-aws@adsviewer.io"
+#  role_name = local.prod_assume_role
+#}
