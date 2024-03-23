@@ -1,0 +1,5 @@
+**/.terraform/**/*
+*.zip
+!modules/environment/lambdas/*.zip
+!environments/local/lambdas/*.zip
+*.lock.hcl

@@ -5,5 +5,4 @@
     "rootDir": "./src"
   },
   "extends": "@repo/typescript-config/app.json",
-  "include": ["src/**.*js", "src/**.ts"]
 }

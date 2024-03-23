@@ -1,6 +1,6 @@
 import process from 'node:process';
 import { OAuth2Client } from 'google-auth-library';
-import { prisma , type Prisma } from '@repo/database';
+import { prisma, type Prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { isMError, type MError } from '@repo/utils';
 import { createJwt } from './auth';
