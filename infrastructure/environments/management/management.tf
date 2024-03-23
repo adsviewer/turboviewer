@@ -45,8 +45,8 @@ resource "aws_organizations_organization" "org" {
   feature_set = "ALL"
 }
 
-#resource "aws_organizations_account" "prod" {
-#  name  = "production account"
-#  email = "prod-aws@adsviewer.io"
-#  role_name = local.prod_assume_role
-#}
+resource "aws_organizations_account" "prod" {
+  name      = "production account"
+  email     = "prod-aws@adsviewer.io"
+  role_name = local.prod_assume_role
+}
