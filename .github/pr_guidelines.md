@@ -25,4 +25,3 @@ Finally, PR titles should never include the authors name, that's already include
 ## Reviews
 
 In general, always choose folks in your team to review your code. Code being directly pushed or merged should be reserved only for special occasions.
-

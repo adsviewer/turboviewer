@@ -9,6 +9,7 @@
     "clean": "turbo clean",
     "update": "pnpm update --latest && turbo update && pnpm install",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prettier": "prettier --check \"**/*.{ts,tsx,md}\"",
     "lint-staged": "lint-staged --no-hide-partially-staged",
     "prepare": "husky"
   },
