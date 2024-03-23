@@ -1,11 +1,12 @@
 locals {
   terraform_provider_url = "app.terraform.io"
   terraform_audience     = "aws.workload.identity"
+  workspaces             = [var.environment, "prod"]
 }
 
 resource "aws_iam_role" "terraform_role" {
-  name        = "${var.organization}-${var.environment}-terraform"
-  description = "Terraform role for managing ${var.organization} ${var.environment} resources"
+  name        = "${local.organization}-terraform"
+  description = "Terraform role for managing ${local.organization} resources"
 
   max_session_duration = 43200
   assume_role_policy   = data.aws_iam_policy_document.terraform_assume_role_policy.json
@@ -27,10 +28,8 @@ data "aws_iam_policy_document" "terraform_assume_role_policy" {
       variable = "${local.terraform_provider_url}:aud"
     }
     condition {
-      test = "StringLike"
-      values = var.environment == "dev" ? ["organization:${var.organization}:project:${var.project}:workspace:*"] : [
-        "organization:${var.organization}:project:${var.project}:workspace:${var.environment}:*"
-      ]
+      test     = "StringLike"
+      values   = [for workspace in local.workspaces : "organization:${local.organization}:project:${var.terraform_project}:workspace:${workspace}:*"]
       variable = "${local.terraform_provider_url}:sub"
     }
   }
@@ -42,7 +41,7 @@ resource "aws_iam_role_policy_attachment" "terraform_admin_policy_attach" {
 }
 
 data "external" "terraform_thumbprint" {
-  program = ["${path.module}/../thumbprint.sh", local.terraform_provider_url]
+  program = ["${path.module}/../../modules/thumbprint.sh", local.terraform_provider_url]
 }
 
 resource "aws_iam_openid_connect_provider" "terraform_openid_connect_provider" {

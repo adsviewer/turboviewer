@@ -4,17 +4,14 @@ data "aws_ssoadmin_instances" "this" {}
 
 
 ############################## Users,Group,Group's Membership #########################################
-# Create SSO user1
 resource "aws_identitystore_user" "giorgos" {
+  display_name      = "Giorgos Trichopoulos"
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
-
-  display_name = "Giorgos Trichopoulos"
-  user_name    = "giorgos"
-
   name {
     given_name  = "Giorgos"
     family_name = "Trichopoulos"
   }
+  user_name = "giorgos"
 
   emails {
     value = "giorgos@adsviewer.io"
