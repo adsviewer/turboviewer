@@ -1,12 +1,12 @@
 variable "aws_region" {
   type    = string
-  default = "us-east-1"
+  default = "eu-central-1"
 }
 
 variable "default_tags" {
   default = {
 
-    Environment = "Management"
+    Environment = "Production"
     ManagedBy   = "Terraform"
     Project     = "AdsViewer"
 
@@ -16,10 +16,5 @@ variable "default_tags" {
 
 variable "environment" {
   type    = string
-  default = "management"
-}
-
-variable "terraform_project" {
-  type    = string
-  default = "Default Project"
+  default = "prod"
 }

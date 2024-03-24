@@ -1,7 +1,6 @@
 locals {
-  organization       = "adsviewer"
-  organization_short = "av"
-  prod_assume_role   = "ProdAdminRoleAssumedByManagement"
+  organization     = "adsviewer"
+  prod_assume_role = "ProdAdminRoleAssumedByManagement"
 }
 
 data "aws_caller_identity" "current" {}
@@ -29,13 +28,6 @@ provider "aws" {
   default_tags {
     tags = var.default_tags
   }
-}
-
-module "iam" {
-  source = "../../modules/iam"
-
-  environment  = var.environment
-  organization = local.organization
 }
 
 resource "aws_organizations_organization" "org" {
