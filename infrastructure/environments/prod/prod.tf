@@ -36,3 +36,11 @@ provider "aws" {
     tags = var.default_tags
   }
 }
+
+module "workspace" {
+  source = "../../modules/workspace"
+
+  base_tags    = var.default_tags
+  environment  = var.environment
+  organization = local.organization
+}
