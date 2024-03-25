@@ -17,17 +17,37 @@ resource "aws_identitystore_user" "giorgos" {
     value = "giorgos@adsviewer.io"
   }
 }
-
-
-####################### Group Membership ############################################
-# Create Group Membership for the user
 resource "aws_identitystore_group_membership" "giorgos_prod_admin" {
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
   group_id          = aws_identitystore_group.prod_admin_group.group_id
+  member_id         = aws_identitystore_user.giorgos.user_id
+}
+resource "aws_identitystore_group_membership" "giorgos_developer" {
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  group_id          = aws_identitystore_group.developers.group_id
   member_id         = aws_identitystore_user.giorgos.user_id
 }
 resource "aws_identitystore_group_membership" "giorgos_managment_admin" {
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
   group_id          = aws_identitystore_group.management_admin_group.group_id
   member_id         = aws_identitystore_user.giorgos.user_id
+}
+
+resource "aws_identitystore_user" "dennis" {
+  display_name      = "Dennis Kreeft"
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  name {
+    given_name  = "Dennis"
+    family_name = "Kreeft"
+  }
+  user_name = "dennis"
+
+  emails {
+    value = "dennis@adsviewer.io"
+  }
+}
+resource "aws_identitystore_group_membership" "dennis_business" {
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  group_id          = aws_identitystore_group.business_users.group_id
+  member_id         = aws_identitystore_user.dennis.user_id
 }
