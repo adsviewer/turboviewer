@@ -17,8 +17,9 @@ resource "aws_identitystore_group" "management_admin_group" {
 
 # Create Custom Permission Set for S3 Read only
 resource "aws_ssoadmin_permission_set" "admin" {
-  name         = "AdministratorAccess"
-  instance_arn = tolist(data.aws_ssoadmin_instances.this.arns)[0]
+  name             = "AdministratorAccess"
+  instance_arn     = tolist(data.aws_ssoadmin_instances.this.arns)[0]
+  session_duration = "PT12H"
 }
 
 resource "aws_ssoadmin_managed_policy_attachment" "admin_policy_attachment" {
