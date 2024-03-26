@@ -32,7 +32,7 @@
     "@repo/logger": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/utils": "workspace:^",
-    "express": "^4.17.21",
+    "express": "^4.19.2",
     "extensionless": "^1.9.6",
     "google-auth-library": "^9.7.0",
     "graphql": "^16.8.1",
