@@ -79,57 +79,57 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache
           cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache,mode=max
 
-  deploy:
-
-    runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write # This is required for requesting the JWT
-      contents: read
-      packages: write
-
-    needs:
-      - build
-
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
-          role-session-name: ${{ inputs.environment }}
-          aws-region: ${{ inputs.aws_region }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: true
-
-      - name: Download service task definition
-        run: |
-          aws ecs describe-task-definition --task-definition ${{ inputs.environment }}-${{ inputs.service_name }} \
-          --query taskDefinition --output json | jq -r 'del(
-            .taskDefinitionArn,
-            .requiresAttributes,
-            .compatibilities,
-            .revision,
-            .status,
-            .registeredAt,
-            .registeredBy
-          )' > task-def.json
-
-      - name: Update Amazon ECS task definition for service
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-def.json
-          container-name: ${{ inputs.environment }}-${{ inputs.service_name }}
-          image: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ github.sha }}
-
-      - name: Deploy Amazon ECS backend service with new service task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ inputs.environment }}-${{ inputs.service_name }}
-          cluster: ${{ inputs.environment }}-${{ inputs.organization }}
-          wait-for-service-stability: true
+#  deploy:
+#
+#    runs-on: ubuntu-latest
+#
+#    permissions:
+#      id-token: write # This is required for requesting the JWT
+#      contents: read
+#      packages: write
+#
+#    needs:
+#      - build
+#
+#    steps:
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+#          role-session-name: ${{ inputs.environment }}
+#          aws-region: ${{ inputs.aws_region }}
+#
+#      - name: Login to Amazon ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v2
+#        with:
+#          mask-password: true
+#
+#      - name: Download service task definition
+#        run: |
+#          aws ecs describe-task-definition --task-definition ${{ inputs.environment }}-${{ inputs.service_name }} \
+#          --query taskDefinition --output json | jq -r 'del(
+#            .taskDefinitionArn,
+#            .requiresAttributes,
+#            .compatibilities,
+#            .revision,
+#            .status,
+#            .registeredAt,
+#            .registeredBy
+#          )' > task-def.json
+#
+#      - name: Update Amazon ECS task definition for service
+#        id: task-def
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        with:
+#          task-definition: task-def.json
+#          container-name: ${{ inputs.environment }}-${{ inputs.service_name }}
+#          image: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ github.sha }}
+#
+#      - name: Deploy Amazon ECS backend service with new service task definition
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def.outputs.task-definition }}
+#          service: ${{ inputs.environment }}-${{ inputs.service_name }}
+#          cluster: ${{ inputs.environment }}-${{ inputs.organization }}
+#          wait-for-service-stability: true
