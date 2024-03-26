@@ -38,6 +38,17 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+  assume_role {
+    role_arn = data.tfe_outputs.management_outputs.values.prod_assume_role_arn
+  }
+  default_tags {
+    tags = var.default_tags
+  }
+}
+
 module "workspace" {
   source = "../../modules/workspace"
 
@@ -48,6 +59,11 @@ module "workspace" {
 
 module "environment" {
   source = "../../modules/environment"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
 
   amplify_token      = var.amplify_token
   domain             = local.domain

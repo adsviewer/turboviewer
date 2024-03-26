@@ -76,6 +76,12 @@ resource "aws_amplify_app" "webapp" {
   platform             = "WEB_COMPUTE"
 
   custom_rule {
+    source = "https://www.app.${local.domain}"
+    target = "https://app.${local.domain}"
+    status = "302"
+  }
+
+  custom_rule {
     source = "/${local.graphql_path}"
     target = "https://api.${local.domain}/${local.graphql_path}"
     status = "200"

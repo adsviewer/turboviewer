@@ -1,15 +1,13 @@
 name: Deploy prod
 
 on:
-  workflow_dispatch:
-
-#  push:
-#    branches: [ "main" ]
-#    paths:
-#      - apps/server/**
-#      - packages/**
-#      - infrastructure/**
-#      - .github/workflows/**
+  push:
+    branches: [ "main" ]
+    paths:
+      - apps/server/**
+      - packages/**
+      - infrastructure/**
+      - .github/workflows/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,7 +25,7 @@ jobs:
     with:
       aws_region: ${{ vars.AWS_REGION }}
       environment: prod
-      github_role: adsviewer-prod-github
-      github-organization: adsviewer
+      github_role: prod-github
+      github-organization: happyharbor
       organization: adsviewer
       service_name: server

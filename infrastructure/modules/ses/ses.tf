@@ -38,13 +38,6 @@ resource "aws_route53_record" "ses_domain_mail_from_txt" {
   records = ["v=spf1 include:amazonses.com -all"]
 }
 
-resource "aws_ses_template" "forgot_password_en" {
-  name    = "${var.environment}-forgot-password-en"
-  subject = "Ads Viewer password reset"
-  html    = file("${path.module}/forgot-password-en.html")
-  text    = file("${path.module}/forgot-password-en.txt")
-}
-
 data "aws_iam_policy_document" "server_task_role_policy_document" {
   statement {
     actions   = ["ses:SendEmail", "ses:SendTemplatedEmail", "ses:SendRawEmail", "ses:SendBulkTemplatedEmail", "ses:SendBounce"]
