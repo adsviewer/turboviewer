@@ -8,6 +8,7 @@ resource "aws_route53_zone" "zone" {
 }
 
 resource "aws_acm_certificate" "wildcard" {
+  provider                  = aws.us_east_1
   domain_name               = local.domain
   validation_method         = "DNS"
   subject_alternative_names = ["*.${local.domain}", local.domain]
@@ -31,6 +32,7 @@ resource "aws_route53_record" "wildcard_records" {
 }
 
 resource "aws_acm_certificate_validation" "wildcard_validation" {
+  provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.wildcard.arn
   validation_record_fqdns = [for record in aws_route53_record.wildcard_records : record.fqdn]
 }
