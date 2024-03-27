@@ -135,6 +135,4 @@ jobs:
           pnpm --filter=database generate
 
       - name: Db migrate
-        run:  |
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-          pnpm --filter=database db:migrate:deploy
+        run:  pnpm --filter=database db:migrate:deploy
