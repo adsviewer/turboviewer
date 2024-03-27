@@ -1,6 +1,7 @@
 locals {
-  organization = "adsviewer"
-  domain       = "adsviewer.happyharbor.io"
+  organization   = "adsviewer"
+  domain         = "adsviewer.io"
+  git_repository = "${local.organization}/turboviewer"
 }
 
 data "aws_caller_identity" "current" {}
@@ -52,9 +53,10 @@ provider "aws" {
 module "workspace" {
   source = "../../modules/workspace"
 
-  base_tags    = var.default_tags
-  environment  = var.environment
-  organization = local.organization
+  base_tags      = var.default_tags
+  environment    = var.environment
+  git_repository = local.git_repository
+  organization   = local.organization
 }
 
 module "environment" {
@@ -68,6 +70,7 @@ module "environment" {
   amplify_token      = var.amplify_token
   domain             = local.domain
   environment        = var.environment
+  git_repository     = local.git_repository
   github_role_name   = module.workspace.github_role_name
   organization       = local.organization
   service_subnet_ids = module.workspace.private_subnet_ids

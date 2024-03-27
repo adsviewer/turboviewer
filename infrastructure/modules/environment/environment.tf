@@ -29,13 +29,14 @@ module "server" {
     PORT         = 4000,
     PUBLIC_URL   = local.full_domain
   }
-  github_role_name = var.github_role_name
-  route53_endpoint = "api"
-  secrets          = []
+  github_role_name   = var.github_role_name
+  mapped_secrets     = local.server_secrets
+  route53_endpoint   = "api"
+  secrets            = []
+  service_name       = "server"
+  service_subnet_ids = var.service_subnet_ids
   task_role_policies = {
     "ses" = module.ses.send_email_policy_arn
   }
-  service_name       = "server"
-  service_subnet_ids = var.service_subnet_ids
-  vpc_id             = var.vpc_id
+  vpc_id = var.vpc_id
 }

@@ -60,11 +60,11 @@ resource "aws_iam_role_policy_attachment" "execution_role_attachment" {
 
 resource "aws_amplify_app" "webapp" {
   name       = "${var.environment}-webapp"
-  repository = "https://github.com/happyharbor/turboviewer"
+  repository = "https://github.com/${var.git_repository}"
   environment_variables = {
-    AMPLIFY_DIFF_DEPLOY       = "false"
-    AMPLIFY_MONOREPO_APP_ROOT = "apps/web"
-    #    AUTH_SECRET                  = aws_secretsmanager_secret_version.auth_secret_version.secret_string
+    AMPLIFY_DIFF_DEPLOY          = "false"
+    AMPLIFY_MONOREPO_APP_ROOT    = "apps/web"
+    AUTH_SECRET                  = aws_ssm_parameter.auth_secret.value
     NEXT_PUBLIC_GRAPHQL_ENDPOINT = local.graphql_endpoint
     NEXT_PUBLIC_ENDPOINT         = local.full_domain
     _CUSTOM_IMAGE                = "amplify:al2023"
@@ -96,7 +96,6 @@ resource "aws_amplify_app" "webapp" {
   enable_auto_branch_creation = true
   enable_branch_auto_deletion = true
 
-  # The default patterns added by the Amplify Console.
   auto_branch_creation_patterns = [
     "env/${var.environment}**",
   ]
