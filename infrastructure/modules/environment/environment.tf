@@ -8,6 +8,10 @@ terraform {
       version               = "~> 5.42.0"
       configuration_aliases = [aws.us_east_1]
     }
+    vercel = {
+      source  = "vercel/vercel"
+      version = "~> 1.4.0"
+    }
   }
 }
 

@@ -120,7 +120,7 @@ resource "aws_amplify_branch" "main" {
 
 resource "aws_amplify_domain_association" "domain_association" {
   app_id      = aws_amplify_app.webapp.id
-  domain_name = local.domain
+  domain_name = "new.${local.domain}"
 
   sub_domain {
     branch_name = aws_amplify_app.webapp.production_branch[0].branch_name
@@ -129,5 +129,17 @@ resource "aws_amplify_domain_association" "domain_association" {
 
   lifecycle {
     ignore_changes = [sub_domain]
+  }
+}
+
+
+
+###### Vercel ######
+resource "vercel_project" "frontend" {
+  name      = "${var.environment}-webapp"
+  framework = "nextjs"
+  git_repository = {
+    type = "github"
+    repo = var.git_repository
   }
 }
