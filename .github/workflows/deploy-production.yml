@@ -26,6 +26,6 @@ jobs:
       aws_region: ${{ vars.AWS_REGION }}
       environment: prod
       github_role: prod-github
-      github-organization: happyharbor
+      github-organization: adsviewer
       organization: adsviewer
       service_name: server
