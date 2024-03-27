@@ -28,10 +28,6 @@ const index = () => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.use(yoga.graphqlEndpoint, yoga);
 
-  app.get('/', (req, res) => {
-    res.send('Ok');
-  });
-
   const port = PORT;
   app.listen(port, () => {
     logger.info(`[${MODE}] Server is running on http://localhost:${String(port)}/graphql`);
