@@ -1,8 +1,13 @@
-resource "aws_apprunner_service" "example" {
+resource "aws_apprunner_service" "server" {
   service_name = "${var.environment}-${var.service_name}"
 
   health_check_configuration {
-    path = "/graphql"
+    healthy_threshold   = 1
+    interval            = 1
+    path                = "/graphql"
+    protocol            = "HTTP"
+    timeout             = 1
+    unhealthy_threshold = 1
   }
   instance_configuration {
     instance_role_arn = aws_iam_role.instance_role.arn
@@ -15,7 +20,7 @@ resource "aws_apprunner_service" "example" {
       image_configuration {
         runtime_environment_secrets   = var.mapped_secrets
         runtime_environment_variables = var.environment_variables
-        port                          = "4000"
+        port                          = "80"
       }
       image_identifier      = "${aws_ecr_repository.ecr_repo.repository_url}:latest"
       image_repository_type = "ECR"

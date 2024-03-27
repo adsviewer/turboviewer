@@ -30,7 +30,7 @@ module "server" {
   environment     = var.environment
   environment_variables = {
     API_ENDPOINT = "https://api.${local.domain}/${local.api_path}"
-    PORT         = 4000,
+    PORT         = 80,
     PUBLIC_URL   = local.full_domain
   }
   github_role_name   = var.github_role_name
