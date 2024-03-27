@@ -13,6 +13,10 @@ resource "aws_ssm_parameter" "database_url" {
   name  = "/${var.environment}/server/database_url"
   type  = "SecureString"
   value = "fill_me_in"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 locals {
