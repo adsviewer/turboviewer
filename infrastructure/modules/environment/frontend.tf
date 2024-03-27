@@ -136,9 +136,12 @@ resource "aws_amplify_branch" "main" {
 
 ###### Vercel ######
 resource "vercel_project" "frontend" {
-  name           = "${var.environment}-webapp"
-  framework      = "nextjs"
-  root_directory = "apps/web"
+  name            = "${var.environment}-webapp"
+  framework       = "nextjs"
+  root_directory  = "apps/web"
+  build_command   = "turbo run build"
+  install_command = "pnpm install"
+  dev_command     = "next"
   git_repository = {
     type = "github"
     repo = var.git_repository
