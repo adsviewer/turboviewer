@@ -38,7 +38,7 @@ module "server" {
   route53_endpoint   = "api"
   service_name       = "server"
   service_subnet_ids = var.service_subnet_ids
-  task_role_policies = {
+  instance_role_policies = {
     "ses" = module.ses.send_email_policy_arn
   }
   vpc_id = var.vpc_id
