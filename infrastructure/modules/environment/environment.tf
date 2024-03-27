@@ -36,7 +36,6 @@ module "server" {
   github_role_name   = var.github_role_name
   mapped_secrets     = local.server_secrets
   route53_endpoint   = "api"
-  secrets            = []
   service_name       = "server"
   service_subnet_ids = var.service_subnet_ids
   task_role_policies = {

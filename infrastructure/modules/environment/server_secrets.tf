@@ -16,14 +16,8 @@ resource "aws_ssm_parameter" "database_url" {
 }
 
 locals {
-  server_secrets = [
-    {
-      name      = "AUTH_SECRET"
-      valueFrom = aws_ssm_parameter.auth_secret.arn
-    },
-    {
-      name      = "DATABASE_URL"
-      valueFrom = aws_ssm_parameter.database_url.arn
-    },
-  ]
+  server_secrets = {
+    AUTH_SECRET  = aws_ssm_parameter.auth_secret.arn
+    DATABASE_URL = aws_ssm_parameter.database_url.arn
+  }
 }

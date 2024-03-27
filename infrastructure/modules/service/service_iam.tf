@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "github_operating" {
   statement {
     actions   = local.ecr_actions
     effect    = "Allow"
-    resources = [aws_ecr_repository.ecr_repo.arn, "${aws_ecr_repository.ecr_repo.arn}/*"]
+    resources = [aws_ecr_repository.ecr_repo.arn]
   }
 }
 
