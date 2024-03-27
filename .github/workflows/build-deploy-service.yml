@@ -35,7 +35,7 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm64
+#          - linux/arm64
     permissions:
       id-token: write
       contents: read
@@ -49,14 +49,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY_IMAGE }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -86,15 +80,13 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-latest
           context: .
           file: ./apps/${{ inputs.service_name }}/Dockerfile
           platforms: ${{ matrix.platform }}
-          labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache
-          cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache
+          cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache,mode=max
 
   db-migrate:
 

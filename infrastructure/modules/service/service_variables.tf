@@ -27,6 +27,10 @@ variable "domain_name" {
   type = string
 }
 
+variable "domain_prefix" {
+  type = string
+}
+
 variable "github_role_name" {
   type = string
 }
@@ -34,10 +38,6 @@ variable "github_role_name" {
 variable "mapped_secrets" {
   type    = map(string)
   default = {}
-}
-
-variable "route53_endpoint" {
-  type = string
 }
 
 variable "instance_role_policies" {
