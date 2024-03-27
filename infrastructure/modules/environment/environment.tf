@@ -30,7 +30,7 @@ module "server" {
   environment     = var.environment
   environment_variables = {
     API_ENDPOINT = "https://api.${local.domain}/${local.api_path}"
-    PORT         = 4000,
+    PORT         = 80,
     PUBLIC_URL   = local.full_domain
   }
   github_role_name   = var.github_role_name
@@ -38,7 +38,7 @@ module "server" {
   route53_endpoint   = "api"
   service_name       = "server"
   service_subnet_ids = var.service_subnet_ids
-  task_role_policies = {
+  instance_role_policies = {
     "ses" = module.ses.send_email_policy_arn
   }
   vpc_id = var.vpc_id

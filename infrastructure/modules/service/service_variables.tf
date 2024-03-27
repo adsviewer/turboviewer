@@ -40,7 +40,7 @@ variable "route53_endpoint" {
   type = string
 }
 
-variable "task_role_policies" {
+variable "instance_role_policies" {
   type = map(string)
 }
 

@@ -93,13 +93,18 @@ resource "aws_iam_policy" "ecr_policy" {
   policy = data.aws_iam_policy_document.github_operating.json
 }
 
+resource "aws_iam_role_policy_attachment" "parameter_access_github_attachment" {
+  role       = var.github_role_name
+  policy_arn = aws_iam_policy.parameters_access_policy.arn
+}
+
 resource "aws_iam_role_policy_attachment" "github_operating" {
   role       = var.github_role_name
   policy_arn = aws_iam_policy.ecr_policy.arn
 }
 
-#resource "aws_iam_role_policy_attachment" "instance_role_attachments" {
-#  for_each   = var.task_role_policies
-#  role       = aws_iam_role.instance_role.name
-#  policy_arn = each.value
-#}
+resource "aws_iam_role_policy_attachment" "instance_role_attachments" {
+  for_each   = var.instance_role_policies
+  role       = aws_iam_role.instance_role.name
+  policy_arn = each.value
+}
