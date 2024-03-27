@@ -19,6 +19,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.42.0"
     }
+    vercel = {
+      source  = "vercel/vercel"
+      version = "~> 1.4.0"
+    }
   }
 
   required_version = ">= 1.6.6"
@@ -78,4 +82,9 @@ module "environment" {
   slack_webhook_url  = var.slack_webhook_url
   vercel_api_token   = var.vercel_api_token
   vercel_team        = var.vercel_team
+}
+
+provider "vercel" {
+  api_token = var.vercel_api_token
+  team      = var.vercel_team
 }
