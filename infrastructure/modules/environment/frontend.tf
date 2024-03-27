@@ -137,15 +137,26 @@ resource "aws_amplify_branch" "main" {
 ###### Vercel ######
 resource "vercel_project" "frontend" {
   build_command = "turbo run build --filter=web"
-  #  install_command = "pnpm install"
-  #  dev_command     = "next"
-  framework = "nextjs"
+  framework     = "nextjs"
   git_repository = {
     repo = var.git_repository
     type = "github"
-    #    production_branch = "add-certificates"
   }
   name                       = "${var.environment}-webapp"
   root_directory             = "apps/web"
   serverless_function_region = "fra1"
+}
+
+resource "vercel_project_domain" "frontend_domain" {
+  project_id = vercel_project.frontend.id
+  domain     = "${local.prefix}.${local.domain}"
+}
+
+resource "aws_route53_record" "frontend_domain_record" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = local.prefix
+  type    = "CNAME"
+  ttl     = "300"
+  records = ["cname.vercel-dns.com."]
 }
