@@ -20,7 +20,7 @@ module "ses" {
 
 module "server" {
   source          = "../service"
-  certificate_arn = "" // aws_acm_certificate.wildcard.arn
+  certificate_arn = aws_acm_certificate.wildcard.arn
   domain_name     = aws_route53_zone.zone.name
   domain_zone_id  = aws_route53_zone.zone.id
   environment     = var.environment

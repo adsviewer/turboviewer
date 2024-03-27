@@ -96,7 +96,6 @@ resource "aws_amplify_app" "webapp" {
   enable_auto_branch_creation = true
   enable_branch_auto_deletion = true
 
-  # The default patterns added by the Amplify Console.
   auto_branch_creation_patterns = [
     "env/${var.environment}**",
   ]
@@ -119,16 +118,16 @@ resource "aws_amplify_branch" "main" {
   stage     = "PRODUCTION"
 }
 
-#resource "aws_amplify_domain_association" "domain_association" {
-#  app_id      = aws_amplify_app.webapp.id
-#  domain_name = local.domain
-#
-#  sub_domain {
-#    branch_name = aws_amplify_app.webapp.production_branch[0].branch_name
-#    prefix      = local.prefix
-#  }
-#
-#  lifecycle {
-#    ignore_changes = [sub_domain]
-#  }
-#}
+resource "aws_amplify_domain_association" "domain_association" {
+  app_id      = aws_amplify_app.webapp.id
+  domain_name = local.domain
+
+  sub_domain {
+    branch_name = aws_amplify_app.webapp.production_branch[0].branch_name
+    prefix      = local.prefix
+  }
+
+  lifecycle {
+    ignore_changes = [sub_domain]
+  }
+}
