@@ -1,4 +1,4 @@
-name: Build service
+name: Migrate database
 
 on:
   workflow_dispatch
@@ -13,9 +13,6 @@ jobs:
       id-token: write # This is required for requesting the JWT
       contents: read
       packages: write
-
-    needs:
-      - build
 
     steps:
       - name: Configure AWS credentials
