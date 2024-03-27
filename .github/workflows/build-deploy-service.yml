@@ -79,57 +79,62 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache
           cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-cache,mode=max
 
-#  deploy:
-#
-#    runs-on: ubuntu-latest
-#
-#    permissions:
-#      id-token: write # This is required for requesting the JWT
-#      contents: read
-#      packages: write
-#
-#    needs:
-#      - build
-#
-#    steps:
-#      - name: Configure AWS credentials
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
-#          role-session-name: ${{ inputs.environment }}
-#          aws-region: ${{ inputs.aws_region }}
-#
-#      - name: Login to Amazon ECR
-#        id: login-ecr
-#        uses: aws-actions/amazon-ecr-login@v2
-#        with:
-#          mask-password: true
-#
-#      - name: Download service task definition
-#        run: |
-#          aws ecs describe-task-definition --task-definition ${{ inputs.environment }}-${{ inputs.service_name }} \
-#          --query taskDefinition --output json | jq -r 'del(
-#            .taskDefinitionArn,
-#            .requiresAttributes,
-#            .compatibilities,
-#            .revision,
-#            .status,
-#            .registeredAt,
-#            .registeredBy
-#          )' > task-def.json
-#
-#      - name: Update Amazon ECS task definition for service
-#        id: task-def
-#        uses: aws-actions/amazon-ecs-render-task-definition@v1
-#        with:
-#          task-definition: task-def.json
-#          container-name: ${{ inputs.environment }}-${{ inputs.service_name }}
-#          image: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.service_name }}:${{ github.sha }}
-#
-#      - name: Deploy Amazon ECS backend service with new service task definition
-#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#        with:
-#          task-definition: ${{ steps.task-def.outputs.task-definition }}
-#          service: ${{ inputs.environment }}-${{ inputs.service_name }}
-#          cluster: ${{ inputs.environment }}-${{ inputs.organization }}
-#          wait-for-service-stability: true
+  db-migrate:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read
+      packages: write
+
+    needs:
+      - build
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          role-session-name: ${{ inputs.environment }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - uses: dkershner6/aws-ssm-getparameters-action@v2
+        with:
+          parameterPairs: "/prod/server/database_url = DATABASE_URL"
+
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: |
+            - node_modules/**/*
+            - .turbo
+            - apps/web/.next/cache/**/*
+            - apps/web/.turbo
+
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - uses: pnpm/action-setup@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm --filter=database generate
+
+      - name: Db migrate
+        run:  |
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          pnpm --filter=database db:migrate:deploy

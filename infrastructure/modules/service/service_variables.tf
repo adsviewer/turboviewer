@@ -3,7 +3,8 @@ variable "environment" {
 }
 
 variable "environment_variables" {
-  type = map(string)
+  type    = map(string)
+  default = {}
 }
 
 variable "service_subnet_ids" {
@@ -31,16 +32,12 @@ variable "github_role_name" {
 }
 
 variable "mapped_secrets" {
-  type    = list(map(string))
-  default = []
+  type    = map(string)
+  default = {}
 }
 
 variable "route53_endpoint" {
   type = string
-}
-
-variable "secrets" {
-  type = set(string)
 }
 
 variable "task_role_policies" {

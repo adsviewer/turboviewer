@@ -12,9 +12,8 @@ const isMode = (val: string): val is Environment => Object.values(Environment).i
 export const MODE = !process.env.MODE || !isMode(process.env.MODE) ? Environment.Local : process.env.MODE;
 
 const schema = z.object({
-  AWS_REGION: z.string().min(1).default('us-east-1'),
+  AWS_REGION: z.string().min(1).default('eu-central-1'),
   AUTH_SECRET: z.string().min(1).default('something'),
-  DATABASE_URL: z.string().regex(/^"?postgresql:\/\/.*:.*?@.*:.*\/.*/),
   PORT: z
     .string()
     .min(1)

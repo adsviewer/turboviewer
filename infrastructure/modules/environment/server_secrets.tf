@@ -9,11 +9,15 @@ resource "random_string" "auth_secret_random_string" {
   special = false
 }
 
+resource "aws_ssm_parameter" "database_url" {
+  name  = "/${var.environment}/server/database_url"
+  type  = "SecureString"
+  value = "fill_me_in"
+}
+
 locals {
-  server_secrets = [
-    {
-      name      = "AUTH_SECRET"
-      valueFrom = aws_ssm_parameter.auth_secret.arn
-    },
-  ]
+  server_secrets = {
+    AUTH_SECRET  = aws_ssm_parameter.auth_secret.arn
+    DATABASE_URL = aws_ssm_parameter.database_url.arn
+  }
 }
