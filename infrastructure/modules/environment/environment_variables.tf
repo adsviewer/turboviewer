@@ -10,6 +10,10 @@ variable "environment" {
   type = string
 }
 
+variable "git_repository" {
+  type = string
+}
+
 variable "github_role_name" {
   type = string
 }

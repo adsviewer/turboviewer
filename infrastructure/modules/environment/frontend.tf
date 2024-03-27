@@ -60,11 +60,11 @@ resource "aws_iam_role_policy_attachment" "execution_role_attachment" {
 
 resource "aws_amplify_app" "webapp" {
   name       = "${var.environment}-webapp"
-  repository = "https://github.com/happyharbor/turboviewer"
+  repository = "https://github.com/${var.git_repository}"
   environment_variables = {
-    AMPLIFY_DIFF_DEPLOY       = "false"
-    AMPLIFY_MONOREPO_APP_ROOT = "apps/web"
-    #    AUTH_SECRET                  = aws_secretsmanager_secret_version.auth_secret_version.secret_string
+    AMPLIFY_DIFF_DEPLOY          = "false"
+    AMPLIFY_MONOREPO_APP_ROOT    = "apps/web"
+    AUTH_SECRET                  = aws_ssm_parameter.auth_secret.value
     NEXT_PUBLIC_GRAPHQL_ENDPOINT = local.graphql_endpoint
     NEXT_PUBLIC_ENDPOINT         = local.full_domain
     _CUSTOM_IMAGE                = "amplify:al2023"
@@ -119,16 +119,16 @@ resource "aws_amplify_branch" "main" {
   stage     = "PRODUCTION"
 }
 
-resource "aws_amplify_domain_association" "domain_association" {
-  app_id      = aws_amplify_app.webapp.id
-  domain_name = local.domain
-
-  sub_domain {
-    branch_name = aws_amplify_app.webapp.production_branch[0].branch_name
-    prefix      = local.prefix
-  }
-
-  lifecycle {
-    ignore_changes = [sub_domain]
-  }
-}
+#resource "aws_amplify_domain_association" "domain_association" {
+#  app_id      = aws_amplify_app.webapp.id
+#  domain_name = local.domain
+#
+#  sub_domain {
+#    branch_name = aws_amplify_app.webapp.production_branch[0].branch_name
+#    prefix      = local.prefix
+#  }
+#
+#  lifecycle {
+#    ignore_changes = [sub_domain]
+#  }
+#}

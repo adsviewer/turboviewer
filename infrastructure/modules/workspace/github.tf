@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "github_assume_role_policy" {
     }
     condition {
       test     = "StringLike"
-      values   = ["repo:happyharbor/turboviewer:*"]
+      values   = ["repo:${var.git_repository}:*"]
       variable = "${local.github_provider_url}:sub"
     }
   }

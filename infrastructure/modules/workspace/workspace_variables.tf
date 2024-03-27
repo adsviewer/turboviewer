@@ -6,6 +6,10 @@ variable "environment" {
   type = string
 }
 
+variable "git_repository" {
+  type = string
+}
+
 variable "multi_nat" {
   type    = bool
   default = false
