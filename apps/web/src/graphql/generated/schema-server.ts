@@ -1,5 +1,5 @@
+import { DocumentNode } from 'graphql';
 import gql from 'graphql-tag';
-import * as Urql from '@urql/next';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -7,7 +7,6 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -207,10 +206,6 @@ export const LoginDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
-
-export function useLoginMutation() {
-  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
-};
 export const SignupDocument = gql`
     mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
   signup(
@@ -226,19 +221,11 @@ export const SignupDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
-
-export function useSignupMutation() {
-  return Urql.useMutation<SignupMutation, SignupMutationVariables>(SignupDocument);
-};
 export const ForgetPasswordDocument = gql`
     mutation forgetPassword($email: String!) {
   forgetPassword(email: $email)
 }
     `;
-
-export function useForgetPasswordMutation() {
-  return Urql.useMutation<ForgetPasswordMutation, ForgetPasswordMutationVariables>(ForgetPasswordDocument);
-};
 export const ResetPasswordDocument = gql`
     mutation resetPassword($token: String!, $password: String!) {
   resetPassword(token: $token, password: $password) {
@@ -249,10 +236,6 @@ export const ResetPasswordDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
-
-export function useResetPasswordMutation() {
-  return Urql.useMutation<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument);
-};
 export const MeDocument = gql`
     query me {
   me {
@@ -262,7 +245,24 @@ export const MeDocument = gql`
   }
 }
     `;
-
-export function useMeQuery(options?: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'>) {
-  return Urql.useQuery<MeQuery, MeQueryVariables>({ query: MeDocument, ...options });
-};
+export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
+export function getSdk<C>(requester: Requester<C>) {
+  return {
+    login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
+      return requester<LoginMutation, LoginMutationVariables>(LoginDocument, variables, options) as Promise<LoginMutation>;
+    },
+    signup(variables: SignupMutationVariables, options?: C): Promise<SignupMutation> {
+      return requester<SignupMutation, SignupMutationVariables>(SignupDocument, variables, options) as Promise<SignupMutation>;
+    },
+    forgetPassword(variables: ForgetPasswordMutationVariables, options?: C): Promise<ForgetPasswordMutation> {
+      return requester<ForgetPasswordMutation, ForgetPasswordMutationVariables>(ForgetPasswordDocument, variables, options) as Promise<ForgetPasswordMutation>;
+    },
+    resetPassword(variables: ResetPasswordMutationVariables, options?: C): Promise<ResetPasswordMutation> {
+      return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument, variables, options) as Promise<ResetPasswordMutation>;
+    },
+    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
+      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
+    }
+  };
+}
+export type Sdk = ReturnType<typeof getSdk>;

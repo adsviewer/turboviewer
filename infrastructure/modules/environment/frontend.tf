@@ -137,6 +137,10 @@ locals {
 ###### Vercel ######
 resource "vercel_project" "frontend" {
   build_command = "turbo run build --filter=web"
+  environment {
+    NEXT_PUBLIC_GRAPHQL_ENDPOINT = local.graphql_endpoint
+    NEXT_PUBLIC_ENDPOINT         = local.full_domain
+  }
   framework     = "nextjs"
   git_repository = {
     repo = var.git_repository

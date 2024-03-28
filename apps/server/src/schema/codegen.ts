@@ -9,7 +9,7 @@ const config: CodegenConfig = {
     './src/schema/generated/schema.graphql': {
       plugins: ['schema-ast'],
     },
-    '../web/src/graphql/generated/schema-client.ts': {
+    '../web/src/graphql/generated/schema-server.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
       config: {
         withHooks: true,
@@ -19,7 +19,7 @@ const config: CodegenConfig = {
       },
       documents: ['../web/src/graphql/*.graphql'],
     },
-    '../web/src/graphql/generated/schema-server.ts': {
+    '../web/src/graphql/generated/schema-client.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
       config: {
         withHooks: true,
