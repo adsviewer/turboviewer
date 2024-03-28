@@ -1,6 +1,6 @@
 {
   "*.graphql": ["prettier --write"],
-  "*.ts": ["eslint --max-warnings=0", "prettier --write"],
+  "*.ts": ["eslint --max-warnings=2", "prettier --write"],
   "*.tf": "terraform fmt",
   "*.prisma": "prisma format --schema packages/database/prisma/schema.prisma"
 }

@@ -2,14 +2,11 @@ resource "aws_apprunner_service" "server" {
   service_name = "${var.environment}-${var.service_name}"
 
   health_check_configuration {
-    healthy_threshold   = 1
-    interval            = 1
-    path                = "/graphql"
-    protocol            = "HTTP"
-    timeout             = 1
-    unhealthy_threshold = 1
+    path     = "/graphql"
+    protocol = "HTTP"
   }
   instance_configuration {
+    cpu               = 256
     instance_role_arn = aws_iam_role.instance_role.arn
   }
   source_configuration {

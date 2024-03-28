@@ -14,7 +14,7 @@
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest",
-    "codegen": "graphql-codegen-esm --config src/schema/codegen.ts"
+    "codegen": "graphql-codegen --config src/schema/codegen.ts"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.535.0",
@@ -46,10 +46,12 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/client-preset": "^4.2.4",
+    "@graphql-codegen/typescript": "^4.0.6",
     "@graphql-codegen/typescript-generic-sdk": "^4.0.1",
     "@graphql-codegen/typescript-operations": "^4.2.0",
     "@graphql-codegen/typescript-react-query": "^6.1.0",
     "@graphql-codegen/typescript-urql": "^4.0.0",
+    "@graphql-codegen/urql-introspection": "^3.0.0",
     "@types/express": "^4.17.21",
     "@types/express-serve-static-core": "^4.17.43",
     "@types/jsonwebtoken": "^9.0.6",

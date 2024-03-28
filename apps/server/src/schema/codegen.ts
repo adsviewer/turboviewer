@@ -9,7 +9,7 @@ const config: CodegenConfig = {
     './src/schema/generated/schema.graphql': {
       plugins: ['schema-ast'],
     },
-    '../web/src/apollo/generated/schema.ts': {
+    '../web/src/graphql/generated/schema-client.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
       config: {
         withHooks: true,
@@ -17,9 +17,9 @@ const config: CodegenConfig = {
           enumValues: 'keep',
         },
       },
-      documents: ['../web/src/apollo/*.graphql'],
+      documents: ['../web/src/graphql/*.graphql'],
     },
-    '../web/src/apollo/generated/schema-client.ts': {
+    '../web/src/graphql/generated/schema-server.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
       config: {
         withHooks: true,
@@ -28,7 +28,7 @@ const config: CodegenConfig = {
           enumValues: 'keep',
         },
       },
-      documents: ['../web/src/apollo/*.graphql'],
+      documents: ['../web/src/graphql/*.graphql'],
     },
   },
   config: {

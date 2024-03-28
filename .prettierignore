@@ -1,2 +1,2 @@
 packages/database/.prisma/
-apps/web/src/apollo/generated
+apps/web/src/graphql/generated
