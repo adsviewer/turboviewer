@@ -43,7 +43,7 @@ For example, in [tailwind.config.js](packages/tailwind-config/tailwind.config.js
     `src/**/*.{js,ts,jsx,tsx}`,
     // include packages if not transpiling
     "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
+  ]
 ```
 
 If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.

@@ -41,5 +41,10 @@ module.exports = {
   // add rules configurations here
   rules: {
     "import/no-default-export": "off",
+    "@typescript-eslint/no-misused-promises": [2, {
+      "checksVoidReturn": {
+        "attributes": false
+      }
+    }]
   },
 };
