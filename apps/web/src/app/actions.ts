@@ -2,9 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { logger } from '@repo/logger';
-import { SignUpSchema } from '../util/schemas/login-schemas';
-import { urqlClientSdk } from '../lib/urql-client';
-import { handleUrqlRequest } from '../util/handle-urql-request';
+import { SignUpSchema } from '@/util/schemas/login-schemas';
+import { urqlClientSdk } from '@/lib/urql-client';
+import { handleUrqlRequest } from '@/util/handle-urql-request';
 
 export async function createUser(
   prevState: {

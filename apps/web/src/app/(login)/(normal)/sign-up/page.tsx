@@ -12,7 +12,7 @@ interface Inputs {
   email: string;
   password: string;
 }
-export default function App(): JSX.Element {
+export default function Page(): JSX.Element {
   const { register, control, handleSubmit } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     await new Promise((resolve) => {
