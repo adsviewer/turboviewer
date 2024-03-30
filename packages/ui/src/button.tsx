@@ -1,8 +1,7 @@
 import { type ButtonHTMLAttributes, type JSX } from 'react';
 
-interface ButtonProps extends ButtonHTMLAttributes<unknown> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   ariaDisabled?: boolean;
-  children: React.ReactNode;
 }
 
 export function Button(props: ButtonProps): JSX.Element {
