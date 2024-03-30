@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html lang="en">
-      <body className={`flex justify-center items-center min-h-screen p-5 ${inter.className}`}>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
