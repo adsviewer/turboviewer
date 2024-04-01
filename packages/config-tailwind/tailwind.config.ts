@@ -6,8 +6,11 @@ const config: Omit<Config, 'content'> = {
     extend: {
       colors: {
         primary: '#43A047',
-        'primary-gradient': '#7CB342',
         secondary: '#a853ba',
+        destructive: {
+          DEFAULT: 'hsl(0 62.8% 30.6%)',
+          foreground: 'hsl(210 40% 98%)',
+        },
       },
       backgroundImage: {
         'glow-conic': 'conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)',

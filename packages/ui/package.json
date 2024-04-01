@@ -6,10 +6,12 @@
     "**/*.css"
   ],
   "exports": {
-    "./styles.css": "./src/styles.css",
+    "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
     "./input": "./src/input.tsx",
-    "./button": "./src/button.tsx"
+    "./label": "./src/label.tsx",
+    "./styles.css": "./src/styles.css",
+    "./tailwind-utils": "./src/tailwind-utils.ts"
   },
   "private": true,
   "scripts": {
@@ -22,13 +24,23 @@
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-slot": "^1.0.2",
     "@repo/eslint-config": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/react": "^18.2.66",
+    "@types/react": "^18.2.73",
+    "@types/react-dom": "^18.2.23",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.363.0",
     "postcss": "^8.4.35",
     "react": "^18.2.0",
     "react-hook-form": "^7.51.2",
+    "tailwind-merge": "^2.2.2",
     "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "react-dom": "^18.2.0"
   }
 }
