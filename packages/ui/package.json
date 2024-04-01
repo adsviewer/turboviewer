@@ -10,8 +10,11 @@
     "./card": "./src/card.tsx",
     "./input": "./src/input.tsx",
     "./label": "./src/label.tsx",
-    "./styles.css": "./src/styles.css",
-    "./tailwind-utils": "./src/tailwind-utils.ts"
+    "./tailwind-utils": "./src/tailwind-utils.ts",
+    "./globals.css": {
+      "import": "./src/globals.css",
+      "require": "./dist/globals.css"
+    }
   },
   "private": true,
   "scripts": {

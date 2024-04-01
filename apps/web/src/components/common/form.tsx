@@ -44,9 +44,9 @@ function Form<
 
   return (
     <FormProvider {...props}>
-      {state.message !== '' && !state.issues && <div className="text-red-500">{state.message}</div>}
+      {state.message !== '' && !state.issues && <div className="text-destructive">{state.message}</div>}
       {state.issues ? (
-        <div className="text-red-500">
+        <div className="text-destructive">
           <ul>
             {state.issues.map((issue) => (
               <li key={issue} className="flex gap-1">
@@ -59,7 +59,7 @@ function Form<
       ) : null}
       <form
         ref={formRef}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-6"
         action={formAction}
         onSubmit={(evt) => {
           evt.preventDefault();

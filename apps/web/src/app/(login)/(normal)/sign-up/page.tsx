@@ -36,65 +36,68 @@ export default function Page(): JSX.Element {
   });
 
   return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-2xl text-center mb-5">Sign up</h1>
-      <Form {...form} formName="mailFormName" onSubmitAction={onSubmitAction}>
-        <div className="flex gap-2">
+    <div>
+      <div className="text-destructive" />
+      <div className="flex flex-col gap-6">
+        <h1 className="text-2xl text-center">Sign up</h1>
+        <Form {...form} formName="signUp" onSubmitAction={onSubmitAction}>
+          <div className="flex gap-2">
+            <FormField
+              name="firstName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
+                  </FormControl>
+                  <FormDescription>Your first name.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="lastName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="" {...field} />
+                  </FormControl>
+                  <FormDescription>Your last name.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
-            name="firstName"
+            name="email"
             render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>First Name</FormLabel>
+              <FormItem>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
-                <FormDescription>Your first name.</FormDescription>
+                <FormDescription>Your email address.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
-            name="lastName"
+            name="password"
             render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Last Name</FormLabel>
+              <FormItem>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="" {...field} />
+                  <Input type="password" placeholder="" {...field} />
                 </FormControl>
-                <FormDescription>Your last name.</FormDescription>
+                <FormDescription>Your password.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
-        <FormField
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="" {...field} />
-              </FormControl>
-              <FormDescription>Your email address.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="" {...field} />
-              </FormControl>
-              <FormDescription>Your password.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Sign up</Button>
-      </Form>
+          <Button type="submit">Sign up</Button>
+        </Form>
+      </div>
     </div>
   );
 }

@@ -5,11 +5,10 @@ const config: Omit<Config, 'content'> = {
   theme: {
     extend: {
       colors: {
-        primary: '#43A047',
-        secondary: '#a853ba',
+        primary: 'rgb(var(--color-primary) / <alpha-value>)',
         destructive: {
-          DEFAULT: 'hsl(0 62.8% 30.6%)',
-          foreground: 'hsl(210 40% 98%)',
+          DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
+          foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
         },
       },
       backgroundImage: {
