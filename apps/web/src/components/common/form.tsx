@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { type JSX, useRef } from 'react';
 import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import {
@@ -14,7 +15,6 @@ import {
 import { X } from 'lucide-react';
 // eslint-disable-next-line import/named -- not sure why this is being flagged
 import { useFormState } from 'react-dom';
-import { type JSX, useRef } from 'react';
 import { cn } from '@repo/ui/tailwind-utils';
 import { Label } from '@repo/ui/label';
 
@@ -44,19 +44,7 @@ function Form<
 
   return (
     <FormProvider {...props}>
-      {state.message !== '' && !state.issues && <div className="text-destructive">{state.message}</div>}
-      {state.issues ? (
-        <div className="text-destructive">
-          <ul>
-            {state.issues.map((issue) => (
-              <li key={issue} className="flex gap-1">
-                <X fill="red" />
-                {issue}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      <FormErrors state={state} />
       <form
         ref={formRef}
         className="flex flex-col gap-6"
@@ -71,6 +59,30 @@ function Form<
         {children}
       </form>
     </FormProvider>
+  );
+}
+
+function FormErrors({ state }: { state: FormState }): JSX.Element {
+  const { formState }: UseFormReturn = useFormContext();
+  if (formState.isSubmitting) {
+    state.message = '';
+  }
+  return (
+    <div>
+      {state.message !== '' && !state.issues && <div className="text-destructive">{state.message}</div>}
+      {state.issues ? (
+        <div className="text-destructive">
+          <ul>
+            {state.issues.map((issue) => (
+              <li key={issue} className="flex gap-1">
+                <X fill="red" />
+                {issue}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

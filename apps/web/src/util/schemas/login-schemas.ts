@@ -8,4 +8,9 @@ export const SignUpSchema = z.object({
   password: PasswordSchema,
 });
 
+export const SignInSchema = z.object({
+  email: z.string().email(),
+  password: PasswordSchema,
+});
+
 export type SignUpSchemaType = z.infer<typeof SignUpSchema>;

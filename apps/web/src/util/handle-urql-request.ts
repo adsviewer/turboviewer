@@ -28,7 +28,7 @@ export const handleUrqlRequest = async <TData>(
     let error: string;
 
     if (err instanceof Error) {
-      error = err.message;
+      error = err.message.replace('[GraphQL] ', '');
     } else {
       logger.error(err);
       error = 'Request handler error';
