@@ -1,3 +1,4 @@
+import { type JSX } from 'react';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 
 export async function Me(): Promise<JSX.Element> {

@@ -180,6 +180,11 @@ export type ResetPasswordMutationVariables = Exact<{
 
 export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
 
+export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RefreshTokenMutation = { __typename?: 'Mutation', refreshToken: string };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -242,6 +247,11 @@ export const ResetPasswordDocument = gql`
   }
 }
     ${UserFieldsFragmentDoc}`;
+export const RefreshTokenDocument = gql`
+    mutation refreshToken {
+  refreshToken
+}
+    `;
 export const MeDocument = gql`
     query me {
   me {
@@ -265,6 +275,9 @@ export function getSdk<C>(requester: Requester<C>) {
     },
     resetPassword(variables: ResetPasswordMutationVariables, options?: C): Promise<ResetPasswordMutation> {
       return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument, variables, options) as Promise<ResetPasswordMutation>;
+    },
+    refreshToken(variables?: RefreshTokenMutationVariables, options?: C): Promise<RefreshTokenMutation> {
+      return requester<RefreshTokenMutation, RefreshTokenMutationVariables>(RefreshTokenDocument, variables, options) as Promise<RefreshTokenMutation>;
     },
     me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
       return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;

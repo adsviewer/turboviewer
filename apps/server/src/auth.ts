@@ -6,7 +6,6 @@ import jwt, {
   type TokenExpiredError,
 } from 'jsonwebtoken';
 import { $Enums } from '@repo/database';
-import { logger } from '@repo/logger';
 import { AUTH_SECRET, env } from './config';
 import RoleEnum = $Enums.RoleEnum;
 
@@ -19,7 +18,7 @@ interface MJwtPayload extends JwtPayload {
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
 const { sign, verify } = jwt;
 
-const expiresIn = '30d';
+const expiresIn = '5m';
 export const createJwt = (userId: string, organizationId: string, roles: RoleEnum[]) =>
   sign({ userId, organizationId, roles }, AUTH_SECRET, { expiresIn });
 
@@ -60,7 +59,6 @@ const safeDecode = (
   } catch (e) {
     if (isGenericJsonWebTokenError(e)) {
       if (isTokenExpiredError(e)) return e;
-      logger.warn(`Error during JWT verification with header ${header}: ${JSON.stringify(e)}`);
       if (isNotBeforeError(e)) return e;
       if (isJsonWebTokenError(e)) return e;
     } else if (e instanceof Error) {

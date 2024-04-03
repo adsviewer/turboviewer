@@ -12,7 +12,6 @@ const makeClient = (): Client => {
   return createClient({
     url: env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
     exchanges: [cacheExchange, makeAuthExchange(token), fetchExchange],
-    fetchOptions: { cache: 'no-cache' },
   });
 };
 

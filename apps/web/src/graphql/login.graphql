@@ -32,6 +32,10 @@ mutation resetPassword($token: String!, $password: String!) {
   }
 }
 
+mutation refreshToken {
+  refreshToken
+}
+
 query me {
   me {
     firstName

@@ -1,5 +1,4 @@
 import { authExchange, type AuthUtilities } from '@urql/exchange-auth';
-import { logger } from '@repo/logger';
 import { type ExchangeInput, type ExchangeIO } from '@urql/core';
 
 export const makeAuthExchange = (token: string | undefined): ((input: ExchangeInput) => ExchangeIO) =>
@@ -16,9 +15,7 @@ export const makeAuthExchange = (token: string | undefined): ((input: ExchangeIn
         return error.graphQLErrors.some((e) => e.message === 'jwt expired');
       },
       refreshAuth: async () => {
-        await new Promise((_resolve) => {
-          logger.info('Urql client (provider): Auth should refresh');
-        });
+        // No need, middleware should catch jwt errors and refresh token
       },
     };
   });
