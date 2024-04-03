@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { createEnv } from '@repo/utils';
+import { commonSchema, createEnv } from '@repo/utils';
 
-const schema = z.object({
-  NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
-  NEXT_PUBLIC_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
-  AUTH_SECRET: z.string().min(1).default('something'),
-  REFRESH_SECRET: z.string().min(1).default('refreshSecret'),
-});
+const schema = z
+  .object({
+    NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
+    NEXT_PUBLIC_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
+  })
+  .merge(commonSchema);
 
 export const env = createEnv(schema);
 

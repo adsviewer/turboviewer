@@ -29,7 +29,6 @@ export const createJwts = (userId: string, organizationId: string, roles: RoleEn
 });
 
 export const decodeJwt = (request: Request): MJwtPayload | null => {
-  logger.info(`Decoding JWT with secret ${AUTH_SECRET}`);
   const decode = safeDecode(request, AUTH_SECRET);
   if (!decode) return null;
   if (isGenericJsonWebTokenError(decode) && isJsonWebTokenError(decode)) {

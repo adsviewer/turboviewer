@@ -232,9 +232,6 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
-      '@types/js-cookie':
-        specifier: ^3.0.6
-        version: 3.0.6
       '@types/node':
         specifier: ^20.12.2
         version: 20.12.2
@@ -3617,10 +3614,6 @@ packages:
 
   /@types/http-errors@2.0.4:
     resolution: {integrity: sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==}
-    dev: true
-
-  /@types/js-cookie@3.0.6:
-    resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
     dev: true
 
   /@types/js-yaml@4.0.9:

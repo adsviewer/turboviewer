@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createEnv } from '@repo/utils';
+import { commonSchema, createEnv } from '@repo/utils';
 
 export enum Environment {
   Production = 'prod',
@@ -11,18 +11,18 @@ const isMode = (val: string): val is Environment => Object.values(Environment).i
 
 export const MODE = !process.env.MODE || !isMode(process.env.MODE) ? Environment.Local : process.env.MODE;
 
-const schema = z.object({
-  AWS_REGION: z.string().min(1).default('eu-central-1'),
-  AUTH_SECRET: z.string().min(1).default('something'),
-  REFRESH_SECRET: z.string().min(1).default('refreshSecret'),
-  PORT: z
-    .string()
-    .min(1)
-    .max(5)
-    .transform((val) => parseInt(val))
-    .default('4000'),
-  PUBLIC_URL: z.string().url().default('http://localhost:3000'),
-});
+const schema = z
+  .object({
+    AWS_REGION: z.string().min(1).default('eu-central-1'),
+    PORT: z
+      .string()
+      .min(1)
+      .max(5)
+      .transform((val) => parseInt(val))
+      .default('4000'),
+    PUBLIC_URL: z.string().url().default('http://localhost:3000'),
+  })
+  .merge(commonSchema);
 
 export const env = createEnv(schema);
 

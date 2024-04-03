@@ -26,10 +26,6 @@ export const signUp = async (prevState: FormState, data: FormData): Promise<Form
     };
   }
 
-  await new Promise((resolve) => {
-    setTimeout(resolve, 1000);
-  });
-
   const result = await handleUrqlRequest(urqlClientSdk().signup(parsed.data));
   if (!result.success) {
     return { message: result.error };
@@ -56,10 +52,6 @@ export const signIn = async (prevState: FormState, data: FormData): Promise<Form
       issues: parsed.error.issues.map((issue) => issue.message),
     };
   }
-
-  await new Promise((resolve) => {
-    setTimeout(resolve, 1000);
-  });
 
   const result = await handleUrqlRequest(urqlClientSdk().login(parsed.data));
   if (!result.success) {
