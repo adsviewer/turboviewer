@@ -5,7 +5,7 @@ import { queryFromInfo } from '@pothos/plugin-prisma';
 import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { PasswordSchema } from '@repo/utils';
-import { createJwt } from '../../auth';
+import { createJwt, createJwts } from '../../auth';
 import { PUBLIC_URL } from '../../config';
 import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
 import { sendForgetPasswordEmail, sendSignupEmail } from '../../email';
@@ -85,12 +85,12 @@ builder.mutationFields((t) => ({
         }),
       );
 
-      const token = createJwt(
+      const { token, refreshToken } = createJwts(
         user.id,
         user.organizationId,
         user.roles.map((r) => r.role.name),
       );
-      return { token, user };
+      return { token, refreshToken, user };
     },
   }),
   login: t.field({
@@ -118,12 +118,30 @@ builder.mutationFields((t) => ({
       if (!valid) {
         throw new GraphQLError('Invalid credentials');
       }
-      const token = createJwt(
+      const { token, refreshToken } = createJwts(
         user.id,
         user.organizationId,
         user.roles.map((r) => r.role.name),
       );
-      return { token, user };
+      return { token, refreshToken, user };
+    },
+  }),
+  refreshToken: t.withAuth({ authenticated: true }).field({
+    description: 'Uses the refresh token to generate a new token',
+    type: 'String',
+    resolve: async (root, args, ctx, _info) => {
+      const user = await prisma.user.findUnique({
+        where: { id: ctx.currentUserId },
+        include: { roles: { select: { role: true } } },
+      });
+      if (!user) {
+        throw new GraphQLError('User not found');
+      }
+      return createJwt(
+        user.id,
+        user.organizationId,
+        user.roles.map((r) => r.role.name),
+      );
     },
   }),
   updateUser: t.withAuth({ authenticated: true }).prismaField({
@@ -257,13 +275,12 @@ builder.mutationFields((t) => ({
         ]);
       }
 
-      const token = createJwt(
+      const { token, refreshToken } = createJwts(
         forgetPassword.user.id,
         forgetPassword.user.organizationId,
         forgetPassword.user.roles.map((r) => r.role.name),
       );
-
-      return { token, user: forgetPassword.user };
+      return { token, refreshToken, user: forgetPassword.user };
     },
   }),
 }));

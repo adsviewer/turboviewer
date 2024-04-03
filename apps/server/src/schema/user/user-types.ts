@@ -28,11 +28,13 @@ export const UserDto = builder.prismaObject('User', {
 export const TokenUserDto = builder
   .objectRef<{
     token: string;
+    refreshToken: string;
     user: User;
   }>('TokenDto')
   .implement({
     fields: (t) => ({
       token: t.string({ nullable: false, resolve: (result) => result.token }),
+      refreshToken: t.string({ nullable: false, resolve: (result) => result.refreshToken }),
       user: t.field({
         type: UserDto,
         nullable: false,

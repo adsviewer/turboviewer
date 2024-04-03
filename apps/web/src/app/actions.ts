@@ -1,9 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { logger } from '@repo/logger';
 import { SignUpSchema } from '@/util/schemas/login-schemas';
-import { urqlClientSdk } from '@/lib/urql-client';
+import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
 
 export async function createUser(
@@ -28,8 +27,7 @@ export async function createUser(
   const data = parse.data;
 
   try {
-    logger.info('Creating user');
-    const result = await handleUrqlRequest(urqlClientSdk.signup(data));
+    const result = await handleUrqlRequest(urqlClientSdk().signup(data));
     if (!result.success) {
       return { message: result.error };
     }

@@ -6,7 +6,8 @@ import { redirect } from 'next/navigation';
 import { type FormState } from '@/components/common/form';
 import { SignInSchema, SignUpSchema } from '@/util/schemas/login-schemas';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
-import { urqlClientSdk } from '@/lib/urql-client';
+import { urqlClientSdk } from '@/lib/urql/urql-client';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/config';
 
 export const signUp = async (prevState: FormState, data: FormData): Promise<FormState> => {
   const formData = Object.fromEntries(data);
@@ -29,11 +30,12 @@ export const signUp = async (prevState: FormState, data: FormData): Promise<Form
     setTimeout(resolve, 1000);
   });
 
-  const result = await handleUrqlRequest(urqlClientSdk.signup(parsed.data));
+  const result = await handleUrqlRequest(urqlClientSdk().signup(parsed.data));
   if (!result.success) {
     return { message: result.error };
   }
-  cookies().set('token', result.data.signup.token);
+  cookies().set(TOKEN_KEY, result.data.signup.token);
+  cookies().set(REFRESH_TOKEN_KEY, result.data.signup.refreshToken);
   revalidatePath('/profile');
   redirect('/profile');
 };
@@ -59,11 +61,12 @@ export const signIn = async (prevState: FormState, data: FormData): Promise<Form
     setTimeout(resolve, 1000);
   });
 
-  const result = await handleUrqlRequest(urqlClientSdk.login(parsed.data));
+  const result = await handleUrqlRequest(urqlClientSdk().login(parsed.data));
   if (!result.success) {
     return { message: result.error };
   }
-  cookies().set('token', result.data.login.token);
+  cookies().set(TOKEN_KEY, result.data.login.token);
+  cookies().set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
   revalidatePath('/profile');
   redirect('/profile');
 };

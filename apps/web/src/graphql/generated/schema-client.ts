@@ -40,6 +40,8 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
   login: TokenDto;
+  /** Uses the refresh token to generate a new token */
+  refreshToken: Scalars['String']['output'];
   resetPassword: TokenDto;
   signup: TokenDto;
   updateUser: User;
@@ -116,6 +118,7 @@ export type Role = {
 
 export type TokenDto = {
   __typename?: 'TokenDto';
+  refreshToken: Scalars['String']['output'];
   token: Scalars['String']['output'];
   user: User;
 };
@@ -151,7 +154,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'TokenDto', token: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
 
 export type SignupMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -161,7 +164,7 @@ export type SignupMutationVariables = Exact<{
 }>;
 
 
-export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'TokenDto', token: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
+export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
 
 export type ForgetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -176,7 +179,7 @@ export type ResetPasswordMutationVariables = Exact<{
 }>;
 
 
-export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { __typename?: 'TokenDto', token: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
+export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -201,6 +204,7 @@ export const LoginDocument = gql`
     mutation login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
     token
+    refreshToken
     user {
       ...UserFields
     }
@@ -220,6 +224,7 @@ export const SignupDocument = gql`
     password: $password
   ) {
     token
+    refreshToken
     user {
       ...UserFields
     }
@@ -243,6 +248,7 @@ export const ResetPasswordDocument = gql`
     mutation resetPassword($token: String!, $password: String!) {
   resetPassword(token: $token, password: $password) {
     token
+    refreshToken
     user {
       ...UserFields
     }

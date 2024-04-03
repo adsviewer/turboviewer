@@ -29,11 +29,11 @@ builder.mutationFields((t) => ({
         info,
         path: ['user'],
       });
-      const googleUserToken = await googleLogin(args.code, query);
-      if (isMError(googleUserToken)) {
-        throw new GraphQLError(googleUserToken.message);
+      const resp = await googleLogin(args.code, query);
+      if (isMError(resp)) {
+        throw new GraphQLError(resp.message);
       }
-      return googleUserToken;
+      return resp;
     },
   }),
 }));

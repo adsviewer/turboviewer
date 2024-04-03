@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { prisma, type Prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { isMError, type MError } from '@repo/utils';
-import { createJwt } from './auth';
+import { createJwts } from './auth';
 import { createUser, type UserData } from './contexts/user';
 
 interface PeopleData {
@@ -123,12 +123,14 @@ export const googleLogin = async (
   });
 
   if (googleUser) {
+    const { token, refreshToken } = createJwts(
+      googleUser.id,
+      googleUser.organizationId,
+      googleUser.roles.map((r) => r.role.name),
+    );
     return {
-      token: createJwt(
-        googleUser.id,
-        googleUser.organizationId,
-        googleUser.roles.map((r) => r.role.name),
-      ),
+      token,
+      refreshToken,
       user: googleUser,
     };
   }
@@ -140,24 +142,28 @@ export const googleLogin = async (
   });
 
   if (emailUser) {
+    const { token, refreshToken } = createJwts(
+      emailUser.id,
+      emailUser.organizationId,
+      emailUser.roles.map((r) => r.role.name),
+    );
     return {
-      token: createJwt(
-        emailUser.id,
-        emailUser.organizationId,
-        emailUser.roles.map((r) => r.role.name),
-      ),
+      token,
+      refreshToken,
       user: emailUser,
     };
   }
 
   const user = await createUser(userdata, query);
 
+  const { token, refreshToken } = createJwts(
+    user.id,
+    user.organizationId,
+    user.roles.map((r) => r.role.name),
+  );
   return {
-    token: createJwt(
-      user.id,
-      user.organizationId,
-      user.roles.map((r) => r.role.name),
-    ),
+    token,
+    refreshToken,
     user,
   };
 };
