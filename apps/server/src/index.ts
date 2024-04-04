@@ -10,7 +10,7 @@ process.on('uncaughtException', (reason) => {
   logger.error(reason, 'Uncaught Exception', reason.stack);
 });
 
-const index = () => {
+const index = (): void => {
   const app = express();
 
   const yoga = createYoga({
