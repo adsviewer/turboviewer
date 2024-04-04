@@ -3,7 +3,6 @@ name: Auto-update packages
 on:
   schedule:
     - cron: '0 0 1 * *' # Run on the first day of every month
-  workflow_dispatch:
 
 jobs:
   update:
