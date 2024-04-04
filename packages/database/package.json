@@ -24,11 +24,11 @@
     "predev": "pnpm run generate && pnpm run db:migrate:deploy",
     "studio": "prisma studio",
     "clean": "rm -rf node_modules .turbo",
-    "update": "pnpm update --latest && pnpm install"
+    "update": "pnpm update --latest"
   },
   "dependencies": {
     "@pothos/plugin-prisma": "^3.65.0",
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.12.0",
     "@prisma/extension-read-replicas": "^0.3.0",
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:^",
@@ -37,12 +37,12 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.12.2",
-    "prisma": "^5.11.0",
+    "@types/node": "^20.12.4",
+    "prisma": "^5.12.0",
     "prisma-json-types-generator": "^3.0.4",
     "rimraf": "^5.0.5",
     "tsup": "^8.0.2",
-    "tsx": "^4.7.1",
+    "tsx": "^4.7.2",
     "typescript": "^5.4.3"
   }
 }

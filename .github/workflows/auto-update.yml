@@ -28,7 +28,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Update packages
-        run: pnpm update
+        run: pnpm run update
 
       - name: Set current date as env variable
         run: echo "BRANCH_NAME=update-packages-$(date +'%y%m%d')" >> $GITHUB_ENV
