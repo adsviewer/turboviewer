@@ -40,9 +40,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     const { formState }: UseFormReturn = useFormContext();
-    if (!formState.isValid) {
-      props.disabled = true;
-    }
+    props.disabled = !formState.isValid || formState.isSubmitting;
     return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
   },
 );

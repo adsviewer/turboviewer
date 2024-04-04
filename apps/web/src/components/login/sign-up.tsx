@@ -1,29 +1,23 @@
 'use client';
 
-// eslint-disable-next-line import/named -- not sure why this is being flagged
-import { useFormState } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { type JSX } from 'react';
 import { Input } from '@repo/ui/input';
 import { Button } from '@repo/ui/button';
-import { signUp } from '@/app/(login)/actions';
 import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/common/form';
+  LoginForm,
+} from '@/components/login/login-form';
 import { SignUpSchema } from '@/util/schemas/login-schemas';
 
 export function SignUp(): JSX.Element {
-  const [state] = useFormState(signUp, {
-    message: '',
-  });
   const form = useForm<z.output<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -31,12 +25,11 @@ export function SignUp(): JSX.Element {
       lastName: '',
       email: '',
       password: '',
-      ...(state.fields ?? {}),
     },
   });
 
   return (
-    <Form {...form} formName="signUp" onSubmitAction={signUp}>
+    <LoginForm {...form} formName="signUp" routeUrl="api/login/sign-up">
       <div className="flex gap-2">
         <FormField
           name="firstName"
@@ -92,6 +85,6 @@ export function SignUp(): JSX.Element {
         )}
       />
       <Button type="submit">Sign up</Button>
-    </Form>
+    </LoginForm>
   );
 }
