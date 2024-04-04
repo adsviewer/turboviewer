@@ -49,7 +49,7 @@ importers:
         version: 3.11.1(@pothos/core@3.41.0)(graphql@16.8.1)
       '@pothos/plugin-prisma':
         specifier: ^3.65.0
-        version: 3.65.0(@pothos/core@3.41.0)(@prisma/client@5.11.0)(graphql@16.8.1)(typescript@5.4.3)
+        version: 3.65.0(@pothos/core@3.41.0)(@prisma/client@5.12.0)(graphql@16.8.1)(typescript@5.4.3)
       '@pothos/plugin-relay':
         specifier: ^3.46.0
         version: 3.46.0(@pothos/core@3.41.0)(graphql@16.8.1)
@@ -2635,7 +2635,7 @@ packages:
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
     engines: {node: '>=10.10.0'}
     dependencies:
-      '@humanwhocodes/object-schema': 2.0.2
+      '@humanwhocodes/object-schema': 2.0.3
       debug: 4.3.4
       minimatch: 3.1.2
     transitivePeerDependencies:
@@ -2647,8 +2647,8 @@ packages:
     engines: {node: '>=12.22'}
     dev: true
 
-  /@humanwhocodes/object-schema@2.0.2:
-    resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
+  /@humanwhocodes/object-schema@2.0.3:
+    resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     dev: true
 
   /@isaacs/cliui@8.0.2:
@@ -2889,6 +2889,22 @@ packages:
       typescript: 5.4.3
     dev: false
 
+  /@pothos/plugin-prisma@3.65.0(@pothos/core@3.41.0)(@prisma/client@5.12.0)(graphql@16.8.1)(typescript@5.4.3):
+    resolution: {integrity: sha512-1XYI139dceyzbEYW6wLVxhREFHHCmH2JLVCqRCn8Q9nAz7yfMYEfAA9nA/XhM5gJYoC0WAsrHgYQ4uBM+tH5BA==}
+    hasBin: true
+    peerDependencies:
+      '@pothos/core': '*'
+      '@prisma/client': '*'
+      graphql: '>=15.1.0'
+      typescript: '>=4.7.2'
+    dependencies:
+      '@pothos/core': 3.41.0(graphql@16.8.1)
+      '@prisma/client': 5.12.0
+      '@prisma/generator-helper': 5.11.0
+      graphql: 16.8.1
+      typescript: 5.4.3
+    dev: false
+
   /@pothos/plugin-relay@3.46.0(@pothos/core@3.41.0)(graphql@16.8.1):
     resolution: {integrity: sha512-EOmyqAsMy/vWgitPWcQRDUvLBcZF5M/RrFxoFeI/VWnRpUJPr8XmHh28jb70G8Wzfg56btPpTY440doSKb60og==}
     peerDependencies:
@@ -2942,6 +2958,17 @@ packages:
         optional: true
     dependencies:
       prisma: 5.11.0
+    dev: false
+
+  /@prisma/client@5.12.0:
+    resolution: {integrity: sha512-bk/+KPpRm0+IzqFCtAxrj+/TNiHzulspnO+OkysaYY/atc/eX0Gx8V3tTLxbHKVX0LKD4Hi8KKCcSbU1U72n7Q==}
+    engines: {node: '>=16.13'}
+    requiresBuild: true
+    peerDependencies:
+      prisma: '*'
+    peerDependenciesMeta:
+      prisma:
+        optional: true
     dev: false
 
   /@prisma/debug@5.11.0:
