@@ -51,3 +51,8 @@ resource "aws_identitystore_group_membership" "dennis_business" {
   group_id          = aws_identitystore_group.business_users.group_id
   member_id         = aws_identitystore_user.dennis.user_id
 }
+resource "aws_identitystore_group_membership" "dennis_developer" {
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  group_id          = aws_identitystore_group.developers.group_id
+  member_id         = aws_identitystore_user.dennis.user_id
+}

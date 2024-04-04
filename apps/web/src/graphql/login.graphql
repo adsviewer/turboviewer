@@ -1,6 +1,7 @@
 mutation login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
     token
+    refreshToken
     user {
       ...UserFields
     }
@@ -10,6 +11,7 @@ mutation login($email: String!, $password: String!) {
 mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
   signup(email: $email, firstName: $firstName, lastName: $lastName, password: $password) {
     token
+    refreshToken
     user {
       ...UserFields
     }
@@ -23,10 +25,15 @@ mutation forgetPassword($email: String!) {
 mutation resetPassword($token: String!, $password: String!) {
   resetPassword(token: $token, password: $password) {
     token
+    refreshToken
     user {
       ...UserFields
     }
   }
+}
+
+mutation refreshToken {
+  refreshToken
 }
 
 query me {

@@ -37,9 +37,14 @@ module.exports = {
       },
     },
   },
-  ignorePatterns: ["node_modules/", "dist/", "src/apollo/generated/*.ts"],
+  ignorePatterns: ["node_modules/", "dist/", "src/graphql/generated/*.ts"],
   // add rules configurations here
   rules: {
     "import/no-default-export": "off",
+    "@typescript-eslint/no-misused-promises": [2, {
+      "checksVoidReturn": {
+        "attributes": false
+      }
+    }]
   },
 };
