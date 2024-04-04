@@ -8,12 +8,9 @@ import { PasswordSchema } from '@repo/utils';
 import { createJwt, createJwts } from '../../auth';
 import { PUBLIC_URL } from '../../config';
 import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
-import { sendForgetPasswordEmail, sendSignupEmail } from '../../email';
-import { FireAndForget } from '../../fire-and-forget';
+import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { TokenUserDto, UserDto } from './user-types';
-
-const fireAndForget = new FireAndForget();
 
 const usernameSchema = z.string().min(2).max(30);
 const emailSchema = z.string().email();
@@ -78,12 +75,13 @@ builder.mutationFields((t) => ({
 
       const user = await createUser(args, query);
 
-      fireAndForget.add(() =>
-        sendSignupEmail({
-          firstName: user.firstName,
-          email: user.email,
-        }),
-      );
+      // TODO: enable me
+      // fireAndForget.add(() =>
+      //   sendSignupEmail({
+      //     firstName: user.firstName,
+      //     email: user.email,
+      //   }),
+      // );
 
       const { token, refreshToken } = createJwts(
         user.id,

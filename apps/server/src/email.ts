@@ -1,4 +1,4 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { logger } from '@repo/logger';
 import { AWS_REGION, DOMAIN, Environment, MODE } from './config';
 
@@ -7,7 +7,6 @@ import { AWS_REGION, DOMAIN, Environment, MODE } from './config';
 const client = new SESClient({ region: AWS_REGION });
 
 const baseDomain = () => `${MODE === Environment.Production ? '' : `${MODE}.`}${DOMAIN}`;
-const baseUrl = () => `https://app.${baseDomain()}`;
 
 interface ForgotPasswordEmailData {
   email: string;
@@ -63,10 +62,10 @@ export const sendSignupEmail = async (data: SignupEmailData) => {
         Destination: {
           ToAddresses: [data.email],
         },
-        Source: `Team Adsviewer <hello@${baseDomain()}>`,
+        Source: `Team AdsViewer <hello@${baseDomain()}>`,
         Message: {
           Subject: {
-            Data: 'Welcome to Adsviewer',
+            Data: 'Welcome to AdsViewer',
           },
           Body: {
             Html: {
@@ -83,15 +82,11 @@ export const sendSignupEmail = async (data: SignupEmailData) => {
 };
 
 const createSignupEmailBody = (data: SignupEmailData) => {
-  const settingsUrl = new URL('/settings', baseUrl()).toString();
-  const addInventoryUrl = new URL('/add-items', baseUrl()).toString();
-  const viewInventoryUrl = new URL('/inventory', baseUrl()).toString();
-
-  const body = `
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <title>Welcome to Adsviewer</title>
+        <title>Welcome to AdsViewer</title>
         <style>
             body { font-family: Arial, sans-serif; }
             .container { width: 80%; margin: auto; padding: 20px; }
@@ -128,35 +123,30 @@ const createSignupEmailBody = (data: SignupEmailData) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>Welcome to Adsviewer</h1>
+                <h1>Welcome to AdsViewer</h1>
             </div>
             <div class="content">
                 <p>Hi ${data.firstName},</p>
 
-                <p>We're thrilled to have you join us at Adsviewer – your new partner in revolutionizing how you manage your inventory. With Adsviewer, you're on the path to more efficient and automated inventory and sales management, tailored for your business needs.</p>
+                <p>We're thrilled to have you join us at AdsViewer – your new partner in revolutionizing how you manage your advertisment.</p>
 
                 <p>You can get started with three easy steps:</p>
                 <ol>
-                    <li><strong><a href="${settingsUrl}">Connect Your Inventory Sources:</a></strong> Integrate your sales channels to effortlessly sync your current inventory from existing channels to Adsviewer.</li>
-                    <li><strong><a href="${addInventoryUrl}">Add New Inventory:</a></strong> Add your first few items using the basic Upload features. This simple step lets you add new items to your inventory in a snap.</li>
-                    <li><strong><a href="${viewInventoryUrl}">List Your Products:</a></strong> Now that you're ready to showcase your products, select items and hit the List button to list your inventory across multiple marketplaces and sales channels.</li>
                 </ol>
 
                 <p>We're eager to support you every step of the way. Should you have any questions or feedback, reach out anytime at <a href="mailto:support@${baseDomain()}">support@${baseDomain()}</a>, or Book A Call by using the button below.</p>
                 
                 <p><a href="https://adsviewer.io/contact" class="button">Book A Call</a></p>
 
-                <p>Once again, welcome to the Adsviewer family. Here's to less time managing inventory and more time growing your business! We look forward to onboarding you to Adsviewer.</p>
+                <p>Once again, welcome to the AdsViewer family. Here's to less time managing inventory and more time growing your business! We look forward to onboarding you to AdsViewer.</p>
 
                 <div class="footer">
                     <p>Cheers,<br>
-                    The Adsviewer Team<br>
+                    The AdsViewer Team<br>
                     <span class="icon-text">✉️</span><a href="mailto:hello@${baseDomain()}">hello@${baseDomain()}</a></p>
                 </div>
             </div>
         </div>
     </body>
     </html>`;
-
-  return body;
 };
