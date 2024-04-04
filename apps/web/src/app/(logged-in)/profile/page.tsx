@@ -1,6 +1,6 @@
 import { type JSX, Suspense } from 'react';
-import Link from 'next/link';
 import { UserProfile } from '@/components/user-profile';
+import { SignOutBtn } from '@/components/login/sign-out-btn';
 
 export default function Page(): JSX.Element {
   return (
@@ -10,9 +10,7 @@ export default function Page(): JSX.Element {
       <Suspense>
         <UserProfile />
       </Suspense>
-      <Link href="/sign-out" prefetch={false}>
-        Sign out
-      </Link>
+      <SignOutBtn />
     </div>
   );
 }
