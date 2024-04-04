@@ -33,6 +33,16 @@ variable "slack_webhook_url" {
 variable "vercel_team" {
   type = string
 }
+variable "vercel_region" {
+  type = map(string)
+  default = {
+    "us-east-1"    = "sfo1"
+    "us-west-1"    = "lax1"
+    "us-west-2"    = "lax1"
+    "us-east-2"    = "ewr"
+    "eu-central-1" = "fra1"
+  }
+}
 variable "vercel_api_token" {
   type = string
 }

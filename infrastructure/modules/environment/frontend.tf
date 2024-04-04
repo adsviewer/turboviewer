@@ -23,7 +23,7 @@ resource "vercel_project" "frontend" {
   }
   name                       = "${var.environment}-webapp"
   root_directory             = "apps/web"
-  serverless_function_region = "fra1"
+  serverless_function_region = var.vercel_region[data.aws_region.current.name]
 }
 
 resource "vercel_project_domain" "frontend_domain" {
