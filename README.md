@@ -38,12 +38,12 @@ Another option is to consume `packages/ui` directly from source without building
 For example, in [tailwind.config.ts](./packages/config-tailwind/tailwind.config.ts):
 
 ```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ]
+content: [
+  // app content
+  `src/**/*.{js,ts,jsx,tsx}`,
+  // include packages if not transpiling
+  '../../packages/ui/*.{js,ts,jsx,tsx}',
+];
 ```
 
 If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.

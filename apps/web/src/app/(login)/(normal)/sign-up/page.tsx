@@ -8,6 +8,7 @@ import { Button } from '@repo/ui/button';
 import { useFormState } from 'react-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type z } from 'zod';
+import Link from 'next/link';
 import { SignUpSchema } from '@/util/schemas/login-schemas';
 import { signUp } from '@/app/(login)/actions';
 import {
@@ -97,6 +98,9 @@ export default function Page(): JSX.Element {
           />
           <Button type="submit">Sign up</Button>
         </Form>
+        <Link className="text-center underline" href="/sign-in">
+          Already have an account? Log in.
+        </Link>
       </div>
     </div>
   );
