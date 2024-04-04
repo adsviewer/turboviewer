@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf node_modules .turbo",
-    "update": "pnpm update --latest && pnpm install"
+    "update": "pnpm update --latest"
   },
   "exports": {
     ".": "./tailwind.config.ts"

@@ -20,7 +20,7 @@
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
     "clean": "rm -rf .turbo .next node_modules dist",
-    "update": "pnpm update --latest && pnpm install"
+    "update": "pnpm update --latest"
   },
   "author": "",
   "license": "UNLICENCED",
@@ -31,7 +31,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.12.2",
+    "@types/node": "^20.12.4",
     "typescript": "^5.4.3"
   }
 }

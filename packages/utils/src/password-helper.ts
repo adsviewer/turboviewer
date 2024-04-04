@@ -2,11 +2,11 @@ import { z } from 'zod';
 
 const minPasswordLength = 8;
 
-export const hasLowerCase = (val: string) => /.*[a-z].*/.test(val);
-export const hasUpperCase = (val: string) => /.*[A-Z].*/.test(val);
-export const hasNumber = (val: string) => /.*\d.*/.test(val);
-export const hasSpecialCharacter = (val: string) => /[^a-zA-Z0-9]/.test(val);
-export const hasMinLength = (val: string) => val.length >= minPasswordLength;
+export const hasLowerCase = (val: string): boolean => /.*[a-z].*/.test(val);
+export const hasUpperCase = (val: string): boolean => /.*[A-Z].*/.test(val);
+export const hasNumber = (val: string): boolean => /.*\d.*/.test(val);
+export const hasSpecialCharacter = (val: string): boolean => /[^a-zA-Z0-9]/.test(val);
+export const hasMinLength = (val: string): boolean => val.length >= minPasswordLength;
 
 export const PasswordSchema = z
   .string()

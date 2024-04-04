@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf node_modules .turbo",
-    "update": "pnpm update --latest && pnpm install"
+    "update": "pnpm update --latest"
   },
   "devDependencies": {
     "@vercel/style-guide": "^6.0.0",
-    "eslint-config-turbo": "^1.13.0"
+    "eslint-config-turbo": "^1.13.2"
   }
 }

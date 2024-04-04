@@ -72,14 +72,14 @@ const client = new OAuth2Client(
   process.env.GOOGLE_REDIRECT_URI,
 );
 
-export const generateAuthUrl = (state: string) =>
+export const generateAuthUrl = (state: string): string =>
   client.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
     state,
   });
 
-const getUserdata = async (code: string) => {
+const getUserdata = async (code: string): Promise<UserData | { error: true; message: string }> => {
   try {
     const getTokenResponse = await client.getToken(code);
     // Make sure to set the credentials on the OAuth2 client.
