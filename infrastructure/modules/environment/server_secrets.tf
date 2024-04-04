@@ -33,15 +33,19 @@ resource "aws_ssm_parameter" "database_url" {
 locals {
 
   common_secrets = {
-    AUTH_SECRET    = aws_ssm_parameter.auth_secret.arn
-    REFRESH_SECRET = aws_ssm_parameter.refresh_secret.arn
+    AUTH_SECRET    = aws_ssm_parameter.auth_secret
+    REFRESH_SECRET = aws_ssm_parameter.refresh_secret
   }
 
-  server_secrets = merge(local.common_secrets, {
+  server_secrets = merge({
+    for k, v in local.common_secrets : k => v.arn
+    }, {
     DATABASE_URL = aws_ssm_parameter.database_url.arn
   })
 
-  fe_secrets = merge(local.common_secrets, {
+  fe_secrets = merge({
+    for k, v in local.common_secrets : k => v.value
+    }, {
     NEXT_PUBLIC_GRAPHQL_ENDPOINT = local.graphql_endpoint
     NEXT_PUBLIC_ENDPOINT         = local.full_domain
   })
