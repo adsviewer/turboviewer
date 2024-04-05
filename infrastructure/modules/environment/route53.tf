@@ -85,3 +85,11 @@ resource "aws_route53_record" "mx" {
   ]
 }
 
+resource "aws_route53_record" "github_pages" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "_github-pages-challenge-adsviewer"
+  type    = "CNAME"
+  ttl     = "300"
+  records = ["1270166284b655e77717434e2d8714"]
+}
