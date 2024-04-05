@@ -1,7 +1,7 @@
 locals {
   terraform_provider_url = "app.terraform.io"
   terraform_audience     = "aws.workload.identity"
-  workspaces             = [var.environment, "prod"]
+  workspaces             = [var.environment, "prod", "local", "dev"]
 }
 
 resource "aws_iam_role" "terraform_role" {

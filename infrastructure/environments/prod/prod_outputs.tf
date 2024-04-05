@@ -2,8 +2,8 @@ output "domain" {
   value = local.domain
 }
 
-output "organization_name" {
-  value = local.organization
+output "git_repository" {
+  value = local.git_repository
 }
 
 output "zone_id" {
