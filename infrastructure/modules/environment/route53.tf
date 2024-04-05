@@ -93,3 +93,36 @@ resource "aws_route53_record" "github_pages" {
   ttl     = "300"
   records = ["1270166284b655e77717434e2d8714"]
 }
+
+resource "aws_route53_record" "google_dkim" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "google._domainkey"
+  type    = "TXT"
+  ttl     = "300"
+  records = [
+    "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlUCgdzxGAoTZBIlDhfq9EzVhmx3dataG70JQnvn98gV3HQg1z3sWkVpoP6HZlnJIrpn7WbB8GBwgvaGowJDKRiFsmaluPe4R+iHV5Ar/7IdKUA1WY/eM+1Vg8Ou12TXzgxniEBRD1LDh8D8Vyo1eRKsL1xi2HSBtWDN/jE3yYjKapXimdkTfvLP7lE9EXNgn\"\"ePn9J76CSzld7/wRJwJgcqHPA/+YxxEOZMp8N10izNQnEkDrWt2IoWMA5YMm10Cm9L6e2KWnPYwfjdn0a3EJQAbmaZ4OX9EWinxIWUh4IWMhqkVA+buH+cKHXume2pJ1qqLD+ZLjCKsfEQPbrVStowIDAQAB"
+  ]
+}
+
+resource "aws_route53_record" "google_verification" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = ""
+  type    = "TXT"
+  ttl     = "300"
+  records = [
+    "v=spf1 include:_spf.google.com ~all",
+  ]
+}
+
+resource "aws_route53_record" "dmarc" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "_dmarc"
+  type    = "TXT"
+  ttl     = "300"
+  records = [
+    "v=DMARC1;p=quarantine;rua=mailto:tech@adsviewer.io;pct=100"
+  ]
+}
