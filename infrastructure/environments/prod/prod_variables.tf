@@ -3,8 +3,7 @@ variable "amplify_token" {
 }
 
 variable "aws_region" {
-  type    = string
-  default = "eu-central-1"
+  type = string
 }
 
 variable "default_tags" {

@@ -78,6 +78,28 @@ resource "aws_ssoadmin_account_assignment" "prod_developers" {
   target_type = "AWS_ACCOUNT"
 }
 
+resource "aws_ssoadmin_account_assignment" "dev_admin" {
+  instance_arn       = tolist(data.aws_ssoadmin_instances.this.arns)[0]
+  permission_set_arn = aws_ssoadmin_permission_set.admin.arn # Custom Permission set
+
+  principal_id   = aws_identitystore_group.prod_admin_group.group_id # Group
+  principal_type = "GROUP"
+
+  target_id   = aws_organizations_account.dev.id # Production Account
+  target_type = "AWS_ACCOUNT"
+}
+
+resource "aws_ssoadmin_account_assignment" "dev_developers" {
+  instance_arn       = tolist(data.aws_ssoadmin_instances.this.arns)[0]
+  permission_set_arn = aws_ssoadmin_permission_set.admin.arn # Custom Permission set
+
+  principal_id   = aws_identitystore_group.developers.group_id # Group
+  principal_type = "GROUP"
+
+  target_id   = aws_organizations_account.dev.id # Development Account
+  target_type = "AWS_ACCOUNT"
+}
+
 resource "aws_ssoadmin_account_assignment" "management_admin" {
   instance_arn       = tolist(data.aws_ssoadmin_instances.this.arns)[0]
   permission_set_arn = aws_ssoadmin_permission_set.admin.arn # Custom Permission set

@@ -33,6 +33,7 @@ resource "aws_identitystore_group_membership" "giorgos_managment_admin" {
   member_id         = aws_identitystore_user.giorgos.user_id
 }
 
+
 resource "aws_identitystore_user" "dennis" {
   display_name      = "Dennis Kreeft"
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
@@ -55,4 +56,24 @@ resource "aws_identitystore_group_membership" "dennis_developer" {
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
   group_id          = aws_identitystore_group.developers.group_id
   member_id         = aws_identitystore_user.dennis.user_id
+}
+
+
+resource "aws_identitystore_user" "iresha" {
+  display_name      = "Iresha Madhuwanthi"
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  name {
+    given_name  = "Iresha"
+    family_name = "Madhuwanthi"
+  }
+  user_name = "iresha"
+
+  emails {
+    value = "ireshamd196@gmail.com"
+  }
+}
+resource "aws_identitystore_group_membership" "iresha_developer" {
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  group_id          = aws_identitystore_group.developers.group_id
+  member_id         = aws_identitystore_user.iresha.user_id
 }
