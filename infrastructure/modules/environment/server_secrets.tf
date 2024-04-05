@@ -43,7 +43,7 @@ locals {
     DATABASE_URL = aws_ssm_parameter.database_url.arn
   })
 
-  fe_secrets = merge({
+  fe_environment_variables = merge({
     for k, v in local.common_secrets : k => v.value
     }, {
     NEXT_PUBLIC_GRAPHQL_ENDPOINT = local.graphql_endpoint

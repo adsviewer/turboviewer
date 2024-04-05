@@ -3,14 +3,14 @@ locals {
   graphql_path     = "graphql"
   prefix           = "app"
   full_domain      = "https://${local.prefix}.${local.domain}"
-  graphql_endpoint = "${local.full_domain}/${local.graphql_path}"
+  graphql_endpoint = "https://${local.api_path}.${local.domain}/${local.graphql_path}"
 }
 
 ###### Vercel ######
 resource "vercel_project" "frontend" {
   build_command = "turbo run build --filter=web"
   environment = [
-    for k, v in local.fe_secrets : {
+    for k, v in local.fe_environment_variables : {
       key    = k
       value  = v
       target = ["production", "preview", "development"]
