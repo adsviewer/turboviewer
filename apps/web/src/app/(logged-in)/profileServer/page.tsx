@@ -1,7 +1,7 @@
 import { type JSX } from 'react';
-import Link from 'next/link';
 import { getUser } from '@/app/(logged-in)/actions';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
+import { SignOutBtn } from '@/components/login/sign-out-btn';
 
 export default async function Home(): Promise<JSX.Element> {
   const result = await getUser();
@@ -17,9 +17,7 @@ export default async function Home(): Promise<JSX.Element> {
           <li key={key}>{value}</li>
         ))}
       </ul>
-      <Link href="/sign-out" prefetch={false}>
-        Sign out
-      </Link>
+      <SignOutBtn />
     </div>
   );
 }

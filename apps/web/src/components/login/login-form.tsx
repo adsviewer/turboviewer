@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type JSX, useRef } from 'react';
+import { type JSX, useState } from 'react';
 import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import {
@@ -7,16 +7,17 @@ import {
   type ControllerProps,
   type FieldPath,
   type FieldValues,
+  Form,
   FormProvider,
   type FormProviderProps,
   useFormContext,
   type UseFormReturn,
 } from 'react-hook-form';
 import { X } from 'lucide-react';
-// eslint-disable-next-line import/named -- not sure why this is being flagged
-import { useFormState } from 'react-dom';
 import { cn } from '@repo/ui/tailwind-utils';
 import { Label } from '@repo/ui/label';
+import { logger } from '@repo/logger';
+import { useRouter } from 'next/navigation';
 
 export interface FormState {
   message: string;
@@ -29,35 +30,42 @@ interface FormProps<
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > extends FormProviderProps<TFieldValues, TName> {
   formName: string;
-  onSubmitAction: (prevState: FormState, data: FormData) => Promise<FormState>;
+  routeUrl: string;
 }
 
-function Form<
+function LoginForm<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({ children, ...props }: FormProps<TFieldValues, TName>): JSX.Element {
-  const [state, formAction] = useFormState(props.onSubmitAction, {
+  const [state, setState] = useState({
     message: '',
   });
-
-  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   return (
     <FormProvider {...props}>
       <FormErrors state={state} />
-      <form
-        ref={formRef}
+      <Form
         className="flex flex-col gap-6"
-        action={formAction}
-        onSubmit={(evt) => {
-          evt.preventDefault();
-          void props.handleSubmit(() => {
-            if (formRef.current) formAction(new FormData(formRef.current));
-          })(evt);
+        action={props.routeUrl}
+        control={props.control}
+        headers={{ 'Content-Type': 'application/json' }}
+        onSuccess={async (data) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- That's fine
+          const body: { success: true } | { success: false; error: FormState } = await data.response.json();
+          if (body.success) {
+            router.push('/profile');
+          } else {
+            setState(body.error);
+          }
+        }}
+        onError={(e) => {
+          logger.error('error', e);
         }}
       >
+        {props.formState.errors.root?.server ? <p>{JSON.stringify(props.formState.errors)}</p> : null}
         {children}
-      </form>
+      </Form>
     </FormProvider>
   );
 }
@@ -205,4 +213,4 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<
 );
 FormMessage.displayName = 'FormMessage';
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };
+export { useFormField, LoginForm, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };

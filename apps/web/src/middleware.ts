@@ -4,7 +4,7 @@ import { logger } from '@repo/logger';
 import { z } from 'zod';
 import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/config';
 
-const publicPaths = ['/', '/sign-in', '/sign-up', '/forgot-password*', '/reset-password*'];
+const publicPaths = ['/', '/sign-in', '/sign-up', '/forgot-password*', '/reset-password*', '/api/login*'];
 
 const isPublic = (path: string): boolean => {
   return Boolean(publicPaths.find((x) => new RegExp(`^${x}$`.replace('*$', '($|/)')).exec(path)));
