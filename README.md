@@ -1,58 +1,60 @@
-# Turborepo Tailwind CSS starter
+# AdsViewer
 
-This is an official starter Turborepo.
+A bunch of cool staff for viewing, optimizing and growing yor digital ad portfolio.
 
-## Using this example
+## Development Setup
 
-Run the following command:
+### Prerequisites
 
-```sh
-npx create-turbo@latest -e with-tailwind
-```
+- [postgres](https://www.postgresql.org/download/)
+- [pnpm](https://pnpm.io/installation)
 
-## What's inside?
+### Setup
 
-This Turborepo includes the following packages/apps:
+1. Clone the repo
+2. Create a db named `adsviewer` in postgres
+3. Create a .env file in the `package/database` directory with the following content:
+   ```env
+   DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
+   ```
+4. Run `pnpm i`
+5. `pnpm run dev`
+6. Open [http://localhost:3000](http://localhost:3000)
 
-### Apps and Packages
+## Developer Onboarding
 
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+Welcome to the team! This page will try to provide the resources that you will need to have a smooth onboarding
+experience
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Things you should have access to
 
-### Building packages/ui
+- email: should be yourNick@adsviewer.io.
+- [slack](https://adsviewer.slack.com/): this is where we communicate.
+- [aws](https://d-9067fd5baf.awsapps.com/start/#/?tab=accounts): this is where we host our infrastructure.
+- [gitHub](https://github.com/adsviewer/): this is where we host our code.
+- [figma](https://www.figma.com/files/project/221242948/adsviewer-project?fuid=1358021073244020634): this is where we
+  design our products.
+- [bitwarden](https://vault.bitwarden.com/#/login): this is where we store our secrets.
+- [terraform](https://app.terraform.io/app/adsviewer/workspaces): this is where we manage our infrastructure.
+- [loom](https://www.loom.com/looms/videos): this is where we record our videos.
 
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.js`. This was chosen for several reasons:
+If you don’t have access to any of these, message giorgos on Slack or [email](mailto:giorgos@adsviewer.io). Please make sure
+that while you are signing up for
+all the services above you take the time to upload your picture to all of them. It does not need to be your picture
+per se, just something that you identify with/like.
 
-- Make sharing one `tailwind.config.js` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
+#### Google two-factor authentication (2FA)
 
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.js` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
+You have a
+few days that you are allowed to access your email without enabling 2FA. To avoid any interruptions
+please [look into it](https://myaccount.google.com/u/2/signinoptions/two-step-verification) as soon as
+possible.
 
-For example, in [tailwind.config.ts](./packages/config-tailwind/tailwind.config.ts):
+#### Setting up your local environment
 
-```js
-content: [
-  // app content
-  `src/**/*.{js,ts,jsx,tsx}`,
-  // include packages if not transpiling
-  '../../packages/ui/*.{js,ts,jsx,tsx}',
-];
-```
+Most of us are using the same github account. You can create a routing in order to receive notification regarding magpie
+to your work email.
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+1. Add your work email in [github](https://github.com/settings/emails)
+2. Create a custom [route](https://github.com/settings/notifications/custom_routing) by picking `adsviewer` from the
+   left dropdown list and your work email on the right dropdown list.

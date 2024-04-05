@@ -1,6 +1,8 @@
 {
   "*.graphql": ["prettier --write"],
   "*.ts": ["prettier --write"],
+  "*.tsx": ["prettier --write"],
+  "*.md": ["prettier --write"],
   "*.tf": "terraform fmt",
   "*.prisma": "prisma format --schema packages/database/prisma/schema.prisma"
 }
