@@ -6,8 +6,10 @@ export async function Me(): Promise<JSX.Element> {
 
   return (
     <div className="grid grid-cols-[auto_1fr] gap-x-2">
-      <div className="capitalize text-gray-100 font-semibold text-xl truncate">{`${me.firstName} ${me.lastName}`}</div>
-      <div className="text-gray-400 font-medium text-sm truncate">{me.email}</div>
+      <div className="truncate">
+        <div className="capitalize text-menu-secondary font-semibold text-xl truncate">{`${me.firstName} ${me.lastName}`}</div>
+        <div className="text-menu-tertiary font-medium text-sm truncate">{me.email}</div>
+      </div>
     </div>
   );
 }
