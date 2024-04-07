@@ -7,7 +7,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "cross-env": "NODE_ENV=development pnpm --filter=@repo/database db:migrate:deploy && tsx watch --env-file=.env src/index.ts",
+    "dev": "cross-env NODE_ENV=development pnpm --filter=@repo/database db:migrate:deploy && tsx watch --env-file=.env src/index.ts",
     "build": "tsc",
     "start": "node --conditions=javascript --import=extensionless/register dist/index.js",
     "lint": "eslint . --max-warnings 0",
@@ -32,6 +32,7 @@
     "@repo/logger": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/utils": "workspace:^",
+    "cross-env": "^7.0.3",
     "express": "^4.19.2",
     "extensionless": "^1.9.6",
     "google-auth-library": "^9.7.0",
