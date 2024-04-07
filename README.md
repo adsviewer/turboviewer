@@ -13,7 +13,7 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
 
 1. Clone the repo
 2. Create a db named `adsviewer` in postgres
-3. Create a .env file in the `package/database` directory with the following content:
+3. Create a .env file in the `packages/database` directory with the following content:
    ```env
    DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
    ```
