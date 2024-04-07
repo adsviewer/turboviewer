@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
 import { type z } from 'zod';
 import { SignInSchema } from '@/util/schemas/login-schemas';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
@@ -33,6 +32,5 @@ export async function POST(
   }
   cookies().set(TOKEN_KEY, result.data.login.token);
   cookies().set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
-  revalidatePath('/profile');
   return NextResponse.json({ success: true });
 }
