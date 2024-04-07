@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   if (isPublic(request.nextUrl.pathname)) {
     if (token) {
-      const redirectUrl = new URL('/dashboard', request.url);
+      const redirectUrl = new URL('/placements', request.url);
       return NextResponse.redirect(redirectUrl);
     }
 

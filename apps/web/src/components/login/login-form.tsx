@@ -54,7 +54,7 @@ function LoginForm<
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- That's fine
           const body: { success: true } | { success: false; error: FormState } = await data.response.json();
           if (body.success) {
-            router.push('/dashboard');
+            router.push('/placements');
           } else {
             setState(body.error);
           }

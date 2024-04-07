@@ -13,9 +13,9 @@ export function SignOutBtn(): JSX.Element {
       <button
         type="button"
         onClick={handleLogout}
-        className="mt-10 lg:mt-[21px] flex items-center gap-2 text-md font-semibold text-gray-300 hover:text-primary-600 transition-all"
+        className="mt-10 lg:mt-[21px] flex items-center gap-2 text-md font-semibold text-menu-tertiary hover:text-primary/90 transition-all"
       >
-        <LogOut className="text-gray-300" />
+        <LogOut className="text-menu-tertiary" />
         Sign Out
       </button>
     </div>
