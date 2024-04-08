@@ -5,7 +5,7 @@ import type { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { type JSX } from 'react';
 import { Input } from '@repo/ui/input';
-import { Button } from '@repo/ui/button';
+import { FormButton } from '@repo/ui/button';
 import {
   FormControl,
   FormDescription,
@@ -54,7 +54,7 @@ export function SignIn(): JSX.Element {
           </FormItem>
         )}
       />
-      <Button type="submit">Sign In</Button>
+      <FormButton type="submit">Sign In</FormButton>
     </LoginForm>
   );
 }

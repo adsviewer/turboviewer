@@ -1,4 +1,4 @@
-export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement | null {
+export function Logo(props: React.ComponentProps<'svg'>): React.ReactElement | null {
   return (
     <svg
       className="stroke-[rgb(var(--foreground-rgb))] fill-[rgb(var(--foreground-rgb))]"

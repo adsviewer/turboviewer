@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { queryFromInfo } from '@pothos/plugin-prisma';
-import { isMError } from '@repo/utils';
+import { isAError } from '@repo/utils';
 import { generateAuthUrl, googleLogin } from '../../google';
 import { builder } from '../builder';
 import { GenerateGoogleAuthUrlResponseDto, TokenUserDto } from './user-types';
@@ -30,7 +30,7 @@ builder.mutationFields((t) => ({
         path: ['user'],
       });
       const resp = await googleLogin(args.code, query);
-      if (isMError(resp)) {
+      if (isAError(resp)) {
         throw new GraphQLError(resp.message);
       }
       return resp;
