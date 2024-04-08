@@ -11,6 +11,14 @@ const typeMap = new Map<IntegrationType, { image: string; name: string }>([
   [IntegrationType.LINKEDIN, { name: 'LinkedIn', image: '/integrations/linkedin-logo-icon.svg' }],
 ]);
 
+const statusMap = new Map<IntegrationStatus, string>([
+  [IntegrationStatus.ComingSoon, 'Coming soon'],
+  [IntegrationStatus.NotConnected, 'Integrate'],
+  [IntegrationStatus.Expired, 'Renew'],
+  [IntegrationStatus.Connected, 'Revoke'],
+  [IntegrationStatus.Listable, 'Revoke'],
+]);
+
 export function Card({ status, type }: UnwrapArray<IntegrationsQuery['integrations']>): React.ReactElement | null {
   const comingSoon = IntegrationStatus.ComingSoon;
   return (
@@ -51,7 +59,7 @@ export function Card({ status, type }: UnwrapArray<IntegrationsQuery['integratio
           }
           disabled={status === IntegrationStatus.ComingSoon}
         >
-          {status}
+          {statusMap.get(status) ?? status}
         </Button>
       </div>
     </div>
