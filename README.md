@@ -13,13 +13,14 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
 
 1. Clone the repo
 2. Create a db named `adsviewer` in postgres
-3. Create a .env file in the `package/database` directory with the following content:
+3. Create a .env file in the `packages/database` directory with the following content:
    ```env
    DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
    ```
-4. Run `pnpm i`
-5. `pnpm run dev`
-6. Open [http://localhost:3000](http://localhost:3000)
+4. Add an empty .env file in the `apps/server` directory
+5. Run `pnpm i`
+6. `pnpm run dev`
+7. Open [http://localhost:3000](http://localhost:3000)
 
 ## Developer Onboarding
 
