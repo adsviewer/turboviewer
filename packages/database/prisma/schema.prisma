@@ -20,12 +20,13 @@ generator pothos {
 }
 
 model Organization {
-  id           String   @id @default(cuid())
+  id           String        @id @default(cuid())
   name         String
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
   users        User[]
-  randomString String   @default(cuid())
+  randomString String        @default(cuid())
+  Integration  Integration[]
 
   @@map("organizations")
 }
@@ -82,4 +83,31 @@ model ForgetPassword {
 
   @@index([createdAt(sort: Desc)])
   @@map("forget_passwords")
+}
+
+enum IntegrationTypeEnum {
+  FACEBOOK
+  TIKTOK
+  LINKEDIN
+}
+
+model Integration {
+  id             String @id @default(cuid())
+  organizationId String @map("organization_id")
+
+  type       IntegrationTypeEnum
+  externalId String              @map("external_id")
+
+  accessToken           String    @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  expiresAt             DateTime? @map("expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, type])
+  @@map("integrations")
 }

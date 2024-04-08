@@ -15,6 +15,43 @@ type GenerateGoogleAuthUrlResponse {
   url: String!
 }
 
+type Integration {
+  accessToken: String!
+  expiresAt: Date
+  externalId: String!
+  id: ID!
+  organization: Organization!
+  organizationId: String!
+  refreshToken: String
+  refreshTokenExpiresAt: Date
+  type: IntegrationType!
+}
+
+type IntegrationAuthUrlResponse {
+  isExternal: Boolean!
+  state: String!
+  url: String!
+}
+
+type IntegrationListItem {
+  status: IntegrationStatus!
+  type: IntegrationType!
+}
+
+enum IntegrationStatus {
+  ComingSoon
+  Connected
+  Expired
+  Listable
+  NotConnected
+}
+
+enum IntegrationType {
+  FACEBOOK
+  LINKEDIN
+  TIKTOK
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -49,6 +86,7 @@ type PrismaClientKnownRequestError implements Error {
 
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
+  integrations: [IntegrationListItem!]!
   me: User!
 }
 

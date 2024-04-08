@@ -10,6 +10,7 @@ export interface LinkType {
   exact?: boolean;
   icon?: React.ReactNode;
   isChild?: boolean;
+  minimized?: boolean;
   sublinks?: LinkType[];
 }
 
@@ -25,7 +26,15 @@ const areChildrenActive = (pathname: string, sublinks: LinkType[]): boolean => {
   });
 };
 
-export function ActiveLink({ url, text, icon, isChild, exact, sublinks }: LinkType): React.ReactElement | null {
+export function ActiveLink({
+  url,
+  text,
+  icon,
+  isChild,
+  exact,
+  sublinks,
+  minimized,
+}: LinkType): React.ReactElement | null {
   const pathname = usePathname();
 
   let active = false;
@@ -62,6 +71,7 @@ export function ActiveLink({ url, text, icon, isChild, exact, sublinks }: LinkTy
             'flex items-center gap-2 text-md font-semibold  transition-all w-full',
             'text-menu-tertiary hover:text-menu-tertiary/90',
             active && 'text-white',
+            minimized && 'lg:hidden',
           )}
         >
           {text}
@@ -84,7 +94,7 @@ export function ActiveLink({ url, text, icon, isChild, exact, sublinks }: LinkTy
         )}
       >
         <span className={cx(active ? 'text-menu-primary' : 'text-menu-tertiary')}>{icon}</span>
-        {text}
+        <span className={cx(minimized ? 'lg:hidden' : '')}>{text}</span>
       </Link>
       {children}
     </li>

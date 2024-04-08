@@ -1,6 +1,6 @@
 'use client';
 
-import { Layers, MenuIcon, Settings, X } from 'lucide-react';
+import { Layers, MenuIcon, PanelLeftClose, PanelLeftOpen, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
 import Link from 'next/link';
@@ -15,12 +15,23 @@ const links: LinkType[] = [
 
 export function Aside({ children }: { children: React.ReactNode }): React.ReactNode | null {
   const [open, setOpen] = useState(false);
+  const [minimize, setMinimize] = useState(false);
 
   return (
-    <aside className="bg-menu-bg text-menu-secondary">
-      <div className="flex flex-col sticky top-0 z-[500] lg:fixed lg:top-auto lg:z-auto lg:h-screen p-4 lg:px-7 lg:py-6 w-full lg:w-[280px]">
+    <div className={cx('bg-menu-bg text-menu-secondary', minimize ? 'lg:w-10' : 'lg:w-[336px]')}>
+      <div
+        className={cx(
+          'flex flex-col sticky top-0 z-[500] lg:fixed lg:top-auto lg:z-auto lg:h-screen lg:py-6 w-full',
+          minimize ? 'lg:w-10 p-1' : 'lg:w-[280px] lg:px-7 p-4',
+        )}
+      >
         <div className="flex lg:block items-center justify-between">
-          <div className="self-baseline relative w-[98px] h-[32px] lg:w-[148px] lg:h-[48px]">
+          <div
+            className={cx(
+              'self-baseline relative w-[98px] h-[32px] lg:w-[148px] lg:h-[48px]',
+              minimize ? 'lg:hidden' : '',
+            )}
+          >
             <Link href="/placements">
               <LogoFull className="stroke-menu-secondary fill-menu-secondary hover:stroke-menu-primary/90 hover:fill-menu-primary/90" />
             </Link>
@@ -43,20 +54,33 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
             'lg:static lg:mt-10 lg:p-0 lg:transition-none lg:translate-x-0',
           )}
         >
-          <div className="hidden lg:block mb-2 text-menu-tertiary text-md font-medium">Navigate</div>
+          <div
+            className={cx('hidden lg:block mb-2 text-menu-tertiary text-md font-medium', minimize ? 'lg:hidden' : '')}
+          >
+            Navigate
+          </div>
           <nav className="w-full grow">
-            <ul className="flex flex-col gap-[21px]">
+            <ul className="flex flex-col gap-[21px] mb-6">
               {links.map((link) => (
-                <ActiveLink key={link.url} {...link} />
+                <ActiveLink key={link.url} minimized={minimize} {...link} />
               ))}
             </ul>
           </nav>
           <div>
-            <div>{children}</div>
-            <SignOutBtn />
+            <div className={cx(minimize ? 'lg:hidden' : '')}>{children}</div>
+            <SignOutBtn classname={minimize ? 'lg:hidden' : ''} />
           </div>
         </div>
+        <button
+          className="absolute right-0 bottom-0 hidden lg:block"
+          type="button"
+          onClick={() => {
+            setMinimize((o) => !o);
+          }}
+        >
+          {minimize ? <PanelLeftOpen /> : <PanelLeftClose />}
+        </button>
       </div>
-    </aside>
+    </div>
   );
 }

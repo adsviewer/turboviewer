@@ -1,14 +1,17 @@
-import { type JSX } from 'react';
+import React, { type JSX, Suspense } from 'react';
+import { Fallback } from '@repo/ui/fallback';
 import { Me } from '@/app/(logged-in)/me';
 import { Aside } from '@/app/(logged-in)/aside';
 
 export default function LoggedInLayout({ children }: React.PropsWithChildren): JSX.Element {
   return (
-    <div className="relative min-h-screen lg:grid lg:grid-cols-[280px_1fr] lg:grid-rows-1">
+    <div className="relative min-h-screen lg:flex lg:flex-row">
       <Aside>
-        <Me />
+        <Suspense fallback={<Fallback height={48} />}>
+          <Me />
+        </Suspense>
       </Aside>
-      <main>{children}</main>
+      <main className="w-full">{children}</main>
     </div>
   );
 }

@@ -34,6 +34,46 @@ export type GenerateGoogleAuthUrlResponse = {
   url: Scalars['String']['output'];
 };
 
+export type Integration = {
+  __typename?: 'Integration';
+  accessToken: Scalars['String']['output'];
+  expiresAt?: Maybe<Scalars['Date']['output']>;
+  externalId: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  organization: Organization;
+  organizationId: Scalars['String']['output'];
+  refreshToken?: Maybe<Scalars['String']['output']>;
+  refreshTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
+  type: IntegrationType;
+};
+
+export type IntegrationAuthUrlResponse = {
+  __typename?: 'IntegrationAuthUrlResponse';
+  isExternal: Scalars['Boolean']['output'];
+  state: Scalars['String']['output'];
+  url: Scalars['String']['output'];
+};
+
+export type IntegrationListItem = {
+  __typename?: 'IntegrationListItem';
+  status: IntegrationStatus;
+  type: IntegrationType;
+};
+
+export enum IntegrationStatus {
+  ComingSoon = 'ComingSoon',
+  Connected = 'Connected',
+  Expired = 'Expired',
+  Listable = 'Listable',
+  NotConnected = 'NotConnected'
+}
+
+export enum IntegrationType {
+  FACEBOOK = 'FACEBOOK',
+  LINKEDIN = 'LINKEDIN',
+  TIKTOK = 'TIKTOK'
+}
+
 export type Mutation = {
   __typename?: 'Mutation';
   forgetPassword: Scalars['Boolean']['output'];
@@ -102,6 +142,7 @@ export type PrismaClientKnownRequestError = Error & {
 export type Query = {
   __typename?: 'Query';
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
+  integrations: Array<IntegrationListItem>;
   me: User;
 };
 
@@ -146,6 +187,11 @@ export type ZodFieldError = {
   message: Scalars['String']['output'];
   path: Array<Scalars['String']['output']>;
 };
+
+export type IntegrationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type IntegrationsQuery = { __typename?: 'Query', integrations: Array<{ __typename?: 'IntegrationListItem', type: IntegrationType, status: IntegrationStatus }> };
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -202,6 +248,14 @@ export const UserFieldsFragmentDoc = gql`
     name
   }
   organizationId
+}
+    `;
+export const IntegrationsDocument = gql`
+    query integrations {
+  integrations {
+    type
+    status
+  }
 }
     `;
 export const LoginDocument = gql`
@@ -264,6 +318,9 @@ export const MeDocument = gql`
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
 export function getSdk<C>(requester: Requester<C>) {
   return {
+    integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
+      return requester<IntegrationsQuery, IntegrationsQueryVariables>(IntegrationsDocument, variables, options) as Promise<IntegrationsQuery>;
+    },
     login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
       return requester<LoginMutation, LoginMutationVariables>(LoginDocument, variables, options) as Promise<LoginMutation>;
     },

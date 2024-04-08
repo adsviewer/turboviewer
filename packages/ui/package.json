@@ -6,6 +6,7 @@
     "**/*.css"
   ],
   "exports": {
+    "./badge": "./src/badge.tsx",
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
     "./fallback": "./src/fallback.tsx",
