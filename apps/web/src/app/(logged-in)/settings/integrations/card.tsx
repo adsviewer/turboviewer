@@ -32,7 +32,7 @@ export function Card({ status, type }: UnwrapArray<IntegrationsQuery['integratio
               <ImageOff size={40} />
             )}
           </div>
-          <div className="grow text-md font-semibold text-gray-900">{typeMap.get(type)?.name ?? type}</div>
+          <div className="grow text-md font-semibold">{typeMap.get(type)?.name ?? type}</div>
         </div>
         {status !== comingSoon && (
           <Badge

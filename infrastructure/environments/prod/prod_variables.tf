@@ -17,6 +17,13 @@ variable "default_tags" {
   type = map(string)
 }
 
+variable "fb_application_id" {
+  type = string
+}
+variable "fb_application_secret" {
+  type = string
+}
+
 variable "environment" {
   type    = string
   default = "prod"
