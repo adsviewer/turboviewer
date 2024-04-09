@@ -1,3 +1,9 @@
+locals {
+  server_secrets_map = {
+    "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret
+  }
+}
+
 resource "aws_ssm_parameter" "auth_secret" {
   name  = "/${var.environment}/server/auth_secret"
   type  = "SecureString"
@@ -30,15 +36,23 @@ resource "aws_ssm_parameter" "database_url" {
   }
 }
 
-locals {
+resource "aws_ssm_parameter" "server_secrets" {
+  for_each = local.server_secrets_map
+  name     = "/${var.environment}/server/${each.key}"
+  type     = "SecureString"
+  value    = each.value
+}
 
+locals {
   common_secrets = {
     AUTH_SECRET    = aws_ssm_parameter.auth_secret
     REFRESH_SECRET = aws_ssm_parameter.refresh_secret
   }
 
   server_secrets = merge({
-    for k, v in local.common_secrets : k => v.arn
+    for k, v in local.common_secrets : upper(k) => v.arn
+    }, {
+    for k, v in aws_ssm_parameter.server_secrets : k => v.arn
     }, {
     DATABASE_URL = aws_ssm_parameter.database_url.arn
   })

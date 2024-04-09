@@ -62,16 +62,16 @@ export type IntegrationListItem = {
 
 export enum IntegrationStatus {
   ComingSoon = 'ComingSoon',
-  Connected = 'Connected',
+  NotConnected = 'NotConnected',
   Expired = 'Expired',
-  Listable = 'Listable',
-  NotConnected = 'NotConnected'
+  Connected = 'Connected',
+  Listable = 'Listable'
 }
 
 export enum IntegrationType {
   FACEBOOK = 'FACEBOOK',
-  LINKEDIN = 'LINKEDIN',
-  TIKTOK = 'TIKTOK'
+  TIKTOK = 'TIKTOK',
+  LINKEDIN = 'LINKEDIN'
 }
 
 export type Mutation = {

@@ -14,6 +14,8 @@ export const MODE = !process.env.MODE || !isMode(process.env.MODE) ? Environment
 const schema = z
   .object({
     AWS_REGION: z.string().min(1).default('eu-central-1'),
+    FB_APPLICATION_ID: z.string().length(17),
+    FB_APPLICATION_SECRET: z.string().length(32),
     PORT: z
       .string()
       .min(1)

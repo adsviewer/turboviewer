@@ -5,6 +5,8 @@
     "AWS_REGION",
     "AUTH_SECRET",
     "DATABASE_URL",
+    "FB_APPLICATION_ID",
+    "FB_APPLICATION_SECRET",
     "PORT",
     "PUBLIC_URL"
     ],

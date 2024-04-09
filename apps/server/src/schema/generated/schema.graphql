@@ -40,16 +40,16 @@ type IntegrationListItem {
 
 enum IntegrationStatus {
   ComingSoon
-  Connected
-  Expired
-  Listable
   NotConnected
+  Expired
+  Connected
+  Listable
 }
 
 enum IntegrationType {
   FACEBOOK
-  LINKEDIN
   TIKTOK
+  LINKEDIN
 }
 
 """
