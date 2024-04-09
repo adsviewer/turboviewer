@@ -50,9 +50,9 @@ locals {
   }
 
   server_secrets = merge({
-    for k, v in local.common_secrets : upper(k) => v.arn
+    for k, v in local.common_secrets : k => v.arn
     }, {
-    for k, v in aws_ssm_parameter.server_secrets : k => v.arn
+    for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.arn
     }, {
     DATABASE_URL = aws_ssm_parameter.database_url.arn
   })
