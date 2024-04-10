@@ -91,6 +91,9 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      body-parser:
+        specifier: ^1.20.2
+        version: 1.20.2
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -149,6 +152,9 @@ importers:
       '@graphql-codegen/urql-introspection':
         specifier: ^3.0.0
         version: 3.0.0(graphql@16.8.1)
+      '@types/body-parser':
+        specifier: ^1.19.5
+        version: 1.19.5
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -164,6 +170,9 @@ importers:
       '@types/node':
         specifier: 20.12.4
         version: 20.12.4
+      '@types/qs':
+        specifier: ^6.9.14
+        version: 6.9.14
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -395,9 +404,6 @@ importers:
       '@types/node':
         specifier: ^20.12.4
         version: 20.12.4
-      tsx:
-        specifier: ^4.7.2
-        version: 4.7.2
       typescript:
         specifier: ^5.4.3
         version: 5.4.3

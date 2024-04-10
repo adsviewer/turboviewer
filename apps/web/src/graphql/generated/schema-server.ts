@@ -60,6 +60,7 @@ export enum IntegrationStatus {
   Expired = 'Expired',
   Connected = 'Connected',
   Listable = 'Listable',
+  Revoked = 'Revoked',
 }
 
 export enum IntegrationType {

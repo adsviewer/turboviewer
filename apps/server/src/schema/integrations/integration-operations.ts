@@ -1,10 +1,11 @@
-import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
+import { type Integration, IntegrationTypeEnum, prisma, IntegrationStatus } from '@repo/database';
 import { builder } from '../builder';
-import { getChannel, saveOrgState } from '../../contexts/channels/channel-helper';
+import { saveOrgState } from '../../contexts/channels/integration-helper';
 import { FireAndForget } from '../../fire-and-forget';
+import { getChannel } from '../../contexts/channels/channel-helper';
 import {
   IntegrationListItemDto,
-  IntegrationStatus,
+  IntegrationStatusEnum,
   IntegrationTypeDto,
   ShouldConnectIntegrationStatuses,
 } from './integration-types';
@@ -52,13 +53,17 @@ builder.queryFields((t) => ({
   }),
 }));
 
-const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatus => {
-  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [];
-  if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatus.ComingSoon;
+const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatusEnum => {
+  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.FACEBOOK];
+  if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
   const integration = integrations.find((i) => i.type === type);
-  if (!integration) return IntegrationStatus.NotConnected;
-  if (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date())
-    return IntegrationStatus.Expired;
-  return IntegrationStatus.Connected;
+  if (!integration) return IntegrationStatusEnum.NotConnected;
+  if (integration.status === IntegrationStatus.REVOKED) return IntegrationStatusEnum.Revoked;
+  if (
+    (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??
+    (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())
+  )
+    return IntegrationStatusEnum.Expired;
+  return IntegrationStatusEnum.Connected;
 };

@@ -1,17 +1,18 @@
 import { IntegrationTypeEnum } from '@repo/database';
 import { builder } from '../builder';
 
-export enum IntegrationStatus {
+export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
   NotConnected = 'NotConnected',
   Expired = 'Expired',
   Connected = 'Connected',
   Listable = 'Listable',
+  Revoked = 'Revoked',
 }
 
-export const ShouldConnectIntegrationStatuses = [IntegrationStatus.NotConnected, IntegrationStatus.Expired];
+export const ShouldConnectIntegrationStatuses = [IntegrationStatusEnum.NotConnected, IntegrationStatusEnum.Expired];
 
-export const IntegrationStatusDto = builder.enumType(IntegrationStatus, {
+export const IntegrationStatusDto = builder.enumType(IntegrationStatusEnum, {
   name: 'IntegrationStatus',
 });
 

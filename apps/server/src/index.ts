@@ -2,10 +2,13 @@ import express from 'express';
 import { createYoga } from 'graphql-yoga';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { logger } from '@repo/logger';
+import bodyParser from 'body-parser';
+import { IntegrationTypeEnum } from '@repo/database';
 import { env, Environment, MODE } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
-import { authRedirectCallback } from './contexts/channels/channel-helper';
+import { authCallback } from './contexts/channels/integration-helper';
+import { getChannel } from './contexts/channels/channel-helper';
 
 process.on('uncaughtException', (reason) => {
   logger.error(reason, 'Uncaught Exception', reason.stack);
@@ -29,7 +32,12 @@ const index = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.use(yoga.graphqlEndpoint, yoga);
 
-  app.get('/api/channel/auth', authRedirectCallback);
+  app.get('/api/channel/auth', authCallback);
+  app.post(
+    '/api/fb/sign-out',
+    bodyParser.urlencoded({ extended: true }),
+    getChannel(IntegrationTypeEnum.FACEBOOK).signOutCallback,
+  );
 
   const port = env.PORT;
   app.listen(port, () => {

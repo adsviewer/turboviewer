@@ -14,6 +14,7 @@ const typeMap = new Map<IntegrationType, { image: string; name: string }>([
 const statusMap = new Map<IntegrationStatus, string>([
   [IntegrationStatus.ComingSoon, 'Coming soon'],
   [IntegrationStatus.NotConnected, 'Integrate'],
+  [IntegrationStatus.Revoked, 'Integrate'],
   [IntegrationStatus.Expired, 'Renew'],
   [IntegrationStatus.Connected, 'Revoke'],
   [IntegrationStatus.Listable, 'Revoke'],

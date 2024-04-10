@@ -39,6 +39,7 @@ enum IntegrationStatus {
   Expired
   Connected
   Listable
+  Revoked
 }
 
 enum IntegrationType {
