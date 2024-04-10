@@ -79,7 +79,7 @@ export const generateAuthUrl = (state: string): string =>
     state,
   });
 
-const getUserdata = async (code: string): Promise<UserData | { error: true; message: string }> => {
+const getUserdata = async (code: string): Promise<UserData | AError> => {
   try {
     const getTokenResponse = await client.getToken(code);
     // Make sure to set the credentials on the OAuth2 client.
@@ -98,7 +98,7 @@ const getUserdata = async (code: string): Promise<UserData | { error: true; mess
     const errorMessage = e instanceof Error ? e.message : JSON.stringify(e);
     logger.error(`Error retrieving user data: ${errorMessage}`);
     return {
-      error: true,
+      name: 'GoogleError',
       message: errorMessage,
     } satisfies AError;
   }

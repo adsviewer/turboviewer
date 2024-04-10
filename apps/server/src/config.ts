@@ -7,13 +7,16 @@ export enum Environment {
   Local = 'local',
 }
 
-const isMode = (val: string): val is Environment => Object.values(Environment).includes(val as Environment);
+export const isMode = (val: string): val is Environment => Object.values(Environment).includes(val as Environment);
 
 export const MODE = !process.env.MODE || !isMode(process.env.MODE) ? Environment.Local : process.env.MODE;
 
+const defaultPort = '4000';
 const schema = z
   .object({
+    API_ENDPOINT: z.string().url().default(`http://localhost:${defaultPort}/api`),
     AWS_REGION: z.string().min(1).default('eu-central-1'),
+    CHANNEL_SECRET: z.string().min(1).default('channelSecret'),
     FB_APPLICATION_ID: z.string().length(17),
     FB_APPLICATION_SECRET: z.string().length(32),
     PORT: z
@@ -21,17 +24,9 @@ const schema = z
       .min(1)
       .max(5)
       .transform((val) => parseInt(val))
-      .default('4000'),
+      .default(defaultPort),
     PUBLIC_URL: z.string().url().default('http://localhost:3000'),
   })
   .merge(commonSchema);
 
 export const env = createEnv(schema);
-
-export const AUTH_SECRET = env.AUTH_SECRET;
-export const AWS_REGION = env.AWS_REGION;
-export const PORT = env.PORT;
-
-export const DOMAIN = 'adsviewer.io';
-export const PUBLIC_URL = env.PUBLIC_URL;
-export const HOSTED_URL = MODE === Environment.Local ? `https://app.demo.${DOMAIN}` : `https://app.${DOMAIN}`;

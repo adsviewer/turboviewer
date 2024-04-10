@@ -37,6 +37,7 @@ const config: CodegenConfig = {
       UUID: 'string',
     },
   },
+  hooks: { afterAllFileWrite: ['prettier --write'] },
 };
 
 // eslint-disable-next-line import/no-default-export -- This is a config file

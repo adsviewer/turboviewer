@@ -29,6 +29,10 @@ variable "organization" {
   type = string
 }
 
+variable "redis_url" {
+  type = string
+}
+
 variable "service_subnet_ids" {
   type = list(string)
 }

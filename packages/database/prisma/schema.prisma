@@ -96,11 +96,11 @@ model Integration {
   organizationId String @map("organization_id")
 
   type       IntegrationTypeEnum
-  externalId String              @map("external_id")
+  externalId String?             @map("external_id")
 
   accessToken           String    @map("access_token")
   refreshToken          String?   @map("refresh_token")
-  expiresAt             DateTime? @map("expires_at")
+  accessTokenExpiresAt  DateTime  @map("access_token_expires_at")
   refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
 
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")

@@ -1,7 +1,4 @@
-export interface AError {
-  error: true;
-  message: string;
-}
+export type AError = Error;
 
 export const isAError = (obj: unknown): obj is AError => {
   return (

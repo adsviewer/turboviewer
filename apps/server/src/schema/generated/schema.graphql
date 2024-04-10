@@ -17,8 +17,8 @@ type GenerateGoogleAuthUrlResponse {
 
 type Integration {
   accessToken: String!
-  expiresAt: Date
-  externalId: String!
+  accessTokenExpiresAt: Date
+  externalId: String
   id: ID!
   organization: Organization!
   organizationId: String!
@@ -27,13 +27,8 @@ type Integration {
   type: IntegrationType!
 }
 
-type IntegrationAuthUrlResponse {
-  isExternal: Boolean!
-  state: String!
-  url: String!
-}
-
 type IntegrationListItem {
+  authUrl: String
   status: IntegrationStatus!
   type: IntegrationType!
 }
@@ -86,6 +81,7 @@ type PrismaClientKnownRequestError implements Error {
 
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
+  integrationAuthUrl(type: IntegrationType!): String!
   integrations: [IntegrationListItem!]!
   me: User!
 }

@@ -1,12 +1,13 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { logger } from '@repo/logger';
-import { AWS_REGION, DOMAIN, Environment, MODE } from './config';
+import { env, Environment, MODE } from './config';
 
 // Import the SignupEmailData interface from the appropriate module
 
-const client = new SESClient({ region: AWS_REGION });
+const client = new SESClient({ region: env.AWS_REGION });
 
-const baseDomain = () => `${MODE === Environment.Production ? '' : `${MODE}.`}${DOMAIN}`;
+const url = new URL(env.PUBLIC_URL);
+const baseDomain = () => `${MODE === Environment.Production ? '' : `${MODE}.`}${url.hostname}`;
 
 interface ForgotPasswordEmailData {
   email: string;

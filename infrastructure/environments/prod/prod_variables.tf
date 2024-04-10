@@ -17,6 +17,11 @@ variable "default_tags" {
   type = map(string)
 }
 
+variable "environment" {
+  type    = string
+  default = "prod"
+}
+
 variable "fb_application_id" {
   type = string
 }
@@ -24,9 +29,8 @@ variable "fb_application_secret" {
   type = string
 }
 
-variable "environment" {
-  type    = string
-  default = "prod"
+variable "redis_url" {
+  type = string
 }
 
 variable "slack_webhook_url" {
