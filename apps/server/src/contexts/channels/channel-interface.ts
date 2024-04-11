@@ -19,4 +19,5 @@ export interface ChannelInterface {
   exchangeCodeForTokens: (code: string) => Promise<TokensResponse | AError>;
   getUserId: (accessToken: string) => Promise<string | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
+  deAuthorize: (organizationId: string) => Promise<boolean>;
 }

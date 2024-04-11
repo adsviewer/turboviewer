@@ -130,10 +130,15 @@ export type PrismaClientKnownRequestError = Error & {
 
 export type Query = {
   __typename?: 'Query';
+  deAuthIntegration: Scalars['Boolean']['output'];
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
   integrationAuthUrl: Scalars['String']['output'];
   integrations: Array<IntegrationListItem>;
   me: User;
+};
+
+export type QueryDeAuthIntegrationArgs = {
+  type: IntegrationType;
 };
 
 export type QueryGenerateGoogleAuthUrlArgs = {

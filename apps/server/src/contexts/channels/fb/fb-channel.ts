@@ -8,7 +8,7 @@ import { type Request as ExpressRequest, type Response as ExpressResponse } from
 import { env, MODE } from '../../../config';
 import { type ChannelInterface, type TokensResponse } from '../channel-interface';
 import { FireAndForget } from '../../../fire-and-forget';
-import { revokeIntegration } from '../integration-util';
+import { getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
 
 const fireAndForget = new FireAndForget();
 
@@ -105,6 +105,35 @@ class Facebook implements ChannelInterface {
     }
     fireAndForget.add(() => revokeIntegration(userId, IntegrationTypeEnum.FACEBOOK));
     res.status(200).send('OK');
+  }
+
+  async deAuthorize(organizationId: string): Promise<boolean> {
+    const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.FACEBOOK);
+    if (!integration) return false;
+
+    const response = await fetch(
+      `${baseGraphFbUrl}/${integration.externalId}/permissions?access_token=${integration.accessToken}`,
+      {
+        method: 'DELETE',
+      },
+    ).catch((error: unknown) => {
+      logger.error('Failed to de-authorize %o', { error });
+    });
+
+    if (!response) return false;
+    if (!response.ok) {
+      logger.error('De-authorization request failed due to %o', await response.json());
+      return false;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
+    const data = await response.json();
+    const parsed = z.object({ success: z.literal(true) }).safeParse(data);
+    if (!parsed.success) {
+      logger.error('Failed to de-authorize %o', data);
+      return false;
+    }
+    return true;
   }
 
   private parseRequest(signedRequest: string, secret: string): string | AError {

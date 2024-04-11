@@ -1,4 +1,5 @@
-import { type Integration, IntegrationTypeEnum, prisma, IntegrationStatus } from '@repo/database';
+import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
+import { logger } from '@repo/logger';
 import { builder } from '../builder';
 import { saveOrgState } from '../../contexts/channels/integration-helper';
 import { FireAndForget } from '../../fire-and-forget';
@@ -49,6 +50,25 @@ builder.queryFields((t) => ({
       const { url, state } = getChannel(type).generateAuthUrl();
       fireAndForget.add(() => saveOrgState(state, ctx.organizationId));
       return url;
+    },
+  }),
+  deAuthIntegration: t.withAuth({ authenticated: true }).field({
+    type: 'Boolean',
+    args: {
+      type: t.arg({
+        type: IntegrationTypeDto,
+        required: true,
+      }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      logger.info(`De-authorizing integration ${args.type} for organization ${ctx.organizationId}`);
+      const resp = await getChannel(args.type).deAuthorize(ctx.organizationId);
+      if (!resp) {
+        logger.error(`Failed to de-authorize integration ${args.type} for organization ${ctx.organizationId}`);
+        return false;
+      }
+      logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
+      return resp;
     },
   }),
 }));

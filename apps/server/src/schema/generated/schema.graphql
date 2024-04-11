@@ -81,6 +81,7 @@ type PrismaClientKnownRequestError implements Error {
 }
 
 type Query {
+  deAuthIntegration(type: IntegrationType!): Boolean!
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
   integrationAuthUrl(type: IntegrationType!): String!
   integrations: [IntegrationListItem!]!
