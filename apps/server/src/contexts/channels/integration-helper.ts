@@ -19,6 +19,7 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
   completeIntegration(code, stateArg, errorDescription)
     .then((integrationType) => {
       if (isAError(integrationType)) {
+        logger.error('Failed to complete integration %s:', integrationType.message);
         res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=${integrationType.message}`);
       } else {
         res.redirect(`${env.PUBLIC_URL}/settings/integrations?type=${integrationType}&status=success`);

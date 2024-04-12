@@ -8,7 +8,7 @@ import { type Request as ExpressRequest, type Response as ExpressResponse } from
 import { env, MODE } from '../../../config';
 import { type ChannelInterface, type TokensResponse } from '../channel-interface';
 import { FireAndForget } from '../../../fire-and-forget';
-import { getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
+import { authEndpoint, getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
 
 const fireAndForget = new FireAndForget();
 
@@ -37,7 +37,7 @@ class Facebook implements ChannelInterface {
     const params = new URLSearchParams({
       client_id: env.FB_APPLICATION_ID,
       scope: scopes.join(','),
-      redirect_uri: `${env.API_ENDPOINT}/channel/auth`,
+      redirect_uri: `${env.API_ENDPOINT}${authEndpoint}`,
       state,
     });
 
@@ -51,7 +51,7 @@ class Facebook implements ChannelInterface {
     const params = new URLSearchParams({
       client_id: env.FB_APPLICATION_ID,
       client_secret: env.FB_APPLICATION_SECRET,
-      redirect_uri: `${env.API_ENDPOINT}/channel/auth`,
+      redirect_uri: `${env.API_ENDPOINT}${authEndpoint}`,
       code,
     });
 
@@ -71,19 +71,24 @@ class Facebook implements ChannelInterface {
     const tokenSchema = z.object({
       access_token: z.string().min(2),
       token_type: z.literal('bearer'),
-      expires_in: z.number(),
+      expires_in: z.number().optional(),
     });
     const parsed = tokenSchema.safeParse(body);
     if (!parsed.success) {
-      return {
-        name: 'FacebookError',
-        message: 'Failed to parse token response',
-      };
+      return new AError('Failed to parse token response');
     }
 
+    if (parsed.data.expires_in) {
+      return {
+        accessToken: parsed.data.access_token,
+        accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
+      };
+    }
+    const accessTokenExpiresAt = await Facebook.getExpireAt(parsed.data.access_token);
+    if (isAError(accessTokenExpiresAt)) return accessTokenExpiresAt;
     return {
       accessToken: parsed.data.access_token,
-      accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
+      accessTokenExpiresAt,
     };
   }
 
@@ -110,7 +115,7 @@ class Facebook implements ChannelInterface {
       res.status(400).send('Failed to parse sign out request');
       return;
     }
-    const userId = facebook.parseRequest(parsedBody.data.signed_request, env.FB_APPLICATION_SECRET);
+    const userId = Facebook.parseRequest(parsedBody.data.signed_request, env.FB_APPLICATION_SECRET);
     if (isAError(userId)) {
       logger.error(userId.message);
       res.status(400).send(userId.message);
@@ -169,7 +174,7 @@ class Facebook implements ChannelInterface {
     return integration.externalId;
   }
 
-  private parseRequest(signedRequest: string, secret: string): string | AError {
+  private static parseRequest(signedRequest: string, secret: string): string | AError {
     const [encodedSig, payload] = signedRequest.split('.');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
@@ -197,6 +202,28 @@ class Facebook implements ChannelInterface {
     if (encodedSig !== encodedPayload) return new AError('Failed to verify sign out token');
 
     return parsed.data.user_id;
+  }
+
+  private static async getExpireAt(accessToken: string): Promise<AError | Date> {
+    const debugToken: Response | AError = await fetch(
+      `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${accessToken}`,
+    ).catch((error: unknown) => {
+      logger.error('Failed to debug token %o', { error });
+      return error instanceof Error ? error : new Error(JSON.stringify(error));
+    });
+    if (isAError(debugToken)) return debugToken;
+    if (!debugToken.ok) {
+      return new AError(`Failed to debug token: ${debugToken.statusText}`);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
+    const debugTokenBody = await debugToken.json().catch((_e: unknown) => null);
+    const debugTokenParsed = z
+      .object({ data: z.object({ data_access_expires_at: z.number() }) })
+      .safeParse(debugTokenBody);
+    if (!debugTokenParsed.success) {
+      return new AError('Failed to parse token response');
+    }
+    return new Date(debugTokenParsed.data.data.data_access_expires_at * 1000);
   }
 }
 

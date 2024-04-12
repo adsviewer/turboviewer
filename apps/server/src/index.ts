@@ -9,6 +9,7 @@ import { createContext } from './context';
 import { schema } from './schema';
 import { authCallback } from './contexts/channels/integration-helper';
 import { getChannel } from './contexts/channels/channel-helper';
+import { authEndpoint } from './contexts/channels/integration-util';
 
 process.on('uncaughtException', (reason) => {
   logger.error(reason, 'Uncaught Exception', reason.stack);
@@ -32,7 +33,7 @@ const index = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.use(yoga.graphqlEndpoint, yoga);
 
-  app.get('/api/channel/auth', authCallback);
+  app.get(`/api${authEndpoint}`, authCallback);
   app.post(
     '/api/fb/sign-out',
     bodyParser.urlencoded({ extended: true }),
