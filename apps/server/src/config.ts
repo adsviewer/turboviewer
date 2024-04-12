@@ -17,7 +17,7 @@ const schema = z
     API_ENDPOINT: z.string().url().default(`http://localhost:${defaultPort}/api`),
     AWS_REGION: z.string().min(1).default('eu-central-1'),
     CHANNEL_SECRET: z.string().min(1).default('channelSecret'),
-    FB_APPLICATION_ID: z.string().length(17),
+    FB_APPLICATION_ID: z.string().min(15).max(17),
     FB_APPLICATION_SECRET: z.string().length(32),
     PORT: z
       .string()
