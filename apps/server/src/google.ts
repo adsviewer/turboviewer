@@ -2,7 +2,7 @@ import process from 'node:process';
 import { OAuth2Client } from 'google-auth-library';
 import { prisma, type Prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { isAError, type AError } from '@repo/utils';
+import { isAError, AError } from '@repo/utils';
 import { createJwts } from './auth';
 import { createUser, type UserData } from './contexts/user';
 
@@ -79,7 +79,7 @@ export const generateAuthUrl = (state: string): string =>
     state,
   });
 
-const getUserdata = async (code: string): Promise<UserData | { error: true; message: string }> => {
+const getUserdata = async (code: string): Promise<UserData | AError> => {
   try {
     const getTokenResponse = await client.getToken(code);
     // Make sure to set the credentials on the OAuth2 client.
@@ -97,10 +97,7 @@ const getUserdata = async (code: string): Promise<UserData | { error: true; mess
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : JSON.stringify(e);
     logger.error(`Error retrieving user data: ${errorMessage}`);
-    return {
-      error: true,
-      message: errorMessage,
-    } satisfies AError;
+    return e instanceof Error ? e : new AError(errorMessage);
   }
 };
 

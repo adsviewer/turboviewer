@@ -1,4 +1,4 @@
-pnpm --filter=server codegen
+# temporarily till we fix top level await    pnpm --filter=server codegen
 git add apps/server/src/schema/generated/*
 git add apps/web/src/graphql/generated/*
 pnpm lint-staged

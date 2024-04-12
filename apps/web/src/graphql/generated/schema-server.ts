@@ -9,15 +9,15 @@ export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> =
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  Date: { input: Date; output: Date; }
+  Date: { input: Date; output: Date };
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSON: { input: any; output: any; }
+  JSON: { input: any; output: any };
 };
 
 export type BaseError = Error & {
@@ -29,6 +29,14 @@ export type Error = {
   message: Scalars['String']['output'];
 };
 
+export type FacebookError = Error & {
+  __typename?: 'FacebookError';
+  code: Scalars['Int']['output'];
+  errorSubCode: Scalars['Int']['output'];
+  fbTraceId: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
 export type GenerateGoogleAuthUrlResponse = {
   __typename?: 'GenerateGoogleAuthUrlResponse';
   url: Scalars['String']['output'];
@@ -37,8 +45,8 @@ export type GenerateGoogleAuthUrlResponse = {
 export type Integration = {
   __typename?: 'Integration';
   accessToken: Scalars['String']['output'];
-  expiresAt?: Maybe<Scalars['Date']['output']>;
-  externalId: Scalars['String']['output'];
+  accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
+  externalId?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   organization: Organization;
   organizationId: Scalars['String']['output'];
@@ -47,15 +55,9 @@ export type Integration = {
   type: IntegrationType;
 };
 
-export type IntegrationAuthUrlResponse = {
-  __typename?: 'IntegrationAuthUrlResponse';
-  isExternal: Scalars['Boolean']['output'];
-  state: Scalars['String']['output'];
-  url: Scalars['String']['output'];
-};
-
 export type IntegrationListItem = {
   __typename?: 'IntegrationListItem';
+  authUrl?: Maybe<Scalars['String']['output']>;
   status: IntegrationStatus;
   type: IntegrationType;
 };
@@ -65,17 +67,18 @@ export enum IntegrationStatus {
   NotConnected = 'NotConnected',
   Expired = 'Expired',
   Connected = 'Connected',
-  Listable = 'Listable'
+  Revoked = 'Revoked',
 }
 
 export enum IntegrationType {
   FACEBOOK = 'FACEBOOK',
   TIKTOK = 'TIKTOK',
-  LINKEDIN = 'LINKEDIN'
+  LINKEDIN = 'LINKEDIN',
 }
 
 export type Mutation = {
   __typename?: 'Mutation';
+  deAuthIntegration: MutationDeAuthIntegrationResult;
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
   login: TokenDto;
@@ -86,28 +89,27 @@ export type Mutation = {
   updateUser: User;
 };
 
+export type MutationDeAuthIntegrationArgs = {
+  type: IntegrationType;
+};
 
 export type MutationForgetPasswordArgs = {
   email: Scalars['String']['input'];
 };
 
-
 export type MutationGoogleLoginSignupArgs = {
   code: Scalars['String']['input'];
 };
-
 
 export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
 };
 
-
 export type MutationResetPasswordArgs = {
   password?: InputMaybe<Scalars['String']['input']>;
   token: Scalars['String']['input'];
 };
-
 
 export type MutationSignupArgs = {
   email: Scalars['String']['input'];
@@ -116,12 +118,18 @@ export type MutationSignupArgs = {
   password: Scalars['String']['input'];
 };
 
-
 export type MutationUpdateUserArgs = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   newPassword?: InputMaybe<Scalars['String']['input']>;
   oldPassword?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationDeAuthIntegrationResult = BaseError | FacebookError | MutationDeAuthIntegrationSuccess;
+
+export type MutationDeAuthIntegrationSuccess = {
+  __typename?: 'MutationDeAuthIntegrationSuccess';
+  data: Scalars['String']['output'];
 };
 
 export type Organization = {
@@ -142,13 +150,17 @@ export type PrismaClientKnownRequestError = Error & {
 export type Query = {
   __typename?: 'Query';
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
+  integrationAuthUrl: Scalars['String']['output'];
   integrations: Array<IntegrationListItem>;
   me: User;
 };
 
-
 export type QueryGenerateGoogleAuthUrlArgs = {
   state: Scalars['String']['input'];
+};
+
+export type QueryIntegrationAuthUrlArgs = {
+  type: IntegrationType;
 };
 
 export type Role = {
@@ -188,18 +200,52 @@ export type ZodFieldError = {
   path: Array<Scalars['String']['output']>;
 };
 
-export type IntegrationsQueryVariables = Exact<{ [key: string]: never; }>;
+export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
 
+export type IntegrationsQuery = {
+  __typename?: 'Query';
+  integrations: Array<{
+    __typename?: 'IntegrationListItem';
+    type: IntegrationType;
+    status: IntegrationStatus;
+    authUrl?: string | null;
+  }>;
+};
 
-export type IntegrationsQuery = { __typename?: 'Query', integrations: Array<{ __typename?: 'IntegrationListItem', type: IntegrationType, status: IntegrationStatus }> };
+export type DeAuthIntegrationMutationVariables = Exact<{
+  type: IntegrationType;
+}>;
+
+export type DeAuthIntegrationMutation = {
+  __typename?: 'Mutation';
+  deAuthIntegration:
+    | { __typename?: 'BaseError'; message: string }
+    | { __typename?: 'FacebookError'; message: string }
+    | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
+};
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
 }>;
 
-
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
+export type LoginMutation = {
+  __typename?: 'Mutation';
+  login: {
+    __typename?: 'TokenDto';
+    token: string;
+    refreshToken: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      organizationId: string;
+      roles: Array<{ __typename?: 'Role'; name: string }>;
+    };
+  };
+};
 
 export type SignupMutationVariables = Exact<{
   email: Scalars['String']['input'];
@@ -208,137 +254,220 @@ export type SignupMutationVariables = Exact<{
   password: Scalars['String']['input'];
 }>;
 
-
-export type SignupMutation = { __typename?: 'Mutation', signup: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
+export type SignupMutation = {
+  __typename?: 'Mutation';
+  signup: {
+    __typename?: 'TokenDto';
+    token: string;
+    refreshToken: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      organizationId: string;
+      roles: Array<{ __typename?: 'Role'; name: string }>;
+    };
+  };
+};
 
 export type ForgetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
 
-
-export type ForgetPasswordMutation = { __typename?: 'Mutation', forgetPassword: boolean };
+export type ForgetPasswordMutation = { __typename?: 'Mutation'; forgetPassword: boolean };
 
 export type ResetPasswordMutationVariables = Exact<{
   token: Scalars['String']['input'];
   password: Scalars['String']['input'];
 }>;
 
+export type ResetPasswordMutation = {
+  __typename?: 'Mutation';
+  resetPassword: {
+    __typename?: 'TokenDto';
+    token: string;
+    refreshToken: string;
+    user: {
+      __typename?: 'User';
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      organizationId: string;
+      roles: Array<{ __typename?: 'Role'; name: string }>;
+    };
+  };
+};
 
-export type ResetPasswordMutation = { __typename?: 'Mutation', resetPassword: { __typename?: 'TokenDto', token: string, refreshToken: string, user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> } } };
+export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
 
-export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
+export type RefreshTokenMutation = { __typename?: 'Mutation'; refreshToken: string };
 
+export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
-export type RefreshTokenMutation = { __typename?: 'Mutation', refreshToken: string };
+export type MeQuery = {
+  __typename?: 'Query';
+  me: { __typename?: 'User'; firstName: string; lastName: string; email: string };
+};
 
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', firstName: string, lastName: string, email: string } };
-
-export type UserFieldsFragment = { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, organizationId: string, roles: Array<{ __typename?: 'Role', name: string }> };
+export type UserFieldsFragment = {
+  __typename?: 'User';
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  organizationId: string;
+  roles: Array<{ __typename?: 'Role'; name: string }>;
+};
 
 export const UserFieldsFragmentDoc = gql`
-    fragment UserFields on User {
-  id
-  firstName
-  lastName
-  email
-  roles {
-    name
-  }
-  organizationId
-}
-    `;
-export const IntegrationsDocument = gql`
-    query integrations {
-  integrations {
-    type
-    status
-  }
-}
-    `;
-export const LoginDocument = gql`
-    mutation login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    token
-    refreshToken
-    user {
-      ...UserFields
-    }
-  }
-}
-    ${UserFieldsFragmentDoc}`;
-export const SignupDocument = gql`
-    mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
-  signup(
-    email: $email
-    firstName: $firstName
-    lastName: $lastName
-    password: $password
-  ) {
-    token
-    refreshToken
-    user {
-      ...UserFields
-    }
-  }
-}
-    ${UserFieldsFragmentDoc}`;
-export const ForgetPasswordDocument = gql`
-    mutation forgetPassword($email: String!) {
-  forgetPassword(email: $email)
-}
-    `;
-export const ResetPasswordDocument = gql`
-    mutation resetPassword($token: String!, $password: String!) {
-  resetPassword(token: $token, password: $password) {
-    token
-    refreshToken
-    user {
-      ...UserFields
-    }
-  }
-}
-    ${UserFieldsFragmentDoc}`;
-export const RefreshTokenDocument = gql`
-    mutation refreshToken {
-  refreshToken
-}
-    `;
-export const MeDocument = gql`
-    query me {
-  me {
+  fragment UserFields on User {
+    id
     firstName
     lastName
     email
+    roles {
+      name
+    }
+    organizationId
   }
-}
-    `;
-export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
+`;
+export const IntegrationsDocument = gql`
+  query integrations {
+    integrations {
+      type
+      status
+      authUrl
+    }
+  }
+`;
+export const DeAuthIntegrationDocument = gql`
+  mutation deAuthIntegration($type: IntegrationType!) {
+    deAuthIntegration(type: $type) {
+      ... on BaseError {
+        message
+      }
+      ... on FacebookError {
+        message
+      }
+      ... on MutationDeAuthIntegrationSuccess {
+        data
+      }
+    }
+  }
+`;
+export const LoginDocument = gql`
+  mutation login($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      token
+      refreshToken
+      user {
+        ...UserFields
+      }
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+export const SignupDocument = gql`
+  mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
+    signup(email: $email, firstName: $firstName, lastName: $lastName, password: $password) {
+      token
+      refreshToken
+      user {
+        ...UserFields
+      }
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+export const ForgetPasswordDocument = gql`
+  mutation forgetPassword($email: String!) {
+    forgetPassword(email: $email)
+  }
+`;
+export const ResetPasswordDocument = gql`
+  mutation resetPassword($token: String!, $password: String!) {
+    resetPassword(token: $token, password: $password) {
+      token
+      refreshToken
+      user {
+        ...UserFields
+      }
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+export const RefreshTokenDocument = gql`
+  mutation refreshToken {
+    refreshToken
+  }
+`;
+export const MeDocument = gql`
+  query me {
+    me {
+      firstName
+      lastName
+      email
+    }
+  }
+`;
+export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
     integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
-      return requester<IntegrationsQuery, IntegrationsQueryVariables>(IntegrationsDocument, variables, options) as Promise<IntegrationsQuery>;
+      return requester<IntegrationsQuery, IntegrationsQueryVariables>(
+        IntegrationsDocument,
+        variables,
+        options,
+      ) as Promise<IntegrationsQuery>;
+    },
+    deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
+      return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(
+        DeAuthIntegrationDocument,
+        variables,
+        options,
+      ) as Promise<DeAuthIntegrationMutation>;
     },
     login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
-      return requester<LoginMutation, LoginMutationVariables>(LoginDocument, variables, options) as Promise<LoginMutation>;
+      return requester<LoginMutation, LoginMutationVariables>(
+        LoginDocument,
+        variables,
+        options,
+      ) as Promise<LoginMutation>;
     },
     signup(variables: SignupMutationVariables, options?: C): Promise<SignupMutation> {
-      return requester<SignupMutation, SignupMutationVariables>(SignupDocument, variables, options) as Promise<SignupMutation>;
+      return requester<SignupMutation, SignupMutationVariables>(
+        SignupDocument,
+        variables,
+        options,
+      ) as Promise<SignupMutation>;
     },
     forgetPassword(variables: ForgetPasswordMutationVariables, options?: C): Promise<ForgetPasswordMutation> {
-      return requester<ForgetPasswordMutation, ForgetPasswordMutationVariables>(ForgetPasswordDocument, variables, options) as Promise<ForgetPasswordMutation>;
+      return requester<ForgetPasswordMutation, ForgetPasswordMutationVariables>(
+        ForgetPasswordDocument,
+        variables,
+        options,
+      ) as Promise<ForgetPasswordMutation>;
     },
     resetPassword(variables: ResetPasswordMutationVariables, options?: C): Promise<ResetPasswordMutation> {
-      return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument, variables, options) as Promise<ResetPasswordMutation>;
+      return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(
+        ResetPasswordDocument,
+        variables,
+        options,
+      ) as Promise<ResetPasswordMutation>;
     },
     refreshToken(variables?: RefreshTokenMutationVariables, options?: C): Promise<RefreshTokenMutation> {
-      return requester<RefreshTokenMutation, RefreshTokenMutationVariables>(RefreshTokenDocument, variables, options) as Promise<RefreshTokenMutation>;
+      return requester<RefreshTokenMutation, RefreshTokenMutationVariables>(
+        RefreshTokenDocument,
+        variables,
+        options,
+      ) as Promise<RefreshTokenMutation>;
     },
     me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
       return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
-    }
+    },
   };
 }
 export type Sdk = ReturnType<typeof getSdk>;

@@ -11,14 +11,21 @@ interface Error {
   message: String!
 }
 
+type FacebookError implements Error {
+  code: Int!
+  errorSubCode: Int!
+  fbTraceId: String!
+  message: String!
+}
+
 type GenerateGoogleAuthUrlResponse {
   url: String!
 }
 
 type Integration {
   accessToken: String!
-  expiresAt: Date
-  externalId: String!
+  accessTokenExpiresAt: Date
+  externalId: String
   id: ID!
   organization: Organization!
   organizationId: String!
@@ -27,13 +34,8 @@ type Integration {
   type: IntegrationType!
 }
 
-type IntegrationAuthUrlResponse {
-  isExternal: Boolean!
-  state: String!
-  url: String!
-}
-
 type IntegrationListItem {
+  authUrl: String
   status: IntegrationStatus!
   type: IntegrationType!
 }
@@ -43,7 +45,7 @@ enum IntegrationStatus {
   NotConnected
   Expired
   Connected
-  Listable
+  Revoked
 }
 
 enum IntegrationType {
@@ -58,6 +60,7 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 scalar JSON
 
 type Mutation {
+  deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
   forgetPassword(email: String!): Boolean!
   googleLoginSignup(code: String!): TokenDto!
   login(email: String!, password: String!): TokenDto!
@@ -69,6 +72,12 @@ type Mutation {
   resetPassword(password: String, token: String!): TokenDto!
   signup(email: String!, firstName: String!, lastName: String!, password: String!): TokenDto!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
+}
+
+union MutationDeAuthIntegrationResult = BaseError | FacebookError | MutationDeAuthIntegrationSuccess
+
+type MutationDeAuthIntegrationSuccess {
+  data: String!
 }
 
 type Organization {
@@ -86,6 +95,7 @@ type PrismaClientKnownRequestError implements Error {
 
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
+  integrationAuthUrl(type: IntegrationType!): String!
   integrations: [IntegrationListItem!]!
   me: User!
 }

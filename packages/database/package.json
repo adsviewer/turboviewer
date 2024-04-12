@@ -33,7 +33,7 @@
     "@prisma/client": "^5.12.0",
     "@prisma/extension-read-replicas": "^0.3.0",
     "@repo/logger": "workspace:*",
-    "@repo/utils": "workspace:^",
+    "@repo/utils": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {

@@ -2,5 +2,20 @@ query integrations {
   integrations {
     type
     status
+    authUrl
+  }
+}
+
+mutation deAuthIntegration($type: IntegrationType!) {
+  deAuthIntegration(type: $type) {
+    ... on BaseError {
+      message
+    }
+    ... on FacebookError {
+      message
+    }
+    ... on MutationDeAuthIntegrationSuccess {
+      data
+    }
   }
 }

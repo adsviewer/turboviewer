@@ -6,10 +6,10 @@ import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { PasswordSchema } from '@repo/utils';
 import { createJwt, createJwts } from '../../auth';
-import { PUBLIC_URL } from '../../config';
 import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
+import { env } from '../../config';
 import { TokenUserDto, UserDto } from './user-types';
 
 const usernameSchema = z.string().min(2).max(30);
@@ -201,7 +201,7 @@ builder.mutationFields((t) => ({
       searchParams.set('expires', String(expires));
       searchParams.set('email', user.email);
 
-      const url = new URL(`${PUBLIC_URL}/reset-password`);
+      const url = new URL(`${env.PUBLIC_URL}/reset-password`);
       url.search = searchParams.toString();
 
       logger.info(`Forget password url for ${user.email}: ${url.toString()}`);

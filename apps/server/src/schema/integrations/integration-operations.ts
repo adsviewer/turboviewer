@@ -1,6 +1,20 @@
-import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
+import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
+import { logger } from '@repo/logger';
+import { AError } from '@repo/utils';
 import { builder } from '../builder';
-import { IntegrationListItemDto, IntegrationStatus } from './integration-types';
+import { getIntegrationAuthUrl } from '../../contexts/channels/integration-helper';
+import { getChannel } from '../../contexts/channels/channel-helper';
+import { FbError } from '../../contexts/channels/fb/fb-channel';
+import { revokeIntegration } from '../../contexts/channels/integration-util';
+import { FireAndForget } from '../../fire-and-forget';
+import {
+  IntegrationListItemDto,
+  IntegrationStatusEnum,
+  IntegrationTypeDto,
+  ShouldConnectIntegrationStatuses,
+} from './integration-types';
+
+const fireAndForget = new FireAndForget();
 
 builder.queryFields((t) => ({
   integrations: t.withAuth({ authenticated: true }).field({
@@ -12,21 +26,69 @@ builder.queryFields((t) => ({
         },
       });
 
-      return Object.values(IntegrationTypeEnum).map((value) => ({
-        type: value,
-        status: integrationStatus(value, integrations),
-      }));
+      return Object.values(IntegrationTypeEnum).map((channel) => {
+        const status = integrationStatus(channel, integrations);
+        const authUrl = ShouldConnectIntegrationStatuses.includes(status)
+          ? getIntegrationAuthUrl(channel, ctx.organizationId)
+          : undefined;
+        return {
+          type: channel,
+          status,
+          authUrl,
+        };
+      });
+    },
+  }),
+  integrationAuthUrl: t.withAuth({ authenticated: true }).field({
+    type: 'String',
+    args: {
+      type: t.arg({
+        type: IntegrationTypeDto,
+        required: true,
+      }),
+    },
+    resolve: (_root, args, ctx, _info) => {
+      const { type } = args;
+      return getIntegrationAuthUrl(type, ctx.organizationId);
     },
   }),
 }));
 
-const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatus => {
-  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [];
-  if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatus.ComingSoon;
+builder.mutationFields((t) => ({
+  deAuthIntegration: t.withAuth({ authenticated: true }).field({
+    type: 'String',
+    errors: { types: [FbError, AError] },
+    args: {
+      type: t.arg({
+        type: IntegrationTypeDto,
+        required: true,
+      }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      logger.info(`De-authorizing integration ${args.type} for organization ${ctx.organizationId}`);
+      const externalId = await getChannel(args.type).deAuthorize(ctx.organizationId);
+      if (externalId instanceof AError) {
+        throw externalId;
+      }
+      fireAndForget.add(() => revokeIntegration(externalId, args.type));
+      const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId);
+      logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
+      return authUrl;
+    },
+  }),
+}));
+
+const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatusEnum => {
+  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.FACEBOOK];
+  if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
   const integration = integrations.find((i) => i.type === type);
-  if (!integration) return IntegrationStatus.NotConnected;
-  if (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date())
-    return IntegrationStatus.Expired;
-  return IntegrationStatus.Connected;
+  if (!integration) return IntegrationStatusEnum.NotConnected;
+  if (integration.status === IntegrationStatus.REVOKED) return IntegrationStatusEnum.Revoked;
+  if (
+    (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??
+    (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())
+  )
+    return IntegrationStatusEnum.Expired;
+  return IntegrationStatusEnum.Connected;
 };

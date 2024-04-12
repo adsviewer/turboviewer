@@ -1,6 +1,6 @@
 locals {
   server_secrets_map = {
-    "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret
+    "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret, "redis_url" : var.redis_url
   }
 }
 
@@ -22,6 +22,17 @@ resource "aws_ssm_parameter" "refresh_secret" {
 }
 
 resource "random_string" "refresh_secret_random_string" {
+  length  = 64
+  special = false
+}
+
+resource "aws_ssm_parameter" "channel_secret" {
+  name  = "/${var.environment}/server/channel_secret"
+  type  = "SecureString"
+  value = random_string.channel_secret_random_string.result
+}
+
+resource "random_string" "channel_secret_random_string" {
   length  = 64
   special = false
 }
@@ -54,7 +65,8 @@ locals {
     }, {
     for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.arn
     }, {
-    DATABASE_URL = aws_ssm_parameter.database_url.arn
+    CHANNEL_SECRET = aws_ssm_parameter.channel_secret.arn
+    DATABASE_URL   = aws_ssm_parameter.database_url.arn
   })
 
   fe_environment_variables = merge({

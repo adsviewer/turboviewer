@@ -6,7 +6,7 @@ import jwt, {
   type TokenExpiredError,
 } from 'jsonwebtoken';
 import { $Enums } from '@repo/database';
-import { AUTH_SECRET, env } from './config';
+import { env, Environment, MODE } from './config';
 import RoleEnum = $Enums.RoleEnum;
 
 interface MJwtPayload extends JwtPayload {
@@ -18,17 +18,17 @@ interface MJwtPayload extends JwtPayload {
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
 const { sign, verify } = jwt;
 
-const expiresIn = '5m';
+const expiresIn = MODE === Environment.Local ? '365d' : '5m';
 export const createJwt = (userId: string, organizationId: string, roles: RoleEnum[]) =>
-  sign({ userId, organizationId, roles }, AUTH_SECRET, { expiresIn });
+  sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn });
 
 export const createJwts = (userId: string, organizationId: string, roles: RoleEnum[]) => ({
-  token: sign({ userId, organizationId, roles }, AUTH_SECRET, { expiresIn }),
+  token: sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn }),
   refreshToken: sign({ userId, organizationId, roles }, env.REFRESH_SECRET, { expiresIn: '183d' }),
 });
 
 export const decodeJwt = (request: Request): MJwtPayload | null => {
-  const decode = safeDecode(request, AUTH_SECRET);
+  const decode = safeDecode(request, env.AUTH_SECRET);
   if (!decode) return null;
   if (isGenericJsonWebTokenError(decode) && isJsonWebTokenError(decode)) {
     // Assume that this is a refresh token

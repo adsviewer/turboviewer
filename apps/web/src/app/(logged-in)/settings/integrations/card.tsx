@@ -1,9 +1,17 @@
+'use client';
+
 import Image from 'next/image';
 import { Badge } from '@repo/ui/badge';
 import { ImageOff } from 'lucide-react';
 import { Button } from '@repo/ui/button';
+import { type JSX, useCallback, useEffect, useState, useTransition } from 'react';
+import { toast } from 'react-toastify';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import * as changeCase from 'change-case';
 import { type IntegrationsQuery, IntegrationStatus, IntegrationType } from '@/graphql/generated/schema-server';
 import { type UnwrapArray } from '@/util/types';
+import { deAuthIntegration } from '@/app/(logged-in)/settings/integrations/actions';
 
 const typeMap = new Map<IntegrationType, { image: string; name: string }>([
   [IntegrationType.TIKTOK, { name: 'TikTok', image: '/integrations/tiktok-logo-icon.svg' }],
@@ -13,16 +21,63 @@ const typeMap = new Map<IntegrationType, { image: string; name: string }>([
 
 const statusMap = new Map<IntegrationStatus, string>([
   [IntegrationStatus.ComingSoon, 'Coming soon'],
-  [IntegrationStatus.NotConnected, 'Integrate'],
+  [IntegrationStatus.NotConnected, 'Connect'],
+  [IntegrationStatus.Revoked, 'Reconnect'],
   [IntegrationStatus.Expired, 'Renew'],
   [IntegrationStatus.Connected, 'Revoke'],
-  [IntegrationStatus.Listable, 'Revoke'],
 ]);
 
-export function Card({ status, type }: UnwrapArray<IntegrationsQuery['integrations']>): React.ReactElement | null {
-  const comingSoon = IntegrationStatus.ComingSoon;
+export default function Card({
+  status,
+  type,
+  authUrl,
+}: UnwrapArray<IntegrationsQuery['integrations']>): React.ReactElement | null {
+  const [cardStatus, setCardStatus] = useState<IntegrationStatus>(status);
+  const [redirectUrl, setRedirectUrl] = useState<string | null | undefined>(authUrl);
+  const [isPending, startTransition] = useTransition();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (searchParams.get('type') === type && searchParams.get('status') === 'success') {
+      setCardStatus(IntegrationStatus.Connected);
+      router.replace('/settings/integrations', undefined);
+    }
+  }, [router, searchParams, type]);
+
+  const handleRevoke = useCallback(() => {
+    startTransition(async () => {
+      const resp = await deAuthIntegration(type);
+      switch (resp.__typename) {
+        case 'MutationDeAuthIntegrationSuccess':
+          setCardStatus(IntegrationStatus.Revoked);
+          setRedirectUrl(resp.data);
+          break;
+        case 'BaseError':
+        case 'FacebookError':
+          toast.error(resp.message);
+          break;
+        default:
+          break;
+      }
+    });
+  }, [type]);
+
+  const makeButton = (onClick: () => void): JSX.Element => (
+    <Button
+      variant={IntegrationStatus.Connected === cardStatus ? 'destructive' : 'default'}
+      className="w-full"
+      disabled={cardStatus === IntegrationStatus.ComingSoon}
+      onClick={onClick}
+      isLoading={isPending}
+    >
+      {statusMap.get(cardStatus) ?? cardStatus}
+    </Button>
+  );
+
   return (
-    <div className="flex flex-col rounded-[12px] border border-gray-600">
+    <div className="flex-1 flex-shrink-1 flex-grow-1 max-w-300px rounded-[12px] border border-gray-600 min-w-96 max-w-[768px]">
       <div className="flex grow gap-2 border-b border-gray-400 p-6">
         <div className="flex grow items-center gap-3">
           <div className="h-12 w-12 rounded-[8px] border border-gray-400 p-1 flex items-center justify-center dark:bg-menu-bg">
@@ -34,33 +89,25 @@ export function Card({ status, type }: UnwrapArray<IntegrationsQuery['integratio
           </div>
           <div className="grow text-md font-semibold">{typeMap.get(type)?.name ?? type}</div>
         </div>
-        {status !== comingSoon && (
+        {cardStatus !== IntegrationStatus.ComingSoon && (
           <Badge
             className="self-start capitalize"
             type="badge-modern"
-            color={
-              status === IntegrationStatus.Connected || status === IntegrationStatus.Listable ? 'success' : 'inactive'
-            }
-            hasDot={status === IntegrationStatus.Connected || status === IntegrationStatus.Listable ? 'outline' : true}
-            text={status}
+            color={cardStatus === IntegrationStatus.Connected ? 'success' : 'inactive'}
+            hasDot={cardStatus === IntegrationStatus.Connected ? 'outline' : true}
+            text={changeCase.noCase(cardStatus)}
           />
         )}
       </div>
 
       <div className="px-6 py-4 flex gap-2">
-        <Button
-          color={status === IntegrationStatus.NotConnected ? 'secondary-color' : 'secondary'}
-          className={
-            status === IntegrationStatus.Expired ||
-            status === IntegrationStatus.Connected ||
-            status === IntegrationStatus.Listable
-              ? 'basis-1/2'
-              : 'w-full'
-          }
-          disabled={status === IntegrationStatus.ComingSoon}
-        >
-          {statusMap.get(status) ?? status}
-        </Button>
+        {cardStatus === IntegrationStatus.Connected || !redirectUrl ? (
+          makeButton(handleRevoke)
+        ) : (
+          <Link className="w-full" href={redirectUrl}>
+            {makeButton(() => undefined)}
+          </Link>
+        )}
       </div>
     </div>
   );

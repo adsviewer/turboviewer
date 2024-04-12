@@ -8,6 +8,7 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
 
 - [postgres](https://www.postgresql.org/download/)
 - [pnpm](https://pnpm.io/installation)
+- [redis-clis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
 
 ### Setup
 

@@ -91,6 +91,11 @@ enum IntegrationTypeEnum {
   LINKEDIN
 }
 
+enum IntegrationStatus {
+  CONNECTED
+  REVOKED
+}
+
 model Integration {
   id             String @id @default(cuid())
   organizationId String @map("organization_id")
@@ -98,10 +103,11 @@ model Integration {
   type       IntegrationTypeEnum
   externalId String              @map("external_id")
 
-  accessToken           String    @map("access_token")
-  refreshToken          String?   @map("refresh_token")
-  expiresAt             DateTime? @map("expires_at")
-  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  accessToken           String            @map("access_token")
+  refreshToken          String?           @map("refresh_token")
+  accessTokenExpiresAt  DateTime          @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime?         @map("refresh_token_expires_at")
+  status                IntegrationStatus
 
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
@@ -109,5 +115,6 @@ model Integration {
   organization Organization @relation(fields: [organizationId], references: [id])
 
   @@unique([organizationId, type])
+  @@unique([externalId, type])
   @@map("integrations")
 }

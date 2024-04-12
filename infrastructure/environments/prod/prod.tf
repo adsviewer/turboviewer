@@ -79,11 +79,12 @@ module "environment" {
   git_repository        = local.git_repository
   github_role_name      = module.workspace.github_role_name
   organization          = local.organization
+  redis_url             = var.redis_url
   service_subnet_ids    = module.workspace.private_subnet_ids
-  vpc_id                = module.workspace.vpc_id
   slack_webhook_url     = var.slack_webhook_url
   vercel_api_token      = var.vercel_api_token
   vercel_team           = var.vercel_team
+  vpc_id                = module.workspace.vpc_id
 }
 
 provider "vercel" {
