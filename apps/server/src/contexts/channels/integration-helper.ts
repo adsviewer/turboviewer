@@ -51,8 +51,8 @@ const completeIntegration = async (
 
   const [mode, integration, state] = stateArg.split('_');
 
-  // mode should only be A-z0-9-_
-  if (!/^[A-z0-9-_]+$/.test(state)) {
+  // mode should only be uuid
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(state)) {
     return new AError('invalid_state');
   }
 
