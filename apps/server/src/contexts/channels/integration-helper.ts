@@ -21,12 +21,18 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
       if (isAError(integrationType)) {
         res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=${integrationType.message}`);
       } else {
-        res.redirect(`${env.PUBLIC_URL}/settings/integrations/${integrationType}/success`);
+        res.redirect(`${env.PUBLIC_URL}/settings/integrations?type=${integrationType}&status=success`);
       }
     })
     .catch((_e: unknown) => {
       res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=uknown_error`);
     });
+};
+
+export const getIntegrationAuthUrl = (type: IntegrationTypeEnum, organizationId: string): string => {
+  const { url, state } = getChannel(type).generateAuthUrl();
+  fireAndForget.add(() => saveOrgState(state, organizationId));
+  return url;
 };
 
 const completeIntegration = async (

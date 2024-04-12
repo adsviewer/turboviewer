@@ -11,6 +11,7 @@
   --destructive-foreground: 210 40% 98%;
 
   --color-primary: 67 160 71;
+  --primary-foreground: 210 40% 98%;
 
   /*menu*/
   --color-menu: 0 0 0;
@@ -24,6 +25,9 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
+
+    --color-primary: 67 160 71;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;

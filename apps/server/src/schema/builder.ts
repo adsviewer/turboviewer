@@ -10,6 +10,7 @@ import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import SimpleObjectsPlugin from '@pothos/plugin-simple-objects';
 import ValidationPlugin from '@pothos/plugin-validation';
 import { prisma, Prisma } from '@repo/database';
+import { AError } from '@repo/utils';
 import { type GraphQLContext } from '../context';
 import JsonValue = Prisma.JsonValue;
 
@@ -42,7 +43,7 @@ export const builder = new SchemaBuilder<{
 }>({
   plugins: [ErrorsPlugin, RelayPlugin, ScopeAuthPlugin, PrismaPlugin, SimpleObjectsPlugin, ValidationPlugin],
   errorOptions: {
-    defaultTypes: [Error],
+    defaultTypes: [AError],
   },
   relayOptions: {
     // These will become the defaults in the next major version

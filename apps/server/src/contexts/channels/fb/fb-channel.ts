@@ -16,6 +16,19 @@ const apiVersion = `v19.0`;
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
+export class FbError extends AError {
+  name = 'FacebookError';
+  code: number;
+  errorSubCode: number;
+  fbTraceId: string;
+  constructor(message: string, code: number, errorSubcode: number, fbtraceId: string) {
+    super(message);
+    this.code = code;
+    this.errorSubCode = errorSubcode;
+    this.fbTraceId = fbtraceId;
+  }
+}
+
 class Facebook implements ChannelInterface {
   generateAuthUrl() {
     const state = `${MODE}_${IntegrationTypeEnum.FACEBOOK}_${randomUUID()}`;
@@ -107,9 +120,9 @@ class Facebook implements ChannelInterface {
     res.status(200).send('OK');
   }
 
-  async deAuthorize(organizationId: string): Promise<boolean> {
+  async deAuthorize(organizationId: string): Promise<string | AError | FbError> {
     const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.FACEBOOK);
-    if (!integration) return false;
+    if (!integration) return new AError('No integration found');
 
     const response = await fetch(
       `${baseGraphFbUrl}/${integration.externalId}/permissions?access_token=${integration.accessToken}`,
@@ -118,12 +131,32 @@ class Facebook implements ChannelInterface {
       },
     ).catch((error: unknown) => {
       logger.error('Failed to de-authorize %o', { error });
+      return error instanceof Error ? error : new Error(JSON.stringify(error));
     });
 
-    if (!response) return false;
+    if (response instanceof Error) return response;
     if (!response.ok) {
-      logger.error('De-authorization request failed due to %o', await response.json());
-      return false;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
+      const json = await response.json();
+      const fbErrorSchema = z.object({
+        error: z.object({
+          message: z.string(),
+          code: z.number(),
+          error_subcode: z.number(),
+          fbtrace_id: z.string(),
+        }),
+      });
+      const parsed = fbErrorSchema.safeParse(json);
+      if (!parsed.success) {
+        logger.error('De-authorization request failed due to %o', json);
+        return new AError('Failed to de-authorize');
+      }
+      return new FbError(
+        parsed.data.error.message,
+        parsed.data.error.code,
+        parsed.data.error.error_subcode,
+        parsed.data.error.fbtrace_id,
+      );
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
@@ -131,9 +164,9 @@ class Facebook implements ChannelInterface {
     const parsed = z.object({ success: z.literal(true) }).safeParse(data);
     if (!parsed.success) {
       logger.error('Failed to de-authorize %o', data);
-      return false;
+      return new AError('Failed to de-authorize');
     }
-    return true;
+    return integration.externalId;
   }
 
   private parseRequest(signedRequest: string, secret: string): string | AError {

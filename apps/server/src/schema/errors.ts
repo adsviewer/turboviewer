@@ -1,15 +1,16 @@
 import { ZodError } from 'zod';
 import { Prisma } from '@repo/database';
+import { AError } from '@repo/utils';
 import { flattenErrors } from '../utils/error-utils';
 import { builder } from './builder';
 
-const ErrorInterface = builder.interfaceRef<Error>('Error').implement({
+export const ErrorInterface = builder.interfaceRef<AError>('Error').implement({
   fields: (t) => ({
     message: t.exposeString('message'),
   }),
 });
 
-builder.objectType(Error, {
+builder.objectType(AError, {
   name: 'BaseError',
   interfaces: [ErrorInterface],
 });

@@ -1,9 +1,12 @@
 import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
+import { AError } from '@repo/utils';
 import { builder } from '../builder';
-import { saveOrgState } from '../../contexts/channels/integration-helper';
-import { FireAndForget } from '../../fire-and-forget';
+import { getIntegrationAuthUrl } from '../../contexts/channels/integration-helper';
 import { getChannel } from '../../contexts/channels/channel-helper';
+import { FbError } from '../../contexts/channels/fb/fb-channel';
+import { revokeIntegration } from '../../contexts/channels/integration-util';
+import { FireAndForget } from '../../fire-and-forget';
 import {
   IntegrationListItemDto,
   IntegrationStatusEnum,
@@ -26,7 +29,7 @@ builder.queryFields((t) => ({
       return Object.values(IntegrationTypeEnum).map((channel) => {
         const status = integrationStatus(channel, integrations);
         const authUrl = ShouldConnectIntegrationStatuses.includes(status)
-          ? getChannel(channel).generateAuthUrl().url
+          ? getIntegrationAuthUrl(channel, ctx.organizationId)
           : undefined;
         return {
           type: channel,
@@ -46,14 +49,15 @@ builder.queryFields((t) => ({
     },
     resolve: (_root, args, ctx, _info) => {
       const { type } = args;
-
-      const { url, state } = getChannel(type).generateAuthUrl();
-      fireAndForget.add(() => saveOrgState(state, ctx.organizationId));
-      return url;
+      return getIntegrationAuthUrl(type, ctx.organizationId);
     },
   }),
+}));
+
+builder.mutationFields((t) => ({
   deAuthIntegration: t.withAuth({ authenticated: true }).field({
-    type: 'Boolean',
+    type: 'String',
+    errors: { types: [FbError, AError] },
     args: {
       type: t.arg({
         type: IntegrationTypeDto,
@@ -62,13 +66,14 @@ builder.queryFields((t) => ({
     },
     resolve: async (_root, args, ctx, _info) => {
       logger.info(`De-authorizing integration ${args.type} for organization ${ctx.organizationId}`);
-      const resp = await getChannel(args.type).deAuthorize(ctx.organizationId);
-      if (!resp) {
-        logger.error(`Failed to de-authorize integration ${args.type} for organization ${ctx.organizationId}`);
-        return false;
+      const externalId = await getChannel(args.type).deAuthorize(ctx.organizationId);
+      if (externalId instanceof AError) {
+        throw externalId;
       }
+      fireAndForget.add(() => revokeIntegration(externalId, args.type));
+      const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId);
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
-      return resp;
+      return authUrl;
     },
   }),
 }));

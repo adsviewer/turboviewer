@@ -1,16 +1,21 @@
 import { IntegrationTypeEnum } from '@repo/database';
 import { builder } from '../builder';
+import { FbError } from '../../contexts/channels/fb/fb-channel';
+import { ErrorInterface } from '../errors';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
   NotConnected = 'NotConnected',
   Expired = 'Expired',
   Connected = 'Connected',
-  Listable = 'Listable',
   Revoked = 'Revoked',
 }
 
-export const ShouldConnectIntegrationStatuses = [IntegrationStatusEnum.NotConnected, IntegrationStatusEnum.Expired];
+export const ShouldConnectIntegrationStatuses = [
+  IntegrationStatusEnum.NotConnected,
+  IntegrationStatusEnum.Expired,
+  IntegrationStatusEnum.Revoked,
+];
 
 export const IntegrationStatusDto = builder.enumType(IntegrationStatusEnum, {
   name: 'IntegrationStatus',
@@ -42,5 +47,15 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     refreshTokenExpiresAt: t.expose('refreshTokenExpiresAt', { type: 'Date', nullable: true }),
 
     organization: t.relation('organization'),
+  }),
+});
+
+builder.objectType(FbError, {
+  name: 'FacebookError',
+  interfaces: [ErrorInterface],
+  fields: (t) => ({
+    code: t.exposeInt('code'),
+    errorSubCode: t.exposeInt('errorSubCode'),
+    fbTraceId: t.exposeString('fbTraceId'),
   }),
 });

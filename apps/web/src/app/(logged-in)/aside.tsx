@@ -18,11 +18,11 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
   const [minimize, setMinimize] = useState(false);
 
   return (
-    <div className={cx('bg-menu-bg text-menu-secondary', minimize ? 'lg:w-10' : 'lg:w-[336px]')}>
+    <div className={cx('bg-menu-bg text-menu-secondary', minimize ? 'lg:w-10' : 'lg:w-1/5')}>
       <div
         className={cx(
-          'flex flex-col sticky top-0 z-[500] lg:fixed lg:top-auto lg:z-auto lg:h-screen lg:py-6 w-full',
-          minimize ? 'lg:w-10 p-1' : 'lg:w-[280px] lg:px-7 p-4',
+          'flex flex-col sticky top-0 z-[500] lg:h-screen lg:py-6 w-full',
+          minimize ? 'lg:w-10 p-1' : 'lg:px-7 p-4',
         )}
       >
         <div className="flex lg:block items-center justify-between">
@@ -32,11 +32,12 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
               minimize ? 'lg:hidden' : '',
             )}
           >
-            <Link href="/placements">
+            <Link href="/placements" aria-label="To Home">
               <LogoFull className="stroke-menu-secondary fill-menu-secondary hover:stroke-menu-primary/90 hover:fill-menu-primary/90" />
             </Link>
           </div>
           <button
+            aria-label="Toggle Menu"
             className="lg:hidden"
             type="button"
             onClick={() => {

@@ -29,6 +29,14 @@ export type Error = {
   message: Scalars['String']['output'];
 };
 
+export type FacebookError = Error & {
+  __typename?: 'FacebookError';
+  code: Scalars['Int']['output'];
+  errorSubCode: Scalars['Int']['output'];
+  fbTraceId: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
 export type GenerateGoogleAuthUrlResponse = {
   __typename?: 'GenerateGoogleAuthUrlResponse';
   url: Scalars['String']['output'];
@@ -59,7 +67,6 @@ export enum IntegrationStatus {
   NotConnected = 'NotConnected',
   Expired = 'Expired',
   Connected = 'Connected',
-  Listable = 'Listable',
   Revoked = 'Revoked',
 }
 
@@ -71,6 +78,7 @@ export enum IntegrationType {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  deAuthIntegration: MutationDeAuthIntegrationResult;
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
   login: TokenDto;
@@ -79,6 +87,10 @@ export type Mutation = {
   resetPassword: TokenDto;
   signup: TokenDto;
   updateUser: User;
+};
+
+export type MutationDeAuthIntegrationArgs = {
+  type: IntegrationType;
 };
 
 export type MutationForgetPasswordArgs = {
@@ -113,6 +125,13 @@ export type MutationUpdateUserArgs = {
   oldPassword?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type MutationDeAuthIntegrationResult = BaseError | FacebookError | MutationDeAuthIntegrationSuccess;
+
+export type MutationDeAuthIntegrationSuccess = {
+  __typename?: 'MutationDeAuthIntegrationSuccess';
+  data: Scalars['String']['output'];
+};
+
 export type Organization = {
   __typename?: 'Organization';
   createdAt: Scalars['Date']['output'];
@@ -130,15 +149,10 @@ export type PrismaClientKnownRequestError = Error & {
 
 export type Query = {
   __typename?: 'Query';
-  deAuthIntegration: Scalars['Boolean']['output'];
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
   integrationAuthUrl: Scalars['String']['output'];
   integrations: Array<IntegrationListItem>;
   me: User;
-};
-
-export type QueryDeAuthIntegrationArgs = {
-  type: IntegrationType;
 };
 
 export type QueryGenerateGoogleAuthUrlArgs = {
@@ -190,7 +204,24 @@ export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type IntegrationsQuery = {
   __typename?: 'Query';
-  integrations: Array<{ __typename?: 'IntegrationListItem'; type: IntegrationType; status: IntegrationStatus }>;
+  integrations: Array<{
+    __typename?: 'IntegrationListItem';
+    type: IntegrationType;
+    status: IntegrationStatus;
+    authUrl?: string | null;
+  }>;
+};
+
+export type DeAuthIntegrationMutationVariables = Exact<{
+  type: IntegrationType;
+}>;
+
+export type DeAuthIntegrationMutation = {
+  __typename?: 'Mutation';
+  deAuthIntegration:
+    | { __typename?: 'BaseError'; message: string }
+    | { __typename?: 'FacebookError'; message: string }
+    | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
 
 export type LoginMutationVariables = Exact<{
@@ -308,6 +339,22 @@ export const IntegrationsDocument = gql`
     integrations {
       type
       status
+      authUrl
+    }
+  }
+`;
+export const DeAuthIntegrationDocument = gql`
+  mutation deAuthIntegration($type: IntegrationType!) {
+    deAuthIntegration(type: $type) {
+      ... on BaseError {
+        message
+      }
+      ... on FacebookError {
+        message
+      }
+      ... on MutationDeAuthIntegrationSuccess {
+        data
+      }
     }
   }
 `;
@@ -375,6 +422,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<IntegrationsQuery>;
+    },
+    deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
+      return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(
+        DeAuthIntegrationDocument,
+        variables,
+        options,
+      ) as Promise<DeAuthIntegrationMutation>;
     },
     login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
       return requester<LoginMutation, LoginMutationVariables>(

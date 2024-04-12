@@ -2,6 +2,7 @@ import React, { type JSX, Suspense } from 'react';
 import { Fallback } from '@repo/ui/fallback';
 import { Me } from '@/app/(logged-in)/me';
 import { Aside } from '@/app/(logged-in)/aside';
+import Toaster from '@/app/(logged-in)/toaster';
 
 export default function LoggedInLayout({ children }: React.PropsWithChildren): JSX.Element {
   return (
@@ -12,6 +13,9 @@ export default function LoggedInLayout({ children }: React.PropsWithChildren): J
         </Suspense>
       </Aside>
       <main className="w-full">{children}</main>
+      <Suspense>
+        <Toaster />
+      </Suspense>
     </div>
   );
 }
