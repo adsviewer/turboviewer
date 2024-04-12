@@ -3,6 +3,8 @@ import { IntegrationStatus, prisma } from '@repo/database';
 import { env } from '../../config';
 import { decryptAesGcm } from '../../utils/aes-util';
 
+export const authEndpoint = '/channel/auth';
+
 export const revokeIntegration = async (externalId: string, type: IntegrationTypeEnum): Promise<void> => {
   await prisma.integration.update({
     where: {
