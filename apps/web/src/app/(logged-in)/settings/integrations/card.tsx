@@ -77,7 +77,7 @@ export default function Card({
   );
 
   return (
-    <div className="flex-1 flex-shrink-1 flex-grow-1 max-w-300px rounded-[12px] border border-gray-600 min-w-96 max-w-[768px]">
+    <div className="flex flex-col rounded-[12px] border border-gray-600">
       <div className="flex grow gap-2 border-b border-gray-400 p-6">
         <div className="flex grow items-center gap-3">
           <div className="h-12 w-12 rounded-[8px] border border-gray-400 p-1 flex items-center justify-center dark:bg-menu-bg">
