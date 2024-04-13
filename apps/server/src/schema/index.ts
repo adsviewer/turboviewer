@@ -13,8 +13,8 @@ builder.mutationType({
   fields: (_t) => ({}),
 });
 
-// builder.subscriptionType({
-//   fields: (_t) => ({}),
-// });
+builder.subscriptionType({
+  fields: (_t) => ({}),
+});
 
 export const schema = builder.toSchema({});

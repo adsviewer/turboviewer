@@ -19,17 +19,17 @@ const config: CodegenConfig = {
       },
       documents: ['../web/src/graphql/*.graphql'],
     },
-    // '../web/src/graphql/generated/schema-client.ts': {
-    //   plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
-    //   config: {
-    //     withHooks: true,
-    //     urqlImportFrom: '@urql/next',
-    //     namingConvention: {
-    //       enumValues: 'keep',
-    //     },
-    //   },
-    //   documents: ['../web/src/graphql/*.graphql'],
-    // },
+    '../web/src/graphql/generated/schema-client.ts': {
+      plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
+      config: {
+        withHooks: true,
+        urqlImportFrom: '@urql/next',
+        namingConvention: {
+          enumValues: 'keep',
+        },
+      },
+      documents: ['../web/src/graphql/*.graphql'],
+    },
   },
   config: {
     scalars: {

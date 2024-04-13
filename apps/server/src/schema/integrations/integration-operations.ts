@@ -1,12 +1,14 @@
 import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError } from '@repo/utils';
+import { pipe } from 'graphql-yoga';
 import { builder } from '../builder';
 import { getIntegrationAuthUrl } from '../../contexts/channels/integration-helper';
 import { getChannel } from '../../contexts/channels/channel-helper';
 import { FbError } from '../../contexts/channels/fb/fb-channel';
 import { revokeIntegration } from '../../contexts/channels/integration-util';
 import { FireAndForget } from '../../fire-and-forget';
+import { pubSub } from '../pubsub';
 import {
   IntegrationListItemDto,
   IntegrationStatusEnum,
@@ -74,6 +76,29 @@ builder.mutationFields((t) => ({
       const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId);
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
       return authUrl;
+    },
+  }),
+  createProgress: t.field({
+    type: 'String',
+    resolve: async (_root, _args, _ctx, _info) => {
+      pubSub.publish('user:fb:progress', 0);
+      for (let i = 1; i <= 100; i++) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        pubSub.publish('user:fb:progress', i);
+      }
+      return 'Success';
+    },
+  }),
+}));
+
+builder.subscriptionFields((t) => ({
+  channelInitialSetupProgress: t.field({
+    type: 'Int',
+    resolve: (root: number, _args, _ctx, _info) => root,
+    subscribe: (_root, _args, _ctx) => {
+      return pipe(pubSub.subscribe('user:fb:progress'));
     },
   }),
 }));

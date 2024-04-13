@@ -19,3 +19,11 @@ mutation deAuthIntegration($type: IntegrationType!) {
     }
   }
 }
+
+mutation createProgress {
+  createProgress
+}
+
+subscription channelInitialSetupProgress {
+  channelInitialSetupProgress
+}
