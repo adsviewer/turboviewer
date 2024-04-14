@@ -7,7 +7,9 @@ import { getChannel } from '../../contexts/channels/channel-helper';
 import { FbError } from '../../contexts/channels/fb/fb-channel';
 import { revokeIntegration } from '../../contexts/channels/integration-util';
 import { FireAndForget } from '../../fire-and-forget';
+import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import {
+  ChannelInitialProgressPayloadDto,
   IntegrationListItemDto,
   IntegrationStatusEnum,
   IntegrationTypeDto,
@@ -75,6 +77,33 @@ builder.mutationFields((t) => ({
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
       return authUrl;
     },
+  }),
+  createProgress: t.withAuth({ authenticated: true }).field({
+    type: 'String',
+    args: {
+      type: t.arg({
+        type: IntegrationTypeDto,
+        required: true,
+      }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: 0 });
+      for (let i = 1; i <= 100; i++) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: i });
+      }
+      return 'Success';
+    },
+  }),
+}));
+
+builder.subscriptionFields((t) => ({
+  channelInitialSetupProgress: t.withAuth({ authenticated: true }).field({
+    type: ChannelInitialProgressPayloadDto,
+    resolve: (root: ChannelInitialProgressPayload, _args, _ctx, _info) => root,
+    subscribe: (_root, _args, ctx) => pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId),
   }),
 }));
 

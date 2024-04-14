@@ -1,5 +1,5 @@
-import { DocumentNode } from 'graphql';
 import gql from 'graphql-tag';
+import * as Urql from '@urql/next';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -7,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string };
@@ -370,6 +371,10 @@ export const IntegrationsDocument = gql`
     }
   }
 `;
+
+export function useIntegrationsQuery(options?: Omit<Urql.UseQueryArgs<IntegrationsQueryVariables>, 'query'>) {
+  return Urql.useQuery<IntegrationsQuery, IntegrationsQueryVariables>({ query: IntegrationsDocument, ...options });
+}
 export const DeAuthIntegrationDocument = gql`
   mutation deAuthIntegration($type: IntegrationType!) {
     deAuthIntegration(type: $type) {
@@ -385,11 +390,19 @@ export const DeAuthIntegrationDocument = gql`
     }
   }
 `;
+
+export function useDeAuthIntegrationMutation() {
+  return Urql.useMutation<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(DeAuthIntegrationDocument);
+}
 export const CreateProgressDocument = gql`
   mutation createProgress {
     createProgress
   }
 `;
+
+export function useCreateProgressMutation() {
+  return Urql.useMutation<CreateProgressMutation, CreateProgressMutationVariables>(CreateProgressDocument);
+}
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {
     channelInitialSetupProgress {
@@ -398,6 +411,17 @@ export const ChannelInitialSetupProgressDocument = gql`
     }
   }
 `;
+
+export function useChannelInitialSetupProgressSubscription<TData = ChannelInitialSetupProgressSubscription>(
+  options?: Omit<Urql.UseSubscriptionArgs<ChannelInitialSetupProgressSubscriptionVariables>, 'query'>,
+  handler?: Urql.SubscriptionHandler<ChannelInitialSetupProgressSubscription, TData>,
+) {
+  return Urql.useSubscription<
+    ChannelInitialSetupProgressSubscription,
+    TData,
+    ChannelInitialSetupProgressSubscriptionVariables
+  >({ query: ChannelInitialSetupProgressDocument, ...options }, handler);
+}
 export const LoginDocument = gql`
   mutation login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
@@ -410,6 +434,10 @@ export const LoginDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
+
+export function useLoginMutation() {
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+}
 export const SignupDocument = gql`
   mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
     signup(email: $email, firstName: $firstName, lastName: $lastName, password: $password) {
@@ -422,11 +450,19 @@ export const SignupDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
+
+export function useSignupMutation() {
+  return Urql.useMutation<SignupMutation, SignupMutationVariables>(SignupDocument);
+}
 export const ForgetPasswordDocument = gql`
   mutation forgetPassword($email: String!) {
     forgetPassword(email: $email)
   }
 `;
+
+export function useForgetPasswordMutation() {
+  return Urql.useMutation<ForgetPasswordMutation, ForgetPasswordMutationVariables>(ForgetPasswordDocument);
+}
 export const ResetPasswordDocument = gql`
   mutation resetPassword($token: String!, $password: String!) {
     resetPassword(token: $token, password: $password) {
@@ -439,11 +475,19 @@ export const ResetPasswordDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
+
+export function useResetPasswordMutation() {
+  return Urql.useMutation<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument);
+}
 export const RefreshTokenDocument = gql`
   mutation refreshToken {
     refreshToken
   }
 `;
+
+export function useRefreshTokenMutation() {
+  return Urql.useMutation<RefreshTokenMutation, RefreshTokenMutationVariables>(RefreshTokenDocument);
+}
 export const MeDocument = gql`
   query me {
     me {
@@ -453,78 +497,7 @@ export const MeDocument = gql`
     }
   }
 `;
-export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
-export function getSdk<C>(requester: Requester<C>) {
-  return {
-    integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
-      return requester<IntegrationsQuery, IntegrationsQueryVariables>(
-        IntegrationsDocument,
-        variables,
-        options,
-      ) as Promise<IntegrationsQuery>;
-    },
-    deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
-      return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(
-        DeAuthIntegrationDocument,
-        variables,
-        options,
-      ) as Promise<DeAuthIntegrationMutation>;
-    },
-    createProgress(variables?: CreateProgressMutationVariables, options?: C): Promise<CreateProgressMutation> {
-      return requester<CreateProgressMutation, CreateProgressMutationVariables>(
-        CreateProgressDocument,
-        variables,
-        options,
-      ) as Promise<CreateProgressMutation>;
-    },
-    channelInitialSetupProgress(
-      variables?: ChannelInitialSetupProgressSubscriptionVariables,
-      options?: C,
-    ): AsyncIterable<ChannelInitialSetupProgressSubscription> {
-      return requester<ChannelInitialSetupProgressSubscription, ChannelInitialSetupProgressSubscriptionVariables>(
-        ChannelInitialSetupProgressDocument,
-        variables,
-        options,
-      ) as AsyncIterable<ChannelInitialSetupProgressSubscription>;
-    },
-    login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
-      return requester<LoginMutation, LoginMutationVariables>(
-        LoginDocument,
-        variables,
-        options,
-      ) as Promise<LoginMutation>;
-    },
-    signup(variables: SignupMutationVariables, options?: C): Promise<SignupMutation> {
-      return requester<SignupMutation, SignupMutationVariables>(
-        SignupDocument,
-        variables,
-        options,
-      ) as Promise<SignupMutation>;
-    },
-    forgetPassword(variables: ForgetPasswordMutationVariables, options?: C): Promise<ForgetPasswordMutation> {
-      return requester<ForgetPasswordMutation, ForgetPasswordMutationVariables>(
-        ForgetPasswordDocument,
-        variables,
-        options,
-      ) as Promise<ForgetPasswordMutation>;
-    },
-    resetPassword(variables: ResetPasswordMutationVariables, options?: C): Promise<ResetPasswordMutation> {
-      return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(
-        ResetPasswordDocument,
-        variables,
-        options,
-      ) as Promise<ResetPasswordMutation>;
-    },
-    refreshToken(variables?: RefreshTokenMutationVariables, options?: C): Promise<RefreshTokenMutation> {
-      return requester<RefreshTokenMutation, RefreshTokenMutationVariables>(
-        RefreshTokenDocument,
-        variables,
-        options,
-      ) as Promise<RefreshTokenMutation>;
-    },
-    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
-      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
-    },
-  };
+
+export function useMeQuery(options?: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'>) {
+  return Urql.useQuery<MeQuery, MeQueryVariables>({ query: MeDocument, ...options });
 }
-export type Sdk = ReturnType<typeof getSdk>;

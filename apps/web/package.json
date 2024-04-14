@@ -27,6 +27,7 @@
     "@vercel/speed-insights": "^1.0.10",
     "change-case": "^5.4.4",
     "graphql": "^16.8.1",
+    "graphql-sse": "^2.5.3",
     "graphql-tag": "^2.12.6",
     "jose": "^5.2.3",
     "lucide-react": "^0.364.0",

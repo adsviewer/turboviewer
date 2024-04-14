@@ -12,3 +12,5 @@ const makeRedis = async (): Promise<RedisClientType<RedisModules, RedisFunctions
     .connect();
 
 export const redis = await makeRedis();
+
+export * from './ioredis';
