@@ -2,6 +2,7 @@ import { IntegrationTypeEnum } from '@repo/database';
 import { builder } from '../builder';
 import { FbError } from '../../contexts/channels/fb/fb-channel';
 import { ErrorInterface } from '../errors';
+import { type ChannelInitialProgressPayload } from '../pubsub';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
@@ -59,3 +60,12 @@ builder.objectType(FbError, {
     fbTraceId: t.exposeString('fbTraceId'),
   }),
 });
+
+export const ChannelInitialProgressPayloadDto = builder
+  .objectRef<ChannelInitialProgressPayload>('ChannelInitialProgressPayload')
+  .implement({
+    fields: (t) => ({
+      channel: t.expose('channel', { type: IntegrationTypeDto }),
+      progress: t.exposeInt('progress'),
+    }),
+  });

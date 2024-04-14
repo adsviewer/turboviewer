@@ -1,15 +1,15 @@
 import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError } from '@repo/utils';
-import { pipe } from 'graphql-yoga';
 import { builder } from '../builder';
 import { getIntegrationAuthUrl } from '../../contexts/channels/integration-helper';
 import { getChannel } from '../../contexts/channels/channel-helper';
 import { FbError } from '../../contexts/channels/fb/fb-channel';
 import { revokeIntegration } from '../../contexts/channels/integration-util';
 import { FireAndForget } from '../../fire-and-forget';
-import { pubSub } from '../pubsub';
+import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import {
+  ChannelInitialProgressPayloadDto,
   IntegrationListItemDto,
   IntegrationStatusEnum,
   IntegrationTypeDto,
@@ -78,15 +78,21 @@ builder.mutationFields((t) => ({
       return authUrl;
     },
   }),
-  createProgress: t.field({
+  createProgress: t.withAuth({ authenticated: true }).field({
     type: 'String',
-    resolve: async (_root, _args, _ctx, _info) => {
-      pubSub.publish('user:fb:progress', 0);
+    args: {
+      type: t.arg({
+        type: IntegrationTypeDto,
+        required: true,
+      }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: 0 });
       for (let i = 1; i <= 100; i++) {
         await new Promise((resolve) => {
           setTimeout(resolve, 100);
         });
-        pubSub.publish('user:fb:progress', i);
+        pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: i });
       }
       return 'Success';
     },
@@ -94,12 +100,10 @@ builder.mutationFields((t) => ({
 }));
 
 builder.subscriptionFields((t) => ({
-  channelInitialSetupProgress: t.field({
-    type: 'Int',
-    resolve: (root: number, _args, _ctx, _info) => root,
-    subscribe: (_root, _args, _ctx) => {
-      return pipe(pubSub.subscribe('user:fb:progress'));
-    },
+  channelInitialSetupProgress: t.withAuth({ authenticated: true }).field({
+    type: ChannelInitialProgressPayloadDto,
+    resolve: (root: ChannelInitialProgressPayload, _args, _ctx, _info) => root,
+    subscribe: (_root, _args, ctx) => pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId),
   }),
 }));
 

@@ -6,7 +6,7 @@ import { Aside } from '@/app/(logged-in)/aside';
 import Toaster from '@/app/(logged-in)/toaster';
 import { AvUrqProvider } from '@/app/(logged-in)/urql-provider';
 import { TOKEN_KEY } from '@/config';
-import FbInitialSetupSubscription from '@/app/(logged-in)/fb-initial-setup-subscription';
+import InitialSetupSubscription from '@/app/(logged-in)/initial-setup-subscription';
 
 export default function LoggedInLayout({ children }: React.PropsWithChildren): JSX.Element {
   const token = cookies().get(TOKEN_KEY)?.value;
@@ -20,7 +20,7 @@ export default function LoggedInLayout({ children }: React.PropsWithChildren): J
       </Aside>
       <main className="w-full">
         <AvUrqProvider token={token}>
-          <FbInitialSetupSubscription />
+          <InitialSetupSubscription />
           {children}
         </AvUrqProvider>
       </main>

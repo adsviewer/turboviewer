@@ -25,5 +25,8 @@ mutation createProgress {
 }
 
 subscription channelInitialSetupProgress {
-  channelInitialSetupProgress
+  channelInitialSetupProgress {
+    progress
+    channel
+  }
 }

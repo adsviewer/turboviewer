@@ -13,10 +13,6 @@ import { createClient as createSSEClient } from 'graphql-sse';
 import { env } from '@/config';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
-const wsClient = createSSEClient({
-  url: env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
-});
-
 export function AvUrqProvider({
   children,
   token,
@@ -24,6 +20,11 @@ export function AvUrqProvider({
   children: React.ReactNode;
   token: string | undefined;
 }): JSX.Element {
+  const wsClient = createSSEClient({
+    url: env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
   const urql = useMemo(() => {
     const ssr = ssrExchange({
       isClient: typeof window !== 'undefined',
@@ -51,7 +52,7 @@ export function AvUrqProvider({
     });
 
     return { client, ssr };
-  }, [token]);
+  }, [token, wsClient]);
 
   return (
     <UrqlProvider client={urql.client} ssr={urql.ssr}>

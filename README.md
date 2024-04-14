@@ -19,6 +19,13 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
    DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
    ```
 4. Add an empty .env file in the `apps/server` directory
+5. Create a .env file in the `apps/server` directory with the following content:
+
+```env
+FB_APPLICATION_ID=<VALUE here: https://developers.facebook.com/apps/387623786246176/settings/basic/?business_id=748522962930698>
+FB_APPLICATION_SECRET=<VALUE here: https://developers.facebook.com/apps/387623786246176/settings/basic/?business_id=748522962930698>
+```
+
 5. Run `pnpm i`
 6. `pnpm run dev`
 7. Open [http://localhost:3000](http://localhost:3000)
@@ -34,6 +41,7 @@ experience
 - [slack](https://adsviewer.slack.com/): this is where we communicate.
 - [aws](https://d-9067fd5baf.awsapps.com/start/#/?tab=accounts): this is where we host our infrastructure.
 - [gitHub](https://github.com/adsviewer/): this is where we host our code.
+- [facebook](https://developers.facebook.com/apps/?show_reminder=true): One of the channels we are working with.
 - [figma](https://www.figma.com/files/project/221242948/adsviewer-project?fuid=1358021073244020634): this is where we
   design our products.
 - [bitwarden](https://vault.bitwarden.com/#/login): this is where we store our secrets.

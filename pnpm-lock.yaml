@@ -37,6 +37,9 @@ importers:
       terraform:
         specifier: ^1.23.0
         version: 1.23.0
+      tsx:
+        specifier: ^4.7.2
+        version: 4.7.2
       turbo:
         specifier: ^1.13.2
         version: 1.13.2

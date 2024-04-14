@@ -26,6 +26,12 @@ export type BaseError = Error & {
   message: Scalars['String']['output'];
 };
 
+export type ChannelInitialProgressPayload = {
+  __typename?: 'ChannelInitialProgressPayload';
+  channel: IntegrationType;
+  progress: Scalars['Int']['output'];
+};
+
 export type Error = {
   message: Scalars['String']['output'];
 };
@@ -172,7 +178,7 @@ export type Role = {
 
 export type Subscription = {
   __typename?: 'Subscription';
-  channelInitialSetupProgress: Scalars['Int']['output'];
+  channelInitialSetupProgress: ChannelInitialProgressPayload;
 };
 
 export type TokenDto = {
@@ -239,7 +245,11 @@ export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: str
 
 export type ChannelInitialSetupProgressSubscription = {
   __typename?: 'Subscription';
-  channelInitialSetupProgress: number;
+  channelInitialSetupProgress: {
+    __typename?: 'ChannelInitialProgressPayload';
+    progress: number;
+    channel: IntegrationType;
+  };
 };
 
 export type LoginMutationVariables = Exact<{
@@ -395,7 +405,10 @@ export function useCreateProgressMutation() {
 }
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {
-    channelInitialSetupProgress
+    channelInitialSetupProgress {
+      progress
+      channel
+    }
   }
 `;
 

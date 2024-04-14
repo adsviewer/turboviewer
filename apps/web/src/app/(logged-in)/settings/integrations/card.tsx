@@ -9,15 +9,9 @@ import { toast } from 'react-toastify';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as changeCase from 'change-case';
-import { type IntegrationsQuery, IntegrationStatus, IntegrationType } from '@/graphql/generated/schema-server';
-import { type UnwrapArray } from '@/util/types';
+import { type IntegrationsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
+import { integrationTypeMap, type UnwrapArray } from '@/util/types';
 import { deAuthIntegration } from '@/app/(logged-in)/settings/integrations/actions';
-
-const typeMap = new Map<IntegrationType, { image: string; name: string }>([
-  [IntegrationType.TIKTOK, { name: 'TikTok', image: '/integrations/tiktok-logo-icon.svg' }],
-  [IntegrationType.FACEBOOK, { name: 'Facebook', image: '/integrations/facebook-logo-icon.svg' }],
-  [IntegrationType.LINKEDIN, { name: 'LinkedIn', image: '/integrations/linkedin-logo-icon.svg' }],
-]);
 
 const statusMap = new Map<IntegrationStatus, string>([
   [IntegrationStatus.ComingSoon, 'Coming soon'],
@@ -81,13 +75,19 @@ export default function Card({
       <div className="flex grow gap-2 border-b border-gray-400 p-6">
         <div className="flex grow items-center gap-3">
           <div className="h-12 w-12 rounded-[8px] border border-gray-400 p-1 flex items-center justify-center dark:bg-menu-bg">
-            {typeMap.has(type) ? (
-              <Image width={40} height={40} src={typeMap.get(type)?.image ?? ''} alt={type} className="rounded-[8px]" />
+            {integrationTypeMap.has(type) ? (
+              <Image
+                width={40}
+                height={40}
+                src={integrationTypeMap.get(type)?.image ?? ''}
+                alt={type}
+                className="rounded-[8px]"
+              />
             ) : (
               <ImageOff size={40} />
             )}
           </div>
-          <div className="grow text-md font-semibold">{typeMap.get(type)?.name ?? type}</div>
+          <div className="grow text-md font-semibold">{integrationTypeMap.get(type)?.name ?? type}</div>
         </div>
         {cardStatus !== IntegrationStatus.ComingSoon && (
           <Badge
