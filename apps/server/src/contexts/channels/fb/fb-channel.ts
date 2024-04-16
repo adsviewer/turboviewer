@@ -32,7 +32,7 @@ export class FbError extends AError {
 class Facebook implements ChannelInterface {
   generateAuthUrl() {
     const state = `${MODE}_${IntegrationTypeEnum.FACEBOOK}_${randomUUID()}`;
-    const scopes = ['ads_read', 'catalog_management'];
+    const scopes = ['ads_read'];
 
     const params = new URLSearchParams({
       client_id: env.FB_APPLICATION_ID,
