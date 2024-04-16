@@ -1,6 +1,7 @@
 import { builder } from './builder';
 import './errors';
 import './integrations/integration-operations';
+import './integrations/ingress-operations';
 import './organization/org-types';
 import './user/google-login-operations';
 import './user/user-operations';

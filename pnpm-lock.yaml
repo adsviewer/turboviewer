@@ -110,8 +110,8 @@ importers:
         specifier: ^1.9.6
         version: 1.9.6
       facebook-nodejs-business-sdk:
-        specifier: ^19.0.2
-        version: 19.0.2
+        specifier: ^19.0.3
+        version: 19.0.3
       google-auth-library:
         specifier: ^9.7.0
         version: 9.7.0
@@ -6323,8 +6323,8 @@ packages:
     engines: {node: ^12.20 || >= 14.13}
     dev: true
 
-  /facebook-nodejs-business-sdk@19.0.2:
-    resolution: {integrity: sha512-KJITuqR9vOOiZv1ZyAjgQ4ThTKUX5XFUI0WI/96HOQ8p3hTtFBAjSisP/aKXbw3Ytg/dIbwFsmbXVHT4d8h9xg==}
+  /facebook-nodejs-business-sdk@19.0.3:
+    resolution: {integrity: sha512-u594CNtN3ypU+VOSvwIm7tUpHZj67jt06EDbSaAyOvbIawg1gUnSCDtaZscypydrjJXBZuQVd5ltPqftSMn8fQ==}
     dependencies:
       axios: 1.6.8
       currency-codes: 1.5.1

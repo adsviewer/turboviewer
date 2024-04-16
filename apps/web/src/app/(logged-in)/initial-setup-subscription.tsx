@@ -12,18 +12,18 @@ export default function InitialSetupSubscription(): JSX.Element {
 
   useChannelInitialSetupProgressSubscription<number[]>({}, (prev, data) => {
     const channel = data.channelInitialSetupProgress.channel;
-    const progress = data.channelInitialSetupProgress.progress / 100;
+    const progress =
+      data.channelInitialSetupProgress.progress === 0 ? 0.01 : data.channelInitialSetupProgress.progress / 100;
     const index = typeMap.get(channel) ?? 0;
     const currentElement = toastRefs.current[index];
-    if (currentElement === null || progress === 0) {
+    if (!currentElement) {
       toastRefs.current[index] = toast(
         `${integrationTypeMap.get(channel)?.name ?? channel} initial setup in progress`,
-        {
-          progress: 0,
-        },
+        { progress: 0.01 },
       );
-    } else if (progress === 100) {
+    } else if (progress === 1) {
       toast.done(currentElement);
+      toastRefs.current[index] = null;
     } else {
       toast.update(currentElement, { progress });
     }

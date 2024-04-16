@@ -28,7 +28,7 @@ export type BaseError = Error & {
 export type ChannelInitialProgressPayload = {
   __typename?: 'ChannelInitialProgressPayload';
   channel: IntegrationType;
-  progress: Scalars['Int']['output'];
+  progress: Scalars['Float']['output'];
 };
 
 export type Error = {
@@ -84,7 +84,7 @@ export enum IntegrationType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createProgress: Scalars['String']['output'];
+  adIngress: Scalars['String']['output'];
   deAuthIntegration: MutationDeAuthIntegrationResult;
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
@@ -96,7 +96,7 @@ export type Mutation = {
   updateUser: User;
 };
 
-export type MutationCreateProgressArgs = {
+export type MutationAdIngressArgs = {
   type: IntegrationType;
 };
 
@@ -161,17 +161,12 @@ export type PrismaClientKnownRequestError = Error & {
 export type Query = {
   __typename?: 'Query';
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
-  integrationAuthUrl: Scalars['String']['output'];
   integrations: Array<IntegrationListItem>;
   me: User;
 };
 
 export type QueryGenerateGoogleAuthUrlArgs = {
   state: Scalars['String']['input'];
-};
-
-export type QueryIntegrationAuthUrlArgs = {
-  type: IntegrationType;
 };
 
 export type Role = {

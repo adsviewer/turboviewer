@@ -33,25 +33,13 @@ builder.queryFields((t) => ({
         const authUrl = ShouldConnectIntegrationStatuses.includes(status)
           ? getIntegrationAuthUrl(channel, ctx.organizationId)
           : undefined;
+        authUrl && logger.info(`Integration ${channel} authUrl: ${authUrl}`);
         return {
           type: channel,
           status,
           authUrl,
         };
       });
-    },
-  }),
-  integrationAuthUrl: t.withAuth({ authenticated: true }).field({
-    type: 'String',
-    args: {
-      type: t.arg({
-        type: IntegrationTypeDto,
-        required: true,
-      }),
-    },
-    resolve: (_root, args, ctx, _info) => {
-      const { type } = args;
-      return getIntegrationAuthUrl(type, ctx.organizationId);
     },
   }),
 }));
@@ -76,25 +64,6 @@ builder.mutationFields((t) => ({
       const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId);
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
       return authUrl;
-    },
-  }),
-  createProgress: t.withAuth({ authenticated: true }).field({
-    type: 'String',
-    args: {
-      type: t.arg({
-        type: IntegrationTypeDto,
-        required: true,
-      }),
-    },
-    resolve: async (_root, args, ctx, _info) => {
-      pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: 0 });
-      for (let i = 1; i <= 100; i++) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 100);
-        });
-        pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: i });
-      }
-      return 'Success';
     },
   }),
 }));

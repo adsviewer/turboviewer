@@ -15,10 +15,35 @@ export interface TokensResponse {
   externalId?: string;
 }
 
+export interface DbAdAccount {
+  accountStatus: number;
+  amountSpent: string;
+  id: string;
+}
+
+export interface Creative {
+  externalAdId: string;
+  externalId: string;
+  name: string;
+}
+
+export interface Insight {
+  externalAdId: string;
+  date: Date;
+  externalAccountId: string;
+  impressions: number;
+  // in μ (micro) currency
+  spend: number;
+  device: string;
+  publisher: string;
+  position: string;
+}
+
 export interface ChannelInterface {
   generateAuthUrl: () => GenerateAuthUrlResp;
   exchangeCodeForTokens: (code: string) => Promise<TokensResponse | AError>;
   getUserId: (accessToken: string) => Promise<string | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   deAuthorize: (organizationId: string) => Promise<string | AError | FbError>;
+  adIngress: (organizationId: string, userId: string) => Promise<undefined | AError>;
 }
