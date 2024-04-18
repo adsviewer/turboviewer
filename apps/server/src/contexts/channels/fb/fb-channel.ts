@@ -6,7 +6,15 @@ import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import * as adsSdk from 'facebook-nodejs-business-sdk';
-import { Ad, AdAccount, AdCreative, AdReportRun, AdsInsights, User } from 'facebook-nodejs-business-sdk';
+import {
+  Ad,
+  AdAccount,
+  AdAccountAdVolume,
+  AdCreative,
+  AdReportRun,
+  AdsInsights,
+  User,
+} from 'facebook-nodejs-business-sdk';
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import { env, MODE } from '../../../config';
 import {
@@ -186,7 +194,7 @@ class Facebook implements ChannelInterface {
   }
 
   async adIngress(organizationId: string, userId: string): Promise<AError | undefined> {
-    logger.info('Starting facebook ad ingress for userI: %s', userId);
+    logger.info('Starting facebook ad ingress for userId: %s', userId);
 
     const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.FACEBOOK);
     if (!integration) return new AError('No integration found');
@@ -194,14 +202,15 @@ class Facebook implements ChannelInterface {
     const _fbApi = adsSdk.FacebookAdsApi.init(integration.accessToken);
     const accounts = await this.getAdAccounts();
     if (isAError(accounts)) return accounts;
-    logger.info(`User ${userId} has ${JSON.stringify(accounts)} accounts`);
+    const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
+    logger.info(`User ${userId} has ${JSON.stringify(activeAccounts)} active accounts`);
 
-    const insightReports = await this.runAdInsightReports(accounts);
-    if (isAError(insightReports)) return insightReports;
-    await this.waitForAdReportResults(insightReports, userId);
-    logger.info(`Created ${String(insightReports.length)} reports`);
+    const insightReportIds = await this.runAdInsightReports(activeAccounts);
+    if (isAError(insightReportIds)) return insightReportIds;
+    await this.waitForAdReportResults(insightReportIds, userId);
+    logger.info(`Created ${String(insightReportIds.length)} reports`);
 
-    const insights = await this.getAdInsights(insightReports);
+    const insights = await this.getAdInsights(insightReportIds);
     if (isAError(insights)) return insights;
     pubSub.publish('user:channel:initial-progress', userId, {
       channel: IntegrationTypeEnum.FACEBOOK,
@@ -215,17 +224,29 @@ class Facebook implements ChannelInterface {
     const user = new User('me');
 
     const res = await user.getAdAccounts(
-      [AdAccount.Fields.account_status, AdAccount.Fields.amount_spent, AdAccount.Fields.id],
+      [
+        AdAccount.Fields.account_status,
+        AdAccount.Fields.amount_spent,
+        AdAccount.Fields.id,
+        `ads_volume{${AdAccountAdVolume.Fields.ads_running_or_in_review_count}}`,
+      ],
       {
         limit: 500,
       },
     );
-    const accountSchema = z.object({ account_status: z.number(), amount_spent: z.string(), id: z.string() });
-    const toAccount = (acc: z.infer<typeof accountSchema>) => ({
-      accountStatus: acc.account_status,
-      amountSpent: acc.amount_spent,
-      id: acc.id,
+    const accountSchema = z.object({
+      account_status: z.number(),
+      amount_spent: z.coerce.number(),
+      id: z.string(),
+      ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
     });
+    const toAccount = (acc: z.infer<typeof accountSchema>) =>
+      ({
+        accountStatus: acc.account_status,
+        amountSpent: acc.amount_spent,
+        hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
+        id: acc.id,
+      }) satisfies DbAdAccount;
 
     return await Facebook.handlePagination(res, accountSchema, toAccount);
   }
@@ -252,7 +273,7 @@ class Facebook implements ChannelInterface {
     return creatives;
   }
 
-  private async getAdInsights(reports: AdReportRun[]): Promise<AError | Insight[]> {
+  private async getAdInsights(reportIds: string[]): Promise<AError | Insight[]> {
     const insights: Insight[] = [];
     const insightSchema = z.object({
       account_id: z.string(),
@@ -276,8 +297,10 @@ class Facebook implements ChannelInterface {
       position: insight.platform_position,
     });
 
-    for (const report of reports) {
-      logger.info('Getting insights for report %s', report.id);
+    for (const reportId of reportIds) {
+      logger.info('Getting insights for report %s', reportId);
+
+      const report = new AdReportRun(reportId, { report_run_id: reportId });
       const resp = await report.getInsights(
         [
           AdsInsights.Fields.account_id,
@@ -299,10 +322,10 @@ class Facebook implements ChannelInterface {
     return insights;
   }
 
-  private async runAdInsightReports(accounts: DbAdAccount[], accessToken?: string): Promise<AError | AdReportRun[]> {
+  private async runAdInsightReports(accounts: DbAdAccount[], accessToken?: string): Promise<AError | string[]> {
     if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
 
-    const adReportRuns: AdReportRun[] = [];
+    const adReportRunIds: string[] = [];
     const adReportRunSchema = z.object({ id: z.string() });
 
     for (const acc of accounts) {
@@ -318,6 +341,7 @@ class Facebook implements ChannelInterface {
         {
           limit: 500,
           time_increment: 1,
+          filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
           breakdowns: [
             AdsInsights.Breakdowns.device_platform,
             AdsInsights.Breakdowns.publisher_platform,
@@ -332,12 +356,12 @@ class Facebook implements ChannelInterface {
         logger.error('Failed to parse ad report run %o', resp);
         return new AError('Failed to parse facebook ad report run');
       }
-      adReportRuns.push(resp);
+      adReportRunIds.push(resp.id);
     }
-    return adReportRuns;
+    return adReportRunIds;
   }
 
-  private async waitForAdReportResults(reports: AdReportRun[], userId: string): Promise<AError | undefined> {
+  private async waitForAdReportResults(reportIds: string[], userId: string): Promise<AError | undefined> {
     const jobStatusEnum = z.enum([
       'Job Not Started',
       'Job Started',
@@ -357,7 +381,8 @@ class Facebook implements ChannelInterface {
     while (true) {
       const status: { percent: number; status: JobStatus }[] = [];
 
-      for (const report of reports) {
+      for (const reportId of reportIds) {
+        const report = new AdReportRun(reportId, { report_run_id: reportId });
         const resp = await report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]);
         const reportSchema = z.object({
           [AdReportRun.Fields.async_status]: jobStatusEnum,
@@ -390,10 +415,9 @@ class Facebook implements ChannelInterface {
         progress: mean,
       });
 
-      // TODO: enable this after testing
-      // await new Promise((resolve) => {
-      //   setTimeout(resolve, 5000);
-      // });
+      await new Promise((resolve) => {
+        setTimeout(resolve, 5000);
+      });
     }
   }
 

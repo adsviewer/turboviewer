@@ -1,3 +1,4 @@
+import { isAError } from '@repo/utils';
 import { builder } from '../builder';
 import { getChannel } from '../../contexts/channels/channel-helper';
 import { IntegrationTypeDto } from './integration-types';
@@ -14,7 +15,10 @@ builder.mutationFields((t) => ({
     resolve: async (_root, args, ctx, _info) => {
       const { type } = args;
       const channel = getChannel(type);
-      await channel.adIngress(ctx.organizationId, ctx.currentUserId);
+      const adIngress = await channel.adIngress(ctx.organizationId, ctx.currentUserId);
+      if (isAError(adIngress)) {
+        return adIngress.message;
+      }
       return 'Ingress started';
     },
   }),

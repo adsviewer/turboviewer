@@ -17,7 +17,9 @@ export interface TokensResponse {
 
 export interface DbAdAccount {
   accountStatus: number;
-  amountSpent: string;
+  // in cents
+  amountSpent: number;
+  hasAdsRunningOrInReview: boolean;
   id: string;
 }
 
