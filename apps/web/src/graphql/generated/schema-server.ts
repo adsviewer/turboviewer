@@ -96,6 +96,10 @@ export type Mutation = {
   updateUser: User;
 };
 
+export type MutationCreateProgressArgs = {
+  type: IntegrationType;
+};
+
 export type MutationDeAuthIntegrationArgs = {
   type: IntegrationType;
 };
@@ -235,10 +239,6 @@ export type DeAuthIntegrationMutation = {
     | { __typename?: 'FacebookError'; message: string }
     | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
-
-export type CreateProgressMutationVariables = Exact<{ [key: string]: never }>;
-
-export type CreateProgressMutation = { __typename?: 'Mutation'; createProgress: string };
 
 export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: string]: never }>;
 
@@ -385,11 +385,6 @@ export const DeAuthIntegrationDocument = gql`
     }
   }
 `;
-export const CreateProgressDocument = gql`
-  mutation createProgress {
-    createProgress
-  }
-`;
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {
     channelInitialSetupProgress {
@@ -469,13 +464,6 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<DeAuthIntegrationMutation>;
-    },
-    createProgress(variables?: CreateProgressMutationVariables, options?: C): Promise<CreateProgressMutation> {
-      return requester<CreateProgressMutation, CreateProgressMutationVariables>(
-        CreateProgressDocument,
-        variables,
-        options,
-      ) as Promise<CreateProgressMutation>;
     },
     channelInitialSetupProgress(
       variables?: ChannelInitialSetupProgressSubscriptionVariables,

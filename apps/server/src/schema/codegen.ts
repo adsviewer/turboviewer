@@ -1,5 +1,6 @@
 import { printSchema } from 'graphql';
 import type { CodegenConfig } from '@graphql-codegen/cli';
+import { generate } from '@graphql-codegen/cli';
 import { schema } from '.';
 
 const config: CodegenConfig = {
@@ -40,5 +41,6 @@ const config: CodegenConfig = {
   hooks: { afterAllFileWrite: ['prettier --write'] },
 };
 
-// eslint-disable-next-line import/no-default-export -- This is a config file
-export default config;
+await generate(config);
+
+process.exit(0);

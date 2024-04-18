@@ -14,7 +14,7 @@
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest",
-    "codegen": "graphql-codegen --require dotenv/config --config src/schema/codegen.ts"
+    "codegen": "tsx --env-file=.env src/schema/codegen.ts"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.540.0",
@@ -65,7 +65,6 @@
     "@types/lodash": "^4.17.0",
     "@types/node": "20.12.4",
     "@types/qs": "^6.9.14",
-    "dotenv": "^16.4.5",
     "tsx": "^4.7.2",
     "typescript": "5.4.3"
   }
