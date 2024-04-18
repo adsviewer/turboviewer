@@ -97,6 +97,10 @@ export type Mutation = {
   updateUser: User;
 };
 
+export type MutationCreateProgressArgs = {
+  type: IntegrationType;
+};
+
 export type MutationDeAuthIntegrationArgs = {
   type: IntegrationType;
 };
@@ -236,10 +240,6 @@ export type DeAuthIntegrationMutation = {
     | { __typename?: 'FacebookError'; message: string }
     | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
-
-export type CreateProgressMutationVariables = Exact<{ [key: string]: never }>;
-
-export type CreateProgressMutation = { __typename?: 'Mutation'; createProgress: string };
 
 export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: string]: never }>;
 
@@ -393,15 +393,6 @@ export const DeAuthIntegrationDocument = gql`
 
 export function useDeAuthIntegrationMutation() {
   return Urql.useMutation<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(DeAuthIntegrationDocument);
-}
-export const CreateProgressDocument = gql`
-  mutation createProgress {
-    createProgress
-  }
-`;
-
-export function useCreateProgressMutation() {
-  return Urql.useMutation<CreateProgressMutation, CreateProgressMutationVariables>(CreateProgressDocument);
 }
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {

@@ -185,9 +185,6 @@ importers:
       '@types/qs':
         specifier: ^6.9.14
         version: 6.9.14
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
       tsx:
         specifier: ^4.7.2
         version: 4.7.2
