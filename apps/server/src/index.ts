@@ -36,7 +36,7 @@ const index = (): void => {
   app.use(yoga.graphqlEndpoint, yoga);
 
   app.get(`/api${authEndpoint}`, authCallback);
-  app.post('api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
+  app.post('/api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
   app.post(
     '/api/fb/sign-out',
     bodyParser.urlencoded({ extended: true }),
