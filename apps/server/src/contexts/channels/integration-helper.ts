@@ -1,5 +1,5 @@
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
+import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redis } from '@repo/redis';
 import { AError, isAError } from '@repo/utils';
@@ -7,8 +7,11 @@ import type QueryString from 'qs';
 import { env, isMode } from '../../config';
 import { FireAndForget } from '../../fire-and-forget';
 import { encryptAesGcm } from '../../utils/aes-util';
-import { type TokensResponse } from './channel-interface';
+import { pubSub } from '../../schema/pubsub';
+import { groupBy } from '../../utils/data-object-utils';
+import { type ChannelInsight, type TokensResponse } from './channel-interface';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
+import { decryptTokens } from './integration-util';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
 
 const fireAndForget = new FireAndForget();
@@ -30,9 +33,9 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
     });
 };
 
-export const getIntegrationAuthUrl = (type: IntegrationTypeEnum, organizationId: string): string => {
+export const getIntegrationAuthUrl = (type: IntegrationTypeEnum, organizationId: string, userId: string): string => {
   const { url, state } = getChannel(type).generateAuthUrl();
-  fireAndForget.add(() => saveOrgState(state, organizationId));
+  fireAndForget.add(() => saveOrgState(state, organizationId, userId));
   return url;
 };
 
@@ -49,7 +52,7 @@ const completeIntegration = async (
     return new AError('invalid_code');
   }
 
-  const [mode, integration, state] = stateArg.split('_');
+  const [mode, integrationType, state] = stateArg.split('_');
 
   // mode should only be uuid
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(state)) {
@@ -61,38 +64,47 @@ const completeIntegration = async (
   }
 
   // integration should only be one of the IntegrationTypeEnum values
-  if (!isIntegrationTypeEnum(integration)) {
+  if (!isIntegrationTypeEnum(integrationType)) {
     return new AError('invalid_integration');
   }
 
-  const organizationId = await getOrgFromState(stateArg);
-  if (!organizationId) {
+  const redisResp = await getOrgFromState(stateArg);
+  if (!redisResp) {
     return new AError('invalid_organization');
   }
 
-  const channel = getChannel(integration);
+  const { organizationId, userId } = redisResp;
+  const channel = getChannel(integrationType);
   const tokens = await channel.exchangeCodeForTokens(code);
   if (isAError(tokens)) {
     return tokens;
   }
 
-  fireAndForget.add(() => saveTokens(tokens, organizationId, integration));
-  return integration;
+  fireAndForget.add(async () => {
+    const dbIntegration = await saveTokens(tokens, organizationId, integrationType);
+    if (isAError(dbIntegration)) return dbIntegration;
+    const integration = decryptTokens(dbIntegration);
+    if (!integration) return new AError('Failed to decrypt integration');
+    await saveChannelData(integration, userId, true);
+  });
+  return integrationType;
 };
 
 const integrationStateKey = (state: string) => `integration-state:${state}`;
-export const saveOrgState = async (state: string, organizationId: string): Promise<void> => {
-  await redis.set(integrationStateKey(state), organizationId, { EX: 12 * 60 * 60 });
+export const saveOrgState = async (state: string, organizationId: string, userId: string): Promise<void> => {
+  await redis.set(integrationStateKey(state), JSON.stringify({ organizationId, userId }), { EX: 12 * 60 * 60 });
 };
-const getOrgFromState = async (state: string): Promise<string | null> => {
-  return await redis.get(integrationStateKey(state));
+const getOrgFromState = async (state: string): Promise<{ organizationId: string; userId: string } | null> => {
+  return await redis
+    .get(integrationStateKey(state))
+    .then((res) => (res ? (JSON.parse(res) as { organizationId: string; userId: string }) : null));
 };
 
 const saveTokens = async (
   tokens: TokensResponse,
   organizationId: string,
   type: IntegrationTypeEnum,
-): Promise<string> => {
+): Promise<Integration | AError> => {
   logger.info(`Saving tokens for organization ${organizationId}`);
 
   const encryptedAccessToken = encryptAesGcm(tokens.accessToken, env.CHANNEL_SECRET);
@@ -107,7 +119,7 @@ const saveTokens = async (
     const externalId = await getChannel(type).getUserId(tokens.accessToken);
     if (isAError(externalId)) {
       logger.error(`Failed to get external id for organization: ${organizationId} and channel: ${type}`);
-      return 'failed to get external id';
+      return externalId;
     }
     tokens.externalId = externalId;
   }
@@ -122,7 +134,7 @@ const saveTokens = async (
     status: IntegrationStatus.CONNECTED,
     organizationId,
   };
-  const integration = await prisma.integration.upsert({
+  return await prisma.integration.upsert({
     create: integrationData,
     update: integrationData,
     where: {
@@ -132,5 +144,127 @@ const saveTokens = async (
       },
     },
   });
-  return integration.id;
+};
+
+const saveInsightsAndAds = async (
+  insightsByExternalAdId: Map<string, ChannelInsight[]>,
+  accountExternalIdMap: Map<string, string>,
+  integration: Integration,
+) => {
+  await Promise.all(
+    Array.from(insightsByExternalAdId.values()).flatMap(async (groupedInsights) => {
+      if (!accountExternalIdMap.has(groupedInsights[0].externalAccountId)) {
+        logger.error('Account %s not found', groupedInsights[0].externalAccountId);
+        return;
+      }
+      return await prisma.$transaction(async (tx) => {
+        const { id } = await tx.ad.upsert({
+          select: { id: true },
+          create: {
+            externalId: groupedInsights[0].externalAdId,
+            adAccount: {
+              connect: {
+                integrationId_externalId: {
+                  integrationId: integration.id,
+                  externalId: groupedInsights[0].externalAccountId,
+                },
+              },
+            },
+          },
+          update: {},
+          where: {
+            adAccountId_externalId: {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
+              adAccountId: accountExternalIdMap.get(groupedInsights[0].externalAccountId)!,
+              externalId: groupedInsights[0].externalAdId,
+            },
+          },
+        });
+        return await prisma.$transaction(
+          groupedInsights.map((insight) => {
+            return tx.insight.upsert({
+              where: {
+                adId_date_device_publisher_position: {
+                  adId: id,
+                  date: insight.date,
+                  device: insight.device,
+                  publisher: insight.publisher,
+                  position: insight.position,
+                },
+              },
+              update: {
+                impressions: insight.impressions,
+                spend: insight.spend,
+              },
+              create: {
+                adId: id,
+                date: insight.date,
+                impressions: insight.impressions,
+                spend: insight.spend,
+                device: insight.device,
+                publisher: insight.publisher,
+                position: insight.position,
+              },
+            });
+          }),
+        );
+      });
+    }),
+  );
+};
+
+export const saveChannelData = async (
+  integration: Integration,
+  userId: string | undefined,
+  initial: boolean,
+): Promise<AError | undefined> => {
+  logger.info(
+    `Starting ${integration.type} ad ingress for organizationId: ${integration.organizationId}${userId ? ` initial.` : ''}`,
+  );
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 0,
+    });
+
+  const channel = getChannel(integration.type);
+  const data = await channel.getChannelData(integration, userId, initial);
+  if (isAError(data)) return data;
+
+  const accounts = await Promise.all(
+    data.accounts.map((acc) =>
+      prisma.adAccount.upsert({
+        select: { id: true, externalId: true },
+        where: {
+          integrationId_externalId: {
+            integrationId: integration.id,
+            externalId: acc.externalId,
+          },
+        },
+        update: { currency: acc.currency },
+        create: {
+          integrationId: integration.id,
+          externalId: acc.externalId,
+          currency: acc.currency,
+        },
+      }),
+    ),
+  );
+
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 95,
+    });
+
+  const accountExternalIdMap = new Map<string, string>(accounts.map((acc) => [acc.externalId, acc.id]));
+
+  const insightsByExternalAdId = groupBy(data.insights, (item) => item.externalAdId);
+  await saveInsightsAndAds(insightsByExternalAdId, accountExternalIdMap, integration);
+
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 100,
+    });
 };

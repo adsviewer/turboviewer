@@ -31,7 +31,7 @@ builder.queryFields((t) => ({
       return Object.values(IntegrationTypeEnum).map((channel) => {
         const status = integrationStatus(channel, integrations);
         const authUrl = ShouldConnectIntegrationStatuses.includes(status)
-          ? getIntegrationAuthUrl(channel, ctx.organizationId)
+          ? getIntegrationAuthUrl(channel, ctx.organizationId, ctx.currentUserId)
           : undefined;
         authUrl && logger.info(`Integration ${channel} authUrl: ${authUrl}`);
         return {
@@ -61,7 +61,7 @@ builder.mutationFields((t) => ({
         throw externalId;
       }
       fireAndForget.add(() => revokeIntegration(externalId, args.type));
-      const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId);
+      const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId, ctx.currentUserId);
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
       return authUrl;
     },

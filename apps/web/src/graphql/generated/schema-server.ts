@@ -84,7 +84,6 @@ export enum IntegrationType {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  adIngress: Scalars['String']['output'];
   deAuthIntegration: MutationDeAuthIntegrationResult;
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
@@ -94,10 +93,6 @@ export type Mutation = {
   resetPassword: TokenDto;
   signup: TokenDto;
   updateUser: User;
-};
-
-export type MutationAdIngressArgs = {
-  type: IntegrationType;
 };
 
 export type MutationDeAuthIntegrationArgs = {

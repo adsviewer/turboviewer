@@ -1,6 +1,6 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
-import { IntegrationTypeEnum } from '@repo/database';
+import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
 import { AError, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -19,14 +19,14 @@ import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import { env, MODE } from '../../../config';
 import {
   type ChannelInterface,
-  type Creative,
-  type DbAdAccount,
-  type Insight,
+  type ChannelCreative,
+  type ChannelAdAccount,
+  type ChannelInsight,
   type TokensResponse,
 } from '../channel-interface';
 import { FireAndForget } from '../../../fire-and-forget';
 import { authEndpoint, getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
-import { getLastThreeMonths } from '../../../utils/date-utils';
+import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
 import { pubSub } from '../../../schema/pubsub';
 
 const fireAndForget = new FireAndForget();
@@ -40,6 +40,7 @@ export class FbError extends AError {
   code: number;
   errorSubCode: number;
   fbTraceId: string;
+
   constructor(message: string, code: number, errorSubcode: number, fbtraceId: string) {
     super(message);
     this.code = code;
@@ -193,33 +194,33 @@ class Facebook implements ChannelInterface {
     return integration.externalId;
   }
 
-  async adIngress(organizationId: string, userId: string): Promise<AError | undefined> {
-    logger.info('Starting facebook ad ingress for userId: %s', userId);
-
-    const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.FACEBOOK);
-    if (!integration) return new AError('No integration found');
-
-    const _fbApi = adsSdk.FacebookAdsApi.init(integration.accessToken);
+  async getChannelData(
+    integration: Integration,
+    userId: string | undefined,
+    initial: boolean,
+  ): Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[] } | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const accounts = await this.getAdAccounts();
     if (isAError(accounts)) return accounts;
+    userId &&
+      pubSub.publish('user:channel:initial-progress', userId, {
+        channel: IntegrationTypeEnum.FACEBOOK,
+        progress: 5,
+      });
     const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
-    logger.info(`User ${userId} has ${JSON.stringify(activeAccounts)} active accounts`);
+    logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(activeAccounts)} active accounts`);
 
-    const insightReportIds = await this.runAdInsightReports(activeAccounts);
+    const insightReportIds = await this.runAdInsightReports(activeAccounts, initial);
     if (isAError(insightReportIds)) return insightReportIds;
     await this.waitForAdReportResults(insightReportIds, userId);
     logger.info(`Created ${String(insightReportIds.length)} reports`);
 
     const insights = await this.getAdInsights(insightReportIds);
     if (isAError(insights)) return insights;
-    pubSub.publish('user:channel:initial-progress', userId, {
-      channel: IntegrationTypeEnum.FACEBOOK,
-      progress: 95,
-    });
-    logger.info('insights %o', insights);
+    return { accounts: activeAccounts, insights };
   }
 
-  private async getAdAccounts(accessToken?: string): Promise<DbAdAccount[] | AError> {
+  private async getAdAccounts(accessToken?: string): Promise<ChannelAdAccount[] | AError> {
     if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
     const user = new User('me');
 
@@ -228,6 +229,7 @@ class Facebook implements ChannelInterface {
         AdAccount.Fields.account_status,
         AdAccount.Fields.amount_spent,
         AdAccount.Fields.id,
+        AdAccount.Fields.currency,
         `ads_volume{${AdAccountAdVolume.Fields.ads_running_or_in_review_count}}`,
       ],
       {
@@ -237,7 +239,8 @@ class Facebook implements ChannelInterface {
     const accountSchema = z.object({
       account_status: z.number(),
       amount_spent: z.coerce.number(),
-      id: z.string(),
+      id: z.string().startsWith('act_'),
+      currency: z.nativeEnum(CurrencyEnum),
       ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
     });
     const toAccount = (acc: z.infer<typeof accountSchema>) =>
@@ -245,36 +248,45 @@ class Facebook implements ChannelInterface {
         accountStatus: acc.account_status,
         amountSpent: acc.amount_spent,
         hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
-        id: acc.id,
-      }) satisfies DbAdAccount;
+        externalId: acc.id.slice(4),
+        currency: acc.currency,
+      }) satisfies ChannelAdAccount;
 
     return await Facebook.handlePagination(res, accountSchema, toAccount);
   }
 
-  private async getCreatives(accounts: DbAdAccount[], accessToken?: string): Promise<Creative[] | AError> {
+  private async getCreatives(accounts: ChannelAdAccount[], accessToken?: string): Promise<ChannelCreative[] | AError> {
     if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
 
-    const creatives: Creative[] = [];
-    const adsSchema = z.object({ id: z.string(), creative: z.object({ id: z.string(), name: z.string() }) });
+    const creatives: ChannelCreative[] = [];
+    const adsSchema = z.object({
+      id: z.string(),
+      account_id: z.string(),
+      creative: z.object({ id: z.string(), name: z.string() }),
+    });
     const toCreative = (ad: z.infer<typeof adsSchema>) => ({
       externalAdId: ad.id,
       externalId: ad.creative.id,
       name: ad.creative.name,
+      externalAdAccountId: ad.account_id,
     });
 
     for (const acc of accounts) {
-      const account = new AdAccount(acc.id);
-      const res = await account.getAds([Ad.Fields.id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`], {
-        limit: 500,
-      });
+      const account = new AdAccount(`act_${acc.externalId}`);
+      const res = await account.getAds(
+        [Ad.Fields.id, Ad.Fields.account_id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`],
+        {
+          limit: 500,
+        },
+      );
       const accountCreatives = await Facebook.handlePagination(res, adsSchema, toCreative);
       if (!isAError(accountCreatives)) creatives.push(...accountCreatives);
     }
     return creatives;
   }
 
-  private async getAdInsights(reportIds: string[]): Promise<AError | Insight[]> {
-    const insights: Insight[] = [];
+  private async getAdInsights(reportIds: string[]): Promise<AError | ChannelInsight[]> {
+    const insights: ChannelInsight[] = [];
     const insightSchema = z.object({
       account_id: z.string(),
       ad_id: z.string(),
@@ -286,14 +298,14 @@ class Facebook implements ChannelInterface {
       platform_position: z.string(),
     });
 
-    const toInsight = (insight: z.infer<typeof insightSchema>): Insight => ({
+    const toInsight = (insight: z.infer<typeof insightSchema>): ChannelInsight => ({
       externalAdId: insight.ad_id,
       date: insight.date_start,
       externalAccountId: insight.account_id,
       impressions: insight.impressions,
-      spend: insight.spend * 1_000_000, // converting to μ (micro) currency
-      device: insight.device_platform,
-      publisher: insight.publisher_platform,
+      spend: Math.trunc(insight.spend * 100), // converting to cents
+      device: Facebook.deviceEnumMap.get(insight.device_platform) ?? DeviceEnum.Unknown,
+      publisher: Facebook.publisherEnumMap.get(insight.publisher_platform) ?? PublisherEnum.Unknown,
       position: insight.platform_position,
     });
 
@@ -322,14 +334,18 @@ class Facebook implements ChannelInterface {
     return insights;
   }
 
-  private async runAdInsightReports(accounts: DbAdAccount[], accessToken?: string): Promise<AError | string[]> {
+  private async runAdInsightReports(
+    accounts: ChannelAdAccount[],
+    initial: boolean,
+    accessToken?: string,
+  ): Promise<AError | string[]> {
     if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
 
     const adReportRunIds: string[] = [];
     const adReportRunSchema = z.object({ id: z.string() });
 
     for (const acc of accounts) {
-      const account = new AdAccount(acc.id);
+      const account = new AdAccount(`act_${acc.externalId}`);
       const resp = await account.getInsightsAsync(
         [
           AdsInsights.Fields.account_id,
@@ -348,7 +364,7 @@ class Facebook implements ChannelInterface {
             AdsInsights.Breakdowns.platform_position,
           ],
           level: AdsInsights.Level.ad,
-          time_range: getLastThreeMonths(),
+          time_range: initial ? getLastThreeMonths() : getLastTwoDays(),
         },
       );
       const parsed = adReportRunSchema.safeParse(resp);
@@ -361,7 +377,7 @@ class Facebook implements ChannelInterface {
     return adReportRunIds;
   }
 
-  private async waitForAdReportResults(reportIds: string[], userId: string): Promise<AError | undefined> {
+  private async waitForAdReportResults(reportIds: string[], userId?: string): Promise<AError | undefined> {
     const jobStatusEnum = z.enum([
       'Job Not Started',
       'Job Started',
@@ -371,11 +387,6 @@ class Facebook implements ChannelInterface {
       'Job Skipped',
     ]);
     type JobStatus = z.infer<typeof jobStatusEnum>;
-
-    pubSub.publish('user:channel:initial-progress', userId, {
-      channel: IntegrationTypeEnum.FACEBOOK,
-      progress: 0,
-    });
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
     while (true) {
@@ -400,20 +411,22 @@ class Facebook implements ChannelInterface {
       }
 
       if (status.every((s) => s.status === 'Job Completed')) {
-        pubSub.publish('user:channel:initial-progress', userId, {
-          channel: IntegrationTypeEnum.FACEBOOK,
-          // Rest 10% for the rest of the process
-          progress: 90,
-        });
+        userId &&
+          pubSub.publish('user:channel:initial-progress', userId, {
+            channel: IntegrationTypeEnum.FACEBOOK,
+            // Rest 10% for the rest of the process
+            progress: 90,
+          });
         break;
       }
 
-      // Multiply by 0.9 to give 10% for the rest of the process
-      const mean = (0.9 * status.reduce((acc, val) => acc + val.percent, 0)) / status.length;
-      pubSub.publish('user:channel:initial-progress', userId, {
-        channel: IntegrationTypeEnum.FACEBOOK,
-        progress: mean,
-      });
+      // Multiply by 0.85 to give 10% for the rest of the process
+      const mean = (0.85 * status.reduce((acc, val) => acc + val.percent, 0)) / status.length;
+      userId &&
+        pubSub.publish('user:channel:initial-progress', userId, {
+          channel: IntegrationTypeEnum.FACEBOOK,
+          progress: mean + 5,
+        });
 
       await new Promise((resolve) => {
         setTimeout(resolve, 5000);
@@ -497,6 +510,19 @@ class Facebook implements ChannelInterface {
     }
     return new Date(debugTokenParsed.data.data.data_access_expires_at * 1000);
   }
+
+  private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([
+    ['mobile_app', DeviceEnum.MobileApp],
+    ['mobile_web', DeviceEnum.MobileWeb],
+    ['desktop', DeviceEnum.Desktop],
+  ]);
+
+  private static publisherEnumMap: Map<string, PublisherEnum> = new Map<string, PublisherEnum>([
+    ['facebook', PublisherEnum.Facebook],
+    ['instagram', PublisherEnum.Instagram],
+    ['messenger', PublisherEnum.Messenger],
+    ['audience_network', PublisherEnum.AudienceNetwork],
+  ]);
 }
 
 export const facebook = new Facebook();

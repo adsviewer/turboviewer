@@ -16,3 +16,15 @@ export const getLastThreeMonths = () => {
     until: formatYYYMMDDDate(tomorrow),
   };
 };
+
+export const getLastTwoDays = () => {
+  const today = new Date();
+  const yesterday = new Date(today);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  yesterday.setDate(today.getDate() - 1);
+  return {
+    since: formatYYYMMDDDate(yesterday),
+    until: formatYYYMMDDDate(tomorrow),
+  };
+};

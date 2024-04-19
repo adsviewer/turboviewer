@@ -1,5 +1,6 @@
 import { type AError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { type DeviceEnum, type PublisherEnum, type CurrencyEnum, type Integration } from '@repo/database';
 import { type FbError } from './fb/fb-channel';
 
 export interface GenerateAuthUrlResp {
@@ -15,29 +16,31 @@ export interface TokensResponse {
   externalId?: string;
 }
 
-export interface DbAdAccount {
+export interface ChannelAdAccount {
   accountStatus: number;
   // in cents
   amountSpent: number;
   hasAdsRunningOrInReview: boolean;
-  id: string;
+  currency: CurrencyEnum;
+  externalId: string;
 }
 
-export interface Creative {
+export interface ChannelCreative {
   externalAdId: string;
+  externalAdAccountId: string;
   externalId: string;
   name: string;
 }
 
-export interface Insight {
+export interface ChannelInsight {
   externalAdId: string;
   date: Date;
   externalAccountId: string;
   impressions: number;
-  // in μ (micro) currency
+  // in cents
   spend: number;
-  device: string;
-  publisher: string;
+  device: DeviceEnum;
+  publisher: PublisherEnum;
   position: string;
 }
 
@@ -47,5 +50,9 @@ export interface ChannelInterface {
   getUserId: (accessToken: string) => Promise<string | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   deAuthorize: (organizationId: string) => Promise<string | AError | FbError>;
-  adIngress: (organizationId: string, userId: string) => Promise<undefined | AError>;
+  getChannelData: (
+    integration: Integration,
+    userId: string | undefined,
+    initial: boolean,
+  ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[] } | AError>;
 }

@@ -10,6 +10,8 @@ import { schema } from './schema';
 import { authCallback } from './contexts/channels/integration-helper';
 import { getChannel } from './contexts/channels/channel-helper';
 import { authEndpoint } from './contexts/channels/integration-util';
+import { snsMiddleware } from './utils/sns-subscription-utils';
+import { channelDataRefreshWebhook } from './contexts/channels/data-refresh';
 
 process.on('uncaughtException', (reason) => {
   logger.error(reason, 'Uncaught Exception', reason.stack);
@@ -34,6 +36,7 @@ const index = (): void => {
   app.use(yoga.graphqlEndpoint, yoga);
 
   app.get(`/api${authEndpoint}`, authCallback);
+  app.post('api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
   app.post(
     '/api/fb/sign-out',
     bodyParser.urlencoded({ extended: true }),

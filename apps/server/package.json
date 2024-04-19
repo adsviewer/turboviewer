@@ -21,6 +21,7 @@
     "@graphql-tools/schema": "10.0.3",
     "@graphql-yoga/plugin-disable-introspection": "^2.3.0",
     "@graphql-yoga/redis-event-target": "^3.0.0",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@pothos/core": "^3.41.0",
     "@pothos/plugin-errors": "^3.11.1",
     "@pothos/plugin-prisma": "^3.65.0",
@@ -46,6 +47,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "p-queue": "^8.0.1",
+    "sns-validator": "^0.3.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -65,6 +67,7 @@
     "@types/lodash": "^4.17.0",
     "@types/node": "20.12.4",
     "@types/qs": "^6.9.14",
+    "@types/sns-validator": "^0.3.3",
     "tsx": "^4.7.2",
     "typescript": "5.4.3"
   }

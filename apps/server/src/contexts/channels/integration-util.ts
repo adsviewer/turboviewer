@@ -36,7 +36,17 @@ export const getConnectedIntegrationByOrg = async (
     .then(decryptTokens);
 };
 
-const decryptTokens = (integration: Integration | null): null | Integration => {
+export const getAllConnectedIntegrations = async (): Promise<Integration[]> => {
+  return await prisma.integration
+    .findMany({
+      where: {
+        status: IntegrationStatus.CONNECTED,
+      },
+    })
+    .then((integrations) => integrations.map(decryptTokens).flatMap((integration) => integration ?? []));
+};
+
+export const decryptTokens = (integration: Integration | null): null | Integration => {
   if (integration) {
     const accessToken = decryptAesGcm(integration.accessToken, env.CHANNEL_SECRET);
     if (typeof accessToken !== 'string') return null;
