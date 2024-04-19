@@ -26,7 +26,7 @@ model Organization {
   updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
   users        User[]
   randomString String        @default(cuid())
-  Integration  Integration[]
+  integrations Integration[]
 
   @@map("organizations")
 }
@@ -113,8 +113,260 @@ model Integration {
   createdAt DateTime @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id])
+  adAccounts   AdAccount[]
 
   @@unique([organizationId, type])
   @@unique([externalId, type])
   @@map("integrations")
+}
+
+model AdAccount {
+  id            String @id @default(cuid())
+  integrationId String @map("integration_id")
+
+  externalId String       @map("external_id")
+  currency   CurrencyEnum
+
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  integration    Integration @relation(fields: [integrationId], references: [id])
+  advertisements Ad[]
+  creative       Creative[]
+
+  @@unique([integrationId, externalId])
+  @@map("ad_accounts")
+}
+
+model Ad {
+  id          String @id @default(cuid())
+  adAccountId String @map("ad_account_id")
+
+  externalId String    @map("external_id")
+  adAccount  AdAccount @relation(fields: [adAccountId], references: [id])
+  insights   Insight[]
+  Creative   Creative? @relation(fields: [creativeId], references: [id])
+  creativeId String?
+
+  @@unique([adAccountId, externalId])
+  @@map("ads")
+}
+
+enum DeviceEnum {
+  MobileWeb
+  MobileApp
+  Desktop
+  Unknown
+}
+
+enum PublisherEnum {
+  Facebook
+  Instagram
+  Messenger
+  AudienceNetwork
+  LinkedIn
+  TikTok
+  Unknown
+}
+
+model Creative {
+  id          String   @id @default(cuid())
+  adAccountId String   @map("ad_account_id")
+  name        String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id])
+  ads       Ad[]
+
+  @@unique([adAccountId, name])
+  @@map("creatives")
+}
+
+model Insight {
+  id          String        @id @default(cuid())
+  adId        String        @map("ad_id")
+  date        DateTime
+  impressions Int
+  /// Amount of money spent on the ad in cents
+  spend       Int
+  device      DeviceEnum
+  publisher   PublisherEnum
+  position    String
+
+  ad Ad @relation(fields: [adId], references: [id])
+
+  @@unique([adId, date, device, publisher, position])
+  @@map("insights")
+}
+
+enum CurrencyEnum {
+  AFN
+  ALL
+  DZD
+  USD
+  EUR
+  AOA
+  XCD
+  ARS
+  AMD
+  AWG
+  AUD
+  AZN
+  BSD
+  BHD
+  BDT
+  BBD
+  BYN
+  BZD
+  XOF
+  BMD
+  BTN
+  INR
+  BOB
+  BOV
+  BAM
+  BWP
+  NOK
+  BRL
+  BND
+  BGN
+  BIF
+  CVE
+  KHR
+  XAF
+  CAD
+  KYD
+  CLF
+  CLP
+  CNY
+  COP
+  COU
+  KMF
+  CDF
+  NZD
+  CRC
+  CUC
+  CUP
+  ANG
+  CZK
+  DKK
+  DJF
+  DOP
+  EGP
+  SVC
+  ERN
+  ETB
+  FKP
+  FJD
+  XPF
+  GMD
+  GEL
+  GHS
+  GIP
+  GTQ
+  GBP
+  GNF
+  GYD
+  HTG
+  HNL
+  HKD
+  HUF
+  ISK
+  IDR
+  XDR
+  IRR
+  IQD
+  ILS
+  JMD
+  JPY
+  JOD
+  KZT
+  KES
+  KPW
+  KRW
+  KWD
+  KGS
+  LAK
+  LBP
+  LSL
+  ZAR
+  LRD
+  LYD
+  CHF
+  MOP
+  MGA
+  MWK
+  MYR
+  MVR
+  MRU
+  MUR
+  XUA
+  MXN
+  MXV
+  MDL
+  MNT
+  MAD
+  MZN
+  MMK
+  NAD
+  NPR
+  NIO
+  NGN
+  OMR
+  PKR
+  PAB
+  PGK
+  PYG
+  PEN
+  PHP
+  PLN
+  QAR
+  MKD
+  RON
+  RUB
+  RWF
+  SHP
+  WST
+  STN
+  SAR
+  RSD
+  SCR
+  SLE
+  SGD
+  XSU
+  SBD
+  SOS
+  SSP
+  LKR
+  SDG
+  SRD
+  SZL
+  SEK
+  CHE
+  CHW
+  SYP
+  TWD
+  TJS
+  TZS
+  THB
+  TOP
+  TTD
+  TND
+  TRY
+  TMT
+  UGX
+  UAH
+  AED
+  USN
+  UYI
+  UYU
+  UZS
+  VUV
+  VEF
+  VED
+  VND
+  YER
+  ZMW
+  ZWL
 }

@@ -13,6 +13,7 @@ const eventTarget = createRedisEventTarget({
 
 export interface ChannelInitialProgressPayload {
   channel: IntegrationTypeEnum;
+  // Progress is a number between 0 and 100
   progress: number;
 }
 

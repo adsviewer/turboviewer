@@ -31,27 +31,15 @@ builder.queryFields((t) => ({
       return Object.values(IntegrationTypeEnum).map((channel) => {
         const status = integrationStatus(channel, integrations);
         const authUrl = ShouldConnectIntegrationStatuses.includes(status)
-          ? getIntegrationAuthUrl(channel, ctx.organizationId)
+          ? getIntegrationAuthUrl(channel, ctx.organizationId, ctx.currentUserId)
           : undefined;
+        authUrl && logger.info(`Integration ${channel} authUrl: ${authUrl}`);
         return {
           type: channel,
           status,
           authUrl,
         };
       });
-    },
-  }),
-  integrationAuthUrl: t.withAuth({ authenticated: true }).field({
-    type: 'String',
-    args: {
-      type: t.arg({
-        type: IntegrationTypeDto,
-        required: true,
-      }),
-    },
-    resolve: (_root, args, ctx, _info) => {
-      const { type } = args;
-      return getIntegrationAuthUrl(type, ctx.organizationId);
     },
   }),
 }));
@@ -73,28 +61,9 @@ builder.mutationFields((t) => ({
         throw externalId;
       }
       fireAndForget.add(() => revokeIntegration(externalId, args.type));
-      const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId);
+      const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId, ctx.currentUserId);
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
       return authUrl;
-    },
-  }),
-  createProgress: t.withAuth({ authenticated: true }).field({
-    type: 'String',
-    args: {
-      type: t.arg({
-        type: IntegrationTypeDto,
-        required: true,
-      }),
-    },
-    resolve: async (_root, args, ctx, _info) => {
-      pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: 0 });
-      for (let i = 1; i <= 100; i++) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 100);
-        });
-        pubSub.publish('user:channel:initial-progress', ctx.currentUserId, { channel: args.type, progress: i });
-      }
-      return 'Success';
     },
   }),
 }));

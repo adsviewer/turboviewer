@@ -66,6 +66,6 @@ export const ChannelInitialProgressPayloadDto = builder
   .implement({
     fields: (t) => ({
       channel: t.expose('channel', { type: IntegrationTypeDto }),
-      progress: t.exposeInt('progress'),
+      progress: t.exposeFloat('progress'),
     }),
   });
