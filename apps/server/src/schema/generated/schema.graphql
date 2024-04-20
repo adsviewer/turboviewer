@@ -69,6 +69,7 @@ type Mutation {
   forgetPassword(email: String!): Boolean!
   googleLoginSignup(code: String!): TokenDto!
   login(email: String!, password: String!): TokenDto!
+  refreshData: String!
 
   """
   Uses the refresh token to generate a new token
