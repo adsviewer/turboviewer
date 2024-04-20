@@ -4,6 +4,7 @@ import { logger } from '@repo/logger';
 import { redis } from '@repo/redis';
 import { AError, isAError } from '@repo/utils';
 import type QueryString from 'qs';
+import { z } from 'zod';
 import { env, isMode } from '../../config';
 import { FireAndForget } from '../../fire-and-forget';
 import { encryptAesGcm } from '../../utils/aes-util';
@@ -13,6 +14,7 @@ import { type ChannelInsight, type TokensResponse } from './channel-interface';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { decryptTokens } from './integration-util';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
+import PrismaClientKnownRequestError = Prisma.PrismaClientKnownRequestError;
 
 const fireAndForget = new FireAndForget();
 
@@ -29,7 +31,7 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
       }
     })
     .catch((_e: unknown) => {
-      res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=uknown_error`);
+      res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=unknown_error`);
     });
 };
 
@@ -80,9 +82,26 @@ const completeIntegration = async (
     return tokens;
   }
 
+  const dbIntegration = await saveTokens(tokens, organizationId, integrationType).catch((e: unknown) => {
+    if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
+      const metaSchema = z.object({ modelName: z.string(), target: z.array(z.string()) });
+      const parsed = metaSchema.safeParse(e.meta);
+      if (
+        parsed.success &&
+        parsed.data.modelName === 'Integration' &&
+        parsed.data.target.includes('external_id') &&
+        parsed.data.target.includes('type')
+      )
+        return new AError(
+          'There is already an integration for this organization. Please disconnect the existing one first.',
+        );
+      return new AError('Failed to save tokens to database');
+    }
+    return new AError('Failed to save tokens to database');
+  });
+  if (isAError(dbIntegration)) return dbIntegration;
+
   fireAndForget.add(async () => {
-    const dbIntegration = await saveTokens(tokens, organizationId, integrationType);
-    if (isAError(dbIntegration)) return dbIntegration;
     const integration = decryptTokens(dbIntegration);
     if (!integration) return new AError('Failed to decrypt integration');
     await saveChannelData(integration, userId, true);
@@ -151,66 +170,64 @@ const saveInsightsAndAds = async (
   accountExternalIdMap: Map<string, string>,
   integration: Integration,
 ) => {
-  await Promise.all(
-    Array.from(insightsByExternalAdId.values()).flatMap(async (groupedInsights) => {
-      if (!accountExternalIdMap.has(groupedInsights[0].externalAccountId)) {
-        logger.error('Account %s not found', groupedInsights[0].externalAccountId);
-        return;
-      }
-      return await prisma.$transaction(async (tx) => {
-        const { id } = await tx.ad.upsert({
-          select: { id: true },
-          create: {
+  for (const groupedInsights of Array.from(insightsByExternalAdId.values())) {
+    if (!accountExternalIdMap.has(groupedInsights[0].externalAccountId)) {
+      logger.error('Account %s not found', groupedInsights[0].externalAccountId);
+      continue;
+    }
+    await prisma.$transaction(async (tx) => {
+      const { id } = await tx.ad.upsert({
+        select: { id: true },
+        create: {
+          externalId: groupedInsights[0].externalAdId,
+          adAccount: {
+            connect: {
+              integrationId_externalId: {
+                integrationId: integration.id,
+                externalId: groupedInsights[0].externalAccountId,
+              },
+            },
+          },
+        },
+        update: {},
+        where: {
+          adAccountId_externalId: {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
+            adAccountId: accountExternalIdMap.get(groupedInsights[0].externalAccountId)!,
             externalId: groupedInsights[0].externalAdId,
-            adAccount: {
-              connect: {
-                integrationId_externalId: {
-                  integrationId: integration.id,
-                  externalId: groupedInsights[0].externalAccountId,
-                },
-              },
-            },
           },
-          update: {},
-          where: {
-            adAccountId_externalId: {
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
-              adAccountId: accountExternalIdMap.get(groupedInsights[0].externalAccountId)!,
-              externalId: groupedInsights[0].externalAdId,
-            },
-          },
-        });
-        return await prisma.$transaction(
-          groupedInsights.map((insight) => {
-            return tx.insight.upsert({
-              where: {
-                adId_date_device_publisher_position: {
-                  adId: id,
-                  date: insight.date,
-                  device: insight.device,
-                  publisher: insight.publisher,
-                  position: insight.position,
-                },
-              },
-              update: {
-                impressions: insight.impressions,
-                spend: insight.spend,
-              },
-              create: {
+        },
+      });
+      await prisma.$transaction(
+        groupedInsights.map((insight) => {
+          return tx.insight.upsert({
+            where: {
+              adId_date_device_publisher_position: {
                 adId: id,
                 date: insight.date,
-                impressions: insight.impressions,
-                spend: insight.spend,
                 device: insight.device,
                 publisher: insight.publisher,
                 position: insight.position,
               },
-            });
-          }),
-        );
-      });
-    }),
-  );
+            },
+            update: {
+              impressions: insight.impressions,
+              spend: insight.spend,
+            },
+            create: {
+              adId: id,
+              date: insight.date,
+              impressions: insight.impressions,
+              spend: insight.spend,
+              device: insight.device,
+              publisher: insight.publisher,
+              position: insight.position,
+            },
+          });
+        }),
+      );
+    });
+  }
 };
 
 export const saveChannelData = async (
@@ -218,9 +235,7 @@ export const saveChannelData = async (
   userId: string | undefined,
   initial: boolean,
 ): Promise<AError | undefined> => {
-  logger.info(
-    `Starting ${integration.type} ad ingress for organizationId: ${integration.organizationId}${userId ? ` initial.` : ''}`,
-  );
+  logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
   userId &&
     pubSub.publish('user:channel:initial-progress', userId, {
       channel: integration.type,
@@ -231,6 +246,7 @@ export const saveChannelData = async (
   const data = await channel.getChannelData(integration, userId, initial);
   if (isAError(data)) return data;
 
+  logger.info('Saving account data for %s', integration.id);
   const accounts = await Promise.all(
     data.accounts.map((acc) =>
       prisma.adAccount.upsert({
@@ -260,6 +276,7 @@ export const saveChannelData = async (
   const accountExternalIdMap = new Map<string, string>(accounts.map((acc) => [acc.externalId, acc.id]));
 
   const insightsByExternalAdId = groupBy(data.insights, (item) => item.externalAdId);
+  logger.info('Saving insights for %s', integration.id);
   await saveInsightsAndAds(insightsByExternalAdId, accountExternalIdMap, integration);
 
   userId &&
@@ -267,4 +284,5 @@ export const saveChannelData = async (
       channel: integration.type,
       progress: 100,
     });
+  logger.info(`Finished ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
 };

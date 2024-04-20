@@ -330,6 +330,7 @@ class Facebook implements ChannelInterface {
       );
       const accountInsights = await Facebook.handlePagination(resp, insightSchema, toInsight);
       if (!isAError(accountInsights)) insights.push(...accountInsights);
+      logger.info('Got insights for report %s', reportId);
     }
     return insights;
   }

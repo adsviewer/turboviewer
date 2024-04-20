@@ -88,6 +88,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
   login: TokenDto;
+  refreshData: Scalars['String']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   resetPassword: TokenDto;
