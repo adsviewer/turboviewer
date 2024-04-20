@@ -83,7 +83,10 @@ builder.subscriptionFields((t) => ({
       logger.info(`Channel initial setup progress: ${String(root.progress)}`);
       return root;
     },
-    subscribe: (_root, _args, ctx) => pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId),
+    subscribe: (_root, _args, ctx) => {
+      logger.info(`Subscribing to channel initial setup progress for user ${ctx.currentUserId}`);
+      return pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId);
+    },
   }),
 }));
 
