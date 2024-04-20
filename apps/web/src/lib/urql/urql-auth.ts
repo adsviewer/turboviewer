@@ -16,7 +16,6 @@ export const makeAuthExchange = (token: string | undefined): ((input: ExchangeIn
       },
       refreshAuth: async () => {
         // No need, middleware should catch jwt errors and refresh token
-        // Trigger push
       },
     };
   });
