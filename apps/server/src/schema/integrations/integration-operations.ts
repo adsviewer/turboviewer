@@ -79,7 +79,10 @@ builder.mutationFields((t) => ({
 builder.subscriptionFields((t) => ({
   channelInitialSetupProgress: t.withAuth({ authenticated: true }).field({
     type: ChannelInitialProgressPayloadDto,
-    resolve: (root: ChannelInitialProgressPayload, _args, _ctx, _info) => root,
+    resolve: (root: ChannelInitialProgressPayload, _args, _ctx, _info) => {
+      logger.info(`Channel initial setup progress: ${String(root.progress)}`);
+      return root;
+    },
     subscribe: (_root, _args, ctx) => pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId),
   }),
 }));

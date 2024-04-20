@@ -175,58 +175,54 @@ const saveInsightsAndAds = async (
       logger.error('Account %s not found', groupedInsights[0].externalAccountId);
       continue;
     }
-    await prisma.$transaction(async (tx) => {
-      const { id } = await tx.ad.upsert({
-        select: { id: true },
-        create: {
-          externalId: groupedInsights[0].externalAdId,
-          adAccount: {
-            connect: {
-              integrationId_externalId: {
-                integrationId: integration.id,
-                externalId: groupedInsights[0].externalAccountId,
-              },
+    const { id } = await prisma.ad.upsert({
+      select: { id: true },
+      create: {
+        externalId: groupedInsights[0].externalAdId,
+        adAccount: {
+          connect: {
+            integrationId_externalId: {
+              integrationId: integration.id,
+              externalId: groupedInsights[0].externalAccountId,
             },
           },
         },
-        update: {},
+      },
+      update: {},
+      where: {
+        adAccountId_externalId: {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
+          adAccountId: accountExternalIdMap.get(groupedInsights[0].externalAccountId)!,
+          externalId: groupedInsights[0].externalAdId,
+        },
+      },
+    });
+    for (const insight of groupedInsights) {
+      await prisma.insight.upsert({
         where: {
-          adAccountId_externalId: {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
-            adAccountId: accountExternalIdMap.get(groupedInsights[0].externalAccountId)!,
-            externalId: groupedInsights[0].externalAdId,
+          adId_date_device_publisher_position: {
+            adId: id,
+            date: insight.date,
+            device: insight.device,
+            publisher: insight.publisher,
+            position: insight.position,
           },
+        },
+        update: {
+          impressions: insight.impressions,
+          spend: insight.spend,
+        },
+        create: {
+          adId: id,
+          date: insight.date,
+          impressions: insight.impressions,
+          spend: insight.spend,
+          device: insight.device,
+          publisher: insight.publisher,
+          position: insight.position,
         },
       });
-      await prisma.$transaction(
-        groupedInsights.map((insight) => {
-          return tx.insight.upsert({
-            where: {
-              adId_date_device_publisher_position: {
-                adId: id,
-                date: insight.date,
-                device: insight.device,
-                publisher: insight.publisher,
-                position: insight.position,
-              },
-            },
-            update: {
-              impressions: insight.impressions,
-              spend: insight.spend,
-            },
-            create: {
-              adId: id,
-              date: insight.date,
-              impressions: insight.impressions,
-              spend: insight.spend,
-              device: insight.device,
-              publisher: insight.publisher,
-              position: insight.position,
-            },
-          });
-        }),
-      );
-    });
+    }
   }
 };
 
