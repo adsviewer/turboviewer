@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   if (!token) {
-    const signInUrl = new URL('/sign-in', env.PUBLIC_ENDPOINT);
+    const signInUrl = new URL('/sign-in', env.PUBLIC_URL);
     signInUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }

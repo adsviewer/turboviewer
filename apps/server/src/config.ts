@@ -25,7 +25,6 @@ const schema = z
       .max(5)
       .transform((val) => parseInt(val))
       .default(defaultPort),
-    PUBLIC_URL: z.string().url().default('http://localhost:3000'),
   })
   .merge(commonSchema);
 

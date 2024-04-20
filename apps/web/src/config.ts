@@ -4,7 +4,6 @@ import { commonSchema, createEnv } from '@repo/utils';
 const schema = z
   .object({
     GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
-    PUBLIC_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
   })
   .merge(commonSchema);
 
