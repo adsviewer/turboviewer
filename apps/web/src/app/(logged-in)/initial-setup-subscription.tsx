@@ -2,6 +2,7 @@
 
 import { type JSX, useRef } from 'react';
 import { toast } from 'react-toastify';
+import { logger } from '@repo/logger';
 import { useChannelInitialSetupProgressSubscription } from '@/graphql/generated/schema-client';
 import { IntegrationType } from '@/graphql/generated/schema-server';
 import { integrationTypeMap } from '@/util/types';
@@ -11,6 +12,7 @@ export default function InitialSetupSubscription(): JSX.Element {
   const toastRefs = useRef<(number | string | null)[]>([]);
 
   useChannelInitialSetupProgressSubscription<number[]>({}, (prev, data) => {
+    logger.info('Initial setup progress', data);
     const channel = data.channelInitialSetupProgress.channel;
     const progress =
       data.channelInitialSetupProgress.progress === 0 ? 0.01 : data.channelInitialSetupProgress.progress / 100;
