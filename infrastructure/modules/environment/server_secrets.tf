@@ -1,6 +1,7 @@
 locals {
   server_secrets_map = {
-    "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret, "redis_url" : var.redis_url
+    "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret,
+    "redis_url" : var.redis_url
   }
 }
 
@@ -72,7 +73,7 @@ locals {
   fe_environment_variables = merge({
     for k, v in local.common_secrets : k => v.value
     }, {
-    NEXT_PUBLIC_GRAPHQL_ENDPOINT = local.graphql_endpoint
-    NEXT_PUBLIC_ENDPOINT         = local.full_domain
+    GRAPHQL_ENDPOINT = local.graphql_endpoint
+    PUBLIC_ENDPOINT  = local.full_domain
   })
 }
