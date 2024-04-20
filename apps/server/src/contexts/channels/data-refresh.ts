@@ -18,7 +18,9 @@ export const refreshData = async () => {
   const integrations = await getAllConnectedIntegrations();
 
   for (const integration of integrations) {
-    await saveChannelData(integration, undefined, false);
+    await saveChannelData(integration, undefined, false).catch((e: unknown) => {
+      logger.error(`Error refreshing channel data for ${integration.id}`, e);
+    });
   }
   logger.info('Refreshed all channel data');
 };

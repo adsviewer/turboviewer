@@ -202,11 +202,6 @@ class Facebook implements ChannelInterface {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const accounts = await this.getAdAccounts();
     if (isAError(accounts)) return accounts;
-    userId &&
-      pubSub.publish('user:channel:initial-progress', userId, {
-        channel: IntegrationTypeEnum.FACEBOOK,
-        progress: 5,
-      });
     const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
     logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(activeAccounts)} active accounts`);
 
