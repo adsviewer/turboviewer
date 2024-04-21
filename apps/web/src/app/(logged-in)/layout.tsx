@@ -5,7 +5,7 @@ import { Me } from '@/app/(logged-in)/me';
 import { Aside } from '@/app/(logged-in)/aside';
 import Toaster from '@/app/(logged-in)/toaster';
 import { AvUrqProvider } from '@/app/(logged-in)/urql-provider';
-import { TOKEN_KEY } from '@/config';
+import { TOKEN_KEY } from '@/env.mjs';
 import InitialSetupSubscription from '@/app/(logged-in)/initial-setup-subscription';
 
 export default function LoggedInLayout({ children }: React.PropsWithChildren): JSX.Element {

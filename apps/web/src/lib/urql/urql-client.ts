@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { cache } from 'react';
 import { createUrqlRequester } from '@/util/create-urql-requester';
 import { getSdk } from '@/graphql/generated/schema-server';
-import { env, TOKEN_KEY } from '@/config';
+import { env, TOKEN_KEY } from '@/env.mjs';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
 const makeClient = (): Client => {

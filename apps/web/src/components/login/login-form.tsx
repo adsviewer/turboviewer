@@ -50,6 +50,7 @@ function LoginForm<
         action={props.routeUrl}
         control={props.control}
         headers={{ 'Content-Type': 'application/json' }}
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises -- That's fine
         onSuccess={async (data) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- That's fine
           const body: { success: true } | { success: false; error: FormState } = await data.response.json();

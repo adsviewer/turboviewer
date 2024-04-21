@@ -20,6 +20,7 @@
     "@repo/logger": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.9.2",
     "@urql/core": "^5.0.0",
     "@urql/exchange-auth": "^2.1.6",
     "@urql/next": "^1.1.1",

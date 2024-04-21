@@ -10,9 +10,11 @@
     "FB_APPLICATION_SECRET",
     "NEXT_PUBLIC_GRAPHQL_ENDPOINT",
     "NEXT_PUBLIC_ENDPOINT",
+    "NODE_ENV",
     "PORT",
     "PUBLIC_URL",
-    "REDIS_URL"
+    "REDIS_URL",
+    "SKIP_ENV_VALIDATION"
     ],
   "pipeline": {
     "build": {

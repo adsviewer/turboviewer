@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { logger } from '@repo/logger';
 import { z } from 'zod';
-import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/config';
+import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
 
 const publicPaths = ['/', '/sign-in', '/sign-up', '/forgot-password*', '/reset-password*', '/api/login*'];
 

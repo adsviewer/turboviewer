@@ -4,7 +4,7 @@ import { type z } from 'zod';
 import { SignInSchema } from '@/util/schemas/login-schemas';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/config';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
 import { type FormState } from '@/components/login/login-form';
 
 export const dynamic = 'force-dynamic'; // defaults to auto

@@ -10,7 +10,7 @@ import {
   UrqlProvider,
 } from '@urql/next';
 import { createClient as createSSEClient } from 'graphql-sse';
-import { env } from '@/config';
+import { env } from '@/env.mjs';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
 export function AvUrqProvider({

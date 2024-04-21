@@ -1,7 +1,7 @@
 import { logger } from '@repo/logger'; // defaults to auto
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/config';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
 
 export const dynamic = 'force-dynamic';
 
