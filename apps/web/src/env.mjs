@@ -23,8 +23,9 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
     // Add `.min(1) on these if you want to make sure they're not empty
-    NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
     NEXT_PUBLIC_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
+    NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:3000/graphql'),
+    NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
   },
 
   /**
@@ -34,8 +35,9 @@ export const env = createEnv({
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     AUTH_SECRET: process.env.AUTH_SECRET,
-    NEXT_PUBLIC_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
     NEXT_PUBLIC_ENDPOINT: process.env.NEXT_PUBLIC_ENDPOINT,
+    NEXT_PUBLIC_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
+    NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
