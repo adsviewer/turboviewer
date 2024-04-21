@@ -18,14 +18,19 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
    ```env
    DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
    ```
-4. Add an empty .env file in the `apps/server` directory
-5. Create a .env file in the `apps/server` directory with the following content:
+4. Create a .env file in the `apps/server` directory with the following content:
 
-```env
-API_ENDPOINT=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-a-https-publicaly-available-endpoint>
-FB_APPLICATION_ID=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-your-test-facebook-app>
-FB_APPLICATION_SECRET=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-your-test-facebook-app>
-```
+   ```env
+   API_ENDPOINT=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-a-https-publicaly-available-endpoint>
+   FB_APPLICATION_ID=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-your-test-facebook-app>
+   FB_APPLICATION_SECRET=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-your-test-facebook-app>
+   ```
+
+5. Create a .env file in the `apps/web` directory with the following content:
+
+   ```env
+   NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
+   ```
 
 6. Run `pnpm i`
 7. `pnpm run dev`
