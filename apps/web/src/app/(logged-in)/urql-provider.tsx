@@ -21,7 +21,7 @@ export function AvUrqProvider({
   token: string | undefined;
 }): JSX.Element {
   const wsClient = createSSEClient({
-    url: env.GRAPHQL_ENDPOINT,
+    url: env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
@@ -30,7 +30,7 @@ export function AvUrqProvider({
       isClient: typeof window !== 'undefined',
     });
     const client = createClient({
-      url: env.GRAPHQL_ENDPOINT,
+      url: env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
       exchanges: [
         cacheExchange,
         makeAuthExchange(token),

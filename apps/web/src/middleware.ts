@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   if (!token) {
-    const signInUrl = new URL('/sign-in', env.PUBLIC_URL);
+    const signInUrl = new URL('/sign-in', env.NEXT_PUBLIC_ENDPOINT);
     signInUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }
@@ -73,7 +73,7 @@ const tryRefreshToken = async (
         refreshToken: z.string(),
       }),
     });
-    const newRefreshToken = await fetch(env.GRAPHQL_ENDPOINT, {
+    const newRefreshToken = await fetch(env.NEXT_PUBLIC_GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
