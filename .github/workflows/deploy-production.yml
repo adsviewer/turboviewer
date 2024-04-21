@@ -1,6 +1,7 @@
 name: Deploy prod
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
@@ -22,6 +23,8 @@ jobs:
     uses: ./.github/workflows/build-deploy-service.yml
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+      turbo_team: ${{ vars.TURBO_TEAM }}
+      turbo_token: ${{ secrets.TURBO_TOKEN }}
     with:
       aws_region: ${{ vars.AWS_REGION }}
       environment: prod

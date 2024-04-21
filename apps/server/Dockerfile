@@ -12,6 +12,13 @@ RUN turbo prune --scope=server --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
+
+ARG TURBO_TEAM
+ENV TURBO_TEAM=$TURBO_TEAM
+
+ARG TURBO_TOKEN
+ENV TURBO_TOKEN=$TURBO_TOKEN
+
 RUN apk add --no-cache libc6-compat
 RUN apk --no-cache add --virtual .builds-deps build-base python3
 RUN apk update
