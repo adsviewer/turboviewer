@@ -19,7 +19,7 @@ export default function InitialSetupSubscription(): JSX.Element {
     if (!currentElement) {
       toastRefs.current[index] = toast(
         `${integrationTypeMap.get(channel)?.name ?? channel} initial setup in progress`,
-        { progress: 0.01 },
+        { progress },
       );
     } else if (progress === 1) {
       toast.done(currentElement);

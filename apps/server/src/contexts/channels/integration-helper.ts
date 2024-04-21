@@ -232,10 +232,7 @@ export const saveChannelData = async (
   initial: boolean,
 ): Promise<AError | undefined> => {
   logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
-  fireAndForget.add(async () => {
-    await new Promise((r) => {
-      setTimeout(r, 500);
-    });
+  fireAndForget.add(() => {
     userId &&
       pubSub.publish('user:channel:initial-progress', userId, {
         channel: integration.type,
