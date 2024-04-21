@@ -4,6 +4,9 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  NEXT_PUBLIC_GRAPHQL_ENDPOINT: https://api.adsviewer.io/graphql
+  NEXT_PUBLIC_ENDPOINT: https://app.adsviewer.io
+
 on:
   push:
     branches:
