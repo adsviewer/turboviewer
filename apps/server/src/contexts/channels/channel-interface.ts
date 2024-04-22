@@ -21,6 +21,7 @@ export interface ChannelAdAccount {
   // in cents
   amountSpent: number;
   hasAdsRunningOrInReview: boolean;
+  name: string;
   currency: CurrencyEnum;
   externalId: string;
 }

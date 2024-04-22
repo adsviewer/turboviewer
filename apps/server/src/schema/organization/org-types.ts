@@ -7,5 +7,6 @@ export const OrganizationDto = builder.prismaObject('Organization', {
     createdAt: t.expose('createdAt', { type: 'Date' }),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
     users: t.relation('users'),
+    integrations: t.relation('integrations'),
   }),
 });

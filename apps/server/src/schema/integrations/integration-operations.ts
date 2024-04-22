@@ -11,6 +11,7 @@ import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import { refreshData } from '../../contexts/channels/data-refresh';
 import {
   ChannelInitialProgressPayloadDto,
+  IntegrationDto,
   IntegrationListItemDto,
   IntegrationStatusEnum,
   IntegrationTypeDto,
@@ -20,7 +21,22 @@ import {
 const fireAndForget = new FireAndForget();
 
 builder.queryFields((t) => ({
-  integrations: t.withAuth({ authenticated: true }).field({
+  integrations: t.withAuth({ authenticated: true }).prismaField({
+    type: [IntegrationDto],
+    args: {
+      type: t.arg({ type: IntegrationTypeDto, required: false }),
+    },
+    resolve: async (query, _root, args, ctx, _info) => {
+      return await prisma.integration.findMany({
+        ...query,
+        where: {
+          organizationId: ctx.organizationId,
+          type: args.type ?? undefined,
+        },
+      });
+    },
+  }),
+  settingsChannels: t.withAuth({ authenticated: true }).field({
     type: [IntegrationListItemDto],
     resolve: async (_root, _args, ctx, _info) => {
       const integrations = await prisma.integration.findMany({

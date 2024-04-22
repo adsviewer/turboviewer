@@ -1,9 +1,9 @@
 import React, { type JSX, Suspense } from 'react';
-import { type IntegrationsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
+import { type SettingsChannelsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
 import Card from '@/app/(logged-in)/settings/integrations/card';
 
 interface CardsProps {
-  integrations: IntegrationsQuery['integrations'];
+  integrations: SettingsChannelsQuery['settingsChannels'];
 }
 export default function Cards({ integrations }: CardsProps): JSX.Element {
   return (

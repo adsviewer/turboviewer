@@ -125,6 +125,8 @@ model AdAccount {
   integrationId String @map("integration_id")
 
   externalId String       @map("external_id")
+  // TODO: name should be mandatory
+  name       String?
   currency   CurrencyEnum
 
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -132,21 +134,21 @@ model AdAccount {
 
   integration    Integration @relation(fields: [integrationId], references: [id])
   advertisements Ad[]
-  creative       Creative[]
+  creatives      Creative[]
 
   @@unique([integrationId, externalId])
   @@map("ad_accounts")
 }
 
 model Ad {
-  id          String @id @default(cuid())
-  adAccountId String @map("ad_account_id")
+  id          String  @id @default(cuid())
+  adAccountId String  @map("ad_account_id")
+  creativeId  String?
 
   externalId String    @map("external_id")
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id])
   insights   Insight[]
-  Creative   Creative? @relation(fields: [creativeId], references: [id])
-  creativeId String?
+  creative   Creative? @relation(fields: [creativeId], references: [id])
 
   @@unique([adAccountId, externalId])
   @@map("ads")

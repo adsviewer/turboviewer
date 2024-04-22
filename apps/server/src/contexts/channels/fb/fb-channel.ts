@@ -225,6 +225,7 @@ class Facebook implements ChannelInterface {
         AdAccount.Fields.amount_spent,
         AdAccount.Fields.id,
         AdAccount.Fields.currency,
+        AdAccount.Fields.name,
         `ads_volume{${AdAccountAdVolume.Fields.ads_running_or_in_review_count}}`,
       ],
       {
@@ -236,6 +237,7 @@ class Facebook implements ChannelInterface {
       amount_spent: z.coerce.number(),
       id: z.string().startsWith('act_'),
       currency: z.nativeEnum(CurrencyEnum),
+      name: z.string(),
       ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
     });
     const toAccount = (acc: z.infer<typeof accountSchema>) =>
@@ -245,6 +247,7 @@ class Facebook implements ChannelInterface {
         hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
         externalId: acc.id.slice(4),
         currency: acc.currency,
+        name: acc.name,
       }) satisfies ChannelAdAccount;
 
     return await Facebook.handlePagination(res, accountSchema, toAccount);

@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as changeCase from 'change-case';
-import { type IntegrationsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
+import { type SettingsChannelsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
 import { integrationTypeMap, type UnwrapArray } from '@/util/types';
 import { deAuthIntegration } from '@/app/(logged-in)/settings/integrations/actions';
 
@@ -25,7 +25,7 @@ export default function Card({
   status,
   type,
   authUrl,
-}: UnwrapArray<IntegrationsQuery['integrations']>): React.ReactElement | null {
+}: UnwrapArray<SettingsChannelsQuery['settingsChannels']>): React.ReactElement | null {
   const [cardStatus, setCardStatus] = useState<IntegrationStatus>(status);
   const [redirectUrl, setRedirectUrl] = useState<string | null | undefined>(authUrl);
   const [isPending, startTransition] = useTransition();

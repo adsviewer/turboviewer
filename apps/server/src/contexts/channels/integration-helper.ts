@@ -165,6 +165,64 @@ const saveTokens = async (
   });
 };
 
+export const saveChannelData = async (
+  integration: Integration,
+  userId: string | undefined,
+  initial: boolean,
+): Promise<AError | undefined> => {
+  logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 0,
+    });
+
+  const channel = getChannel(integration.type);
+  const data = await channel.getChannelData(integration, userId, initial);
+  if (isAError(data)) return data;
+
+  logger.info('Saving account data for %s', integration.id);
+  const accounts = await Promise.all(
+    data.accounts.map((acc) =>
+      prisma.adAccount.upsert({
+        select: { id: true, externalId: true },
+        where: {
+          integrationId_externalId: {
+            integrationId: integration.id,
+            externalId: acc.externalId,
+          },
+        },
+        update: { currency: acc.currency, name: acc.name },
+        create: {
+          integrationId: integration.id,
+          externalId: acc.externalId,
+          currency: acc.currency,
+          name: acc.name,
+        },
+      }),
+    ),
+  );
+
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 95,
+    });
+
+  const accountExternalIdMap = new Map<string, string>(accounts.map((acc) => [acc.externalId, acc.id]));
+
+  const insightsByExternalAdId = groupBy(data.insights, (item) => item.externalAdId);
+  logger.info('Saving insights for %s', integration.id);
+  await saveInsightsAndAds(insightsByExternalAdId, accountExternalIdMap, integration);
+
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 100,
+    });
+  logger.info(`Finished ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
+};
+
 const saveInsightsAndAds = async (
   insightsByExternalAdId: Map<string, ChannelInsight[]>,
   accountExternalIdMap: Map<string, string>,
@@ -224,61 +282,4 @@ const saveInsightsAndAds = async (
       });
     }
   }
-};
-
-export const saveChannelData = async (
-  integration: Integration,
-  userId: string | undefined,
-  initial: boolean,
-): Promise<AError | undefined> => {
-  logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
-  userId &&
-    pubSub.publish('user:channel:initial-progress', userId, {
-      channel: integration.type,
-      progress: 0,
-    });
-
-  const channel = getChannel(integration.type);
-  const data = await channel.getChannelData(integration, userId, initial);
-  if (isAError(data)) return data;
-
-  logger.info('Saving account data for %s', integration.id);
-  const accounts = await Promise.all(
-    data.accounts.map((acc) =>
-      prisma.adAccount.upsert({
-        select: { id: true, externalId: true },
-        where: {
-          integrationId_externalId: {
-            integrationId: integration.id,
-            externalId: acc.externalId,
-          },
-        },
-        update: { currency: acc.currency },
-        create: {
-          integrationId: integration.id,
-          externalId: acc.externalId,
-          currency: acc.currency,
-        },
-      }),
-    ),
-  );
-
-  userId &&
-    pubSub.publish('user:channel:initial-progress', userId, {
-      channel: integration.type,
-      progress: 95,
-    });
-
-  const accountExternalIdMap = new Map<string, string>(accounts.map((acc) => [acc.externalId, acc.id]));
-
-  const insightsByExternalAdId = groupBy(data.insights, (item) => item.externalAdId);
-  logger.info('Saving insights for %s', integration.id);
-  await saveInsightsAndAds(insightsByExternalAdId, accountExternalIdMap, integration);
-
-  userId &&
-    pubSub.publish('user:channel:initial-progress', userId, {
-      channel: integration.type,
-      progress: 100,
-    });
-  logger.info(`Finished ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
 };

@@ -8,7 +8,7 @@ export const UserDto = builder.prismaObject('User', {
     lastName: t.exposeString('lastName'),
     email: t.exposeString('email'),
     createdAt: t.expose('createdAt', { type: 'Date' }),
-    updatedAt: t.expose('createdAt', { type: 'Date' }),
+    updatedAt: t.expose('updatedAt', { type: 'Date' }),
     roles: t.field({
       type: [RoleDto],
       select: (_args, _ctx, nestedSelection) => ({
