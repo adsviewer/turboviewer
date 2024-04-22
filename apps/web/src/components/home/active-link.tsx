@@ -69,7 +69,6 @@ export function ActiveLink({
           href={url}
           className={cx(
             'flex items-center gap-2 text-md font-semibold  transition-all w-full',
-            'text-menu-tertiary hover:text-menu-tertiary/90',
             active && 'text-white',
             minimized && 'lg:hidden',
           )}
@@ -93,7 +92,7 @@ export function ActiveLink({
           'transition-all',
         )}
       >
-        <span className={cx(active ? 'text-menu-primary' : 'text-menu-tertiary')}>{icon}</span>
+        <span className={cx(active ? 'text-menu-primary' : '')}>{icon}</span>
         <span className={cx(minimized ? 'lg:hidden' : '')}>{text}</span>
       </Link>
       {children}

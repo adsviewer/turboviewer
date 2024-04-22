@@ -14,15 +14,13 @@
   --primary-foreground: 210 40% 98%;
 
   /*menu*/
-  --color-menu: 0 0 0;
+  --color-menu: 242 242 242;
   --color-menu-primary: 67 160 71;
-  --color-menu-secondary: 255 255 255;
-  --color-menu-tertiary : 156 163 175;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
+    --foreground-rgb: 156,163,175;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
 
@@ -33,10 +31,8 @@
     --destructive-foreground: 210 40% 98%;
 
     /*menu*/
-    --color-menu: 255 255 255;
+    --color-menu: 17 24 39;
     --color-menu-primary: 67 160 71;
-    --color-menu-secondary: 0 0 0;
-    --color-menu-tertiary : 156 163 175;
   }
 }
 

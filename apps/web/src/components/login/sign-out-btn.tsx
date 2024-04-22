@@ -15,11 +15,11 @@ export function SignOutBtn({ classname }: { classname?: string }): JSX.Element {
         type="button"
         onClick={handleLogout}
         className={cx(
-          'mt-10 lg:mt-[21px] flex items-center gap-2 text-md font-semibold text-menu-tertiary hover:text-primary/90 transition-all',
+          'mt-10 lg:mt-[21px] flex items-center gap-2 text-md font-semibold hover:text-primary/90 transition-all',
           classname,
         )}
       >
-        <LogOut className="text-menu-tertiary" />
+        <LogOut />
         Sign Out
       </button>
     </div>

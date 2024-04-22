@@ -74,7 +74,7 @@ export function Badge({
           'flex items-center gap-1 whitespace-nowrap rounded border px-2 py-[2px] text-sm font-medium',
           type === 'badge-color' ? textColor[color] : 'text-gray-700',
           type === 'badge-color' ? borderColor[color] : 'border-gray-200',
-          type === 'badge-color' ? bgColor[color] : 'bg-white',
+          type === 'badge-color' ? bgColor[color] : 'bg-white dark:bg-gray-200',
           type === 'badge-modern' && 'shadow-sm',
         ),
         truncateClassName,

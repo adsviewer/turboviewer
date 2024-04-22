@@ -18,7 +18,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
   const [minimize, setMinimize] = useState(false);
 
   return (
-    <div className={cx('bg-menu-bg text-menu-secondary', minimize ? 'lg:w-10' : 'lg:w-1/5')}>
+    <div className={cx('bg-menu-bg', minimize ? 'lg:w-10' : 'lg:w-1/5')}>
       <div
         className={cx(
           'flex flex-col sticky top-0 z-[500] lg:h-screen lg:py-6 w-full',
@@ -33,7 +33,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
             )}
           >
             <Link href="/placements" aria-label="To Home">
-              <LogoFull className="stroke-menu-secondary fill-menu-secondary hover:stroke-menu-primary/90 hover:fill-menu-primary/90" />
+              <LogoFull className="stroke-[rgb(var(--foreground-rgb))] fill-[rgb(var(--foreground-rgb))] hover:stroke-menu-primary/90 hover:fill-menu-primary/90" />
             </Link>
           </div>
           <button
@@ -55,11 +55,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
             'lg:static lg:mt-10 lg:p-0 lg:transition-none lg:translate-x-0',
           )}
         >
-          <div
-            className={cx('hidden lg:block mb-2 text-menu-tertiary text-md font-medium', minimize ? 'lg:hidden' : '')}
-          >
-            Navigate
-          </div>
+          <div className={cx('hidden lg:block mb-2 text-md font-medium', minimize ? 'lg:hidden' : '')}>Navigate</div>
           <nav className="w-full grow">
             <ul className="flex flex-col gap-[21px] mb-6">
               {links.map((link) => (

@@ -17,8 +17,6 @@ const config: Omit<Config, 'content'> = {
           DEFAULT: 'rgb(var(--color-menu) / <alpha-value>)',
           bg: 'rgb(var(--color-menu) / <alpha-value>)',
           primary: 'rgb(var(--color-menu-primary) / <alpha-value>)',
-          secondary: 'rgb(var(--color-menu-secondary) / <alpha-value>)',
-          tertiary: 'rgb(var(--color-menu-tertiary) / <alpha-value>)',
         },
       },
       backgroundImage: {
