@@ -7,7 +7,7 @@ const makeRedis = async (): Promise<RedisClientType<RedisModules, RedisFunctions
     url: env.REDIS_URL,
   })
     .on('error', (err) => {
-      logger.error('Redis Client Error', err);
+      logger.error(`Redis Client Error ${JSON.stringify(err)}`);
     })
     .connect();
 
