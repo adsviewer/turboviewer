@@ -11,7 +11,13 @@ export async function Insights(): Promise<JSX.Element> {
         await urqlClientSdk()
           .insights({
             adAccountId: account.id,
-            groupBy: [InsightsColumnsGroupBy.device, InsightsColumnsGroupBy.date],
+            groupBy: [
+              InsightsColumnsGroupBy.device,
+              InsightsColumnsGroupBy.date,
+              InsightsColumnsGroupBy.publisher,
+              InsightsColumnsGroupBy.position,
+              InsightsColumnsGroupBy.adId,
+            ],
           })
           .then((response) => {
             return response.insights.edges.map((insight) => ({

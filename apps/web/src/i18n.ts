@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
 import { getRequestConfig } from 'next-intl/server';
-import gr from '../messages/gr.json';
+import el from '../messages/el.json';
 import en from '../messages/en.json';
 
 export const localesMap = new Map([
-  ['en', en],
-  ['gr', gr],
+  ['en-us', en],
+  ['en-gb', en],
+  ['el', el],
 ]);
 
 export const locales = Array.from(localesMap.keys());

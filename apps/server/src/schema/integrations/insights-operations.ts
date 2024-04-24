@@ -25,7 +25,7 @@ builder.queryFields((t) => ({
       highestFirst: t.arg.boolean({ defaultValue: true }),
       orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
       groupBy: t.arg({ type: [InsightsColumnsGroupByDto], required: false }),
-      take: t.arg.int({ required: true, defaultValue: 10 }),
+      take: t.arg.int({ required: true, defaultValue: 18 }),
       skip: t.arg.int({ required: true, defaultValue: 0 }),
     },
     resolve: async (_root, args, ctx, _info) => {

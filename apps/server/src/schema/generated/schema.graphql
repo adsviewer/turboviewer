@@ -415,7 +415,7 @@ type Query {
     positions: [String!]
     publishers: [PublisherEnum!]
     skip: Int! = 0
-    take: Int! = 10
+    take: Int! = 18
   ): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   me: User!
