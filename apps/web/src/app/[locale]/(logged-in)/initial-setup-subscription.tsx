@@ -1,12 +1,12 @@
 'use client';
 
-import { type JSX, useRef } from 'react';
+import { useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useChannelInitialSetupProgressSubscription } from '@/graphql/generated/schema-client';
 import { IntegrationType } from '@/graphql/generated/schema-server';
 import { integrationTypeMap } from '@/util/types';
 
-export default function InitialSetupSubscription(): JSX.Element {
+export default function InitialSetupSubscription(): React.ReactNode {
   const typeMap = new Map<IntegrationType, number>(Object.values(IntegrationType).map((type, index) => [type, index]));
   const toastRefs = useRef<(number | string | null)[]>([]);
 
@@ -29,7 +29,5 @@ export default function InitialSetupSubscription(): JSX.Element {
     }
     return [...(prev ?? []), progress];
   });
-
-  // eslint-disable-next-line react/jsx-no-useless-fragment -- required for JSX
-  return <></>;
+  return null;
 }

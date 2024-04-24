@@ -1,4 +1,5 @@
 import { prisma, Prisma } from '@repo/database';
+import { Kind } from 'graphql/language';
 import { builder } from '../builder';
 import { getEndofDay } from '../../utils/date-utils';
 import {
@@ -15,7 +16,7 @@ builder.queryFields((t) => ({
     description:
       'Get grouped insights for ads. Beware that this is not an Insight entity. You cannot ask for id or any connected entity',
     args: {
-      adAccountId: t.arg.string({ required: false }),
+      adAccountId: t.arg.string({ required: true }),
       dateFrom: t.arg({ type: 'Date', required: false }),
       dateTo: t.arg({ type: 'Date', required: false }),
       devices: t.arg({ type: [DeviceEnumDto], required: false }),
@@ -31,7 +32,7 @@ builder.queryFields((t) => ({
       const where: InsightWhereInput = {
         ad: {
           adAccount: {
-            id: args.adAccountId ?? undefined,
+            id: args.adAccountId,
             integration: {
               organizationId: ctx.organizationId,
             },
@@ -43,39 +44,53 @@ builder.queryFields((t) => ({
         position: { in: args.positions ?? undefined },
       };
 
-      const groupByColumns = [...(args.groupBy ?? []), 'date'] as const;
-      const grouped = await prisma.insight.groupBy({
-        by: [...groupByColumns],
-        _sum: {
-          spend: true,
-          impressions: true,
-        },
-        where,
-        orderBy: { _sum: { [args.orderBy]: args.highestFirst ? 'desc' : 'asc' } },
-        take: args.take,
-        skip: args.skip,
-      });
+      const groupedByEdges = async () =>
+        await prisma.insight
+          .groupBy({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we are checking before using it
+            by: [...args.groupBy!],
+            _sum: {
+              spend: true,
+              impressions: true,
+            },
+            where,
+            orderBy: { _sum: { [args.orderBy]: args.highestFirst ? 'desc' : 'asc' } },
+            take: args.take,
+            skip: args.skip,
+          })
+          .then((grouped) =>
+            grouped.map((group) => ({
+              ...group,
+              spend: group._sum.spend ?? 0,
+              impressions: group._sum.impressions ?? 0,
+            })),
+          );
 
-      const count = await prisma.insight.findMany({
-        select: { id: true },
-        distinct: [...groupByColumns],
-        where,
-      });
+      const findAllEdges = async () =>
+        await prisma.insight
+          .findMany({
+            select: { spend: true, impressions: true },
+            where,
+          })
+          .then((insights) => {
+            const spend = insights.reduce((acc, insight) => acc + insight.spend, 0);
+            const impressions = insights.reduce((acc, insight) => acc + insight.impressions, 0);
+            return [{ spend, impressions }];
+          });
 
-      const edges = grouped.map((group) => ({
-        id: 'null',
-        /* eslint-disable @typescript-eslint/no-unnecessary-condition -- This is a hack :( */
-        adId: group.adId ?? 'null',
-        date: group.date,
-        device: group.device ?? 'null',
-        publisher: group.publisher ?? 'null',
-        position: group.position ?? 'null',
-        spend: group._sum.spend ?? 0,
-        impressions: group._sum.impressions ?? 0,
-        /* eslint-enable @typescript-eslint/no-unnecessary-condition -- This is a hack :( */
-      }));
+      const edges = args.groupBy ? await groupedByEdges() : await findAllEdges();
+
+      const totalElements = _info.fieldNodes.some((f) =>
+        f.selectionSet?.selections.some((s) => s.kind === Kind.FIELD && s.name.value === 'totalCount'),
+      )
+        ? await prisma.insight.findMany({
+            select: { id: true },
+            distinct: args.groupBy ?? undefined,
+            where,
+          })
+        : [];
       return {
-        totalCount: count.length,
+        totalCount: totalElements.length,
         edges,
       };
     },
@@ -98,8 +113,8 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
 const GroupedInsightDto = builder.simpleObject('GroupedInsights', {
   fields: (t) => ({
     adId: t.string({ nullable: true }),
-    date: t.field({ type: 'Date' }),
-    device: t.field({ type: DeviceEnumDto }),
+    date: t.field({ type: 'Date', nullable: true }),
+    device: t.field({ type: DeviceEnumDto, nullable: true }),
     publisher: t.field({ type: PublisherEnumDto, nullable: true }),
     position: t.string({ nullable: true }),
     spend: t.int({ nullable: false }),

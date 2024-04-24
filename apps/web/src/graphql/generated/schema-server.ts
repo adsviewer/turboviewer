@@ -303,8 +303,8 @@ export type GroupedInsight = Pagination & {
 export type GroupedInsights = {
   __typename?: 'GroupedInsights';
   adId?: Maybe<Scalars['String']['output']>;
-  date: Scalars['Date']['output'];
-  device: DeviceEnum;
+  date?: Maybe<Scalars['Date']['output']>;
+  device?: Maybe<DeviceEnum>;
   impressions: Scalars['Int']['output'];
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
@@ -328,6 +328,8 @@ export enum InsightsColumnsGroupBy {
   publisher = 'publisher',
   device = 'device',
   position = 'position',
+  adId = 'adId',
+  date = 'date',
 }
 
 export enum InsightsColumnsOrderBy {
@@ -489,7 +491,7 @@ export type QueryGenerateGoogleAuthUrlArgs = {
 };
 
 export type QueryInsightsArgs = {
-  adAccountId?: InputMaybe<Scalars['String']['input']>;
+  adAccountId: Scalars['String']['input'];
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
@@ -546,6 +548,47 @@ export type ZodFieldError = {
   __typename?: 'ZodFieldError';
   message: Scalars['String']['output'];
   path: Array<Scalars['String']['output']>;
+};
+
+export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AdAccountsQuery = {
+  __typename?: 'Query';
+  integrations: Array<{
+    __typename?: 'Integration';
+    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name?: string | null; currency: CurrencyEnum }>;
+  }>;
+};
+
+export type InsightsQueryVariables = Exact<{
+  adAccountId: Scalars['String']['input'];
+  dateFrom?: InputMaybe<Scalars['Date']['input']>;
+  dateTo?: InputMaybe<Scalars['Date']['input']>;
+  devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
+  publishers?: InputMaybe<Array<PublisherEnum> | PublisherEnum>;
+  positions?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  highestFirst?: InputMaybe<Scalars['Boolean']['input']>;
+  orderBy?: InputMaybe<InsightsColumnsOrderBy>;
+  groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type InsightsQuery = {
+  __typename?: 'Query';
+  insights: {
+    __typename?: 'GroupedInsight';
+    edges: Array<{
+      __typename?: 'GroupedInsights';
+      adId?: string | null;
+      date?: Date | null;
+      device?: DeviceEnum | null;
+      publisher?: PublisherEnum | null;
+      position?: string | null;
+      impressions: number;
+      spend: number;
+    }>;
+  };
 };
 
 export type SettingsChannelsQueryVariables = Exact<{ [key: string]: never }>;
@@ -693,6 +736,56 @@ export const UserFieldsFragmentDoc = gql`
     organizationId
   }
 `;
+export const AdAccountsDocument = gql`
+  query adAccounts {
+    integrations {
+      adAccounts {
+        id
+        name
+        currency
+      }
+    }
+  }
+`;
+export const InsightsDocument = gql`
+  query insights(
+    $adAccountId: String!
+    $dateFrom: Date
+    $dateTo: Date
+    $devices: [DeviceEnum!]
+    $publishers: [PublisherEnum!]
+    $positions: [String!]
+    $highestFirst: Boolean
+    $orderBy: InsightsColumnsOrderBy
+    $groupBy: [InsightsColumnsGroupBy!]
+    $take: Int
+    $skip: Int
+  ) {
+    insights(
+      adAccountId: $adAccountId
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+      devices: $devices
+      publishers: $publishers
+      positions: $positions
+      highestFirst: $highestFirst
+      orderBy: $orderBy
+      groupBy: $groupBy
+      take: $take
+      skip: $skip
+    ) {
+      edges {
+        adId
+        date
+        device
+        publisher
+        position
+        impressions
+        spend
+      }
+    }
+  }
+`;
 export const SettingsChannelsDocument = gql`
   query settingsChannels {
     settingsChannels {
@@ -783,6 +876,20 @@ export const MeDocument = gql`
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
+    adAccounts(variables?: AdAccountsQueryVariables, options?: C): Promise<AdAccountsQuery> {
+      return requester<AdAccountsQuery, AdAccountsQueryVariables>(
+        AdAccountsDocument,
+        variables,
+        options,
+      ) as Promise<AdAccountsQuery>;
+    },
+    insights(variables: InsightsQueryVariables, options?: C): Promise<InsightsQuery> {
+      return requester<InsightsQuery, InsightsQueryVariables>(
+        InsightsDocument,
+        variables,
+        options,
+      ) as Promise<InsightsQuery>;
+    },
     settingsChannels(variables?: SettingsChannelsQueryVariables, options?: C): Promise<SettingsChannelsQuery> {
       return requester<SettingsChannelsQuery, SettingsChannelsQueryVariables>(
         SettingsChannelsDocument,

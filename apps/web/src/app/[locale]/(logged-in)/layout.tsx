@@ -1,16 +1,15 @@
 import React, { type JSX, Suspense } from 'react';
 import { Fallback } from '@repo/ui/fallback';
 import { cookies } from 'next/headers';
-import { Me } from '@/app/(logged-in)/me';
-import { Aside } from '@/app/(logged-in)/aside';
-import Toaster from '@/app/(logged-in)/toaster';
-import { AvUrqProvider } from '@/app/(logged-in)/urql-provider';
 import { TOKEN_KEY } from '@/env.mjs';
-import InitialSetupSubscription from '@/app/(logged-in)/initial-setup-subscription';
+import { Aside } from '@/app/[locale]/(logged-in)/aside';
+import { Me } from '@/app/[locale]/(logged-in)/me';
+import { AvUrqProvider } from '@/app/[locale]/(logged-in)/urql-provider';
+import InitialSetupSubscription from '@/app/[locale]/(logged-in)/initial-setup-subscription';
+import Toaster from '@/app/[locale]/(logged-in)/toaster';
 
 export default function LoggedInLayout({ children }: React.PropsWithChildren): JSX.Element {
   const token = cookies().get(TOKEN_KEY)?.value;
-
   return (
     <div className="relative min-h-screen lg:flex lg:flex-row">
       <Aside>

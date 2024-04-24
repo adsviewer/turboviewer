@@ -3,7 +3,7 @@
 import { LogOut } from 'lucide-react';
 import { type JSX } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
-import { signOut } from '@/app/(login)/(normal)/actions';
+import { signOut } from '@/app/[locale]/(login)/(normal)/actions';
 
 export function SignOutBtn({ classname }: { classname?: string }): JSX.Element {
   const handleLogout = (): void => {

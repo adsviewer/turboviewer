@@ -1,6 +1,6 @@
 import React, { type JSX, Suspense } from 'react';
 import { type SettingsChannelsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
-import Card from '@/app/(logged-in)/settings/integrations/card';
+import Card from '@/app/[locale]/(logged-in)/settings/integrations/card';
 
 interface CardsProps {
   integrations: SettingsChannelsQuery['settingsChannels'];

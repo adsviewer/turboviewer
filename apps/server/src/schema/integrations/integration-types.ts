@@ -105,8 +105,14 @@ export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderB
   values: insightsColumnsOrderBy,
 });
 
-type InsightsColumnsGroupByType = keyof Pick<Insight, 'publisher' | 'device' | 'position' | 'adId'>;
-const insightsColumnsGroupBy: InsightsColumnsGroupByType[] = ['publisher', 'device', 'position'] as const;
+type InsightsColumnsGroupByType = keyof Pick<Insight, 'publisher' | 'device' | 'position' | 'adId' | 'date'>;
+const insightsColumnsGroupBy: InsightsColumnsGroupByType[] = [
+  'publisher',
+  'device',
+  'position',
+  'adId',
+  'date',
+] as const;
 export const InsightsColumnsGroupByDto = builder.enumType('InsightsColumnsGroupBy', {
   values: insightsColumnsGroupBy,
 });

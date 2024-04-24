@@ -12,9 +12,15 @@ export const metadata: Metadata = {
   description: 'Get granular insights into your ads performance',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function RootLayout({
+  children,
+  params: { locale },
+}: {
+  children: React.ReactNode;
+  params: { locale: string };
+}): React.JSX.Element {
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={inter.className}>
         {children}
         <Analytics />

@@ -5,11 +5,12 @@ import { useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
 import Link from 'next/link';
 import { SignOutBtn } from '@/components/login/sign-out-btn';
-import { LogoFull } from '@/app/(logged-in)/logo-full';
 import { ActiveLink, type LinkType } from '@/components/home/active-link';
+import { LogoFull } from '@/app/[locale]/(logged-in)/logo-full';
+import { Filters } from '@/app/[locale]/(logged-in)/filters';
 
 const links: LinkType[] = [
-  { url: '/placements', text: 'Ad Placements', icon: <Layers /> },
+  { url: '/insights', text: 'Insights', icon: <Layers /> },
   { url: '/settings/integrations', text: 'Settings', icon: <Settings /> },
 ];
 
@@ -32,7 +33,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
               minimize ? 'lg:hidden' : '',
             )}
           >
-            <Link href="/placements" aria-label="To Home">
+            <Link href="/insights" aria-label="To Home">
               <LogoFull className="stroke-[rgb(var(--foreground-rgb))] fill-[rgb(var(--foreground-rgb))] hover:stroke-menu-primary/90 hover:fill-menu-primary/90" />
             </Link>
           </div>
@@ -62,6 +63,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
                 <ActiveLink key={link.url} minimized={minimize} {...link} />
               ))}
             </ul>
+            <Filters />
           </nav>
           <div>
             <div className={cx(minimize ? 'lg:hidden' : '')}>{children}</div>

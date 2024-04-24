@@ -1,7 +1,7 @@
 import { type JSX } from 'react';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import Cards from '@/app/(logged-in)/settings/integrations/cards';
 import { IntegrationStatus, IntegrationType } from '@/graphql/generated/schema-server';
+import Cards from '@/app/[locale]/(logged-in)/settings/integrations/cards';
 
 export async function CardsCall(): Promise<JSX.Element> {
   const { settingsChannels } = await urqlClientSdk().settingsChannels();

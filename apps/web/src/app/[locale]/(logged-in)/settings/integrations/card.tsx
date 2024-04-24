@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import * as changeCase from 'change-case';
 import { type SettingsChannelsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
 import { integrationTypeMap, type UnwrapArray } from '@/util/types';
-import { deAuthIntegration } from '@/app/(logged-in)/settings/integrations/actions';
+import { deAuthIntegration } from '@/app/[locale]/(logged-in)/settings/integrations/actions';
 
 const statusMap = new Map<IntegrationStatus, string>([
   [IntegrationStatus.ComingSoon, 'Coming soon'],

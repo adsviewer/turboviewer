@@ -17,7 +17,11 @@ import {
 } from '@/components/login/login-form';
 import { SignUpSchema } from '@/util/schemas/login-schemas';
 
-export function SignUp(): JSX.Element {
+interface SignInProps {
+  title: string;
+}
+
+export function SignUp({ title }: SignInProps): JSX.Element {
   const form = useForm<z.output<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -84,7 +88,7 @@ export function SignUp(): JSX.Element {
           </FormItem>
         )}
       />
-      <FormButton type="submit">Sign up</FormButton>
+      <FormButton type="submit">{title}</FormButton>
     </LoginForm>
   );
 }

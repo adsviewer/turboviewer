@@ -265,8 +265,8 @@ type GroupedInsight implements Pagination {
 
 type GroupedInsights {
   adId: String
-  date: Date!
-  device: DeviceEnum!
+  date: Date
+  device: DeviceEnum
   impressions: Int!
   position: String
   publisher: PublisherEnum
@@ -289,6 +289,8 @@ enum InsightsColumnsGroupBy {
   publisher
   device
   position
+  adId
+  date
 }
 
 enum InsightsColumnsOrderBy {
@@ -403,7 +405,7 @@ type Query {
   Get grouped insights for ads. Beware that this is not an Insight entity. You cannot ask for id or any connected entity
   """
   insights(
-    adAccountId: String
+    adAccountId: String!
     dateFrom: Date
     dateTo: Date
     devices: [DeviceEnum!]

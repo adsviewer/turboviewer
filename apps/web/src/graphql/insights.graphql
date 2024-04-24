@@ -1,0 +1,47 @@
+query adAccounts {
+  integrations {
+    adAccounts {
+      id
+      name
+      currency
+    }
+  }
+}
+
+query insights(
+  $adAccountId: String!
+  $dateFrom: Date
+  $dateTo: Date
+  $devices: [DeviceEnum!]
+  $publishers: [PublisherEnum!]
+  $positions: [String!]
+  $highestFirst: Boolean
+  $orderBy: InsightsColumnsOrderBy
+  $groupBy: [InsightsColumnsGroupBy!]
+  $take: Int
+  $skip: Int
+) {
+  insights(
+    adAccountId: $adAccountId
+    dateFrom: $dateFrom
+    dateTo: $dateTo
+    devices: $devices
+    publishers: $publishers
+    positions: $positions
+    highestFirst: $highestFirst
+    orderBy: $orderBy
+    groupBy: $groupBy
+    take: $take
+    skip: $skip
+  ) {
+    edges {
+      adId
+      date
+      device
+      publisher
+      position
+      impressions
+      spend
+    }
+  }
+}

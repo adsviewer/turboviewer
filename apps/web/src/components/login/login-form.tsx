@@ -57,7 +57,7 @@ function LoginForm<
           const body: { success: true } | { success: false; error: FormState } = await data.response.json();
           if (body.success) {
             const redirect = searchParams.get('redirect');
-            router.push(redirect ?? '/placements');
+            router.push(redirect ?? '/insights');
           } else {
             setState(body.error);
           }

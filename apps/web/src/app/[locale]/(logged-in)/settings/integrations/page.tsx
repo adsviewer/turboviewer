@@ -1,5 +1,5 @@
 import React, { type JSX, Suspense } from 'react';
-import { CardsCall, CardsNoCall } from '@/app/(logged-in)/settings/integrations/cards-call';
+import { CardsCall, CardsNoCall } from '@/app/[locale]/(logged-in)/settings/integrations/cards-call';
 
 export default function Page(): JSX.Element {
   return (
