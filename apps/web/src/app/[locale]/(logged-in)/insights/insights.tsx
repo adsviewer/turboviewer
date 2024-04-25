@@ -1,9 +1,12 @@
 import React, { type JSX } from 'react';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-server';
+import { InsightsColumnsGroupBy, type InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 import Insight from '@/app/[locale]/(logged-in)/insights/insight';
 
-export async function Insights(): Promise<JSX.Element> {
+interface InsightsProps {
+  orderBy: InsightsColumnsOrderBy;
+}
+export async function Insights({ orderBy }: InsightsProps): Promise<JSX.Element> {
   const accounts = (await urqlClientSdk().adAccounts()).integrations.flatMap((integration) => integration.adAccounts);
   const insights = await Promise.all(
     accounts.map(
@@ -18,6 +21,7 @@ export async function Insights(): Promise<JSX.Element> {
               InsightsColumnsGroupBy.position,
               InsightsColumnsGroupBy.adId,
             ],
+            orderBy,
           })
           .then((response) => {
             return response.insights.edges.map((insight) => ({

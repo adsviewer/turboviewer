@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { SignOutBtn } from '@/components/login/sign-out-btn';
 import { ActiveLink, type LinkType } from '@/components/home/active-link';
 import { LogoFull } from '@/app/[locale]/(logged-in)/logo-full';
-import { Filters } from '@/app/[locale]/(logged-in)/filters';
 
 const links: LinkType[] = [
   { url: '/insights', text: 'Insights', icon: <Layers /> },
@@ -63,7 +62,6 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
                 <ActiveLink key={link.url} minimized={minimize} {...link} />
               ))}
             </ul>
-            <Filters />
           </nav>
           <div>
             <div className={cx(minimize ? 'lg:hidden' : '')}>{children}</div>

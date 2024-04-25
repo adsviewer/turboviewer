@@ -3,6 +3,16 @@
     "title": "Insights",
     "tooltipPosition": "position"
   },
+  "Filters": {
+    "title": "Filters",
+    "groupedBy": "Grouped By",
+    "publisher": "Publisher",
+    "device": "Device",
+    "position": "Position",
+    "adId": "Ad Id",
+    "date": "Date",
+    "orderBy": "{value, select, spend {spend} impressions {impressions} other {unknown}}"
+  },
   "Login": {
     "SignIn": "Sign In",
     "SignUp": "Sign Up"

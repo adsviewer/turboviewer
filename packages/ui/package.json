@@ -12,6 +12,7 @@
     "./fallback": "./src/fallback.tsx",
     "./input": "./src/input.tsx",
     "./label": "./src/label.tsx",
+    "./select": "./src/select.tsx",
     "./tailwind-utils": "./src/tailwind-utils.ts",
     "./globals.css": {
       "import": "./src/globals.css",

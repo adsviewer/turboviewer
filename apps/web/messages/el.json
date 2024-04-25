@@ -3,6 +3,16 @@
     "title": "Διορατικότητες",
     "tooltipPosition": "θέση"
   },
+  "Filters": {
+    "title": "Φίλτρα",
+    "groupedBy": "Ομαδοποίηση",
+    "publisher": "Εκδότης",
+    "device": "Συσκευή",
+    "position": "Θέση",
+    "adId": "Αναγνωριστικό διαφήμισης",
+    "date": "Ημερομηνία",
+    "orderBy": "{value, select, spend {δαπάνες} impressions {εντυπώσεις} other {Άγνωστο}}"
+  },
   "Login": {
     "SignIn": "Σύνδεση",
     "SignUp": "Εγγραφή"

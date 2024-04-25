@@ -9,6 +9,9 @@ const config: Omit<Config, 'content'> = {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
           foreground: 'hsl(var(--primary-foreground) / <alpha-value>)',
         },
+        faint: {
+          DEFAULT: 'rgb(var(--faint) / <alpha-value>)',
+        },
         destructive: {
           DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
           foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
