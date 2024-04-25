@@ -1,6 +1,7 @@
 {
   "Insights": {
-    "title": "Διορατικότητες"
+    "title": "Διορατικότητες",
+    "tooltipPosition": "θέση"
   },
   "Login": {
     "SignIn": "Σύνδεση",

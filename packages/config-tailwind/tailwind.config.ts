@@ -18,6 +18,10 @@ const config: Omit<Config, 'content'> = {
           bg: 'rgb(var(--color-menu) / <alpha-value>)',
           primary: 'rgb(var(--color-menu-primary) / <alpha-value>)',
         },
+        tooltip: {
+          DEFAULT: 'rgb(var(--tooltip) / <alpha-value>)',
+          bg: 'rgb(var(--tooltip-background) / <alpha-value>)',
+        },
       },
       backgroundImage: {
         'glow-conic': 'conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)',

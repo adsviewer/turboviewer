@@ -1,6 +1,7 @@
 {
   "Insights": {
-    "title": "Insights"
+    "title": "Insights",
+    "tooltipPosition": "position"
   },
   "Login": {
     "SignIn": "Sign In",

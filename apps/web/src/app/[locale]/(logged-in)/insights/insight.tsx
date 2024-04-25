@@ -1,5 +1,5 @@
 import { CalendarDays, Eye } from 'lucide-react';
-import { useFormatter } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import type { UnwrapArray } from '@/util/types';
 import type { AdAccountsQuery, InsightsQuery } from '@/graphql/generated/schema-server';
 import Spend from '@/app/[locale]/(logged-in)/insights/spend';
@@ -21,6 +21,7 @@ export default function Insight({
   account: UnwrapArray<UnwrapArray<AdAccountsQuery['integrations']>['adAccounts']>;
 }): React.ReactElement | null {
   const format = useFormatter();
+  const t = useTranslations('Insights');
   return (
     <div className="flex flex-col rounded-[12px] border border-gray-600">
       <div className="flex grow gap-2 border-b border-gray-400 p-6">iFrame Placeholder</div>
@@ -38,7 +39,7 @@ export default function Insight({
         <Publisher publisher={publisher} />
       </div>
       <AdId adId={adId} />
-      <Position position={position} />
+      <Position position={position} tooltipPosition={t('tooltipPosition')} />
     </div>
   );
 }

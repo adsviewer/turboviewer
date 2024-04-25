@@ -16,6 +16,10 @@
   /*menu*/
   --color-menu: 242 242 242;
   --color-menu-primary: 67 160 71;
+
+  /* tooltip */
+  --tooltip-background: 17 24 39;
+  --tooltip: 243 244 246;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,6 +37,10 @@
     /*menu*/
     --color-menu: 17 24 39;
     --color-menu-primary: 67 160 71;
+
+    /* tooltip */
+    --tooltip-background: 243 244 246;
+    --tooltip: 17 24 39;
   }
 }
 
