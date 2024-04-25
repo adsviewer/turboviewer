@@ -5,14 +5,12 @@ import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 export function OrderBy({ orderBy }: { orderBy: InsightsColumnsOrderBy }): React.ReactElement {
   const t = useTranslations('Filters');
   return (
-    <div className="flex justify-end">
-      <OrderBySelect orderBy={orderBy}>
-        {[InsightsColumnsOrderBy.spend, InsightsColumnsOrderBy.impressions].map((value) => (
-          <option key={value} value={value}>
-            {t('orderBy', { value })}
-          </option>
-        ))}
-      </OrderBySelect>
-    </div>
+    <OrderBySelect orderByLabel={t('orderByLabel')} orderBy={orderBy}>
+      {[InsightsColumnsOrderBy.spend, InsightsColumnsOrderBy.impressions].map((value) => (
+        <option key={value} value={value}>
+          {t('orderByDropDown', { value })}
+        </option>
+      ))}
+    </OrderBySelect>
   );
 }

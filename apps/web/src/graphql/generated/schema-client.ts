@@ -497,12 +497,12 @@ export type QueryInsightsArgs = {
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy>>;
-  highestFirst?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InsightsColumnsOrderBy;
+  page?: Scalars['Int']['input'];
+  pageSize?: Scalars['Int']['input'];
   positions?: InputMaybe<Array<Scalars['String']['input']>>;
   publishers?: InputMaybe<Array<PublisherEnum>>;
-  skip?: Scalars['Int']['input'];
-  take?: Scalars['Int']['input'];
 };
 
 export type QueryIntegrationsArgs = {
@@ -568,17 +568,18 @@ export type InsightsQueryVariables = Exact<{
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
   publishers?: InputMaybe<Array<PublisherEnum> | PublisherEnum>;
   positions?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-  highestFirst?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<InsightsColumnsOrderBy>;
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
+  pageSize?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 export type InsightsQuery = {
   __typename?: 'Query';
   insights: {
     __typename?: 'GroupedInsight';
+    totalCount: number;
     edges: Array<{
       __typename?: 'GroupedInsights';
       adId?: string | null;
@@ -760,11 +761,11 @@ export const InsightsDocument = gql`
     $devices: [DeviceEnum!]
     $publishers: [PublisherEnum!]
     $positions: [String!]
-    $highestFirst: Boolean
+    $order: String
     $orderBy: InsightsColumnsOrderBy
     $groupBy: [InsightsColumnsGroupBy!]
-    $take: Int
-    $skip: Int
+    $pageSize: Int
+    $page: Int
   ) {
     insights(
       adAccountId: $adAccountId
@@ -773,12 +774,13 @@ export const InsightsDocument = gql`
       devices: $devices
       publishers: $publishers
       positions: $positions
-      highestFirst: $highestFirst
+      order: $order
       orderBy: $orderBy
       groupBy: $groupBy
-      take: $take
-      skip: $skip
+      pageSize: $pageSize
+      page: $page
     ) {
+      totalCount
       edges {
         adId
         date

@@ -5,13 +5,23 @@
   },
   "Filters": {
     "title": "Φίλτρα",
-    "groupedBy": "Ομαδοποίηση",
-    "publisher": "Εκδότης",
-    "device": "Συσκευή",
-    "position": "Θέση",
-    "adId": "Αναγνωριστικό διαφήμισης",
-    "date": "Ημερομηνία",
-    "orderBy": "{value, select, spend {δαπάνες} impressions {εντυπώσεις} other {Άγνωστο}}"
+    "GroupBy": {
+      "groupedBy": "Ομαδοποίηση",
+      "publisher": "Εκδότης",
+      "device": "Συσκευή",
+      "position": "Θέση",
+      "adId": "Αναγνωριστικό διαφήμισης",
+      "date": "Ημερομηνία"
+    },
+    "orderByDropDown": "{value, select, spend {δαπάνες} impressions {εντυπώσεις} other {άγνωστο}}",
+    "orderDropDown": "{value, select, asc {αύξουσα} desc {φθήνουσα} other {άγνωστο}}",
+    "orderByLabel": "Ταξινόμηση",
+    "pageSize": "Μέγεθος σελίδας",
+    "Pagination": {
+      "prev": "Προηγούμενη",
+      "next": "Επόμενη",
+      "info": "Σελίδα {page, number} από {totalPages, number} ({totalElements, plural, =1 {one απότέλεσμα} other {# απότελέσματα}} συνολικά)"
+    }
   },
   "Login": {
     "SignIn": "Σύνδεση",

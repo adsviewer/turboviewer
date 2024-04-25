@@ -410,12 +410,16 @@ type Query {
     dateTo: Date
     devices: [DeviceEnum!]
     groupBy: [InsightsColumnsGroupBy!]
-    highestFirst: Boolean = true
+    order: String = "desc"
     orderBy: InsightsColumnsOrderBy! = spend
+
+    """
+    Starting at 1
+    """
+    page: Int! = 1
+    pageSize: Int! = 12
     positions: [String!]
     publishers: [PublisherEnum!]
-    skip: Int! = 0
-    take: Int! = 18
   ): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   me: User!

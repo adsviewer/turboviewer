@@ -15,11 +15,11 @@ query insights(
   $devices: [DeviceEnum!]
   $publishers: [PublisherEnum!]
   $positions: [String!]
-  $highestFirst: Boolean
+  $order: String
   $orderBy: InsightsColumnsOrderBy
   $groupBy: [InsightsColumnsGroupBy!]
-  $take: Int
-  $skip: Int
+  $pageSize: Int
+  $page: Int
 ) {
   insights(
     adAccountId: $adAccountId
@@ -28,12 +28,13 @@ query insights(
     devices: $devices
     publishers: $publishers
     positions: $positions
-    highestFirst: $highestFirst
+    order: $order
     orderBy: $orderBy
     groupBy: $groupBy
-    take: $take
-    skip: $skip
+    pageSize: $pageSize
+    page: $page
   ) {
+    totalCount
     edges {
       adId
       date

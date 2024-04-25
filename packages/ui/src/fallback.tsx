@@ -1,9 +1,10 @@
 import Spinner from './spinner';
+import { cx } from './tailwind-utils';
 
-export function Fallback({ height }: { height: number }): React.ReactNode | null {
+export function Fallback({ height, className }: { height: number; className?: string }): React.ReactNode | null {
   return (
-    <div className="flex items-center justify-center" style={{ height: `${String(height)}px` }}>
-      <Spinner />
+    <div className={cx('flex items-center justify-center', className)} style={{ height: `${String(height)}px` }}>
+      <Spinner height={height} />
     </div>
   );
 }

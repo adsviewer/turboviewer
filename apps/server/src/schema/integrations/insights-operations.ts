@@ -22,11 +22,25 @@ builder.queryFields((t) => ({
       devices: t.arg({ type: [DeviceEnumDto], required: false }),
       publishers: t.arg({ type: [PublisherEnumDto], required: false }),
       positions: t.arg.stringList({ required: false }),
-      highestFirst: t.arg.boolean({ defaultValue: true }),
+      order: t.arg.string({
+        defaultValue: 'desc',
+        validate: {
+          regex: [/^(?:desc|asc)$/, { message: 'Order can be only asc(ascending) or desc(descending)' }],
+        },
+      }),
       orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
       groupBy: t.arg({ type: [InsightsColumnsGroupByDto], required: false }),
-      take: t.arg.int({ required: true, defaultValue: 18 }),
-      skip: t.arg.int({ required: true, defaultValue: 0 }),
+      pageSize: t.arg.int({
+        required: true,
+        defaultValue: 12,
+        validate: { max: [100, { message: 'Page size should not be more than 100' }] },
+      }),
+      page: t.arg.int({
+        required: true,
+        description: 'Starting at 1',
+        defaultValue: 1,
+        validate: { min: [1, { message: 'Minimum page is 1' }] },
+      }),
     },
     resolve: async (_root, args, ctx, _info) => {
       const where: InsightWhereInput = {
@@ -44,6 +58,17 @@ builder.queryFields((t) => ({
         position: { in: args.positions ?? undefined },
       };
 
+      // Only if totalCount is requested, we need to fetch all elements
+      const totalElementsP = _info.fieldNodes.some((f) =>
+        f.selectionSet?.selections.some((s) => s.kind === Kind.FIELD && s.name.value === 'totalCount'),
+      )
+        ? prisma.insight.findMany({
+            select: { id: true },
+            distinct: args.groupBy ?? undefined,
+            where,
+          })
+        : [];
+
       const groupedByEdges = async () =>
         await prisma.insight
           .groupBy({
@@ -54,9 +79,9 @@ builder.queryFields((t) => ({
               impressions: true,
             },
             where,
-            orderBy: { _sum: { [args.orderBy]: args.highestFirst ? 'desc' : 'asc' } },
-            take: args.take,
-            skip: args.skip,
+            orderBy: { _sum: { [args.orderBy]: args.order } },
+            take: args.pageSize,
+            skip: args.page ? (args.page - 1) * args.pageSize : undefined,
           })
           .then((grouped) =>
             grouped.map((group) => ({
@@ -80,17 +105,8 @@ builder.queryFields((t) => ({
 
       const edges = args.groupBy ? await groupedByEdges() : await findAllEdges();
 
-      const totalElements = _info.fieldNodes.some((f) =>
-        f.selectionSet?.selections.some((s) => s.kind === Kind.FIELD && s.name.value === 'totalCount'),
-      )
-        ? await prisma.insight.findMany({
-            select: { id: true },
-            distinct: args.groupBy ?? undefined,
-            where,
-          })
-        : [];
       return {
-        totalCount: totalElements.length,
+        totalCount: (await totalElementsP).length,
         edges,
       };
     },

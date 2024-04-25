@@ -1,18 +1,37 @@
-import React, { type JSX } from 'react';
+'use server';
+import React from 'react';
+import {
+  type AdAccountsQuery,
+  InsightsColumnsGroupBy,
+  InsightsColumnsOrderBy,
+  type InsightsQuery,
+} from '@/graphql/generated/schema-server';
+import type { UnwrapArray } from '@/util/types';
+import type { SearchParams } from '@/app/[locale]/(logged-in)/insights/query-string-util';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import { InsightsColumnsGroupBy, type InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
-import Insight from '@/app/[locale]/(logged-in)/insights/insight';
+import InsightsNoCall from '@/app/[locale]/(logged-in)/insights/insights-no-call';
 
 interface InsightsProps {
-  orderBy: InsightsColumnsOrderBy;
+  insights?: (UnwrapArray<InsightsQuery['insights']['edges']> & {
+    account: UnwrapArray<UnwrapArray<AdAccountsQuery['integrations']>['adAccounts']>;
+  })[];
+  searchParams?: SearchParams;
 }
-export async function Insights({ orderBy }: InsightsProps): Promise<JSX.Element> {
+export async function Insights({ searchParams }: InsightsProps): Promise<React.ReactElement> {
+  const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend;
+  const pageSize = parseInt(searchParams?.pageSize ?? '12', 10);
+  const page = parseInt(searchParams?.page ?? '1', 10);
+
   const accounts = (await urqlClientSdk().adAccounts()).integrations.flatMap((integration) => integration.adAccounts);
-  const insights = await Promise.all(
+  const order = searchParams?.order ?? 'desc';
+  const insightsByAccount = await Promise.all(
     accounts.map(
       async (account) =>
         await urqlClientSdk()
           .insights({
+            page,
+            pageSize,
+            order,
             adAccountId: account.id,
             groupBy: [
               InsightsColumnsGroupBy.device,
@@ -24,23 +43,28 @@ export async function Insights({ orderBy }: InsightsProps): Promise<JSX.Element>
             orderBy,
           })
           .then((response) => {
-            return response.insights.edges.map((insight) => ({
-              ...insight,
-              account,
-            }));
+            return {
+              totalCount: response.insights.totalCount,
+              insights: response.insights.edges.map((insight) => ({
+                ...insight,
+                account,
+              })),
+            };
           }),
     ),
-  ).then((response) => response.flat());
+  );
+
+  const insights = insightsByAccount.flatMap((ins) => ins.insights);
+  const totalCount = insightsByAccount.reduce((acc, ins) => acc + ins.totalCount, 0);
+
   return (
-    <div>
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {insights.map((insight) => (
-          <Insight
-            key={`${insight.adId ?? 'null'}${String(insight.date)}${String(insight.device)}${String(insight.publisher)}${String(insight.position)}`}
-            {...insight}
-          />
-        ))}
-      </div>
-    </div>
+    <InsightsNoCall
+      insights={insights}
+      page={page}
+      totalCount={totalCount}
+      pageSize={pageSize}
+      orderBy={orderBy}
+      searchParams={searchParams}
+    />
   );
 }
