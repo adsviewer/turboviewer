@@ -6,7 +6,7 @@ import Spend from '@/app/[locale]/(logged-in)/insights/spend';
 import Device from '@/app/[locale]/(logged-in)/insights/device';
 import Publisher from '@/app/[locale]/(logged-in)/insights/publisher';
 import Position from '@/app/[locale]/(logged-in)/insights/position';
-import AdId from '@/app/[locale]/(logged-in)/insights/ad-id';
+import AdName from '@/app/[locale]/(logged-in)/insights/ad-name';
 
 export default function Insight({
   spend,
@@ -16,7 +16,7 @@ export default function Insight({
   publisher,
   impressions,
   account,
-  adId,
+  adName,
 }: UnwrapArray<InsightsQuery['insights']['edges']> & {
   account: UnwrapArray<UnwrapArray<AdAccountsQuery['integrations']>['adAccounts']>;
 }): React.ReactElement | null {
@@ -38,7 +38,7 @@ export default function Insight({
         <Device device={device} />
         <Publisher publisher={publisher} />
       </div>
-      <AdId adId={adId} />
+      <AdName adName={adName} />
       <Position position={position} tooltipPosition={t('tooltipPosition')} />
     </div>
   );

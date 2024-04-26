@@ -146,6 +146,7 @@ model Ad {
   creativeId  String?
 
   externalId String    @map("external_id")
+  name       String    @default("No name") // TODO: remove this once all ads have a name
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id])
   insights   Insight[]
   creative   Creative? @relation(fields: [creativeId], references: [id])

@@ -36,7 +36,7 @@ query insights(
   ) {
     totalCount
     edges {
-      adId
+      adName
       date
       device
       publisher

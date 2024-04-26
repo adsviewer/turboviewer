@@ -304,6 +304,7 @@ export type GroupedInsight = Pagination & {
 export type GroupedInsights = {
   __typename?: 'GroupedInsights';
   adId?: Maybe<Scalars['String']['output']>;
+  adName?: Maybe<Scalars['String']['output']>;
   date?: Maybe<Scalars['Date']['output']>;
   device?: Maybe<DeviceEnum>;
   impressions: Scalars['Int']['output'];
@@ -582,7 +583,7 @@ export type InsightsQuery = {
     totalCount: number;
     edges: Array<{
       __typename?: 'GroupedInsights';
-      adId?: string | null;
+      adName?: string | null;
       date?: Date | null;
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
@@ -782,7 +783,7 @@ export const InsightsDocument = gql`
     ) {
       totalCount
       edges {
-        adId
+        adName
         date
         device
         publisher

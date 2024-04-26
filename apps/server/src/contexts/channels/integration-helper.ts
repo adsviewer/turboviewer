@@ -10,7 +10,7 @@ import { FireAndForget } from '../../fire-and-forget';
 import { encryptAesGcm } from '../../utils/aes-util';
 import { pubSub } from '../../schema/pubsub';
 import { groupBy } from '../../utils/data-object-utils';
-import { type ChannelInsight, type TokensResponse } from './channel-interface';
+import { type ChannelAd, type ChannelAdAccount, type ChannelInsight, type TokensResponse } from './channel-interface';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { decryptTokens } from './integration-util';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
@@ -165,6 +165,48 @@ const saveTokens = async (
   });
 };
 
+async function saveAds(
+  integration: Integration,
+  data: {
+    accounts: ChannelAdAccount[];
+    insights: ChannelInsight[];
+    ads: ChannelAd[];
+  },
+  accountExternalIdMap: Map<string, string>,
+) {
+  logger.info('Saving ads for %s', integration.id);
+  const adExternalIdMap = new Map<string, string>();
+  for (const channelAd of data.ads) {
+    const { id } = await prisma.ad.upsert({
+      select: { id: true },
+      create: {
+        externalId: channelAd.externalId,
+        name: channelAd.name,
+        adAccount: {
+          connect: {
+            integrationId_externalId: {
+              integrationId: integration.id,
+              externalId: channelAd.externalAdAccountId,
+            },
+          },
+        },
+      },
+      update: {
+        name: channelAd.name,
+      },
+      where: {
+        adAccountId_externalId: {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
+          adAccountId: accountExternalIdMap.get(channelAd.externalAdAccountId)!,
+          externalId: channelAd.externalId,
+        },
+      },
+    });
+    adExternalIdMap.set(channelAd.externalId, id);
+  }
+  return adExternalIdMap;
+}
+
 export const saveChannelData = async (
   integration: Integration,
   userId: string | undefined,
@@ -206,14 +248,20 @@ export const saveChannelData = async (
   userId &&
     pubSub.publish('user:channel:initial-progress', userId, {
       channel: integration.type,
-      progress: 95,
+      progress: 92,
     });
 
   const accountExternalIdMap = new Map<string, string>(accounts.map((acc) => [acc.externalId, acc.id]));
+  const adExternalIdMap = await saveAds(integration, data, accountExternalIdMap);
+  userId &&
+    pubSub.publish('user:channel:initial-progress', userId, {
+      channel: integration.type,
+      progress: 95,
+    });
 
   const insightsByExternalAdId = groupBy(data.insights, (item) => item.externalAdId);
   logger.info('Saving insights for %s', integration.id);
-  await saveInsightsAndAds(insightsByExternalAdId, accountExternalIdMap, integration);
+  await saveInsights(insightsByExternalAdId, accountExternalIdMap, adExternalIdMap);
 
   userId &&
     pubSub.publish('user:channel:initial-progress', userId, {
@@ -223,43 +271,23 @@ export const saveChannelData = async (
   logger.info(`Finished ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
 };
 
-const saveInsightsAndAds = async (
+const saveInsights = async (
   insightsByExternalAdId: Map<string, ChannelInsight[]>,
   accountExternalIdMap: Map<string, string>,
-  integration: Integration,
+  adExternalIdMap: Map<string, string>,
 ) => {
   for (const groupedInsights of Array.from(insightsByExternalAdId.values())) {
     if (!accountExternalIdMap.has(groupedInsights[0].externalAccountId)) {
       logger.error('Account %s not found', groupedInsights[0].externalAccountId);
       continue;
     }
-    const { id } = await prisma.ad.upsert({
-      select: { id: true },
-      create: {
-        externalId: groupedInsights[0].externalAdId,
-        adAccount: {
-          connect: {
-            integrationId_externalId: {
-              integrationId: integration.id,
-              externalId: groupedInsights[0].externalAccountId,
-            },
-          },
-        },
-      },
-      update: {},
-      where: {
-        adAccountId_externalId: {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
-          adAccountId: accountExternalIdMap.get(groupedInsights[0].externalAccountId)!,
-          externalId: groupedInsights[0].externalAdId,
-        },
-      },
-    });
     for (const insight of groupedInsights) {
+      if (!adExternalIdMap.has(insight.externalAdId)) continue;
       await prisma.insight.upsert({
         where: {
           adId_date_device_publisher_position: {
-            adId: id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked above
+            adId: adExternalIdMap.get(insight.externalAdId)!,
             date: insight.date,
             device: insight.device,
             publisher: insight.publisher,
@@ -271,7 +299,8 @@ const saveInsightsAndAds = async (
           spend: insight.spend,
         },
         create: {
-          adId: id,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked above
+          adId: adExternalIdMap.get(insight.externalAdId)!,
           date: insight.date,
           impressions: insight.impressions,
           spend: insight.spend,

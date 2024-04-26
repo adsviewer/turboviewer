@@ -2,6 +2,7 @@ import { prisma, Prisma } from '@repo/database';
 import { Kind } from 'graphql/language';
 import { builder } from '../builder';
 import { getEndofDay } from '../../utils/date-utils';
+import { uniqueBy } from '../../utils/data-object-utils';
 import {
   DeviceEnumDto,
   InsightsColumnsGroupByDto,
@@ -42,7 +43,7 @@ builder.queryFields((t) => ({
       }),
       publishers: t.arg({ type: [PublisherEnumDto], required: false }),
     },
-    resolve: async (_root, args, ctx, _info) => {
+    resolve: async (_root, args, ctx, info) => {
       const where: InsightWhereInput = {
         ad: {
           adAccount: {
@@ -59,7 +60,7 @@ builder.queryFields((t) => ({
       };
 
       // Only if totalCount is requested, we need to fetch all elements
-      const totalElementsP = _info.fieldNodes.some((f) =>
+      const totalElementsP = info.fieldNodes.some((f) =>
         f.selectionSet?.selections.some((s) => s.kind === Kind.FIELD && s.name.value === 'totalCount'),
       )
         ? prisma.insight.findMany({
@@ -69,8 +70,8 @@ builder.queryFields((t) => ({
           })
         : [];
 
-      const groupedByEdges = async () =>
-        await prisma.insight
+      const groupedByEdges = async () => {
+        const groupedEdges = await prisma.insight
           .groupBy({
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we are checking before using it
             by: [...args.groupBy!],
@@ -90,6 +91,28 @@ builder.queryFields((t) => ({
               impressions: group._sum.impressions ?? 0,
             })),
           );
+        if (
+          args.groupBy?.includes('adId') &&
+          info.fieldNodes.some((f) =>
+            f.selectionSet?.selections.some(
+              (s) =>
+                s.kind === Kind.FIELD &&
+                s.name.value === 'edges' &&
+                s.selectionSet?.selections.some((sel) => sel.kind === Kind.FIELD && sel.name.value === 'adName'),
+            ),
+          )
+        ) {
+          const uniqueAdIds = uniqueBy(groupedEdges, (edge) => edge.adId);
+          const adNamesMap = await prisma.ad
+            .findMany({
+              select: { id: true, name: true },
+              where: { id: { in: Array.from(uniqueAdIds) } },
+            })
+            .then((ads) => new Map(ads.map((ad) => [ad.id, ad.name])));
+          return groupedEdges.map((edge) => ({ ...edge, adName: adNamesMap.get(edge.adId) }));
+        }
+        return groupedEdges;
+      };
 
       const findAllEdges = async () =>
         await prisma.insight
@@ -132,6 +155,7 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
 const GroupedInsightDto = builder.simpleObject('GroupedInsights', {
   fields: (t) => ({
     adId: t.string({ nullable: true }),
+    adName: t.string({ nullable: true }),
     date: t.field({ type: 'Date', nullable: true }),
     device: t.field({ type: DeviceEnumDto, nullable: true }),
     publisher: t.field({ type: PublisherEnumDto, nullable: true }),

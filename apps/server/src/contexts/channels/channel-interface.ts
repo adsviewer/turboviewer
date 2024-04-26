@@ -26,6 +26,12 @@ export interface ChannelAdAccount {
   externalId: string;
 }
 
+export interface ChannelAd {
+  externalAdAccountId: string;
+  externalId: string;
+  name: string;
+}
+
 export interface ChannelCreative {
   externalAdId: string;
   externalAdAccountId: string;
@@ -55,5 +61,5 @@ export interface ChannelInterface {
     integration: Integration,
     userId: string | undefined,
     initial: boolean,
-  ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[] } | AError>;
+  ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[]; ads: ChannelAd[] } | AError>;
 }

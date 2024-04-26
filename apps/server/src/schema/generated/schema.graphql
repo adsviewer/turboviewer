@@ -265,6 +265,7 @@ type GroupedInsight implements Pagination {
 
 type GroupedInsights {
   adId: String
+  adName: String
   date: Date
   device: DeviceEnum
   impressions: Int!
