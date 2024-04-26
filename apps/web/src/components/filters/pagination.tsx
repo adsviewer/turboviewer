@@ -49,7 +49,7 @@ interface PagesProps {
 }
 
 function Pages({ pageInfo, searchParams }: PagesProps): React.ReactElement {
-  const t = useTranslations('Filters.Pagination');
+  const t = useTranslations('filters.pagination');
   const totalPages = Math.ceil(pageInfo.totalElements / pageInfo.size);
 
   function getHref(page: number): UrlObject {

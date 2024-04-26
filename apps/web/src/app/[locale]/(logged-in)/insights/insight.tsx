@@ -21,7 +21,7 @@ export default function Insight({
   account: UnwrapArray<UnwrapArray<AdAccountsQuery['integrations']>['adAccounts']>;
 }): React.ReactElement | null {
   const format = useFormatter();
-  const t = useTranslations('Insights');
+  const t = useTranslations('insights');
   return (
     <div className="flex flex-col rounded-[12px] border border-gray-600">
       <div className="flex grow gap-2 border-b border-gray-400 p-6">iFrame Placeholder</div>

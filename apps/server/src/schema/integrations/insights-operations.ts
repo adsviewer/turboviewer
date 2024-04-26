@@ -20,8 +20,7 @@ builder.queryFields((t) => ({
       dateFrom: t.arg({ type: 'Date', required: false }),
       dateTo: t.arg({ type: 'Date', required: false }),
       devices: t.arg({ type: [DeviceEnumDto], required: false }),
-      publishers: t.arg({ type: [PublisherEnumDto], required: false }),
-      positions: t.arg.stringList({ required: false }),
+      groupBy: t.arg({ type: [InsightsColumnsGroupByDto], required: false }),
       order: t.arg.string({
         defaultValue: 'desc',
         validate: {
@@ -29,18 +28,19 @@ builder.queryFields((t) => ({
         },
       }),
       orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
-      groupBy: t.arg({ type: [InsightsColumnsGroupByDto], required: false }),
-      pageSize: t.arg.int({
-        required: true,
-        defaultValue: 12,
-        validate: { max: [100, { message: 'Page size should not be more than 100' }] },
-      }),
+      positions: t.arg.stringList({ required: false }),
       page: t.arg.int({
         required: true,
         description: 'Starting at 1',
         defaultValue: 1,
         validate: { min: [1, { message: 'Minimum page is 1' }] },
       }),
+      pageSize: t.arg.int({
+        required: true,
+        defaultValue: 12,
+        validate: { max: [100, { message: 'Page size should not be more than 100' }] },
+      }),
+      publishers: t.arg({ type: [PublisherEnumDto], required: false }),
     },
     resolve: async (_root, args, ctx, _info) => {
       const where: InsightWhereInput = {
@@ -103,7 +103,10 @@ builder.queryFields((t) => ({
             return [{ spend, impressions }];
           });
 
-      const edges = args.groupBy ? await groupedByEdges() : await findAllEdges();
+      const edges =
+        args.groupBy && Array.isArray(args.groupBy) && args.groupBy.length !== 0
+          ? await groupedByEdges()
+          : await findAllEdges();
 
       return {
         totalCount: (await totalElementsP).length,

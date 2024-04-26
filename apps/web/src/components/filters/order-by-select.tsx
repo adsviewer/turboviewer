@@ -30,7 +30,7 @@ export default function OrderBySelect({
   return (
     <div>
       <label htmlFor="orderBy">{orderByLabel}:</label>
-      <Select className="mr-1" defaultValue={orderBy} onChange={onChange} disabled={isTransitioning}>
+      <Select id="orderBy" className="mr-1" defaultValue={orderBy} onChange={onChange} disabled={isTransitioning}>
         {children}
       </Select>
     </div>

@@ -1,11 +1,11 @@
 {
-  "Insights": {
+  "insights": {
     "title": "Διορατικότητες",
     "tooltipPosition": "θέση"
   },
-  "Filters": {
+  "filters": {
     "title": "Φίλτρα",
-    "GroupBy": {
+    "groupBy": {
       "groupedBy": "Ομαδοποίηση",
       "publisher": "Εκδότης",
       "device": "Συσκευή",
@@ -17,14 +17,14 @@
     "orderDropDown": "{value, select, asc {αύξουσα} desc {φθήνουσα} other {άγνωστο}}",
     "orderByLabel": "Ταξινόμηση",
     "pageSize": "Μέγεθος σελίδας",
-    "Pagination": {
+    "pagination": {
       "prev": "Προηγούμενη",
       "next": "Επόμενη",
       "info": "Σελίδα {page, number} από {totalPages, number} ({totalElements, plural, =1 {one απότέλεσμα} other {# απότελέσματα}} συνολικά)"
     }
   },
-  "Login": {
-    "SignIn": "Σύνδεση",
-    "SignUp": "Εγγραφή"
+  "login": {
+    "signIn": "Σύνδεση",
+    "signUp": "Εγγραφή"
   }
 }

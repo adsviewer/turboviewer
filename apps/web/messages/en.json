@@ -1,11 +1,11 @@
 {
-  "Insights": {
+  "insights": {
     "title": "Insights",
     "tooltipPosition": "position"
   },
-  "Filters": {
+  "filters": {
     "title": "Filters",
-    "GroupBy": {
+    "groupBy": {
       "groupedBy": "Grouped By",
       "publisher": "Publisher",
       "device": "Device",
@@ -17,14 +17,14 @@
     "orderDropDown": "{value, select, asc {ascending} desc {descending} other {unknown}}",
     "orderByLabel": "Order By",
     "pageSize": "Page Size",
-    "Pagination": {
+    "pagination": {
       "prev": "Previous",
       "next": "Next",
       "info": "Page {page, number} of {totalPages, number} ({totalElements, plural, =1 {one result} other {# results}} in total)"
     }
   },
-  "Login": {
-    "SignIn": "Sign In",
-    "SignUp": "Sign Up"
+  "login": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up"
   }
 }

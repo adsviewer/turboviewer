@@ -29,7 +29,7 @@ export default function PageSizeSelect({
   return (
     <div>
       <label htmlFor="pageSize">{pageSizeLabel}:</label>
-      <Select defaultValue={pageSize} onChange={onChange} disabled={isTransitioning}>
+      <Select id="pageSize" defaultValue={pageSize} onChange={onChange} disabled={isTransitioning}>
         {children}
       </Select>
     </div>
