@@ -19,12 +19,16 @@ export async function Insights({ searchParams }: InsightsProps): Promise<React.R
   const order = searchParams?.order ?? 'desc';
 
   const resp = await urqlClientSdk().insights({
-    adAccountId: searchParams?.account,
-    page,
-    pageSize,
+    adAccountIds: searchParams?.account,
+    adIds: searchParams?.ad,
+    devices: searchParams?.device,
+    groupBy: searchParams?.groupedBy,
     order,
     orderBy,
-    groupBy: searchParams?.groupedBy,
+    page,
+    pageSize,
+    positions: searchParams?.position,
+    publishers: searchParams?.publisher,
   });
   const insights = resp.insights.edges;
   const totalCount = resp.insights.totalCount;

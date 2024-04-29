@@ -5,15 +5,10 @@
   },
   "filters": {
     "account": "Account",
-    "title": "Filters",
-    "groupBy": {
-      "groupedBy": "Grouped By",
-      "publisher": "Publisher",
-      "device": "Device",
-      "position": "Position",
-      "adId": "Ad Id",
-      "date": "Date"
-    },
+    "adId": "Ad Id",
+    "date": "Date",
+    "device": "Device",
+    "groupedBy": "Grouped By",
     "orderByDropDown": "{value, select, spend {spend} impressions {impressions} other {unknown}}",
     "orderDropDown": "{value, select, asc {ascending} desc {descending} other {unknown}}",
     "orderByLabel": "Order By",
@@ -22,7 +17,11 @@
       "prev": "Previous",
       "next": "Next",
       "info": "Page {page, number} of {totalPages, number} ({totalElements, plural, =1 {one result} other {# results}} in total)"
-    }
+    },
+    "position": "Position",
+    "publisher": "Publisher",
+    "select": "Select",
+    "title": "Filters"
   },
   "login": {
     "signIn": "Sign In",

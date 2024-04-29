@@ -31,8 +31,8 @@ export default function GroupedCheckbox<T extends string>({
 
   return (
     <div>
-      <label htmlFor={id}>{label}:</label>
       <Checkbox id={id} className="m-1" defaultChecked={checked} onChange={onChange} disabled={isTransitioning} />
+      <label htmlFor={id}>{label}</label>
     </div>
   );
 }

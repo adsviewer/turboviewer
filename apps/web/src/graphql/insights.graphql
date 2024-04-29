@@ -9,20 +9,22 @@ query adAccounts {
 }
 
 query insights(
-  $adAccountId: String
+  $adAccountIds: [String!]
+  $adIds: [String!]
   $dateFrom: Date
   $dateTo: Date
   $devices: [DeviceEnum!]
   $publishers: [PublisherEnum!]
   $positions: [String!]
   $order: String
-  $orderBy: InsightsColumnsOrderBy
+  $orderBy: InsightsColumnsOrderBy!
   $groupBy: [InsightsColumnsGroupBy!]
-  $pageSize: Int
-  $page: Int
+  $pageSize: Int!
+  $page: Int!
 ) {
   insights(
-    adAccountId: $adAccountId
+    adAccountIds: $adAccountIds
+    adIds: $adIds
     dateFrom: $dateFrom
     dateTo: $dateTo
     devices: $devices

@@ -495,8 +495,8 @@ export type QueryGenerateGoogleAuthUrlArgs = {
 };
 
 export type QueryInsightsArgs = {
-  adAccountId?: InputMaybe<Scalars['String']['input']>;
-  adId?: InputMaybe<Scalars['String']['input']>;
+  adAccountIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
@@ -566,17 +566,18 @@ export type AdAccountsQuery = {
 };
 
 export type InsightsQueryVariables = Exact<{
-  adAccountId?: InputMaybe<Scalars['String']['input']>;
+  adAccountIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  adIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
   publishers?: InputMaybe<Array<PublisherEnum> | PublisherEnum>;
   positions?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   order?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InputMaybe<InsightsColumnsOrderBy>;
+  orderBy: InsightsColumnsOrderBy;
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
-  pageSize?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
+  pageSize: Scalars['Int']['input'];
+  page: Scalars['Int']['input'];
 }>;
 
 export type InsightsQuery = {
@@ -759,20 +760,22 @@ export const AdAccountsDocument = gql`
 `;
 export const InsightsDocument = gql`
   query insights(
-    $adAccountId: String
+    $adAccountIds: [String!]
+    $adIds: [String!]
     $dateFrom: Date
     $dateTo: Date
     $devices: [DeviceEnum!]
     $publishers: [PublisherEnum!]
     $positions: [String!]
     $order: String
-    $orderBy: InsightsColumnsOrderBy
+    $orderBy: InsightsColumnsOrderBy!
     $groupBy: [InsightsColumnsGroupBy!]
-    $pageSize: Int
-    $page: Int
+    $pageSize: Int!
+    $page: Int!
   ) {
     insights(
-      adAccountId: $adAccountId
+      adAccountIds: $adAccountIds
+      adIds: $adIds
       dateFrom: $dateFrom
       dateTo: $dateTo
       devices: $devices
@@ -898,7 +901,7 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<AdAccountsQuery>;
     },
-    insights(variables?: InsightsQueryVariables, options?: C): Promise<InsightsQuery> {
+    insights(variables: InsightsQueryVariables, options?: C): Promise<InsightsQuery> {
       return requester<InsightsQuery, InsightsQueryVariables>(
         InsightsDocument,
         variables,

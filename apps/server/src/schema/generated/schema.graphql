@@ -406,8 +406,8 @@ enum PublisherEnum {
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
   insights(
-    adAccountId: String
-    adId: String
+    adAccountIds: [String!]
+    adIds: [String!]
     dateFrom: Date
     dateTo: Date
     devices: [DeviceEnum!]

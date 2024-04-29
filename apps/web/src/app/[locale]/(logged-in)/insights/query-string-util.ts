@@ -1,6 +1,11 @@
 import { useCallback } from 'react';
 import { type ReadonlyURLSearchParams } from 'next/navigation';
-import { InsightsColumnsGroupBy, type InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import {
+  type DeviceEnum,
+  InsightsColumnsGroupBy,
+  type InsightsColumnsOrderBy,
+  type PublisherEnum,
+} from '@/graphql/generated/schema-server';
 
 export type OrderType = 'asc' | 'desc';
 
@@ -11,6 +16,10 @@ export interface SearchParams {
   pageSize?: string;
   groupedBy?: InsightsColumnsGroupBy[];
   account?: string;
+  ad?: string;
+  device?: DeviceEnum;
+  publisher?: PublisherEnum;
+  position?: string;
 }
 
 export type SearchParamsKeys = keyof SearchParams;

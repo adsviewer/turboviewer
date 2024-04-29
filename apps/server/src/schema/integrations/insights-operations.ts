@@ -17,8 +17,8 @@ builder.queryFields((t) => ({
   insights: t.withAuth({ authenticated: true }).field({
     type: GroupedInsightsDto,
     args: {
-      adAccountId: t.arg.string({ required: false }),
-      adId: t.arg.string({ required: false }),
+      adAccountIds: t.arg.stringList({ required: false }),
+      adIds: t.arg.stringList({ required: false }),
       dateFrom: t.arg({ type: 'Date', required: false }),
       dateTo: t.arg({ type: 'Date', required: false }),
       devices: t.arg({ type: [DeviceEnumDto], required: false }),
@@ -30,7 +30,6 @@ builder.queryFields((t) => ({
         },
       }),
       orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
-      positions: t.arg.stringList({ required: false }),
       page: t.arg.int({
         required: true,
         description: 'Starting at 1',
@@ -42,12 +41,13 @@ builder.queryFields((t) => ({
         defaultValue: 12,
         validate: { max: [100, { message: 'Page size should not be more than 100' }] },
       }),
+      positions: t.arg.stringList({ required: false }),
       publishers: t.arg({ type: [PublisherEnumDto], required: false }),
     },
     resolve: async (_root, args, ctx, info) => {
       const where: InsightWhereInput = {
-        adAccountId: args.adId ?? undefined,
-        adId: args.adId ?? undefined,
+        adAccountId: { in: args.adAccountIds ?? undefined },
+        adId: { in: args.adIds ?? undefined },
         date: { gte: args.dateFrom ?? undefined, lte: getEndofDay(args.dateTo) },
         device: { in: args.devices ?? undefined },
         publisher: { in: args.publishers ?? undefined },
