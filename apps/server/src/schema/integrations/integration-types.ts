@@ -90,7 +90,7 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
     externalId: t.exposeString('externalId'),
 
     currency: t.expose('currency', { type: CurrencyEnumDto }),
-    name: t.exposeString('name', { nullable: true }),
+    name: t.exposeString('name'),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
 
@@ -105,13 +105,17 @@ export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderB
   values: insightsColumnsOrderBy,
 });
 
-type InsightsColumnsGroupByType = keyof Pick<Insight, 'publisher' | 'device' | 'position' | 'adId' | 'date'>;
+type InsightsColumnsGroupByType = keyof Pick<
+  Insight,
+  'adAccountId' | 'adId' | 'date' | 'device' | 'position' | 'publisher'
+>;
 const insightsColumnsGroupBy: InsightsColumnsGroupByType[] = [
-  'publisher',
-  'device',
-  'position',
+  'adAccountId',
   'adId',
   'date',
+  'device',
+  'position',
+  'publisher',
 ] as const;
 export const InsightsColumnsGroupByDto = builder.enumType('InsightsColumnsGroupBy', {
   values: insightsColumnsGroupBy,

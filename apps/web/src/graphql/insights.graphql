@@ -9,7 +9,7 @@ query adAccounts {
 }
 
 query insights(
-  $adAccountId: String!
+  $adAccountId: String
   $dateFrom: Date
   $dateTo: Date
   $devices: [DeviceEnum!]
@@ -36,7 +36,11 @@ query insights(
   ) {
     totalCount
     edges {
+      adAccountId
+      adAccountName
+      adId
       adName
+      currency
       date
       device
       publisher

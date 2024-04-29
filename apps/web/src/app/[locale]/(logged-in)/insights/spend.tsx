@@ -7,7 +7,7 @@ export default function Spend({ spend, currency }: { spend: number; currency: Cu
   return (
     <div className="flex flex-row">
       <HandCoins />
-      {format.number(spend, { style: 'currency', currency })}
+      {format.number(spend / 100, { style: 'currency', currency })}
     </div>
   );
 }

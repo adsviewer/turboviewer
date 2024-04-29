@@ -5,6 +5,7 @@
   },
   "filters": {
     "title": "Φίλτρα",
+    "account": "Λογαριασμός",
     "groupBy": {
       "groupedBy": "Ομαδοποίηση",
       "publisher": "Εκδότης",

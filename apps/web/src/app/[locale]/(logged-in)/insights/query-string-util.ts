@@ -10,9 +10,10 @@ export interface SearchParams {
   page?: string;
   pageSize?: string;
   groupedBy?: InsightsColumnsGroupBy[];
+  account?: string;
 }
 
-type SearchParamsKeys = keyof SearchParams;
+export type SearchParamsKeys = keyof SearchParams;
 
 export const useCreateQueryString = (
   searchParams: ReadonlyURLSearchParams,
@@ -36,17 +37,17 @@ export const useCreateQueryString = (
     [keysToDelete, searchParams],
   );
 
-export const useCreateGroupedByString = (
+export const useCreateGroupedByString = <T extends string>(
   searchParams: ReadonlyURLSearchParams,
-): ((name: InsightsColumnsGroupBy, group: boolean) => string) =>
+  key: SearchParamsKeys,
+): ((name: T, group: boolean) => string) =>
   useCallback(
-    (name: InsightsColumnsGroupBy, group: boolean) => {
+    (name: T, group: boolean) => {
       const params = new URLSearchParams(searchParams.toString());
-      const groupedByKey: SearchParamsKeys = 'groupedBy';
       if (group) {
-        params.append(groupedByKey, name);
+        params.append(key, name);
       } else {
-        params.delete(groupedByKey, name);
+        params.delete(key, name);
       }
 
       // We should always remove the page parameter when any of the search params change
@@ -55,7 +56,7 @@ export const useCreateGroupedByString = (
 
       return params.toString();
     },
-    [searchParams],
+    [key, searchParams],
   );
 
 export const isInsightsColumnsGroupBy = (value: string): value is InsightsColumnsGroupBy =>

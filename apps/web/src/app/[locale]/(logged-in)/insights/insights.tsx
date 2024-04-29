@@ -16,34 +16,18 @@ export async function Insights({ searchParams }: InsightsProps): Promise<React.R
   const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend;
   const pageSize = parseInt(searchParams?.pageSize ?? '12', 10);
   const page = parseInt(searchParams?.page ?? '1', 10);
-  const accounts = (await urqlClientSdk().adAccounts()).integrations.flatMap((integration) => integration.adAccounts);
   const order = searchParams?.order ?? 'desc';
-  const insightsByAccount = await Promise.all(
-    accounts.map(
-      async (account) =>
-        await urqlClientSdk()
-          .insights({
-            adAccountId: account.id,
-            page,
-            pageSize,
-            order,
-            orderBy,
-            groupBy: searchParams?.groupedBy,
-          })
-          .then((response) => {
-            return {
-              totalCount: response.insights.totalCount,
-              insights: response.insights.edges.map((insight) => ({
-                ...insight,
-                account,
-              })),
-            };
-          }),
-    ),
-  );
 
-  const insights = insightsByAccount.flatMap((ins) => ins.insights);
-  const totalCount = insightsByAccount.reduce((acc, ins) => acc + ins.totalCount, 0);
+  const resp = await urqlClientSdk().insights({
+    adAccountId: searchParams?.account,
+    page,
+    pageSize,
+    order,
+    orderBy,
+    groupBy: searchParams?.groupedBy,
+  });
+  const insights = resp.insights.edges;
+  const totalCount = resp.insights.totalCount;
 
   return (
     <InsightsNoCall

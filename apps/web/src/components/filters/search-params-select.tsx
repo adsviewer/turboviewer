@@ -3,16 +3,18 @@
 import { type ChangeEvent, useTransition } from 'react';
 import Select from '@repo/ui/select';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCreateQueryString } from '@/app/[locale]/(logged-in)/insights/query-string-util';
+import { type SearchParamsKeys, useCreateQueryString } from '@/app/[locale]/(logged-in)/insights/query-string-util';
 
-export default function PageSizeSelect({
-  pageSize,
+export default function SearchParamsSelect<T extends string | number | readonly string[] | undefined>({
+  defaultValue,
   children,
-  pageSizeLabel,
+  label,
+  searchParamKey,
 }: {
-  pageSize: number;
-  pageSizeLabel: string;
+  defaultValue: T;
+  label?: string;
   children: React.ReactNode;
+  searchParamKey: SearchParamsKeys;
 }): React.ReactElement {
   const [isTransitioning, startTransition] = useTransition();
   const router = useRouter();
@@ -22,14 +24,14 @@ export default function PageSizeSelect({
 
   function onChange(event: ChangeEvent<HTMLSelectElement>): void {
     startTransition(() => {
-      router.replace(`${pathname}/?${createQueryString('pageSize', event.target.value)}`);
+      router.replace(`${pathname}/?${createQueryString(searchParamKey, event.target.value)}`);
     });
   }
 
   return (
     <div>
-      <label htmlFor="pageSize">{pageSizeLabel}:</label>
-      <Select id="pageSize" defaultValue={pageSize} onChange={onChange} disabled={isTransitioning}>
+      {label ? <label htmlFor={searchParamKey}>{label}:</label> : null}
+      <Select id={searchParamKey} defaultValue={defaultValue} onChange={onChange} disabled={isTransitioning}>
         {children}
       </Select>
     </div>

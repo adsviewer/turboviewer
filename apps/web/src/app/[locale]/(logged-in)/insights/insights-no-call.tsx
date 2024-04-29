@@ -1,12 +1,7 @@
 import React from 'react';
 import Pagination from '@/components/filters/pagination';
 import Insight from '@/app/[locale]/(logged-in)/insights/insight';
-import type { UnwrapArray } from '@/util/types';
-import {
-  type AdAccountsQuery,
-  type InsightsColumnsOrderBy,
-  type InsightsQuery,
-} from '@/graphql/generated/schema-server';
+import { type InsightsColumnsOrderBy, type InsightsQuery } from '@/graphql/generated/schema-server';
 import type { SearchParams } from '@/app/[locale]/(logged-in)/insights/query-string-util';
 
 interface InsightsNoCallProps {
@@ -15,9 +10,7 @@ interface InsightsNoCallProps {
   pageSize: number;
   orderBy: InsightsColumnsOrderBy;
   searchParams?: SearchParams;
-  insights: (UnwrapArray<InsightsQuery['insights']['edges']> & {
-    account: UnwrapArray<UnwrapArray<AdAccountsQuery['integrations']>['adAccounts']>;
-  })[];
+  insights: InsightsQuery['insights']['edges'];
 }
 
 export default function InsightsNoCall({

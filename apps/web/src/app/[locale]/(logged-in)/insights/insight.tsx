@@ -1,7 +1,7 @@
 import { CalendarDays, Eye } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import type { UnwrapArray } from '@/util/types';
-import type { AdAccountsQuery, InsightsQuery } from '@/graphql/generated/schema-server';
+import { CurrencyEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
 import Spend from '@/app/[locale]/(logged-in)/insights/spend';
 import Device from '@/app/[locale]/(logged-in)/insights/device';
 import Publisher from '@/app/[locale]/(logged-in)/insights/publisher';
@@ -15,18 +15,16 @@ export default function Insight({
   position,
   publisher,
   impressions,
-  account,
   adName,
-}: UnwrapArray<InsightsQuery['insights']['edges']> & {
-  account: UnwrapArray<UnwrapArray<AdAccountsQuery['integrations']>['adAccounts']>;
-}): React.ReactElement | null {
+  currency,
+}: UnwrapArray<InsightsQuery['insights']['edges']>): React.ReactElement | null {
   const format = useFormatter();
   const t = useTranslations('insights');
   return (
     <div className="flex flex-col rounded-[12px] border border-gray-600">
       <div className="flex grow gap-2 border-b border-gray-400 p-6">iFrame Placeholder</div>
       <div className="flex flex-row">
-        <Spend spend={spend} currency={account.currency} />
+        <Spend spend={spend} currency={currency ?? CurrencyEnum.USD} />
         <Eye />
         <div>{impressions}</div>
         {date ? (

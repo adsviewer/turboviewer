@@ -4,6 +4,7 @@
     "tooltipPosition": "position"
   },
   "filters": {
+    "account": "Account",
     "title": "Filters",
     "groupBy": {
       "groupedBy": "Grouped By",

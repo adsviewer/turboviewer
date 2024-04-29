@@ -26,7 +26,7 @@ type AdAccount {
   id: ID!
   integration: Integration!
   integrationId: String!
-  name: String
+  name: String!
   updatedAt: Date!
 }
 
@@ -264,8 +264,11 @@ type GroupedInsight implements Pagination {
 }
 
 type GroupedInsights {
+  adAccountId: String
+  adAccountName: String
   adId: String
   adName: String
+  currency: CurrencyEnum
   date: Date
   device: DeviceEnum
   impressions: Int!
@@ -287,11 +290,12 @@ type Insight {
 }
 
 enum InsightsColumnsGroupBy {
-  publisher
-  device
-  position
+  adAccountId
   adId
   date
+  device
+  position
+  publisher
 }
 
 enum InsightsColumnsOrderBy {
@@ -401,12 +405,9 @@ enum PublisherEnum {
 
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
-
-  """
-  Get grouped insights for ads. Beware that this is not an Insight entity. You cannot ask for id or any connected entity
-  """
   insights(
-    adAccountId: String!
+    adAccountId: String
+    adId: String
     dateFrom: Date
     dateTo: Date
     devices: [DeviceEnum!]

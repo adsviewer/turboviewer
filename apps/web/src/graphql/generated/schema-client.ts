@@ -53,7 +53,7 @@ export type AdAccount = {
   id: Scalars['ID']['output'];
   integration: Integration;
   integrationId: Scalars['String']['output'];
-  name?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
   updatedAt: Scalars['Date']['output'];
 };
 
@@ -303,8 +303,11 @@ export type GroupedInsight = Pagination & {
 
 export type GroupedInsights = {
   __typename?: 'GroupedInsights';
+  adAccountId?: Maybe<Scalars['String']['output']>;
+  adAccountName?: Maybe<Scalars['String']['output']>;
   adId?: Maybe<Scalars['String']['output']>;
   adName?: Maybe<Scalars['String']['output']>;
+  currency?: Maybe<CurrencyEnum>;
   date?: Maybe<Scalars['Date']['output']>;
   device?: Maybe<DeviceEnum>;
   impressions: Scalars['Int']['output'];
@@ -327,11 +330,12 @@ export type Insight = {
 };
 
 export enum InsightsColumnsGroupBy {
-  publisher = 'publisher',
-  device = 'device',
-  position = 'position',
+  adAccountId = 'adAccountId',
   adId = 'adId',
   date = 'date',
+  device = 'device',
+  position = 'position',
+  publisher = 'publisher',
 }
 
 export enum InsightsColumnsOrderBy {
@@ -481,7 +485,6 @@ export enum PublisherEnum {
 export type Query = {
   __typename?: 'Query';
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
-  /** Get grouped insights for ads. Beware that this is not an Insight entity. You cannot ask for id or any connected entity */
   insights: GroupedInsight;
   integrations: Array<Integration>;
   me: User;
@@ -493,7 +496,8 @@ export type QueryGenerateGoogleAuthUrlArgs = {
 };
 
 export type QueryInsightsArgs = {
-  adAccountId: Scalars['String']['input'];
+  adAccountId?: InputMaybe<Scalars['String']['input']>;
+  adId?: InputMaybe<Scalars['String']['input']>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
@@ -558,12 +562,12 @@ export type AdAccountsQuery = {
   __typename?: 'Query';
   integrations: Array<{
     __typename?: 'Integration';
-    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name?: string | null; currency: CurrencyEnum }>;
+    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum }>;
   }>;
 };
 
 export type InsightsQueryVariables = Exact<{
-  adAccountId: Scalars['String']['input'];
+  adAccountId?: InputMaybe<Scalars['String']['input']>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
@@ -583,7 +587,11 @@ export type InsightsQuery = {
     totalCount: number;
     edges: Array<{
       __typename?: 'GroupedInsights';
+      adAccountId?: string | null;
+      adAccountName?: string | null;
+      adId?: string | null;
       adName?: string | null;
+      currency?: CurrencyEnum | null;
       date?: Date | null;
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
@@ -756,7 +764,7 @@ export function useAdAccountsQuery(options?: Omit<Urql.UseQueryArgs<AdAccountsQu
 }
 export const InsightsDocument = gql`
   query insights(
-    $adAccountId: String!
+    $adAccountId: String
     $dateFrom: Date
     $dateTo: Date
     $devices: [DeviceEnum!]
@@ -783,7 +791,11 @@ export const InsightsDocument = gql`
     ) {
       totalCount
       edges {
+        adAccountId
+        adAccountName
+        adId
         adName
+        currency
         date
         device
         publisher
@@ -795,7 +807,7 @@ export const InsightsDocument = gql`
   }
 `;
 
-export function useInsightsQuery(options: Omit<Urql.UseQueryArgs<InsightsQueryVariables>, 'query'>) {
+export function useInsightsQuery(options?: Omit<Urql.UseQueryArgs<InsightsQueryVariables>, 'query'>) {
   return Urql.useQuery<InsightsQuery, InsightsQueryVariables>({ query: InsightsDocument, ...options });
 }
 export const SettingsChannelsDocument = gql`
