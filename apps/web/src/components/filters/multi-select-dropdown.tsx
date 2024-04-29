@@ -22,7 +22,7 @@ export default function MultiSelectDropdown({
         {changeCase.noCase(prompt ?? '')}
       </div>
 
-      <div className="absolute bg-menu-bg border transition-opacity opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto w-full max-h-60 overflow-y-scroll">
+      <div className="z-10 absolute bg-gray-200 dark:bg-gray-700 border transition-opacity opacity-0 pointer-events-none peer-checked:opacity-100 peer-checked:pointer-events-auto w-max max-h-60 overflow-y-scroll">
         <ul>
           {options.map((option, _i) => {
             return (

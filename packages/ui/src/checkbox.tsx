@@ -5,7 +5,7 @@ type Props = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputE
 
 export default function Checkbox({ children, ...rest }: Props): React.ReactElement {
   return (
-    <input type="checkbox" {...rest} className={cx('', rest.className)}>
+    <input type="checkbox" {...rest} className={cx('cursor-pointer', rest.className)}>
       {children}
     </input>
   );

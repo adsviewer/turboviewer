@@ -31,8 +31,13 @@ export default function GroupedCheckbox<T extends string>({
 
   return (
     <div>
-      <Checkbox id={id} className="m-1" defaultChecked={checked} onChange={onChange} disabled={isTransitioning} />
-      <label htmlFor={id}>{label}</label>
+      <label
+        className="flex whitespace-nowrap cursor-pointer px-2 py-1 transition-colors hover:bg-blue-100 [&:has(input:checked)]:bg-blue-200"
+        htmlFor={id}
+      >
+        <Checkbox id={id} className="m-1" defaultChecked={checked} onChange={onChange} disabled={isTransitioning} />
+        {label}
+      </label>
     </div>
   );
 }
