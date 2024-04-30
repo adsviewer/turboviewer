@@ -4,6 +4,7 @@ import { builder } from '../builder';
 import { getEndofDay } from '../../utils/date-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
 import {
+  AdDto,
   CurrencyEnumDto,
   DeviceEnumDto,
   InsightsColumnsGroupByDto,
@@ -14,6 +15,23 @@ import InsightWhereInput = Prisma.InsightWhereInput;
 import InsightScalarFieldEnum = Prisma.InsightScalarFieldEnum;
 
 builder.queryFields((t) => ({
+  lastThreeMonthsAds: t.withAuth({ authenticated: true }).prismaField({
+    type: [AdDto],
+    resolve: async (query, _root, _args, ctx) => {
+      return await prisma.ad.findMany({
+        ...query,
+        distinct: 'id',
+        where: {
+          adAccount: { integration: { organizationId: ctx.organizationId } },
+          insights: {
+            some: {
+              date: { gte: new Date(new Date().setMonth(new Date().getMonth() - 3)) },
+            },
+          },
+        },
+      });
+    },
+  }),
   insights: t.withAuth({ authenticated: true }).field({
     type: GroupedInsightsDto,
     args: {

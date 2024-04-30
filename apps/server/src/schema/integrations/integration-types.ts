@@ -126,6 +126,7 @@ export const AdDto = builder.prismaObject('Ad', {
     id: t.exposeID('id'),
     adAccountId: t.exposeString('adAccountId'),
     externalId: t.exposeString('externalId'),
+    name: t.exposeString('name'),
 
     adAccount: t.relation('adAccount'),
     insights: t.relatedConnection('insights', {

@@ -16,7 +16,7 @@ export interface SearchParams {
   pageSize?: string;
   groupedBy?: InsightsColumnsGroupBy[];
   account?: string;
-  ad?: string;
+  adId?: string;
   device?: DeviceEnum;
   publisher?: PublisherEnum;
   position?: string;

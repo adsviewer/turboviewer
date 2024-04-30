@@ -6,6 +6,7 @@ import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/gen
 import AccountId from '@/app/[locale]/(logged-in)/insights/account-id';
 import { GroupedByCheckbox } from '@/components/filters/grouped-checkbox';
 import MultiFilter from '@/components/filters/multi-filter';
+import AdId from '@/app/[locale]/(logged-in)/insights/ad-id';
 
 export default function Filters(): React.ReactElement {
   const t = useTranslations('filters');
@@ -22,8 +23,11 @@ export default function Filters(): React.ReactElement {
   ].map((pos) => ({ value: pos, label: changeCase.noCase(pos) }));
 
   return (
-    <div>
+    <div className="mb-6">
       <h3>{t('title')}</h3>
+      <Suspense fallback={<Fallback height={48} />}>
+        <AdId />
+      </Suspense>
       <Suspense fallback={<Fallback height={48} />}>
         <AccountId />
       </Suspense>

@@ -16,6 +16,7 @@ type Ad {
     positions: [String!]
     publishers: [PublisherEnum!]
   ): AdInsightsConnection!
+  name: String!
 }
 
 type AdAccount {
@@ -424,6 +425,7 @@ type Query {
     publishers: [PublisherEnum!]
   ): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
+  lastThreeMonthsAds: [Ad!]!
   me: User!
   settingsChannels: [IntegrationListItem!]!
 }

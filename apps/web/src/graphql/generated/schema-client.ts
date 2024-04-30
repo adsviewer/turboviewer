@@ -28,6 +28,7 @@ export type Ad = {
   externalId: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insights: AdInsightsConnection;
+  name: Scalars['String']['output'];
 };
 
 export type AdInsightsArgs = {
@@ -487,6 +488,7 @@ export type Query = {
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
   insights: GroupedInsight;
   integrations: Array<Integration>;
+  lastThreeMonthsAds: Array<Ad>;
   me: User;
   settingsChannels: Array<IntegrationListItem>;
 };
@@ -601,6 +603,13 @@ export type InsightsQuery = {
       spend: number;
     }>;
   };
+};
+
+export type LastThreeMonthsAdsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type LastThreeMonthsAdsQuery = {
+  __typename?: 'Query';
+  lastThreeMonthsAds: Array<{ __typename?: 'Ad'; id: string; name: string }>;
 };
 
 export type SettingsChannelsQueryVariables = Exact<{ [key: string]: never }>;
@@ -812,6 +821,23 @@ export const InsightsDocument = gql`
 
 export function useInsightsQuery(options: Omit<Urql.UseQueryArgs<InsightsQueryVariables>, 'query'>) {
   return Urql.useQuery<InsightsQuery, InsightsQueryVariables>({ query: InsightsDocument, ...options });
+}
+export const LastThreeMonthsAdsDocument = gql`
+  query lastThreeMonthsAds {
+    lastThreeMonthsAds {
+      id
+      name
+    }
+  }
+`;
+
+export function useLastThreeMonthsAdsQuery(
+  options?: Omit<Urql.UseQueryArgs<LastThreeMonthsAdsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<LastThreeMonthsAdsQuery, LastThreeMonthsAdsQueryVariables>({
+    query: LastThreeMonthsAdsDocument,
+    ...options,
+  });
 }
 export const SettingsChannelsDocument = gql`
   query settingsChannels {

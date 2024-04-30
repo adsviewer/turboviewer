@@ -52,3 +52,10 @@ query insights(
     }
   }
 }
+
+query lastThreeMonthsAds {
+  lastThreeMonthsAds {
+    id
+    name
+  }
+}
