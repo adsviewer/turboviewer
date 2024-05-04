@@ -1,6 +1,6 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
-import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
+import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
 import { AError, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -11,6 +11,7 @@ import {
   AdAccount,
   AdAccountAdVolume,
   AdCreative,
+  AdPreview,
   AdReportRun,
   AdsInsights,
   User,
@@ -18,18 +19,19 @@ import {
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import { env, MODE } from '../../../config';
 import {
-  type ChannelInterface,
-  type ChannelCreative,
-  type ChannelAdAccount,
-  type ChannelInsight,
-  type TokensResponse,
   type ChannelAd,
+  type ChannelAdAccount,
+  type ChannelCreative,
+  type ChannelInsight,
+  type ChannelInterface,
+  type TokensResponse,
 } from '../channel-interface';
 import { FireAndForget } from '../../../fire-and-forget';
 import { authEndpoint, getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
 import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
 import { pubSub } from '../../../schema/pubsub';
 import { groupBy, uniqueBy } from '../../../utils/data-object-utils';
+import { getIFrameAdFormat } from './iframe-fb-helper';
 
 const fireAndForget = new FireAndForget();
 
@@ -77,10 +79,10 @@ class Facebook implements ChannelInterface {
       code,
     });
 
-    const response: Response | AError = await fetch(`${baseGraphFbUrl}/oauth/access_token?${params.toString()}`).catch(
+    const response = await fetch(`${baseGraphFbUrl}/oauth/access_token?${params.toString()}`).catch(
       (error: unknown) => {
         logger.error('Failed to exchange code for tokens %o', { error });
-        return error instanceof Error ? error : new Error(JSON.stringify(error));
+        return error instanceof Error ? error : new AError(JSON.stringify(error));
       },
     );
 
@@ -217,6 +219,37 @@ class Facebook implements ChannelInterface {
     const ads = await this.getAds(insights);
 
     return { accounts: activeAccounts, insights, ads };
+  }
+
+  async getAdPreview(
+    integration: Integration,
+    adId: string,
+    publisher?: PublisherEnum,
+    device?: DeviceEnum,
+    position?: string,
+  ): Promise<string | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
+    const { externalId } = await prisma.ad.findUniqueOrThrow({ where: { id: adId } });
+    const ad = new Ad(externalId);
+    const format = getIFrameAdFormat(publisher, device, position);
+    if (!format) {
+      logger.error('Invalid ad format %o', { publisher, device, position, adId });
+      return new AError('Invalid ad format');
+    }
+    const previews = await ad.getPreviews([AdPreview.Fields.body], {
+      ad_format: format,
+    });
+    const previewSchema = z.object({ body: z.string() });
+    const toBody = (preview: z.infer<typeof previewSchema>) => preview.body;
+    const parsedPreviews = await Facebook.handlePagination(previews, previewSchema, toBody);
+    if (isAError(parsedPreviews)) return parsedPreviews;
+    if (parsedPreviews.length === 0) return new AError('No ad preview found');
+    if (parsedPreviews.length > 1) return new AError('More than one ad previews found');
+    return parsedPreviews[0];
+  }
+
+  getDefaultPublisher(): PublisherEnum {
+    return PublisherEnum.Facebook;
   }
 
   private async getAdAccounts(accessToken?: string): Promise<ChannelAdAccount[] | AError> {
@@ -520,7 +553,7 @@ class Facebook implements ChannelInterface {
   }
 
   private static async getExpireAt(accessToken: string): Promise<AError | Date> {
-    const debugToken: Response | AError = await fetch(
+    const debugToken = await fetch(
       `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${accessToken}`,
     ).catch((error: unknown) => {
       logger.error('Failed to debug token %o', { error });

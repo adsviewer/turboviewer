@@ -11,15 +11,27 @@ import AdId from '@/app/[locale]/(logged-in)/insights/ad-id';
 export default function Filters(): React.ReactElement {
   const t = useTranslations('filters');
   const positions = [
+    'an_classic',
+    'biz_disco_feed',
     'facebook_reels',
-    'instagram_explore_grid_home',
-    'marketplace',
-    'instagram_reels',
-    'feed',
     'facebook_reels_overlay',
+    'facebook_stories',
+    'feed',
     'instagram_explore',
-    'video_feeds',
+    'instagram_explore_grid_home',
+    'instagram_profile_feed',
+    'instagram_reels',
+    'instagram_search',
     'instagram_stories',
+    'instream_video',
+    'marketplace',
+    'messenger_inbox',
+    'messenger_stories',
+    'rewarded_video',
+    'right_hand_column',
+    'search',
+    'video_feeds',
+    'unknown',
   ].map((pos) => ({ value: pos, label: changeCase.noCase(pos) }));
 
   return (

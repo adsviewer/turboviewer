@@ -20,7 +20,7 @@ export async function Insights({ searchParams }: InsightsProps): Promise<React.R
 
   const resp = await urqlClientSdk().insights({
     adAccountIds: searchParams?.account,
-    adIds: searchParams?.ad,
+    adIds: searchParams?.adId,
     devices: searchParams?.device,
     groupBy: searchParams?.groupedBy,
     order,

@@ -62,4 +62,12 @@ export interface ChannelInterface {
     userId: string | undefined,
     initial: boolean,
   ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[]; ads: ChannelAd[] } | AError>;
+  getAdPreview: (
+    integration: Integration,
+    adId: string,
+    publisher?: PublisherEnum,
+    device?: DeviceEnum,
+    position?: string,
+  ) => Promise<string | AError>;
+  getDefaultPublisher: () => PublisherEnum;
 }

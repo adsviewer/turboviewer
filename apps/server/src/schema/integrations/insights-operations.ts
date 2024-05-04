@@ -1,8 +1,12 @@
 import { prisma, Prisma } from '@repo/database';
 import { Kind } from 'graphql/language';
+import { isAError } from '@repo/utils';
+import { logger } from '@repo/logger';
 import { builder } from '../builder';
 import { getEndofDay } from '../../utils/date-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
+import { iFramePerInsight } from '../../contexts/channels/iframe-helper';
+import { getIFrameAdFormat } from '../../contexts/channels/fb/iframe-fb-helper';
 import {
   AdDto,
   CurrencyEnumDto,
@@ -172,21 +176,54 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
   }),
 });
 
-const GroupedInsightDto = builder.simpleObject('GroupedInsights', {
-  fields: (t) => ({
-    adId: t.string({ nullable: true }),
-    adAccountId: t.string({ nullable: true }),
-    adAccountName: t.string({ nullable: true }),
-    adName: t.string({ nullable: true }),
+const GroupedInsightDto = builder.simpleObject(
+  'GroupedInsights',
+  {
+    fields: (t) => ({
+      adId: t.string({ nullable: true }),
+      adAccountId: t.string({ nullable: true }),
+      adAccountName: t.string({ nullable: true }),
+      adName: t.string({ nullable: true }),
 
-    // TODO this should be non nullable
-    currency: t.field({ type: CurrencyEnumDto, nullable: true }),
+      // TODO this should be non nullable
+      currency: t.field({ type: CurrencyEnumDto, nullable: true }),
 
-    date: t.field({ type: 'Date', nullable: true }),
-    device: t.field({ type: DeviceEnumDto, nullable: true }),
-    publisher: t.field({ type: PublisherEnumDto, nullable: true }),
-    position: t.string({ nullable: true }),
-    spend: t.int({ nullable: false }),
-    impressions: t.int({ nullable: false }),
+      date: t.field({ type: 'Date', nullable: true }),
+      device: t.field({ type: DeviceEnumDto, nullable: true }),
+      publisher: t.field({ type: PublisherEnumDto, nullable: true }),
+      position: t.string({ nullable: true }),
+      spend: t.int({ nullable: false }),
+      impressions: t.int({ nullable: false }),
+    }),
+  },
+  (t) => ({
+    iFrameHtml: t.string({
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) => {
+        if (!root.adId) return null;
+        const format = getIFrameAdFormat(root.publisher, root.device, root.position);
+        if (!format) {
+          logger.error(
+            `No format found for publisher: ${root.publisher ?? 'unknown'}, device: ${root.device ?? 'unknown'}, position: ${root.position ?? 'unknown'}`,
+          );
+          return null;
+        }
+        const iFrame = await iFramePerInsight.getValue(
+          {
+            adId: root.adId,
+            publisher: root.publisher ?? undefined,
+            format,
+          },
+          {
+            adId: root.adId,
+            publisher: root.publisher ?? undefined,
+            position: root.position ?? undefined,
+            device: root.device ?? undefined,
+          },
+        );
+        if (isAError(iFrame)) return null;
+        return iFrame;
+      },
+    }),
   }),
-});
+);

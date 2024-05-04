@@ -272,6 +272,7 @@ type GroupedInsights {
   currency: CurrencyEnum
   date: Date
   device: DeviceEnum
+  iFrameHtml: String
   impressions: Int!
   position: String
   publisher: PublisherEnum

@@ -310,6 +310,7 @@ export type GroupedInsights = {
   currency?: Maybe<CurrencyEnum>;
   date?: Maybe<Scalars['Date']['output']>;
   device?: Maybe<DeviceEnum>;
+  iFrameHtml?: Maybe<Scalars['String']['output']>;
   impressions: Scalars['Int']['output'];
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
