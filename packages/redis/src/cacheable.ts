@@ -1,8 +1,9 @@
 import { logger } from '@repo/logger';
 import { AError } from '@repo/utils';
 import { ioredis } from './ioredis';
+import { RedisBatcher } from './redis-batcher';
 
-interface CacheableDataWrapper<T> {
+export interface CacheableDataWrapper<T> {
   expiresAt: number;
   payload: T;
 }
@@ -14,6 +15,7 @@ export class Cacheable<
 > {
   private readonly getKeyFn: (keyArg: U) => Promise<string> | string;
   private readonly fn: (fnArg: V) => Promise<T> | T;
+  private readonly batcher: RedisBatcher<T>;
   // Time to live in seconds
   private readonly ttlSec: number;
 
@@ -22,6 +24,7 @@ export class Cacheable<
     this.fn = fn;
     // Time to live in seconds
     this.ttlSec = ttlMs;
+    this.batcher = new RedisBatcher<T>(ioredis);
   }
 
   async getKey(keyArg: U): Promise<string> {
@@ -35,13 +38,12 @@ export class Cacheable<
 
   async getValue(keyArg: U, fnArg: V): Promise<T | AError> {
     const key = await this.getKeyFn(keyArg);
-    const cached = await ioredis.get(key);
+    const cached = await this.batcher.request(key);
 
     if (!cached) {
       return await this.forceUpdate(keyArg, fnArg);
     }
-    const data = JSON.parse(cached) as CacheableDataWrapper<T>;
-    return data.payload;
+    return cached.payload;
   }
 
   async forceUpdate(keyArg: U, fnArg: V): Promise<T | AError> {
