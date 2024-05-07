@@ -9,9 +9,12 @@
     "./badge": "./src/badge.tsx",
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
+    "./checkbox": "./src/checkbox.tsx",
     "./fallback": "./src/fallback.tsx",
+    "./iframe": "./src/iframe.tsx",
     "./input": "./src/input.tsx",
     "./label": "./src/label.tsx",
+    "./select": "./src/select.tsx",
     "./tailwind-utils": "./src/tailwind-utils.ts",
     "./globals.css": {
       "import": "./src/globals.css",

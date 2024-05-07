@@ -1,6 +1,6 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
-import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
+import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
 import { AError, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -11,6 +11,7 @@ import {
   AdAccount,
   AdAccountAdVolume,
   AdCreative,
+  AdPreview,
   AdReportRun,
   AdsInsights,
   User,
@@ -18,16 +19,19 @@ import {
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import { env, MODE } from '../../../config';
 import {
-  type ChannelInterface,
-  type ChannelCreative,
+  type ChannelAd,
   type ChannelAdAccount,
+  type ChannelCreative,
   type ChannelInsight,
+  type ChannelInterface,
   type TokensResponse,
 } from '../channel-interface';
 import { FireAndForget } from '../../../fire-and-forget';
 import { authEndpoint, getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
 import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
 import { pubSub } from '../../../schema/pubsub';
+import { groupBy, uniqueBy } from '../../../utils/data-object-utils';
+import { getIFrameAdFormat } from './iframe-fb-helper';
 
 const fireAndForget = new FireAndForget();
 
@@ -75,10 +79,10 @@ class Facebook implements ChannelInterface {
       code,
     });
 
-    const response: Response | AError = await fetch(`${baseGraphFbUrl}/oauth/access_token?${params.toString()}`).catch(
+    const response = await fetch(`${baseGraphFbUrl}/oauth/access_token?${params.toString()}`).catch(
       (error: unknown) => {
         logger.error('Failed to exchange code for tokens %o', { error });
-        return error instanceof Error ? error : new Error(JSON.stringify(error));
+        return error instanceof Error ? error : new AError(JSON.stringify(error));
       },
     );
 
@@ -198,7 +202,7 @@ class Facebook implements ChannelInterface {
     integration: Integration,
     userId: string | undefined,
     initial: boolean,
-  ): Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[] } | AError> {
+  ): Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[]; ads: ChannelAd[] } | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const accounts = await this.getAdAccounts();
     if (isAError(accounts)) return accounts;
@@ -212,7 +216,40 @@ class Facebook implements ChannelInterface {
 
     const insights = await this.getAdInsights(insightReportIds);
     if (isAError(insights)) return insights;
-    return { accounts: activeAccounts, insights };
+    const ads = await this.getAds(insights);
+
+    return { accounts: activeAccounts, insights, ads };
+  }
+
+  async getAdPreview(
+    integration: Integration,
+    adId: string,
+    publisher?: PublisherEnum,
+    device?: DeviceEnum,
+    position?: string,
+  ): Promise<string | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
+    const { externalId } = await prisma.ad.findUniqueOrThrow({ where: { id: adId } });
+    const ad = new Ad(externalId);
+    const format = getIFrameAdFormat(publisher, device, position);
+    if (!format) {
+      logger.error('Invalid ad format %o', { publisher, device, position, adId });
+      return new AError('Invalid ad format');
+    }
+    const previews = await ad.getPreviews([AdPreview.Fields.body], {
+      ad_format: format,
+    });
+    const previewSchema = z.object({ body: z.string() });
+    const toBody = (preview: z.infer<typeof previewSchema>) => preview.body;
+    const parsedPreviews = await Facebook.handlePagination(previews, previewSchema, toBody);
+    if (isAError(parsedPreviews)) return parsedPreviews;
+    if (parsedPreviews.length === 0) return new AError('No ad preview found');
+    if (parsedPreviews.length > 1) return new AError('More than one ad previews found');
+    return parsedPreviews[0];
+  }
+
+  getDefaultPublisher(): PublisherEnum {
+    return PublisherEnum.Facebook;
   }
 
   private async getAdAccounts(accessToken?: string): Promise<ChannelAdAccount[] | AError> {
@@ -225,6 +262,7 @@ class Facebook implements ChannelInterface {
         AdAccount.Fields.amount_spent,
         AdAccount.Fields.id,
         AdAccount.Fields.currency,
+        AdAccount.Fields.name,
         `ads_volume{${AdAccountAdVolume.Fields.ads_running_or_in_review_count}}`,
       ],
       {
@@ -236,6 +274,7 @@ class Facebook implements ChannelInterface {
       amount_spent: z.coerce.number(),
       id: z.string().startsWith('act_'),
       currency: z.nativeEnum(CurrencyEnum),
+      name: z.string(),
       ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
     });
     const toAccount = (acc: z.infer<typeof accountSchema>) =>
@@ -245,6 +284,7 @@ class Facebook implements ChannelInterface {
         hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
         externalId: acc.id.slice(4),
         currency: acc.currency,
+        name: acc.name,
       }) satisfies ChannelAdAccount;
 
     return await Facebook.handlePagination(res, accountSchema, toAccount);
@@ -430,6 +470,33 @@ class Facebook implements ChannelInterface {
     }
   }
 
+  private async getAds(insights: ChannelInsight[], accessToken?: string) {
+    if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
+    const adAndAccountIds = uniqueBy(insights, (insight) => ({
+      externalAdId: insight.externalAdId,
+      externalAccountId: insight.externalAccountId,
+    }));
+    const adIdByAccountId = groupBy(Array.from(adAndAccountIds), (insight) => insight.externalAccountId);
+    const ads: ChannelAd[] = [];
+    const adSchema = z.object({ id: z.string(), name: z.string() });
+    for (const [accountId, adIds] of adIdByAccountId) {
+      const account = new AdAccount(`act_${accountId}`);
+      const res = await account.getAds([Ad.Fields.id, Ad.Fields.name], {
+        filtering: [{ field: Ad.Fields.id, operator: 'IN', value: adIds.map((ad) => ad.externalAdId) }],
+      });
+      const toAd = (ad: z.infer<typeof adSchema>) => ({
+        externalAdAccountId: accountId,
+        externalId: ad.id,
+        name: ad.name,
+      });
+      const fbAds = await Facebook.handlePagination(res, adSchema, toAd);
+      if (!isAError(fbAds)) {
+        ads.push(...fbAds);
+      }
+    }
+    return ads;
+  }
+
   private static async handlePagination<T, U extends ZodTypeAny>(
     cursor: Cursor,
     schema: U,
@@ -486,7 +553,7 @@ class Facebook implements ChannelInterface {
   }
 
   private static async getExpireAt(accessToken: string): Promise<AError | Date> {
-    const debugToken: Response | AError = await fetch(
+    const debugToken = await fetch(
       `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${accessToken}`,
     ).catch((error: unknown) => {
       logger.error('Failed to debug token %o', { error });

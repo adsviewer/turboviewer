@@ -28,3 +28,9 @@ export const getLastTwoDays = () => {
     until: formatYYYMMDDDate(tomorrow),
   };
 };
+
+export const getEndofDay = (date?: Date | null) => {
+  const endOfDay = new Date(date ?? new Date());
+  endOfDay.setHours(23, 59, 59, 999);
+  return endOfDay;
+};

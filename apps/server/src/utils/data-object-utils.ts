@@ -9,3 +9,12 @@ export const groupBy = <K, V>(array: V[], grouper: (item: V) => K) =>
     }
     return acc;
   }, new Map<K, V[]>());
+
+export const uniqueBy = <K, V>(array: V[], grouper: (item: V) => K) =>
+  array.reduce((acc, item) => {
+    const key = grouper(item);
+    if (!acc.has(key)) {
+      acc.add(key);
+    }
+    return acc;
+  }, new Set<K>());

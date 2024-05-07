@@ -1,8 +1,9 @@
-import { IntegrationTypeEnum } from '@repo/database';
+import { CurrencyEnum, DeviceEnum, type Insight, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
 import { builder } from '../builder';
 import { FbError } from '../../contexts/channels/fb/fb-channel';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
+import { getEndofDay } from '../../utils/date-utils';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
@@ -42,12 +43,20 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     type: t.expose('type', { type: IntegrationTypeDto }),
     externalId: t.exposeString('externalId', { nullable: true }),
 
-    accessToken: t.exposeString('accessToken'),
-    refreshToken: t.exposeString('refreshToken', { nullable: true }),
     accessTokenExpiresAt: t.expose('accessTokenExpiresAt', { type: 'Date', nullable: true }),
     refreshTokenExpiresAt: t.expose('refreshTokenExpiresAt', { type: 'Date', nullable: true }),
 
     organization: t.relation('organization'),
+    adAccounts: t.relation('adAccounts', {
+      args: {
+        currency: t.arg({ type: CurrencyEnumDto, required: false }),
+      },
+      query: (args, _ctx) => ({
+        where: {
+          currency: args.currency ?? undefined,
+        },
+      }),
+    }),
   }),
 });
 
@@ -69,3 +78,106 @@ export const ChannelInitialProgressPayloadDto = builder
       progress: t.exposeFloat('progress'),
     }),
   });
+
+export const CurrencyEnumDto = builder.enumType(CurrencyEnum, {
+  name: 'CurrencyEnum',
+});
+
+export const AdAccountDto = builder.prismaObject('AdAccount', {
+  fields: (t) => ({
+    id: t.exposeID('id'),
+    integrationId: t.exposeString('integrationId'),
+    externalId: t.exposeString('externalId'),
+
+    currency: t.expose('currency', { type: CurrencyEnumDto }),
+    name: t.exposeString('name'),
+    updatedAt: t.expose('updatedAt', { type: 'Date' }),
+    createdAt: t.expose('createdAt', { type: 'Date' }),
+
+    integration: t.relation('integration'),
+    advertisements: t.relatedConnection('advertisements', { cursor: 'id' }),
+  }),
+});
+
+type InsightsColumnsOrderByType = keyof Pick<Insight, 'spend' | 'impressions'>;
+const insightsColumnsOrderBy: InsightsColumnsOrderByType[] = ['spend', 'impressions'] as const;
+export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderBy', {
+  values: insightsColumnsOrderBy,
+});
+
+type InsightsColumnsGroupByType = keyof Pick<
+  Insight,
+  'adAccountId' | 'adId' | 'date' | 'device' | 'position' | 'publisher'
+>;
+const insightsColumnsGroupBy: InsightsColumnsGroupByType[] = [
+  'adAccountId',
+  'adId',
+  'date',
+  'device',
+  'position',
+  'publisher',
+] as const;
+export const InsightsColumnsGroupByDto = builder.enumType('InsightsColumnsGroupBy', {
+  values: insightsColumnsGroupBy,
+});
+
+export const AdDto = builder.prismaObject('Ad', {
+  fields: (t) => ({
+    id: t.exposeID('id'),
+    adAccountId: t.exposeString('adAccountId'),
+    externalId: t.exposeString('externalId'),
+    name: t.exposeString('name'),
+
+    adAccount: t.relation('adAccount'),
+    insights: t.relatedConnection('insights', {
+      cursor: 'id',
+      args: {
+        dateFrom: t.arg({ type: 'Date', required: false }),
+        dateTo: t.arg({ type: 'Date', required: false }),
+        devices: t.arg({ type: [DeviceEnumDto], required: false }),
+        publishers: t.arg({ type: [PublisherEnumDto], required: false }),
+        positions: t.arg.stringList({ required: false }),
+        highestFirst: t.arg.boolean({ defaultValue: true }),
+        orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
+      },
+      totalCount: true,
+      query: (args, _ctx) => ({
+        where: {
+          date: { gte: args.dateFrom ?? undefined, lte: getEndofDay(args.dateTo) },
+          device: { in: args.devices ?? undefined },
+          publisher: { in: args.publishers ?? undefined },
+          position: { in: args.positions ?? undefined },
+        },
+        orderBy: args.highestFirst ? { [args.orderBy]: 'desc' } : { [args.orderBy]: 'asc' },
+      }),
+    }),
+  }),
+});
+
+export const InsightsOrderByDto = builder.enumType(DeviceEnum, {
+  name: 'InsightsOrderBy',
+});
+
+export const DeviceEnumDto = builder.enumType(DeviceEnum, {
+  name: 'DeviceEnum',
+});
+
+export const PublisherEnumDto = builder.enumType(PublisherEnum, {
+  name: 'PublisherEnum',
+});
+
+export const InsightDto = builder.prismaObject('Insight', {
+  fields: (t) => ({
+    id: t.exposeID('id'),
+    adId: t.exposeString('adId'),
+
+    date: t.expose('date', { type: 'Date' }),
+    impressions: t.exposeInt('impressions'),
+    spend: t.exposeInt('spend'),
+    device: t.expose('device', { type: DeviceEnumDto }),
+    publisher: t.expose('publisher', { type: PublisherEnum }),
+    position: t.exposeString('position'),
+
+    ad: t.relation('ad'),
+  }),
+});

@@ -2,16 +2,21 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { logger } from '@repo/logger';
 import { z } from 'zod';
+import createMiddleware from 'next-intl/middleware';
 import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
+import { locales } from '@/i18n';
 
 const publicPaths = ['/', '/sign-in', '/sign-up', '/forgot-password*', '/reset-password*', '/api/login*'];
 
 const isPublic = (path: string): boolean => {
-  return Boolean(publicPaths.find((x) => new RegExp(`^${x}$`.replace('*$', '($|/)')).exec(path)));
+  return Boolean(
+    publicPaths.find((x) => new RegExp(`^(?:/(?:${locales.join('|')}))?${x}$`.replace('*$', '($|/)')).exec(path)),
+  );
 };
 
 const signOut = (request: NextRequest): NextResponse => {
   const signOutUrl = new URL('/sign-out', request.url);
+  signOutUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
   return NextResponse.redirect(signOutUrl);
 };
 
@@ -29,21 +34,33 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   if (isPublic(request.nextUrl.pathname)) {
     if (token) {
-      const redirectUrl = new URL('/placements', request.url);
+      const redirectUrl = new URL('/insights', request.url);
       return NextResponse.redirect(redirectUrl);
     }
 
-    return NextResponse.next();
+    return intlMiddleware(request);
   }
-
   if (!token) {
-    const signInUrl = new URL('/sign-in', env.NEXT_PUBLIC_ENDPOINT);
+    const signInUrl = new URL('/sign-in', request.url);
     signInUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }
 
-  return NextResponse.next();
+  if (request.nextUrl.pathname === '/graphql') {
+    return NextResponse.next();
+  }
+
+  return intlMiddleware(request);
 }
+
+const intlMiddleware = createMiddleware({
+  // A list of all locales that are supported
+  locales,
+
+  // Used when no locale matches
+  defaultLocale: locales[0],
+  localePrefix: 'as-needed',
+});
 
 // Stop Middleware running on static files and public folder
 export const config = {
@@ -58,6 +75,7 @@ export const config = {
      */
     '/((?!static|.*\\..*|_next|favicon.ico).*)',
     '/',
+    `/(de|en|gr)/:path*`,
   ],
 };
 

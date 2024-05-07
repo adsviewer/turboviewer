@@ -1,3 +1,57 @@
+type Ad {
+  adAccount: AdAccount!
+  adAccountId: String!
+  externalId: String!
+  id: ID!
+  insights(
+    after: ID
+    before: ID
+    dateFrom: Date
+    dateTo: Date
+    devices: [DeviceEnum!]
+    first: Int
+    highestFirst: Boolean = true
+    last: Int
+    orderBy: InsightsColumnsOrderBy! = spend
+    positions: [String!]
+    publishers: [PublisherEnum!]
+  ): AdInsightsConnection!
+  name: String!
+}
+
+type AdAccount {
+  advertisements(after: ID, before: ID, first: Int, last: Int): AdAccountAdvertisementsConnection!
+  createdAt: Date!
+  currency: CurrencyEnum!
+  externalId: String!
+  id: ID!
+  integration: Integration!
+  integrationId: String!
+  name: String!
+  updatedAt: Date!
+}
+
+type AdAccountAdvertisementsConnection {
+  edges: [AdAccountAdvertisementsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type AdAccountAdvertisementsConnectionEdge {
+  cursor: ID!
+  node: Ad!
+}
+
+type AdInsightsConnection {
+  edges: [AdInsightsConnectionEdge]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AdInsightsConnectionEdge {
+  cursor: ID!
+  node: Insight!
+}
+
 type BaseError implements Error {
   message: String!
 }
@@ -7,10 +61,188 @@ type ChannelInitialProgressPayload {
   progress: Float!
 }
 
+enum CurrencyEnum {
+  AFN
+  ALL
+  DZD
+  USD
+  EUR
+  AOA
+  XCD
+  ARS
+  AMD
+  AWG
+  AUD
+  AZN
+  BSD
+  BHD
+  BDT
+  BBD
+  BYN
+  BZD
+  XOF
+  BMD
+  BTN
+  INR
+  BOB
+  BOV
+  BAM
+  BWP
+  NOK
+  BRL
+  BND
+  BGN
+  BIF
+  CVE
+  KHR
+  XAF
+  CAD
+  KYD
+  CLF
+  CLP
+  CNY
+  COP
+  COU
+  KMF
+  CDF
+  NZD
+  CRC
+  CUC
+  CUP
+  ANG
+  CZK
+  DKK
+  DJF
+  DOP
+  EGP
+  SVC
+  ERN
+  ETB
+  FKP
+  FJD
+  XPF
+  GMD
+  GEL
+  GHS
+  GIP
+  GTQ
+  GBP
+  GNF
+  GYD
+  HTG
+  HNL
+  HKD
+  HUF
+  ISK
+  IDR
+  XDR
+  IRR
+  IQD
+  ILS
+  JMD
+  JPY
+  JOD
+  KZT
+  KES
+  KPW
+  KRW
+  KWD
+  KGS
+  LAK
+  LBP
+  LSL
+  ZAR
+  LRD
+  LYD
+  CHF
+  MOP
+  MGA
+  MWK
+  MYR
+  MVR
+  MRU
+  MUR
+  XUA
+  MXN
+  MXV
+  MDL
+  MNT
+  MAD
+  MZN
+  MMK
+  NAD
+  NPR
+  NIO
+  NGN
+  OMR
+  PKR
+  PAB
+  PGK
+  PYG
+  PEN
+  PHP
+  PLN
+  QAR
+  MKD
+  RON
+  RUB
+  RWF
+  SHP
+  WST
+  STN
+  SAR
+  RSD
+  SCR
+  SLE
+  SGD
+  XSU
+  SBD
+  SOS
+  SSP
+  LKR
+  SDG
+  SRD
+  SZL
+  SEK
+  CHE
+  CHW
+  SYP
+  TWD
+  TJS
+  TZS
+  THB
+  TOP
+  TTD
+  TND
+  TRY
+  TMT
+  UGX
+  UAH
+  AED
+  USN
+  UYI
+  UYU
+  UZS
+  VUV
+  VEF
+  VED
+  VND
+  YER
+  ZMW
+  ZWL
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar Date
+
+enum DeviceEnum {
+  MobileWeb
+  MobileApp
+  Desktop
+  Unknown
+}
 
 interface Error {
   message: String!
@@ -27,14 +259,72 @@ type GenerateGoogleAuthUrlResponse {
   url: String!
 }
 
+type GroupedInsight implements Pagination {
+  edges: [GroupedInsights!]!
+  totalCount: Int!
+}
+
+type GroupedInsights {
+  adAccountId: String
+  adAccountName: String
+  adId: String
+  adName: String
+  currency: CurrencyEnum
+  date: Date
+  device: DeviceEnum
+  iFrame: IFrame
+  impressions: Int!
+  position: String
+  publisher: PublisherEnum
+  spend: Int!
+}
+
+type IFrame {
+  height: String!
+  src: String!
+  width: String!
+}
+
+type Insight {
+  ad: Ad!
+  adId: String!
+  date: Date!
+  device: DeviceEnum!
+  id: ID!
+  impressions: Int!
+  position: String!
+  publisher: PublisherEnum!
+  spend: Int!
+}
+
+enum InsightsColumnsGroupBy {
+  adAccountId
+  adId
+  date
+  device
+  position
+  publisher
+}
+
+enum InsightsColumnsOrderBy {
+  spend
+  impressions
+}
+
+enum InsightsOrderBy {
+  MobileWeb
+  MobileApp
+  Desktop
+  Unknown
+}
+
 type Integration {
-  accessToken: String!
   accessTokenExpiresAt: Date
+  adAccounts(currency: CurrencyEnum): [AdAccount!]!
   externalId: String
   id: ID!
   organization: Organization!
   organizationId: String!
-  refreshToken: String
   refreshTokenExpiresAt: Date
   type: IntegrationType!
 }
@@ -89,9 +379,21 @@ type MutationDeAuthIntegrationSuccess {
 type Organization {
   createdAt: Date!
   id: ID!
+  integrations: [Integration!]!
   name: String!
   updatedAt: Date!
   users: [User!]!
+}
+
+type PageInfo {
+  endCursor: ID
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: ID
+}
+
+interface Pagination {
+  totalCount: Int!
 }
 
 type PrismaClientKnownRequestError implements Error {
@@ -99,10 +401,40 @@ type PrismaClientKnownRequestError implements Error {
   message: String!
 }
 
+enum PublisherEnum {
+  Facebook
+  Instagram
+  Messenger
+  AudienceNetwork
+  LinkedIn
+  TikTok
+  Unknown
+}
+
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
-  integrations: [IntegrationListItem!]!
+  insights(
+    adAccountIds: [String!]
+    adIds: [String!]
+    dateFrom: Date
+    dateTo: Date
+    devices: [DeviceEnum!]
+    groupBy: [InsightsColumnsGroupBy!]
+    order: String = "desc"
+    orderBy: InsightsColumnsOrderBy! = spend
+
+    """
+    Starting at 1
+    """
+    page: Int! = 1
+    pageSize: Int! = 12
+    positions: [String!]
+    publishers: [PublisherEnum!]
+  ): GroupedInsight!
+  integrations(type: IntegrationType): [Integration!]!
+  lastThreeMonthsAds: [Ad!]!
   me: User!
+  settingsChannels: [IntegrationListItem!]!
 }
 
 type Role {

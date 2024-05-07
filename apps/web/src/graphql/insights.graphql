@@ -1,0 +1,66 @@
+query adAccounts {
+  integrations {
+    adAccounts {
+      id
+      name
+      currency
+    }
+  }
+}
+
+query insights(
+  $adAccountIds: [String!]
+  $adIds: [String!]
+  $dateFrom: Date
+  $dateTo: Date
+  $devices: [DeviceEnum!]
+  $publishers: [PublisherEnum!]
+  $positions: [String!]
+  $order: String
+  $orderBy: InsightsColumnsOrderBy!
+  $groupBy: [InsightsColumnsGroupBy!]
+  $pageSize: Int!
+  $page: Int!
+) {
+  insights(
+    adAccountIds: $adAccountIds
+    adIds: $adIds
+    dateFrom: $dateFrom
+    dateTo: $dateTo
+    devices: $devices
+    publishers: $publishers
+    positions: $positions
+    order: $order
+    orderBy: $orderBy
+    groupBy: $groupBy
+    pageSize: $pageSize
+    page: $page
+  ) {
+    totalCount
+    edges {
+      adAccountId
+      adAccountName
+      adId
+      adName
+      currency
+      date
+      device
+      publisher
+      position
+      impressions
+      spend
+      iFrame {
+        src
+        height
+        width
+      }
+    }
+  }
+}
+
+query lastThreeMonthsAds {
+  lastThreeMonthsAds {
+    id
+    name
+  }
+}

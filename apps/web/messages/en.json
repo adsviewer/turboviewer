@@ -1,0 +1,30 @@
+{
+  "insights": {
+    "title": "Insights",
+    "tooltipPosition": "position"
+  },
+  "filters": {
+    "account": "Account",
+    "adId": "Ad Id",
+    "date": "Date",
+    "device": "Device",
+    "groupedBy": "Grouped By",
+    "orderByDropDown": "{value, select, spend {spend} impressions {impressions} other {unknown}}",
+    "orderDropDown": "{value, select, asc {ascending} desc {descending} other {unknown}}",
+    "orderByLabel": "Order By",
+    "pageSize": "Page Size",
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "info": "Page {page, number} of {totalPages, number} ({totalElements, plural, =1 {one result} other {# results}} in total)"
+    },
+    "position": "Position",
+    "publisher": "Publisher",
+    "select": "Select",
+    "title": "Filters"
+  },
+  "login": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up"
+  }
+}

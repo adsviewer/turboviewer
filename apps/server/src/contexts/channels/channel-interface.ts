@@ -21,8 +21,15 @@ export interface ChannelAdAccount {
   // in cents
   amountSpent: number;
   hasAdsRunningOrInReview: boolean;
+  name: string;
   currency: CurrencyEnum;
   externalId: string;
+}
+
+export interface ChannelAd {
+  externalAdAccountId: string;
+  externalId: string;
+  name: string;
 }
 
 export interface ChannelCreative {
@@ -54,5 +61,13 @@ export interface ChannelInterface {
     integration: Integration,
     userId: string | undefined,
     initial: boolean,
-  ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[] } | AError>;
+  ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[]; ads: ChannelAd[] } | AError>;
+  getAdPreview: (
+    integration: Integration,
+    adId: string,
+    publisher?: PublisherEnum,
+    device?: DeviceEnum,
+    position?: string,
+  ) => Promise<string | AError>;
+  getDefaultPublisher: () => PublisherEnum;
 }

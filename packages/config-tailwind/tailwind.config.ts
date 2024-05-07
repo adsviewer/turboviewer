@@ -9,6 +9,9 @@ const config: Omit<Config, 'content'> = {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
           foreground: 'hsl(var(--primary-foreground) / <alpha-value>)',
         },
+        faint: {
+          DEFAULT: 'rgb(var(--faint) / <alpha-value>)',
+        },
         destructive: {
           DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
           foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
@@ -17,8 +20,10 @@ const config: Omit<Config, 'content'> = {
           DEFAULT: 'rgb(var(--color-menu) / <alpha-value>)',
           bg: 'rgb(var(--color-menu) / <alpha-value>)',
           primary: 'rgb(var(--color-menu-primary) / <alpha-value>)',
-          secondary: 'rgb(var(--color-menu-secondary) / <alpha-value>)',
-          tertiary: 'rgb(var(--color-menu-tertiary) / <alpha-value>)',
+        },
+        tooltip: {
+          DEFAULT: 'rgb(var(--tooltip) / <alpha-value>)',
+          bg: 'rgb(var(--tooltip-background) / <alpha-value>)',
         },
       },
       backgroundImage: {

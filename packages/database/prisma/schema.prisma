@@ -125,6 +125,7 @@ model AdAccount {
   integrationId String @map("integration_id")
 
   externalId String       @map("external_id")
+  name       String       @default("No name") // TODO: remove this once all ad accounts have a name
   currency   CurrencyEnum
 
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -132,21 +133,23 @@ model AdAccount {
 
   integration    Integration @relation(fields: [integrationId], references: [id])
   advertisements Ad[]
-  creative       Creative[]
+  creatives      Creative[]
+  Insight        Insight[]
 
   @@unique([integrationId, externalId])
   @@map("ad_accounts")
 }
 
 model Ad {
-  id          String @id @default(cuid())
-  adAccountId String @map("ad_account_id")
+  id          String  @id @default(cuid())
+  adAccountId String  @map("ad_account_id")
+  creativeId  String?
 
   externalId String    @map("external_id")
+  name       String    @default("No name") // TODO: remove this once all ads have a name
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id])
   insights   Insight[]
-  Creative   Creative? @relation(fields: [creativeId], references: [id])
-  creativeId String?
+  creative   Creative? @relation(fields: [creativeId], references: [id])
 
   @@unique([adAccountId, externalId])
   @@map("ads")
@@ -184,7 +187,12 @@ model Creative {
 }
 
 model Insight {
-  id          String        @id @default(cuid())
+  id String @id @default(cuid())
+
+  // TODO: both should be required. After a run they should be populated.
+  adAccountId String?       @map("ad_account_id")
+  currency    CurrencyEnum?
+
   adId        String        @map("ad_id")
   date        DateTime
   impressions Int
@@ -194,9 +202,18 @@ model Insight {
   publisher   PublisherEnum
   position    String
 
-  ad Ad @relation(fields: [adId], references: [id])
+  ad        Ad         @relation(fields: [adId], references: [id])
+  adAccount AdAccount? @relation(fields: [adAccountId], references: [id])
 
   @@unique([adId, date, device, publisher, position])
+  @@index([adAccountId])
+  @@index([currency])
+  @@index([date])
+  @@index([impressions])
+  @@index([spend])
+  @@index([device])
+  @@index([publisher])
+  @@index([position])
   @@map("insights")
 }
 
