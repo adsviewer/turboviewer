@@ -2,6 +2,9 @@ import { prisma, Prisma } from '@repo/database';
 import { Kind } from 'graphql/language';
 import { isAError } from '@repo/utils';
 import { logger } from '@repo/logger';
+import { parse as htmlParse } from 'node-html-parser';
+import { GraphQLError } from 'graphql';
+import { z } from 'zod';
 import { builder } from '../builder';
 import { getEndofDay } from '../../utils/date-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
@@ -176,6 +179,24 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
   }),
 });
 
+const iFrameSchema = z.object({
+  title: z.string().optional(),
+  src: z.string(),
+  width: z.string(),
+  height: z.string(),
+  scrolling: z.string().optional(),
+});
+
+type IFrameType = z.infer<typeof iFrameSchema>;
+
+const IFrameDTO = builder.objectRef<IFrameType>('IFrame').implement({
+  fields: (t) => ({
+    src: t.exposeString('src'),
+    width: t.exposeString('width'),
+    height: t.exposeString('height'),
+  }),
+});
+
 const GroupedInsightDto = builder.simpleObject(
   'GroupedInsights',
   {
@@ -197,7 +218,8 @@ const GroupedInsightDto = builder.simpleObject(
     }),
   },
   (t) => ({
-    iFrameHtml: t.string({
+    iFrame: t.field({
+      type: IFrameDTO,
       nullable: true,
       resolve: async (root, _args, _ctx, _info) => {
         if (!root.adId) return null;
@@ -222,7 +244,11 @@ const GroupedInsightDto = builder.simpleObject(
           },
         );
         if (isAError(iFrame)) return null;
-        return iFrame;
+        const htmlRoot = htmlParse(iFrame);
+        const attributes = htmlRoot.querySelector('iframe')?.attributes;
+        const iFrameData = iFrameSchema.safeParse(attributes);
+        if (!iFrameData.success) throw new GraphQLError('Invalid iFrame data found');
+        return iFrameData.data;
       },
     }),
   }),

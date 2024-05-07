@@ -49,6 +49,11 @@ query insights(
       position
       impressions
       spend
+      iFrame {
+        src
+        height
+        width
+      }
     }
   }
 }

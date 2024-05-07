@@ -311,11 +311,18 @@ export type GroupedInsights = {
   currency?: Maybe<CurrencyEnum>;
   date?: Maybe<Scalars['Date']['output']>;
   device?: Maybe<DeviceEnum>;
-  iFrameHtml?: Maybe<Scalars['String']['output']>;
+  iFrame?: Maybe<IFrame>;
   impressions: Scalars['Int']['output'];
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
   spend: Scalars['Int']['output'];
+};
+
+export type IFrame = {
+  __typename?: 'IFrame';
+  height: Scalars['String']['output'];
+  src: Scalars['String']['output'];
+  width: Scalars['String']['output'];
 };
 
 export type Insight = {
@@ -602,6 +609,7 @@ export type InsightsQuery = {
       position?: string | null;
       impressions: number;
       spend: number;
+      iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
     }>;
   };
 };
@@ -815,6 +823,11 @@ export const InsightsDocument = gql`
         position
         impressions
         spend
+        iFrame {
+          src
+          height
+          width
+        }
       }
     }
   }
