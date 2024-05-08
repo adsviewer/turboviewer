@@ -14,18 +14,18 @@ export const channelDataRefreshWebhook = (_req: Request, res: Response): void =>
   });
 };
 
-export const refreshDataOf = async (integration: Integration) => {
-  await saveChannelData(integration, undefined, false).catch((e: unknown) => {
+export const refreshDataOf = async (integration: Integration, initial: boolean) => {
+  await saveChannelData(integration, undefined, initial).catch((e: unknown) => {
     logger.error(`Error refreshing channel data for ${integration.id}. Error: ${JSON.stringify(e)}`);
   });
 };
 
-export const refreshData = async () => {
+export const refreshData = async (initial?: boolean) => {
   logger.info('Refreshing all channel data');
   const integrations = await getAllConnectedIntegrations();
 
   for (const integration of integrations) {
-    await refreshDataOf(integration);
+    await refreshDataOf(integration, Boolean(initial));
   }
   logger.info('Refreshed all channel data');
 };

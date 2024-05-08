@@ -427,6 +427,7 @@ export type MutationLoginArgs = {
 };
 
 export type MutationRefreshDataArgs = {
+  initial: Scalars['Boolean']['input'];
   integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 

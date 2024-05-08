@@ -359,7 +359,7 @@ type Mutation {
   forgetPassword(email: String!): Boolean!
   googleLoginSignup(code: String!): TokenDto!
   login(email: String!, password: String!): TokenDto!
-  refreshData(integrationIds: [String!]): Boolean!
+  refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
 
   """
   Uses the refresh token to generate a new token
