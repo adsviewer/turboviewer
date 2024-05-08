@@ -173,6 +173,7 @@ builder.mutationFields((t) => ({
     type: 'Boolean',
     args: {
       integrationIds: t.arg.stringList({ required: false }),
+      initial: t.arg.boolean({ required: true }),
     },
     resolve: async (_root, args, _ctx, _info) => {
       if (args.integrationIds) {
@@ -182,10 +183,10 @@ builder.mutationFields((t) => ({
           })
           .then((ints) => ints.map(decryptTokens).flatMap((integration) => integration ?? []));
         for (const integration of integrations) {
-          await refreshDataOf(integration);
+          await refreshDataOf(integration, args.initial);
         }
       } else {
-        await refreshData();
+        await refreshData(args.initial);
       }
       return true;
     },
