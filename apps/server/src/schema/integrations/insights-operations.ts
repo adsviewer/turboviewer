@@ -169,7 +169,7 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
-  refreshChannels: t.withAuth({ isAdmin: true }).field({
+  refreshData: t.withAuth({ isAdmin: true }).field({
     type: 'Boolean',
     args: {
       integrationIds: t.arg.stringList({ required: false }),

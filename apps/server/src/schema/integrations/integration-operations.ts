@@ -8,7 +8,6 @@ import { FbError } from '../../contexts/channels/fb/fb-channel';
 import { revokeIntegration } from '../../contexts/channels/integration-util';
 import { FireAndForget } from '../../fire-and-forget';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
-import { refreshData } from '../../contexts/channels/data-refresh';
 import {
   ChannelInitialProgressPayloadDto,
   IntegrationDto,
@@ -81,13 +80,6 @@ builder.mutationFields((t) => ({
       const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId, ctx.currentUserId);
       logger.info(`De-authorized integration ${args.type} for organization ${ctx.organizationId}`);
       return authUrl;
-    },
-  }),
-  refreshData: t.withAuth({ authenticated: true }).field({
-    type: 'String',
-    resolve: (_root, _args, _ctx, _info) => {
-      fireAndForget.add(refreshData);
-      return 'Success';
     },
   }),
 }));

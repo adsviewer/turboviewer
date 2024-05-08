@@ -401,8 +401,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
   login: TokenDto;
-  refreshChannels: Scalars['Boolean']['output'];
-  refreshData: Scalars['String']['output'];
+  refreshData: Scalars['Boolean']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   resetPassword: TokenDto;
@@ -427,7 +426,7 @@ export type MutationLoginArgs = {
   password: Scalars['String']['input'];
 };
 
-export type MutationRefreshChannelsArgs = {
+export type MutationRefreshDataArgs = {
   integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
