@@ -86,7 +86,7 @@ builder.mutationFields((t) => ({
       const { token, refreshToken } = createJwts(
         user.id,
         user.organizationId,
-        user.roles.map((r) => r.role.name),
+        user.roles.map((r) => r.role),
       );
       return { token, refreshToken, user };
     },
@@ -119,7 +119,7 @@ builder.mutationFields((t) => ({
       const { token, refreshToken } = createJwts(
         user.id,
         user.organizationId,
-        user.roles.map((r) => r.role.name),
+        user.roles.map((r) => r.role),
       );
       return { token, refreshToken, user };
     },
@@ -138,7 +138,7 @@ builder.mutationFields((t) => ({
       return createJwt(
         user.id,
         user.organizationId,
-        user.roles.map((r) => r.role.name),
+        user.roles.map((r) => r.role),
       );
     },
   }),
@@ -276,7 +276,7 @@ builder.mutationFields((t) => ({
       const { token, refreshToken } = createJwts(
         forgetPassword.user.id,
         forgetPassword.user.organizationId,
-        forgetPassword.user.roles.map((r) => r.role.name),
+        forgetPassword.user.roles.map((r) => r.role),
       );
       return { token, refreshToken, user: forgetPassword.user };
     },

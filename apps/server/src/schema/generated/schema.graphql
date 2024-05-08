@@ -359,6 +359,7 @@ type Mutation {
   forgetPassword(email: String!): Boolean!
   googleLoginSignup(code: String!): TokenDto!
   login(email: String!, password: String!): TokenDto!
+  refreshChannels(integrationIds: [String!]): Boolean!
   refreshData: String!
 
   """
@@ -437,10 +438,6 @@ type Query {
   settingsChannels: [IntegrationListItem!]!
 }
 
-type Role {
-  name: String!
-}
-
 type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
 }
@@ -459,7 +456,7 @@ type User {
   lastName: String!
   organization: Organization!
   organizationId: ID!
-  roles: [Role!]!
+  roles: [String!]!
   updatedAt: Date!
 }
 

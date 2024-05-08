@@ -54,20 +54,11 @@ enum RoleEnum {
   ADMIN
 }
 
-model Role {
-  id    String     @id @default(cuid())
-  name  RoleEnum   @unique
-  users UserRole[]
-
-  @@map("roles")
-}
-
 model UserRole {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
-  roleId    String   @map("role_id")
-  role      Role     @relation(fields: [roleId], references: [id])
+  role      RoleEnum
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 

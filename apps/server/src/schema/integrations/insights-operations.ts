@@ -10,6 +10,8 @@ import { getEndofDay } from '../../utils/date-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
 import { iFramePerInsight } from '../../contexts/channels/iframe-helper';
 import { getIFrameAdFormat } from '../../contexts/channels/fb/iframe-fb-helper';
+import { refreshData, refreshDataOf } from '../../contexts/channels/data-refresh';
+import { decryptTokens } from '../../contexts/channels/integration-util';
 import {
   AdDto,
   CurrencyEnumDto,
@@ -162,6 +164,30 @@ builder.queryFields((t) => ({
       }
 
       return { totalCount: await totalElementsP, edges: groupedEdges };
+    },
+  }),
+}));
+
+builder.mutationFields((t) => ({
+  refreshChannels: t.withAuth({ isAdmin: true }).field({
+    type: 'Boolean',
+    args: {
+      integrationIds: t.arg.stringList({ required: false }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      if (args.integrationIds) {
+        const integrations = await prisma.integration
+          .findMany({
+            where: { id: { in: args.integrationIds } },
+          })
+          .then((ints) => ints.map(decryptTokens).flatMap((integration) => integration ?? []));
+        for (const integration of integrations) {
+          await refreshDataOf(integration);
+        }
+      } else {
+        await refreshData();
+      }
+      return true;
     },
   }),
 }));
