@@ -123,7 +123,7 @@ export const googleLogin = async (
     const { token, refreshToken } = createJwts(
       googleUser.id,
       googleUser.organizationId,
-      googleUser.roles.map((r) => r.role.name),
+      googleUser.roles.map((r) => r.role),
     );
     return {
       token,
@@ -142,7 +142,7 @@ export const googleLogin = async (
     const { token, refreshToken } = createJwts(
       emailUser.id,
       emailUser.organizationId,
-      emailUser.roles.map((r) => r.role.name),
+      emailUser.roles.map((r) => r.role),
     );
     return {
       token,
@@ -156,7 +156,7 @@ export const googleLogin = async (
   const { token, refreshToken } = createJwts(
     user.id,
     user.organizationId,
-    user.roles.map((r) => r.role.name),
+    user.roles.map((r) => r.role),
   );
   return {
     token,

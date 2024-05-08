@@ -9,8 +9,7 @@ export const UserDto = builder.prismaObject('User', {
     email: t.exposeString('email'),
     createdAt: t.expose('createdAt', { type: 'Date' }),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
-    roles: t.field({
-      type: [RoleDto],
+    roles: t.stringList({
       select: (_args, _ctx, nestedSelection) => ({
         roles: {
           select: {
@@ -46,12 +45,5 @@ export const TokenUserDto = builder
 export const GenerateGoogleAuthUrlResponseDto = builder.simpleObject('GenerateGoogleAuthUrlResponse', {
   fields: (t) => ({
     url: t.string({ nullable: false }),
-  }),
-});
-
-export const RoleDto = builder.prismaObject('Role', {
-  select: { id: true },
-  fields: (t) => ({
-    name: t.exposeString('name'),
   }),
 });

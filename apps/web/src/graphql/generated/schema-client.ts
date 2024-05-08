@@ -402,6 +402,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   googleLoginSignup: TokenDto;
   login: TokenDto;
+  refreshChannels: Scalars['Boolean']['output'];
   refreshData: Scalars['String']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
@@ -425,6 +426,10 @@ export type MutationGoogleLoginSignupArgs = {
 export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
+};
+
+export type MutationRefreshChannelsArgs = {
+  integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type MutationResetPasswordArgs = {
@@ -524,11 +529,6 @@ export type QueryIntegrationsArgs = {
   type?: InputMaybe<IntegrationType>;
 };
 
-export type Role = {
-  __typename?: 'Role';
-  name: Scalars['String']['output'];
-};
-
 export type Subscription = {
   __typename?: 'Subscription';
   channelInitialSetupProgress: ChannelInitialProgressPayload;
@@ -550,7 +550,7 @@ export type User = {
   lastName: Scalars['String']['output'];
   organization: Organization;
   organizationId: Scalars['ID']['output'];
-  roles: Array<Role>;
+  roles: Array<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
 };
 
@@ -673,8 +673,8 @@ export type LoginMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      roles: Array<string>;
       organizationId: string;
-      roles: Array<{ __typename?: 'Role'; name: string }>;
     };
   };
 };
@@ -698,8 +698,8 @@ export type SignupMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      roles: Array<string>;
       organizationId: string;
-      roles: Array<{ __typename?: 'Role'; name: string }>;
     };
   };
 };
@@ -727,8 +727,8 @@ export type ResetPasswordMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      roles: Array<string>;
       organizationId: string;
-      roles: Array<{ __typename?: 'Role'; name: string }>;
     };
   };
 };
@@ -750,8 +750,8 @@ export type UserFieldsFragment = {
   firstName: string;
   lastName: string;
   email: string;
+  roles: Array<string>;
   organizationId: string;
-  roles: Array<{ __typename?: 'Role'; name: string }>;
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -760,9 +760,7 @@ export const UserFieldsFragmentDoc = gql`
     firstName
     lastName
     email
-    roles {
-      name
-    }
+    roles
     organizationId
   }
 `;
