@@ -3,7 +3,7 @@ import { getRequestConfig } from 'next-intl/server';
 import el from '../messages/el.json';
 import en from '../messages/en.json';
 
-export const localesMap = new Map([
+const localesMap = new Map([
   ['en-us', en],
   ['en-gb', en],
   ['el', el],
