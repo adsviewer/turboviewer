@@ -77,3 +77,23 @@ resource "aws_identitystore_group_membership" "iresha_developer" {
   group_id          = aws_identitystore_group.developers.group_id
   member_id         = aws_identitystore_user.iresha.user_id
 }
+
+
+resource "aws_identitystore_user" "lefteris" {
+  display_name      = "Lefteris Hytiroglou"
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  name {
+    given_name  = "Lefteris"
+    family_name = "Hytiroglou"
+  }
+  user_name = "lefteris"
+
+  emails {
+    value = "lehy64@gmail.com"
+  }
+}
+resource "aws_identitystore_group_membership" "lefteris_developer" {
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  group_id          = aws_identitystore_group.developers.group_id
+  member_id         = aws_identitystore_user.lefteris.user_id
+}
