@@ -17,6 +17,7 @@ import {
   User,
 } from 'facebook-nodejs-business-sdk';
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
+import _ from 'lodash';
 import { env, MODE } from '../../../config';
 import {
   type ChannelAd,
@@ -30,7 +31,7 @@ import { FireAndForget } from '../../../fire-and-forget';
 import { authEndpoint, getConnectedIntegrationByOrg, revokeIntegration } from '../integration-util';
 import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
 import { pubSub } from '../../../schema/pubsub';
-import { groupBy, uniqueBy } from '../../../utils/data-object-utils';
+import { mapDictionary } from '../../../utils/lodash-utils';
 import { getIFrameAdFormat } from './iframe-fb-helper';
 
 const fireAndForget = new FireAndForget();
@@ -472,17 +473,14 @@ class Facebook implements ChannelInterface {
 
   private async getAds(insights: ChannelInsight[], accessToken?: string) {
     if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
-    const adAndAccountIds = uniqueBy(insights, (insight) => ({
-      externalAdId: insight.externalAdId,
-      externalAccountId: insight.externalAccountId,
-    }));
-    const adIdByAccountId = groupBy(Array.from(adAndAccountIds), (insight) => insight.externalAccountId);
-    const ads: ChannelAd[] = [];
+    const adAndAccountIds = _.uniqBy(insights, (insight) => `${insight.externalAdId}_${insight.externalAccountId}`);
+    const adIdByAccountId = _.groupBy(Array.from(adAndAccountIds), 'externalAccountId');
     const adSchema = z.object({ id: z.string(), name: z.string() });
-    for (const [accountId, adIds] of adIdByAccountId) {
+
+    const asyncMapToAds = async (channelInsights: ChannelInsight[], accountId: string): Promise<ChannelAd[]> => {
       const account = new AdAccount(`act_${accountId}`);
       const res = await account.getAds([Ad.Fields.id, Ad.Fields.name], {
-        filtering: [{ field: Ad.Fields.id, operator: 'IN', value: adIds.map((ad) => ad.externalAdId) }],
+        filtering: [{ field: Ad.Fields.id, operator: 'IN', value: channelInsights.map((ad) => ad.externalAdId) }],
       });
       const toAd = (ad: z.infer<typeof adSchema>) => ({
         externalAdAccountId: accountId,
@@ -490,11 +488,10 @@ class Facebook implements ChannelInterface {
         name: ad.name,
       });
       const fbAds = await Facebook.handlePagination(res, adSchema, toAd);
-      if (!isAError(fbAds)) {
-        ads.push(...fbAds);
-      }
-    }
-    return ads;
+      return isAError(fbAds) ? [] : fbAds;
+    };
+
+    return await mapDictionary(adIdByAccountId, asyncMapToAds);
   }
 
   private static async handlePagination<T, U extends ZodTypeAny>(

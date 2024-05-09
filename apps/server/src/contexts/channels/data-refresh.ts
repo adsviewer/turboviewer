@@ -16,7 +16,8 @@ export const channelDataRefreshWebhook = (_req: Request, res: Response): void =>
 
 export const refreshDataOf = async (integration: Integration, initial: boolean) => {
   await saveChannelData(integration, undefined, initial).catch((e: unknown) => {
-    logger.error(`Error refreshing channel data for ${integration.id}. Error: ${JSON.stringify(e)}`);
+    const msg = e instanceof Error ? e.message : JSON.stringify(e);
+    logger.error(`Error refreshing channel data for ${integration.id}. Error: ${msg}`);
   });
 };
 
