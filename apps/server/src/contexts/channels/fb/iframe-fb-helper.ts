@@ -321,3 +321,5 @@ add(PublisherEnum.Facebook, undefined, undefined, 'MOBILE_FEED_STANDARD');
 add(PublisherEnum.Instagram, undefined, undefined, 'MOBILE_FEED_STANDARD');
 add(PublisherEnum.Messenger, undefined, undefined, 'MOBILE_FEED_STANDARD');
 add(PublisherEnum.Unknown, undefined, undefined, 'MOBILE_FEED_STANDARD');
+
+add(undefined, undefined, undefined, 'MOBILE_FEED_STANDARD');
