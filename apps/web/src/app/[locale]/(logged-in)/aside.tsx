@@ -47,7 +47,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
   }, [pathname, router]);
 
   useEffect(() => {
-    if (pathname === '/insights') {
+    if (pathname === '/insights' && searchParams.size === 0) {
       setInitialGroupedByFilters();
     }
   }, [pathname, searchParams, setInitialGroupedByFilters]);
