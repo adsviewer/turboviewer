@@ -4,7 +4,7 @@ import { Layers, MenuIcon, PanelLeftClose, PanelLeftOpen, Settings, X } from 'lu
 import { useCallback, useEffect, useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { SignOutBtn } from '@/components/login/sign-out-btn';
 import { ActiveLink, type LinkType } from '@/components/home/active-link';
 import { LogoFull } from '@/app/[locale]/(logged-in)/logo-full';
@@ -19,6 +19,7 @@ const links: LinkType[] = [
 export function Aside({ children }: { children: React.ReactNode }): React.ReactNode | null {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [minimize, setMinimize] = useState(false);
 
@@ -49,7 +50,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
     if (pathname === '/insights') {
       setInitialGroupedByFilters();
     }
-  }, [pathname, setInitialGroupedByFilters]);
+  }, [pathname, searchParams, setInitialGroupedByFilters]);
 
   return (
     <div className={cx('bg-menu-bg', minimize ? 'lg:w-10' : 'lg:w-1/5')}>
