@@ -102,7 +102,6 @@ jobs:
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read
-      packages: write
 
     needs:
       - build
@@ -117,7 +116,7 @@ jobs:
 
       - uses: dkershner6/aws-ssm-getparameters-action@v2
         with:
-          parameterPairs: "/prod/server/database_url = DATABASE_URL"
+          parameterPairs: "/${{ inputs.environment }}/${{ inputs.service_name }}/database_url = DATABASE_URL"
 
       - name: Check out code
         uses: actions/checkout@v4
@@ -152,3 +151,48 @@ jobs:
 
       - name: Db migrate
         run:  pnpm --filter=database db:migrate:deploy
+
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read
+
+    needs:
+      - build
+      - db-migrate
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          role-session-name: ${{ inputs.environment }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: true
+
+      - name: Deploy to App Runner Image
+        id: deploy-apprunner
+        uses: awslabs/amazon-app-runner-deploy@main
+        with:
+          service: app-runner-git-deploy-service
+          image: https://${{ inputs.aws_region }}.console.aws.amazon.com/ecr/repositories/private/${{ secrets.aws_account_id }}/${{ inputs.environment }}-${{ inputs.service_name }
+          access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          region: ${{ inputs.aws_region }}
+#          cpu : 1
+#          memory : 2
+          # Deprecated: wait-for-service-stability: true
+          # The new way to control service stability timeout
+          wait-for-service-stability-seconds: 1200
+
+      - name: App Runner URL
+        run: echo "App runner URL ${{ steps.deploy-apprunner.outputs.service-url }}"
+
