@@ -161,9 +161,9 @@ jobs:
       id-token: write # This is required for requesting the JWT
       contents: read
 
-    needs:
-      - build
-      - db-migrate
+#    needs:
+#      - build
+#      - db-migrate
 
     steps:
       - name: Configure AWS credentials
@@ -185,7 +185,7 @@ jobs:
         with:
           service: app-runner-git-deploy-service
           image: ${{ secrets.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.environment }}-${{ inputs.service_name }}:amd-latest
-          access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/prod-server-ecr-access-role
+          access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.environment }}-${{ inputs.service_name }}-ecr-access-role
           region: ${{ inputs.aws_region }}
 #          cpu : 1
 #          memory : 2

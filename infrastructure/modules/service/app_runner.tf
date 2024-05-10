@@ -50,17 +50,11 @@ resource "aws_route53_record" "server_record" {
 data "aws_iam_policy_document" "deploy_apprunner_policy_document" {
   statement {
     actions = [
-      "apprunner:ListServices",
       "apprunner:CreateService",
+      "apprunner:ListServices",
       "apprunner:UpdateService",
       "apprunner:DescribeService",
       "apprunner:TagResource",
-      "iam:PassRole",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:BatchGetImage",
-      "ecr:DescribeImages",
-      "ecr:GetAuthorizationToken",
-      "ecr:BatchCheckLayerAvailability"
     ]
     resources = ["*"]
   }
