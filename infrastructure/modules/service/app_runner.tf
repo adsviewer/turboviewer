@@ -23,7 +23,7 @@ resource "aws_apprunner_service" "server" {
       image_identifier      = "${aws_ecr_repository.ecr_repo.repository_url}:amd-latest"
       image_repository_type = "ECR"
     }
-    auto_deployments_enabled = false
+    auto_deployments_enabled = true
   }
 }
 
