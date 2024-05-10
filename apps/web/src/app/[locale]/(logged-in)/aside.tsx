@@ -46,8 +46,10 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
   }, [pathname, router]);
 
   useEffect(() => {
-    setInitialGroupedByFilters();
-  }, [setInitialGroupedByFilters]);
+    if (pathname === '/insights') {
+      setInitialGroupedByFilters();
+    }
+  }, [pathname, setInitialGroupedByFilters]);
 
   return (
     <div className={cx('bg-menu-bg', minimize ? 'lg:w-10' : 'lg:w-1/5')}>
