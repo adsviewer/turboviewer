@@ -9,6 +9,11 @@ import {
 
 export type OrderType = 'asc' | 'desc';
 
+export type QueryParamsType = {
+  key: string;
+  value: string;
+}[];
+
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
   order?: OrderType;
@@ -70,3 +75,14 @@ export const useCreateGroupedByString = <T extends string>(
 
 export const isInsightsColumnsGroupBy = (value: string): value is InsightsColumnsGroupBy =>
   Object.values(InsightsColumnsGroupBy).includes(value as InsightsColumnsGroupBy);
+
+export const createURLWithQueryParams = (pathname: string, paramsMap: QueryParamsType): string => {
+  let URLWithQueryParams = `${pathname}/`;
+
+  for (let i = 0; i < paramsMap.length; i++) {
+    const prefixChar = i === 0 ? `?` : '&';
+    URLWithQueryParams += `${prefixChar}${paramsMap[i].key}=${paramsMap[i].value}`;
+  }
+
+  return URLWithQueryParams;
+};
