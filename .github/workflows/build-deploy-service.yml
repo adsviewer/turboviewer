@@ -185,7 +185,7 @@ jobs:
         with:
           service: app-runner-git-deploy-service
           image: ${{ secrets.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.environment }}-${{ inputs.service_name }}:amd-latest
-          access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/temp-role
           region: ${{ inputs.aws_region }}
 #          cpu : 1
 #          memory : 2
