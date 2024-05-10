@@ -183,7 +183,7 @@ jobs:
         id: deploy-apprunner
         uses: awslabs/amazon-app-runner-deploy@main
         with:
-          service: app-runner-git-deploy-service
+          service: ${{ inputs.environment }}-${{ inputs.service_name }}
           image: ${{ secrets.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.environment }}-${{ inputs.service_name }}:amd-latest
           access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.environment }}-${{ inputs.service_name }}-ecr-access-role
           region: ${{ inputs.aws_region }}
