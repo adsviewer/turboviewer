@@ -46,3 +46,31 @@ resource "aws_route53_record" "server_record" {
     evaluate_target_health = true
   }
 }
+
+data "aws_iam_policy_document" "deploy_apprunner_policy_document" {
+  statement {
+    actions = [
+      "apprunner:CreateService",
+      "apprunner:ListServices",
+    ]
+    resources = ["*"]
+  }
+  statement {
+    actions = [
+      "apprunner:UpdateService",
+      "apprunner:DescribeService",
+      "apprunner:TagResource",
+    ]
+    resources = [aws_apprunner_service.server.arn]
+  }
+}
+
+resource "aws_iam_policy" "deploy_apprunner_policy" {
+  name   = "${local.name}-deploy-apprunner-policy"
+  policy = data.aws_iam_policy_document.deploy_apprunner_policy_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "deploy_apprunner_github_attachment" {
+  role       = var.github_role_name
+  policy_arn = aws_iam_policy.deploy_apprunner_policy.arn
+}
