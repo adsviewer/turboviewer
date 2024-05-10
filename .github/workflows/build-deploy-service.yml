@@ -184,7 +184,7 @@ jobs:
         uses: awslabs/amazon-app-runner-deploy@main
         with:
           service: app-runner-git-deploy-service
-          image: https://${{ inputs.aws_region }}.console.aws.amazon.com/ecr/repositories/private/${{ secrets.aws_account_id }}/${{ inputs.environment }}-${{ inputs.service_name }
+          image: https://${{ inputs.aws_region }}.console.aws.amazon.com/ecr/repositories/private/${{ secrets.aws_account_id }}/${{ inputs.environment }}-${{ inputs.service_name }}
           access-role-arn: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
           region: ${{ inputs.aws_region }}
 #          cpu : 1
