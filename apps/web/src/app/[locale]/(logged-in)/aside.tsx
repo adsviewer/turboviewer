@@ -24,7 +24,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
   const [minimize, setMinimize] = useState(false);
 
   const setInitialGroupedByFilters = useCallback(() => {
-    const initialParams: QueryParamsType = [
+    const initialParams: QueryParamsType[] = [
       {
         key: 'groupedBy',
         value: InsightsColumnsGroupBy.adId,
@@ -47,7 +47,7 @@ export function Aside({ children }: { children: React.ReactNode }): React.ReactN
   }, [pathname, router]);
 
   useEffect(() => {
-    if (pathname === '/insights' && searchParams.size === 0) {
+    if (pathname.endsWith('/insights') && searchParams.size === 0) {
       setInitialGroupedByFilters();
     }
   }, [pathname, searchParams, setInitialGroupedByFilters]);
