@@ -61,7 +61,7 @@ export interface ChannelInterface {
     integration: Integration,
     userId: string | undefined,
     initial: boolean,
-  ) => Promise<{ accounts: ChannelAdAccount[]; insights: ChannelInsight[]; ads: ChannelAd[] } | AError>;
+  ) => Promise<AError | undefined>;
   getAdPreview: (
     integration: Integration,
     adId: string,
