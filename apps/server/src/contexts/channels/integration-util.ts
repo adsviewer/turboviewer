@@ -95,45 +95,49 @@ export const saveAds = async (
   adAccountId: string,
   adExternalIdMap: Map<string, string>,
 ): Promise<void> => {
-  logger.info('Saving ads for %s', integration.id);
-  for (const channelAd of ads) {
-    const { id } = await prisma.ad.upsert({
-      select: { id: true },
-      create: {
-        externalId: channelAd.externalId,
-        name: channelAd.name,
-        adAccount: {
-          connect: {
-            integrationId_externalId: {
-              integrationId: integration.id,
-              externalId: channelAd.externalAdAccountId,
+  logger.info('Saving %d ads for %s', ads.length, adAccountId);
+  await Promise.all(
+    ads.map((channelAd) =>
+      prisma.ad
+        .upsert({
+          select: { id: true },
+          create: {
+            externalId: channelAd.externalId,
+            name: channelAd.name,
+            adAccount: {
+              connect: {
+                integrationId_externalId: {
+                  integrationId: integration.id,
+                  externalId: channelAd.externalAdAccountId,
+                },
+              },
             },
           },
-        },
-      },
-      update: {
-        name: channelAd.name,
-      },
-      where: {
-        adAccountId_externalId: {
-          adAccountId,
-          externalId: channelAd.externalId,
-        },
-      },
-    });
-    adExternalIdMap.set(channelAd.externalId, id);
-  }
+          update: {
+            name: channelAd.name,
+          },
+          where: {
+            adAccountId_externalId: {
+              adAccountId,
+              externalId: channelAd.externalId,
+            },
+          },
+        })
+        .then(({ id }) => adExternalIdMap.set(channelAd.externalId, id)),
+    ),
+  );
 };
 
 export const saveInsights = async (
-  insightsByExternalAdId: Map<string, ChannelInsight[]>,
+  insights: ChannelInsight[],
   adExternalIdMap: Map<string, string>,
   dbAccount: AdAccountEssential,
 ) => {
-  for (const groupedInsights of Array.from(insightsByExternalAdId.values())) {
-    for (const insight of groupedInsights) {
+  logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
+  await Promise.all(
+    insights.map(async (insight) => {
       const adId = adExternalIdMap.get(insight.externalAdId);
-      if (!adId) continue;
+      if (!adId) return;
       await prisma.insight.upsert({
         where: {
           adId_date_device_publisher_position: {
@@ -162,6 +166,6 @@ export const saveInsights = async (
           position: insight.position,
         },
       });
-    }
-  }
+    }),
+  );
 };

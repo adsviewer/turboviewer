@@ -39,7 +39,6 @@ import {
 } from '../integration-util';
 import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
 import { pubSub } from '../../../schema/pubsub';
-import { groupBy } from '../../../utils/data-object-utils';
 import { getIFrameAdFormat } from './iframe-fb-helper';
 
 const fireAndForget = new FireAndForget();
@@ -218,10 +217,12 @@ class Facebook implements ChannelInterface {
     const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
     logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(activeAccounts)} active accounts`);
     const dbAccounts = await saveAccounts(activeAccounts, integration);
+
     const adReportsAccountMap = await this.runAdInsightReports(dbAccounts, initial);
     if (isAError(adReportsAccountMap)) return adReportsAccountMap;
+
     const adExternalIdMap = new Map<string, string>();
-    await this.waitForAdReportResults(adReportsAccountMap, integration, adExternalIdMap, userId);
+    await this.waitAndProcessReports(adReportsAccountMap, integration, adExternalIdMap, userId);
     logger.info(`Created ${String(adReportsAccountMap.size)} reports`);
   }
 
@@ -368,7 +369,7 @@ class Facebook implements ChannelInterface {
     return adReportsAccountMap;
   }
 
-  private async waitForAdReportResults(
+  private async waitAndProcessReports(
     adReportsAccountMap: Map<string, AdAccountEssential>,
     integration: Integration,
     adExternalIdMap: Map<string, string>,
@@ -408,7 +409,7 @@ class Facebook implements ChannelInterface {
           logger.error('Ad report failed %o', resp);
         }
         if (item.status === 'Job Completed') {
-          await this.getAdInsights(reportId, integration, adExternalIdMap, dbAccount);
+          await this.getAndSaveAdsAndInsights(reportId, integration, adExternalIdMap, dbAccount);
         }
         status.push(item);
       }
@@ -435,7 +436,7 @@ class Facebook implements ChannelInterface {
     }
   }
 
-  private async getAdInsights(
+  private async getAndSaveAdsAndInsights(
     reportId: string,
     integration: Integration,
     adExternalIdMap: Map<string, string>,
@@ -520,9 +521,8 @@ class Facebook implements ChannelInterface {
     const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
     const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
     await saveAds(integration, newAds, dbAccount.id, adExternalIdMap);
-    const insightsByExternalAdId = groupBy(insights, (item) => item.externalAdId);
 
-    await saveInsights(insightsByExternalAdId, adExternalIdMap, dbAccount);
+    await saveInsights(insights, adExternalIdMap, dbAccount);
   }
 
   private static async handlePagination<T, U extends ZodTypeAny>(
@@ -567,9 +567,9 @@ class Facebook implements ChannelInterface {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
       const next = await cursor.next();
       const parsedNext = arraySchema.safeParse(next);
-      if (parsedNext.success && results) {
+      if (parsedNext.success) {
         const processed = await processCallback(parsedNext.data.map(parseCallback));
-        if (processed) results.push(...processed);
+        if (results && processed) results.push(...processed);
       } else {
         logger.error('Failed to parse paginated %o', next);
       }
