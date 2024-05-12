@@ -34,8 +34,7 @@ export default function GroupedCheckbox<T extends string>({
       // If the upcoming URL after the checkbox is pressed is about to be empty, add the groupedBy=none parameter
       let upcomingURL = `${pathname}/?${createQueryString(groupByColumn, event.target.checked)}`;
       if (upcomingURL.endsWith('/insights/?')) {
-        const noneParams = userActionOverrideParams;
-        const noneURL = createURLWithQueryParams(pathname, [noneParams]);
+        const noneURL = createURLWithQueryParams(pathname, [userActionOverrideParams]);
         router.replace(noneURL);
       } else {
         if (isParamInSearchParams(searchParams, userActionOverrideParams.key, userActionOverrideParams.value)) {
