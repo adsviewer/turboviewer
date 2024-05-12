@@ -9,6 +9,11 @@ import {
 
 export type OrderType = 'asc' | 'desc';
 
+export interface QueryParamsType {
+  key: string;
+  value: string;
+}
+
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
   order?: OrderType;
@@ -23,6 +28,13 @@ export interface SearchParams {
 }
 
 export type SearchParamsKeys = keyof SearchParams;
+
+// Signals that the user has altered the url via UI actions so that automatic
+// loading of search filters is aborted
+export const userActionOverrideParams: QueryParamsType = {
+  key: 'overrideUserAction',
+  value: 'true',
+};
 
 export const useCreateQueryString = (
   searchParams: ReadonlyURLSearchParams,
@@ -70,3 +82,18 @@ export const useCreateGroupedByString = <T extends string>(
 
 export const isInsightsColumnsGroupBy = (value: string): value is InsightsColumnsGroupBy =>
   Object.values(InsightsColumnsGroupBy).includes(value as InsightsColumnsGroupBy);
+
+export const createURLWithQueryParams = (pathname: string, paramsMap: QueryParamsType[]): string => {
+  let URLWithQueryParams = `${pathname}/`;
+
+  for (let i = 0; i < paramsMap.length; i++) {
+    const prefixChar = i === 0 ? `?` : '&';
+    URLWithQueryParams += `${prefixChar}${paramsMap[i].key}=${paramsMap[i].value}`;
+  }
+
+  return URLWithQueryParams;
+};
+
+export const isParamInSearchParams = (searchParams: ReadonlyURLSearchParams, key: string, value: string): boolean => {
+  return searchParams.getAll(key).includes(value);
+};

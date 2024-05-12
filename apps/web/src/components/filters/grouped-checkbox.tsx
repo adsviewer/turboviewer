@@ -3,7 +3,13 @@
 import { type ChangeEvent, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Checkbox from '@repo/ui/checkbox';
-import { type SearchParamsKeys, useCreateGroupedByString } from '@/app/[locale]/(logged-in)/insights/query-string-util';
+import {
+  type SearchParamsKeys,
+  useCreateGroupedByString,
+  createURLWithQueryParams,
+  userActionOverrideParams,
+  isParamInSearchParams,
+} from '@/app/[locale]/(logged-in)/insights/query-string-util';
 
 export default function GroupedCheckbox<T extends string>({
   label,
@@ -21,11 +27,21 @@ export default function GroupedCheckbox<T extends string>({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const createQueryString = useCreateGroupedByString(searchParams, groupKey);
-  const checked = searchParams.getAll(groupKey).includes(groupByColumn);
+  const checked = isParamInSearchParams(searchParams, groupKey, groupByColumn);
 
   function onChange(event: ChangeEvent<HTMLInputElement>): void {
     startTransition(() => {
-      router.replace(`${pathname}/?${createQueryString(groupByColumn, event.target.checked)}`);
+      // If the upcoming URL after the checkbox is pressed is about to be empty, add the groupedBy=none parameter
+      let upcomingURL = `${pathname}/?${createQueryString(groupByColumn, event.target.checked)}`;
+      if (upcomingURL.endsWith('/insights/?')) {
+        const noneURL = createURLWithQueryParams(pathname, [userActionOverrideParams]);
+        router.replace(noneURL);
+      } else {
+        if (isParamInSearchParams(searchParams, userActionOverrideParams.key, userActionOverrideParams.value)) {
+          upcomingURL = `insights/?${groupKey}=${groupByColumn}`;
+        }
+        router.replace(upcomingURL);
+      }
     });
   }
 
@@ -35,7 +51,7 @@ export default function GroupedCheckbox<T extends string>({
         className="flex whitespace-nowrap cursor-pointer px-2 py-1 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900 [&:has(input:checked)]:bg-blue-200 dark:[&:has(input:checked)]:bg-blue-800"
         htmlFor={id}
       >
-        <Checkbox id={id} className="m-1" defaultChecked={checked} onChange={onChange} disabled={isTransitioning} />
+        <Checkbox id={id} className="m-1" checked={checked} onChange={onChange} disabled={isTransitioning} />
         {label}
       </label>
     </div>
