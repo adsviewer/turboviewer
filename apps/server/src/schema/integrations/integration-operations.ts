@@ -4,7 +4,7 @@ import { AError } from '@repo/utils';
 import { builder } from '../builder';
 import { getIntegrationAuthUrl } from '../../contexts/channels/integration-helper';
 import { getChannel } from '../../contexts/channels/channel-helper';
-import { FbError } from '../../contexts/channels/fb/fb-channel';
+import { MetaError } from '../../contexts/channels/meta/meta-channel';
 import { revokeIntegration } from '../../contexts/channels/integration-util';
 import { FireAndForget } from '../../fire-and-forget';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
@@ -63,7 +63,7 @@ builder.queryFields((t) => ({
 builder.mutationFields((t) => ({
   deAuthIntegration: t.withAuth({ authenticated: true }).field({
     type: 'String',
-    errors: { types: [FbError, AError] },
+    errors: { types: [MetaError, AError] },
     args: {
       type: t.arg({
         type: IntegrationTypeDto,
@@ -93,7 +93,7 @@ builder.subscriptionFields((t) => ({
 }));
 
 const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatusEnum => {
-  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.FACEBOOK];
+  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.META];
   if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
   const integration = integrations.find((i) => i.type === type);

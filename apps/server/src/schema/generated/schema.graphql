@@ -248,13 +248,6 @@ interface Error {
   message: String!
 }
 
-type FacebookError implements Error {
-  code: Int!
-  errorSubCode: Int!
-  fbTraceId: String!
-  message: String!
-}
-
 type GenerateGoogleAuthUrlResponse {
   url: String!
 }
@@ -344,7 +337,7 @@ enum IntegrationStatus {
 }
 
 enum IntegrationType {
-  FACEBOOK
+  META
   TIKTOK
   LINKEDIN
 }
@@ -353,6 +346,13 @@ enum IntegrationType {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
+
+type MetaError implements Error {
+  code: Int!
+  errorSubCode: Int!
+  fbTraceId: String!
+  message: String!
+}
 
 type Mutation {
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
@@ -370,7 +370,7 @@ type Mutation {
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }
 
-union MutationDeAuthIntegrationResult = BaseError | FacebookError | MutationDeAuthIntegrationSuccess
+union MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDeAuthIntegrationSuccess
 
 type MutationDeAuthIntegrationSuccess {
   data: String!

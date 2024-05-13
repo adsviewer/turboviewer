@@ -282,14 +282,6 @@ export type Error = {
   message: Scalars['String']['output'];
 };
 
-export type FacebookError = Error & {
-  __typename?: 'FacebookError';
-  code: Scalars['Int']['output'];
-  errorSubCode: Scalars['Int']['output'];
-  fbTraceId: Scalars['String']['output'];
-  message: Scalars['String']['output'];
-};
-
 export type GenerateGoogleAuthUrlResponse = {
   __typename?: 'GenerateGoogleAuthUrlResponse';
   url: Scalars['String']['output'];
@@ -390,10 +382,18 @@ export enum IntegrationStatus {
 }
 
 export enum IntegrationType {
-  FACEBOOK = 'FACEBOOK',
+  META = 'META',
   TIKTOK = 'TIKTOK',
   LINKEDIN = 'LINKEDIN',
 }
+
+export type MetaError = Error & {
+  __typename?: 'MetaError';
+  code: Scalars['Int']['output'];
+  errorSubCode: Scalars['Int']['output'];
+  fbTraceId: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -450,7 +450,7 @@ export type MutationUpdateUserArgs = {
   oldPassword?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type MutationDeAuthIntegrationResult = BaseError | FacebookError | MutationDeAuthIntegrationSuccess;
+export type MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDeAuthIntegrationSuccess;
 
 export type MutationDeAuthIntegrationSuccess = {
   __typename?: 'MutationDeAuthIntegrationSuccess';
@@ -640,7 +640,7 @@ export type DeAuthIntegrationMutation = {
   __typename?: 'Mutation';
   deAuthIntegration:
     | { __typename?: 'BaseError'; message: string }
-    | { __typename?: 'FacebookError'; message: string }
+    | { __typename?: 'MetaError'; message: string }
     | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
 
@@ -848,7 +848,7 @@ export const DeAuthIntegrationDocument = gql`
       ... on BaseError {
         message
       }
-      ... on FacebookError {
+      ... on MetaError {
         message
       }
       ... on MutationDeAuthIntegrationSuccess {
