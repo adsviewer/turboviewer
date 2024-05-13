@@ -39,7 +39,7 @@ import {
 } from '../integration-util';
 import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
 import { pubSub } from '../../../schema/pubsub';
-import { getIFrameAdFormat } from './iframe-fb-helper';
+import { getIFrameAdFormat } from './iframe-meta-helper';
 
 const fireAndForget = new FireAndForget();
 
@@ -47,8 +47,8 @@ const apiVersion = 'v19.0';
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
-export class FbError extends AError {
-  name = 'FacebookError';
+export class MetaError extends AError {
+  name = 'MetaError';
   code: number;
   errorSubCode: number;
   fbTraceId: string;
@@ -61,9 +61,9 @@ export class FbError extends AError {
   }
 }
 
-class Facebook implements ChannelInterface {
+class Meta implements ChannelInterface {
   generateAuthUrl() {
-    const state = `${MODE}_${IntegrationTypeEnum.FACEBOOK}_${randomUUID()}`;
+    const state = `${MODE}_${IntegrationTypeEnum.META}_${randomUUID()}`;
     const scopes = ['ads_read'];
 
     const params = new URLSearchParams({
@@ -116,7 +116,7 @@ class Facebook implements ChannelInterface {
         accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
       };
     }
-    const accessTokenExpiresAt = await Facebook.getExpireAt(parsed.data.access_token);
+    const accessTokenExpiresAt = await Meta.getExpireAt(parsed.data.access_token);
     if (isAError(accessTokenExpiresAt)) return accessTokenExpiresAt;
     return {
       accessToken: parsed.data.access_token,
@@ -147,18 +147,18 @@ class Facebook implements ChannelInterface {
       res.status(400).send('Failed to parse sign out request');
       return;
     }
-    const userId = Facebook.parseRequest(parsedBody.data.signed_request, env.FB_APPLICATION_SECRET);
+    const userId = Meta.parseRequest(parsedBody.data.signed_request, env.FB_APPLICATION_SECRET);
     if (isAError(userId)) {
       logger.error(userId.message);
       res.status(400).send(userId.message);
       return;
     }
-    fireAndForget.add(() => revokeIntegration(userId, IntegrationTypeEnum.FACEBOOK));
+    fireAndForget.add(() => revokeIntegration(userId, IntegrationTypeEnum.META));
     res.status(200).send('OK');
   }
 
-  async deAuthorize(organizationId: string): Promise<string | AError | FbError> {
-    const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.FACEBOOK);
+  async deAuthorize(organizationId: string): Promise<string | AError | MetaError> {
+    const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.META);
     if (!integration) return new AError('No integration found');
 
     const response = await fetch(
@@ -188,7 +188,7 @@ class Facebook implements ChannelInterface {
         logger.error('De-authorization request failed due to %o', json);
         return new AError('Failed to de-authorize');
       }
-      return new FbError(
+      return new MetaError(
         parsed.data.error.message,
         parsed.data.error.code,
         parsed.data.error.error_subcode,
@@ -246,7 +246,7 @@ class Facebook implements ChannelInterface {
     });
     const previewSchema = z.object({ body: z.string() });
     const toBody = (preview: z.infer<typeof previewSchema>) => preview.body;
-    const parsedPreviews = await Facebook.handlePagination(previews, previewSchema, toBody);
+    const parsedPreviews = await Meta.handlePagination(previews, previewSchema, toBody);
     if (isAError(parsedPreviews)) return parsedPreviews;
     if (parsedPreviews.length === 0) return new AError('No ad preview found');
     if (parsedPreviews.length > 1) return new AError('More than one ad previews found');
@@ -292,7 +292,7 @@ class Facebook implements ChannelInterface {
         name: acc.name,
       }) satisfies ChannelAdAccount;
 
-    return await Facebook.handlePagination(res, accountSchema, toAccount);
+    return await Meta.handlePagination(res, accountSchema, toAccount);
   }
 
   private async getCreatives(accounts: ChannelAdAccount[], accessToken?: string): Promise<ChannelCreative[] | AError> {
@@ -319,7 +319,7 @@ class Facebook implements ChannelInterface {
           limit: 500,
         },
       );
-      const accountCreatives = await Facebook.handlePagination(res, adsSchema, toCreative);
+      const accountCreatives = await Meta.handlePagination(res, adsSchema, toCreative);
       if (!isAError(accountCreatives)) creatives.push(...accountCreatives);
     }
     return creatives;
@@ -362,7 +362,7 @@ class Facebook implements ChannelInterface {
       const parsed = adReportRunSchema.safeParse(resp);
       if (!parsed.success) {
         logger.error('Failed to parse ad report run %o', resp);
-        return new AError('Failed to parse facebook ad report run');
+        return new AError('Failed to parse meta ad report run');
       }
       adReportsAccountMap.set(resp.id, acc);
     }
@@ -399,7 +399,7 @@ class Facebook implements ChannelInterface {
         const parsed = reportSchema.safeParse(resp);
         if (!parsed.success) {
           logger.error('Failed to parse ad report %o', resp);
-          return new AError('Failed to parse facebook ad report');
+          return new AError('Failed to parse meta ad report');
         }
         const item = {
           percent: parsed.data.async_percent_completion,
@@ -417,7 +417,7 @@ class Facebook implements ChannelInterface {
       if (status.every((s) => s.status === 'Job Completed')) {
         userId &&
           pubSub.publish('user:channel:initial-progress', userId, {
-            channel: IntegrationTypeEnum.FACEBOOK,
+            channel: IntegrationTypeEnum.META,
             progress: 100,
           });
         break;
@@ -426,7 +426,7 @@ class Facebook implements ChannelInterface {
       const mean = (0.95 * status.reduce((acc, val) => acc + val.percent, 0)) / status.length;
       userId &&
         pubSub.publish('user:channel:initial-progress', userId, {
-          channel: IntegrationTypeEnum.FACEBOOK,
+          channel: IntegrationTypeEnum.META,
           progress: mean + 5,
         });
 
@@ -461,8 +461,8 @@ class Facebook implements ChannelInterface {
         externalAccountId: insight.account_id,
         impressions: insight.impressions,
         spend: Math.trunc(insight.spend * 100), // converting to cents
-        device: Facebook.deviceEnumMap.get(insight.device_platform) ?? DeviceEnum.Unknown,
-        publisher: Facebook.publisherEnumMap.get(insight.publisher_platform) ?? PublisherEnum.Unknown,
+        device: Meta.deviceEnumMap.get(insight.device_platform) ?? DeviceEnum.Unknown,
+        publisher: Meta.publisherEnumMap.get(insight.publisher_platform) ?? PublisherEnum.Unknown,
         position: insight.platform_position,
       },
       ad: {
@@ -495,12 +495,7 @@ class Facebook implements ChannelInterface {
       await this.saveAdsAndInsights(i, adExternalIdMap, integration, dbAccount);
       return undefined;
     };
-    const accountInsightsAndAds = await Facebook.handlePaginationFn(
-      resp,
-      insightSchema,
-      toInsightAndAd,
-      insightsProcessFn,
-    );
+    const accountInsightsAndAds = await Meta.handlePaginationFn(resp, insightSchema, toInsightAndAd, insightsProcessFn);
     if (isAError(accountInsightsAndAds)) return accountInsightsAndAds;
   }
 
@@ -534,7 +529,7 @@ class Facebook implements ChannelInterface {
     const parsed = arraySchema.safeParse(cursor);
     if (!parsed.success) {
       logger.error('Failed to parse %o', cursor);
-      return new AError('Failed to parse facebook paginated response');
+      return new AError('Failed to parse meta paginated response');
     }
     const results = parsed.data.map(parseCallback);
     while (cursor.hasNext()) {
@@ -560,7 +555,7 @@ class Facebook implements ChannelInterface {
     const parsed = arraySchema.safeParse(cursor);
     if (!parsed.success) {
       logger.error('Failed to parse %o', cursor);
-      return new AError('Failed to parse facebook paginated response');
+      return new AError('Failed to parse meta paginated response');
     }
     const results = await processCallback(parsed.data.map(parseCallback));
     while (cursor.hasNext()) {
@@ -643,4 +638,4 @@ class Facebook implements ChannelInterface {
   ]);
 }
 
-export const facebook = new Facebook();
+export const meta = new Meta();

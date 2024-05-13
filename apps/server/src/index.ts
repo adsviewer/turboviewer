@@ -40,7 +40,7 @@ const index = (): void => {
   app.post(
     '/api/fb/sign-out',
     bodyParser.urlencoded({ extended: true }),
-    getChannel(IntegrationTypeEnum.FACEBOOK).signOutCallback,
+    getChannel(IntegrationTypeEnum.META).signOutCallback,
   );
 
   const port = env.PORT;

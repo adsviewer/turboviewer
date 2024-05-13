@@ -9,7 +9,7 @@ import { builder } from '../builder';
 import { getEndofDay } from '../../utils/date-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
 import { iFramePerInsight } from '../../contexts/channels/iframe-helper';
-import { getIFrameAdFormat } from '../../contexts/channels/fb/iframe-fb-helper';
+import { getIFrameAdFormat } from '../../contexts/channels/meta/iframe-meta-helper';
 import { refreshData, refreshDataOf } from '../../contexts/channels/data-refresh';
 import { decryptTokens } from '../../contexts/channels/integration-util';
 import {

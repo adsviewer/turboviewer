@@ -11,7 +11,7 @@ mutation deAuthIntegration($type: IntegrationType!) {
     ... on BaseError {
       message
     }
-    ... on FacebookError {
+    ... on MetaError {
       message
     }
     ... on MutationDeAuthIntegrationSuccess {

@@ -78,7 +78,7 @@ model ForgetPassword {
 }
 
 enum IntegrationTypeEnum {
-  FACEBOOK
+  META
   TIKTOK
   LINKEDIN
 }

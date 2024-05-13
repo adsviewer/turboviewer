@@ -49,7 +49,7 @@ export default function Card({
           setRedirectUrl(resp.data);
           break;
         case 'BaseError':
-        case 'FacebookError':
+        case 'MetaError':
           toast.error(resp.message);
           break;
         default:

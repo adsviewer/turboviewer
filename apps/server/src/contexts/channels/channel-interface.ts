@@ -1,7 +1,7 @@
 import { type AError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { type DeviceEnum, type PublisherEnum, type CurrencyEnum, type Integration } from '@repo/database';
-import { type FbError } from './fb/fb-channel';
+import { type MetaError } from './meta/meta-channel';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -56,7 +56,7 @@ export interface ChannelInterface {
   exchangeCodeForTokens: (code: string) => Promise<TokensResponse | AError>;
   getUserId: (accessToken: string) => Promise<string | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
-  deAuthorize: (organizationId: string) => Promise<string | AError | FbError>;
+  deAuthorize: (organizationId: string) => Promise<string | AError | MetaError>;
   getChannelData: (
     integration: Integration,
     userId: string | undefined,
