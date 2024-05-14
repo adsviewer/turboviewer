@@ -1,5 +1,5 @@
 import { logger } from '@repo/logger';
-import { AError } from '@repo/utils';
+import { AError, isAError } from '@repo/utils';
 import { ioredis } from './ioredis';
 import { RedisBatcher } from './redis-batcher';
 
@@ -14,7 +14,7 @@ export class Cacheable<
   V extends string | object,
 > {
   private readonly getKeyFn: (keyArg: U) => Promise<string> | string;
-  private readonly fn: (fnArg: V) => Promise<T> | T;
+  private readonly fn: (fnArg: V) => Promise<T | AError> | T | AError;
   private readonly batcher: RedisBatcher<T>;
   // Time to live in seconds
   private readonly ttlSec: number;
@@ -50,6 +50,10 @@ export class Cacheable<
     const key = await this.getKeyFn(keyArg);
     try {
       const data = await this.fn(fnArg);
+      if (isAError(data)) {
+        logger.error(`Error in forceUpdate: ${data.message}`);
+        return data;
+      }
       if (data) {
         await ioredis.psetex(
           key,

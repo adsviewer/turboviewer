@@ -28,7 +28,7 @@ export default function Insight({
       <div className="flex flex-row">
         <Spend spend={spend} currency={currency ?? CurrencyEnum.USD} />
         <Eye />
-        <div>{impressions}</div>
+        <div>{format.number(impressions, { style: 'decimal' })}</div>
         {date ? (
           <div className="flex flex-row">
             <CalendarDays />
