@@ -48,6 +48,16 @@ resource "aws_ssm_parameter" "database_url" {
   }
 }
 
+resource "aws_ssm_parameter" "database_ro_url" {
+  name  = "/${var.environment}/server/database_ro_url"
+  type  = "SecureString"
+  value = "fill_me_in"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "server_secrets" {
   for_each = local.server_secrets_map
   name     = "/${var.environment}/server/${each.key}"
@@ -66,8 +76,9 @@ locals {
     }, {
     for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.arn
     }, {
-    CHANNEL_SECRET = aws_ssm_parameter.channel_secret.arn
-    DATABASE_URL   = aws_ssm_parameter.database_url.arn
+    CHANNEL_SECRET  = aws_ssm_parameter.channel_secret.arn
+    DATABASE_URL    = aws_ssm_parameter.database_url.arn
+    DATABASE_RO_URL = aws_ssm_parameter.database_ro_url.arn
   })
 
   fe_environment_variables = merge({

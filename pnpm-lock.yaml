@@ -362,6 +362,9 @@ importers:
       '@prisma/client':
         specifier: ^5.13.0
         version: 5.13.0(prisma@5.13.0)
+      '@prisma/extension-read-replicas':
+        specifier: ^0.3.0
+        version: 0.3.0(@prisma/client@5.13.0(prisma@5.13.0))
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
@@ -1879,6 +1882,11 @@ packages:
 
   '@prisma/engines@5.13.0':
     resolution: {integrity: sha512-hIFLm4H1boj6CBZx55P4xKby9jgDTeDG0Jj3iXtwaaHmlD5JmiDkZhh8+DYWkTGchu+rRF36AVROLnk0oaqhHw==}
+
+  '@prisma/extension-read-replicas@0.3.0':
+    resolution: {integrity: sha512-F9+rSmYday6GT2qjhJtkZcBOpLO5LtpvFcMGqrBDHf+78LEdSuxfFjOxYlNuqk4B+th62yxpbhfpmB9/Mca14Q==}
+    peerDependencies:
+      '@prisma/client': ^5.2.0
 
   '@prisma/fetch-engine@5.13.0':
     resolution: {integrity: sha512-Yh4W+t6YKyqgcSEB3odBXt7QyVSm0OQlBSldQF2SNXtmOgMX8D7PF/fvH6E6qBCpjB/yeJLy/FfwfFijoHI6sA==}
@@ -7741,6 +7749,10 @@ snapshots:
       '@prisma/engines-version': 5.13.0-23.b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b
       '@prisma/fetch-engine': 5.13.0
       '@prisma/get-platform': 5.13.0
+
+  '@prisma/extension-read-replicas@0.3.0(@prisma/client@5.13.0(prisma@5.13.0))':
+    dependencies:
+      '@prisma/client': 5.13.0(prisma@5.13.0)
 
   '@prisma/fetch-engine@5.13.0':
     dependencies:
