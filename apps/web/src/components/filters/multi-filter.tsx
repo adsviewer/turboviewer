@@ -31,7 +31,7 @@ export default function MultiFilter({ options, groupKey }: MultiFilterProps): Re
   }
   return (
     <div className="py-0.5">
-      <MultiSelectDropdown options={options} groupKey="position" prompt={`${t('select')} ${t(groupKey)}...`} />
+      <MultiSelectDropdown options={options} groupKey={groupKey} prompt={`${t('select')} ${t(groupKey)}...`} />
     </div>
   );
 }

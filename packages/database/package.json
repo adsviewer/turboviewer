@@ -33,6 +33,7 @@
     "@pothos/plugin-prisma": "^3.65.1",
     "@prisma/adapter-neon": "^5.13.0",
     "@prisma/client": "^5.13.0",
+    "@prisma/extension-read-replicas": "^0.3.0",
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:*",
     "ws": "^8.17.0",
