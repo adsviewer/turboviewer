@@ -15,7 +15,7 @@ const hasPgbouncer = params.has('pgbouncer');
 const adapter = new PrismaNeon(pool);
 export const prisma = new PrismaClient(hasPgbouncer ? { adapter } : undefined).$extends(
   readReplicas({
-    url: process.env.DATABASE_RO_URL ?? env.DATABASE_URL,
+    url: env.DATABASE_RO_URL ?? env.DATABASE_URL,
   }),
 );
 
