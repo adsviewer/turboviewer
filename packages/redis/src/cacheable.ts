@@ -51,7 +51,9 @@ export class Cacheable<
     try {
       const data = await this.fn(fnArg);
       if (isAError(data)) {
-        logger.error(`Error in forceUpdate: ${data.message}`);
+        logger.error(
+          `Error in forceUpdate fn. Key: ${JSON.stringify(keyArg)}. Args: ${JSON.stringify(fnArg)}. Msg: ${data.message}`,
+        );
         return data;
       }
       if (data) {
@@ -64,7 +66,9 @@ export class Cacheable<
       return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : JSON.stringify(e);
-      logger.error(`Error in forceUpdate: ${message}`);
+      logger.error(
+        `Error in forceUpdate: ${message}. Key: ${JSON.stringify(keyArg)}. Fn args: ${JSON.stringify(fnArg)}`,
+      );
       return new AError(message);
     }
   }
