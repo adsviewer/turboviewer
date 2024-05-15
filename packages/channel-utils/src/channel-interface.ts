@@ -1,7 +1,7 @@
 import { type AError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { type DeviceEnum, type PublisherEnum, type CurrencyEnum, type Integration } from '@repo/database';
-import { type MetaError } from './meta/meta-channel';
+import { type CurrencyEnum, type DeviceEnum, type Integration, type PublisherEnum } from '@repo/database';
+import { type MetaError } from './errors';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -57,11 +57,7 @@ export interface ChannelInterface {
   getUserId: (accessToken: string) => Promise<string | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   deAuthorize: (organizationId: string) => Promise<string | AError | MetaError>;
-  getChannelData: (
-    integration: Integration,
-    userId: string | undefined,
-    initial: boolean,
-  ) => Promise<AError | undefined>;
+  getChannelData: (integration: Integration, initial: boolean) => Promise<AError | undefined>;
   getAdPreview: (
     integration: Integration,
     adId: string,

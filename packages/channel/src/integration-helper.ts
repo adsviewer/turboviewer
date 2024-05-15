@@ -2,16 +2,13 @@ import type { Request as ExpressRequest, Response as ExpressResponse } from 'exp
 import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redis } from '@repo/redis';
-import { AError, isAError } from '@repo/utils';
+import { AError, FireAndForget, isAError, isMode } from '@repo/utils';
 import type QueryString from 'qs';
 import { z } from 'zod';
-import { env, isMode } from '../../config';
-import { FireAndForget } from '../../fire-and-forget';
-import { encryptAesGcm } from '../../utils/aes-util';
-import { pubSub } from '../../schema/pubsub';
-import { type TokensResponse } from './channel-interface';
+import { decryptTokens, encryptAesGcm } from '@repo/channel-utils';
+import { type TokensResponse } from '@repo/channel-utils';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
-import { decryptTokens } from './integration-util';
+import { env } from './config';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
 import PrismaClientKnownRequestError = Prisma.PrismaClientKnownRequestError;
 
@@ -108,7 +105,7 @@ const completeIntegration = async (
   return integrationType;
 };
 
-const integrationStateKey = (state: string) => `integration-state:${state}`;
+const integrationStateKey = (state: string): string => `integration-state:${state}`;
 export const saveOrgState = async (state: string, organizationId: string, userId: string): Promise<void> => {
   await redis.set(integrationStateKey(state), JSON.stringify({ organizationId, userId }), { EX: 12 * 60 * 60 });
 };
@@ -170,13 +167,8 @@ export const saveChannelData = async (
   initial: boolean,
 ): Promise<AError | undefined> => {
   logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
-  userId &&
-    pubSub.publish('user:channel:initial-progress', userId, {
-      channel: integration.type,
-      progress: 0,
-    });
 
   const channel = getChannel(integration.type);
-  const data = await channel.getChannelData(integration, userId, initial);
+  const data = await channel.getChannelData(integration, initial);
   if (isAError(data)) return data;
 };

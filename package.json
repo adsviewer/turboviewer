@@ -5,6 +5,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
     "update": "pnpm update --latest && turbo update --concurrency=1 && pnpm install",

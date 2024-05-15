@@ -4,14 +4,13 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { logger } from '@repo/logger';
 import bodyParser from 'body-parser';
 import { IntegrationTypeEnum } from '@repo/database';
-import { env, Environment, MODE } from './config';
+import { Environment, MODE } from '@repo/utils';
+import { authCallback, getChannel, channelDataRefreshWebhook } from '@repo/channel';
+import { authEndpoint } from '@repo/channel-utils';
+import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
-import { authCallback } from './contexts/channels/integration-helper';
-import { getChannel } from './contexts/channels/channel-helper';
-import { authEndpoint } from './contexts/channels/integration-util';
 import { snsMiddleware } from './utils/sns-subscription-utils';
-import { channelDataRefreshWebhook } from './contexts/channels/data-refresh';
 
 process.on('uncaughtException', (reason) => {
   logger.error(reason, 'Uncaught Exception', reason.stack);

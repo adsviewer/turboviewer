@@ -1,9 +1,9 @@
 import { CurrencyEnum, DeviceEnum, type Insight, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
+import { MetaError } from '@repo/channel-utils';
+import { getEndOfDay } from '@repo/utils';
 import { builder } from '../builder';
-import { MetaError } from '../../contexts/channels/meta/meta-channel';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
-import { getEndofDay } from '../../utils/date-utils';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
@@ -143,7 +143,7 @@ export const AdDto = builder.prismaObject('Ad', {
       totalCount: true,
       query: (args, _ctx) => ({
         where: {
-          date: { gte: args.dateFrom ?? undefined, lte: getEndofDay(args.dateTo) },
+          date: { gte: args.dateFrom ?? undefined, lte: getEndOfDay(args.dateTo) },
           device: { in: args.devices ?? undefined },
           publisher: { in: args.publishers ?? undefined },
           position: { in: args.positions ?? undefined },

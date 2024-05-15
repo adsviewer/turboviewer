@@ -1,10 +1,10 @@
 import { Cacheable } from '@repo/redis';
 import { type DeviceEnum, prisma, type PublisherEnum } from '@repo/database';
 import { AError } from '@repo/utils';
+import { decryptTokens } from '@repo/channel-utils';
 import { getChannel } from './channel-helper';
-import { decryptTokens } from './integration-util';
 
-const getKey = (publisher: PublisherEnum, adId: string, format: string) =>
+const getKey = (publisher: PublisherEnum, adId: string, format: string): string =>
   `iFramePerInsight:${publisher}:${String(adId)}:${format}`;
 
 export const iFramePerInsight = new Cacheable(

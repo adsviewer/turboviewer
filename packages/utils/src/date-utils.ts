@@ -1,11 +1,11 @@
-const formatYYYMMDDDate = (date: Date) => {
+const formatYYYMMDDDate: (date: Date) => string = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
   const day = String(date.getDate()).padStart(2, '0');
   return `${String(year)}-${month}-${day}`;
 };
 
-export const getLastThreeMonths = () => {
+export const getLastThreeMonths: () => { until: string; since: string } = () => {
   const today = new Date();
   const lastThreeMonths = new Date(today);
   const tomorrow = new Date(today);
@@ -17,7 +17,7 @@ export const getLastThreeMonths = () => {
   };
 };
 
-export const getLastTwoDays = () => {
+export const getLastTwoDays: () => { until: string; since: string } = () => {
   const today = new Date();
   const yesterday = new Date(today);
   const tomorrow = new Date(today);
@@ -29,7 +29,7 @@ export const getLastTwoDays = () => {
   };
 };
 
-export const getEndofDay = (date?: Date | null) => {
+export const getEndOfDay: (date?: Date | null) => Date = (date?: Date | null) => {
   const endOfDay = new Date(date ?? new Date());
   endOfDay.setHours(23, 59, 59, 999);
   return endOfDay;

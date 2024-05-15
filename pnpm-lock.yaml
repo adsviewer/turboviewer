@@ -82,6 +82,12 @@ importers:
       '@pothos/plugin-validation':
         specifier: ^3.10.1
         version: 3.10.1(@pothos/core@3.41.1(graphql@16.8.1(patch_hash=3uxq64xlzmb5b66uwb44e4rcra)))(graphql@16.8.1(patch_hash=3uxq64xlzmb5b66uwb44e4rcra))(zod@3.23.5)
+      '@repo/channel':
+        specifier: workspace:*
+        version: link:../../packages/channel
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../../packages/channel-utils
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -109,12 +115,6 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.19.2
-      extensionless:
-        specifier: ^1.9.6
-        version: 1.9.6
-      facebook-nodejs-business-sdk:
-        specifier: ^19.0.3
-        version: 19.0.3
       google-auth-library:
         specifier: ^9.9.0
         version: 9.9.0
@@ -130,15 +130,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
       node-html-parser:
         specifier: ^6.1.13
         version: 6.1.13
-      p-queue:
-        specifier: ^8.0.1
-        version: 8.0.1
       sns-validator:
         specifier: ^0.3.5
         version: 0.3.5
@@ -179,21 +173,12 @@ importers:
       '@types/express-serve-static-core':
         specifier: ^4.19.0
         version: 4.19.0
-      '@types/facebook-nodejs-business-sdk':
-        specifier: ^18.0.0
-        version: 18.0.0
       '@types/jsonwebtoken':
         specifier: ^9.0.6
         version: 9.0.6
-      '@types/lodash':
-        specifier: ^4.17.0
-        version: 4.17.0
       '@types/node':
         specifier: 20.12.7
         version: 20.12.7
-      '@types/qs':
-        specifier: ^6.9.15
-        version: 6.9.15
       '@types/sns-validator':
         specifier: ^0.3.3
         version: 0.3.3
@@ -324,6 +309,126 @@ importers:
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+
+  packages/channel:
+    dependencies:
+      '@repo/channel-meta':
+        specifier: workspace:*
+        version: link:../channel-meta
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../channel-utils
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../redis
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      zod:
+        specifier: ^3.23.5
+        version: 3.23.5
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/node':
+        specifier: ^20.12.7
+        version: 20.12.7
+      '@types/qs':
+        specifier: ^6.9.15
+        version: 6.9.15
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+
+  packages/channel-meta:
+    dependencies:
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../channel-utils
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      facebook-nodejs-business-sdk:
+        specifier: ^19.0.3
+        version: 19.0.3
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      zod:
+        specifier: ^3.23.5
+        version: 3.23.5
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/facebook-nodejs-business-sdk':
+        specifier: ^18.0.0
+        version: 18.0.0
+      '@types/lodash':
+        specifier: ^4.17.0
+        version: 4.17.0
+      '@types/node':
+        specifier: ^20.12.7
+        version: 20.12.7
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+
+  packages/channel-utils:
+    dependencies:
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      zod:
+        specifier: ^3.23.5
+        version: 3.23.5
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/node':
+        specifier: ^20.12.7
+        version: 20.12.7
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -528,6 +633,12 @@ importers:
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      p-queue:
+        specifier: ^8.0.1
+        version: 8.0.1
       zod:
         specifier: ^3.23.5
         version: 3.23.5
@@ -538,6 +649,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../config-typescript
+      '@types/lodash':
+        specifier: ^4.17.0
+        version: 4.17.0
       '@types/node':
         specifier: ^20.12.7
         version: 20.12.7
@@ -3627,9 +3741,6 @@ packages:
 
   extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
-
-  extensionless@1.9.6:
-    resolution: {integrity: sha512-40F6zThJu1MxaT1A1pJ/2SHlU1BPYYnQNHt0j2ZlPuxxm2ddMcNc1D7uS/LGc4K3VwMEMaZLkCdHWaKk0LnQXA==}
 
   external-editor@3.1.0:
     resolution: {integrity: sha512-hMQ4CX1p1izmuLYyZqLMO/qGNw10wSv9QDCPfzXfyFrOaCSSoRfqE1Kf1s5an66J5JZC62NewG+mK49jOCtQew==}
@@ -9933,8 +10044,6 @@ snapshots:
       - supports-color
 
   extend@3.0.2: {}
-
-  extensionless@1.9.6: {}
 
   external-editor@3.1.0:
     dependencies:

@@ -1,17 +1,14 @@
 import { prisma, Prisma } from '@repo/database';
 import { Kind } from 'graphql/language';
-import { isAError } from '@repo/utils';
+import { getEndOfDay, isAError } from '@repo/utils';
 import { logger } from '@repo/logger';
 import { parse as htmlParse } from 'node-html-parser';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';
-import { builder } from '../builder';
-import { getEndofDay } from '../../utils/date-utils';
+import { iFramePerInsight, refreshData, refreshDataOf } from '@repo/channel';
+import { decryptTokens, getIFrameAdFormat } from '@repo/channel-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
-import { iFramePerInsight } from '../../contexts/channels/iframe-helper';
-import { getIFrameAdFormat } from '../../contexts/channels/meta/iframe-meta-helper';
-import { refreshData, refreshDataOf } from '../../contexts/channels/data-refresh';
-import { decryptTokens } from '../../contexts/channels/integration-util';
+import { builder } from '../builder';
 import {
   AdDto,
   CurrencyEnumDto,
@@ -75,7 +72,7 @@ builder.queryFields((t) => ({
       const where: InsightWhereInput = {
         adAccountId: { in: args.adAccountIds ?? undefined },
         adId: { in: args.adIds ?? undefined },
-        date: { gte: args.dateFrom ?? undefined, lte: getEndofDay(args.dateTo) },
+        date: { gte: args.dateFrom ?? undefined, lte: getEndOfDay(args.dateTo) },
         device: { in: args.devices ?? undefined },
         publisher: { in: args.publishers ?? undefined },
         position: { in: args.positions ?? undefined },
