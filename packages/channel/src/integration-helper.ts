@@ -71,7 +71,7 @@ const completeIntegration = async (
     return new AError('invalid_organization');
   }
 
-  const { organizationId, userId } = redisResp;
+  const { organizationId } = redisResp;
   const channel = getChannel(integrationType);
   const tokens = await channel.exchangeCodeForTokens(code);
   if (isAError(tokens)) {
@@ -100,7 +100,7 @@ const completeIntegration = async (
   fireAndForget.add(async () => {
     const integration = decryptTokens(dbIntegration);
     if (!integration) return new AError('Failed to decrypt integration');
-    await saveChannelData(integration, userId, true);
+    await saveChannelData(integration, true);
   });
   return integrationType;
 };
@@ -161,11 +161,7 @@ const saveTokens = async (
   });
 };
 
-export const saveChannelData = async (
-  integration: Integration,
-  userId: string | undefined,
-  initial: boolean,
-): Promise<AError | undefined> => {
+export const saveChannelData = async (integration: Integration, initial: boolean): Promise<AError | undefined> => {
   logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
 
   const channel = getChannel(integration.type);
