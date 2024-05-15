@@ -16,14 +16,15 @@ export class FireAndForget {
     });
   }
 
-  add<T>(fun: () => Promise<T>) {
+  add<T>(fun: () => Promise<T>): void {
     if (this._shutoff) {
       return;
     }
 
-    const wrappedFun = () =>
+    const wrappedFun = (): Promise<T | undefined> =>
       fun().catch((e: unknown) => {
         logger.error(e instanceof Error ? e.message : JSON.stringify(e));
+        return undefined;
       });
 
     this._queue.add(wrappedFun).catch((e: unknown) => {
@@ -33,7 +34,7 @@ export class FireAndForget {
     });
   }
 
-  stop() {
+  stop(): void {
     this._shutoff = true;
     this._queue.clear();
   }

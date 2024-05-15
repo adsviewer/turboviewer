@@ -23,6 +23,7 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {},
+    "lint:fix": {},
     "update": {
       "cache": false
     },

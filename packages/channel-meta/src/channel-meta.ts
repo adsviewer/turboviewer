@@ -1,7 +1,7 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
 import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
-import { AError, isAError } from '@repo/utils';
+import { AError, FireAndForget, getLastThreeMonths, getLastTwoDays, isAError, MODE } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -18,28 +18,24 @@ import {
 } from 'facebook-nodejs-business-sdk';
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import _ from 'lodash';
-import { env, MODE } from '../../../config';
 import {
+  type AdAccountEssential,
+  authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
   type ChannelCreative,
   type ChannelInsight,
   type ChannelInterface,
-  type TokensResponse,
-} from '../channel-interface';
-import { FireAndForget } from '../../../fire-and-forget';
-import {
-  type AdAccountEssential,
-  authEndpoint,
   getConnectedIntegrationByOrg,
+  MetaError,
   revokeIntegration,
   saveAccounts,
   saveAds,
   saveInsights,
-} from '../integration-util';
-import { getLastThreeMonths, getLastTwoDays } from '../../../utils/date-utils';
-import { pubSub } from '../../../schema/pubsub';
-import { getIFrameAdFormat } from './iframe-meta-helper';
+  type TokensResponse,
+} from '@repo/channel-utils';
+import { getIFrameAdFormat } from '@repo/channel-utils';
+import { env } from './config';
 
 const fireAndForget = new FireAndForget();
 
@@ -47,22 +43,8 @@ const apiVersion = 'v19.0';
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
-export class MetaError extends AError {
-  name = 'MetaError';
-  code: number;
-  errorSubCode: number;
-  fbTraceId: string;
-
-  constructor(message: string, code: number, errorSubcode: number, fbtraceId: string) {
-    super(message);
-    this.code = code;
-    this.errorSubCode = errorSubcode;
-    this.fbTraceId = fbtraceId;
-  }
-}
-
 class Meta implements ChannelInterface {
-  generateAuthUrl() {
+  generateAuthUrl(): { state: string; url: string } {
     const state = `${MODE}_${IntegrationTypeEnum.META}_${randomUUID()}`;
     const scopes = ['ads_read'];
 
@@ -206,11 +188,7 @@ class Meta implements ChannelInterface {
     return integration.externalId;
   }
 
-  async getChannelData(
-    integration: Integration,
-    userId: string | undefined,
-    initial: boolean,
-  ): Promise<AError | undefined> {
+  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const accounts = await this.getAdAccounts();
     if (isAError(accounts)) return accounts;
@@ -222,7 +200,7 @@ class Meta implements ChannelInterface {
     if (isAError(adReportsAccountMap)) return adReportsAccountMap;
 
     const adExternalIdMap = new Map<string, string>();
-    await this.waitAndProcessReports(adReportsAccountMap, integration, adExternalIdMap, userId);
+    await this.waitAndProcessReports(adReportsAccountMap, integration, adExternalIdMap);
     logger.info(`Created ${String(adReportsAccountMap.size)} reports`);
   }
 
@@ -245,6 +223,7 @@ class Meta implements ChannelInterface {
       ad_format: format,
     });
     const previewSchema = z.object({ body: z.string() });
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
     const toBody = (preview: z.infer<typeof previewSchema>) => preview.body;
     const parsedPreviews = await Meta.handlePagination(previews, previewSchema, toBody);
     if (isAError(parsedPreviews)) return parsedPreviews;
@@ -282,6 +261,7 @@ class Meta implements ChannelInterface {
       name: z.string(),
       ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
     });
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
     const toAccount = (acc: z.infer<typeof accountSchema>) =>
       ({
         accountStatus: acc.account_status,
@@ -304,6 +284,7 @@ class Meta implements ChannelInterface {
       account_id: z.string(),
       creative: z.object({ id: z.string(), name: z.string() }),
     });
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
     const toCreative = (ad: z.infer<typeof adsSchema>) => ({
       externalAdId: ad.id,
       externalId: ad.creative.id,
@@ -373,7 +354,6 @@ class Meta implements ChannelInterface {
     adReportsAccountMap: Map<string, AdAccountEssential>,
     integration: Integration,
     adExternalIdMap: Map<string, string>,
-    userId?: string,
   ): Promise<AError | undefined> {
     const jobStatusEnum = z.enum([
       'Job Not Started',
@@ -415,20 +395,8 @@ class Meta implements ChannelInterface {
       }
 
       if (status.every((s) => s.status === 'Job Completed')) {
-        userId &&
-          pubSub.publish('user:channel:initial-progress', userId, {
-            channel: IntegrationTypeEnum.META,
-            progress: 100,
-          });
         break;
       }
-
-      const mean = (0.95 * status.reduce((acc, val) => acc + val.percent, 0)) / status.length;
-      userId &&
-        pubSub.publish('user:channel:initial-progress', userId, {
-          channel: IntegrationTypeEnum.META,
-          progress: mean + 5,
-        });
 
       await new Promise((resolve) => {
         setTimeout(resolve, 5000);
@@ -491,7 +459,7 @@ class Meta implements ChannelInterface {
         limit: 500,
       },
     );
-    const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]) => {
+    const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]): Promise<undefined> => {
       await this.saveAdsAndInsights(i, adExternalIdMap, integration, dbAccount);
       return undefined;
     };
@@ -504,7 +472,7 @@ class Meta implements ChannelInterface {
     adExternalIdMap: Map<string, string>,
     integration: Integration,
     dbAccount: AdAccountEssential,
-  ) {
+  ): Promise<void> {
     const [insights, ads] = accountInsightsAndAds.reduce(
       (acc, item) => {
         acc[0].push(item.insight);

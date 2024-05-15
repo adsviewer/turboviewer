@@ -1,12 +1,9 @@
 import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { AError } from '@repo/utils';
+import { AError, FireAndForget } from '@repo/utils';
+import { getIntegrationAuthUrl, getChannel } from '@repo/channel';
+import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { builder } from '../builder';
-import { getIntegrationAuthUrl } from '../../contexts/channels/integration-helper';
-import { getChannel } from '../../contexts/channels/channel-helper';
-import { MetaError } from '../../contexts/channels/meta/meta-channel';
-import { revokeIntegration } from '../../contexts/channels/integration-util';
-import { FireAndForget } from '../../fire-and-forget';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import {
   ChannelInitialProgressPayloadDto,

@@ -6,7 +6,8 @@ import jwt, {
   type TokenExpiredError,
 } from 'jsonwebtoken';
 import { $Enums } from '@repo/database';
-import { env, Environment, MODE } from './config';
+import { Environment, MODE } from '@repo/utils';
+import { env } from './config';
 import RoleEnum = $Enums.RoleEnum;
 
 interface MJwtPayload extends JwtPayload {

@@ -1,6 +1,6 @@
 import { IntegrationTypeEnum } from '@repo/database';
-import type { ChannelInterface } from './channel-interface';
-import { meta } from './meta/meta-channel';
+import { meta } from '@repo/channel-meta';
+import type { ChannelInterface } from '@repo/channel-utils';
 
 export const getChannel = (channel: IntegrationTypeEnum): ChannelInterface => {
   switch (channel) {

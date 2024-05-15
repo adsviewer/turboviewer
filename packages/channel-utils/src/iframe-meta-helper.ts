@@ -6,14 +6,14 @@ const getKey = (
   publisher: PublisherEnum | undefined | null,
   device: DeviceEnum | undefined | null,
   position: string | undefined | null,
-) => `${publisher ?? 'noPublisher'}_${position ?? 'noPosition'}_${device ?? 'noDevice'}`;
+): string => `${publisher ?? 'noPublisher'}_${position ?? 'noPosition'}_${device ?? 'noDevice'}`;
 
 const add = (
   publisher: PublisherEnum | undefined,
   device: DeviceEnum | undefined,
   position: string | undefined,
   value: string,
-) => iFrameAdFormatsMap.set(getKey(publisher, device, position), value);
+): Map<string, string> => iFrameAdFormatsMap.set(getKey(publisher, device, position), value);
 
 export const getIFrameAdFormat = (
   publisher: PublisherEnum | undefined | null,

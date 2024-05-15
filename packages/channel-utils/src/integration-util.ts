@@ -1,9 +1,9 @@
 import type { AdAccount, Integration, IntegrationTypeEnum } from '@repo/database';
 import { IntegrationStatus, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { env } from '../../config';
-import { decryptAesGcm } from '../../utils/aes-util';
-import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
+import { env } from './config';
+import { decryptAesGcm } from './aes-util';
+import { type ChannelAd, type ChannelAdAccount, type ChannelInsight } from './channel-interface';
 
 export const authEndpoint = '/channel/auth';
 
@@ -67,7 +67,10 @@ export const decryptTokens = (integration: Integration | null): null | Integrati
   return integration;
 };
 
-export const saveAccounts = async (activeAccounts: ChannelAdAccount[], integration: Integration) =>
+export const saveAccounts = async (
+  activeAccounts: ChannelAdAccount[],
+  integration: Integration,
+): Promise<AdAccountEssential[]> =>
   await Promise.all(
     activeAccounts.map((acc) =>
       prisma.adAccount.upsert({
@@ -132,7 +135,7 @@ export const saveInsights = async (
   insights: ChannelInsight[],
   adExternalIdMap: Map<string, string>,
   dbAccount: AdAccountEssential,
-) => {
+): Promise<void> => {
   logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
   await Promise.all(
     insights.map(async (insight) => {
