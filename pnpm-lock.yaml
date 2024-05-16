@@ -44,14 +44,17 @@ importers:
         specifier: ^1.13.3
         version: 1.13.3
 
-  apps/channel-meta-insights:
+  apps/channel-ingress:
     dependencies:
+      '@repo/channel':
+        specifier: workspace:*
+        version: link:../../packages/channel
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
-      extensionless:
-        specifier: ^1.9.6
-        version: 1.9.7
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -219,8 +222,6 @@ importers:
       typescript:
         specifier: 5.4.5
         version: 5.4.5
-
-  apps/test: {}
 
   apps/web:
     dependencies:

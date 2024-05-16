@@ -1,8 +1,8 @@
 {
-  "name": "channel-meta-insights",
+  "name": "channel-ingress",
   "version": "1.0.0",
   "private": true,
-  "description": "Ingests meta insights data",
+  "description": "Ingests channel data",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -23,6 +23,8 @@
     "typescript": "5.4.3"
   },
   "dependencies": {
+    "@repo/channel": "workspace:*",
+    "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*"
   }
 }
