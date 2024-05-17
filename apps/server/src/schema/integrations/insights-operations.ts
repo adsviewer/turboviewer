@@ -5,10 +5,11 @@ import { logger } from '@repo/logger';
 import { parse as htmlParse } from 'node-html-parser';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';
-import { iFramePerInsight, refreshData, refreshDataOf } from '@repo/channel';
-import { decryptTokens, getIFrameAdFormat } from '@repo/channel-utils';
+import { iFramePerInsight } from '@repo/channel';
+import { getIFrameAdFormat } from '@repo/channel-utils';
 import { uniqueBy } from '../../utils/data-object-utils';
 import { builder } from '../builder';
+import { invokeChannelIngress } from '../../utils/lambda-utils';
 import {
   AdDto,
   CurrencyEnumDto,
@@ -173,18 +174,7 @@ builder.mutationFields((t) => ({
       initial: t.arg.boolean({ required: true }),
     },
     resolve: async (_root, args, _ctx, _info) => {
-      if (args.integrationIds) {
-        const integrations = await prisma.integration
-          .findMany({
-            where: { id: { in: args.integrationIds } },
-          })
-          .then((ints) => ints.map(decryptTokens).flatMap((integration) => integration ?? []));
-        for (const integration of integrations) {
-          await refreshDataOf(integration, args.initial);
-        }
-      } else {
-        await refreshData(args.initial);
-      }
+      await invokeChannelIngress({ initial: args.initial, integrationIds: args.integrationIds ?? undefined });
       return true;
     },
   }),

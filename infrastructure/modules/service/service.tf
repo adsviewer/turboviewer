@@ -15,8 +15,3 @@ resource "aws_ecr_repository" "ecr_repo" {
     scan_on_push = true
   }
 }
-
-resource "aws_cloudwatch_log_group" "service_log_group" {
-  name              = "/ecs/${var.environment}/${var.service_name}"
-  retention_in_days = var.environment == "prod" ? 0 : 180
-}

@@ -76,7 +76,7 @@ class Meta implements ChannelInterface {
       },
     );
 
-    if (isAError(response)) return response;
+    if (response instanceof Error) return response;
     if (!response.ok) {
       return new AError(`Failed to exchange code for tokens: ${response.statusText}`);
     }
@@ -577,7 +577,7 @@ class Meta implements ChannelInterface {
       logger.error('Failed to debug token %o', { error });
       return error instanceof Error ? error : new Error(JSON.stringify(error));
     });
-    if (isAError(debugToken)) return debugToken;
+    if (debugToken instanceof Error) return debugToken;
     if (!debugToken.ok) {
       return new AError(`Failed to debug token: ${debugToken.statusText}`);
     }

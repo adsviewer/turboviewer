@@ -1,4 +1,4 @@
-name: Deploy prod
+name: Deploy server prod
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - .github/workflows/**
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-server
   cancel-in-progress: true
 
 jobs:

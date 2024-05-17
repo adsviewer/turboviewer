@@ -1,4 +1,4 @@
-name: Build service
+name: Build and push service image
 
 on:
   workflow_call:

@@ -1,7 +1,11 @@
+import { type ZodError } from 'zod';
+
 export class AError extends Error {
-  constructor(message: string) {
+  private zodError?: ZodError | undefined;
+  constructor(message: string, zodError?: ZodError) {
     super(message);
     this.name = 'AError';
+    this.zodError = zodError;
   }
 }
 

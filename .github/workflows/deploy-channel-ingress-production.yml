@@ -1,4 +1,4 @@
-name: Deploy prod
+name: Deploy channel ingress lambda prod
 
 on:
   push:
@@ -14,11 +14,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-channel-ingress
   cancel-in-progress: true
 
 jobs:
-  deploy_server:
+  channel_ingress_lambda:
     permissions:
       id-token: write
       contents: read
