@@ -17,7 +17,7 @@ resource "aws_apprunner_service" "server" {
     image_repository {
       image_configuration {
         runtime_environment_secrets   = var.mapped_secrets
-        runtime_environment_variables = var.environment_variables
+        runtime_environment_variables = merge(var.environment_variables, { MODE = var.environment })
         port                          = var.environment_variables.PORT
       }
       image_identifier      = "${aws_ecr_repository.ecr_repo.repository_url}:amd-latest"
