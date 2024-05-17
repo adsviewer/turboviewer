@@ -1,3 +1,5 @@
+const xMonths = 3;
+
 const formatYYYMMDDDate: (date: Date) => string = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -5,14 +7,14 @@ const formatYYYMMDDDate: (date: Date) => string = (date: Date) => {
   return `${String(year)}-${month}-${day}`;
 };
 
-export const getLastThreeMonths: () => { until: string; since: string } = () => {
+export const getLastXMonths: () => { until: string; since: string } = () => {
   const today = new Date();
-  const lastThreeMonths = new Date(today);
+  const lastXMonths = new Date(today);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  lastThreeMonths.setMonth(today.getMonth() - 3);
+  lastXMonths.setMonth(today.getMonth() - xMonths);
   return {
-    since: formatYYYMMDDDate(lastThreeMonths),
+    since: formatYYYMMDDDate(lastXMonths),
     until: formatYYYMMDDDate(tomorrow),
   };
 };
@@ -33,4 +35,19 @@ export const getEndOfDay: (date?: Date | null) => Date = (date?: Date | null) =>
   const endOfDay = new Date(date ?? new Date());
   endOfDay.setHours(23, 59, 59, 999);
   return endOfDay;
+};
+
+export const getYesterday: () => Date = () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+  return yesterday;
+};
+
+export const getBeforeXMonths: () => Date = () => {
+  const today = new Date();
+  const xMonthsAgo = new Date(today);
+  xMonthsAgo.setMonth(today.getMonth() - xMonths);
+  xMonthsAgo.setHours(0, 0, 0, 0);
+  return xMonthsAgo;
 };
