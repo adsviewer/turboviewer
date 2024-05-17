@@ -6,8 +6,6 @@ export interface SlackTransportOptions {
 }
 
 const options: Partial<SlackTransportOptions> = { webhookUrl: process.env.SLACK_WEBHOOK_URL };
-const destination = pinoLambdaDestination();
-
 const optionsOrStream: LoggerOptions = {
   transport: {
     targets: [
@@ -17,6 +15,8 @@ const optionsOrStream: LoggerOptions = {
   },
 };
 export const logger =
-  process.env.IS_LAMBDA === 'true' ? pino(destination) : pino(process.env.NEXT_RUNTIME ? {} : optionsOrStream);
+  process.env.IS_LAMBDA === 'true'
+    ? pino(pinoLambdaDestination())
+    : pino(process.env.NEXT_RUNTIME ? {} : optionsOrStream);
 
 export { lambdaRequestTracker } from 'pino-lambda';
