@@ -51,6 +51,36 @@ resource "aws_ssoadmin_managed_policy_attachment" "read_only_policy_attachment" 
   permission_set_arn = aws_ssoadmin_permission_set.read_only.arn
 }
 
+data "aws_iam_policy_document" "read_only_inline_policy_document" {
+  statement {
+    effect = "Deny"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+  statement {
+    effect = "Deny"
+    actions = [
+      "lambda:GetFunction",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+}
+
+resource "aws_ssoadmin_permission_set_inline_policy" "read_only_inline_policy" {
+  inline_policy      = data.aws_iam_policy_document.read_only_inline_policy_document.json
+  instance_arn       = tolist(data.aws_ssoadmin_instances.this.arns)[0]
+  permission_set_arn = aws_ssoadmin_permission_set.read_only.arn
+}
+
 
 ########################## AWS Account/OU Assignment ###################################
 

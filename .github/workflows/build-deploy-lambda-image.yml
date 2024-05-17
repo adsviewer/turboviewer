@@ -1,4 +1,4 @@
-name: Build service
+name: Build and deploy lambda
 
 on:
   workflow_call:
@@ -91,7 +91,38 @@ jobs:
             TURBO_TEAM=${{ secrets.turbo_team }}
             TURBO_TOKEN=${{ secrets.turbo_token }}
             lambda=${{ inputs.lambda_name }}
-          file: .Lambda.Dockerfile
+          file: ./Lambda.Dockerfile
           platforms: ${{ matrix.platform }}
+          provenance: false # https://github.com/docker/buildx/issues/1509#issuecomment-1378538197
           cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.lambda_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache
           cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.lambda_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache,mode=max
+
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read
+      packages: write
+
+    needs:
+      - build
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.aws_account_id }}:role/${{ inputs.github_role }}
+          role-session-name: ${{ inputs.environment }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: true
+
+      - uses: int128/deploy-lambda-action@v1
+        with:
+          function-name: ${{ inputs.environment }}-${{ inputs.lambda_name }}
+          image-uri: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.environment }}-${{ inputs.lambda_name }}:arm-${{ github.sha }}

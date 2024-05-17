@@ -35,9 +35,10 @@ RUN rm -rf node_modules && pnpm recursive exec -- rm -rf ./node_modules ./src
 
 FROM base AS stripper
 WORKDIR /app
+ARG lambda
 
 COPY --from=installer /app .
-RUN pnpm install --prod --ignore-scripts --=-meta-insights
+RUN pnpm install --prod --ignore-scripts --filter=$lambda
 RUN pnpm install --prod --workspace-root extensionless
 
 FROM base AS runner
@@ -46,4 +47,4 @@ ENV NODE_OPTIONS="--conditions=javascript --import=extensionless/register $NODE_
 
 COPY --from=stripper /app ${LAMBDA_TASK_ROOT}
 
-CMD [ "apps/channel-meta-insights/dist/index.handler" ]
+CMD [ "apps/channel-ingress/dist/index.handler" ]

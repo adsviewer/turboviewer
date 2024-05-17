@@ -1,20 +1,30 @@
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { createYoga } from 'graphql-yoga';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { logger } from '@repo/logger';
 import bodyParser from 'body-parser';
 import { IntegrationTypeEnum } from '@repo/database';
-import { Environment, MODE } from '@repo/utils';
-import { authCallback, getChannel, channelDataRefreshWebhook } from '@repo/channel';
+import { Environment, FireAndForget, MODE } from '@repo/utils';
+import { authCallback, getChannel } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
 import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
 import { snsMiddleware } from './utils/sns-subscription-utils';
+import { invokeChannelIngress } from './utils/lambda-utils';
+
+const fireAndForget = new FireAndForget();
 
 process.on('uncaughtException', (reason) => {
   logger.error(reason, 'Uncaught Exception', reason.stack);
 });
+
+const channelDataRefreshWebhook = (_req: Request, res: Response): void => {
+  fireAndForget.add(() => invokeChannelIngress({ initial: false }));
+  res.send({
+    statusCode: 200,
+  });
+};
 
 const index = (): void => {
   const app = express();

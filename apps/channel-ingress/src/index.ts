@@ -1,32 +1,23 @@
-import { type Handler } from 'aws-lambda';
-import { logger } from '@repo/logger';
-import { decryptTokens, refreshDataOf } from '@repo/channel';
-import { prisma } from '@repo/database';
+import { type Context, type Handler } from 'aws-lambda';
+import { refreshData } from '@repo/channel';
+import { type z } from 'zod';
+import { lambdaRequestTracker, logger } from '@repo/logger';
+import { channelIngressInput, type channelIngressOutput } from '@repo/lambda-types';
 
-interface Resp {
-  statusCode: number;
-  body: unknown;
-}
+const withRequest = lambdaRequestTracker();
 
-export const handler = async (event: Handler): Promise<Resp> => {
+export const handler = async (event: Handler, context: Context): Promise<z.infer<typeof channelIngressOutput>> => {
+  withRequest(event, context);
   logger.info(event);
-  const integration = await prisma.integration
-    .findUniqueOrThrow({
-      where: { id: 'cluwfzvm20001lwr71gx1hcsn' },
-    })
-    .then(decryptTokens);
 
-  if (!integration) {
-    logger.error('Integration not found');
+  const parsedEvent = channelIngressInput.safeParse(event);
+  if (!parsedEvent.success) {
+    logger.error(parsedEvent.error);
     return {
-      statusCode: 404,
-      body: 'Integration not found',
+      statusCode: 400,
+      body: 'Bad request',
     };
   }
-  await refreshDataOf(integration, false);
-  logger.info('Success!');
-  return {
-    statusCode: 200,
-    body: 'Success',
-  };
+  const body = parsedEvent.data;
+  return await refreshData(body);
 };

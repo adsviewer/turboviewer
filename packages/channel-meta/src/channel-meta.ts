@@ -1,7 +1,7 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
 import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
-import { AError, FireAndForget, getLastThreeMonths, getLastTwoDays, isAError, MODE } from '@repo/utils';
+import { AError, FireAndForget, getLastXMonths, getLastTwoDays, isAError, MODE } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -26,6 +26,7 @@ import {
   type ChannelCreative,
   type ChannelInsight,
   type ChannelInterface,
+  deleteOldInsights,
   getConnectedIntegrationByOrg,
   MetaError,
   revokeIntegration,
@@ -76,7 +77,7 @@ class Meta implements ChannelInterface {
       },
     );
 
-    if (isAError(response)) return response;
+    if (response instanceof Error) return response;
     if (!response.ok) {
       return new AError(`Failed to exchange code for tokens: ${response.statusText}`);
     }
@@ -200,8 +201,7 @@ class Meta implements ChannelInterface {
     if (isAError(adReportsAccountMap)) return adReportsAccountMap;
 
     const adExternalIdMap = new Map<string, string>();
-    await this.waitAndProcessReports(adReportsAccountMap, integration, adExternalIdMap);
-    logger.info(`Created ${String(adReportsAccountMap.size)} reports`);
+    await this.waitAndProcessReports(adReportsAccountMap, integration, adExternalIdMap, initial);
   }
 
   async getAdPreview(
@@ -337,7 +337,7 @@ class Meta implements ChannelInterface {
             AdsInsights.Breakdowns.platform_position,
           ],
           level: AdsInsights.Level.ad,
-          time_range: initial ? getLastThreeMonths() : getLastTwoDays(),
+          time_range: initial ? getLastXMonths() : getLastTwoDays(),
         },
       );
       const parsed = adReportRunSchema.safeParse(resp);
@@ -354,6 +354,7 @@ class Meta implements ChannelInterface {
     adReportsAccountMap: Map<string, AdAccountEssential>,
     integration: Integration,
     adExternalIdMap: Map<string, string>,
+    initial: boolean,
   ): Promise<AError | undefined> {
     const jobStatusEnum = z.enum([
       'Job Not Started',
@@ -363,13 +364,12 @@ class Meta implements ChannelInterface {
       'Job Failed',
       'Job Skipped',
     ]);
-    type JobStatus = z.infer<typeof jobStatusEnum>;
+
+    const adReportsAccountMapCopy = new Map(adReportsAccountMap);
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
     while (true) {
-      const status: { percent: number; status: JobStatus }[] = [];
-
-      for (const [reportId, dbAccount] of adReportsAccountMap) {
+      for (const [reportId, dbAccount] of adReportsAccountMapCopy) {
         const report = new AdReportRun(reportId, { report_run_id: reportId });
         const resp = await report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]);
         const reportSchema = z.object({
@@ -387,14 +387,17 @@ class Meta implements ChannelInterface {
         };
         if (item.status === 'Job Failed') {
           logger.error('Ad report failed %o', resp);
+          adReportsAccountMapCopy.delete(reportId);
         }
         if (item.status === 'Job Completed') {
+          await deleteOldInsights(dbAccount.id, initial);
           await this.getAndSaveAdsAndInsights(reportId, integration, adExternalIdMap, dbAccount);
+          adReportsAccountMapCopy.delete(reportId);
         }
-        status.push(item);
       }
 
-      if (status.every((s) => s.status === 'Job Completed')) {
+      if (adReportsAccountMapCopy.size === 0) {
+        logger.info('All reports completed');
         break;
       }
 
@@ -525,19 +528,20 @@ class Meta implements ChannelInterface {
       logger.error('Failed to parse %o', cursor);
       return new AError('Failed to parse meta paginated response');
     }
-    const results = await processCallback(parsed.data.map(parseCallback));
+    const resultsP = processCallback(parsed.data.map(parseCallback));
     while (cursor.hasNext()) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
       const next = await cursor.next();
       const parsedNext = arraySchema.safeParse(next);
       if (parsedNext.success) {
         const processed = await processCallback(parsedNext.data.map(parseCallback));
+        const results = await resultsP;
         if (results && processed) results.push(...processed);
       } else {
         logger.error('Failed to parse paginated %o', next);
       }
     }
-    return results;
+    return resultsP;
   }
 
   private static parseRequest(signedRequest: string, secret: string): string | AError {
@@ -577,7 +581,7 @@ class Meta implements ChannelInterface {
       logger.error('Failed to debug token %o', { error });
       return error instanceof Error ? error : new Error(JSON.stringify(error));
     });
-    if (isAError(debugToken)) return debugToken;
+    if (debugToken instanceof Error) return debugToken;
     if (!debugToken.ok) {
       return new AError(`Failed to debug token: ${debugToken.statusText}`);
     }

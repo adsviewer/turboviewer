@@ -17,6 +17,7 @@
     "codegen": "tsx --env-file=.env src/schema/codegen.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.577.0",
     "@aws-sdk/client-ses": "^3.565.0",
     "@graphql-tools/schema": "10.0.3",
     "@graphql-yoga/plugin-disable-introspection": "^2.3.0",
@@ -32,6 +33,7 @@
     "@repo/channel": "workspace:*",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
+    "@repo/lambda-types": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
