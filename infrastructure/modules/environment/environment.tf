@@ -36,6 +36,20 @@ resource "aws_iam_policy" "sns_policy" {
   policy = data.aws_iam_policy_document.sns_policy_document.json
 }
 
+data "aws_iam_policy_document" "lambda_invoke_policy_document" {
+  statement {
+    actions = ["lambda:InvokeFunction"]
+    resources = [
+      aws_lambda_function.channel_ingress_lambda.arn,
+    ]
+  }
+}
+
+resource "aws_iam_policy" "lambda_invoke_policy" {
+  name   = "${var.environment}-lambda-invoke-policy"
+  policy = data.aws_iam_policy_document.lambda_invoke_policy_document.json
+}
+
 locals {
   server_domain_prefix = "api"
   server_api_endpoint  = "https://${local.server_domain_prefix}.${local.domain}/${local.api_path}"
@@ -57,8 +71,9 @@ module "server" {
   service_name       = "server"
   service_subnet_ids = var.service_subnet_ids
   instance_role_policies = {
-    "ses" = module.ses.send_email_policy_arn
-    "sns" = aws_iam_policy.sns_policy.arn
+    "ses"    = module.ses.send_email_policy_arn
+    "sns"    = aws_iam_policy.sns_policy.arn
+    "lambda" = aws_iam_policy.lambda_invoke_policy.arn
   }
   vpc_id = var.vpc_id
 }
