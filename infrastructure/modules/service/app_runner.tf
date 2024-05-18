@@ -1,6 +1,7 @@
 locals {
   error_metric_name = "${var.environment}-apprunner-error-metric"
   error_namespace   = "${var.environment}-error-namespace"
+  alarm_name        = "${var.environment}-apprunner-error-alarm"
 }
 
 resource "aws_apprunner_service" "server" {
@@ -52,6 +53,32 @@ resource "aws_route53_record" "server_record" {
   }
 }
 
+data "aws_iam_policy_document" "app_runner_error_policy_document" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudwatch.amazonaws.com"]
+    }
+
+    actions = ["SNS:Publish"]
+    resources = [
+      "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${var.environment}-${var.service_name}/*"
+    ]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:cloudwatch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alarm:${local.alarm_name}"]
+    }
+  }
+}
+resource "aws_sns_topic" "app_runner_error_topic" {
+  name   = "${var.environment}-${var.service_name}-error-topic"
+  policy = data.aws_iam_policy_document.app_runner_error_policy_document.json
+}
+
 resource "aws_cloudwatch_log_metric_filter" "app_runner_error_filter" {
   name           = "${var.environment}-apprunner-error-filter"
   pattern        = "{ $.level = 50 }"
@@ -65,13 +92,14 @@ resource "aws_cloudwatch_log_metric_filter" "app_runner_error_filter" {
   }
 }
 resource "aws_cloudwatch_metric_alarm" "app_runner_error_alarm" {
-  alarm_name          = "${var.environment}-apprunner-error-alarm"
+  alarm_name          = local.alarm_name
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 1
   metric_name         = local.error_metric_name
   namespace           = local.error_namespace
-  period              = 120
+  period              = 60
   statistic           = "SampleCount"
   threshold           = 1
   alarm_description   = "Alarm when the App Runner service instance has errors"
+  alarm_actions       = [aws_sns_topic.app_runner_error_topic.arn]
 }

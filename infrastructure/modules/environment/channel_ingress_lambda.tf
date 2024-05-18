@@ -1,5 +1,6 @@
 locals {
-  channel_ingress_name = "${var.environment}-channel-ingress"
+  channel_ingress_name       = "${var.environment}-channel-ingress"
+  channel_ingress_alarm_name = "${local.channel_ingress_name}-error-alarm"
 }
 
 resource "aws_ecr_repository" "channel_ingress_ecr_repo" {
@@ -99,6 +100,32 @@ resource "aws_lambda_function" "channel_ingress_lambda" {
   }
 }
 
+data "aws_iam_policy_document" "channel_ingress_error_policy_document" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudwatch.amazonaws.com"]
+    }
+
+    actions = ["SNS:Publish"]
+    resources = [
+      "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${local.channel_ingress_name}"
+    ]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:cloudwatch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alarm:${local.channel_ingress_alarm_name}"]
+    }
+  }
+}
+resource "aws_sns_topic" "channel_ingress_error_topic" {
+  name   = "${local.channel_ingress_name}-error-topic"
+  policy = data.aws_iam_policy_document.channel_ingress_error_policy_document.json
+}
+
 resource "aws_cloudwatch_log_metric_filter" "channel_ingress_lambda_log_error_filter" {
   name           = "${local.channel_ingress_name}-error-filter"
   pattern        = "{ $.level = 50 }"
@@ -112,13 +139,14 @@ resource "aws_cloudwatch_log_metric_filter" "channel_ingress_lambda_log_error_fi
   }
 }
 resource "aws_cloudwatch_metric_alarm" "channel_ingress_lambda_error_alarm" {
-  alarm_name          = "${local.channel_ingress_name}-error-alarm"
+  alarm_name          = local.channel_ingress_alarm_name
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = 1
   metric_name         = local.channel_ingress_name
   namespace           = local.error_namespace
-  period              = 120
+  period              = 60
   statistic           = "SampleCount"
   threshold           = 1
   alarm_description   = "Alarm when the channel ingress lambda has errors"
+  alarm_actions       = [aws_sns_topic.channel_ingress_error_topic.arn]
 }
