@@ -23,6 +23,10 @@ terraform {
       source  = "vercel/vercel"
       version = "~> 1.4.0"
     }
+    awscc = {
+      source  = "hashicorp/awscc"
+      version = "0.77.0"
+    }
   }
 
   required_version = ">= 1.6.6"
@@ -54,6 +58,13 @@ provider "aws" {
   }
 }
 
+provider "awscc" {
+  assume_role = {
+    role_arn = data.tfe_outputs.management_outputs.values.prod_assume_role_arn
+  }
+  region = var.aws_region
+}
+
 module "workspace" {
   source = "../../modules/workspace"
 
@@ -82,6 +93,7 @@ module "environment" {
   redis_url             = var.redis_url
   service_subnet_ids    = module.workspace.private_subnet_ids
   slack_webhook_url     = var.slack_webhook_url
+  slack_workspace_id    = var.slack_workspace_id
   vercel_api_token      = var.vercel_api_token
   vercel_team           = var.vercel_team
   vpc_id                = module.workspace.vpc_id
