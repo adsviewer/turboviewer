@@ -1,3 +1,7 @@
+locals {
+  error_namespace = "${var.environment}-error-namespace"
+}
+
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 

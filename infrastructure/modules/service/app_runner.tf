@@ -1,3 +1,8 @@
+locals {
+  error_metric_name = "${var.environment}-apprunner-error-metric"
+  error_namespace   = "${var.environment}-error-namespace"
+}
+
 resource "aws_apprunner_service" "server" {
   service_name = "${var.environment}-${var.service_name}"
 
@@ -45,4 +50,28 @@ resource "aws_route53_record" "server_record" {
     zone_id                = data.aws_apprunner_hosted_zone_id.this.id
     evaluate_target_health = true
   }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "app_runner_error_filter" {
+  name           = "${var.environment}-apprunner-error-filter"
+  pattern        = "{ $.level = 50 }"
+  log_group_name = "/aws/apprunner/prod-server/${aws_apprunner_service.server.service_id}/application"
+
+  metric_transformation {
+    name      = local.error_metric_name
+    namespace = local.error_namespace
+    value     = "1"
+    unit      = "Count"
+  }
+}
+resource "aws_cloudwatch_metric_alarm" "app_runner_error_alarm" {
+  alarm_name          = "${var.environment}-apprunner-error-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = local.error_metric_name
+  namespace           = local.error_namespace
+  period              = 120
+  statistic           = "SampleCount"
+  threshold           = 1
+  alarm_description   = "Alarm when the App Runner service instance has errors"
 }

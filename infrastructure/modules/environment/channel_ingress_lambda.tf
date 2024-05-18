@@ -93,4 +93,32 @@ resource "aws_lambda_function" "channel_ingress_lambda" {
   package_type = "Image"
   role         = aws_iam_role.channel_ingress_role.arn
   timeout      = 900
+
+  lifecycle {
+    ignore_changes = [image_uri]
+  }
+}
+
+resource "aws_cloudwatch_log_metric_filter" "channel_ingress_lambda_log_error_filter" {
+  name           = "${local.channel_ingress_name}-error-filter"
+  pattern        = "{ $.level = 50 }"
+  log_group_name = "/aws/lambda/${local.channel_ingress_name}"
+
+  metric_transformation {
+    name      = local.channel_ingress_name
+    namespace = local.error_namespace
+    value     = "1"
+    unit      = "Count"
+  }
+}
+resource "aws_cloudwatch_metric_alarm" "channel_ingress_lambda_error_alarm" {
+  alarm_name          = "${local.channel_ingress_name}-error-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 1
+  metric_name         = local.channel_ingress_name
+  namespace           = local.error_namespace
+  period              = 120
+  statistic           = "SampleCount"
+  threshold           = 1
+  alarm_description   = "Alarm when the channel ingress lambda has errors"
 }
