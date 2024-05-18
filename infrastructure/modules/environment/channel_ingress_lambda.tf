@@ -86,8 +86,11 @@ resource "aws_lambda_function" "channel_ingress_lambda" {
   }
   function_name = local.channel_ingress_name
   image_uri     = "${aws_ecr_repository.channel_ingress_ecr_repo.repository_url}:arm-latest"
-  memory_size   = 3008
-  package_type  = "Image"
-  role          = aws_iam_role.channel_ingress_role.arn
-  timeout       = 900
+  logging_config {
+    log_format = "JSON"
+  }
+  memory_size  = 3008
+  package_type = "Image"
+  role         = aws_iam_role.channel_ingress_role.arn
+  timeout      = 900
 }
