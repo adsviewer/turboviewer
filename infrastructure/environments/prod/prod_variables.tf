@@ -37,6 +37,10 @@ variable "slack_webhook_url" {
   type = string
 }
 
+variable "slack_workspace_id" {
+  type = string
+}
+
 variable "vercel_api_token" {
   type = string
 }
