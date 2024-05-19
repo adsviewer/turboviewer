@@ -8,7 +8,7 @@ export default function IntegrationsGrid(): ReactNode {
       <IntegrationCard
         title="Meta"
         description="Connect your Meta account and manage advertisments for every Meta Platforms application!"
-        isConnected
+        isConnected={false}
       />
     </SimpleGrid>
   );

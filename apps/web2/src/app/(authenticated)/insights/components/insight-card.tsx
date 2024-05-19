@@ -6,12 +6,12 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { type DeviceEnum, type PublisherEnum, type CurrencyEnum } from '@/graphql/generated/schema-server';
 
 interface InsightCardProps {
-  publisher: PublisherEnum;
-  position: string;
-  device: DeviceEnum;
+  publisher: PublisherEnum | null | undefined;
+  position: string | null | undefined;
+  device: DeviceEnum | null | undefined;
   rank: 'good' | 'mid' | 'bad' | 'unknown';
-  amountSpent: string;
-  currency: CurrencyEnum;
+  amountSpent: number | null | undefined;
+  currency: CurrencyEnum | null | undefined;
   impressions: number;
 }
 
