@@ -14,6 +14,7 @@ import {
   Group,
   Button,
   SimpleGrid,
+  Flex,
 } from '@mantine/core';
 import { logger } from '@repo/logger';
 
@@ -39,26 +40,28 @@ export default function SignUp(): React.JSX.Element {
 
   return (
     <Container size={420} my={40}>
-      <Title ta="center">Sign Up</Title>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Already have an account?{' '}
-        <Anchor
-          size="sm"
-          component="button"
-          onClick={() => {
-            router.push('/sign-in');
-          }}
-        >
-          Sign in now!
-        </Anchor>
-      </Text>
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <Flex direction="column" align="center" justify="center" mb="xl">
+          <Title ta="center">Sign Up</Title>
+          <Text c="dimmed" size="sm" ta="center" mt={5}>
+            Already have an account?{' '}
+            <Anchor
+              size="sm"
+              component="button"
+              onClick={() => {
+                router.push('/sign-in');
+              }}
+            >
+              Sign in now!
+            </Anchor>
+          </Text>
+        </Flex>
 
-      <form
-        onSubmit={form.onSubmit((values) => {
-          handleSubmit(values);
-        })}
-      >
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <form
+          onSubmit={form.onSubmit((values) => {
+            handleSubmit(values);
+          })}
+        >
           <SimpleGrid cols={2}>
             <TextInput
               label="First Name"
@@ -97,8 +100,8 @@ export default function SignUp(): React.JSX.Element {
           <Button type="submit" fullWidth mt="xl">
             Sign Up!
           </Button>
-        </Paper>
-      </form>
+        </form>
+      </Paper>
     </Container>
   );
 }
