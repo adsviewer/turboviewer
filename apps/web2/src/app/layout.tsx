@@ -1,3 +1,5 @@
+import './global.scss';
+
 export const metadata = {
   title: 'Main',
   description: 'I have followed setup instructions carefully',
