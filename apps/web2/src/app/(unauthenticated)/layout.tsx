@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
-import { ColorSchemeScript, Flex, MantineProvider } from '@mantine/core';
+import { Suspense } from 'react';
+import { ColorSchemeScript, Flex, MantineProvider, Loader } from '@mantine/core';
 import type { Metadata } from 'next';
 import { LogoFull } from '@/components/misc/logo-full';
 
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
           <Flex align="center" justify="center" my="xl">
             <LogoFull />
           </Flex>
-          {children}
+          <Suspense fallback={<Loader />}>{children}</Suspense>
         </MantineProvider>
       </body>
     </html>
