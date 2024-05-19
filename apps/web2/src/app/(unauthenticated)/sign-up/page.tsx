@@ -110,7 +110,17 @@ export default function SignUp(): React.JSX.Element {
             mt="md"
           />
           <Group justify="space-between" mt="lg">
-            <Checkbox label="Agree to the Terms and Conditions" required />
+            <Checkbox
+              label={
+                <>
+                  Agree to the{' '}
+                  <Anchor size="sm" href="https://adsviewer.io/terms" target="_blank">
+                    Terms and Conditions
+                  </Anchor>
+                </>
+              }
+              required
+            />
           </Group>
           <Button type="submit" fullWidth mt="xl">
             Sign Up!
