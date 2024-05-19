@@ -2,12 +2,14 @@
 
 import { Badge, Button, Card, Flex, Group, Text, useMantineTheme } from '@mantine/core';
 import { type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
-// import { deAuthIntegration } from '../actions';
+import { deAuthIntegration } from '../actions';
 
 interface IntegrationProps {
   title: string;
   description: string;
+  authUrl?: string | null | undefined;
   integrationType: IntegrationType;
   isConnected: boolean;
   isAvailable: boolean;
@@ -16,17 +18,33 @@ interface IntegrationProps {
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
   const theme = useMantineTheme();
+  const router = useRouter();
 
   const handleRevoke = (): void => {
-    // void deAuthIntegration(props.integrationType).then((res) => {
-    //   // logger.info(res, 'NEW RES!');
-    // });
+    void deAuthIntegration(props.integrationType).then(() => {
+      router.refresh();
+    });
+  };
+
+  const handleConnect = (): void => {
+    if (props.authUrl) {
+      window.location.href = props.authUrl;
+    }
   };
 
   const renderIntegrationButton = (): ReactNode => {
     if (props.isAvailable) {
       if (!props.isConnected) {
-        return <Button mt="lg">Connect</Button>;
+        return (
+          <Button
+            mt="lg"
+            onClick={() => {
+              handleConnect();
+            }}
+          >
+            Connect
+          </Button>
+        );
       }
       return (
         <Button
@@ -42,7 +60,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
     }
     return (
       <Button mt="lg" disabled>
-        Available soon!
+        Coming soon!
       </Button>
     );
   };
