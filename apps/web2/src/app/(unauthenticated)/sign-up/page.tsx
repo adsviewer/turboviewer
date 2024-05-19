@@ -17,6 +17,7 @@ import {
   Flex,
 } from '@mantine/core';
 import { logger } from '@repo/logger';
+import { type SignUpSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignUp(): React.JSX.Element {
   const form = useForm({
@@ -34,8 +35,22 @@ export default function SignUp(): React.JSX.Element {
     },
   });
   const router = useRouter();
-  const handleSubmit = (values: { email: string; password: string }): void => {
-    logger.info(values);
+  const handleSubmit = (values: SignUpSchemaType): void => {
+    fetch('/api/auth/sign-up', {
+      method: 'POST',
+      body: JSON.stringify(values),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data: { success: true } | { success: false }) => {
+        if (data.success) {
+          router.push('/insights');
+        }
+      })
+      .catch((error: unknown) => {
+        logger.error(error);
+      });
   };
 
   return (

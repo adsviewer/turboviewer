@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from '@mantine/form';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   TextInput,
   PasswordInput,
@@ -16,8 +16,12 @@ import {
   Flex,
 } from '@mantine/core';
 import { logger } from '@repo/logger';
+import { type SignInSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignIn(): React.JSX.Element {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -30,9 +34,26 @@ export default function SignIn(): React.JSX.Element {
       password: (value) => (value.length > 5 ? null : 'Password must be at least 5 characters long.'),
     },
   });
-  const router = useRouter();
-  const handleSubmit = (values: { email: string; password: string }): void => {
-    logger.info(values);
+  logger.info(pathname);
+
+  const handleSubmit = (values: SignInSchemaType): void => {
+    fetch('/api/auth/sign-in', {
+      method: 'POST',
+      body: JSON.stringify(values),
+    })
+      .then((response) => {
+        logger.info(searchParams.get('redirect'));
+        return response.json();
+      })
+      .then((data: { success: true } | { success: false }) => {
+        if (data.success) {
+          const redirect = searchParams.get('redirect');
+          router.push(redirect ?? '/insights');
+        }
+      })
+      .catch((error: unknown) => {
+        logger.error(error);
+      });
   };
 
   return (
@@ -41,7 +62,7 @@ export default function SignIn(): React.JSX.Element {
         <Flex direction="column" align="center" justify="center" mb="xl">
           <Title ta="center">Sign In</Title>
           <Text c="dimmed" size="sm" ta="center" mt={5}>
-            Don&apos;t have an account yet?{' '}
+            Don&apos;t have an account?{' '}
             <Anchor
               size="sm"
               component="button"
