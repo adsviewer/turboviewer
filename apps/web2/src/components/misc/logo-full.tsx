@@ -2,15 +2,11 @@
 
 import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
 import { useRouter } from 'next/navigation';
-import { logger } from '@repo/logger';
 
 export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement | null {
   const computedColorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
   const router = useRouter();
-
-  logger.info(computedColorScheme);
-  logger.info(theme);
 
   // Set the correct color of the logo based on the current color scheme
   let strokeColor = theme.colors.dark[9];
