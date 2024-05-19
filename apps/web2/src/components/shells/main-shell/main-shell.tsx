@@ -57,9 +57,13 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             leftSection={<IconPlugConnected size="1rem" stroke={1.5} />}
           />
 
-          {/* Group Filters */}
-          <Divider mt="auto" />
-          <GroupFilters />
+          {/* Group Filters (insights only) */}
+          {pathname === '/insights' ? (
+            <>
+              <Divider mt="auto" />
+              <GroupFilters />
+            </>
+          ) : null}
 
           {/* User */}
           <Flex direction="column" justify="flex-end" gap="md" mt="auto">
