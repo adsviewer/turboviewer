@@ -20,6 +20,7 @@ export default function OrderFilters(): ReactNode {
           data={['6', '12', '18', '50', '100']}
           defaultValue="12"
           allowDeselect={false}
+          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           maw={90}
         />
       </Flex>
@@ -34,6 +35,7 @@ export default function OrderFilters(): ReactNode {
           data={['Spent', 'Impressions']}
           defaultValue="Spent"
           allowDeselect={false}
+          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           maw={150}
           mr="sm"
         />
@@ -42,6 +44,7 @@ export default function OrderFilters(): ReactNode {
           data={['Ascending', 'Descending']}
           defaultValue="Descending"
           allowDeselect={false}
+          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           maw={150}
         />
       </Flex>

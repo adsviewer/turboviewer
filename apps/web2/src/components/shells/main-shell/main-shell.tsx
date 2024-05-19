@@ -18,6 +18,7 @@ import { usePathname } from 'next/navigation';
 import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
 import UserButton from '@/components/user-button/user-button';
+import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): ReactNode {
   const [opened, { toggle }] = useDisclosure();
@@ -55,6 +56,10 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             active={pathname === '/settings'}
             leftSection={<IconSettings size="1rem" stroke={1.5} />}
           />
+
+          {/* Group Filters */}
+          <Divider mt="auto" />
+          <GroupFilters />
 
           {/* User */}
           <Flex direction="column" justify="flex-end" gap="md" mt="auto">
