@@ -1,13 +1,23 @@
 'use client';
 
-import { AppShell, AppShellHeader, AppShellMain, AppShellNavbar, Burger, Flex, Group, NavLink } from '@mantine/core';
+import {
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
+  AppShellNavbar,
+  Burger,
+  Divider,
+  Flex,
+  Group,
+  NavLink,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { type ReactNode } from 'react';
-import { IconGraph, IconSettings } from '@tabler/icons-react';
+import { IconGraph, IconSettings, IconLogout } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
-import LanguagePicker from '@/components/buttons/language-picker/language-picker';
+import UserButton from '@/components/user-button/user-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): ReactNode {
   const [opened, { toggle }] = useDisclosure();
@@ -24,24 +34,36 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <LogoFull />
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
-            <LanguagePicker />
             <ColorSchemeToggle />
           </Flex>
         </Group>
       </AppShellHeader>
+
+      {/* Navbar */}
       <AppShellNavbar p="md">
-        <NavLink
-          label="Insights"
-          href="/insights"
-          active={pathname === '/insights'}
-          leftSection={<IconGraph size="1rem" stroke={1.5} />}
-        />
-        <NavLink
-          label="Settings"
-          href="/settings"
-          active={pathname === '/settings'}
-          leftSection={<IconSettings size="1rem" stroke={1.5} />}
-        />
+        <Flex direction="column">
+          {/* Navigation */}
+          <NavLink
+            label="Insights"
+            href="/insights"
+            active={pathname === '/insights'}
+            leftSection={<IconGraph size="1rem" stroke={1.5} />}
+          />
+          <NavLink
+            label="Settings"
+            href="/settings"
+            active={pathname === '/settings'}
+            leftSection={<IconSettings size="1rem" stroke={1.5} />}
+          />
+
+          {/* User */}
+          <Flex direction="column" justify="flex-end" gap="md">
+            <Divider />
+            <UserButton />
+            <Divider />
+            <NavLink label="Sign Out" href="/sign-out" leftSection={<IconLogout size="1rem" stroke={1.5} />} />
+          </Flex>
+        </Flex>
       </AppShellNavbar>
       <AppShellMain>{children}</AppShellMain>
     </AppShell>
