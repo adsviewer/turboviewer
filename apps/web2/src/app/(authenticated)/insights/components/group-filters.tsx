@@ -1,7 +1,32 @@
 import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
-import { type ReactNode } from 'react';
+import { type ChangeEvent, type ReactNode } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-server';
+import { createURLWithNewParam, createURLWithRemovedParam, isParamInSearchParams } from '@/util/url-query-utils';
 
 export default function GroupFilters(): ReactNode {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const groupedByKey = 'groupedBy';
+
+  const handleCheckboxFilter = (e: ChangeEvent<HTMLInputElement>): void => {
+    const isChecked = e.target.checked;
+
+    if (isChecked) {
+      router.replace(createURLWithNewParam(pathname, searchParams, groupedByKey, e.target.defaultValue));
+    } else {
+      router.replace(createURLWithRemovedParam(pathname, searchParams, groupedByKey, e.target.defaultValue));
+    }
+  };
+
+  const isChecked = (groupByValue: InsightsColumnsGroupBy): boolean => {
+    if (isParamInSearchParams(searchParams, groupedByKey, groupByValue)) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <ScrollArea offsetScrollbars>
       <Flex direction="column">
@@ -45,12 +70,48 @@ export default function GroupFilters(): ReactNode {
         <Text size="sm" mt="lg">
           Group By
         </Text>
-        <Checkbox label="Account" my={4} />
-        <Checkbox label="Ad ID" my={4} />
-        <Checkbox label="Device" my={4} />
-        <Checkbox label="Date" my={4} />
-        <Checkbox label="Publisher" my={4} />
-        <Checkbox label="Position" my={4} />
+        <Checkbox
+          label="Account"
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.adAccountId}
+          checked={isChecked(InsightsColumnsGroupBy.adAccountId)}
+        />
+        <Checkbox
+          label="Ad ID"
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.adId}
+          checked={isChecked(InsightsColumnsGroupBy.adId)}
+        />
+        <Checkbox
+          label="Device"
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.device}
+          checked={isChecked(InsightsColumnsGroupBy.device)}
+        />
+        <Checkbox
+          label="Date"
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.date}
+          checked={isChecked(InsightsColumnsGroupBy.date)}
+        />
+        <Checkbox
+          label="Publisher"
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.publisher}
+          checked={isChecked(InsightsColumnsGroupBy.publisher)}
+        />
+        <Checkbox
+          label="Position"
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.position}
+          checked={isChecked(InsightsColumnsGroupBy.position)}
+        />
       </Flex>
     </ScrollArea>
   );
