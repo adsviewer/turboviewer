@@ -1,9 +1,9 @@
 import { type ReactNode } from 'react';
 
-export default function Settings(): ReactNode {
+export default function Integrations(): ReactNode {
   return (
     <>
-      <h1>Settings</h1>
+      <h1>Integrations</h1>
       <p>
         Fugiat occaecat dolore ullamco deserunt ut reprehenderit deserunt tempor nostrud ipsum exercitation. Laboris
         dolore deserunt occaecat ut eu culpa duis ea adipisicing pariatur laborum velit. Tempor eiusmod consectetur

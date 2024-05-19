@@ -13,7 +13,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { type ReactNode } from 'react';
-import { IconGraph, IconSettings, IconLogout } from '@tabler/icons-react';
+import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
@@ -51,10 +51,10 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             leftSection={<IconGraph size="1rem" stroke={1.5} />}
           />
           <NavLink
-            label="Settings"
-            href="/settings"
-            active={pathname === '/settings'}
-            leftSection={<IconSettings size="1rem" stroke={1.5} />}
+            label="Integrations"
+            href="/integrations"
+            active={pathname === '/integrations'}
+            leftSection={<IconPlugConnected size="1rem" stroke={1.5} />}
           />
 
           {/* Group Filters */}
