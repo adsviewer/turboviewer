@@ -13,6 +13,7 @@ import {
   Container,
   Group,
   Button,
+  Flex,
 } from '@mantine/core';
 import { logger } from '@repo/logger';
 
@@ -36,26 +37,28 @@ export default function SignIn(): React.JSX.Element {
 
   return (
     <Container size={420} my={40}>
-      <Title ta="center">Sign In</Title>
-      <Text c="dimmed" size="sm" ta="center" mt={5}>
-        Do not have an account yet?{' '}
-        <Anchor
-          size="sm"
-          component="button"
-          onClick={() => {
-            router.push('/sign-up');
-          }}
-        >
-          Create account!
-        </Anchor>
-      </Text>
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <Flex direction="column" align="center" justify="center" mb="xl">
+          <Title ta="center">Sign In</Title>
+          <Text c="dimmed" size="sm" ta="center" mt={5}>
+            Don&apos;t have an account yet?{' '}
+            <Anchor
+              size="sm"
+              component="button"
+              onClick={() => {
+                router.push('/sign-up');
+              }}
+            >
+              Sign up!
+            </Anchor>
+          </Text>
+        </Flex>
 
-      <form
-        onSubmit={form.onSubmit((values) => {
-          handleSubmit(values);
-        })}
-      >
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <form
+          onSubmit={form.onSubmit((values) => {
+            handleSubmit(values);
+          })}
+        >
           <TextInput
             label="Email"
             placeholder="you@example.com"
@@ -77,8 +80,8 @@ export default function SignIn(): React.JSX.Element {
           <Button type="submit" fullWidth mt="xl">
             Sign In!
           </Button>
-        </Paper>
-      </form>
+        </form>
+      </Paper>
     </Container>
   );
 }

@@ -1,6 +1,7 @@
 import '@mantine/core/styles.css';
-import { ColorSchemeScript, MantineProvider } from '@mantine/core';
+import { ColorSchemeScript, Flex, MantineProvider } from '@mantine/core';
 import type { Metadata } from 'next';
+import { LogoFull } from '@/components/misc/logo-full';
 
 export const metadata: Metadata = {
   title: 'AdsViewer',
@@ -14,7 +15,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider>
+          <Flex align="center" justify="center" my="xl">
+            <LogoFull />
+          </Flex>
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );
