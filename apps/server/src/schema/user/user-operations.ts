@@ -5,6 +5,7 @@ import { queryFromInfo } from '@pothos/plugin-prisma';
 import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { PasswordSchema } from '@repo/utils';
+import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { createJwt, createJwts } from '../../auth';
 import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
 import { sendForgetPasswordEmail } from '../../email';
@@ -46,8 +47,6 @@ const updateUserSchema = z.object({
   oldPassword: PasswordSchema.optional(),
   newPassword: PasswordSchema.optional(),
 });
-
-const forgotPasswordDuration = 1000 * 60 * 60 * 24; // 1 day
 
 builder.mutationFields((t) => ({
   signup: t.field({
@@ -185,13 +184,15 @@ builder.mutationFields((t) => ({
       email: t.arg.string({ required: true, validate: { email: true } }),
     },
     resolve: async (root, args, _ctx, _info) => {
+      const forgotPasswordDurationSec = 60 * 60 * 24; // 1 day
+
       const user = await prisma.user.findUnique({
         where: { email: args.email },
       });
       if (!user) return true;
 
       const now = new Date();
-      const expires = now.getTime() + forgotPasswordDuration;
+      const expires = now.getTime() + forgotPasswordDurationSec;
 
       const token = randomUUID();
       const searchParams = new URLSearchParams();
@@ -206,19 +207,17 @@ builder.mutationFields((t) => ({
 
       logger.info(`Forget password url for ${user.email}: ${url.toString()}`);
 
-      await prisma.forgetPassword.upsert({
-        where: { id: user.id },
-        create: { id: user.id, token },
-        update: { token },
-      });
-      await sendForgetPasswordEmail({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        action_url: url.toString(),
-        operating_system: _ctx.request.operatingSystem,
-        browser_name: _ctx.request.browserName,
-      });
+      await Promise.all([
+        redisSet(`forget-password:${token}`, user.id, forgotPasswordDurationSec),
+        sendForgetPasswordEmail({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          action_url: url.toString(),
+          operating_system: _ctx.request.operatingSystem,
+          browser_name: _ctx.request.browserName,
+        }),
+      ]);
       return true;
     },
   }),
@@ -227,58 +226,42 @@ builder.mutationFields((t) => ({
     args: {
       token: t.arg.string({ required: true, validate: { uuid: true } }),
       password: t.arg.string({
-        required: false, // if the frontend decides to check the token first
+        required: true,
         validate: {
           schema: PasswordSchema,
         },
       }),
     },
-    resolve: async (root, args, _ctx, _info) => {
-      const forgetPassword = await prisma.forgetPassword.findUnique({
-        where: { token: args.token },
-        include: {
-          user: {
-            include: {
-              roles: {
-                select: {
-                  role: true,
-                },
-              },
-            },
-          },
-        },
-      });
+    resolve: async (_root, args, ctx, info) => {
+      const userId = await redisGet(`forget-password:${args.token}`);
 
-      if (!forgetPassword) {
-        throw new GraphQLError('Invalid token');
-      }
-
-      if (forgetPassword.updatedAt.getTime() + forgotPasswordDuration < Date.now()) {
-        await prisma.forgetPassword.delete({
-          where: { id: forgetPassword.id },
-        });
+      if (!userId) {
         throw new GraphQLError('Token expired');
       }
 
-      if (args.password) {
-        const password = await createPassword(args.password);
-        await prisma.$transaction([
-          prisma.user.update({
-            where: { id: forgetPassword.id },
-            data: { password },
-          }),
-          prisma.forgetPassword.delete({
-            where: { id: forgetPassword.id },
-          }),
-        ]);
-      }
+      const password = await createPassword(args.password);
+      const query = queryFromInfo({
+        context: ctx,
+        info,
+        path: ['user'],
+      });
+
+      const [user, _] = await Promise.all([
+        await prisma.user.update({
+          ...query,
+          where: { id: userId },
+          include: { roles: { select: { role: true } } },
+          data: { password },
+        }),
+        await redisDel(`forget-password:${args.token}`),
+      ]);
 
       const { token, refreshToken } = createJwts(
-        forgetPassword.user.id,
-        forgetPassword.user.organizationId,
-        forgetPassword.user.roles.map((r) => r.role),
+        user.id,
+        user.organizationId,
+        user.roles.map((r) => r.role),
       );
-      return { token, refreshToken, user: forgetPassword.user };
+      return { token, refreshToken, user };
     },
   }),
 }));
