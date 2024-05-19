@@ -94,3 +94,7 @@ const tryRefreshToken = async (
 const isPublic = (path: string): boolean => {
   return publicPaths.includes(path);
 };
+
+// const isAPIRequest = (path: string): boolean => {
+//   return path.startsWith('/api');
+// };
