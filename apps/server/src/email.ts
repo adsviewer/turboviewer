@@ -7,7 +7,7 @@ import { env } from './config';
 
 const client = new SESClient({ region: env.AWS_REGION });
 
-const url = new URL(env.PUBLIC_URL);
+const url = MODE === Environment.Local ? new URL('https://adsviewer.io') : new URL(env.PUBLIC_URL);
 const baseDomain = () => `${MODE === Environment.Production ? '' : `${MODE}.`}${url.hostname}`;
 
 interface ForgotPasswordEmailData {

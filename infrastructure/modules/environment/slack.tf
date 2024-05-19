@@ -35,7 +35,8 @@ resource "awscc_iam_role" "slack_assume_role" {
   managed_policy_arns = ["arn:aws:iam::aws:policy/AWSResourceExplorerReadOnlyAccess"]
   policies = [
     {
-      policy_document = data.aws_iam_policy_document.logs_policy.json
+      #   remove jsonencode/jsondecode when https://github.com/hashicorp/terraform-provider-awscc/issues/750 is fixed
+      policy_document = jsonencode(jsondecode(data.aws_iam_policy_document.logs_policy.json))
       policy_name     = "logs_policy"
     }
   ]

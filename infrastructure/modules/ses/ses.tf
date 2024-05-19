@@ -50,3 +50,7 @@ resource "aws_iam_policy" "ses_policy" {
   name   = "${var.environment}-ses-policy"
   policy = data.aws_iam_policy_document.server_task_role_policy_document.json
 }
+
+resource "aws_ses_email_identity" "ses_email_identity" {
+  email = "hello@${var.domain}"
+}

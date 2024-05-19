@@ -1,12 +1,11 @@
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { redis } from '@repo/redis';
+import { redisGet, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError, isMode } from '@repo/utils';
 import type QueryString from 'qs';
 import { z } from 'zod';
-import { decryptTokens, encryptAesGcm } from '@repo/channel-utils';
-import { type TokensResponse } from '@repo/channel-utils';
+import { decryptTokens, encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
@@ -107,12 +106,12 @@ const completeIntegration = async (
 
 const integrationStateKey = (state: string): string => `integration-state:${state}`;
 export const saveOrgState = async (state: string, organizationId: string, userId: string): Promise<void> => {
-  await redis.set(integrationStateKey(state), JSON.stringify({ organizationId, userId }), { EX: 12 * 60 * 60 });
+  await redisSet(integrationStateKey(state), JSON.stringify({ organizationId, userId }), 12 * 60 * 60);
 };
 const getOrgFromState = async (state: string): Promise<{ organizationId: string; userId: string } | null> => {
-  return await redis
-    .get(integrationStateKey(state))
-    .then((res) => (res ? (JSON.parse(res) as { organizationId: string; userId: string }) : null));
+  return await redisGet(integrationStateKey(state)).then((res) =>
+    res ? (JSON.parse(res) as { organizationId: string; userId: string }) : null,
+  );
 };
 
 const saveTokens = async (
