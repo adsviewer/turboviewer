@@ -41,7 +41,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
 
       {/* Navbar */}
       <AppShellNavbar p="md">
-        <Flex direction="column">
+        <Flex direction="column" h="100%">
           {/* Navigation */}
           <NavLink
             label="Insights"
@@ -57,7 +57,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           />
 
           {/* User */}
-          <Flex direction="column" justify="flex-end" gap="md">
+          <Flex direction="column" justify="flex-end" gap="md" mt="auto">
             <Divider />
             <UserButton />
             <Divider />
