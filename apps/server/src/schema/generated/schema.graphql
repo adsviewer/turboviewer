@@ -365,7 +365,7 @@ type Mutation {
   Uses the refresh token to generate a new token
   """
   refreshToken: String!
-  resetPassword(password: String, token: String!): TokenDto!
+  resetPassword(password: String!, token: String!): TokenDto!
   signup(email: String!, firstName: String!, lastName: String!, password: String!): TokenDto!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }

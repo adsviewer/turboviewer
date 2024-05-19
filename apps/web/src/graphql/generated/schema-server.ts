@@ -432,7 +432,7 @@ export type MutationRefreshDataArgs = {
 };
 
 export type MutationResetPasswordArgs = {
-  password?: InputMaybe<Scalars['String']['input']>;
+  password: Scalars['String']['input'];
   token: Scalars['String']['input'];
 };
 
