@@ -1,12 +1,26 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useMantineTheme } from '@mantine/core';
+import { logger } from '@repo/logger';
+
 export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement | null {
+  const theme = useMantineTheme();
+  const router = useRouter();
+  logger.info(theme);
+
   return (
     <svg
-      className="stroke-[rgb(var(--foreground-rgb))] fill-[rgb(var(--foreground-rgb))]"
+      stroke="red"
+      fill="purple"
       width={200}
       height={26}
       viewBox="0 0 200 26"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
+      onClick={() => {
+        router.push('/insights');
+      }}
     >
       <line x1="9.19527" y1="2.28171" x2="1.28172" y2="24.024" strokeWidth="2" strokeLinecap="round" />
       <line
