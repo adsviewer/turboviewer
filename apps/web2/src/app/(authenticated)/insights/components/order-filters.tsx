@@ -1,12 +1,16 @@
 import { type ReactNode } from 'react';
 import { Flex, Text, Select } from '@mantine/core';
 
-export default function OrderFilters(): ReactNode {
+interface OrderFiltersProps {
+  resultsCount: number;
+}
+
+export default function OrderFilters(props: OrderFiltersProps): ReactNode {
   return (
     <Flex w="100%" mb="lg" align="center" wrap="wrap">
       {/* Page data info */}
       <Text size="md" mr="auto">
-        Page 1 of 1 (10 results in total)
+        Page 1 of 1 ({props.resultsCount} results in total)
       </Text>
 
       {/* Filters */}
