@@ -3,11 +3,11 @@
 import { Card, Image, Text, Badge, Group, Divider, Flex, useComputedColorScheme, useMantineTheme } from '@mantine/core';
 import { IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { type DeviceEnum, type PublisherEnum, type CurrencyEnum } from '@/graphql/generated/schema-server';
+import { type DeviceEnum, type CurrencyEnum } from '@/graphql/generated/schema-server';
 
 interface InsightCardProps {
-  publisher: PublisherEnum | null | undefined;
-  position: string | null | undefined;
+  title: string | null | undefined;
+  description: string | null | undefined;
   device: DeviceEnum | null | undefined;
   rank: 'good' | 'mid' | 'bad' | 'unknown';
   amountSpent: number | null | undefined;
@@ -76,12 +76,12 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       </Card.Section>
 
       <Group justify="space-between" mt="md" mb="xs">
-        <Text fw={500}>{props.position}</Text>
+        <Text fw={500}>{props.title}</Text>
         <Badge color={rank.color}>{rank.label}</Badge>
       </Group>
 
       <Text size="sm" c="dimmed">
-        {props.publisher}
+        {props.description}
       </Text>
 
       <Divider my="lg" />

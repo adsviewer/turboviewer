@@ -9,13 +9,13 @@ interface PropsType {
 
 export default function InsightsGrid(props: PropsType): ReactNode {
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
+    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} style={{ display: 'relative' }}>
       {props.insights.length
         ? props.insights.map((insight) => (
             <InsightCard
               key={insight.adId}
-              publisher={insight.publisher}
-              position={insight.position}
+              title={insight.publisher}
+              description={insight.position}
               device={insight.device}
               rank="unknown"
               amountSpent={insight.spend}
