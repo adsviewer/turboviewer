@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider>
+        <MantineProvider forceColorScheme="light">
           <Flex align="center" justify="center" my="xl">
             <LogoFull />
           </Flex>
