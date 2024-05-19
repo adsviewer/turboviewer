@@ -5,6 +5,7 @@ import IntegrationsGrid from './components/integrations-grid';
 
 export default async function Integrations(): Promise<ReactNode> {
   const { settingsChannels } = await urqlClientSdk().settingsChannels();
+
   return (
     <>
       <h1>Integrations</h1>

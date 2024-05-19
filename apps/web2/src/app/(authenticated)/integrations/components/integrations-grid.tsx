@@ -12,7 +12,7 @@ interface IntegrationProps {
 }
 
 export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
-  // (backend response needs refactor to return object with IntegrationType as key)
+  // (backend response probably needs refactor to return object with IntegrationType as key)
   const isIntegrationAvailable = (status: IntegrationStatus): boolean => {
     if (status !== IntegrationStatus.ComingSoon) {
       return true;
@@ -32,6 +32,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
       <IntegrationCard
         title="Meta"
         description="Connect your Meta account and view analytics for your ad campaigns on every Meta Platforms application!"
+        authUrl={props.integrations[0].authUrl}
         integrationType={IntegrationType.META}
         isConnected={isIntegrationConnected(props.integrations[0].status)}
         isAvailable={isIntegrationAvailable(props.integrations[0].status)}
