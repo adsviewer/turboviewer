@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Get granular insights into your ads performance',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.ReactNode {
   return (
     <html lang="en">
       <head>
