@@ -31,6 +31,6 @@ export const logger =
           formatter: new CustomLogFormatter(),
         }),
       )
-    : pino(process.env.NEXT_RUNTIME ? {} : optionsOrStream);
+    : pino(optionsOrStream);
 
 export { lambdaRequestTracker } from 'pino-lambda';

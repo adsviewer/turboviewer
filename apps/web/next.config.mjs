@@ -4,6 +4,9 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  experimental: {
+    serverComponentsExternalPackages: ['pino'],
+  },
   reactStrictMode: true,
   rewrites: async () => {
     return {
