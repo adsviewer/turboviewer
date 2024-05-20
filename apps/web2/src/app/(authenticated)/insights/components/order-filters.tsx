@@ -20,6 +20,14 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
   const searchParams = useSearchParams();
   const orderDirectionKey = 'order';
   const orderByKey = 'orderBy';
+  const pageSizeKey = 'pageSize';
+
+  const getPageSizeValue = (): string => {
+    if (isParamInSearchParams(searchParams, pageSizeKey, searchParams.get(pageSizeKey) ?? '12')) {
+      return searchParams.get(pageSizeKey) ?? '12';
+    }
+    return '12';
+  };
 
   const getOrderDirectionValue = (): string => {
     if (isParamInSearchParams(searchParams, orderDirectionKey, OrderDirection.asc)) {
@@ -33,6 +41,11 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
       return InsightsColumnsOrderBy.impressions;
     }
     return InsightsColumnsOrderBy.spend;
+  };
+
+  const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
+    const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
+    router.replace(newURL);
   };
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
@@ -61,7 +74,8 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
         <Select
           placeholder="Pick value"
           data={['6', '12', '18', '50', '100']}
-          defaultValue="12"
+          value={getPageSizeValue()}
+          onChange={handlePageSizeChange}
           allowDeselect={false}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           maw={90}
@@ -79,7 +93,7 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
             { value: InsightsColumnsOrderBy.spend, label: 'Spent' },
             { value: InsightsColumnsOrderBy.impressions, label: 'Impressions' },
           ]}
-          defaultValue={getOrderByValue()}
+          value={getOrderByValue()}
           onChange={handleOrderByChange}
           allowDeselect={false}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
