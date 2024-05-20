@@ -55,6 +55,7 @@
     "lucide-react": "^0.376.0",
     "next": "^14.2.3",
     "next-intl": "^3.11.3",
+    "pino": "^9.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.3",
