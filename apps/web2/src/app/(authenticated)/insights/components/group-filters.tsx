@@ -2,21 +2,23 @@ import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
 import { type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-server';
-import { createURLWithNewParam, createURLWithRemovedParam, isParamInSearchParams } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, groupedByKey, isParamInSearchParams } from '@/util/url-query-utils';
 
 export default function GroupFilters(): ReactNode {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const groupedByKey = 'groupedBy';
 
   const handleCheckboxFilter = (e: ChangeEvent<HTMLInputElement>): void => {
     const isChecked = e.target.checked;
 
     if (isChecked) {
-      router.replace(createURLWithNewParam(pathname, searchParams, groupedByKey, e.target.defaultValue));
+      // router.replace(createURLWithNewParam(pathname, searchParams, groupedByKey, e.target.defaultValue));
+      const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
+      router.replace(newURL);
     } else {
-      router.replace(createURLWithRemovedParam(pathname, searchParams, groupedByKey, e.target.defaultValue));
+      const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
+      router.replace(newURL);
     }
   };
 
