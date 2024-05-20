@@ -1,6 +1,8 @@
 import { type ReactNode } from 'react';
 import { Flex, Text, Select } from '@mantine/core';
 
+export type OrderType = 'asc' | 'desc';
+
 interface OrderFiltersProps {
   resultsCount: number;
 }

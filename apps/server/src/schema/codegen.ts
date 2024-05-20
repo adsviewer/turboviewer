@@ -39,7 +39,7 @@ const config: CodegenConfig = {
           enumValues: 'keep',
         },
       },
-      documents: ['../web/src/graphql/*.graphql'],
+      documents: ['../web2/src/graphql/*.graphql'],
     },
     '../web2/src/graphql/generated/schema-client.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
@@ -50,7 +50,7 @@ const config: CodegenConfig = {
           enumValues: 'keep',
         },
       },
-      documents: ['../web/src/graphql/*.graphql'],
+      documents: ['../web2/src/graphql/*.graphql'],
     },
   },
   config: {

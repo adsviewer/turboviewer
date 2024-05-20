@@ -1,5 +1,5 @@
 import { SimpleGrid } from '@mantine/core';
-import { type ReactNode } from 'react';
+import { type Key, type ReactNode } from 'react';
 import { type InsightsQuery } from '@/graphql/generated/schema-server';
 import InsightCard from './insight-card';
 
@@ -13,7 +13,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
       {props.insights.length
         ? props.insights.map((insight) => (
             <InsightCard
-              key={insight.adId}
+              key={insight.id as Key}
               title={insight.publisher}
               description={insight.position}
               device={insight.device}

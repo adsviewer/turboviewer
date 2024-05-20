@@ -303,6 +303,7 @@ export type GroupedInsights = {
   date?: Maybe<Scalars['Date']['output']>;
   device?: Maybe<DeviceEnum>;
   iFrame?: Maybe<IFrame>;
+  id: Scalars['String']['output'];
   impressions: Scalars['Int']['output'];
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
@@ -432,7 +433,7 @@ export type MutationRefreshDataArgs = {
 };
 
 export type MutationResetPasswordArgs = {
-  password?: InputMaybe<Scalars['String']['input']>;
+  password: Scalars['String']['input'];
   token: Scalars['String']['input'];
 };
 
@@ -597,6 +598,7 @@ export type InsightsQuery = {
     totalCount: number;
     edges: Array<{
       __typename?: 'GroupedInsights';
+      id: string;
       adAccountId?: string | null;
       adAccountName?: string | null;
       adId?: string | null;
@@ -805,6 +807,7 @@ export const InsightsDocument = gql`
     ) {
       totalCount
       edges {
+        id
         adAccountId
         adAccountName
         adId

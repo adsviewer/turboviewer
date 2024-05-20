@@ -4,6 +4,7 @@ export interface QueryParamsType {
   key: string;
   value: string;
 }
+
 // Signals that the user has altered the url via UI actions so that automatic
 // loading of search filters is aborted
 export const userActionOverrideParams: QueryParamsType = {
