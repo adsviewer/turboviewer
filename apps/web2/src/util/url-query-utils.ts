@@ -1,5 +1,7 @@
 import { type ReadonlyURLSearchParams } from 'next/navigation';
 
+const groupedByKey = 'groupedBy';
+
 export interface QueryParamsType {
   key: string;
   value: string;
@@ -65,6 +67,51 @@ export const createURLWithRemovedParam = (
   }
 
   return newURL;
+};
+
+// Replaces the value of a query param's key of a URL
+// export const createURLWithReplacedParam = (
+//   pathname: string,
+//   searchParams: ReadonlyURLSearchParams,
+//   key: string,
+//   newValue: string,
+// ): string => {
+//   const newParams = new URLSearchParams(searchParams.toString());
+//   const newURL = `${pathname}?${paramString}`;
+
+//   const regex = new RegExp(`([?&])(${key}=)([^&]*)`, 'i');
+
+//   if (newURL.match(regex)) {
+//     return newURL.replace(regex, `$1${key}=${newValue}`);
+//   }
+//   const separator = newURL.includes('?') ? '&' : '?';
+//   return `${newURL}${separator}${key}=${newValue}`;
+// };
+
+// If the specific key exists its value is replaced, otherwise
+// it's added as a new key=value param
+export const addOrReplaceURLParams = (
+  pathname: string,
+  searchParams: ReadonlyURLSearchParams,
+  key: string,
+  newValue: string,
+): string => {
+  const newParams = new URLSearchParams(searchParams.toString());
+
+  // Specific case for groupBy (insights) so that it handles
+  // multiple params with the same key & different values
+  if (key === groupedByKey) {
+    if (!newParams.has(groupedByKey, newValue)) {
+      newParams.set(groupedByKey, newValue);
+      return `${pathname}?${newParams.toString()}`;
+    }
+    newParams.delete(groupedByKey, newValue);
+    return `${pathname}?${newParams.toString()}`;
+  }
+
+  // Generic logic (replace value or add param if it doesn't exist)
+  newParams.set(key, newValue);
+  return `${pathname}?${newParams.toString()}`;
 };
 
 export const isParamInSearchParams = (searchParams: ReadonlyURLSearchParams, key: string, value: string): boolean => {
