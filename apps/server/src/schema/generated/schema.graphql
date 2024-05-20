@@ -266,6 +266,7 @@ type GroupedInsights {
   date: Date
   device: DeviceEnum
   iFrame: IFrame
+  id: String!
   impressions: Int!
   position: String
   publisher: PublisherEnum

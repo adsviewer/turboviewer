@@ -161,6 +161,8 @@ builder.queryFields((t) => ({
         }));
       }
 
+      groupedEdges.forEach((edge) => (edge.id = groupBy.map((group) => edge[group] ?? '').join('-')));
+
       return { totalCount: await totalElementsP, edges: groupedEdges };
     },
   }),
@@ -215,6 +217,7 @@ const GroupedInsightDto = builder.simpleObject(
   'GroupedInsights',
   {
     fields: (t) => ({
+      id: t.string({ nullable: false }),
       adId: t.string({ nullable: true }),
       adAccountId: t.string({ nullable: true }),
       adAccountName: t.string({ nullable: true }),
