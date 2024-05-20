@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { logger } from '@repo/logger';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -46,6 +47,7 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
   });
   const insights = resp.insights.edges;
   const totalCount = resp.insights.totalCount;
+  logger.info(insights);
 
   return (
     <>

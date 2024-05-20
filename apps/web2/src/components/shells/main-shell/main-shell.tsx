@@ -12,15 +12,14 @@ import {
   NavLink,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { type ReactNode } from 'react';
 import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
-import UserButton from '@/components/user-button/user-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
+import UserButton from '@/components/user-button/user-button';
 
-export function MainAppShell({ children }: { children: React.ReactNode }): ReactNode {
+export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
 
@@ -68,7 +67,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           {/* User */}
           <Flex direction="column" justify="flex-end" gap="md" mt="auto">
             <Divider />
-            <UserButton />
+            <UserButton firstName="test" lastName="guy" email="test@gmail.com" />
             <Divider />
             <NavLink label="Sign Out" href="/sign-out" leftSection={<IconLogout size="1rem" stroke={1.5} />} />
           </Flex>

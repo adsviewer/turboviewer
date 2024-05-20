@@ -2,7 +2,13 @@ import { Group, Avatar, Text, Flex } from '@mantine/core';
 import { type ReactNode } from 'react';
 import classes from './user-button.module.scss';
 
-export default function UserButton(): ReactNode {
+export interface UserProps {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export default function UserButton(props: UserProps): ReactNode {
   return (
     <Flex justify="flex-start" className={classes.user}>
       <Group>
@@ -13,11 +19,11 @@ export default function UserButton(): ReactNode {
 
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={500}>
-            Some Dude
+            {`${props.firstName} ${props.lastName}`}
           </Text>
 
           <Text c="dimmed" size="xs">
-            dudesome@outlook.com
+            {props.email}
           </Text>
         </div>
       </Group>
