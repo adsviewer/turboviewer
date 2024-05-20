@@ -300,6 +300,9 @@ importers:
       next-intl:
         specifier: ^3.11.3
         version: 3.12.0(next@14.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.76.0))(react@18.3.1)
+      pino:
+        specifier: ^9.0.0
+        version: 9.0.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
