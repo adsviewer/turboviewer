@@ -38,6 +38,7 @@ query insights(
   ) {
     totalCount
     edges {
+      id
       adAccountId
       adAccountName
       adId

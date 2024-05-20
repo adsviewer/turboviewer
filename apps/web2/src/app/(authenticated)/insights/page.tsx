@@ -1,9 +1,26 @@
 import { type ReactNode } from 'react';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import {
+  type DeviceEnum,
+  type InsightsColumnsGroupBy,
+  InsightsColumnsOrderBy,
+  type PublisherEnum,
+} from '@/graphql/generated/schema-server';
 import InsightsGrid from './components/insights-grid';
-import OrderFilters from './components/order-filters';
-import { type SearchParams } from './query-string-util';
+import OrderFilters, { type OrderType } from './components/order-filters';
+
+export interface SearchParams {
+  orderBy?: InsightsColumnsOrderBy;
+  order?: OrderType;
+  page?: string;
+  pageSize?: string;
+  groupedBy?: InsightsColumnsGroupBy[];
+  account?: string;
+  adId?: string;
+  device?: DeviceEnum;
+  publisher?: PublisherEnum;
+  position?: string;
+}
 
 interface InsightsProps {
   searchParams?: SearchParams;
