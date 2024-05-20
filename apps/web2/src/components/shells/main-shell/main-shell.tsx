@@ -67,7 +67,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           {/* User */}
           <Flex direction="column" justify="flex-end" gap="md" mt="auto">
             <Divider />
-            <UserButton firstName="test" lastName="guy" email="test@gmail.com" />
+            <UserButton />
             <Divider />
             <NavLink label="Sign Out" href="/sign-out" leftSection={<IconLogout size="1rem" stroke={1.5} />} />
           </Flex>
