@@ -5,6 +5,7 @@ export const groupedByKey = 'groupedBy';
 export const publisherKey = 'publisher';
 export const deviceKey = 'device';
 export const positionKey = 'position';
+export const accountKey = 'account';
 
 export const positions = [
   'an_classic',
@@ -51,10 +52,11 @@ export const addOrReplaceURLParams = (
   key: string,
   newValue: string,
 ): string => {
+  const multiKeyParams = [groupedByKey, publisherKey, deviceKey, positionKey, accountKey];
   const newParams = new URLSearchParams(searchParams.toString());
 
   // Specific case for handling keys that can co-exist with different values
-  if (key === groupedByKey || key === publisherKey || key === deviceKey || key === positionKey) {
+  if (multiKeyParams.includes(key)) {
     // If it doesn't exist, just add it
     if (!newParams.has(key, newValue)) {
       newParams.append(key, newValue);

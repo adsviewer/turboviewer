@@ -3,6 +3,7 @@ export const titleCaseToSpaces = (str: string): string => {
   return str.replace(/(?!^)(?:[A-Z])/g, ' $&');
 };
 
+// e.g. facebook_reels -> Facebook Reels
 export const snakeCaseToTitleCaseWithSpaces = (str: string): string => {
   return str
     .split('_')
