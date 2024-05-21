@@ -1,6 +1,34 @@
 import { type ReadonlyURLSearchParams } from 'next/navigation';
+import { snakeCaseToTitleCaseWithSpaces } from './string-utils';
 
 export const groupedByKey = 'groupedBy';
+export const publisherKey = 'publisher';
+export const deviceKey = 'device';
+export const positionKey = 'position';
+
+export const positions = [
+  'an_classic',
+  'biz_disco_feed',
+  'facebook_reels',
+  'facebook_reels_overlay',
+  'facebook_stories',
+  'feed',
+  'instagram_explore',
+  'instagram_explore_grid_home',
+  'instagram_profile_feed',
+  'instagram_reels',
+  'instagram_search',
+  'instagram_stories',
+  'instream_video',
+  'marketplace',
+  'messenger_inbox',
+  'messenger_stories',
+  'rewarded_video',
+  'right_hand_column',
+  'search',
+  'video_feeds',
+  'unknown',
+].map((pos) => ({ value: pos, label: snakeCaseToTitleCaseWithSpaces(pos) }));
 
 export interface QueryParamsType {
   key: string;
@@ -15,7 +43,8 @@ export const userActionOverrideParams: QueryParamsType = {
 };
 
 // If the specific key exists its value is replaced, otherwise
-// it's added as a new key=value param
+// it's added as a new key=value param.
+// If the key=value pair exists, it is removed
 export const addOrReplaceURLParams = (
   pathname: string,
   searchParams: ReadonlyURLSearchParams,
@@ -24,16 +53,15 @@ export const addOrReplaceURLParams = (
 ): string => {
   const newParams = new URLSearchParams(searchParams.toString());
 
-  // Specific case for groupBy (insights) so that it handles
-  // multiple params with the same key & different values
-  if (key === groupedByKey) {
+  // Specific case for handling keys that can co-exist with different values
+  if (key === groupedByKey || key === publisherKey || key === deviceKey || key === positionKey) {
     // If it doesn't exist, just add it
-    if (!newParams.has(groupedByKey, newValue)) {
-      newParams.append(groupedByKey, newValue);
+    if (!newParams.has(key, newValue)) {
+      newParams.append(key, newValue);
       return `${pathname}?${newParams.toString()}`;
     }
     // If it already exists, remove it!
-    newParams.delete(groupedByKey, newValue);
+    newParams.delete(key, newValue);
     return `${pathname}?${newParams.toString()}`;
   }
 
