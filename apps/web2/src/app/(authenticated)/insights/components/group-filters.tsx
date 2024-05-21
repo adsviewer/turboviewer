@@ -1,5 +1,5 @@
 import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
-import { type ChangeEvent, type ReactNode } from 'react';
+import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import {
@@ -10,8 +10,10 @@ import {
   positionKey,
   positions,
   publisherKey,
+  accountKey,
 } from '@/util/url-query-utils';
 import { titleCaseToSpaces } from '@/util/string-utils';
+import getAccounts from '../../actions';
 
 interface MultiSelectDataType {
   value: string;
@@ -23,7 +25,46 @@ export default function GroupFilters(): ReactNode {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Populate & set current values methods
+  // Dropdowns logic //
+
+  // Accounts
+  // Get ad account for every integration!
+  const [accounts, setAccounts] = useState<MultiSelectDataType[]>([]);
+  useEffect(() => {
+    void getAccounts().then((res) => {
+      const integrations = res.integrations;
+      let adAccounts: MultiSelectDataType[] = [];
+      for (const integration of integrations) {
+        for (const adAccount of integration.adAccounts) {
+          const newValue: MultiSelectDataType = {
+            value: adAccount.id,
+            label: adAccount.name,
+          };
+          adAccounts = [...adAccounts, newValue];
+        }
+      }
+      setAccounts(adAccounts);
+    });
+  }, []);
+
+  const populateAccountsAvailableValues = (): MultiSelectDataType[] => {
+    let data: MultiSelectDataType[] = [];
+    for (const account of accounts) {
+      data = [...data, { value: account.value, label: account.label }];
+    }
+    return data;
+  };
+
+  const getAccountCurrentValues = (): string[] => {
+    let values: string[] = [];
+    for (const account of accounts) {
+      const value = account.value;
+      if (isParamInSearchParams(searchParams, accountKey, value)) {
+        values = [...values, value];
+      }
+    }
+    return values;
+  };
 
   // Positions (will be refactored to use the enum from schema-server when it is done)
   // (for now we create a map instead of an enum...)
@@ -97,6 +138,7 @@ export default function GroupFilters(): ReactNode {
     router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
   };
 
+  // Checkboxes logic //
   const handleCheckboxFilter = (e: ChangeEvent<HTMLInputElement>): void => {
     const isChecked = e.target.checked;
 
@@ -120,15 +162,27 @@ export default function GroupFilters(): ReactNode {
     <ScrollArea offsetScrollbars>
       <Flex direction="column">
         <Text size="xl">Filters</Text>
-        <Text size="sm" mt="xs">
-          Accounts
-        </Text>
-        <MultiSelect
-          placeholder="Select accounts..."
-          data={['Some Dude 1', 'Some Dude 2', 'Some Dude 3', 'Some Dude 4']}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          my={4}
-        />
+        {accounts.length ? (
+          <>
+            <Text size="sm" mt="xs">
+              Accounts
+            </Text>
+
+            <MultiSelect
+              placeholder="Select accounts..."
+              data={populateAccountsAvailableValues()}
+              value={getAccountCurrentValues()}
+              onOptionSubmit={(value) => {
+                handleMultiFilterAdd(accountKey, value);
+              }}
+              onRemove={(value) => {
+                handleMultiFilterRemove(accountKey, value);
+              }}
+              comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+              my={4}
+            />
+          </>
+        ) : null}
         <Text size="sm" mt="xs">
           Positions
         </Text>
