@@ -1,19 +1,106 @@
 import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
 import { type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-server';
-import { addOrReplaceURLParams, groupedByKey, isParamInSearchParams } from '@/util/url-query-utils';
+import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
+import {
+  addOrReplaceURLParams,
+  deviceKey,
+  groupedByKey,
+  isParamInSearchParams,
+  positionKey,
+  positions,
+  publisherKey,
+} from '@/util/url-query-utils';
+import { titleCaseToSpaces } from '@/util/string-utils';
+
+interface MultiSelectDataType {
+  value: string;
+  label: string;
+}
 
 export default function GroupFilters(): ReactNode {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
+  // Populate & set current values methods
+
+  // Positions (will be refactored to use the enum from schema-server when it is done)
+  // (for now we create a map instead of an enum...)
+  const populatePositionAvailableValues = (): MultiSelectDataType[] => {
+    let data: MultiSelectDataType[] = [];
+    for (const position of positions) {
+      data = [...data, { value: position.value, label: position.label }];
+    }
+    return data;
+  };
+
+  const getPositionCurrentValues = (): string[] => {
+    let values: string[] = [];
+    for (const position of positions) {
+      const value = position.value;
+      if (isParamInSearchParams(searchParams, positionKey, value)) {
+        values = [...values, value];
+      }
+    }
+    return values;
+  };
+
+  // Publishers
+  const populatePublisherAvailableValues = (): MultiSelectDataType[] => {
+    let data: MultiSelectDataType[] = [];
+    for (const key of Object.keys(PublisherEnum)) {
+      const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
+      data = [...data, { value: enumValue, label: enumValue }];
+    }
+    return data;
+  };
+
+  const getPublisherCurrentValues = (): string[] => {
+    let values: string[] = [];
+    for (const key of Object.keys(PublisherEnum)) {
+      const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
+      if (isParamInSearchParams(searchParams, publisherKey, enumValue)) {
+        values = [...values, enumValue];
+      }
+    }
+    return values;
+  };
+
+  // Devices
+  const populateDeviceAvailableValues = (): MultiSelectDataType[] => {
+    let data: MultiSelectDataType[] = [];
+    for (const key of Object.keys(DeviceEnum)) {
+      const enumValue = DeviceEnum[key as keyof typeof DeviceEnum];
+      data = [...data, { value: enumValue, label: titleCaseToSpaces(enumValue) }];
+    }
+    return data;
+  };
+
+  const getDeviceCurrentValues = (): string[] => {
+    let values: string[] = [];
+    for (const key of Object.keys(DeviceEnum)) {
+      const enumValue = DeviceEnum[key as keyof typeof DeviceEnum];
+      if (isParamInSearchParams(searchParams, deviceKey, enumValue)) {
+        values = [...values, enumValue];
+      }
+    }
+    return values;
+  };
+
+  // Generic functions for handling changes in multi-dropdowns
+  const handleMultiFilterAdd = (key: string, value: string): void => {
+    router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+  };
+
+  const handleMultiFilterRemove = (key: string, value: string): void => {
+    router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+  };
+
   const handleCheckboxFilter = (e: ChangeEvent<HTMLInputElement>): void => {
     const isChecked = e.target.checked;
 
     if (isChecked) {
-      // router.replace(createURLWithNewParam(pathname, searchParams, groupedByKey, e.target.defaultValue));
       const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
       router.replace(newURL);
     } else {
@@ -47,7 +134,14 @@ export default function GroupFilters(): ReactNode {
         </Text>
         <MultiSelect
           placeholder="Select positions..."
-          data={['Facebook Reels', 'Facebook Stories', 'Instagram Reels', 'Instagram Stories']}
+          data={populatePositionAvailableValues()}
+          value={getPositionCurrentValues()}
+          onOptionSubmit={(value) => {
+            handleMultiFilterAdd(positionKey, value);
+          }}
+          onRemove={(value) => {
+            handleMultiFilterRemove(positionKey, value);
+          }}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
         />
@@ -56,7 +150,14 @@ export default function GroupFilters(): ReactNode {
         </Text>
         <MultiSelect
           placeholder="Select devices..."
-          data={['Mobile (Web)', 'Mobile (App)', 'Desktop', 'Unknown']}
+          data={populateDeviceAvailableValues()}
+          value={getDeviceCurrentValues()}
+          onOptionSubmit={(value) => {
+            handleMultiFilterAdd(deviceKey, value);
+          }}
+          onRemove={(value) => {
+            handleMultiFilterRemove(deviceKey, value);
+          }}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
         />
@@ -65,7 +166,14 @@ export default function GroupFilters(): ReactNode {
         </Text>
         <MultiSelect
           placeholder="Select publishers..."
-          data={['Facebook', 'Instagram', 'Messenger', 'Audience Network', 'LinkedIn', 'TikTok', 'Unknown']}
+          data={populatePublisherAvailableValues()}
+          value={getPublisherCurrentValues()}
+          onOptionSubmit={(value) => {
+            handleMultiFilterAdd(publisherKey, value);
+          }}
+          onRemove={(value) => {
+            handleMultiFilterRemove(publisherKey, value);
+          }}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
         />
