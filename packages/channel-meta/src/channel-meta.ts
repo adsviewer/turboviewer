@@ -1,7 +1,23 @@
 import { createHmac, randomUUID } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
-import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
-import { AError, FireAndForget, getLastXMonths, getLastTwoDays, isAError, MODE } from '@repo/utils';
+import {
+  CurrencyEnum,
+  DeviceEnum,
+  type Integration,
+  IntegrationStatus,
+  IntegrationTypeEnum,
+  prisma,
+  PublisherEnum,
+} from '@repo/database';
+import {
+  AError,
+  FireAndForget,
+  getLastXMonths,
+  getLastTwoDays,
+  isAError,
+  MODE,
+  metaErrorValidatingAccessToken,
+} from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -171,12 +187,20 @@ class Meta implements ChannelInterface {
         logger.error('De-authorization request failed due to %o', json);
         return new AError('Failed to de-authorize');
       }
-      return new MetaError(
+      const metaError = new MetaError(
         parsed.data.error.message,
         parsed.data.error.code,
         parsed.data.error.error_subcode,
         parsed.data.error.fbtrace_id,
       );
+      logger.error(metaError, 'De-authorization request failed');
+      if (metaError.message === metaErrorValidatingAccessToken) {
+        await prisma.integration.update({
+          where: { id: integration.id },
+          data: { status: IntegrationStatus.REVOKED },
+        });
+      }
+      return metaError;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
