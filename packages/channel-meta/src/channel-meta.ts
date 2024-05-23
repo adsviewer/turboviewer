@@ -12,11 +12,11 @@ import {
 import {
   AError,
   FireAndForget,
+  getLastXDays,
   getLastXMonths,
-  getLastTwoDays,
   isAError,
-  MODE,
   metaErrorValidatingAccessToken,
+  MODE,
 } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -44,6 +44,7 @@ import {
   type ChannelInterface,
   deleteOldInsights,
   getConnectedIntegrationByOrg,
+  getIFrameAdFormat,
   MetaError,
   revokeIntegration,
   saveAccounts,
@@ -51,7 +52,6 @@ import {
   saveInsights,
   type TokensResponse,
 } from '@repo/channel-utils';
-import { getIFrameAdFormat } from '@repo/channel-utils';
 import { env } from './config';
 
 const fireAndForget = new FireAndForget();
@@ -215,13 +215,13 @@ class Meta implements ChannelInterface {
 
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const accounts = await this.getAdAccounts();
+    const accounts = await this.getAdAccounts(integration);
     if (isAError(accounts)) return accounts;
     const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
     logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(activeAccounts)} active accounts`);
     const dbAccounts = await saveAccounts(activeAccounts, integration);
 
-    const adReportsAccountMap = await this.runAdInsightReports(dbAccounts, initial);
+    const adReportsAccountMap = await this.runAdInsightReports(dbAccounts, initial, integration);
     if (isAError(adReportsAccountMap)) return adReportsAccountMap;
 
     const adExternalIdMap = new Map<string, string>();
@@ -243,13 +243,13 @@ class Meta implements ChannelInterface {
       logger.error('Invalid ad format %o', { publisher, device, position, adId });
       return new AError('Invalid ad format');
     }
-    const previews = await ad.getPreviews([AdPreview.Fields.body], {
+    const previewsFn = ad.getPreviews([AdPreview.Fields.body], {
       ad_format: format,
     });
     const previewSchema = z.object({ body: z.string() });
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
     const toBody = (preview: z.infer<typeof previewSchema>) => preview.body;
-    const parsedPreviews = await Meta.handlePagination(previews, previewSchema, toBody);
+    const parsedPreviews = await Meta.handlePagination(integration, previewsFn, previewSchema, toBody);
     if (isAError(parsedPreviews)) return parsedPreviews;
     if (parsedPreviews.length === 0) return new AError('No ad preview found');
     if (parsedPreviews.length > 1) return new AError('More than one ad previews found');
@@ -260,11 +260,11 @@ class Meta implements ChannelInterface {
     return PublisherEnum.Facebook;
   }
 
-  private async getAdAccounts(accessToken?: string): Promise<ChannelAdAccount[] | AError> {
-    if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
+  private async getAdAccounts(integration: Integration): Promise<ChannelAdAccount[] | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const user = new User('me');
 
-    const res = await user.getAdAccounts(
+    const getAdAccountsFn = user.getAdAccounts(
       [
         AdAccount.Fields.account_status,
         AdAccount.Fields.amount_spent,
@@ -296,12 +296,14 @@ class Meta implements ChannelInterface {
         name: acc.name,
       }) satisfies ChannelAdAccount;
 
-    return await Meta.handlePagination(res, accountSchema, toAccount);
+    return await Meta.handlePagination(integration, getAdAccountsFn, accountSchema, toAccount);
   }
 
-  private async getCreatives(accounts: ChannelAdAccount[], accessToken?: string): Promise<ChannelCreative[] | AError> {
-    if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
-
+  private async getCreatives(
+    accounts: ChannelAdAccount[],
+    integration: Integration,
+  ): Promise<ChannelCreative[] | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const creatives: ChannelCreative[] = [];
     const adsSchema = z.object({
       id: z.string(),
@@ -318,13 +320,13 @@ class Meta implements ChannelInterface {
 
     for (const acc of accounts) {
       const account = new AdAccount(`act_${acc.externalId}`);
-      const res = await account.getAds(
+      const getAdsFn = account.getAds(
         [Ad.Fields.id, Ad.Fields.account_id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`],
         {
           limit: 500,
         },
       );
-      const accountCreatives = await Meta.handlePagination(res, adsSchema, toCreative);
+      const accountCreatives = await Meta.handlePagination(integration, getAdsFn, adsSchema, toCreative);
       if (!isAError(accountCreatives)) creatives.push(...accountCreatives);
     }
     return creatives;
@@ -333,37 +335,41 @@ class Meta implements ChannelInterface {
   private async runAdInsightReports(
     accounts: AdAccountEssential[],
     initial: boolean,
-    accessToken?: string,
+    integration: Integration,
   ): Promise<AError | Map<string, AdAccountEssential>> {
-    if (accessToken) adsSdk.FacebookAdsApi.init(accessToken);
-
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const adReportsAccountMap = new Map<string, AdAccountEssential>();
     const adReportRunSchema = z.object({ id: z.string() });
 
     for (const acc of accounts) {
       const account = new AdAccount(`act_${acc.externalId}`);
-      const resp = await account.getInsightsAsync(
-        [
-          AdsInsights.Fields.account_id,
-          AdsInsights.Fields.ad_id,
-          AdsInsights.Fields.ad_name,
-          AdsInsights.Fields.date_start,
-          AdsInsights.Fields.spend,
-          AdsInsights.Fields.impressions,
-        ],
-        {
-          limit: 500,
-          time_increment: 1,
-          filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
-          breakdowns: [
-            AdsInsights.Breakdowns.device_platform,
-            AdsInsights.Breakdowns.publisher_platform,
-            AdsInsights.Breakdowns.platform_position,
-          ],
-          level: AdsInsights.Level.ad,
-          time_range: initial ? getLastXMonths() : getLastTwoDays(),
-        },
+      const resp = await Meta.sdk(
+        async () =>
+          account.getInsightsAsync(
+            [
+              AdsInsights.Fields.account_id,
+              AdsInsights.Fields.ad_id,
+              AdsInsights.Fields.ad_name,
+              AdsInsights.Fields.date_start,
+              AdsInsights.Fields.spend,
+              AdsInsights.Fields.impressions,
+            ],
+            {
+              limit: 500,
+              time_increment: 1,
+              filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
+              breakdowns: [
+                AdsInsights.Breakdowns.device_platform,
+                AdsInsights.Breakdowns.publisher_platform,
+                AdsInsights.Breakdowns.platform_position,
+              ],
+              level: AdsInsights.Level.ad,
+              time_range: await timeRange(initial, acc.id),
+            },
+          ),
+        integration,
       );
+      if (isAError(resp)) return resp;
       const parsed = adReportRunSchema.safeParse(resp);
       if (!parsed.success) {
         logger.error('Failed to parse ad report run %o', resp);
@@ -395,7 +401,10 @@ class Meta implements ChannelInterface {
     while (true) {
       for (const [reportId, dbAccount] of adReportsAccountMapCopy) {
         const report = new AdReportRun(reportId, { report_run_id: reportId });
-        const resp = await report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]);
+        const resp = await Meta.sdk(
+          () => report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]),
+          integration,
+        );
         const reportSchema = z.object({
           [AdReportRun.Fields.async_status]: jobStatusEnum,
           [AdReportRun.Fields.async_percent_completion]: z.number(),
@@ -470,7 +479,7 @@ class Meta implements ChannelInterface {
     logger.info('Getting insights for report %s', reportId);
 
     const report = new AdReportRun(reportId, { report_run_id: reportId });
-    const resp = await report.getInsights(
+    const getInsightsFn = report.getInsights(
       [
         AdsInsights.Fields.account_id,
         AdsInsights.Fields.ad_id,
@@ -490,7 +499,13 @@ class Meta implements ChannelInterface {
       await this.saveAdsAndInsights(i, adExternalIdMap, integration, dbAccount);
       return undefined;
     };
-    const accountInsightsAndAds = await Meta.handlePaginationFn(resp, insightSchema, toInsightAndAd, insightsProcessFn);
+    const accountInsightsAndAds = await Meta.handlePaginationFn(
+      integration,
+      getInsightsFn,
+      insightSchema,
+      toInsightAndAd,
+      insightsProcessFn,
+    );
     if (isAError(accountInsightsAndAds)) return accountInsightsAndAds;
   }
 
@@ -516,10 +531,13 @@ class Meta implements ChannelInterface {
   }
 
   private static async handlePagination<T, U extends ZodTypeAny>(
-    cursor: Cursor,
+    integration: Integration,
+    fn: Promise<Cursor | AError>,
     schema: U,
     parseCallback: (result: z.infer<U>) => T,
   ): Promise<AError | T[]> {
+    const cursor = await this.sdk(() => fn, integration);
+    if (isAError(cursor)) return cursor;
     const arraySchema = z.array(schema);
     const parsed = arraySchema.safeParse(cursor);
     if (!parsed.success) {
@@ -528,8 +546,8 @@ class Meta implements ChannelInterface {
     }
     const results = parsed.data.map(parseCallback);
     while (cursor.hasNext()) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
-      const next = await cursor.next();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Will catch error
+      const next = await this.sdk(() => cursor.next(), integration);
       const parsedNext = arraySchema.safeParse(next);
       if (parsedNext.success) {
         results.push(...parsedNext.data.map(parseCallback));
@@ -541,11 +559,14 @@ class Meta implements ChannelInterface {
   }
 
   private static async handlePaginationFn<T, U extends ZodTypeAny, V>(
-    cursor: Cursor,
+    integration: Integration,
+    fn: Promise<Cursor>,
     schema: U,
     parseCallback: (result: z.infer<U>) => T,
     processCallback: (result: T[]) => Promise<V[] | undefined> | V[] | undefined,
   ): Promise<AError | V[] | undefined> {
+    const cursor = await this.sdk(() => fn, integration);
+    if (isAError(cursor)) return cursor;
     const arraySchema = z.array(schema);
     const parsed = arraySchema.safeParse(cursor);
     if (!parsed.success) {
@@ -554,8 +575,8 @@ class Meta implements ChannelInterface {
     }
     const resultsP = processCallback(parsed.data.map(parseCallback));
     while (cursor.hasNext()) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
-      const next = await cursor.next();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Will catch error
+      const next = await this.sdk(() => cursor.next(), integration);
       const parsedNext = arraySchema.safeParse(next);
       if (parsedNext.success) {
         const processed = await processCallback(parsedNext.data.map(parseCallback));
@@ -566,6 +587,23 @@ class Meta implements ChannelInterface {
       }
     }
     return resultsP;
+  }
+
+  private static async sdk<T>(fn: () => Promise<T>, integration: Integration): Promise<T | AError> {
+    try {
+      return await fn();
+    } catch (error) {
+      const msg = 'Failed to complete fb sdk call';
+      logger.error(error, msg);
+      if (error instanceof Error && error.message === metaErrorValidatingAccessToken) {
+        // TODO: notify the organization that the integration has been revoked
+        await prisma.integration.update({
+          where: { id: integration.id },
+          data: { status: IntegrationStatus.REVOKED },
+        });
+      }
+      return new AError(msg);
+    }
   }
 
   private static parseRequest(signedRequest: string, secret: string): string | AError {
@@ -633,5 +671,15 @@ class Meta implements ChannelInterface {
     ['audience_network', PublisherEnum.AudienceNetwork],
   ]);
 }
+
+const timeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {
+  if (initial) return getLastXMonths();
+  const latestInsight = await prisma.insight.findFirst({
+    select: { date: true },
+    where: { adAccountId },
+    orderBy: { date: 'desc' },
+  });
+  return latestInsight ? getLastXDays(latestInsight.date) : getLastXDays();
+};
 
 export const meta = new Meta();
