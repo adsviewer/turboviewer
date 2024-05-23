@@ -12,7 +12,7 @@ import {
 import {
   AError,
   FireAndForget,
-  getLastTwoDays,
+  getLastXDays,
   getLastXMonths,
   isAError,
   metaErrorValidatingAccessToken,
@@ -344,7 +344,7 @@ class Meta implements ChannelInterface {
     for (const acc of accounts) {
       const account = new AdAccount(`act_${acc.externalId}`);
       const resp = await Meta.sdk(
-        () =>
+        async () =>
           account.getInsightsAsync(
             [
               AdsInsights.Fields.account_id,
@@ -364,7 +364,7 @@ class Meta implements ChannelInterface {
                 AdsInsights.Breakdowns.platform_position,
               ],
               level: AdsInsights.Level.ad,
-              time_range: initial ? getLastXMonths() : getLastTwoDays(),
+              time_range: await timeRange(initial, acc.id),
             },
           ),
         integration,
@@ -671,5 +671,15 @@ class Meta implements ChannelInterface {
     ['audience_network', PublisherEnum.AudienceNetwork],
   ]);
 }
+
+const timeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {
+  if (initial) return getLastXMonths();
+  const latestInsight = await prisma.insight.findFirst({
+    select: { date: true },
+    where: { adAccountId },
+    orderBy: { date: 'desc' },
+  });
+  return latestInsight ? getLastXDays(latestInsight.date) : getLastXDays();
+};
 
 export const meta = new Meta();
