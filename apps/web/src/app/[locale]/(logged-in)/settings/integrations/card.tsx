@@ -9,7 +9,8 @@ import { toast } from 'react-toastify';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as changeCase from 'change-case';
-import { type SettingsChannelsQuery, IntegrationStatus } from '@/graphql/generated/schema-server';
+import { metaErrorValidatingAccessToken } from '@repo/utils';
+import { IntegrationStatus, type SettingsChannelsQuery } from '@/graphql/generated/schema-server';
 import { integrationTypeMap, type UnwrapArray } from '@/util/types';
 import { deAuthIntegration } from '@/app/[locale]/(logged-in)/settings/integrations/actions';
 
@@ -49,9 +50,14 @@ export default function Card({
           setRedirectUrl(resp.data);
           break;
         case 'BaseError':
-        case 'MetaError':
-          toast.error(resp.message);
+        case 'MetaError': {
+          if (resp.message === metaErrorValidatingAccessToken) {
+            setCardStatus(IntegrationStatus.Revoked);
+          } else {
+            toast.error(resp.message);
+          }
           break;
+        }
         default:
           break;
       }
