@@ -6,6 +6,14 @@
   },
   "insights": {
     "title": "Insights",
+    "pagesInfo": "Page {CURR_PAGE} of {TOTAL_PAGES} ({RESULTS_COUNT} results in total)",
+    "pagesInfoSingular": "Page {CURR_PAGE} of {TOTAL_PAGES} ({RESULTS_COUNT} result in total)",
+    "pageSize": "Page size",
+    "orderBy": "Order by",
+    "spent": "Spent",
+    "impressions": "Impressions",
+    "descending": "Descending",
+    "ascending": "Ascending",
     "filters": {
       "accounts": "Accounts",
       "selectAccounts": "Select accounts",
