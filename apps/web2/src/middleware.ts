@@ -22,6 +22,16 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_KEY)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value;
 
+  // Redirect to correct route if visiting the root url
+  if (request.nextUrl.pathname === '/') {
+    if (token) {
+      const redirectUrl = new URL('/insights', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+    const redirectUrl = new URL('/sign-in', request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // Refresh user's JWT if invalid (except if signing out)
   if (request.nextUrl.pathname !== '/sign-out' && token) {
     try {
