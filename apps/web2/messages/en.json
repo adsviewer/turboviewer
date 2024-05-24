@@ -1,7 +1,14 @@
 {
+  "pages": {
+    "insights": "Insights",
+    "integrations": "Integrations"
+  },
   "insights": {
-    "title": "Insights",
-    "tooltipPosition": "position"
+    "title": "Insights"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!"
   },
   "filters": {
     "adId": "Ad Id",
@@ -23,8 +30,15 @@
     "select": "Select",
     "title": "Filters"
   },
-  "login": {
+  "authentication": {
+    "noAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInNow": "Sign in now",
     "signIn": "Sign In",
-    "signUp": "Sign Up"
+    "signUp": "Sign Up",
+    "password": "Password",
+    "yourPassword": "Your password",
+    "agree": "Agree to the",
+    "termsAndConditions": "Terms and Conditions"
   }
 }
