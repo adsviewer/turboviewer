@@ -4,13 +4,14 @@ import { Card, Image, Text, Badge, Group, Divider, Flex, useComputedColorScheme,
 import { IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { type DeviceEnum, type CurrencyEnum } from '@/graphql/generated/schema-server';
+import { snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
 
 interface InsightCardProps {
   title: string | null | undefined;
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
   rank: 'good' | 'mid' | 'bad' | 'unknown';
-  amountSpent: number | null | undefined;
+  amountSpent: string;
   currency: CurrencyEnum | null | undefined;
   impressions: number;
 }
@@ -81,7 +82,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       </Group>
 
       <Text size="sm" c="dimmed">
-        {props.description}
+        {snakeCaseToTitleCaseWithSpaces(props.description ?? '')}
       </Text>
 
       <Divider my="lg" />

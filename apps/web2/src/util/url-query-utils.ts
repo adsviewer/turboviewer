@@ -31,6 +31,11 @@ export const positions = [
   'unknown',
 ].map((pos) => ({ value: pos, label: snakeCaseToTitleCaseWithSpaces(pos) }));
 
+export const OrderDirection = {
+  asc: 'asc',
+  desc: 'desc',
+};
+
 export interface QueryParamsType {
   key: string;
   value: string;

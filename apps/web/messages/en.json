@@ -23,7 +23,7 @@
     "select": "Select",
     "title": "Filters"
   },
-  "login": {
+  "authentication": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "forgotPassword": "Forgot Password?",

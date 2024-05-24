@@ -4,8 +4,8 @@
     "tooltipPosition": "position"
   },
   "filters": {
-    "account": "Account",
     "adId": "Ad Id",
+    "account": "Account",
     "date": "Date",
     "device": "Device",
     "groupedBy": "Grouped By",
