@@ -29,6 +29,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
               currency={insight.currency}
               impressions={insight.impressions}
               date={insight.date ? format.dateTime(new Date(insight.date), dateFormatOptions) : null}
+              iframe={insight.iFrame}
             />
           ))
         : null}

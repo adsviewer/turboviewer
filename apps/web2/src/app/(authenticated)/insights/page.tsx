@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -6,6 +6,7 @@ import {
   InsightsColumnsOrderBy,
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
+import LoaderCentered from '@/components/misc/loader-centered';
 import InsightsGrid from './components/insights-grid';
 import OrderFilters from './components/order-filters';
 
@@ -51,7 +52,9 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
     <>
       <h1>Insights</h1>
       <OrderFilters resultsCount={totalCount} />
-      <InsightsGrid insights={insights} />
+      <Suspense fallback={<LoaderCentered type="dots" />}>
+        <InsightsGrid insights={insights} />
+      </Suspense>
     </>
   );
 }
