@@ -16,7 +16,7 @@ import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LogoFull } from '@/components/misc/logo-full';
-import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
+import SettingsButton from '@/components/buttons/settings-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
 import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
@@ -28,14 +28,12 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
 
   const navLinksData = [
     {
-      id: 1,
       iconNode: <IconGraph />,
       label: t('insights'),
       href: '/insights',
       isActive: pathname === '/insights',
     },
     {
-      id: 2,
       iconNode: <IconPlugConnected />,
       label: t('integrations'),
       href: '/integrations',
@@ -54,7 +52,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <LogoFull />
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
-            <ColorSchemeToggle />
+            <SettingsButton />
           </Flex>
         </Group>
       </AppShellHeader>
@@ -64,9 +62,10 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         <Flex direction="column" h="100%">
           {/* Navigation */}
           {navLinksData.length
-            ? navLinksData.map((navLink) => (
+            ? navLinksData.map((navLink, index) => (
                 <NavlinkButton
-                  key={navLink.id}
+                  // eslint-disable-next-line react/no-array-index-key -- using the index as key is safe here
+                  key={index}
                   iconNode={navLink.iconNode}
                   label={navLink.label}
                   href={navLink.href}
@@ -78,7 +77,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           {/* Group Filters (insights only) */}
           {pathname === '/insights' ? (
             <>
-              <Divider mt="auto" />
+              <Divider my="sm" />
               <GroupFilters />
             </>
           ) : null}

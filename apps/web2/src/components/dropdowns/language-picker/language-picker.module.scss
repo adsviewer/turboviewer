@@ -1,20 +1,18 @@
 .control {
-
-
   width: calc(12.5rem * var(--mantine-scale));
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-md)!important;
   border-radius: var(--mantine-radius-md)!important;
-  border: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-gray-2)!important;
+  border: calc(0.0625rem * var(--mantine-scale)) solid var(--mantine-color-gray-3)!important;
 
   &[data-expanded] {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5))!important;
   }
 
   @mixin hover {
-    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
+    background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5))!important;
   }
 }
 

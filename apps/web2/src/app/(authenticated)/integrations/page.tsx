@@ -1,4 +1,4 @@
-import { Text } from '@mantine/core';
+import { Text, Title } from '@mantine/core';
 import { type ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
@@ -10,8 +10,8 @@ export default async function Integrations(): Promise<ReactNode> {
 
   return (
     <>
-      <h1>{t('title')}</h1>
-      <Text mb="md">{t('description')}</Text>
+      <Title mb="md">{t('title')}</Title>
+      <Text mb="xl">{t('description')}</Text>
       <IntegrationsGrid integrations={settingsChannels} />
     </>
   );

@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
+import { Title } from '@mantine/core';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -52,7 +53,7 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
 
   return (
     <>
-      <h1>{t('title')}</h1>
+      <Title mb="md">{t('title')}</Title>
       <OrderFilters resultsCount={totalCount} />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <InsightsGrid insights={insights} />
