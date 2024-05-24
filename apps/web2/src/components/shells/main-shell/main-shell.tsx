@@ -11,7 +11,6 @@ import {
   Group,
   NavLink,
 } from '@mantine/core';
-import Link from 'next/link';
 import { useDisclosure } from '@mantine/hooks';
 import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
@@ -19,10 +18,28 @@ import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
 import UserButton from '@/components/user-button/user-button';
+import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
+
+  const navLinksData = [
+    {
+      id: 1,
+      iconNode: <IconGraph />,
+      label: 'Insights',
+      href: '/insights',
+      isActive: pathname === '/insights',
+    },
+    {
+      id: 2,
+      iconNode: <IconPlugConnected />,
+      label: 'Integrations',
+      href: '/integrations',
+      isActive: pathname === '/integrations',
+    },
+  ];
 
   return (
     <AppShell
@@ -44,20 +61,17 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
       <AppShellNavbar p="md">
         <Flex direction="column" h="100%">
           {/* Navigation */}
-          <NavLink
-            component={Link}
-            label="Insights"
-            href="/insights"
-            active={pathname === '/insights'}
-            leftSection={<IconGraph size="1rem" stroke={1.5} />}
-          />
-          <NavLink
-            component={Link}
-            label="Integrations"
-            href="/integrations"
-            active={pathname === '/integrations'}
-            leftSection={<IconPlugConnected size="1rem" stroke={1.5} />}
-          />
+          {navLinksData.length
+            ? navLinksData.map((navLink) => (
+                <NavlinkButton
+                  key={navLink.id}
+                  iconNode={navLink.iconNode}
+                  label={navLink.label}
+                  href={navLink.href}
+                  isActive={pathname === navLink.href}
+                />
+              ))
+            : null}
 
           {/* Group Filters (insights only) */}
           {pathname === '/insights' ? (
