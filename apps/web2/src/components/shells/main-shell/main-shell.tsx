@@ -14,13 +14,11 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
-import { Suspense } from 'react';
 import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
 import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
-import LoaderCentered from '@/components/misc/loader-centered';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const [opened, { toggle }] = useDisclosure();
@@ -92,9 +90,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           </Flex>
         </Flex>
       </AppShellNavbar>
-      <AppShellMain>
-        <Suspense fallback={<LoaderCentered />}>{children}</Suspense>
-      </AppShellMain>
+      <AppShellMain>{children}</AppShellMain>
     </AppShell>
   );
 }

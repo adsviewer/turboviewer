@@ -17,9 +17,11 @@ import {
   Flex,
 } from '@mantine/core';
 import { logger } from '@repo/logger';
+import { useTranslations } from 'next-intl';
 import { type SignUpSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignUp(): React.JSX.Element {
+  const t = useTranslations('authentication');
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -57,9 +59,9 @@ export default function SignUp(): React.JSX.Element {
     <Container size={420} my={40}>
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <Flex direction="column" align="center" justify="center" mb="xl">
-          <Title ta="center">Sign Up</Title>
+          <Title ta="center">{t('signUp')}</Title>
           <Text c="dimmed" size="sm" ta="center" mt={5}>
-            Already have an account?{' '}
+            {t('alreadyHaveAccount')}{' '}
             <Anchor
               size="sm"
               component="button"
@@ -67,7 +69,7 @@ export default function SignUp(): React.JSX.Element {
                 router.push('/sign-in');
               }}
             >
-              Sign in now!
+              {t('signInNow')}!
             </Anchor>
           </Text>
         </Flex>
@@ -79,14 +81,14 @@ export default function SignUp(): React.JSX.Element {
         >
           <SimpleGrid cols={2}>
             <TextInput
-              label="First Name"
+              label={t('firstName')}
               placeholder="John"
               key={form.key('firstName')}
               {...form.getInputProps('firstName')}
               required
             />
             <TextInput
-              label="Last Name"
+              label={t('lastName')}
               placeholder="Doe"
               key={form.key('lastName')}
               {...form.getInputProps('lastName')}
@@ -102,8 +104,8 @@ export default function SignUp(): React.JSX.Element {
             mt="md"
           />
           <PasswordInput
-            label="Password"
-            placeholder="Your password"
+            label={t('password')}
+            placeholder={t('yourPassword')}
             key={form.key('password')}
             {...form.getInputProps('password')}
             required
@@ -113,9 +115,9 @@ export default function SignUp(): React.JSX.Element {
             <Checkbox
               label={
                 <>
-                  Agree to the{' '}
+                  {t('agree')}{' '}
                   <Anchor size="sm" href="https://adsviewer.io/terms" target="_blank">
-                    Terms and Conditions
+                    {t('termsAndConditions')}
                   </Anchor>
                 </>
               }
@@ -123,7 +125,7 @@ export default function SignUp(): React.JSX.Element {
             />
           </Group>
           <Button type="submit" fullWidth mt="xl">
-            Sign Up!
+            {t('signUp')}!
           </Button>
         </form>
       </Paper>
