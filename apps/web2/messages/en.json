@@ -2,6 +2,7 @@
   "navbar": {
     "insights": "Insights",
     "integrations": "Integrations",
+    "settings": "Settings",
     "signOut": "Sign Out"
   },
   "insights": {
@@ -35,6 +36,11 @@
   "integrations": {
     "title": "Integrations",
     "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!"
+  },
+  "settings": {
+    "title": "Settings",
+    "changeLanguage": "Change language",
+    "changeColorScheme": "Color theme"
   },
   "authentication": {
     "noAccount": "Don't have an account?",
