@@ -25,7 +25,10 @@ export default function InsightsGrid(props: PropsType): ReactNode {
               description={insight.position}
               device={insight.device}
               rank="good"
-              amountSpent={format.number(insight.spend, { style: 'currency', currency: insight.currency ?? 'EUR' })}
+              amountSpent={format.number(insight.spend / 100, {
+                style: 'currency',
+                currency: insight.currency ?? 'EUR',
+              })}
               currency={insight.currency}
               impressions={insight.impressions}
               date={insight.date ? format.dateTime(new Date(insight.date), dateFormatOptions) : null}
