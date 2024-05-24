@@ -2,6 +2,7 @@
 
 import { Flex, Text, Select, type ComboboxItem } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { OrderDirection, addOrReplaceURLParams, isParamInSearchParams } from '@/util/url-query-utils';
 import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 
@@ -10,6 +11,7 @@ interface OrderFiltersProps {
 }
 
 export default function OrderFilters(props: OrderFiltersProps): React.ReactNode {
+  const t = useTranslations('insights');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -57,14 +59,24 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
     <Flex w="100%" mb="lg" align="center" wrap="wrap">
       {/* Page data info */}
       <Text size="md" mr="auto">
-        Page 1 of 1 ({props.resultsCount} results in total)
+        {props.resultsCount > 1
+          ? t('pagesInfo', {
+              CURR_PAGE: 1,
+              TOTAL_PAGES: 1,
+              RESULTS_COUNT: props.resultsCount,
+            })
+          : t('pagesInfoSingular', {
+              CURR_PAGE: 1,
+              TOTAL_PAGES: 1,
+              RESULTS_COUNT: props.resultsCount,
+            })}
       </Text>
 
       {/* Filters */}
       <Flex align="center" mr="sm" my="md">
         {/* Page size filter */}
         <Text size="md" mr="sm">
-          Page size:
+          {t('pageSize')}:
         </Text>
         <Select
           placeholder="Pick value"
@@ -80,13 +92,13 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
       <Flex align="center">
         {/* Order filter */}
         <Text size="md" mr="sm">
-          Order by:
+          {t('orderBy')}:
         </Text>
         <Select
           placeholder="Pick value"
           data={[
-            { value: InsightsColumnsOrderBy.spend, label: 'Spent' },
-            { value: InsightsColumnsOrderBy.impressions, label: 'Impressions' },
+            { value: InsightsColumnsOrderBy.spend, label: t('spent') },
+            { value: InsightsColumnsOrderBy.impressions, label: t('impressions') },
           ]}
           value={getOrderByValue()}
           onChange={handleOrderByChange}
@@ -98,8 +110,8 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
         <Select
           placeholder="Pick value"
           data={[
-            { value: OrderDirection.asc, label: 'Ascending' },
-            { value: OrderDirection.desc, label: 'Descending' },
+            { value: OrderDirection.asc, label: t('ascending') },
+            { value: OrderDirection.desc, label: t('descending') },
           ]}
           value={getOrderDirectionValue()}
           onChange={handleOrderDirectionChange}
