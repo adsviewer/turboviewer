@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, Image, Text, Badge, Group, Divider, Flex, useComputedColorScheme, useMantineTheme } from '@mantine/core';
-import { IconCoins, IconEye } from '@tabler/icons-react';
+import { IconCalendar, IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { type DeviceEnum, type CurrencyEnum } from '@/graphql/generated/schema-server';
 import { snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
@@ -14,6 +14,7 @@ interface InsightCardProps {
   amountSpent: string;
   currency: CurrencyEnum | null | undefined;
   impressions: number;
+  date: string | null;
 }
 
 interface RankType {
@@ -100,6 +101,14 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
             {props.impressions}
           </Text>
         </Flex>
+        {props.date ? (
+          <Flex align="center" mr="md">
+            <IconCalendar color={iconColor} />
+            <Text size="sm" c="dimmed" ml={4}>
+              {props.date}
+            </Text>
+          </Flex>
+        ) : null}
       </Flex>
     </Card>
   );
