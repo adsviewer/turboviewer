@@ -1,34 +1,32 @@
 {
-  "pages": {
+  "navbar": {
     "insights": "Insights",
-    "integrations": "Integrations"
+    "integrations": "Integrations",
+    "signOut": "Sign Out"
   },
   "insights": {
-    "title": "Insights"
+    "title": "Insights",
+    "filters": {
+      "accounts": "Accounts",
+      "selectAccounts": "Select accounts",
+      "positions": "Positions",
+      "selectPositions": "Select positions",
+      "devices": "Devices",
+      "selectDevices": "Select devices",
+      "publishers": "Publishers",
+      "selectPublishers": "Select publishers",
+      "groupBy": "Group By",
+      "account": "Account",
+      "adId": "Ad ID",
+      "device": "Device",
+      "date": "Date",
+      "publisher": "Publisher",
+      "position": "Position"
+    }
   },
   "integrations": {
     "title": "Integrations",
     "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!"
-  },
-  "filters": {
-    "adId": "Ad Id",
-    "account": "Account",
-    "date": "Date",
-    "device": "Device",
-    "groupedBy": "Grouped By",
-    "orderByDropDown": "{value, select, spend {spend} impressions {impressions} other {unknown}}",
-    "orderDropDown": "{value, select, asc {ascending} desc {descending} other {unknown}}",
-    "orderByLabel": "Order By",
-    "pageSize": "Page Size",
-    "pagination": {
-      "prev": "Previous",
-      "next": "Next",
-      "info": "Page {page, number} of {totalPages, number} ({totalElements, plural, =1 {one result} other {# results}} in total)"
-    },
-    "position": "Position",
-    "publisher": "Publisher",
-    "select": "Select",
-    "title": "Filters"
   },
   "authentication": {
     "noAccount": "Don't have an account?",

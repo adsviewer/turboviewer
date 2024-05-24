@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -28,6 +29,7 @@ interface InsightsProps {
 }
 
 export default async function Insights({ searchParams }: InsightsProps): Promise<ReactNode> {
+  const t = await getTranslations('insights');
   const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend;
   const pageSize = parseInt(searchParams?.pageSize ?? '12', 10);
   const page = parseInt(searchParams?.page ?? '1', 10);
@@ -50,7 +52,7 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
 
   return (
     <>
-      <h1>Insights</h1>
+      <h1>{t('title')}</h1>
       <OrderFilters resultsCount={totalCount} />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <InsightsGrid insights={insights} />

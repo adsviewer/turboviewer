@@ -1,34 +1,32 @@
 {
-  "pages": {
+  "navbar": {
     "insights": "Διορατικότητες",
-    "integrations": "Ενσωματώσεις"
+    "integrations": "Ενσωματώσεις",
+    "signOut": "Αποσύνδεση"
   },
   "insights": {
-    "title": "Διορατικότητες"
+    "title": "Διορατικότητες",
+    "filters": {
+      "accounts": "Λογαριασμοί",
+      "selectAccounts": "Επιλέξτε λογαριασμούς",
+      "positions": "Θέσεις",
+      "selectPositions": "Επιλέξτε θέσεις",
+      "devices": "Συσκευές",
+      "selectDevices": "Επιλέξτε συσκευές",
+      "publishers": "Πλατφόρμες",
+      "selectPublishers": "Επιλέξτε πλατφόρμες",
+      "groupBy": "Ομαδοποίηση",
+      "account": "Λογαριασμός",
+      "adId": "Αναγνωριστικό Διαφήμισης",
+      "device": "Συσκευή",
+      "date": "Ημερομηνία",
+      "publisher": "Πλατφόρμα",
+      "position": "Θέση"
+    }
   },
   "integrations": {
     "title": "Ενσωματώσεις",
     "description": "Ενισχύστε τη δουλειά σας συνδέοντας τα εργαλεία που χρησιμοποιείτε καθημερινά για τη διαχείριση των διαφημίσεών σας σε ένα μέρος!"
-  },
-  "filters": {
-    "adId": "Αναγνωριστικό διαφήμισης",
-    "account": "Λογαριασμό",
-    "date": "Ημερομηνία",
-    "device": "Συσκευή",
-    "groupedBy": "Ομαδοποίηση",
-    "orderByDropDown": "{value, select, spend {δαπάνες} impressions {εντυπώσεις} other {άγνωστο}}",
-    "orderDropDown": "{value, select, asc {αύξουσα} desc {φθήνουσα} other {άγνωστο}}",
-    "orderByLabel": "Ταξινόμηση",
-    "pageSize": "Μέγεθος σελίδας",
-    "pagination": {
-      "prev": "Προηγούμενη",
-      "next": "Επόμενη",
-      "info": "Σελίδα {page, number} από {totalPages, number} ({totalElements, plural, =1 {one απότέλεσμα} other {# απότελέσματα}} συνολικά)"
-    },
-    "position": "Θέση",
-    "publisher": "Εκδότη",
-    "select": "Διάλεξε",
-    "title": "Φίλτρα"
   },
   "authentication": {
     "noAccount": "Δεν έχετε ακόμα λογαριασμό;",
