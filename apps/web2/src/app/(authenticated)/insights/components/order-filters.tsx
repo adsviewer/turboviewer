@@ -2,13 +2,8 @@
 
 import { Flex, Text, Select, type ComboboxItem } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { addOrReplaceURLParams, isParamInSearchParams } from '@/util/url-query-utils';
+import { OrderDirection, addOrReplaceURLParams, isParamInSearchParams } from '@/util/url-query-utils';
 import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
-
-const OrderDirection = {
-  asc: 'asc',
-  desc: 'desc',
-};
 
 interface OrderFiltersProps {
   resultsCount: number;

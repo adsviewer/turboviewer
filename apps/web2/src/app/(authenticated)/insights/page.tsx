@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-import { logger } from '@repo/logger';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -8,11 +7,11 @@ import {
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import InsightsGrid from './components/insights-grid';
-import OrderFilters, { type OrderType } from './components/order-filters';
+import OrderFilters from './components/order-filters';
 
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
-  order?: OrderType;
+  order?: string;
   page?: string;
   pageSize?: string;
   groupedBy?: InsightsColumnsGroupBy[];
@@ -47,7 +46,6 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
   });
   const insights = resp.insights.edges;
   const totalCount = resp.insights.totalCount;
-  logger.info(insights);
 
   return (
     <>

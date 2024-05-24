@@ -1,5 +1,5 @@
 import '@mantine/core/styles.css';
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { ColorSchemeScript, Flex, MantineProvider, Loader } from '@mantine/core';
 import type { Metadata } from 'next';
 import { LogoFull } from '@/components/misc/logo-full';
@@ -9,7 +9,10 @@ export const metadata: Metadata = {
   description: 'Get granular insights into your ads performance',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.ReactNode {
+  // const locale = await getLocale();
+  // const messages = await getMessages();
+
   return (
     <html lang="en">
       <head>

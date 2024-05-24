@@ -23,7 +23,7 @@
     "select": "Διάλεξε",
     "title": "Φίλτρα"
   },
-  "login": {
+  "authentication": {
     "signIn": "Σύνδεση",
     "signUp": "Εγγραφή",
     "forgotPassword": "Ξέχασες τον κωδικό σου;",
