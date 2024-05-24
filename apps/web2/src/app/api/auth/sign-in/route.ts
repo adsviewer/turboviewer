@@ -1,4 +1,3 @@
-import { logger } from '@repo/logger';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { type z } from 'zod';
@@ -28,7 +27,6 @@ export async function POST(request: Request): Promise<NextResponse<{ success: tr
   if (!result.success) {
     return NextResponse.json({ success: false, error: { message: result.error } });
   }
-  logger.info(result);
   cookies().set(TOKEN_KEY, result.data.login.token);
   cookies().set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
   return NextResponse.json({ success: true });

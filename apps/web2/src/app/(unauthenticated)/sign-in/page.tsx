@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm } from '@mantine/form';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   TextInput,
   PasswordInput,
@@ -20,7 +20,6 @@ import { type SignInSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignIn(): React.JSX.Element {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const form = useForm({
     mode: 'uncontrolled',
@@ -34,7 +33,6 @@ export default function SignIn(): React.JSX.Element {
       password: (value) => (value.length > 5 ? null : 'Password must be at least 5 characters long.'),
     },
   });
-  logger.info(pathname);
 
   const handleSubmit = (values: SignInSchemaType): void => {
     fetch('/api/auth/sign-in', {
@@ -42,7 +40,6 @@ export default function SignIn(): React.JSX.Element {
       body: JSON.stringify(values),
     })
       .then((response) => {
-        logger.info(searchParams.get('redirect'));
         return response.json();
       })
       .then((data: { success: true } | { success: false }) => {
