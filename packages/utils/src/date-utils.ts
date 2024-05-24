@@ -37,8 +37,8 @@ export const getEndOfDay = (date?: Date | null): Date => {
   return endOfDay;
 };
 
-export const getYesterday = (): Date => {
-  const yesterday = new Date();
+export const getYesterday = (date?: Date): Date => {
+  const yesterday = date ? date : new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   yesterday.setHours(0, 0, 0, 0);
   return yesterday;

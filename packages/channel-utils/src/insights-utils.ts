@@ -94,12 +94,21 @@ export const saveInsights = async (
 };
 
 export const deleteOldInsights = async (adAccountId: string, initial: boolean): Promise<void> => {
+  const gte = (async () => {
+    if (initial) {
+      return getBeforeXMonths();
+    }
+    const latestInsight = await prisma.insight.findFirst({
+      select: { date: true },
+      where: { adAccountId },
+      orderBy: { date: 'desc' },
+    });
+    return latestInsight ? getYesterday(latestInsight.date) : getYesterday();
+  })();
   await prisma.insight.deleteMany({
     where: {
       adAccountId,
-      date: {
-        gte: initial ? getBeforeXMonths() : getYesterday(),
-      },
+      date: { gte: await gte },
     },
   });
 };
