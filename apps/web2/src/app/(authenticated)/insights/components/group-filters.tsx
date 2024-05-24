@@ -1,6 +1,7 @@
 import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
 import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import {
   addOrReplaceURLParams,
@@ -21,6 +22,7 @@ interface MultiSelectDataType {
 }
 
 export default function GroupFilters(): ReactNode {
+  const t = useTranslations('insights.filters');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -165,11 +167,11 @@ export default function GroupFilters(): ReactNode {
         {accounts.length ? (
           <>
             <Text size="sm" mt="xs">
-              Accounts
+              {t('accounts')}
             </Text>
 
             <MultiSelect
-              placeholder="Select accounts..."
+              placeholder={`${t('selectAccounts')}...`}
               data={populateAccountsAvailableValues()}
               value={getAccountCurrentValues()}
               onOptionSubmit={(value) => {
@@ -184,10 +186,10 @@ export default function GroupFilters(): ReactNode {
           </>
         ) : null}
         <Text size="sm" mt="xs">
-          Positions
+          {t('positions')}
         </Text>
         <MultiSelect
-          placeholder="Select positions..."
+          placeholder={`${t('selectPositions')}...`}
           data={populatePositionAvailableValues()}
           value={getPositionCurrentValues()}
           onOptionSubmit={(value) => {
@@ -200,10 +202,10 @@ export default function GroupFilters(): ReactNode {
           my={4}
         />
         <Text size="sm" mt="xs">
-          Devices
+          {t('devices')}
         </Text>
         <MultiSelect
-          placeholder="Select devices..."
+          placeholder={`${t('selectDevices')}...`}
           data={populateDeviceAvailableValues()}
           value={getDeviceCurrentValues()}
           onOptionSubmit={(value) => {
@@ -216,10 +218,10 @@ export default function GroupFilters(): ReactNode {
           my={4}
         />
         <Text size="sm" mt="xs">
-          Publishers
+          {t('publishers')}
         </Text>
         <MultiSelect
-          placeholder="Select publishers..."
+          placeholder={`${t('selectPublishers')}...`}
           data={populatePublisherAvailableValues()}
           value={getPublisherCurrentValues()}
           onOptionSubmit={(value) => {
@@ -232,45 +234,45 @@ export default function GroupFilters(): ReactNode {
           my={4}
         />
         <Text size="sm" mt="lg">
-          Group By
+          {t('groupBy')}
         </Text>
         <Checkbox
-          label="Account"
+          label={t('account')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.adAccountId}
           checked={isChecked(InsightsColumnsGroupBy.adAccountId)}
         />
         <Checkbox
-          label="Ad ID"
+          label={t('adId')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.adId}
           checked={isChecked(InsightsColumnsGroupBy.adId)}
         />
         <Checkbox
-          label="Device"
+          label={t('device')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.device}
           checked={isChecked(InsightsColumnsGroupBy.device)}
         />
         <Checkbox
-          label="Date"
+          label={t('date')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.date}
           checked={isChecked(InsightsColumnsGroupBy.date)}
         />
         <Checkbox
-          label="Publisher"
+          label={t('publisher')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.publisher}
           checked={isChecked(InsightsColumnsGroupBy.publisher)}
         />
         <Checkbox
-          label="Position"
+          label={t('position')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.position}

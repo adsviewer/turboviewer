@@ -14,6 +14,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { LogoFull } from '@/components/misc/logo-full';
 import ColorSchemeToggle from '@/components/buttons/color-scheme-toggle';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
@@ -21,6 +22,7 @@ import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
+  const t = useTranslations('navbar');
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
 
@@ -28,14 +30,14 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     {
       id: 1,
       iconNode: <IconGraph />,
-      label: 'Insights',
+      label: t('insights'),
       href: '/insights',
       isActive: pathname === '/insights',
     },
     {
       id: 2,
       iconNode: <IconPlugConnected />,
-      label: 'Integrations',
+      label: t('integrations'),
       href: '/integrations',
       isActive: pathname === '/integrations',
     },
@@ -86,7 +88,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             <Divider />
             <UserButton />
             <Divider />
-            <NavLink label="Sign Out" href="/sign-out" leftSection={<IconLogout size="1rem" stroke={1.5} />} />
+            <NavLink label={t('signOut')} href="/sign-out" leftSection={<IconLogout size="1rem" stroke={1.5} />} />
           </Flex>
         </Flex>
       </AppShellNavbar>
