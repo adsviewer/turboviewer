@@ -3,8 +3,9 @@
 import { Card, Image, Text, Badge, Group, Divider, Flex, useComputedColorScheme, useMantineTheme } from '@mantine/core';
 import { IconCalendar, IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { type DeviceEnum, type CurrencyEnum } from '@/graphql/generated/schema-server';
+import { type DeviceEnum, type CurrencyEnum, type IFrame } from '@/graphql/generated/schema-server';
 import { snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
+import AdPopover from './ad-popover';
 
 interface InsightCardProps {
   title: string | null | undefined;
@@ -15,6 +16,7 @@ interface InsightCardProps {
   currency: CurrencyEnum | null | undefined;
   impressions: number;
   date: string | null;
+  iframe: IFrame | null | undefined;
 }
 
 interface RankType {
@@ -107,6 +109,11 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
             <Text size="sm" c="dimmed" ml={4}>
               {props.date}
             </Text>
+          </Flex>
+        ) : null}
+        {props.iframe ? (
+          <Flex align="center" justify="flex-end" w="100%" mr="md">
+            <AdPopover iconColor={iconColor} iframe={props.iframe} />
           </Flex>
         ) : null}
       </Flex>
