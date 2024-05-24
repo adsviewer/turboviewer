@@ -11,6 +11,7 @@ import {
   Group,
   NavLink,
 } from '@mantine/core';
+import Link from 'next/link';
 import { useDisclosure } from '@mantine/hooks';
 import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
@@ -44,12 +45,14 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         <Flex direction="column" h="100%">
           {/* Navigation */}
           <NavLink
+            component={Link}
             label="Insights"
             href="/insights"
             active={pathname === '/insights'}
             leftSection={<IconGraph size="1rem" stroke={1.5} />}
           />
           <NavLink
+            component={Link}
             label="Integrations"
             href="/integrations"
             active={pathname === '/integrations'}

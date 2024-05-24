@@ -24,7 +24,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
               title={insight.publisher}
               description={insight.position}
               device={insight.device}
-              rank="unknown"
+              rank="good"
               amountSpent={format.number(insight.spend, { style: 'currency', currency: insight.currency ?? 'EUR' })}
               currency={insight.currency}
               impressions={insight.impressions}
