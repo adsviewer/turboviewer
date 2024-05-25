@@ -1,5 +1,6 @@
 import { Select } from '@mantine/core';
-import React from 'react';
+import React, { useState } from 'react';
+import { getCookie, setCookie } from '@/app/actions';
 
 const languages = [
   {
@@ -13,19 +14,23 @@ const languages = [
 ];
 
 export default function LanguagePickerSimple(): React.ReactNode {
-  // const currLanguage = getCookie('NEXT_LOCALE').value ?? 'en';
-  const currLanguage = 'en';
+  const [locale, setLocale] = useState<string>('en');
+
+  void getCookie('NEXT_LOCALE').then((cookieData) => {
+    setLocale(cookieData?.value ?? 'en');
+  });
 
   const handleLanguageChange = (value: string | null): void => {
-    // eslint-disable-next-line no-console -- t
-    console.log(value);
+    void setCookie('NEXT_LOCALE', String(value)).then(() => {
+      setLocale(value ?? 'en');
+    });
   };
 
   return (
     <Select
-      placeholder="Select color scheme"
+      placeholder="Select language"
       data={languages}
-      value={currLanguage}
+      value={locale}
       comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
       onChange={handleLanguageChange}
       my={4}

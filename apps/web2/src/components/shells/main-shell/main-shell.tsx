@@ -62,10 +62,9 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         <Flex direction="column" h="100%">
           {/* Navigation */}
           {navLinksData.length
-            ? navLinksData.map((navLink, index) => (
+            ? navLinksData.map((navLink) => (
                 <NavlinkButton
-                  // eslint-disable-next-line react/no-array-index-key -- using the index as key is safe here
-                  key={index}
+                  key={navLink.href}
                   iconNode={navLink.iconNode}
                   label={navLink.label}
                   href={navLink.href}
