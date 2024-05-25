@@ -45,8 +45,8 @@ add(PublisherEnum.Instagram, DeviceEnum.MobileApp, 'instagram_reels', 'INSTAGRAM
 add(PublisherEnum.Instagram, DeviceEnum.MobileApp, 'instagram_reels_overlay', 'INSTAGRAM_REELS_OVERLAY');
 add(PublisherEnum.Messenger, DeviceEnum.MobileApp, 'messenger_inbox', 'MESSENGER_MOBILE_INBOX_MEDIA');
 add(PublisherEnum.Facebook, DeviceEnum.MobileApp, 'marketplace', 'MARKETPLACE_MOBILE');
-add(PublisherEnum.Facebook, DeviceEnum.MobileApp, 'search', 'UNKNOWN');
-add(PublisherEnum.Facebook, DeviceEnum.Desktop, 'search', 'UNKNOWN');
+add(PublisherEnum.Facebook, DeviceEnum.MobileApp, 'search', 'MOBILE_FEED_STANDARD');
+add(PublisherEnum.Facebook, DeviceEnum.Desktop, 'search', 'MOBILE_FEED_STANDARD');
 add(PublisherEnum.Facebook, DeviceEnum.Desktop, 'right_hand_column', 'RIGHT_COLUMN_STANDARD');
 add(PublisherEnum.AudienceNetwork, DeviceEnum.MobileApp, 'rewarded_video', 'AUDIENCE_NETWORK_REWARDED_VIDEO');
 add(PublisherEnum.Facebook, DeviceEnum.Desktop, 'instream_video', 'INSTREAM_VIDEO_DESKTOP');

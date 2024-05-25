@@ -248,6 +248,27 @@ interface Error {
   message: String!
 }
 
+input FilterInsightsInput {
+  adAccountIds: [String!]
+  adIds: [String!]
+  dataPointsPerInterval: Int! = 3
+  dateFrom: Date
+  dateTo: Date
+  devices: [DeviceEnum!]
+  groupBy: [InsightsColumnsGroupBy!]
+  interval: InsightsInterval!
+  order: OrderBy = desc
+  orderBy: InsightsColumnsOrderBy! = spend
+
+  """
+  Starting at 1
+  """
+  page: Int! = 1
+  pageSize: Int! = 12
+  positions: [InsightsPosition!]
+  publishers: [PublisherEnum!]
+}
+
 type GenerateGoogleAuthUrlResponse {
   url: String!
 }
@@ -263,14 +284,12 @@ type GroupedInsights {
   adId: String
   adName: String
   currency: CurrencyEnum
-  date: Date
+  datapoints: [InsightsDatapoints!]!
   device: DeviceEnum
   iFrame: IFrame
   id: String!
-  impressions: Int!
   position: String
   publisher: PublisherEnum
-  spend: Int!
 }
 
 type IFrame {
@@ -294,7 +313,6 @@ type Insight {
 enum InsightsColumnsGroupBy {
   adAccountId
   adId
-  date
   device
   position
   publisher
@@ -305,11 +323,47 @@ enum InsightsColumnsOrderBy {
   impressions
 }
 
+type InsightsDatapoints {
+  date: Date!
+  impressions: Int!
+  spend: Int!
+}
+
+enum InsightsInterval {
+  day
+  week
+  month
+}
+
 enum InsightsOrderBy {
   MobileWeb
   MobileApp
   Desktop
   Unknown
+}
+
+enum InsightsPosition {
+  an_classic
+  biz_disco_feed
+  facebook_reels
+  facebook_reels_overlay
+  facebook_stories
+  feed
+  instagram_explore
+  instagram_explore_grid_home
+  instagram_profile_feed
+  instagram_reels
+  instagram_search
+  instagram_stories
+  instream_video
+  marketplace
+  messenger_inbox
+  messenger_stories
+  rewarded_video
+  right_hand_column
+  search
+  video_feeds
+  unknown
 }
 
 type Integration {
@@ -377,6 +431,11 @@ type MutationDeAuthIntegrationSuccess {
   data: String!
 }
 
+enum OrderBy {
+  asc
+  desc
+}
+
 type Organization {
   createdAt: Date!
   id: ID!
@@ -414,24 +473,7 @@ enum PublisherEnum {
 
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
-  insights(
-    adAccountIds: [String!]
-    adIds: [String!]
-    dateFrom: Date
-    dateTo: Date
-    devices: [DeviceEnum!]
-    groupBy: [InsightsColumnsGroupBy!]
-    order: String = "desc"
-    orderBy: InsightsColumnsOrderBy! = spend
-
-    """
-    Starting at 1
-    """
-    page: Int! = 1
-    pageSize: Int! = 12
-    positions: [String!]
-    publishers: [PublisherEnum!]
-  ): GroupedInsight!
+  insights(filter: FilterInsightsInput!): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   lastThreeMonthsAds: [Ad!]!
   me: User!

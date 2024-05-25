@@ -4,10 +4,10 @@ import {
   type DeviceEnum,
   InsightsColumnsGroupBy,
   type InsightsColumnsOrderBy,
+  type InsightsPosition,
+  type OrderBy,
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
-
-export type OrderType = 'asc' | 'desc';
 
 export interface QueryParamsType {
   key: string;
@@ -16,7 +16,7 @@ export interface QueryParamsType {
 
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
-  order?: OrderType;
+  order?: OrderBy;
   page?: string;
   pageSize?: string;
   groupedBy?: InsightsColumnsGroupBy[];
@@ -24,7 +24,7 @@ export interface SearchParams {
   adId?: string;
   device?: DeviceEnum;
   publisher?: PublisherEnum;
-  position?: string;
+  position?: InsightsPosition;
 }
 
 export type SearchParamsKeys = keyof SearchParams;

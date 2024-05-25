@@ -106,14 +106,11 @@ export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderB
   values: insightsColumnsOrderBy,
 });
 
-type InsightsColumnsGroupByType = keyof Pick<
-  Insight,
-  'adAccountId' | 'adId' | 'date' | 'device' | 'position' | 'publisher'
->;
+export type InsightsPossibleGrouping = 'adAccountId' | 'adId' | 'device' | 'position' | 'publisher';
+export type InsightsColumnsGroupByType = keyof Pick<Insight, InsightsPossibleGrouping>;
 const insightsColumnsGroupBy: InsightsColumnsGroupByType[] = [
   'adAccountId',
   'adId',
-  'date',
   'device',
   'position',
   'publisher',
@@ -182,3 +179,67 @@ export const InsightDto = builder.prismaObject('Insight', {
     ad: t.relation('ad'),
   }),
 });
+
+const OrderByDto = builder.enumType('OrderBy', {
+  values: ['asc', 'desc'] as const,
+});
+
+const InsightsIntervalDto = builder.enumType('InsightsInterval', {
+  values: ['day', 'week', 'month'] as const,
+});
+
+export const InsightsPositionDto = builder.enumType('InsightsPosition', {
+  values: [
+    'an_classic',
+    'biz_disco_feed',
+    'facebook_reels',
+    'facebook_reels_overlay',
+    'facebook_stories',
+    'feed',
+    'instagram_explore',
+    'instagram_explore_grid_home',
+    'instagram_profile_feed',
+    'instagram_reels',
+    'instagram_search',
+    'instagram_stories',
+    'instream_video',
+    'marketplace',
+    'messenger_inbox',
+    'messenger_stories',
+    'rewarded_video',
+    'right_hand_column',
+    'search',
+    'video_feeds',
+    'unknown',
+  ] as const,
+});
+
+export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
+  fields: (t) => ({
+    adAccountIds: t.stringList({ required: false }),
+    adIds: t.stringList({ required: false }),
+    dateFrom: t.field({ type: 'Date', required: false }),
+    dateTo: t.field({ type: 'Date', required: false }),
+    dataPointsPerInterval: t.int({ required: true, defaultValue: 3 }),
+    devices: t.field({ type: [DeviceEnumDto], required: false }),
+    groupBy: t.field({ type: [InsightsColumnsGroupByDto], required: false }),
+    interval: t.field({ type: InsightsIntervalDto, required: true }),
+    order: t.field({ type: OrderByDto, defaultValue: 'desc' }),
+    orderBy: t.field({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
+    page: t.int({
+      required: true,
+      description: 'Starting at 1',
+      defaultValue: 1,
+      validate: { min: [1, { message: 'Minimum page is 1' }] },
+    }),
+    pageSize: t.int({
+      required: true,
+      defaultValue: 12,
+      validate: { max: [100, { message: 'Page size should not be more than 100' }] },
+    }),
+    positions: t.field({ type: [InsightsPositionDto], required: false }),
+    publishers: t.field({ type: [PublisherEnumDto], required: false }),
+  }),
+});
+
+export type FilterInsightsInputType = typeof FilterInsightsInput.$inferInput;

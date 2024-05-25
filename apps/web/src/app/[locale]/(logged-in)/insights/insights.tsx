@@ -1,6 +1,12 @@
 'use server';
 import React from 'react';
-import { type AdAccountsQuery, InsightsColumnsOrderBy, type InsightsQuery } from '@/graphql/generated/schema-server';
+import {
+  type AdAccountsQuery,
+  InsightsColumnsOrderBy,
+  InsightsInterval,
+  type InsightsQuery,
+  OrderBy,
+} from '@/graphql/generated/schema-server';
 import type { UnwrapArray } from '@/util/types';
 import { type SearchParams } from '@/app/[locale]/(logged-in)/insights/query-string-util';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
@@ -16,12 +22,13 @@ export async function Insights({ searchParams }: InsightsProps): Promise<React.R
   const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend;
   const pageSize = parseInt(searchParams?.pageSize ?? '12', 10);
   const page = parseInt(searchParams?.page ?? '1', 10);
-  const order = searchParams?.order ?? 'desc';
+  const order = searchParams?.order ?? OrderBy.desc;
 
   const resp = await urqlClientSdk().insights({
     adAccountIds: searchParams?.account,
     adIds: searchParams?.adId,
     devices: searchParams?.device,
+    interval: InsightsInterval.week,
     groupBy: searchParams?.groupedBy,
     order,
     orderBy,

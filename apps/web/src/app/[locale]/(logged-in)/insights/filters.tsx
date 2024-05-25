@@ -50,7 +50,6 @@ export default function Filters(): React.ReactElement {
       <GroupedByCheckbox label={t('account')} id="adAccountId" groupByColumn={InsightsColumnsGroupBy.adAccountId} />
       <GroupedByCheckbox label={t('adId')} id="groupBy.adId" groupByColumn={InsightsColumnsGroupBy.adId} />
       <GroupedByCheckbox label={t('device')} id="groupBy.device" groupByColumn={InsightsColumnsGroupBy.device} />
-      <GroupedByCheckbox label={t('date')} id="groupBy.date" groupByColumn={InsightsColumnsGroupBy.date} />
       <GroupedByCheckbox
         label={t('publisher')}
         id="groupBy.publisher"
