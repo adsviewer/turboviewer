@@ -283,6 +283,24 @@ export type Error = {
   message: Scalars['String']['output'];
 };
 
+export type FilterInsightsInput = {
+  adAccountIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  dataPointsPerInterval?: Scalars['Int']['input'];
+  dateFrom?: InputMaybe<Scalars['Date']['input']>;
+  dateTo?: InputMaybe<Scalars['Date']['input']>;
+  devices?: InputMaybe<Array<DeviceEnum>>;
+  groupBy?: InputMaybe<Array<InsightsColumnsGroupBy>>;
+  interval: InsightsInterval;
+  order?: InputMaybe<OrderBy>;
+  orderBy?: InsightsColumnsOrderBy;
+  /** Starting at 1 */
+  page?: Scalars['Int']['input'];
+  pageSize?: Scalars['Int']['input'];
+  positions?: InputMaybe<Array<InsightsPosition>>;
+  publishers?: InputMaybe<Array<PublisherEnum>>;
+};
+
 export type GenerateGoogleAuthUrlResponse = {
   __typename?: 'GenerateGoogleAuthUrlResponse';
   url: Scalars['String']['output'];
@@ -301,14 +319,12 @@ export type GroupedInsights = {
   adId?: Maybe<Scalars['String']['output']>;
   adName?: Maybe<Scalars['String']['output']>;
   currency?: Maybe<CurrencyEnum>;
-  date?: Maybe<Scalars['Date']['output']>;
+  datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;
   iFrame?: Maybe<IFrame>;
   id: Scalars['String']['output'];
-  impressions: Scalars['Int']['output'];
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
-  spend: Scalars['Int']['output'];
 };
 
 export type IFrame = {
@@ -334,7 +350,6 @@ export type Insight = {
 export enum InsightsColumnsGroupBy {
   adAccountId = 'adAccountId',
   adId = 'adId',
-  date = 'date',
   device = 'device',
   position = 'position',
   publisher = 'publisher',
@@ -345,11 +360,48 @@ export enum InsightsColumnsOrderBy {
   impressions = 'impressions',
 }
 
+export type InsightsDatapoints = {
+  __typename?: 'InsightsDatapoints';
+  date: Scalars['Date']['output'];
+  impressions: Scalars['Int']['output'];
+  spend: Scalars['Int']['output'];
+};
+
+export enum InsightsInterval {
+  day = 'day',
+  week = 'week',
+  month = 'month',
+}
+
 export enum InsightsOrderBy {
   MobileWeb = 'MobileWeb',
   MobileApp = 'MobileApp',
   Desktop = 'Desktop',
   Unknown = 'Unknown',
+}
+
+export enum InsightsPosition {
+  an_classic = 'an_classic',
+  biz_disco_feed = 'biz_disco_feed',
+  facebook_reels = 'facebook_reels',
+  facebook_reels_overlay = 'facebook_reels_overlay',
+  facebook_stories = 'facebook_stories',
+  feed = 'feed',
+  instagram_explore = 'instagram_explore',
+  instagram_explore_grid_home = 'instagram_explore_grid_home',
+  instagram_profile_feed = 'instagram_profile_feed',
+  instagram_reels = 'instagram_reels',
+  instagram_search = 'instagram_search',
+  instagram_stories = 'instagram_stories',
+  instream_video = 'instream_video',
+  marketplace = 'marketplace',
+  messenger_inbox = 'messenger_inbox',
+  messenger_stories = 'messenger_stories',
+  rewarded_video = 'rewarded_video',
+  right_hand_column = 'right_hand_column',
+  search = 'search',
+  video_feeds = 'video_feeds',
+  unknown = 'unknown',
 }
 
 export type Integration = {
@@ -459,6 +511,11 @@ export type MutationDeAuthIntegrationSuccess = {
   data: Scalars['String']['output'];
 };
 
+export enum OrderBy {
+  asc = 'asc',
+  desc = 'desc',
+}
+
 export type Organization = {
   __typename?: 'Organization';
   createdAt: Scalars['Date']['output'];
@@ -512,18 +569,7 @@ export type QueryGenerateGoogleAuthUrlArgs = {
 };
 
 export type QueryInsightsArgs = {
-  adAccountIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  adIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  dateFrom?: InputMaybe<Scalars['Date']['input']>;
-  dateTo?: InputMaybe<Scalars['Date']['input']>;
-  devices?: InputMaybe<Array<DeviceEnum>>;
-  groupBy?: InputMaybe<Array<InsightsColumnsGroupBy>>;
-  order?: InputMaybe<Scalars['String']['input']>;
-  orderBy?: InsightsColumnsOrderBy;
-  page?: Scalars['Int']['input'];
-  pageSize?: Scalars['Int']['input'];
-  positions?: InputMaybe<Array<Scalars['String']['input']>>;
-  publishers?: InputMaybe<Array<PublisherEnum>>;
+  filter: FilterInsightsInput;
 };
 
 export type QueryIntegrationsArgs = {
@@ -583,9 +629,10 @@ export type InsightsQueryVariables = Exact<{
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
+  interval: InsightsInterval;
   publishers?: InputMaybe<Array<PublisherEnum> | PublisherEnum>;
-  positions?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-  order?: InputMaybe<Scalars['String']['input']>;
+  positions?: InputMaybe<Array<InsightsPosition> | InsightsPosition>;
+  order?: InputMaybe<OrderBy>;
   orderBy: InsightsColumnsOrderBy;
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
   pageSize: Scalars['Int']['input'];
@@ -604,12 +651,10 @@ export type InsightsQuery = {
       adId?: string | null;
       adName?: string | null;
       currency?: CurrencyEnum | null;
-      date?: Date | null;
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
       position?: string | null;
-      impressions: number;
-      spend: number;
+      datapoints: Array<{ __typename?: 'InsightsDatapoints'; date: Date; spend: number; impressions: number }>;
       iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
     }>;
   };
@@ -787,27 +832,31 @@ export const InsightsDocument = gql`
     $dateFrom: Date
     $dateTo: Date
     $devices: [DeviceEnum!]
+    $interval: InsightsInterval!
     $publishers: [PublisherEnum!]
-    $positions: [String!]
-    $order: String
+    $positions: [InsightsPosition!]
+    $order: OrderBy
     $orderBy: InsightsColumnsOrderBy!
     $groupBy: [InsightsColumnsGroupBy!]
     $pageSize: Int!
     $page: Int!
   ) {
     insights(
-      adAccountIds: $adAccountIds
-      adIds: $adIds
-      dateFrom: $dateFrom
-      dateTo: $dateTo
-      devices: $devices
-      publishers: $publishers
-      positions: $positions
-      order: $order
-      orderBy: $orderBy
-      groupBy: $groupBy
-      pageSize: $pageSize
-      page: $page
+      filter: {
+        adAccountIds: $adAccountIds
+        adIds: $adIds
+        dateFrom: $dateFrom
+        dateTo: $dateTo
+        devices: $devices
+        interval: $interval
+        publishers: $publishers
+        positions: $positions
+        order: $order
+        orderBy: $orderBy
+        groupBy: $groupBy
+        pageSize: $pageSize
+        page: $page
+      }
     ) {
       totalCount
       edges {
@@ -816,12 +865,14 @@ export const InsightsDocument = gql`
         adId
         adName
         currency
-        date
+        datapoints {
+          date
+          spend
+          impressions
+        }
         device
         publisher
         position
-        impressions
-        spend
         iFrame {
           src
           height

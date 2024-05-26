@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
+    "test": "turbo test",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
     "update": "pnpm update --latest && turbo update --concurrency=1 && pnpm install",
@@ -26,7 +27,7 @@
     "tsx": "^4.7.3",
     "turbo": "^1.13.3"
   },
-  "packageManager": "pnpm@9.1.1",
+  "packageManager": "pnpm@9.1.2",
   "engines": {
     "node": ">=20"
   },

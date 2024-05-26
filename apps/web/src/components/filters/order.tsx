@@ -1,10 +1,10 @@
 import { useTranslations } from 'next-intl';
-import { type OrderType } from '@/app/[locale]/(logged-in)/insights/query-string-util';
 import SearchParamsSelect from '@/components/filters/search-params-select';
+import { OrderBy } from '@/graphql/generated/schema-server';
 
-export function Order({ order }: { order: OrderType }): React.ReactElement {
+export function Order({ order }: { order: OrderBy }): React.ReactElement {
   const t = useTranslations('filters');
-  const types: OrderType[] = ['asc', 'desc'];
+  const types: OrderBy[] = [OrderBy.asc, OrderBy.desc];
   return (
     <SearchParamsSelect defaultValue={order} searchParamKey="order">
       {types.map((value) => (

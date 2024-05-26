@@ -27,6 +27,7 @@
     "update": {
       "cache": false
     },
+    "test": {},
     "type-check": {},
     "dev": {
       "cache": false,

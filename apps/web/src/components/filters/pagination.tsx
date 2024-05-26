@@ -7,7 +7,7 @@ import { type SearchParams } from '@/app/[locale]/(logged-in)/insights/query-str
 import { PageSize } from '@/components/filters/page-size';
 import { OrderBy } from '@/components/filters/order-by';
 import { Order } from '@/components/filters/order';
-import { type InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import { type InsightsColumnsOrderBy, OrderBy as OrderByEnum } from '@/graphql/generated/schema-server';
 
 export interface PageInfo {
   page: number;
@@ -37,7 +37,7 @@ export default function Pagination({
       <div className="flex w-full justify-center xl:justify-end">
         <PageSize pageSize={pageSize} />
         <OrderBy orderBy={orderBy} />
-        <Order order={searchParams?.order ?? 'desc'} />
+        <Order order={searchParams?.order ?? OrderByEnum.desc} />
       </div>
     </div>
   );
