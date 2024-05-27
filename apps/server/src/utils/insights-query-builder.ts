@@ -1,32 +1,53 @@
 import * as changeCase from 'change-case';
-import { type FilterInsightsInputType } from '../schema/integrations/integration-types';
+import {
+  type FilterInsightsInputType,
+  type InsightsDatapointsInputType,
+} from '../schema/integrations/integration-types';
 
-export const getOrganizationalInsights = (organizationId: string): string =>
+export const getOrganizationalInsights = (organizationId: string, filter: FilterInsightsInputType): string =>
   `organization_insights AS (SELECT i.*
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = '${organizationId}')`;
+                                              WHERE int.organization_id = '${organizationId}'
+                                                ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
+                                                ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
+                                                ${filter.dateFrom ? `AND i.date >= TIMESTAMP '${filter.dateFrom.toISOString()}'` : ''}
+                                                ${filter.dateTo ? `AND i.date < TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
+                                                ${filter.devices ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}
+                                                ${filter.positions ? `AND i.position IN (${filter.positions.map((i) => `'${i}'`).join(', ')})` : ''}
+                                                ${filter.publishers ? `AND i.publisher IN (${filter.publishers.map((i) => `'${i}'`).join(', ')})` : ''}
+                                              )`;
 
 export const lastInterval = (
   group: string,
   interval: FilterInsightsInputType['interval'],
   orderColumn: FilterInsightsInputType['orderBy'],
   isOrderByLastInterval: boolean,
-): string =>
-  `last_interval AS (SELECT ${group}, SUM(i.${orderColumn}) AS ${orderColumn}
+  dateTo?: Date | null,
+): string => {
+  const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
+  return `last_interval AS (SELECT ${group}, SUM(i.${orderColumn}) AS ${orderColumn}
                                       FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '1 ${interval}')
-                                        AND date < DATE_TRUNC('${interval}', CURRENT_DATE)
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
+                                        AND date < DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}${isOrderByLastInterval ? ` ORDER BY SUM(${orderColumn} DESC LIMIT $3 OFFSET $4` : ''})`;
+};
 
-export const intervalBeforeLast = (group: string, interval: string, orderColumn: string): string =>
-  `interval_before_last AS (SELECT ${group}, SUM(i.${orderColumn}) AS ${orderColumn}
+export const intervalBeforeLast = (
+  group: string,
+  interval: string,
+  orderColumn: string,
+  dateTo?: Date | null,
+): string => {
+  const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
+  return `interval_before_last AS (SELECT ${group}, SUM(i.${orderColumn}) AS ${orderColumn}
                                              FROM organization_insights i
-                                             WHERE date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '2 ${interval}')
-                                               AND date < DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '1 ${interval}')
+                                             WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '2 ${interval}')
+                                               AND date < DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
                                              GROUP BY ${group})`;
+};
 
 const joinFn = (columns: string[], table: string, left: string) => {
   const right = abbreviateSnakeCase(table);
@@ -59,17 +80,37 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   const joinedSnakeGroup = snakeGroup.join(', ');
   const limit = args.pageSize;
   const offset = (args.page - 1) * args.pageSize;
-  return `WITH ${getOrganizationalInsights(organizationId)}, 
-  ${lastInterval(joinedSnakeGroup, args.interval, args.orderBy, false)}, 
-  ${intervalBeforeLast(joinedSnakeGroup, args.interval, args.orderBy)}, 
+  const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
+  return `WITH ${getOrganizationalInsights(organizationId, args)}, 
+  ${lastInterval(joinedSnakeGroup, args.interval, args.orderBy, false, args.dateTo)},
+  ${intervalBeforeLast(joinedSnakeGroup, args.interval, args.orderBy, args.dateTo)},
   ${orderColumnTrend(snakeGroup, args.orderBy, args.order, limit, offset)}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, CAST(SUM(i.spend) AS NUMERIC) AS spend, CAST(SUM(i.impressions) AS NUMERIC) AS impressions 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
-  WHERE i.date >= DATE_TRUNC('${args.interval}', CURRENT_DATE - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
-    AND i.date < DATE_TRUNC('${args.interval}', CURRENT_DATE)
+  WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
+    AND i.date < DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
   ORDER BY oct.trend, interval_start DESC;`;
 };
+
+export const insightsDatapoints = (args: InsightsDatapointsInputType, organizationId: string) =>
+  `SELECT DATE_TRUNC('${args.interval}', i.date) AS date,
+          CAST(SUM(i.spend) AS NUMERIC)          AS spend,
+          CAST(SUM(i.impressions) AS NUMERIC)    AS impressions
+   FROM insights i
+            JOIN ads a on i.ad_id = a.id
+            JOIN ad_accounts aa on a.ad_account_id = aa.id
+            JOIN integrations int on aa.integration_id = int.id
+   WHERE int.organization_id = '${organizationId}'
+     AND i.date >= DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateFrom.toISOString()}')
+     AND i.date < DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateTo.toISOString()}')
+       ${args.adAccountId ? `AND i.ad_account_id = '${args.adAccountId}'` : ''}
+           ${args.adId ? `AND i.ad_id = '${args.adId}'` : ''}
+           ${args.device ? `AND i.device = '${args.device}'` : ''}
+           ${args.position ? `AND i.position = '${args.position}'` : ''}
+           ${args.publisher ? `AND i.publisher = '${args.publisher}'` : ''}
+   GROUP BY date
+   ORDER BY date DESC;`;
 
 const abbreviateSnakeCase = (snakeCaseString: string) =>
   snakeCaseString

@@ -329,6 +329,17 @@ type InsightsDatapoints {
   spend: Int!
 }
 
+input InsightsDatapointsInput {
+  adAccountId: String
+  adId: String
+  dateFrom: Date!
+  dateTo: Date!
+  device: DeviceEnum
+  interval: InsightsInterval!
+  position: InsightsPosition
+  publisher: PublisherEnum
+}
+
 enum InsightsInterval {
   day
   week
@@ -473,6 +484,7 @@ enum PublisherEnum {
 
 type Query {
   generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
+  insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insights(filter: FilterInsightsInput!): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   lastThreeMonthsAds: [Ad!]!

@@ -242,4 +242,18 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
   }),
 });
 
+export const InsightsDatapointsInput = builder.inputType('InsightsDatapointsInput', {
+  fields: (t) => ({
+    adAccountId: t.string({ required: false }),
+    adId: t.string({ required: false }),
+    dateFrom: t.field({ type: 'Date', required: true }),
+    dateTo: t.field({ type: 'Date', required: true }),
+    device: t.field({ type: DeviceEnumDto, required: false }),
+    interval: t.field({ type: InsightsIntervalDto, required: true }),
+    position: t.field({ type: InsightsPositionDto, required: false }),
+    publisher: t.field({ type: PublisherEnumDto, required: false }),
+  }),
+});
+
 export type FilterInsightsInputType = typeof FilterInsightsInput.$inferInput;
+export type InsightsDatapointsInputType = typeof InsightsDatapointsInput.$inferInput;
