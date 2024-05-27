@@ -12,10 +12,11 @@
     "pageSize": "Μέγεθος σελίδας",
     "orderBy": "Ταξινόμηση",
     "spent": "Δαπάνες",
-    "impressions": "Εντυπώσεις",
+    "impressions": "Εμφανίσεις",
     "descending": "Φθίνουσα",
     "ascending": "Αύξουσα",
     "filters": {
+      "title": "Φίλτρα",
       "accounts": "Λογαριασμοί",
       "selectAccounts": "Επιλέξτε λογαριασμούς",
       "positions": "Θέσεις",
