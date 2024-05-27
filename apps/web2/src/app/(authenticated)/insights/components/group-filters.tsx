@@ -163,7 +163,7 @@ export default function GroupFilters(): ReactNode {
   return (
     <ScrollArea offsetScrollbars>
       <Flex direction="column">
-        <Text size="xl">Filters</Text>
+        <Text size="xl">{t('title')}</Text>
         {accounts.length ? (
           <>
             <Text size="sm" mt="xs">

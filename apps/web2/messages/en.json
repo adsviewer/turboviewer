@@ -16,6 +16,7 @@
     "descending": "Descending",
     "ascending": "Ascending",
     "filters": {
+      "title": "Filters",
       "accounts": "Accounts",
       "selectAccounts": "Select accounts",
       "positions": "Positions",
