@@ -1,6 +1,6 @@
 import { type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
 import { Kind } from 'graphql/language';
-import { getEndOfDay, isAError } from '@repo/utils';
+import { isAError } from '@repo/utils';
 import { logger } from '@repo/logger';
 import { parse as htmlParse } from 'node-html-parser';
 import { GraphQLError } from 'graphql';
@@ -11,8 +11,15 @@ import * as changeCase from 'change-case';
 import { groupBy as groupByUtil, uniqueBy } from '../../utils/data-object-utils';
 import { builder } from '../builder';
 import { invokeChannelIngress } from '../../utils/lambda-utils';
-import { groupedInsights } from '../../utils/insights-query-builder';
-import { AdDto, CurrencyEnumDto, DeviceEnumDto, FilterInsightsInput, PublisherEnumDto } from './integration-types';
+import { groupedInsights, insightsDatapoints } from '../../utils/insights-query-builder';
+import {
+  AdDto,
+  CurrencyEnumDto,
+  DeviceEnumDto,
+  FilterInsightsInput,
+  InsightsDatapointsInput,
+  PublisherEnumDto,
+} from './integration-types';
 import InsightWhereInput = Prisma.InsightWhereInput;
 import InsightScalarFieldEnum = Prisma.InsightScalarFieldEnum;
 
@@ -43,7 +50,6 @@ builder.queryFields((t) => ({
       const where: InsightWhereInput = {
         adAccountId: { in: args.filter.adAccountIds ?? undefined },
         adId: { in: args.filter.adIds ?? undefined },
-        date: { gte: args.filter.dateFrom ?? undefined, lte: getEndOfDay(args.filter.dateTo) },
         device: { in: args.filter.devices ?? undefined },
         publisher: { in: args.filter.publishers ?? undefined },
         position: { in: args.filter.positions ?? undefined },
@@ -159,6 +165,18 @@ builder.queryFields((t) => ({
       }
 
       return { totalCount: await totalElementsP, edges: ret };
+    },
+  }),
+  insightDatapoints: t.withAuth({ authenticated: true }).field({
+    type: [InsightsDatapointsDto],
+    args: {
+      args: t.arg({ type: InsightsDatapointsInput, required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      const datapoints: (typeof InsightsDatapointsDto.$inferType)[] = await prisma.$queryRawUnsafe(
+        insightsDatapoints(args.args, ctx.organizationId),
+      );
+      return datapoints;
     },
   }),
 }));

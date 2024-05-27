@@ -366,6 +366,17 @@ export type InsightsDatapoints = {
   spend: Scalars['Int']['output'];
 };
 
+export type InsightsDatapointsInput = {
+  adAccountId?: InputMaybe<Scalars['String']['input']>;
+  adId?: InputMaybe<Scalars['String']['input']>;
+  dateFrom: Scalars['Date']['input'];
+  dateTo: Scalars['Date']['input'];
+  device?: InputMaybe<DeviceEnum>;
+  interval: InsightsInterval;
+  position?: InputMaybe<InsightsPosition>;
+  publisher?: InputMaybe<PublisherEnum>;
+};
+
 export enum InsightsInterval {
   day = 'day',
   week = 'week',
@@ -556,6 +567,7 @@ export enum PublisherEnum {
 export type Query = {
   __typename?: 'Query';
   generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
+  insightDatapoints: Array<InsightsDatapoints>;
   insights: GroupedInsight;
   integrations: Array<Integration>;
   lastThreeMonthsAds: Array<Ad>;
@@ -565,6 +577,10 @@ export type Query = {
 
 export type QueryGenerateGoogleAuthUrlArgs = {
   state: Scalars['String']['input'];
+};
+
+export type QueryInsightDatapointsArgs = {
+  args: InsightsDatapointsInput;
 };
 
 export type QueryInsightsArgs = {

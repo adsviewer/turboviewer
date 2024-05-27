@@ -52,6 +52,9 @@ jobs:
           pnpm install
           pnpm --filter=database generate
 
+      - name: Test
+        run: pnpm test
+
       - name: Lint
         run: pnpm lint
 
