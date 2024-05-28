@@ -25,6 +25,17 @@
   },
   "login": {
     "signIn": "Sign In",
-    "signUp": "Sign Up"
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "backToSignIn": "Back to Sign In",
+    "checkYourEmail": "Check your email",
+    "forgotPasswordInstructions": "We have sent a password reset link to",
+    "resendCode": "Resend Code",
+    "tokenMissing": "Token missing",
+    "tokenExpired": "Token expired",
+    "tokenMissingMsg" : "The password reset link is missing the token. Please try again.",
+    "tokenExpiredMsg" : "The password reset link has expired. Please request a new one.",
+    "changePassword": "Change Password"
   }
 }

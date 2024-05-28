@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { type JSX } from 'react';
 import { Input } from '@repo/ui/input';
 import { FormButton } from '@repo/ui/button';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   FormControl,
   FormDescription,
@@ -22,6 +23,9 @@ interface SignInProps {
 }
 
 export function SignUp({ title }: SignInProps): JSX.Element {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const form = useForm<z.output<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     defaultValues: {
@@ -32,8 +36,13 @@ export function SignUp({ title }: SignInProps): JSX.Element {
     },
   });
 
+  const onSuccess = (): void => {
+    const redirect = searchParams.get('redirect');
+    router.push(redirect ?? '/insights');
+  };
+
   return (
-    <LoginForm {...form} formName="signUp" routeUrl="api/login/sign-up">
+    <LoginForm {...form} formName="signUp" routeUrl="api/login/sign-up" onSuccess={onSuccess}>
       <div className="flex gap-2">
         <FormField
           name="firstName"
