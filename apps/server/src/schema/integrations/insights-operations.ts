@@ -83,7 +83,7 @@ builder.queryFields((t) => ({
         datapoints: { spend: number; impressions: number; date: Date }[];
       }[] = [];
       const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
-        return groupBy.map((group) => insight[group] ?? '').join('-');
+        return groupBy.map((group) => insight[group]).join('-');
       });
       for (const [_, value] of insightsGrouped) {
         if (value.length > 0) {
@@ -93,7 +93,7 @@ builder.queryFields((t) => ({
           });
           ret.push({
             ...newKey,
-            id: groupBy.map((group) => value[0][group] ?? '').join('-'),
+            id: groupBy.map((group) => value[0][group]).join('-'),
             datapoints: value.map((v) => ({ spend: v.spend, impressions: v.impressions, date: v.date })),
           });
         }

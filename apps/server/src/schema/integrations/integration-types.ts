@@ -1,6 +1,6 @@
 import { CurrencyEnum, DeviceEnum, type Insight, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
 import { MetaError } from '@repo/channel-utils';
-import { getEndOfDay } from '@repo/utils';
+import { getEndOfDay, type IntervalType } from '@repo/utils';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
@@ -184,8 +184,9 @@ const OrderByDto = builder.enumType('OrderBy', {
   values: ['asc', 'desc'] as const,
 });
 
+const insightsIntervals: IntervalType[] = ['day', 'week', 'month'] as const;
 const InsightsIntervalDto = builder.enumType('InsightsInterval', {
-  values: ['day', 'week', 'month'] as const,
+  values: insightsIntervals,
 });
 
 export const InsightsPositionDto = builder.enumType('InsightsPosition', {

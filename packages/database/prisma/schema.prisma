@@ -105,7 +105,7 @@ model AdAccount {
   integrationId String @map("integration_id")
 
   externalId String       @map("external_id")
-  name       String       @default("No name") // TODO: remove this once all ad accounts have a name
+  name       String
   currency   CurrencyEnum
 
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -126,7 +126,7 @@ model Ad {
   creativeId  String?
 
   externalId String    @map("external_id")
-  name       String    @default("No name") // TODO: remove this once all ads have a name
+  name       String
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id])
   insights   Insight[]
   creative   Creative? @relation(fields: [creativeId], references: [id])
@@ -169,9 +169,8 @@ model Creative {
 model Insight {
   id String @id @default(cuid())
 
-  // TODO: both should be required. After a run they should be populated.
-  adAccountId String?       @map("ad_account_id")
-  currency    CurrencyEnum?
+  adAccountId String       @map("ad_account_id")
+  currency    CurrencyEnum
 
   adId        String        @map("ad_id")
   date        DateTime
