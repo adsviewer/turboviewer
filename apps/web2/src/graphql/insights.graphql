@@ -14,27 +14,31 @@ query insights(
   $dateFrom: Date
   $dateTo: Date
   $devices: [DeviceEnum!]
+  $interval: InsightsInterval!
   $publishers: [PublisherEnum!]
-  $positions: [String!]
-  $order: String
+  $positions: [InsightsPosition!]
+  $order: OrderBy
   $orderBy: InsightsColumnsOrderBy!
   $groupBy: [InsightsColumnsGroupBy!]
   $pageSize: Int!
   $page: Int!
 ) {
   insights(
-    adAccountIds: $adAccountIds
-    adIds: $adIds
-    dateFrom: $dateFrom
-    dateTo: $dateTo
-    devices: $devices
-    publishers: $publishers
-    positions: $positions
-    order: $order
-    orderBy: $orderBy
-    groupBy: $groupBy
-    pageSize: $pageSize
-    page: $page
+    filter: {
+      adAccountIds: $adAccountIds
+      adIds: $adIds
+      dateFrom: $dateFrom
+      dateTo: $dateTo
+      devices: $devices
+      interval: $interval
+      publishers: $publishers
+      positions: $positions
+      order: $order
+      orderBy: $orderBy
+      groupBy: $groupBy
+      pageSize: $pageSize
+      page: $page
+    }
   ) {
     totalCount
     edges {
@@ -44,12 +48,14 @@ query insights(
       adId
       adName
       currency
-      date
+      datapoints {
+        date
+        spend
+        impressions
+      }
       device
       publisher
       position
-      impressions
-      spend
       iFrame {
         src
         height

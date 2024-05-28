@@ -257,13 +257,13 @@ export default function GroupFilters(): ReactNode {
           value={InsightsColumnsGroupBy.device}
           checked={isChecked(InsightsColumnsGroupBy.device)}
         />
-        <Checkbox
+        {/* <Checkbox
           label={t('date')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.date}
           checked={isChecked(InsightsColumnsGroupBy.date)}
-        />
+        /> */}
         <Checkbox
           label={t('publisher')}
           my={4}

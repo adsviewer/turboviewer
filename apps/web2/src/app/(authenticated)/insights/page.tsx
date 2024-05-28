@@ -6,6 +6,9 @@ import {
   type DeviceEnum,
   type InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
+  InsightsInterval,
+  type InsightsPosition,
+  OrderBy,
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
@@ -14,7 +17,7 @@ import OrderFilters from './components/order-filters';
 
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
-  order?: string;
+  order?: OrderBy;
   page?: string;
   pageSize?: string;
   groupedBy?: InsightsColumnsGroupBy[];
@@ -22,31 +25,33 @@ export interface SearchParams {
   adId?: string;
   device?: DeviceEnum;
   publisher?: PublisherEnum;
-  position?: string;
+  position?: InsightsPosition;
+  interval?: InsightsInterval;
 }
 
 interface InsightsProps {
-  searchParams?: SearchParams;
+  searchParams: SearchParams;
 }
 
 export default async function Insights({ searchParams }: InsightsProps): Promise<ReactNode> {
   const t = await getTranslations('insights');
-  const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend;
-  const pageSize = parseInt(searchParams?.pageSize ?? '12', 10);
-  const page = parseInt(searchParams?.page ?? '1', 10);
-  const order = searchParams?.order ?? 'desc';
+  const orderBy = searchParams.orderBy ?? InsightsColumnsOrderBy.spend;
+  const order = searchParams.order ?? OrderBy.desc;
+  const pageSize = parseInt(searchParams.pageSize ?? '12', 10);
+  const page = parseInt(searchParams.page ?? '1', 10);
 
   const resp = await urqlClientSdk().insights({
-    adAccountIds: searchParams?.account,
-    adIds: searchParams?.adId,
-    devices: searchParams?.device,
-    groupBy: searchParams?.groupedBy,
+    adAccountIds: searchParams.account,
+    adIds: searchParams.adId,
+    devices: searchParams.device,
+    groupBy: searchParams.groupedBy,
     order,
     orderBy,
     page,
     pageSize,
-    positions: searchParams?.position,
-    publishers: searchParams?.publisher,
+    positions: searchParams.position,
+    publishers: searchParams.publisher,
+    interval: InsightsInterval.week,
   });
   const insights = resp.insights.edges;
   const totalCount = resp.insights.totalCount;
