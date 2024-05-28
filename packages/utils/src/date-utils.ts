@@ -1,5 +1,7 @@
 const xMonths = 3;
 
+export type IntervalType = 'day' | 'week' | 'month';
+
 const formatYYYMMDDDate = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -50,4 +52,30 @@ export const getBeforeXMonths = (): Date => {
   xMonthsAgo.setMonth(today.getMonth() - xMonths);
   xMonthsAgo.setHours(0, 0, 0, 0);
   return xMonthsAgo;
+};
+
+export const addInterval = (date: Date, interval: 'week' | 'month' | 'day', numOfIntervals: number): Date => {
+  const result = new Date(date);
+  switch (interval) {
+    case 'week':
+      result.setDate(result.getDate() + numOfIntervals * 7);
+      break;
+    case 'month':
+      result.setMonth(result.getMonth() + numOfIntervals);
+      break;
+    case 'day':
+      result.setDate(result.getDate() + numOfIntervals);
+      break;
+  }
+  return result;
+};
+
+export const isDateWithinInterval = (
+  dateFrom: Date,
+  interval: 'week' | 'month' | 'day',
+  dateTo: Date,
+  numOfIntervals: number,
+): boolean => {
+  const targetDate = addInterval(dateFrom, interval, numOfIntervals);
+  return targetDate < dateTo;
 };

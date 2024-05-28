@@ -1,11 +1,13 @@
 import { describe, it } from 'node:test';
 import * as assert from 'node:assert';
 import { DeviceEnum, PublisherEnum } from '@repo/database';
+import { addInterval } from '@repo/utils';
 import type {
   FilterInsightsInputType,
   InsightsDatapointsInputType,
 } from '../../src/schema/integrations/integration-types';
 import {
+  getInsightsDateFrom,
   getOrganizationalInsights,
   groupedInsights,
   insightsDatapoints,
@@ -27,6 +29,41 @@ const assertSql = (actual: string, expected: string) => {
 };
 
 void describe('insights query builder tests', () => {
+  void it('getInsightsDateFrom no range', () => {
+    const dateFrom = getInsightsDateFrom(undefined, undefined, 3, 'day');
+    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', CURRENT_DATE - INTERVAL '3 day')`);
+  });
+  void it('getInsightsDateFrom onlyDateTo', () => {
+    const dateFrom = getInsightsDateFrom(undefined, new Date('2024-05-15'), 3, 'day');
+    assert.strictEqual(
+      dateFrom,
+      `AND i.date >= DATE_TRUNC('day', TIMESTAMP '2024-05-15T00:00:00.000Z' - INTERVAL '3 day')`,
+    );
+  });
+  void it('getInsightsDateFrom onlyDateFrom back in the past', () => {
+    const dateFrom = getInsightsDateFrom(new Date('2024-05-15'), undefined, 3, 'day');
+    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', CURRENT_DATE - INTERVAL '3 day')`);
+  });
+  void it('getInsightsDateFrom onlyDateFrom recent past', () => {
+    const date = addInterval(new Date(), 'day', -2);
+    const dateFrom = getInsightsDateFrom(date, undefined, 3, 'day');
+    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', TIMESTAMP '${date.toISOString()}')`);
+  });
+  void it('getInsightsDateFrom bothDates back in the past', () => {
+    const dateTo = new Date('2024-05-28');
+    const dateFrom = getInsightsDateFrom(new Date('2024-01-15'), dateTo, 3, 'month');
+    assert.strictEqual(
+      dateFrom,
+      `AND i.date >= DATE_TRUNC('month', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '3 month')`,
+    );
+  });
+  void it('getInsightsDateFrom bothDates recent past', () => {
+    const dateTo = new Date('2024-05-28');
+    const dateFrom = addInterval(dateTo, 'week', -2);
+    const res = getInsightsDateFrom(dateFrom, dateTo, 3, 'week');
+    assert.strictEqual(res, `AND i.date >= DATE_TRUNC('week', TIMESTAMP '${dateFrom.toISOString()}')`);
+  });
+
   void it('get insights no filters', () => {
     const args: FilterInsightsInputType = {
       orderBy: 'spend',
@@ -47,6 +84,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN integrations int on aa.integration_id = int.id
                                               WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               )`,
     );
   });
@@ -72,6 +110,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN integrations int on aa.integration_id = int.id
                                               WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
                                                 AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               )`,
     );
   });
@@ -104,7 +143,7 @@ void describe('insights query builder tests', () => {
                                               WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
                                                 AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
                                                 AND a.id IN ('clwnqvgwx000008mlbmkchjwg')
-                                                AND i.date >= TIMESTAMP '2024-04-01T00:00:00.000Z'
+                                                AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                                 AND i.device IN ('MobileWeb', 'MobileApp')
                                                 AND i.position IN ('feed')
@@ -199,6 +238,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN integrations int on aa.integration_id = int.id
                                               WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               ), 
   last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend
                                       FROM organization_insights i
@@ -246,7 +286,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN integrations int on aa.integration_id = int.id
                                               WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= TIMESTAMP '2024-04-01T00:00:00.000Z'
+                                                AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                               ), 
   last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend

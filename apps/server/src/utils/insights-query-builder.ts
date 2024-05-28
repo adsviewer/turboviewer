@@ -1,8 +1,34 @@
 import * as changeCase from 'change-case';
+import { type IntervalType, isDateWithinInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
   type InsightsDatapointsInputType,
 } from '../schema/integrations/integration-types';
+
+export const getInsightsDateFrom = (
+  dateFrom: Date | undefined | null,
+  dateTo: Date | undefined | null,
+  dataPointsPerInterval: number,
+  interval: IntervalType,
+) => {
+  if (!dateFrom && !dateTo)
+    return `AND i.date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+  if (!dateFrom && dateTo)
+    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+  if (dateFrom && !dateTo) {
+    if (isDateWithinInterval(dateFrom, interval, new Date(), dataPointsPerInterval)) {
+      return `AND i.date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+    }
+    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom.toISOString()}')`;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
+  if (isDateWithinInterval(dateFrom!, interval, dateTo!, dataPointsPerInterval)) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
+    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
+  return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom!.toISOString()}')`;
+};
 
 export const getOrganizationalInsights = (organizationId: string, filter: FilterInsightsInputType): string =>
   `organization_insights AS (SELECT i.*
@@ -13,7 +39,7 @@ export const getOrganizationalInsights = (organizationId: string, filter: Filter
                                               WHERE int.organization_id = '${organizationId}'
                                                 ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
-                                                ${filter.dateFrom ? `AND i.date >= TIMESTAMP '${filter.dateFrom.toISOString()}'` : ''}
+                                                ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, filter.dataPointsPerInterval, filter.interval)}
                                                 ${filter.dateTo ? `AND i.date < TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
                                                 ${filter.devices ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.positions ? `AND i.position IN (${filter.positions.map((i) => `'${i}'`).join(', ')})` : ''}
