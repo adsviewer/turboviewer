@@ -3,7 +3,8 @@
 import { Card, Image, Text, Badge, Group, Divider, Flex, useComputedColorScheme, useMantineTheme } from '@mantine/core';
 import { IconCalendar, IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { type DeviceEnum, type CurrencyEnum, type IFrame } from '@/graphql/generated/schema-server';
+import { type DateTimeFormatOptions, useFormatter } from 'next-intl';
+import { CurrencyEnum, type DeviceEnum, type IFrame, type InsightsDatapoints } from '@/graphql/generated/schema-server';
 import { snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
 import AdPopover from './ad-popover';
 
@@ -12,10 +13,8 @@ interface InsightCardProps {
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
   rank: 'good' | 'mid' | 'bad' | 'unknown';
-  amountSpent: string;
   currency: CurrencyEnum | null | undefined;
-  impressions: number;
-  date: string | null;
+  datapoints: InsightsDatapoints[];
   iframe: IFrame | null | undefined;
 }
 
@@ -25,6 +24,11 @@ interface RankType {
 }
 
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
+  const format = useFormatter();
+  const dateFormatOptions: DateTimeFormatOptions = {
+    month: 'numeric',
+    day: 'numeric',
+  };
   const computedColorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
   const [rank, setRank] = useState<RankType>({
@@ -94,23 +98,26 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         <Flex align="center" mr="md">
           <IconCoins color={iconColor} />
           <Text size="sm" c="dimmed" ml={4}>
-            {props.amountSpent}
+            {format.number(props.datapoints[0].spend / 100, {
+              style: 'currency',
+              currency: props.currency ?? CurrencyEnum.EUR,
+            })}
           </Text>
         </Flex>
         <Flex align="center" mr="md">
           <IconEye color={iconColor} />
           <Text size="sm" c="dimmed" ml={4}>
-            {props.impressions}
+            {format.number(props.datapoints[0].impressions, { style: 'decimal' })}
           </Text>
         </Flex>
-        {props.date ? (
-          <Flex align="center" mr="md">
-            <IconCalendar color={iconColor} />
-            <Text size="sm" c="dimmed" ml={4}>
-              {props.date}
-            </Text>
-          </Flex>
-        ) : null}
+
+        <Flex align="center" mr="md">
+          <IconCalendar color={iconColor} />
+          <Text size="sm" c="dimmed" ml={4}>
+            {format.dateTime(new Date(props.datapoints[0].date), dateFormatOptions)}
+          </Text>
+        </Flex>
+
         {props.iframe ? (
           <Flex align="center" justify="flex-end" w="100%" mr="md">
             <AdPopover iconColor={iconColor} iframe={props.iframe} />
