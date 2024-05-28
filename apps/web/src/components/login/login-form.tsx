@@ -17,7 +17,6 @@ import { X } from 'lucide-react';
 import { cn } from '@repo/ui/tailwind-utils';
 import { Label } from '@repo/ui/label';
 import { logger } from '@repo/logger';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 export interface FormState {
   message: string;
@@ -31,6 +30,7 @@ interface FormProps<
 > extends FormProviderProps<TFieldValues, TName> {
   formName: string;
   routeUrl: string;
+  onSuccess: (data: { response: Response }) => void;
 }
 
 function LoginForm<
@@ -40,8 +40,6 @@ function LoginForm<
   const [state, setState] = useState({
     message: '',
   });
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   return (
     <FormProvider {...props}>
@@ -56,8 +54,7 @@ function LoginForm<
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- That's fine
           const body: { success: true } | { success: false; error: FormState } = await data.response.json();
           if (body.success) {
-            const redirect = searchParams.get('redirect');
-            router.push(redirect ?? '/insights');
+            props.onSuccess(data);
           } else {
             setState(body.error);
           }
