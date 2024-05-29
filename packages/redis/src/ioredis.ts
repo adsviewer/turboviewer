@@ -22,3 +22,11 @@ export const redisExists = async (key: string): Promise<boolean> => {
 export const redisDel = async (key: string): Promise<number> => {
   return ioredis.del(key);
 };
+
+export const redisIncr = async (key: string): Promise<number> => {
+  return ioredis.incr(key);
+};
+
+export const redisExpire = async (key: string, ttlSec: number): Promise<number> => {
+  return ioredis.expire(key, ttlSec);
+};
