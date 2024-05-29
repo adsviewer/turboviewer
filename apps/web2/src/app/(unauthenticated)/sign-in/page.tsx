@@ -1,12 +1,12 @@
 'use client';
 
-import { useForm } from '@mantine/form';
+import { useForm, zodResolver } from '@mantine/form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Button, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
-import { type SignInSchemaType } from '@/util/schemas/login-schemas';
+import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignIn(): React.JSX.Element {
   const t = useTranslations('authentication');
@@ -19,11 +19,7 @@ export default function SignIn(): React.JSX.Element {
       email: '',
       password: '',
     },
-
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email.'),
-      password: (value) => (value.length > 5 ? null : 'Password must be at least 5 characters long.'),
-    },
+    validate: zodResolver(SignInSchema),
   });
 
   const handleSubmit = (values: SignInSchemaType): void => {
