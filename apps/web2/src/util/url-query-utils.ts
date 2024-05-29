@@ -7,6 +7,9 @@ export const deviceKey = 'device';
 export const positionKey = 'position';
 export const accountKey = 'account';
 export const pageKey = 'page';
+export const pageSizeKey = 'pageSize';
+export const orderDirectionKey = 'order';
+export const orderByKey = 'orderBy';
 
 export const positions = [
   'an_classic',

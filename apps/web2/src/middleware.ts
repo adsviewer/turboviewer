@@ -3,6 +3,8 @@ import { jwtVerify } from 'jose';
 import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@repo/logger';
 import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from './env.mjs';
+import { groupedByKey } from './util/url-query-utils';
+import { InsightsColumnsGroupBy } from './graphql/generated/schema-server';
 
 const publicPaths = ['/', '/sign-in', '/sign-up', '/api/auth/sign-in', '/api/auth/sign-up'];
 
@@ -53,6 +55,14 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const signInUrl = new URL('/sign-in', request.url);
     signInUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
+  }
+
+  // If page is loaded without any query params, set the following initial group filters
+  if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
+    const newURL = `/insights?${groupedByKey}=${InsightsColumnsGroupBy.adId}&${groupedByKey}=${InsightsColumnsGroupBy.device}&${groupedByKey}=${InsightsColumnsGroupBy.publisher}&${groupedByKey}=${InsightsColumnsGroupBy.position}`;
+    const redirectUrl = new URL(newURL, request.url);
+    logger.info(redirectUrl.toString());
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
