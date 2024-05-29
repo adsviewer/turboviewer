@@ -1,9 +1,10 @@
 import '@repo/ui/globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import Toaster from '@/app/[locale]/(logged-in)/toaster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,6 +26,9 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
+        <Suspense>
+          <Toaster />
+        </Suspense>
       </body>
     </html>
   );

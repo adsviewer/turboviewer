@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Fallback } from '@repo/ui/fallback';
 import { useTranslations } from 'next-intl';
 import { SignIn } from '@/components/login/sign-in';
+import LoginProvidersLinks from '@/app/[locale]/(login)/(normal)/login-providers-links';
 
 export default function Page(): JSX.Element {
   const t = useTranslations('login');
@@ -20,6 +21,9 @@ export default function Page(): JSX.Element {
         <Link className="text-center underline" href="/forgot-password">
           {t('forgotPassword')}
         </Link>
+        <Suspense fallback={<Fallback height={25} />}>
+          <LoginProvidersLinks message={t('loginWith')} />
+        </Suspense>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { CalendarDays, Eye } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { IFrame } from '@repo/ui/iframe';
 import type { UnwrapArray } from '@/util/types';
-import { CurrencyEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
+import { type InsightsQuery } from '@/graphql/generated/schema-server';
 import Spend from '@/app/[locale]/(logged-in)/insights/spend';
 import Device from '@/app/[locale]/(logged-in)/insights/device';
 import Publisher from '@/app/[locale]/(logged-in)/insights/publisher';
@@ -29,7 +29,7 @@ export default function Insight({
           return (
             <div key={`${String(spend)}-${String(impressions)}-${String(date)}`}>
               <div className="flex flex-row">
-                <Spend spend={spend} currency={currency ?? CurrencyEnum.USD} />
+                <Spend spend={spend} currency={currency} />
                 <Eye />
                 <div>{format.number(impressions, { style: 'decimal' })}</div>
                 <CalendarDays />

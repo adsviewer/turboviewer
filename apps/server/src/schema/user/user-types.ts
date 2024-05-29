@@ -1,4 +1,4 @@
-import { type User } from '@repo/database';
+import { LoginProviderEnum, type User } from '@repo/database';
 import { builder } from '../builder';
 
 export const UserDto = builder.prismaObject('User', {
@@ -45,5 +45,18 @@ export const TokenUserDto = builder
 export const GenerateGoogleAuthUrlResponseDto = builder.simpleObject('GenerateGoogleAuthUrlResponse', {
   fields: (t) => ({
     url: t.string({ nullable: false }),
+    name: t.field({ type: LoginProviderEnumDto, nullable: false }),
   }),
 });
+
+export const SignUpInputDto = builder.inputType('SignUpInput', {
+  fields: (t) => ({
+    email: t.string({ required: true }),
+    password: t.string({ required: true }),
+    firstName: t.string({ required: true }),
+    lastName: t.string({ required: true }),
+  }),
+});
+
+export type SignUpInput = typeof SignUpInputDto.$inferInput;
+export const LoginProviderEnumDto = builder.enumType(LoginProviderEnum, { name: 'LoginProviderEnum' });

@@ -302,6 +302,7 @@ export type FilterInsightsInput = {
 
 export type GenerateGoogleAuthUrlResponse = {
   __typename?: 'GenerateGoogleAuthUrlResponse';
+  name: LoginProviderEnum;
   url: Scalars['String']['output'];
 };
 
@@ -317,7 +318,7 @@ export type GroupedInsights = {
   adAccountName?: Maybe<Scalars['String']['output']>;
   adId?: Maybe<Scalars['String']['output']>;
   adName?: Maybe<Scalars['String']['output']>;
-  currency?: Maybe<CurrencyEnum>;
+  currency: CurrencyEnum;
   datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;
   iFrame?: Maybe<IFrame>;
@@ -451,6 +452,10 @@ export enum IntegrationType {
   LINKEDIN = 'LINKEDIN',
 }
 
+export enum LoginProviderEnum {
+  GOOGLE = 'GOOGLE',
+}
+
 export type MetaError = Error & {
   __typename?: 'MetaError';
   code: Scalars['Int']['output'];
@@ -463,7 +468,6 @@ export type Mutation = {
   __typename?: 'Mutation';
   deAuthIntegration: MutationDeAuthIntegrationResult;
   forgetPassword: Scalars['Boolean']['output'];
-  googleLoginSignup: TokenDto;
   login: TokenDto;
   refreshData: Scalars['Boolean']['output'];
   /** Uses the refresh token to generate a new token */
@@ -479,10 +483,6 @@ export type MutationDeAuthIntegrationArgs = {
 
 export type MutationForgetPasswordArgs = {
   email: Scalars['String']['input'];
-};
-
-export type MutationGoogleLoginSignupArgs = {
-  code: Scalars['String']['input'];
 };
 
 export type MutationLoginArgs = {
@@ -501,10 +501,7 @@ export type MutationResetPasswordArgs = {
 };
 
 export type MutationSignupArgs = {
-  email: Scalars['String']['input'];
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
+  args: SignUpInput;
 };
 
 export type MutationUpdateUserArgs = {
@@ -566,17 +563,13 @@ export enum PublisherEnum {
 
 export type Query = {
   __typename?: 'Query';
-  generateGoogleAuthUrl: GenerateGoogleAuthUrlResponse;
   insightDatapoints: Array<InsightsDatapoints>;
   insights: GroupedInsight;
   integrations: Array<Integration>;
   lastThreeMonthsAds: Array<Ad>;
+  loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
   settingsChannels: Array<IntegrationListItem>;
-};
-
-export type QueryGenerateGoogleAuthUrlArgs = {
-  state: Scalars['String']['input'];
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -589,6 +582,13 @@ export type QueryInsightsArgs = {
 
 export type QueryIntegrationsArgs = {
   type?: InputMaybe<IntegrationType>;
+};
+
+export type SignUpInput = {
+  email: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type Subscription = {
@@ -665,7 +665,7 @@ export type InsightsQuery = {
       adAccountName?: string | null;
       adId?: string | null;
       adName?: string | null;
-      currency?: CurrencyEnum | null;
+      currency: CurrencyEnum;
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
       position?: string | null;
@@ -803,6 +803,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>;
 export type MeQuery = {
   __typename?: 'Query';
   me: { __typename?: 'User'; firstName: string; lastName: string; email: string };
+};
+
+export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type LoginProvidersQuery = {
+  __typename?: 'Query';
+  loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; name: LoginProviderEnum }>;
 };
 
 export type UserFieldsFragment = {
@@ -947,7 +954,7 @@ export const LoginDocument = gql`
 `;
 export const SignupDocument = gql`
   mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
-    signup(email: $email, firstName: $firstName, lastName: $lastName, password: $password) {
+    signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
       token
       refreshToken
       user {
@@ -985,6 +992,14 @@ export const MeDocument = gql`
       firstName
       lastName
       email
+    }
+  }
+`;
+export const LoginProvidersDocument = gql`
+  query loginProviders {
+    loginProviders {
+      url
+      name
     }
   }
 `;
@@ -1073,6 +1088,13 @@ export function getSdk<C>(requester: Requester<C>) {
     },
     me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
       return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
+    },
+    loginProviders(variables?: LoginProvidersQueryVariables, options?: C): Promise<LoginProvidersQuery> {
+      return requester<LoginProvidersQuery, LoginProvidersQueryVariables>(
+        LoginProvidersDocument,
+        variables,
+        options,
+      ) as Promise<LoginProvidersQuery>;
     },
   };
 }

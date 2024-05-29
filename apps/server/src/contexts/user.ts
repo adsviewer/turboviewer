@@ -1,16 +1,8 @@
-import { scrypt, randomBytes, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { prisma, type Prisma } from '@repo/database';
-
-export interface UserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password?: string;
-  photo?: string;
-  googleId?: string;
-  organizationId?: string;
-}
+import { type SignUpInput } from '../schema/user/user-types';
+import { type LoginProviderUserData } from './login-provider/login-provider-types';
 
 const scryptAsync = promisify(scrypt);
 
@@ -41,14 +33,14 @@ export const passwordsMatch = async (password: string, hashedPassword: string | 
 };
 
 export const createUser = async (
-  data: UserData,
+  data: SignUpInput,
   query?: { include?: Prisma.UserInclude | undefined; select?: Prisma.UserSelect | undefined },
 ) => {
   const truthyQuery = query ?? {};
-  const hashedPassword = data.password ? await createPassword(data.password) : undefined;
+  const hashedPassword = await createPassword(data.password);
 
   // Create user with specified organization or default to creating a new organization
-  const user = await prisma.user.create({
+  return await prisma.user.create({
     ...truthyQuery,
     include: { roles: { select: { role: true } } },
     data: {
@@ -56,16 +48,34 @@ export const createUser = async (
       firstName: data.firstName,
       lastName: data.lastName,
       password: hashedPassword,
-      photo: data.photo,
-      googleId: data.googleId,
-      organization: data.organizationId
-        ? { connect: { id: data.organizationId } }
-        : {
-            create: {
-              name: `${data.firstName} ${data.lastName}`,
-            },
-          },
+      organization: {
+        create: {
+          name: `${data.firstName} ${data.lastName}`,
+        },
+      },
     },
   });
-  return user;
+};
+
+export const createLoginProviderUser = async (data: LoginProviderUserData) => {
+  return await prisma.user.create({
+    include: { roles: { select: { role: true } } },
+    data: {
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      photoUrl: data.photoUrl,
+      loginProviders: {
+        create: {
+          externalId: data.providerId,
+          provider: data.providerType,
+        },
+      },
+      organization: {
+        create: {
+          name: `${data.firstName} ${data.lastName}`,
+        },
+      },
+    },
+  });
 };

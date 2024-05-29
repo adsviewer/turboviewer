@@ -11,7 +11,7 @@ import { createPassword, createUser, passwordsMatch } from '../../contexts/user'
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
-import { TokenUserDto, UserDto } from './user-types';
+import { SignUpInputDto, TokenUserDto, UserDto } from './user-types';
 
 const usernameSchema = z.string().min(2).max(30);
 const emailSchema = z.string().email();
@@ -28,11 +28,13 @@ builder.queryFields((t) => ({
   }),
 }));
 
-const signUpSchema = z.object({
-  firstName: usernameSchema,
-  lastName: usernameSchema,
-  email: emailSchema,
-  password: PasswordSchema,
+const signUpInputSchema = z.object({
+  args: z.object({
+    firstName: usernameSchema,
+    lastName: usernameSchema,
+    email: emailSchema,
+    password: PasswordSchema,
+  }),
 });
 
 const loginSchema = z.object({
@@ -52,12 +54,9 @@ builder.mutationFields((t) => ({
   signup: t.field({
     type: TokenUserDto,
     args: {
-      email: t.arg.string({ required: true }),
-      password: t.arg.string({ required: true }),
-      firstName: t.arg.string({ required: true }),
-      lastName: t.arg.string({ required: true }),
+      args: t.arg({ type: SignUpInputDto, required: true }),
     },
-    validate: (args) => Boolean(signUpSchema.parse(args)),
+    validate: (args) => Boolean(signUpInputSchema.parse(args)),
     resolve: async (root, args, ctx, info) => {
       const query = queryFromInfo({
         context: ctx,
@@ -66,13 +65,13 @@ builder.mutationFields((t) => ({
       });
 
       const existingUser = await prisma.user.findUnique({
-        where: { email: args.email },
+        where: { email: args.args.email },
       });
       if (existingUser) {
         throw new GraphQLError('User already exists');
       }
 
-      const user = await createUser(args, query);
+      const user = await createUser(args.args, query);
 
       // TODO: enable me
       // fireAndForget.add(() =>

@@ -5,7 +5,6 @@ import { type MetaError } from './errors';
 
 export interface GenerateAuthUrlResp {
   url: string;
-  state: string;
 }
 
 export interface TokensResponse {
@@ -52,7 +51,7 @@ export interface ChannelInsight {
 }
 
 export interface ChannelInterface {
-  generateAuthUrl: () => GenerateAuthUrlResp;
+  generateAuthUrl: (state: string) => GenerateAuthUrlResp;
   exchangeCodeForTokens: (code: string) => Promise<TokensResponse | AError>;
   getUserId: (accessToken: string) => Promise<string | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
