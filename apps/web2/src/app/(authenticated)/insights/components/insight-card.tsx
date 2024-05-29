@@ -14,9 +14,10 @@ import {
 import { AreaChart } from '@mantine/charts';
 import { IconCalendar, IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { useFormatter } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { CurrencyEnum, type DeviceEnum, type IFrame, type InsightsDatapoints } from '@/graphql/generated/schema-server';
 import { dateFormatOptions, snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
+import { getCurrencySymbol } from '@/util/generic-utils';
 import AdPopover from './ad-popover';
 
 interface InsightCardProps {
@@ -42,6 +43,7 @@ interface Datapoint {
 
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const format = useFormatter();
+  const t = useTranslations('insights');
   const computedColorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
   const [rank, setRank] = useState<RankType>({
@@ -112,9 +114,10 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           data={datapoints}
           dataKey="date"
           series={[
-            { name: 'spend', color: 'teal.6' },
-            { name: 'impressions', color: 'blue.6' },
+            { name: 'spend', color: 'teal.6', label: `${t('spent')} (${getCurrencySymbol(props.currency)})` },
+            { name: 'impressions', color: 'blue.6', label: t('impressions') },
           ]}
+          valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
           curveType="natural"
           strokeWidth={1.5}
           tooltipAnimationDuration={200}
