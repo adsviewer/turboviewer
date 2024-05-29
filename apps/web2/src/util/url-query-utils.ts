@@ -63,6 +63,9 @@ export const addOrReplaceURLParams = (
 
   // Specific case for handling keys that can co-exist with different values
   if (multiKeyParams.includes(key)) {
+    // First, make sure to remove the 'page' param so that the new results start from the 1st page
+    newParams.delete(pageKey);
+
     // If it doesn't exist, just add it
     if (!newParams.has(key, newValue)) {
       newParams.append(key, newValue);
