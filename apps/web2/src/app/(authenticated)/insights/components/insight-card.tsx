@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  Card,
-  Text,
-  Badge,
-  Group,
-  Divider,
-  Flex,
-  useComputedColorScheme,
-  useMantineTheme,
-  CardSection,
-} from '@mantine/core';
+import { Card, Text, Badge, Group, Divider, Flex, useComputedColorScheme, useMantineTheme, Box } from '@mantine/core';
 import { AreaChart } from '@mantine/charts';
 import { IconCalendar, IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
@@ -108,7 +98,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <CardSection withBorder>
+      <Box>
         <AreaChart
           h={300}
           data={datapoints}
@@ -122,7 +112,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           strokeWidth={1.5}
           tooltipAnimationDuration={200}
         />
-      </CardSection>
+      </Box>
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500}>{props.title}</Text>
