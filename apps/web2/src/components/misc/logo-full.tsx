@@ -2,24 +2,30 @@
 
 import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement | null {
   const computedColorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
   const router = useRouter();
+  const [colors, setColors] = useState({
+    stroke: theme.colors.dark[9],
+    fill: theme.colors.dark[9],
+  });
 
   // Set the correct color of the logo based on the current color scheme
-  let strokeColor = theme.colors.dark[9];
-  let fillColor = theme.colors.dark[9];
-  if (computedColorScheme === 'dark') {
-    strokeColor = theme.colors.gray[4];
-    fillColor = theme.colors.gray[4];
-  }
+  useEffect(() => {
+    if (computedColorScheme === 'dark') {
+      setColors({ stroke: theme.colors.gray[4], fill: theme.colors.gray[4] });
+    } else {
+      setColors({ stroke: theme.colors.dark[9], fill: theme.colors.dark[9] });
+    }
+  }, [computedColorScheme, theme.colors.dark, theme.colors.gray]);
 
   return (
     <svg
-      stroke={strokeColor}
-      fill={fillColor}
+      stroke={colors.stroke}
+      fill={colors.fill}
       width={200}
       height={26}
       viewBox="0 0 200 26"

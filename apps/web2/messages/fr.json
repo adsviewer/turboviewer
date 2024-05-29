@@ -1,0 +1,61 @@
+{
+  "navbar": {
+    "insights": "Aperçus",
+    "integrations": "Intégrations",
+    "settings": "Paramètres",
+    "signOut": "Déconnexion"
+  },
+  "insights": {
+    "title": "Aperçus",
+    "pagesInfo": "Page {CURR_PAGE} de {TOTAL_PAGES} ({RESULTS_COUNT} résultats au total)",
+    "pagesInfoSingular": "Page {CURR_PAGE} de {TOTAL_PAGES} ({RESULTS_COUNT} résultat au total)",
+    "pageSize": "Taille de la page",
+    "orderBy": "Trier par",
+    "spent": "Dépensé",
+    "impressions": "Impressions",
+    "descending": "Décroissant",
+    "ascending": "Croissant",
+    "nextPage": "Page suivante",
+    "prevPage": "Page précédente",
+    "filters": {
+      "title": "Filtres",
+      "accounts": "Comptes",
+      "selectAccounts": "Sélectionner des comptes",
+      "positions": "Positions",
+      "selectPositions": "Sélectionner des positions",
+      "devices": "Appareils",
+      "selectDevices": "Sélectionner des appareils",
+      "publishers": "Éditeurs",
+      "selectPublishers": "Sélectionner des éditeurs",
+      "groupBy": "Grouper par",
+      "account": "Compte",
+      "adId": "ID de l'annonce",
+      "device": "Appareil",
+      "date": "Date",
+      "publisher": "Éditeur",
+      "position": "Position"
+    }
+  },
+  "integrations": {
+    "title": "Intégrations",
+    "description": "Boostez votre travail en connectant les outils que vous utilisez tous les jours pour gérer vos publicités en un seul endroit !"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "changeLanguage": "Changer la langue",
+    "changeColorScheme": "Thème de couleur"
+  },
+  "authentication": {
+    "noAccount": "Vous n'avez pas de compte ?",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signInNow": "Connectez-vous maintenant",
+    "signIn": "Connexion",
+    "signUp": "Inscription",
+    "password": "Mot de passe",
+    "yourPassword": "Votre mot de passe",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "agree": "Accepter les",
+    "termsAndConditions": "Conditions générales"
+  }
+}

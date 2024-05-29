@@ -7,6 +7,8 @@ const localesMap = new Map([
   ['en-us', 'en'],
   ['en-gb', 'en'],
   ['el', 'el'],
+  ['nl', 'nl'],
+  ['fr', 'fr'],
 ]);
 
 export default getRequestConfig(async () => {
