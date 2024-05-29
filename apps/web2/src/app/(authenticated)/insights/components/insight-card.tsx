@@ -1,11 +1,22 @@
 'use client';
 
-import { Card, Image, Text, Badge, Group, Divider, Flex, useComputedColorScheme, useMantineTheme } from '@mantine/core';
+import {
+  Card,
+  Text,
+  Badge,
+  Group,
+  Divider,
+  Flex,
+  useComputedColorScheme,
+  useMantineTheme,
+  CardSection,
+} from '@mantine/core';
+import { AreaChart } from '@mantine/charts';
 import { IconCalendar, IconCoins, IconEye } from '@tabler/icons-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { type DateTimeFormatOptions, useFormatter } from 'next-intl';
+import { useFormatter } from 'next-intl';
 import { CurrencyEnum, type DeviceEnum, type IFrame, type InsightsDatapoints } from '@/graphql/generated/schema-server';
-import { snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
+import { dateFormatOptions, snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
 import AdPopover from './ad-popover';
 
 interface InsightCardProps {
@@ -23,18 +34,21 @@ interface RankType {
   color: 'green' | 'yellow' | 'red' | 'gray';
 }
 
+interface Datapoint {
+  date: string;
+  impressions: number;
+  spend: number;
+}
+
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const format = useFormatter();
-  const dateFormatOptions: DateTimeFormatOptions = {
-    month: 'numeric',
-    day: 'numeric',
-  };
   const computedColorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
   const [rank, setRank] = useState<RankType>({
     label: '-',
     color: 'gray',
   });
+  const [datapoints, setDatapoints] = useState<Datapoint[]>([]);
 
   // Set the correct color of the logo based on the current color scheme
   let iconColor = theme.colors.dark[2];
@@ -73,15 +87,39 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     }
   }, [props.rank]);
 
+  const setupDatapoints = useCallback(() => {
+    const formattedDatapoints: Datapoint[] = [];
+    for (const datapoint of props.datapoints) {
+      formattedDatapoints.push({
+        date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
+        impressions: datapoint.impressions,
+        spend: datapoint.spend,
+      });
+    }
+    setDatapoints(formattedDatapoints);
+  }, [props.datapoints, format]);
+
   useEffect(() => {
     setupRank();
-  }, [setupRank]);
+    setupDatapoints();
+  }, [setupRank, setupDatapoints]);
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Card.Section>
-        <Image src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-5.png" height={300} />
-      </Card.Section>
+      <CardSection withBorder>
+        <AreaChart
+          h={300}
+          data={datapoints}
+          dataKey="date"
+          series={[
+            { name: 'spend', color: 'teal.6' },
+            { name: 'impressions', color: 'blue.6' },
+          ]}
+          curveType="natural"
+          strokeWidth={1.5}
+          tooltipAnimationDuration={200}
+        />
+      </CardSection>
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500}>{props.title}</Text>

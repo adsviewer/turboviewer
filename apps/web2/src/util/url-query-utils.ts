@@ -6,6 +6,7 @@ export const publisherKey = 'publisher';
 export const deviceKey = 'device';
 export const positionKey = 'position';
 export const accountKey = 'account';
+export const pageKey = 'page';
 
 export const positions = [
   'an_classic',
