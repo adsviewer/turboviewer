@@ -7,6 +7,8 @@ const schema = z
     API_ENDPOINT: z.string().url().default(`http://localhost:${defaultPort}/api`),
     AWS_REGION: z.string().min(1).default('eu-central-1'),
     CHANNEL_SECRET: z.string().min(1).default('channelSecret'),
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET: z.string().min(1),
     PORT: z
       .string()
       .min(1)

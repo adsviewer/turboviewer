@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
 import {
   CurrencyEnum,
@@ -16,7 +16,6 @@ import {
   getLastXMonths,
   isAError,
   metaErrorValidatingAccessToken,
-  MODE,
 } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -43,6 +42,7 @@ import {
   type ChannelInsight,
   type ChannelInterface,
   deleteOldInsights,
+  type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   getIFrameAdFormat,
   MetaError,
@@ -61,8 +61,7 @@ export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
 class Meta implements ChannelInterface {
-  generateAuthUrl(): { state: string; url: string } {
-    const state = `${MODE}_${IntegrationTypeEnum.META}_${randomUUID()}`;
+  generateAuthUrl(state: string): GenerateAuthUrlResp {
     const scopes = ['ads_read'];
 
     const params = new URLSearchParams({
@@ -74,7 +73,6 @@ class Meta implements ChannelInterface {
 
     return {
       url: decodeURIComponent(`${baseOauthFbUrl}/dialog/oauth?${params.toString()}`),
-      state,
     };
   }
 

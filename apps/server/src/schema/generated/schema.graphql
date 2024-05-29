@@ -270,6 +270,7 @@ input FilterInsightsInput {
 }
 
 type GenerateGoogleAuthUrlResponse {
+  name: LoginProviderEnum!
   url: String!
 }
 
@@ -283,7 +284,7 @@ type GroupedInsights {
   adAccountName: String
   adId: String
   adName: String
-  currency: CurrencyEnum
+  currency: CurrencyEnum!
   datapoints: [InsightsDatapoints!]!
   device: DeviceEnum
   iFrame: IFrame
@@ -413,6 +414,10 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+enum LoginProviderEnum {
+  GOOGLE
+}
+
 type MetaError implements Error {
   code: Int!
   errorSubCode: Int!
@@ -423,7 +428,6 @@ type MetaError implements Error {
 type Mutation {
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
   forgetPassword(email: String!): Boolean!
-  googleLoginSignup(code: String!): TokenDto!
   login(email: String!, password: String!): TokenDto!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
 
@@ -432,7 +436,7 @@ type Mutation {
   """
   refreshToken: String!
   resetPassword(password: String!, token: String!): TokenDto!
-  signup(email: String!, firstName: String!, lastName: String!, password: String!): TokenDto!
+  signup(args: SignUpInput!): TokenDto!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }
 
@@ -483,13 +487,20 @@ enum PublisherEnum {
 }
 
 type Query {
-  generateGoogleAuthUrl(state: String!): GenerateGoogleAuthUrlResponse!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insights(filter: FilterInsightsInput!): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   lastThreeMonthsAds: [Ad!]!
+  loginProviders: [GenerateGoogleAuthUrlResponse!]!
   me: User!
   settingsChannels: [IntegrationListItem!]!
+}
+
+input SignUpInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
 }
 
 type Subscription {

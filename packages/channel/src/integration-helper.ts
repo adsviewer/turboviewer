@@ -1,8 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
+import { type Integration, IntegrationStatus, IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisGet, redisSet } from '@repo/redis';
-import { AError, FireAndForget, isAError, isMode } from '@repo/utils';
+import { AError, FireAndForget, isAError, isMode, MODE } from '@repo/utils';
 import type QueryString from 'qs';
 import { z } from 'zod';
 import { decryptTokens, encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
@@ -31,7 +32,8 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
 };
 
 export const getIntegrationAuthUrl = (type: IntegrationTypeEnum, organizationId: string, userId: string): string => {
-  const { url, state } = getChannel(type).generateAuthUrl();
+  const state = `${MODE}_${IntegrationTypeEnum.META}_${randomUUID()}`;
+  const { url } = getChannel(type).generateAuthUrl(state);
   fireAndForget.add(() => saveOrgState(state, organizationId, userId));
   return url;
 };

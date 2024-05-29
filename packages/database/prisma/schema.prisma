@@ -33,20 +33,36 @@ model Organization {
 }
 
 model User {
-  id             String       @id @default(cuid())
-  firstName      String       @map("first_name")
-  lastName       String       @map("last_name")
-  email          String       @unique @db.Citext
+  id             String              @id @default(cuid())
+  firstName      String              @map("first_name")
+  lastName       String              @map("last_name")
+  email          String              @unique @db.Citext
   password       String?
-  photo          String?      @map("photo_url")
-  googleId       String?      @unique @map("google_id")
+  photoUrl       String?             @map("photo_url")
   roles          UserRole[]
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String       @map("organization_id")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization   Organization        @relation(fields: [organizationId], references: [id])
+  organizationId String              @map("organization_id")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @default(now()) @updatedAt @map("updated_at")
+  loginProviders LoginProviderUser[]
 
   @@map("users")
+}
+
+enum LoginProviderEnum {
+  GOOGLE
+}
+
+model LoginProviderUser {
+  id         String            @id @default(cuid())
+  externalId String            @map("user_id")
+  provider   LoginProviderEnum
+
+  user User @relation(fields: [id], references: [id])
+
+  @@unique([id, provider])
+  @@unique([externalId, provider])
+  @@map("login_provider_users")
 }
 
 enum RoleEnum {

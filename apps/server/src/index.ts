@@ -12,6 +12,9 @@ import { createContext } from './context';
 import { schema } from './schema';
 import { snsMiddleware } from './utils/sns-subscription-utils';
 import { invokeChannelIngress } from './utils/lambda-utils';
+import { authLoginCallback } from './contexts/login-provider/login-provider-helper';
+import { authLoginEndpoint } from './contexts/login-provider/login-provider-types';
+import { loginProviderRateLimiter } from './utils/rate-limiter';
 
 const fireAndForget = new FireAndForget();
 
@@ -45,6 +48,8 @@ const index = (): void => {
   app.use(yoga.graphqlEndpoint, yoga);
 
   app.get(`/api${authEndpoint}`, authCallback);
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
+  app.get(`/api${authLoginEndpoint}`, loginProviderRateLimiter, authLoginCallback);
   app.post('/api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
   app.post(
     '/api/fb/sign-out',

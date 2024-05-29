@@ -10,7 +10,7 @@ import { Environment, MODE } from '@repo/utils';
 import { env } from './config';
 import RoleEnum = $Enums.RoleEnum;
 
-interface MJwtPayload extends JwtPayload {
+interface AJwtPayload extends JwtPayload {
   userId: string;
   roles: RoleEnum[];
   organizationId: string;
@@ -28,7 +28,7 @@ export const createJwts = (userId: string, organizationId: string, roles: RoleEn
   refreshToken: sign({ userId, organizationId, roles }, env.REFRESH_SECRET, { expiresIn: '183d' }),
 });
 
-export const decodeJwt = (request: Request): MJwtPayload | null => {
+export const decodeJwt = (request: Request): AJwtPayload | null => {
   const decode = safeDecode(request, env.AUTH_SECRET);
   if (!decode) return null;
   if (isGenericJsonWebTokenError(decode) && isJsonWebTokenError(decode)) {
@@ -49,14 +49,14 @@ export const decodeJwt = (request: Request): MJwtPayload | null => {
 const safeDecode = (
   request: Request,
   secret: string,
-): MJwtPayload | JsonWebTokenError | TokenExpiredError | NotBeforeError | Error | null | undefined => {
+): AJwtPayload | JsonWebTokenError | TokenExpiredError | NotBeforeError | Error | null | undefined => {
   const header = request.headers.get('authorization');
 
   if (header === null) return null;
 
   const token = header.split(' ')[1];
   try {
-    return verify(token, secret) as MJwtPayload;
+    return verify(token, secret) as AJwtPayload;
   } catch (e) {
     if (isGenericJsonWebTokenError(e)) {
       if (isTokenExpiredError(e)) return e;

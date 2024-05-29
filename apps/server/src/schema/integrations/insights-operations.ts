@@ -1,4 +1,4 @@
-import { type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
+import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
 import { Kind } from 'graphql/language';
 import { isAError } from '@repo/utils';
 import { logger } from '@repo/logger';
@@ -80,6 +80,7 @@ builder.queryFields((t) => ({
         position?: string;
         device?: DeviceEnum;
         publisher?: PublisherEnum;
+        currency: CurrencyEnum;
         datapoints: { spend: number; impressions: number; date: Date }[];
       }[] = [];
       const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
@@ -87,12 +88,9 @@ builder.queryFields((t) => ({
       });
       for (const [_, value] of insightsGrouped) {
         if (value.length > 0) {
-          const newKey: Record<string, unknown> = {};
-          groupBy.forEach((field) => {
-            newKey[field] = value[0][field];
-          });
+          const valueWithoutDatepoints = { ...value[0], date: undefined, impressions: undefined, spend: undefined };
           ret.push({
-            ...newKey,
+            ...valueWithoutDatepoints,
             id: groupBy.map((group) => value[0][group]).join('-'),
             datapoints: value.map((v) => ({ spend: v.spend, impressions: v.impressions, date: v.date })),
           });
@@ -236,10 +234,7 @@ const GroupedInsightDto = builder.simpleObject(
       adAccountId: t.string({ nullable: true }),
       adAccountName: t.string({ nullable: true }),
       adName: t.string({ nullable: true }),
-
-      // TODO this should be non nullable
-      currency: t.field({ type: CurrencyEnumDto, nullable: true }),
-
+      currency: t.field({ type: CurrencyEnumDto, nullable: false }),
       device: t.field({ type: DeviceEnumDto, nullable: true }),
       publisher: t.field({ type: PublisherEnumDto, nullable: true }),
       position: t.string({ nullable: true }),

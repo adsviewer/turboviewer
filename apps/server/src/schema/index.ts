@@ -3,7 +3,7 @@ import './errors';
 import './integrations/integration-operations';
 import './integrations/insights-operations';
 import './organization/org-types';
-import './user/google-login-operations';
+import './user/social-login-operations';
 import './user/user-operations';
 
 builder.queryType({
