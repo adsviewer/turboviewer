@@ -15,6 +15,8 @@
     "impressions": "Impressions",
     "descending": "Descending",
     "ascending": "Ascending",
+    "nextPage": "Next page",
+    "prevPage": "Prev page",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",
@@ -51,6 +53,8 @@
     "signUp": "Sign Up",
     "password": "Password",
     "yourPassword": "Your password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "agree": "Agree to the",
     "termsAndConditions": "Terms and Conditions"
   }
