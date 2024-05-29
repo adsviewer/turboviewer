@@ -5,12 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Button, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
+import { useTransition } from 'react';
 import { type SignInSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignIn(): React.JSX.Element {
   const t = useTranslations('authentication');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -25,22 +27,24 @@ export default function SignIn(): React.JSX.Element {
   });
 
   const handleSubmit = (values: SignInSchemaType): void => {
-    fetch('/api/auth/sign-in', {
-      method: 'POST',
-      body: JSON.stringify(values),
-    })
-      .then((response) => {
-        return response.json();
+    startTransition(() => {
+      fetch('/api/auth/sign-in', {
+        method: 'POST',
+        body: JSON.stringify(values),
       })
-      .then((data: { success: true } | { success: false }) => {
-        if (data.success) {
-          const redirect = searchParams.get('redirect');
-          router.push(redirect ?? '/insights');
-        }
-      })
-      .catch((error: unknown) => {
-        logger.error(error);
-      });
+        .then((response) => {
+          return response.json();
+        })
+        .then((data: { success: true } | { success: false }) => {
+          if (data.success) {
+            const redirect = searchParams.get('redirect');
+            router.push(redirect ?? '/insights');
+          }
+        })
+        .catch((error: unknown) => {
+          logger.error(error);
+        });
+    });
   };
 
   return (
@@ -82,7 +86,7 @@ export default function SignIn(): React.JSX.Element {
             required
             mt="md"
           />
-          <Button type="submit" fullWidth mt="xl">
+          <Button type="submit" fullWidth mt="xl" disabled={isPending}>
             {t('signIn')}!
           </Button>
         </form>

@@ -4,7 +4,9 @@ import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { Suspense } from 'react';
 import { MainAppShell } from '@/components/shells/main-shell/main-shell';
+import LoaderCentered from '@/components/misc/loader-centered';
 
 export const metadata: Metadata = {
   title: 'AdsViewer',
@@ -23,7 +25,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <NextIntlClientProvider messages={messages}>
           <MantineProvider>
-            <MainAppShell>{children}</MainAppShell>
+            <MainAppShell>
+              <Suspense fallback={<LoaderCentered />}>{children}</Suspense>
+            </MainAppShell>
           </MantineProvider>
         </NextIntlClientProvider>
       </body>

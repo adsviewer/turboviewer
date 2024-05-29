@@ -135,11 +135,15 @@ export default function GroupFilters(): ReactNode {
 
   // Generic functions for handling changes in multi-dropdowns
   const handleMultiFilterAdd = (key: string, value: string): void => {
-    router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    startTransition(() => {
+      router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    });
   };
 
   const handleMultiFilterRemove = (key: string, value: string): void => {
-    router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    startTransition(() => {
+      router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    });
   };
 
   // Checkboxes logic //
