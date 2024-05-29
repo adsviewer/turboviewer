@@ -8,6 +8,14 @@ const languages = [
     value: 'en',
   },
   {
+    label: 'French',
+    value: 'fr',
+  },
+  {
+    label: 'Dutch',
+    value: 'nl',
+  },
+  {
     label: 'Greek',
     value: 'el',
   },

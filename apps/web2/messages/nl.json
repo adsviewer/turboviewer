@@ -1,0 +1,61 @@
+{
+  "navbar": {
+    "insights": "Inzichten",
+    "integrations": "Integraties",
+    "settings": "Instellingen",
+    "signOut": "Uitloggen"
+  },
+  "insights": {
+    "title": "Inzichten",
+    "pagesInfo": "Pagina {CURR_PAGE} van {TOTAL_PAGES} ({RESULTS_COUNT} resultaten in totaal)",
+    "pagesInfoSingular": "Pagina {CURR_PAGE} van {TOTAL_PAGES} ({RESULTS_COUNT} resultaat in totaal)",
+    "pageSize": "Paginagrootte",
+    "orderBy": "Sorteren op",
+    "spent": "Uitgegeven",
+    "impressions": "Impressies",
+    "descending": "Aflopend",
+    "ascending": "Oplopend",
+    "nextPage": "Volgende pagina",
+    "prevPage": "Vorige pagina",
+    "filters": {
+      "title": "Filters",
+      "accounts": "Accounts",
+      "selectAccounts": "Selecteer accounts",
+      "positions": "Posities",
+      "selectPositions": "Selecteer posities",
+      "devices": "Apparaten",
+      "selectDevices": "Selecteer apparaten",
+      "publishers": "Uitgevers",
+      "selectPublishers": "Selecteer uitgevers",
+      "groupBy": "Groeperen op",
+      "account": "Account",
+      "adId": "Advertentie-ID",
+      "device": "Apparaat",
+      "date": "Datum",
+      "publisher": "Uitgever",
+      "position": "Positie"
+    }
+  },
+  "integrations": {
+    "title": "Integraties",
+    "description": "Versterk je werk door de tools die je dagelijks gebruikt te verbinden om je advertenties op één plek te beheren!"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "changeLanguage": "Wijzig taal",
+    "changeColorScheme": "Kleuren thema"
+  },
+  "authentication": {
+    "noAccount": "Heb je geen account?",
+    "alreadyHaveAccount": "Heb je al een account?",
+    "signInNow": "Log nu in",
+    "signIn": "Inloggen",
+    "signUp": "Registreren",
+    "password": "Wachtwoord",
+    "yourPassword": "Je wachtwoord",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "agree": "Akkoord met de",
+    "termsAndConditions": "Algemene voorwaarden"
+  }
+}
