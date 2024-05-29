@@ -1,4 +1,5 @@
 import '@mantine/core/styles.css';
+import '@mantine/charts/styles.css';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
