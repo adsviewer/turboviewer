@@ -37,8 +37,10 @@ export default function SignIn(): React.JSX.Element {
         })
         .then((data: { success: true } | { success: false }) => {
           if (data.success) {
-            const redirect = searchParams.get('redirect');
-            router.push(redirect ?? '/insights');
+            startTransition(() => {
+              const redirect = searchParams.get('redirect');
+              router.push(redirect ?? '/insights');
+            });
           }
         })
         .catch((error: unknown) => {
