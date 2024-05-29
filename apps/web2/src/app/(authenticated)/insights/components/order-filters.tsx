@@ -3,7 +3,14 @@
 import { Flex, Text, Select, type ComboboxItem } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { OrderDirection, addOrReplaceURLParams, isParamInSearchParams } from '@/util/url-query-utils';
+import {
+  OrderDirection,
+  addOrReplaceURLParams,
+  isParamInSearchParams,
+  orderByKey,
+  orderDirectionKey,
+  pageSizeKey,
+} from '@/util/url-query-utils';
 import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 
 interface OrderFiltersProps {
@@ -15,9 +22,6 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const orderDirectionKey = 'order';
-  const orderByKey = 'orderBy';
-  const pageSizeKey = 'pageSize';
 
   const getPageSizeValue = (): string => {
     if (isParamInSearchParams(searchParams, pageSizeKey, searchParams.get(pageSizeKey) ?? '12')) {

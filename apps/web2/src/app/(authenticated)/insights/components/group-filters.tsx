@@ -2,6 +2,7 @@ import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
 import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useTransition } from 'react';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import {
   addOrReplaceURLParams,
@@ -26,6 +27,7 @@ export default function GroupFilters(): ReactNode {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
 
   // Dropdowns logic //
 
@@ -142,15 +144,17 @@ export default function GroupFilters(): ReactNode {
 
   // Checkboxes logic //
   const handleCheckboxFilter = (e: ChangeEvent<HTMLInputElement>): void => {
-    const isChecked = e.target.checked;
+    startTransition(() => {
+      const isChecked = e.target.checked;
 
-    if (isChecked) {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
-      router.replace(newURL);
-    } else {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
-      router.replace(newURL);
-    }
+      if (isChecked) {
+        const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
+        router.replace(newURL);
+      } else {
+        const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
+        router.replace(newURL);
+      }
+    });
   };
 
   const isChecked = (groupByValue: InsightsColumnsGroupBy): boolean => {
@@ -171,6 +175,7 @@ export default function GroupFilters(): ReactNode {
             </Text>
 
             <MultiSelect
+              disabled={isPending}
               placeholder={`${t('selectAccounts')}...`}
               data={populateAccountsAvailableValues()}
               value={getAccountCurrentValues()}
@@ -189,6 +194,7 @@ export default function GroupFilters(): ReactNode {
           {t('positions')}
         </Text>
         <MultiSelect
+          disabled={isPending}
           placeholder={`${t('selectPositions')}...`}
           data={populatePositionAvailableValues()}
           value={getPositionCurrentValues()}
@@ -205,6 +211,7 @@ export default function GroupFilters(): ReactNode {
           {t('devices')}
         </Text>
         <MultiSelect
+          disabled={isPending}
           placeholder={`${t('selectDevices')}...`}
           data={populateDeviceAvailableValues()}
           value={getDeviceCurrentValues()}
@@ -221,6 +228,7 @@ export default function GroupFilters(): ReactNode {
           {t('publishers')}
         </Text>
         <MultiSelect
+          disabled={isPending}
           placeholder={`${t('selectPublishers')}...`}
           data={populatePublisherAvailableValues()}
           value={getPublisherCurrentValues()}
@@ -237,6 +245,7 @@ export default function GroupFilters(): ReactNode {
           {t('groupBy')}
         </Text>
         <Checkbox
+          disabled={isPending}
           label={t('account')}
           my={4}
           onChange={handleCheckboxFilter}
@@ -244,6 +253,7 @@ export default function GroupFilters(): ReactNode {
           checked={isChecked(InsightsColumnsGroupBy.adAccountId)}
         />
         <Checkbox
+          disabled={isPending}
           label={t('adId')}
           my={4}
           onChange={handleCheckboxFilter}
@@ -251,20 +261,15 @@ export default function GroupFilters(): ReactNode {
           checked={isChecked(InsightsColumnsGroupBy.adId)}
         />
         <Checkbox
+          disabled={isPending}
           label={t('device')}
           my={4}
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.device}
           checked={isChecked(InsightsColumnsGroupBy.device)}
         />
-        {/* <Checkbox
-          label={t('date')}
-          my={4}
-          onChange={handleCheckboxFilter}
-          value={InsightsColumnsGroupBy.date}
-          checked={isChecked(InsightsColumnsGroupBy.date)}
-        /> */}
         <Checkbox
+          disabled={isPending}
           label={t('publisher')}
           my={4}
           onChange={handleCheckboxFilter}
@@ -272,6 +277,7 @@ export default function GroupFilters(): ReactNode {
           checked={isChecked(InsightsColumnsGroupBy.publisher)}
         />
         <Checkbox
+          disabled={isPending}
           label={t('position')}
           my={4}
           onChange={handleCheckboxFilter}
