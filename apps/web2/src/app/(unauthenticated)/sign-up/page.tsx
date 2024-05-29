@@ -18,10 +18,12 @@ import {
 } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
+import { useTransition } from 'react';
 import { type SignUpSchemaType } from '@/util/schemas/login-schemas';
 
 export default function SignUp(): React.JSX.Element {
   const t = useTranslations('authentication');
+  const [isPending, startTransition] = useTransition();
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -47,7 +49,9 @@ export default function SignUp(): React.JSX.Element {
       })
       .then((data: { success: true } | { success: false }) => {
         if (data.success) {
-          router.push('/insights');
+          startTransition(() => {
+            router.push('/insights');
+          });
         }
       })
       .catch((error: unknown) => {
@@ -124,7 +128,7 @@ export default function SignUp(): React.JSX.Element {
               required
             />
           </Group>
-          <Button type="submit" fullWidth mt="xl">
+          <Button type="submit" fullWidth mt="xl" disabled={isPending}>
             {t('signUp')}!
           </Button>
         </form>
