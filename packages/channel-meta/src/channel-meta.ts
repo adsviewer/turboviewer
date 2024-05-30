@@ -9,14 +9,7 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
-import {
-  AError,
-  FireAndForget,
-  getLastXDays,
-  getLastXMonths,
-  isAError,
-  metaErrorValidatingAccessToken,
-} from '@repo/utils';
+import { AError, FireAndForget, getLastXDays, getLastXMonths, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -192,11 +185,8 @@ class Meta implements ChannelInterface {
         parsed.data.error.fbtrace_id,
       );
       logger.error(metaError, 'De-authorization request failed');
-      if (metaError.message === metaErrorValidatingAccessToken) {
-        await prisma.integration.update({
-          where: { id: integration.id },
-          data: { status: IntegrationStatus.REVOKED },
-        });
+      if (await disConnectIntegrationOnError(integration.id, metaError)) {
+        return integration.externalId;
       }
       return metaError;
     }
@@ -593,12 +583,8 @@ class Meta implements ChannelInterface {
     } catch (error) {
       const msg = 'Failed to complete fb sdk call';
       logger.error(error, msg);
-      if (error instanceof Error && error.message === metaErrorValidatingAccessToken) {
-        // TODO: notify the organization that the integration has been revoked
-        await prisma.integration.update({
-          where: { id: integration.id },
-          data: { status: IntegrationStatus.REVOKED },
-        });
+      if (error instanceof Error) {
+        await disConnectIntegrationOnError(integration.id, error);
       }
       return new AError(msg);
     }
@@ -678,6 +664,24 @@ const timeRange = async (initial: boolean, adAccountId: string): Promise<{ until
     orderBy: { date: 'desc' },
   });
   return latestInsight ? getLastXDays(latestInsight.date) : getLastXDays();
+};
+
+const disConnectIntegrationOnError = async (integrationId: string, error: Error): Promise<boolean> => {
+  const metaErrorValidatingAccessTokenChangedSession =
+    'Error validating access token: The session has been invalidated because the user changed their password or Facebook has changed the session for security reasons.';
+  const metaErrorNotAuthenticated = 'Error validating access token: The user has not authorized application';
+  if (
+    error.message === metaErrorValidatingAccessTokenChangedSession ||
+    error.message.startsWith(metaErrorNotAuthenticated)
+  ) {
+    // TODO: notify the organization that the integration has been revoked
+    await prisma.integration.update({
+      where: { id: integrationId },
+      data: { status: IntegrationStatus.REVOKED },
+    });
+    return true;
+  }
+  return false;
 };
 
 export const meta = new Meta();
