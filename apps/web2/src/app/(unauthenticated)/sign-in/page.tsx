@@ -1,18 +1,24 @@
 'use client';
 
+import Link from 'next/link';
 import { useForm, zodResolver } from '@mantine/form';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Button, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
-import { useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schemas';
+import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
+import LoaderCentered from '@/components/misc/loader-centered';
+import GoogleIcon from './components/google-login-icon';
+import { getLoginProviders } from './actions';
 
 export default function SignIn(): React.JSX.Element {
   const t = useTranslations('authentication');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [loginProviders, setLoginProviders] = useState<LoginProvidersQuery['loginProviders']>([]);
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -21,6 +27,17 @@ export default function SignIn(): React.JSX.Element {
     },
     validate: zodResolver(SignInSchema),
   });
+
+  useEffect(() => {
+    void getLoginProviders().then((res) => {
+      setLoginProviders(res.loginProviders);
+    });
+
+    // Get auth tokens from URL if they exist
+    void fetch('/api/auth/sign-in', {
+      method: 'GET',
+    });
+  }, []);
 
   const handleSubmit = (values: SignInSchemaType): void => {
     startTransition(() => {
@@ -47,7 +64,7 @@ export default function SignIn(): React.JSX.Element {
 
   return (
     <Container size={420} my={40}>
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+      <Paper withBorder shadow="sm" p={30} mt={30} radius="md">
         <Flex direction="column" align="center" justify="center" mb="xl">
           <Title ta="center">{t('signIn')}</Title>
           <Text c="dimmed" size="sm" ta="center" mt={5}>
@@ -89,6 +106,17 @@ export default function SignIn(): React.JSX.Element {
           </Button>
         </form>
       </Paper>
+
+      <Flex direction="column" justify="center" my="xl">
+        {/* We'll be rendering using .map when more providers are implemented */}
+        {loginProviders.length ? (
+          <Button component={Link} href={loginProviders[0].url} w="100%" leftSection={<GoogleIcon />} variant="default">
+            Continue with Google
+          </Button>
+        ) : (
+          <LoaderCentered />
+        )}
+      </Flex>
     </Container>
   );
 }
