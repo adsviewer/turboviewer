@@ -12,30 +12,21 @@ import { type InsightsColumnsOrderBy, OrderBy as OrderByEnum } from '@/graphql/g
 export interface PageInfo {
   page: number;
   size: number;
-  totalElements: number;
+  hasNext: boolean;
 }
 
 interface PaginationProps {
   pageInfo: PageInfo;
   searchParams?: SearchParams;
-  pageSize: number;
   orderBy: InsightsColumnsOrderBy;
-  totalCount: number;
-  page: number;
 }
 
-export default function Pagination({
-  page,
-  totalCount,
-  pageSize,
-  orderBy,
-  searchParams,
-}: PaginationProps): React.ReactElement {
+export default function Pagination({ pageInfo, orderBy, searchParams }: PaginationProps): React.ReactElement {
   return (
     <div className="flex flex-col xl:flex-row">
-      <Pages pageInfo={{ page, size: pageSize, totalElements: totalCount }} searchParams={searchParams} />
+      <Pages pageInfo={pageInfo} searchParams={searchParams} />
       <div className="flex w-full justify-center xl:justify-end">
-        <PageSize pageSize={pageSize} />
+        <PageSize pageSize={pageInfo.size} />
         <OrderBy orderBy={orderBy} />
         <Order order={searchParams?.order ?? OrderByEnum.desc} />
       </div>
@@ -50,7 +41,6 @@ interface PagesProps {
 
 function Pages({ pageInfo, searchParams }: PagesProps): React.ReactElement {
   const t = useTranslations('filters.pagination');
-  const totalPages = Math.ceil(pageInfo.totalElements / pageInfo.size);
 
   function getHref(page: number): UrlObject {
     return {
@@ -65,12 +55,12 @@ function Pages({ pageInfo, searchParams }: PagesProps): React.ReactElement {
           <ArrowLeftIcon height={24} />
         </Link>
       )}
-      <div>{t('info', { ...pageInfo, totalPages })}</div>
-      {pageInfo.page < totalPages && (
+      <div>{t('info', { ...pageInfo })}</div>
+      {pageInfo.hasNext ? (
         <Link aria-label={t('prev')} href={getHref(pageInfo.page + 1)}>
           <ArrowRightIcon height={24} />
         </Link>
-      )}
+      ) : null}
     </div>
   );
 }

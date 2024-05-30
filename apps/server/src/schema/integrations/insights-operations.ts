@@ -76,7 +76,9 @@ builder.queryFields((t) => ({
       const ret: {
         id: string;
         adAccountId?: string;
+        adAccountName?: string;
         adId?: string;
+        adName?: string;
         position?: string;
         device?: DeviceEnum;
         publisher?: PublisherEnum;
@@ -88,14 +90,17 @@ builder.queryFields((t) => ({
       });
       for (const [_, value] of insightsGrouped) {
         if (value.length > 0) {
-          const valueWithoutDatepoints = { ...value[0], date: undefined, impressions: undefined, spend: undefined };
+          const valueWithoutDatapoints = { ...value[0], date: undefined, impressions: undefined, spend: undefined };
           ret.push({
-            ...valueWithoutDatepoints,
+            ...valueWithoutDatapoints,
             id: groupBy.map((group) => value[0][group]).join('-'),
             datapoints: value.map((v) => ({ spend: v.spend, impressions: v.impressions, date: v.date })),
           });
         }
       }
+
+      const hasNext = ret.length > args.filter.pageSize;
+      if (hasNext) ret.pop();
 
       // Only if totalCount is requested, we need to fetch all elements
       const totalElementsP = info.fieldNodes.some((f) =>
@@ -129,8 +134,9 @@ builder.queryFields((t) => ({
             where: { id: { in: Array.from(uniqueAdIds) } },
           })
           .then((ads) => new Map(ads.map((ad) => [ad.id, ad.name])));
-        // @ts-expect-error -- it is checked above
-        ret.forEach((edge) => ({ ...edge, adName: adNamesMap.get(edge.adId) }));
+        ret.forEach((edge) => {
+          edge.adName = edge.adName ? adNamesMap.get(edge.adName) : undefined;
+        });
       }
 
       if (
@@ -152,17 +158,18 @@ builder.queryFields((t) => ({
             },
           })
           .then((ads) => new Map(ads.map((ad) => [ad.id, ad.name])));
-        ret.forEach((edge) => ({
-          ...edge,
-          adAccountName: edge.adAccountId ? adAccountNamesMap.get(edge.adAccountId) : 'no name',
-        }));
-        ret.forEach((edge) => ({
-          ...edge,
-          adAccountName: edge.adAccountId ? adAccountNamesMap.get(edge.adAccountId) : 'no name',
-        }));
+        ret.forEach((edge) => {
+          edge.adAccountName = edge.adAccountId ? adAccountNamesMap.get(edge.adAccountId) : undefined;
+        });
       }
 
-      return { totalCount: await totalElementsP, edges: ret };
+      return {
+        totalCount: await totalElementsP,
+        hasNext,
+        page: args.filter.page,
+        pageSize: args.filter.pageSize,
+        edges: ret,
+      };
     },
   }),
   insightDatapoints: t.withAuth({ authenticated: true }).field({
@@ -196,6 +203,9 @@ builder.mutationFields((t) => ({
 export const PaginationDto = builder.simpleInterface('Pagination', {
   fields: (t) => ({
     totalCount: t.int(),
+    hasNext: t.boolean(),
+    page: t.int(),
+    pageSize: t.int(),
   }),
 });
 

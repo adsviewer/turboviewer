@@ -236,7 +236,10 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
     pageSize: t.int({
       required: true,
       defaultValue: 12,
-      validate: { max: [100, { message: 'Page size should not be more than 100' }] },
+      validate: {
+        min: [1, { message: 'Minimum page is 1' }],
+        max: [100, { message: 'Page size should not be more than 100' }],
+      },
     }),
     positions: t.field({ type: [InsightsPositionDto], required: false }),
     publishers: t.field({ type: [PublisherEnumDto], required: false }),

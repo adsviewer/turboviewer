@@ -309,6 +309,9 @@ export type GenerateGoogleAuthUrlResponse = {
 export type GroupedInsight = Pagination & {
   __typename?: 'GroupedInsight';
   edges: Array<GroupedInsights>;
+  hasNext: Scalars['Boolean']['output'];
+  page: Scalars['Int']['output'];
+  pageSize: Scalars['Int']['output'];
   totalCount: Scalars['Int']['output'];
 };
 
@@ -542,6 +545,9 @@ export type PageInfo = {
 };
 
 export type Pagination = {
+  hasNext: Scalars['Boolean']['output'];
+  page: Scalars['Int']['output'];
+  pageSize: Scalars['Int']['output'];
   totalCount: Scalars['Int']['output'];
 };
 
@@ -658,7 +664,7 @@ export type InsightsQuery = {
   __typename?: 'Query';
   insights: {
     __typename?: 'GroupedInsight';
-    totalCount: number;
+    hasNext: boolean;
     edges: Array<{
       __typename?: 'GroupedInsights';
       adAccountId?: string | null;
@@ -876,7 +882,7 @@ export const InsightsDocument = gql`
         page: $page
       }
     ) {
-      totalCount
+      hasNext
       edges {
         adAccountId
         adAccountName

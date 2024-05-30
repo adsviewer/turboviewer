@@ -255,13 +255,13 @@ void describe('insights query builder tests', () => {
                                       WHERE ibl.spend
                                           > 0
                                       ORDER BY trend
-                                      LIMIT 10 OFFSET 0)
+                                      LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS NUMERIC) AS spend, CAST(SUM(i.impressions) AS NUMERIC) AS impressions 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
     AND i.date < DATE_TRUNC('week', CURRENT_DATE)
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
-  ORDER BY oct.trend, interval_start DESC;`,
+  ORDER BY oct.trend, interval_start;`,
     );
   });
   void it('grouped insights with date filter', () => {
@@ -304,13 +304,13 @@ void describe('insights query builder tests', () => {
                                       WHERE ibl.spend
                                           > 0
                                       ORDER BY trend
-                                      LIMIT 10 OFFSET 0)
+                                      LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS NUMERIC) AS spend, CAST(SUM(i.impressions) AS NUMERIC) AS impressions 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
     AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
-  ORDER BY oct.trend, interval_start DESC;`,
+  ORDER BY oct.trend, interval_start;`,
     );
   });
   void it('insights datapoints', () => {

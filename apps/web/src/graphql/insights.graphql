@@ -40,7 +40,7 @@ query insights(
       page: $page
     }
   ) {
-    totalCount
+    hasNext
     edges {
       adAccountId
       adAccountName

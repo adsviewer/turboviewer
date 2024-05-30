@@ -104,7 +104,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   const groupBy = [...(args.groupBy ?? []), 'currency'];
   const snakeGroup = groupBy.map((group) => changeCase.snakeCase(group));
   const joinedSnakeGroup = snakeGroup.join(', ');
-  const limit = args.pageSize;
+  const limit = args.pageSize + 1;
   const offset = (args.page - 1) * args.pageSize;
   const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
   return `WITH ${getOrganizationalInsights(organizationId, args)}, 
@@ -116,7 +116,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
     AND i.date < DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
-  ORDER BY oct.trend, interval_start DESC;`;
+  ORDER BY oct.trend, interval_start;`;
 };
 
 export const insightsDatapoints = (args: InsightsDatapointsInputType, organizationId: string) =>

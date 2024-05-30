@@ -17,7 +17,7 @@ export default function Page({ searchParams }: InsightsProps): React.ReactElemen
             <InsightsNoCall
               insights={[]}
               page={1}
-              totalCount={0}
+              hasNext={false}
               pageSize={12}
               orderBy={InsightsColumnsOrderBy.spend}
               searchParams={searchParams}
