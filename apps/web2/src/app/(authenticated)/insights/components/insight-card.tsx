@@ -119,12 +119,10 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       </Box>
 
       <Group justify="space-between" mt="md" mb="xs">
-        <Text fw={500}>{props.title}</Text>
-        {props.iframe ? (
-          <Flex align="center" justify="flex-end" w="100%" mr="md">
-            <AdPopover iconColor={iconColor} iframe={props.iframe} />
-          </Flex>
-        ) : null}
+        <Flex gap="sm" align="center">
+          {props.iframe ? <AdPopover iconColor={iconColor} iframe={props.iframe} /> : null}
+          <Text fw={500}>{props.title}</Text>
+        </Flex>
         <Badge color={rank.color}>{rank.label}</Badge>
       </Group>
 

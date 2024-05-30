@@ -13,9 +13,9 @@ export default function InsightsGrid(props: PropsType): ReactNode {
     <Flex direction="column">
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} style={{ display: 'relative' }}>
         {props.insights.length
-          ? props.insights.map((insight) => (
+          ? props.insights.map((insight, index) => (
               <InsightCard
-                key={insight.id as Key}
+                key={index as Key}
                 title={insight.publisher}
                 description={insight.position}
                 device={insight.device}
