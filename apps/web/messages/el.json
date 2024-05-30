@@ -16,7 +16,7 @@
     "pagination": {
       "prev": "Προηγούμενη",
       "next": "Επόμενη",
-      "info": "Σελίδα {page, number} από {totalPages, number} ({totalElements, plural, =1 {one απότέλεσμα} other {# απότελέσματα}} συνολικά)"
+      "info": "Σελίδα {page, number}"
     },
     "position": "Θέση",
     "publisher": "Εκδότη",

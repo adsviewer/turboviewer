@@ -276,6 +276,9 @@ type GenerateGoogleAuthUrlResponse {
 
 type GroupedInsight implements Pagination {
   edges: [GroupedInsights!]!
+  hasNext: Boolean!
+  page: Int!
+  pageSize: Int!
   totalCount: Int!
 }
 
@@ -468,6 +471,9 @@ type PageInfo {
 }
 
 interface Pagination {
+  hasNext: Boolean!
+  page: Int!
+  pageSize: Int!
   totalCount: Int!
 }
 

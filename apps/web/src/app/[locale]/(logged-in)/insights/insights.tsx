@@ -38,13 +38,12 @@ export async function Insights({ searchParams }: InsightsProps): Promise<React.R
     publishers: searchParams?.publisher,
   });
   const insights = resp.insights.edges;
-  const totalCount = resp.insights.totalCount;
 
   return (
     <InsightsNoCall
       insights={insights}
       page={page}
-      totalCount={totalCount}
+      hasNext={resp.insights.hasNext}
       pageSize={pageSize}
       orderBy={orderBy}
       searchParams={searchParams}

@@ -6,16 +6,16 @@ import type { SearchParams } from '@/app/[locale]/(logged-in)/insights/query-str
 
 interface InsightsNoCallProps {
   page: number;
-  totalCount: number;
   pageSize: number;
+  hasNext: boolean;
   orderBy: InsightsColumnsOrderBy;
   searchParams?: SearchParams;
   insights: InsightsQuery['insights']['edges'];
 }
 
 export default function InsightsNoCall({
+  hasNext,
   page,
-  totalCount,
   pageSize,
   orderBy,
   searchParams,
@@ -23,14 +23,7 @@ export default function InsightsNoCall({
 }: InsightsNoCallProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-6">
-      <Pagination
-        page={page}
-        totalCount={totalCount}
-        pageSize={pageSize}
-        orderBy={orderBy}
-        searchParams={searchParams}
-        pageInfo={{ page, size: pageSize, totalElements: totalCount }}
-      />
+      <Pagination orderBy={orderBy} searchParams={searchParams} pageInfo={{ page, size: pageSize, hasNext }} />
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {insights.map((insight) => (
           <Insight
@@ -39,16 +32,9 @@ export default function InsightsNoCall({
           />
         ))}
       </div>
-      {pageSize > 10 && totalCount > 10 && (
-        <Pagination
-          page={page}
-          totalCount={totalCount}
-          pageSize={pageSize}
-          orderBy={orderBy}
-          searchParams={searchParams}
-          pageInfo={{ page, size: pageSize, totalElements: totalCount }}
-        />
-      )}
+      {pageSize > 10 && hasNext ? (
+        <Pagination orderBy={orderBy} searchParams={searchParams} pageInfo={{ page, size: pageSize, hasNext }} />
+      ) : null}
     </div>
   );
 }
