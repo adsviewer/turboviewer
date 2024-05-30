@@ -7,8 +7,6 @@
   },
   "insights": {
     "title": "Inzichten",
-    "pagesInfo": "Pagina {CURR_PAGE} van {TOTAL_PAGES} ({RESULTS_COUNT} resultaten in totaal)",
-    "pagesInfoSingular": "Pagina {CURR_PAGE} van {TOTAL_PAGES} ({RESULTS_COUNT} resultaat in totaal)",
     "pageSize": "Paginagrootte",
     "orderBy": "Sorteren op",
     "spent": "Uitgegeven",

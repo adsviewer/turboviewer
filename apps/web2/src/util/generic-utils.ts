@@ -14,9 +14,6 @@ const currencySymbols: Partial<{ [key in CurrencyEnum]: string }> = {
   // Add more currencies as needed
 };
 
-export const getCurrencySymbol = (currency: CurrencyEnum | null | undefined): string => {
-  if (currency) {
-    return currencySymbols[currency] ?? 'err';
-  }
-  return 'err';
+export const getCurrencySymbol = (currency: CurrencyEnum): string => {
+  return currencySymbols[currency] ?? '?';
 };

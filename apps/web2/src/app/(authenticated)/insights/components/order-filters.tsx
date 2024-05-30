@@ -13,11 +13,7 @@ import {
 } from '@/util/url-query-utils';
 import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 
-interface OrderFiltersProps {
-  resultsCount: number;
-}
-
-export default function OrderFilters(props: OrderFiltersProps): React.ReactNode {
+export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
   const router = useRouter();
   const pathname = usePathname();
@@ -61,21 +57,6 @@ export default function OrderFilters(props: OrderFiltersProps): React.ReactNode 
 
   return (
     <Flex w="100%" mb="lg" align="center" wrap="wrap">
-      {/* Page data info */}
-      <Text size="md" mr="auto">
-        {props.resultsCount > 1
-          ? t('pagesInfo', {
-              CURR_PAGE: 1,
-              TOTAL_PAGES: 1,
-              RESULTS_COUNT: props.resultsCount,
-            })
-          : t('pagesInfoSingular', {
-              CURR_PAGE: 1,
-              TOTAL_PAGES: 1,
-              RESULTS_COUNT: props.resultsCount,
-            })}
-      </Text>
-
       {/* Filters */}
       <Flex align="center" mr="sm" my="md">
         {/* Page size filter */}
