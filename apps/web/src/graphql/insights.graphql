@@ -51,6 +51,7 @@ query insights(
         date
         spend
         impressions
+        cpm
       }
       device
       publisher

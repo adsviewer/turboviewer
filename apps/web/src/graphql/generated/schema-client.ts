@@ -366,6 +366,7 @@ export enum InsightsColumnsOrderBy {
 
 export type InsightsDatapoints = {
   __typename?: 'InsightsDatapoints';
+  cpm: Scalars['Int']['output'];
   date: Scalars['Date']['output'];
   impressions: Scalars['Int']['output'];
   spend: Scalars['Int']['output'];
@@ -676,7 +677,13 @@ export type InsightsQuery = {
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
       position?: string | null;
-      datapoints: Array<{ __typename?: 'InsightsDatapoints'; date: Date; spend: number; impressions: number }>;
+      datapoints: Array<{
+        __typename?: 'InsightsDatapoints';
+        date: Date;
+        spend: number;
+        impressions: number;
+        cpm: number;
+      }>;
       iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
     }>;
   };
@@ -898,6 +905,7 @@ export const InsightsDocument = gql`
           date
           spend
           impressions
+          cpm
         }
         device
         publisher
