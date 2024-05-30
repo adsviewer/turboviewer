@@ -9,7 +9,7 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
-import { AError, FireAndForget, getLastXDays, getLastXMonths, isAError } from '@repo/utils';
+import { AError, FireAndForget, getDayPriorTillTomorrow, getLastXMonths, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -663,7 +663,7 @@ const timeRange = async (initial: boolean, adAccountId: string): Promise<{ until
     where: { adAccountId },
     orderBy: { date: 'desc' },
   });
-  return latestInsight ? getLastXDays(latestInsight.date) : getLastXDays();
+  return latestInsight ? getDayPriorTillTomorrow(latestInsight.date) : getLastXMonths();
 };
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error): Promise<boolean> => {
