@@ -19,7 +19,7 @@ interface InsightCardProps {
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
   rank: 'good' | 'mid' | 'bad' | 'unknown';
-  currency: CurrencyEnum | null | undefined;
+  currency: CurrencyEnum;
   datapoints: InsightsDatapoints[];
   iframe: IFrame | null | undefined;
 }

@@ -54,12 +54,11 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
     interval: InsightsInterval.week,
   });
   const insights = resp.insights.edges;
-  const totalCount = resp.insights.totalCount;
 
   return (
     <>
       <Title mb="md">{t('title')}</Title>
-      <OrderFilters resultsCount={totalCount} />
+      <OrderFilters />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <InsightsGrid insights={insights} />
       </Suspense>

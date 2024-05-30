@@ -7,8 +7,6 @@
   },
   "insights": {
     "title": "Διορατικότητες",
-    "pagesInfo": "Σελίδα {CURR_PAGE} από {TOTAL_PAGES} ({RESULTS_COUNT} αποτελέσματα συνολικά)",
-    "pagesInfoSingular": "Σελίδα {CURR_PAGE} από {TOTAL_PAGES} ({RESULTS_COUNT} αποτέλεσμα συνολικά)",
     "pageSize": "Μέγεθος σελίδας",
     "orderBy": "Ταξινόμηση",
     "spent": "Δαπάνες",

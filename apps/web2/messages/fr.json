@@ -7,8 +7,6 @@
   },
   "insights": {
     "title": "Aperçus",
-    "pagesInfo": "Page {CURR_PAGE} de {TOTAL_PAGES} ({RESULTS_COUNT} résultats au total)",
-    "pagesInfoSingular": "Page {CURR_PAGE} de {TOTAL_PAGES} ({RESULTS_COUNT} résultat au total)",
     "pageSize": "Taille de la page",
     "orderBy": "Trier par",
     "spent": "Dépensé",

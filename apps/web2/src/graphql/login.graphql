@@ -9,7 +9,7 @@ mutation login($email: String!, $password: String!) {
 }
 
 mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
-  signup(email: $email, firstName: $firstName, lastName: $lastName, password: $password) {
+  signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
     token
     refreshToken
     user {
@@ -41,6 +41,13 @@ query me {
     firstName
     lastName
     email
+  }
+}
+
+query loginProviders {
+  loginProviders {
+    url
+    name
   }
 }
 
