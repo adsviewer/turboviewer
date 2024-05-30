@@ -111,7 +111,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   ${lastInterval(joinedSnakeGroup, args.interval, args.orderBy, false, args.dateTo)},
   ${intervalBeforeLast(joinedSnakeGroup, args.interval, args.orderBy, args.dateTo)},
   ${orderColumnTrend(snakeGroup, args.orderBy, args.order, limit, offset)}
-  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, CAST(SUM(i.spend) AS NUMERIC) AS spend, CAST(SUM(i.impressions) AS NUMERIC) AS impressions 
+  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
     AND i.date < DATE_TRUNC('${args.interval}', ${date})
@@ -120,9 +120,10 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
 };
 
 export const insightsDatapoints = (args: InsightsDatapointsInputType, organizationId: string) =>
-  `SELECT DATE_TRUNC('${args.interval}', i.date) AS date,
-          CAST(SUM(i.spend) AS NUMERIC)          AS spend,
-          CAST(SUM(i.impressions) AS NUMERIC)    AS impressions
+  `SELECT DATE_TRUNC('${args.interval}', i.date)                             AS date,
+          CAST(SUM(i.spend) AS INTEGER)                                      AS spend,
+          CAST(SUM(i.impressions) AS INTEGER)                                AS impressions,
+          CAST(SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS INTEGER) AS cpm
    FROM insights i
             JOIN ads a on i.ad_id = a.id
             JOIN ad_accounts aa on a.ad_account_id = aa.id
@@ -136,7 +137,7 @@ export const insightsDatapoints = (args: InsightsDatapointsInputType, organizati
            ${args.position ? `AND i.position = '${args.position}'` : ''}
            ${args.publisher ? `AND i.publisher = '${args.publisher}'` : ''}
    GROUP BY date
-   ORDER BY date DESC;`;
+   ORDER BY date;`;
 
 const abbreviateSnakeCase = (snakeCaseString: string) =>
   snakeCaseString

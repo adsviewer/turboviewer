@@ -71,7 +71,7 @@ builder.queryFields((t) => ({
           }
         }
         return newObj;
-      }) as unknown as Insight[];
+      }) as unknown as (Insight & { cpm: number })[];
 
       const ret: {
         id: string;
@@ -83,7 +83,7 @@ builder.queryFields((t) => ({
         device?: DeviceEnum;
         publisher?: PublisherEnum;
         currency: CurrencyEnum;
-        datapoints: { spend: number; impressions: number; date: Date }[];
+        datapoints: { spend: number; impressions: number; date: Date; cpm: number }[];
       }[] = [];
       const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
         return groupBy.map((group) => insight[group]).join('-');
@@ -94,7 +94,7 @@ builder.queryFields((t) => ({
           ret.push({
             ...valueWithoutDatapoints,
             id: groupBy.map((group) => value[0][group]).join('-'),
-            datapoints: value.map((v) => ({ spend: v.spend, impressions: v.impressions, date: v.date })),
+            datapoints: value.map((v) => ({ spend: v.spend, impressions: v.impressions, date: v.date, cpm: v.cpm })),
           });
         }
       }
@@ -291,6 +291,7 @@ const InsightsDatapointsDto = builder.simpleObject('InsightsDatapoints', {
   fields: (t) => ({
     spend: t.field({ type: 'Int', nullable: false }),
     impressions: t.field({ type: 'Int', nullable: false }),
+    cpm: t.field({ type: 'Int', nullable: false }),
     date: t.field({ type: 'Date', nullable: false }),
   }),
 });

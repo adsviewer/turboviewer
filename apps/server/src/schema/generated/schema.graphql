@@ -328,6 +328,7 @@ enum InsightsColumnsOrderBy {
 }
 
 type InsightsDatapoints {
+  cpm: Int!
   date: Date!
   impressions: Int!
   spend: Int!
