@@ -21,14 +21,13 @@ export const getLastXMonths = (): { until: string; since: string } => {
   };
 };
 
-export const getLastXDays = (date?: Date): { until: string; since: string } => {
-  const today = date ? date : new Date();
-  const yesterday = new Date(today);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  yesterday.setDate(today.getDate() - 1);
+export const getDayPriorTillTomorrow = (date?: Date): { until: string; since: string } => {
+  const dayPrior = new Date(date ? date : new Date());
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  dayPrior.setDate(dayPrior.getDate() - 1);
   return {
-    since: formatYYYMMDDDate(yesterday),
+    since: formatYYYMMDDDate(dayPrior),
     until: formatYYYMMDDDate(tomorrow),
   };
 };
