@@ -18,12 +18,9 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
    ```env
    DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
    ```
-4. Create a .env file in the `apps/server` directory with the following content:
-
-   ```env
-   FB_APPLICATION_ID=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-your-test-facebook-app>
-   FB_APPLICATION_SECRET=<VALUE from here: https://github.com/adsviewer/turboviewer/wiki/Create-your-test-facebook-app>
-   ```
+4. Copy
+   the [.env.server](https://eu-central-1.console.aws.amazon.com/s3/object/local-adsviewer?region=eu-central-1&bucketType=general&prefix=.env.server)
+   in the `apps/server` directory. Look at [Configuring aws-cli](#configuring-aws-cli) if you don't have access.
 
 5. Create a .env file in the `apps/web` directory with the following content:
 
