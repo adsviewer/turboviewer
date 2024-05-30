@@ -82,21 +82,23 @@ module "environment" {
     aws.us_east_1 = aws.us_east_1
   }
 
-  amplify_token         = var.amplify_token
-  domain                = local.domain
-  environment           = var.environment
-  fb_application_id     = var.fb_application_id
-  fb_application_secret = var.fb_application_secret
-  git_repository        = local.git_repository
-  github_role_name      = module.workspace.github_role_name
-  organization          = local.organization
-  redis_url             = var.redis_url
-  service_subnet_ids    = module.workspace.private_subnet_ids
-  slack_webhook_url     = var.slack_webhook_url
-  slack_workspace_id    = var.slack_workspace_id
-  vercel_api_token      = var.vercel_api_token
-  vercel_team           = var.vercel_team
-  vpc_id                = module.workspace.vpc_id
+  amplify_token             = var.amplify_token
+  domain                    = local.domain
+  environment               = var.environment
+  fb_application_id         = var.fb_application_id
+  fb_application_secret     = var.fb_application_secret
+  google_application_id     = var.google_application_id
+  google_application_secret = var.google_application_secret
+  git_repository            = local.git_repository
+  github_role_name          = module.workspace.github_role_name
+  organization              = local.organization
+  redis_url                 = var.redis_url
+  service_subnet_ids        = module.workspace.private_subnet_ids
+  slack_webhook_url         = var.slack_webhook_url
+  slack_workspace_id        = var.slack_workspace_id
+  vercel_api_token          = var.vercel_api_token
+  vercel_team               = var.vercel_team
+  vpc_id                    = module.workspace.vpc_id
 }
 
 provider "vercel" {

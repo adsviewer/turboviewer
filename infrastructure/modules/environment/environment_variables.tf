@@ -17,6 +17,13 @@ variable "fb_application_secret" {
   type = string
 }
 
+variable "google_application_id" {
+  type = string
+}
+variable "google_application_secret" {
+  type = string
+}
+
 variable "git_repository" {
   type = string
 }
