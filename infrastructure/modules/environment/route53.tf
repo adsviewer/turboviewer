@@ -122,6 +122,7 @@ resource "aws_route53_record" "google_verification" {
   ttl     = "300"
   records = [
     "v=spf1 include:_spf.google.com ~all",
+    "tiktok-developers-site-verification=jXaq05M1uPB5S5GMgUus2mGxzv5siSYu"
   ]
 }
 
