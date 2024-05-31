@@ -37,7 +37,7 @@
     "tokenMissingMsg" : "The password reset link is missing the token. Please try again.",
     "tokenExpiredMsg" : "The password reset link has expired. Please request a new one.",
     "changePassword": "Change Password",
-    "loginWith": "Login with",
+    "loginWith": "Sign in with",
     "signUpWith": "Sign up with"
   }
 }
