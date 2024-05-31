@@ -7,7 +7,11 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { addOrReplaceURLParams, pageKey } from '@/util/url-query-utils';
 
-export default function PageControls(): React.ReactNode {
+interface PropsType {
+  hasNextPage: boolean;
+}
+
+export default function PageControls(props: PropsType): React.ReactNode {
   const t = useTranslations('insights');
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -26,6 +30,7 @@ export default function PageControls(): React.ReactNode {
   return (
     <Flex justify="space-between" my="lg" gap="sm">
       <Button
+        disabled={!searchParams.get(pageKey) || searchParams.get(pageKey) === '1'}
         leftSection={<IconArrowLeft size={14} />}
         variant="default"
         onClick={() => {
@@ -35,6 +40,7 @@ export default function PageControls(): React.ReactNode {
         {t('prevPage')}
       </Button>
       <Button
+        disabled={!props.hasNextPage}
         rightSection={<IconArrowRight size={14} />}
         variant="default"
         onClick={() => {
