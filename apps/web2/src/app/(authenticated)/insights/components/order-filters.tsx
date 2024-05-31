@@ -36,8 +36,10 @@ export default function OrderFilters(): React.ReactNode {
   const getOrderByValue = (): string => {
     if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions)) {
       return InsightsColumnsOrderBy.impressions;
+    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm)) {
+      return InsightsColumnsOrderBy.cpm;
     }
-    return InsightsColumnsOrderBy.spend;
+    return InsightsColumnsOrderBy.spend; // default
   };
 
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
@@ -84,6 +86,7 @@ export default function OrderFilters(): React.ReactNode {
           data={[
             { value: InsightsColumnsOrderBy.spend, label: t('spent') },
             { value: InsightsColumnsOrderBy.impressions, label: t('impressions') },
+            { value: InsightsColumnsOrderBy.cpm, label: 'CPM' },
           ]}
           value={getOrderByValue()}
           onChange={handleOrderByChange}
