@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { Title } from '@mantine/core';
+import { Flex, Title } from '@mantine/core';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -14,6 +14,7 @@ import {
 import LoaderCentered from '@/components/misc/loader-centered';
 import InsightsGrid from './components/insights-grid';
 import OrderFilters from './components/order-filters';
+import PageControls from './components/page-controls';
 
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
@@ -54,13 +55,17 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
     interval: InsightsInterval.week,
   });
   const insights = resp.insights.edges;
+  const hasNextPage = resp.insights.hasNext;
 
   return (
     <>
       <Title mb="md">{t('title')}</Title>
       <OrderFilters />
       <Suspense fallback={<LoaderCentered type="dots" />}>
-        <InsightsGrid insights={insights} />
+        <Flex direction="column">
+          <InsightsGrid insights={insights} />
+          <PageControls hasNextPage={hasNextPage} />
+        </Flex>
       </Suspense>
     </>
   );
