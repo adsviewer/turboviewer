@@ -54,6 +54,13 @@
     "firstName": "First Name",
     "lastName": "Last Name",
     "agree": "Agree to the",
-    "termsAndConditions": "Terms and Conditions"
+    "termsAndConditions": "Terms and Conditions",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "forgotPasswordHint": "Enter your account's email",
+    "resetPasswordHint": "Enter your new password",
+    "sendResetLink": "Send reset link",
+    "resetLinkSent": "We have sent a password reset link to your email",
+    "submit": "Submit"
   }
 }

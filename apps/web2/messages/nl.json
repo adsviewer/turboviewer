@@ -10,7 +10,7 @@
     "pageSize": "Paginagrootte",
     "orderBy": "Sorteren op",
     "spent": "Uitgegeven",
-    "impressions": "Impressies",
+    "impressions": "Vertoningen",
     "descending": "Aflopend",
     "ascending": "Oplopend",
     "nextPage": "Volgende pagina",
@@ -25,7 +25,7 @@
       "selectDevices": "Selecteer apparaten",
       "publishers": "Uitgevers",
       "selectPublishers": "Selecteer uitgevers",
-      "groupBy": "Groeperen op",
+      "groupBy": "Groepeer op",
       "account": "Account",
       "adId": "Advertentie-ID",
       "device": "Apparaat",
@@ -40,13 +40,13 @@
   },
   "settings": {
     "title": "Instellingen",
-    "changeLanguage": "Wijzig taal",
-    "changeColorScheme": "Kleuren thema"
+    "changeLanguage": "Taal wijzigen",
+    "changeColorScheme": "Kleurenthema"
   },
   "authentication": {
     "noAccount": "Heb je geen account?",
     "alreadyHaveAccount": "Heb je al een account?",
-    "signInNow": "Log nu in",
+    "signInNow": "Meld je nu aan",
     "signIn": "Inloggen",
     "signUp": "Registreren",
     "password": "Wachtwoord",
@@ -54,6 +54,13 @@
     "firstName": "Voornaam",
     "lastName": "Achternaam",
     "agree": "Akkoord met de",
-    "termsAndConditions": "Algemene voorwaarden"
+    "termsAndConditions": "Algemene voorwaarden",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "resetPassword": "Wachtwoord resetten",
+    "forgotPasswordHint": "Voer het e-mailadres van je account in",
+    "resetPasswordHint": "Voer je nieuwe wachtwoord in",
+    "sendResetLink": "Stuur resetlink",
+    "resetLinkSent": "We hebben een link om je wachtwoord te resetten naar je e-mail gestuurd",
+    "submit": "Verzenden"
   }
 }

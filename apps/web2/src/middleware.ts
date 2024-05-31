@@ -6,7 +6,18 @@ import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from './env.mjs';
 import { groupedByKey } from './util/url-query-utils';
 import { InsightsColumnsGroupBy } from './graphql/generated/schema-server';
 
-const publicPaths = ['/', '/sign-in', '/sign-up', '/api/auth/sign-in', '/api/auth/sign-up'];
+const publicPaths = [
+  '/',
+  '/sign-in',
+  '/sign-up',
+  '/forgot-password',
+  '/reset-password-pending',
+  '/reset-password',
+  '/api/auth/sign-in',
+  '/api/auth/sign-up',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+];
 
 // Stop Middleware running on static files and public folder
 export const config = {
@@ -53,6 +64,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // & after successful sign in, redirect to the desired page
   if (!isPublic(request.nextUrl.pathname) && !token) {
     const signInUrl = new URL('/sign-in', request.url);
+    logger.info('HELLO!!!');
     signInUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }
