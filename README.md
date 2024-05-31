@@ -31,3 +31,22 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
 6. Run `pnpm i`
 7. `pnpm run dev`
 8. Open [http://localhost:3000](http://localhost:3000)
+
+### Configuring aws-cli
+
+#### Prerequisites
+
+- [aws-cli](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+
+#### Setup
+
+There should be a `~/.aws/credentials` file, this will be used to authenticate with aws services. In order to get
+credentials you visit the [AWS access portal](https://d-9067fd5baf.awsapps.com/start/#/?tab=accounts) open
+the `development account` and click on `Access keys`. Scroll down to Option 2 and click copy. Then paste the content in
+the `~/.aws/credentials` file.
+
+#### Everyday hustle
+
+The credentials that you generated above will expire every 12 hours. In order to refresh them you need to repeat the
+process. On the flip side, very few features require aws services to be run locally (sending emails on forget password
+flow is an example). So you can skip this step if you believe you won't need them.
