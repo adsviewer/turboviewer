@@ -33,6 +33,7 @@ interface Datapoint {
   date: string;
   impressions: number;
   spend: number;
+  cpm: number;
 }
 
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
@@ -90,6 +91,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
         impressions: datapoint.impressions,
         spend: datapoint.spend,
+        cpm: datapoint.cpm,
       });
     }
     setDatapoints(formattedDatapoints);
@@ -110,6 +112,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           series={[
             { name: 'spend', color: 'teal.6', label: `${t('spent')} (${getCurrencySymbol(props.currency)})` },
             { name: 'impressions', color: 'blue.6', label: t('impressions') },
+            { name: 'cpm', color: 'orange', label: 'CPM' },
           ]}
           valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
           curveType="natural"
