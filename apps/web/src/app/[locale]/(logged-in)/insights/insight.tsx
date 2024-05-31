@@ -10,6 +10,7 @@ import AdName from '@/app/[locale]/(logged-in)/insights/ad-name';
 import { Cpm, Spend } from '@/app/[locale]/(logged-in)/insights/spend';
 
 export default function Insight({
+  id,
   datapoints,
   device,
   position,
@@ -27,7 +28,7 @@ export default function Insight({
         {datapoints.map((datapoint) => {
           const { spend, impressions, date, cpm } = datapoint;
           return (
-            <div key={`${String(spend)}-${String(impressions)}-${String(date)}`}>
+            <div key={id}>
               <div className="flex flex-row">
                 <Spend spend={spend} currency={currency} />
                 <Cpm spend={cpm} currency={currency} />
