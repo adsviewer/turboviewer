@@ -42,6 +42,7 @@ query insights(
   ) {
     hasNext
     edges {
+      id
       adAccountId
       adAccountName
       adId

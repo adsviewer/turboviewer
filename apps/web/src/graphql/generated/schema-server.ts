@@ -668,6 +668,7 @@ export type InsightsQuery = {
     hasNext: boolean;
     edges: Array<{
       __typename?: 'GroupedInsights';
+      id: string;
       adAccountId?: string | null;
       adAccountName?: string | null;
       adId?: string | null;
@@ -891,6 +892,7 @@ export const InsightsDocument = gql`
     ) {
       hasNext
       edges {
+        id
         adAccountId
         adAccountName
         adId
