@@ -54,6 +54,13 @@
     "firstName": "Όνομα",
     "lastName": "Επώνυμο",
     "agree": "Συμφωνώ με τους",
-    "termsAndConditions": "Όρους και Προϋποθέσεις"
+    "termsAndConditions": "Όρους και Προϋποθέσεις",
+    "forgotPassword": "Ξεχάσατε τον κωδικό σας;",
+    "resetPassword": "Επαμαφορά Κωδικού",
+    "forgotPasswordHint": "Εισάγετε το email του λογαριασμού σας",
+    "resetPasswordHint": "Εισάγετε τον νέο σας κωδικό",
+    "sendResetLink": "Αποστολή συνδέσμου επαναφορας",
+    "resetLinkSent": "Έχει σταλεί ένας σύνδεσμος επαναφοράς κωδικού στο email σας",
+    "submit": "Υποβολή"
   }
 }
