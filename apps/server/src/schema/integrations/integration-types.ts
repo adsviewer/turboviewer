@@ -100,8 +100,8 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
   }),
 });
 
-type InsightsColumnsOrderByType = keyof Pick<Insight, 'spend' | 'impressions'>;
-const insightsColumnsOrderBy: InsightsColumnsOrderByType[] = ['spend', 'impressions'] as const;
+type InsightsColumnsOrderByType = keyof Pick<Insight, 'spend' | 'impressions'> | 'cpm';
+const insightsColumnsOrderBy: InsightsColumnsOrderByType[] = ['spend', 'impressions', 'cpm'] as const;
 export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderBy', {
   values: insightsColumnsOrderBy,
 });

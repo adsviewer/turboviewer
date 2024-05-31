@@ -362,6 +362,7 @@ export enum InsightsColumnsGroupBy {
 export enum InsightsColumnsOrderBy {
   spend = 'spend',
   impressions = 'impressions',
+  cpm = 'cpm',
 }
 
 export type InsightsDatapoints = {

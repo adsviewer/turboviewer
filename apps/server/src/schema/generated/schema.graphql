@@ -325,6 +325,7 @@ enum InsightsColumnsGroupBy {
 enum InsightsColumnsOrderBy {
   spend
   impressions
+  cpm
 }
 
 type InsightsDatapoints {
