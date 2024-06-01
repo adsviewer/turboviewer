@@ -7,6 +7,7 @@ export const UserDto = builder.prismaObject('User', {
     firstName: t.exposeString('firstName'),
     lastName: t.exposeString('lastName'),
     email: t.exposeString('email'),
+    photoUrl: t.exposeString('photoUrl', { nullable: true }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
     roles: t.stringList({

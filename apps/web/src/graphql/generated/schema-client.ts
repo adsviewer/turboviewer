@@ -621,6 +621,7 @@ export type User = {
   lastName: Scalars['String']['output'];
   organization: Organization;
   organizationId: Scalars['ID']['output'];
+  photoUrl?: Maybe<Scalars['String']['output']>;
   roles: Array<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
 };
@@ -818,7 +819,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
   __typename?: 'Query';
-  me: { __typename?: 'User'; firstName: string; lastName: string; email: string };
+  me: { __typename?: 'User'; firstName: string; lastName: string; email: string; photoUrl?: string | null };
 };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
@@ -1069,6 +1070,7 @@ export const MeDocument = gql`
       firstName
       lastName
       email
+      photoUrl
     }
   }
 `;
