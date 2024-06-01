@@ -529,6 +529,7 @@ type User {
   lastName: String!
   organization: Organization!
   organizationId: ID!
+  photoUrl: String
   roles: [String!]!
   updatedAt: Date!
 }
