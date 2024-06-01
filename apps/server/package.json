@@ -7,7 +7,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development pnpm --filter=@repo/database db:migrate:deploy && tsx watch --env-file=.env src/index.ts",
+    "dev": "cross-env NODE_ENV=development pnpm --filter=@repo/database start && tsx watch --env-file=.env src/index.ts",
     "build": "tsc",
     "start": "node --conditions=javascript --import=extensionless/register dist/index.js",
     "lint": "eslint . --max-warnings 0",
