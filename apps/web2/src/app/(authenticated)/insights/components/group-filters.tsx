@@ -161,12 +161,8 @@ export default function GroupFilters(): ReactNode {
     });
   };
 
-  const isChecked = (groupByValue: InsightsColumnsGroupBy): boolean => {
-    if (isParamInSearchParams(searchParams, groupedByKey, groupByValue)) {
-      return true;
-    }
-    return false;
-  };
+  const isChecked = (groupByValue: InsightsColumnsGroupBy): boolean =>
+    isParamInSearchParams(searchParams, groupedByKey, groupByValue);
 
   return (
     <ScrollArea offsetScrollbars>
