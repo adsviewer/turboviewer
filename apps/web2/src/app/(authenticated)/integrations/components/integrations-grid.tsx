@@ -24,19 +24,9 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
   }, []);
 
   // (backend response probably needs refactor to return object with IntegrationType as key)
-  const isIntegrationAvailable = (status: IntegrationStatus): boolean => {
-    if (status !== IntegrationStatus.ComingSoon) {
-      return true;
-    }
-    return false;
-  };
+  const isIntegrationAvailable = (status: IntegrationStatus): boolean => status !== IntegrationStatus.ComingSoon;
 
-  const isIntegrationConnected = (status: IntegrationStatus): boolean => {
-    if (status === IntegrationStatus.Connected) {
-      return true;
-    }
-    return false;
-  };
+  const isIntegrationConnected = (status: IntegrationStatus): boolean => status === IntegrationStatus.Connected;
 
   return (
     <Transition mounted={isMounted} transition="fade" duration={400} timingFunction="ease">
