@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import { SimpleGrid, Transition } from '@mantine/core';
 import { useEffect, useState, type ReactNode } from 'react';
-import metaLogo from '@/assets/images/meta-logo.png';
-import tiktokLogo from '@/assets/images/tiktok-logo.png';
-import linkedinLogo from '@/assets/images/linkedin-logo.png';
 import { IntegrationStatus, IntegrationType, type SettingsChannelsQuery } from '@/graphql/generated/schema-server';
+import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
+import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
+import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
 import IntegrationCard from './integration-card';
 
 interface IntegrationProps {
@@ -50,7 +50,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
               integrationType={IntegrationType.META}
               isConnected={isIntegrationConnected(props.integrations[0].status)}
               isAvailable={isIntegrationAvailable(props.integrations[0].status)}
-              image={<Image src={metaLogo} alt="Meta" width={300} priority />}
+              image={<Image src={metaLogo as string} alt="Meta" width={100} priority />}
             />
             <IntegrationCard
               title="TikTok"
@@ -58,7 +58,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
               integrationType={IntegrationType.TIKTOK}
               isConnected={isIntegrationConnected(props.integrations[1].status)}
               isAvailable={isIntegrationAvailable(props.integrations[1].status)}
-              image={<Image src={tiktokLogo} alt="TikTok" width={300} priority />}
+              image={<Image src={tiktokLogo as string} alt="TikTok" width={100} priority />}
             />
             <IntegrationCard
               title="LinkedIn"
@@ -66,7 +66,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
               integrationType={IntegrationType.LINKEDIN}
               isConnected={isIntegrationConnected(props.integrations[2].status)}
               isAvailable={isIntegrationAvailable(props.integrations[2].status)}
-              image={<Image src={linkedinLogo} alt="LinkedIn" width={300} priority />}
+              image={<Image src={linkedinLogo as string} alt="LinkedIn" width={100} priority />}
             />
           </SimpleGrid>
         </div>
