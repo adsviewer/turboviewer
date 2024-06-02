@@ -15,6 +15,7 @@
     "ascending": "Oplopend",
     "nextPage": "Volgende pagina",
     "prevPage": "Vorige pagina",
+    "noResultsFound": "Geen resultaten gevonden",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",

@@ -15,6 +15,7 @@
     "ascending": "Ascending",
     "nextPage": "Next page",
     "prevPage": "Prev page",
+    "noResultsFound": "No results found",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",
