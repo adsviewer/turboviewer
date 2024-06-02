@@ -54,7 +54,11 @@ export const lastInterval = (
   dateTo?: Date | null,
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
-  return `last_interval AS (SELECT ${group}, SUM(i.${orderColumn}) AS ${orderColumn}
+  const sqlOrderColumn =
+    orderColumn === 'cpm'
+      ? 'SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS cpm'
+      : `SUM(i.${orderColumn}) AS ${orderColumn}`;
+  return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
                                         AND date < DATE_TRUNC('${interval}', ${date})
@@ -63,12 +67,16 @@ export const lastInterval = (
 
 export const intervalBeforeLast = (
   group: string,
-  interval: string,
-  orderColumn: string,
+  interval: FilterInsightsInputType['interval'],
+  orderColumn: FilterInsightsInputType['orderBy'],
   dateTo?: Date | null,
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
-  return `interval_before_last AS (SELECT ${group}, SUM(i.${orderColumn}) AS ${orderColumn}
+  const sqlOrderColumn =
+    orderColumn === 'cpm'
+      ? 'SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS cpm'
+      : `SUM(i.${orderColumn}) AS ${orderColumn}`;
+  return `interval_before_last AS (SELECT ${group}, ${sqlOrderColumn}
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '2 ${interval}')
                                                AND date < DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
