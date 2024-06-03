@@ -34,7 +34,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                   title={insight.publisher}
                   description={insight.position}
                   device={insight.device}
-                  rank="good"
+                  rank="good" // TODO: Set rank according to CPM
                   currency={insight.currency}
                   datapoints={insight.datapoints}
                   iframe={insight.iFrame}

@@ -3,6 +3,7 @@ import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
+import { sentenceCase } from 'change-case';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import {
   addOrReplaceURLParams,
@@ -14,7 +15,6 @@ import {
   publisherKey,
   accountKey,
 } from '@/util/url-query-utils';
-import { titleCaseToSpaces } from '@/util/string-utils';
 import getAccounts from '../../actions';
 
 interface MultiSelectDataType {
@@ -117,7 +117,7 @@ export default function GroupFilters(): ReactNode {
     let data: MultiSelectDataType[] = [];
     for (const key of Object.keys(DeviceEnum)) {
       const enumValue = DeviceEnum[key as keyof typeof DeviceEnum];
-      data = [...data, { value: enumValue, label: titleCaseToSpaces(enumValue) }];
+      data = [...data, { value: enumValue, label: sentenceCase(enumValue) }];
     }
     return data;
   };

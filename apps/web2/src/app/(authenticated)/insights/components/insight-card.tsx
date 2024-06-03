@@ -4,14 +4,15 @@ import { Card, Text, Badge, Group, Flex, useComputedColorScheme, useMantineTheme
 import { AreaChart } from '@mantine/charts';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { sentenceCase } from 'change-case';
 import {
   type CurrencyEnum,
   type DeviceEnum,
   type IFrame,
   type InsightsDatapoints,
 } from '@/graphql/generated/schema-server';
-import { dateFormatOptions, snakeCaseToTitleCaseWithSpaces } from '@/util/string-utils';
-import { getCurrencySymbol } from '@/util/generic-utils';
+import { dateFormatOptions } from '@/util/format-utils';
+import { getCurrencySymbol } from '@/util/currency-utils';
 import AdPopover from './ad-popover';
 
 interface InsightCardProps {
@@ -130,7 +131,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       </Group>
 
       <Text size="sm" c="dimmed">
-        {snakeCaseToTitleCaseWithSpaces(props.description ?? '')}
+        {sentenceCase(props.description ?? '')}
       </Text>
     </Card>
   );

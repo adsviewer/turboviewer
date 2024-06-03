@@ -1,5 +1,5 @@
 import { type ReadonlyURLSearchParams } from 'next/navigation';
-import { snakeCaseToTitleCaseWithSpaces } from './string-utils';
+import { sentenceCase } from 'change-case';
 
 export const groupedByKey = 'groupedBy';
 export const publisherKey = 'publisher';
@@ -33,7 +33,7 @@ export const positions = [
   'search',
   'video_feeds',
   'unknown',
-].map((pos) => ({ value: pos, label: snakeCaseToTitleCaseWithSpaces(pos) }));
+].map((pos) => ({ value: pos, label: sentenceCase(pos) }));
 
 export const OrderDirection = {
   asc: 'asc',
