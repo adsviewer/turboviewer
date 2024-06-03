@@ -12,7 +12,7 @@ const localesMap = new Map([
 ]);
 
 export default getRequestConfig(async () => {
-  const locale = cookies().get('NEXT_LOCALE')?.value ?? 'en';
+  const locale = cookies().get('NEXT_LOCALE')?.value ?? 'en-gb';
 
   return {
     locale,
