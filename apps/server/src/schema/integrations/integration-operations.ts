@@ -1,7 +1,7 @@
 import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, FireAndForget } from '@repo/utils';
-import { getIntegrationAuthUrl, getChannel } from '@repo/channel';
+import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { builder } from '../builder';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
@@ -90,7 +90,7 @@ builder.subscriptionFields((t) => ({
 }));
 
 const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatusEnum => {
-  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.META];
+  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.META, IntegrationTypeEnum.LINKEDIN];
   if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
   const integration = integrations.find((i) => i.type === type);

@@ -53,7 +53,11 @@ export const getBeforeXMonths = (): Date => {
   return xMonthsAgo;
 };
 
-export const addInterval = (date: Date, interval: 'week' | 'month' | 'day', numOfIntervals: number): Date => {
+export const addInterval = (
+  date: Date,
+  interval: 'week' | 'month' | 'day' | 'seconds',
+  numOfIntervals: number,
+): Date => {
   const result = new Date(date);
   switch (interval) {
     case 'week':
@@ -64,6 +68,9 @@ export const addInterval = (date: Date, interval: 'week' | 'month' | 'day', numO
       break;
     case 'day':
       result.setDate(result.getDate() + numOfIntervals);
+      break;
+    case 'seconds':
+      result.setSeconds(result.getSeconds() + numOfIntervals);
       break;
   }
   return result;

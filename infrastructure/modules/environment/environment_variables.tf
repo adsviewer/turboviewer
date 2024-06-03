@@ -32,6 +32,13 @@ variable "github_role_name" {
   type = string
 }
 
+variable "linkedin_application_id" {
+  type = string
+}
+variable "linkedin_application_secret" {
+  type = string
+}
+
 variable "organization" {
   type = string
 }

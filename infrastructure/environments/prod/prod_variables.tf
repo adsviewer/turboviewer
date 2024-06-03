@@ -36,6 +36,13 @@ variable "google_application_secret" {
   type = string
 }
 
+variable "linkedin_application_id" {
+  type = string
+}
+variable "linkedin_application_secret" {
+  type = string
+}
+
 variable "redis_url" {
   type = string
 }
