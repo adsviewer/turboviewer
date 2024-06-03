@@ -64,7 +64,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // & after successful sign in, redirect to the desired page
   if (!isPublic(request.nextUrl.pathname) && !token) {
     const signInUrl = new URL('/sign-in', request.url);
-    logger.info('HELLO!!!');
     signInUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(signInUrl);
   }
