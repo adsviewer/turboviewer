@@ -8,6 +8,5 @@ export async function getUserDetails(): Promise<MeQuery['me']> {
 }
 
 export default async function getAccounts(): Promise<AdAccountsQuery> {
-  const accounts = await urqlClientSdk().adAccounts();
-  return accounts;
+  return await urqlClientSdk().adAccounts();
 }
