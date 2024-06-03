@@ -686,7 +686,6 @@ export type InsightsQuery = {
         impressions: number;
         cpm: number;
       }>;
-      iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
     }>;
   };
 };
@@ -913,11 +912,6 @@ export const InsightsDocument = gql`
         device
         publisher
         position
-        iFrame {
-          src
-          height
-          width
-        }
       }
     }
   }
