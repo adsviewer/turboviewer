@@ -3,6 +3,7 @@
 import { Badge, Button, Card, Flex, Group, Text, useMantineTheme } from '@mantine/core';
 import { type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
 import { deAuthIntegration } from '../actions';
 
@@ -17,6 +18,7 @@ interface IntegrationProps {
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
+  const t = useTranslations('integrations');
   const theme = useMantineTheme();
   const router = useRouter();
 
@@ -42,7 +44,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
               handleConnect();
             }}
           >
-            Connect
+            {t('connect')}
           </Button>
         );
       }
@@ -54,13 +56,13 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             handleRevoke();
           }}
         >
-          Revoke
+          {t('revoke')}
         </Button>
       );
     }
     return (
       <Button mt="lg" disabled>
-        Coming soon!
+        {t('comingSoon')}!
       </Button>
     );
   };
@@ -75,7 +77,11 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500}>{props.title}</Text>
-        {props.isConnected ? <Badge color="green">Connected</Badge> : <Badge color="gray">Not Connected</Badge>}
+        {props.isConnected ? (
+          <Badge color="green">{t('connected')}</Badge>
+        ) : (
+          <Badge color="gray">{t('notConnected')}</Badge>
+        )}
       </Group>
 
       <Text size="sm" c="dimmed" mb="auto">

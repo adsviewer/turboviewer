@@ -37,7 +37,12 @@
   },
   "integrations": {
     "title": "Integrations",
-    "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!"
+    "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!",
+    "connect": "Connect",
+    "revoke": "Revoke",
+    "comingSoon": "Coming soon",
+    "connected": "Connected",
+    "notConnected": "Not Connected"
   },
   "settings": {
     "title": "Settings",
@@ -62,6 +67,7 @@
     "resetPasswordHint": "Enter your new password",
     "sendResetLink": "Send reset link",
     "resetLinkSent": "We have sent a password reset link to your email",
-    "submit": "Submit"
+    "submit": "Submit",
+    "loginGoogle": "Continue with Google"
   }
 }

@@ -143,7 +143,7 @@ export default function SignIn(): React.JSX.Element {
                   leftSection={<GoogleIcon />}
                   variant="default"
                 >
-                  Continue with Google
+                  {t('loginGoogle')}
                 </Button>
               ) : (
                 <LoaderCentered />

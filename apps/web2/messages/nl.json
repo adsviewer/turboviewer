@@ -37,7 +37,12 @@
   },
   "integrations": {
     "title": "Integraties",
-    "description": "Versterk je werk door de tools die je dagelijks gebruikt te verbinden om je advertenties op één plek te beheren!"
+    "description": "Versterk je werk door de tools die je dagelijks gebruikt te verbinden om je advertenties op één plek te beheren!",
+    "connect": "Verbinden",
+    "revoke": "Intrekken",
+    "comingSoon": "Binnenkort beschikbaar",
+    "connected": "Verbonden",
+    "notConnected": "Niet verbonden"
   },
   "settings": {
     "title": "Instellingen",
@@ -62,6 +67,7 @@
     "resetPasswordHint": "Voer je nieuwe wachtwoord in",
     "sendResetLink": "Stuur resetlink",
     "resetLinkSent": "We hebben een link om je wachtwoord te resetten naar je e-mail gestuurd",
-    "submit": "Verzenden"
+    "submit": "Verzenden",
+    "loginGoogle": "Verder met Google"
   }
 }
