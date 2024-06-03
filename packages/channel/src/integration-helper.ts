@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { type Integration, IntegrationStatus, IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
+import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisGet, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError, isMode, MODE } from '@repo/utils';
@@ -15,12 +15,20 @@ import PrismaClientKnownRequestError = Prisma.PrismaClientKnownRequestError;
 const fireAndForget = new FireAndForget();
 
 export const authCallback = (req: ExpressRequest, res: ExpressResponse): void => {
-  const { code, state: stateArg, error_description: errorDescription } = req.query;
+  const {
+    code,
+    state: stateArg,
+    error_description: errorDescription,
+    error: channelError,
+    scopes: _scopes,
+  } = req.query;
 
-  completeIntegration(code, stateArg, errorDescription)
+  const error = errorDescription ?? channelError;
+
+  completeIntegration(code, stateArg, error)
     .then((integrationType) => {
       if (isAError(integrationType)) {
-        logger.error('Failed to complete integration %s:', integrationType.message);
+        logger.warn('Failed to complete integration %s:', integrationType.message);
         res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=${integrationType.message}`);
       } else {
         res.redirect(`${env.PUBLIC_URL}/settings/integrations?type=${integrationType}&status=success`);
@@ -32,7 +40,7 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
 };
 
 export const getIntegrationAuthUrl = (type: IntegrationTypeEnum, organizationId: string, userId: string): string => {
-  const state = `${MODE}_${IntegrationTypeEnum.META}_${randomUUID()}`;
+  const state = `${MODE}_${type}_${randomUUID()}`;
   const { url } = getChannel(type).generateAuthUrl(state);
   fireAndForget.add(() => saveOrgState(state, organizationId, userId));
   return url;

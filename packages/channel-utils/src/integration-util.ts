@@ -65,3 +65,13 @@ export const decryptTokens = (integration: Integration | null): null | Integrati
   }
   return integration;
 };
+
+export const revokeIntegrationById = async (integrationId: string, notify: boolean): Promise<Integration> => {
+  if (notify) {
+    // TODO: notify the organization that the integration has been revoked
+  }
+  return await prisma.integration.update({
+    where: { id: integrationId },
+    data: { status: IntegrationStatus.REVOKED },
+  });
+};

@@ -1,14 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
-import {
-  CurrencyEnum,
-  DeviceEnum,
-  type Integration,
-  IntegrationStatus,
-  IntegrationTypeEnum,
-  prisma,
-  PublisherEnum,
-} from '@repo/database';
+import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
 import { AError, FireAndForget, getDayPriorTillTomorrow, getLastXMonths, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -40,6 +32,7 @@ import {
   getIFrameAdFormat,
   MetaError,
   revokeIntegration,
+  revokeIntegrationById,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -185,7 +178,7 @@ class Meta implements ChannelInterface {
         parsed.data.error.fbtrace_id,
       );
       logger.error(metaError, 'De-authorization request failed');
-      if (await disConnectIntegrationOnError(integration.id, metaError)) {
+      if (await disConnectIntegrationOnError(integration.id, metaError, false)) {
         return integration.externalId;
       }
       return metaError;
@@ -584,7 +577,7 @@ class Meta implements ChannelInterface {
       const msg = 'Failed to complete fb sdk call';
       logger.error(error, msg);
       if (error instanceof Error) {
-        await disConnectIntegrationOnError(integration.id, error);
+        await disConnectIntegrationOnError(integration.id, error, true);
       }
       return new AError(msg);
     }
@@ -666,7 +659,7 @@ const timeRange = async (initial: boolean, adAccountId: string): Promise<{ until
   return latestInsight ? getDayPriorTillTomorrow(latestInsight.date) : getLastXMonths();
 };
 
-const disConnectIntegrationOnError = async (integrationId: string, error: Error): Promise<boolean> => {
+const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
   const metaErrorValidatingAccessTokenChangedSession =
     'Error validating access token: The session has been invalidated because the user changed their password or Facebook has changed the session for security reasons.';
   const metaErrorNotAuthenticated = 'Error validating access token: The user has not authorized application';
@@ -674,11 +667,7 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error)
     error.message === metaErrorValidatingAccessTokenChangedSession ||
     error.message.startsWith(metaErrorNotAuthenticated)
   ) {
-    // TODO: notify the organization that the integration has been revoked
-    await prisma.integration.update({
-      where: { id: integrationId },
-      data: { status: IntegrationStatus.REVOKED },
-    });
+    await revokeIntegrationById(integrationId, notify);
     return true;
   }
   return false;
