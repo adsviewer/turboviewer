@@ -21,10 +21,14 @@ import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
+import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
+import LoginProviders from '../components/login-providers';
+import { getLoginProviders } from '../sign-in/actions';
 
 export default function SignUp(): React.JSX.Element {
   const t = useTranslations('authentication');
   const [isPending, startTransition] = useTransition();
+  const [loginProviders, setLoginProviders] = useState<LoginProvidersQuery['loginProviders']>([]);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const form = useForm({
     mode: 'uncontrolled',
@@ -39,6 +43,10 @@ export default function SignUp(): React.JSX.Element {
   const router = useRouter();
 
   useEffect(() => {
+    void getLoginProviders().then((res) => {
+      setLoginProviders(res.loginProviders);
+    });
+
     // Play animation
     setIsMounted(false);
     setTimeout(() => {
@@ -143,6 +151,8 @@ export default function SignUp(): React.JSX.Element {
                 </Button>
               </form>
             </Paper>
+
+            <LoginProviders loginProviders={loginProviders} />
           </Container>
         </div>
       )}

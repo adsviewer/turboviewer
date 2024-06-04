@@ -20,8 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
 import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
-import LoaderCentered from '@/components/misc/loader-centered';
-import GoogleIcon from './components/google-login-icon';
+import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from './actions';
 
 export default function SignIn(): React.JSX.Element {
@@ -43,11 +42,6 @@ export default function SignIn(): React.JSX.Element {
   useEffect(() => {
     void getLoginProviders().then((res) => {
       setLoginProviders(res.loginProviders);
-    });
-
-    // Get auth tokens from URL if they exist
-    void fetch('/api/auth/sign-in', {
-      method: 'GET',
     });
 
     // Play animation
@@ -133,22 +127,7 @@ export default function SignIn(): React.JSX.Element {
               </form>
             </Paper>
 
-            <Flex direction="column" justify="center" my="xl">
-              {/* We'll be rendering using .map when more providers are implemented */}
-              {loginProviders.length ? (
-                <Button
-                  component={Link}
-                  href={loginProviders[0].url}
-                  w="100%"
-                  leftSection={<GoogleIcon />}
-                  variant="default"
-                >
-                  {t('loginGoogle')}
-                </Button>
-              ) : (
-                <LoaderCentered />
-              )}
-            </Flex>
+            <LoginProviders loginProviders={loginProviders} />
           </Container>
         </div>
       )}
