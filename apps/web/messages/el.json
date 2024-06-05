@@ -1,43 +1,73 @@
 {
+  "navbar": {
+    "insights": "Διορατικότητες",
+    "integrations": "Ενσωματώσεις",
+    "settings": "Ρυθμίσεις",
+    "signOut": "Αποσύνδεση"
+  },
   "insights": {
     "title": "Διορατικότητες",
-    "tooltipPosition": "θέση"
-  },
-  "filters": {
-    "adId": "Αναγνωριστικό διαφήμισης",
-    "account": "Λογαριασμό",
-    "date": "Ημερομηνία",
-    "device": "Συσκευή",
-    "groupedBy": "Ομαδοποίηση",
-    "orderByDropDown": "{value, select, spend {δαπάνες} impressions {εντυπώσεις} other {άγνωστο}}",
-    "orderDropDown": "{value, select, asc {αύξουσα} desc {φθήνουσα} other {άγνωστο}}",
-    "orderByLabel": "Ταξινόμηση",
     "pageSize": "Μέγεθος σελίδας",
-    "pagination": {
-      "prev": "Προηγούμενη",
-      "next": "Επόμενη",
-      "info": "Σελίδα {page, number}"
-    },
-    "position": "Θέση",
-    "publisher": "Εκδότη",
-    "select": "Διάλεξε",
-    "title": "Φίλτρα"
+    "orderBy": "Ταξινόμηση",
+    "spent": "Δαπάνες",
+    "impressions": "Εμφανίσεις",
+    "descending": "Φθίνουσα",
+    "ascending": "Αύξουσα",
+    "nextPage": "Επόμενη σελίδα",
+    "prevPage": "Προηγούμενη σελίδα",
+    "noResultsFound": "Δεν βρέθηκαν αποτελέσματα",
+    "filters": {
+      "title": "Φίλτρα",
+      "accounts": "Λογαριασμοί",
+      "selectAccounts": "Επιλέξτε λογαριασμούς",
+      "positions": "Θέσεις",
+      "selectPositions": "Επιλέξτε θέσεις",
+      "devices": "Συσκευές",
+      "selectDevices": "Επιλέξτε συσκευές",
+      "publishers": "Πλατφόρμες",
+      "selectPublishers": "Επιλέξτε πλατφόρμες",
+      "groupBy": "Ομαδοποίηση",
+      "account": "Λογαριασμός",
+      "adId": "Αναγνωριστικό Διαφήμισης",
+      "device": "Συσκευή",
+      "date": "Ημερομηνία",
+      "publisher": "Πλατφόρμα",
+      "position": "Θέση"
+    }
+  },
+  "integrations": {
+    "title": "Ενσωματώσεις",
+    "description": "Ενισχύστε τη δουλειά σας συνδέοντας τα εργαλεία που χρησιμοποιείτε καθημερινά για τη διαχείριση των διαφημίσεών σας σε ένα μέρος!",
+    "connect": "Σύνδεση",
+    "revoke": "Ακύρωση",
+    "comingSoon": "Έρχεται σύντομα",
+    "connected": "Συνδέθηκε",
+    "notConnected": "Δεν συνδέθηκε"
+  },
+  "settings": {
+    "title": "Ρυθμίσεις",
+    "changeLanguage": "Αλλαγή γλώσσας",
+    "changeColorScheme": "Χρωματικό θέμα"
   },
   "authentication": {
+    "noAccount": "Δεν έχετε ακόμα λογαριασμό;",
+    "alreadyHaveAccount": "Έχετε ήδη έναν λογαριασμό;",
+    "signInNow": "Συνδεθείτε τώρα",
     "signIn": "Σύνδεση",
     "signUp": "Εγγραφή",
-    "forgotPassword": "Ξέχασες τον κωδικό σου;",
-    "resetPassword": "Επαναφορά κωδικού",
-    "backToSignIn": "Πίσω στη σύνδεση",
-    "checkYourEmail": "Ελέγξτε το email σας",
-    "forgotPasswordInstructions": "Έχουμε στείλει ένα email στο",
-    "resendCode": "Επαναποστολή κωδικού",
-    "tokenMissing": "Λείπει ο σύνδεσμος επαναφοράς",
-    "tokenExpired": "Ο σύνδεσμος επαναφοράς έχει λήξει",
-    "tokenMissingMsg" : "Ο σύνδεσμος επαναφοράς κωδικού λείπει. Παρακαλώ ζητήστε έναν νέο.",
-    "tokenExpiredMsg" : "Ο σύνδεσμος επαναφοράς κωδικού έχει λήξει. Παρακαλώ ζητήστε έναν νέο.",
-    "changePassword": "Αλλαγή κωδικού",
-    "loginWith": "Σύνδεση με",
-    "signUpWith": "Εγγραφή με"
+    "password": "Κωδικός Πρόσβασης",
+    "yourPassword": "Ο κωδικός πρόσβασης σας",
+    "firstName": "Όνομα",
+    "lastName": "Επώνυμο",
+    "agree": "Συμφωνώ με τους",
+    "termsAndConditions": "Όρους και Προϋποθέσεις",
+    "forgotPassword": "Ξεχάσατε τον κωδικό σας;",
+    "resetPassword": "Επαμαφορά Κωδικού",
+    "forgotPasswordHint": "Εισάγετε το email του λογαριασμού σας",
+    "resetPasswordHint": "Εισάγετε τον νέο σας κωδικό",
+    "sendResetLink": "Αποστολή συνδέσμου επαναφορας",
+    "resetLinkSent": "Έχει σταλεί ένας σύνδεσμος επαναφοράς κωδικού στο email σας",
+    "submit": "Υποβολή",
+    "loginGoogle": "Συνέχεια με λογαριασμό Google"
   }
 }

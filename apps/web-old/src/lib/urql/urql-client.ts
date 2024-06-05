@@ -2,10 +2,9 @@ import { cacheExchange, type Client, createClient, fetchExchange } from '@urql/c
 import { cookies } from 'next/headers';
 // eslint-disable-next-line import/named -- this should work
 import { cache } from 'react';
-import { TOKEN_KEY } from '@repo/utils';
 import { createUrqlRequester } from '@/util/create-urql-requester';
 import { getSdk } from '@/graphql/generated/schema-server';
-import { env } from '@/env.mjs';
+import { env, TOKEN_KEY } from '@/env.mjs';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
 const makeClient = (): Client => {

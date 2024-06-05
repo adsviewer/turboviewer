@@ -1,0 +1,43 @@
+{
+  "insights": {
+    "title": "Διορατικότητες",
+    "tooltipPosition": "θέση"
+  },
+  "filters": {
+    "adId": "Αναγνωριστικό διαφήμισης",
+    "account": "Λογαριασμό",
+    "date": "Ημερομηνία",
+    "device": "Συσκευή",
+    "groupedBy": "Ομαδοποίηση",
+    "orderByDropDown": "{value, select, spend {δαπάνες} impressions {εντυπώσεις} other {άγνωστο}}",
+    "orderDropDown": "{value, select, asc {αύξουσα} desc {φθήνουσα} other {άγνωστο}}",
+    "orderByLabel": "Ταξινόμηση",
+    "pageSize": "Μέγεθος σελίδας",
+    "pagination": {
+      "prev": "Προηγούμενη",
+      "next": "Επόμενη",
+      "info": "Σελίδα {page, number}"
+    },
+    "position": "Θέση",
+    "publisher": "Εκδότη",
+    "select": "Διάλεξε",
+    "title": "Φίλτρα"
+  },
+  "authentication": {
+    "signIn": "Σύνδεση",
+    "signUp": "Εγγραφή",
+    "forgotPassword": "Ξέχασες τον κωδικό σου;",
+    "resetPassword": "Επαναφορά κωδικού",
+    "backToSignIn": "Πίσω στη σύνδεση",
+    "checkYourEmail": "Ελέγξτε το email σας",
+    "forgotPasswordInstructions": "Έχουμε στείλει ένα email στο",
+    "resendCode": "Επαναποστολή κωδικού",
+    "tokenMissing": "Λείπει ο σύνδεσμος επαναφοράς",
+    "tokenExpired": "Ο σύνδεσμος επαναφοράς έχει λήξει",
+    "tokenMissingMsg" : "Ο σύνδεσμος επαναφοράς κωδικού λείπει. Παρακαλώ ζητήστε έναν νέο.",
+    "tokenExpiredMsg" : "Ο σύνδεσμος επαναφοράς κωδικού έχει λήξει. Παρακαλώ ζητήστε έναν νέο.",
+    "changePassword": "Αλλαγή κωδικού",
+    "loginWith": "Σύνδεση με",
+    "signUpWith": "Εγγραφή με"
+  }
+}
