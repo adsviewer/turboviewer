@@ -5,6 +5,7 @@ import { AreaChart } from '@mantine/charts';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
+import { YAxis } from 'recharts';
 import { type CurrencyEnum, type DeviceEnum, type InsightsDatapoints } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
@@ -101,19 +102,47 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Box>
         <AreaChart
+          mt="md"
+          px="sm"
           h={300}
           data={datapoints}
           dataKey="date"
           series={[
-            { name: 'spend', color: 'teal.6', label: `${t('spent')} (${getCurrencySymbol(props.currency)})` },
-            { name: 'impressions', color: 'blue.6', label: t('impressions') },
-            { name: 'cpm', color: 'orange', label: 'CPM' },
+            {
+              yAxisId: 'right',
+              name: 'spend',
+              color: 'teal.6',
+              label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
+            },
+            { yAxisId: 'right', name: 'impressions', color: 'blue.6', label: t('impressions') },
+            { yAxisId: 'left', name: 'cpm', color: 'orange', label: 'CPM' },
           ]}
-          valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
+          tooltipProps={{ wrapperStyle: { zIndex: 3 } }}
+          yAxisProps={{ yAxisId: 'left' }}
+          areaProps={(series) => series}
+          splitColors={['green', 'white']}
+          withLegend
           curveType="natural"
           strokeWidth={1.5}
           tooltipAnimationDuration={200}
-        />
+        >
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            axisLine={false}
+            type="number"
+            tick={{
+              transform: 'translate(10, 0)',
+              fontSize: 12,
+              fill: 'currentColor',
+            }}
+            allowDecimals
+            tickLine={{
+              color: 'var(--chart-grid-color)',
+              stroke: 'var(--chart-grid-color)',
+            }}
+          />
+        </AreaChart>
       </Box>
 
       <Group justify="space-between" mt="md" mb="xs">

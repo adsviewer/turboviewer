@@ -6,7 +6,7 @@ import { IconSettings } from '@tabler/icons-react';
 import React from 'react';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import LanguagePickerSimple from '../dropdowns/language-picker-simple/language-picker-simple';
+import LanguagePickerSimple from '../dropdowns/language-picker/language-picker';
 import ColorSchemePicker from '../dropdowns/color-scheme-picker/color-scheme-picker';
 
 export default function SettingsButton(): ReactNode {
