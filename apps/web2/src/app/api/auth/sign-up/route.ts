@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
 
 export const dynamic = 'force-dynamic'; // defaults to auto
 export async function POST(request: Request): Promise<NextResponse<{ success: true } | { success: false }>> {

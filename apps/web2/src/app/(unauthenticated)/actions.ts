@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 
 export const signOut = (): void => {
   cookies().delete(TOKEN_KEY);

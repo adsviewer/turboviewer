@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { AError, FireAndForget, isAError, isMode, MODE } from '@repo/utils';
+import { AError, FireAndForget, isAError, isMode, MODE, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
 import type QueryString from 'qs';
@@ -49,7 +49,7 @@ export const authLoginCallback = (req: ExpressRequest, res: ExpressResponse): vo
         res.redirect(`${env.PUBLIC_URL}/sign-in?error=${loginProviderResult.message}`);
       } else {
         res.redirect(
-          `${env.PUBLIC_URL}/api/login/sign-in?token=${loginProviderResult.token}&refreshToken=${loginProviderResult.refreshToken}`,
+          `${env.PUBLIC_URL}?${TOKEN_KEY}=${loginProviderResult.token}&${REFRESH_TOKEN_KEY}=${loginProviderResult.refreshToken}`,
         );
       }
     })

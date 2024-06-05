@@ -46,5 +46,3 @@ export const env = createEnv({
   skipValidation: Boolean(process.env.SKIP_ENV_VALIDATION),
 });
 
-export const TOKEN_KEY = 'av_token';
-export const REFRESH_TOKEN_KEY = 'av_refresh_token';

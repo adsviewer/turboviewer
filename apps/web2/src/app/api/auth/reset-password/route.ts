@@ -1,10 +1,9 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PasswordSchema } from '@repo/utils';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY, PasswordSchema } from '@repo/utils';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
-import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@/env.mjs';
 
 const schema = z.object({
   token: z.string(),

@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { jwtVerify } from 'jose';
 import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@repo/logger';
-import { env, REFRESH_TOKEN_KEY, TOKEN_KEY } from './env.mjs';
+import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
+import { env } from './env.mjs';
 import { groupedByKey } from './util/url-query-utils';
 import { InsightsColumnsGroupBy } from './graphql/generated/schema-server';
 
@@ -48,10 +49,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_KEY)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value;
 
-  // In case of token in URL (e.g. during Google auth), set JWT token & redirect to root
-  if (request.nextUrl.searchParams.get('token') && request.nextUrl.searchParams.get('refreshToken')) {
-    const redirectUrl = new URL(`/api/auth/sign-in?${request.nextUrl.searchParams.toString()}`, request.url);
-    return NextResponse.redirect(redirectUrl);
+  // In case of token in URL (e.g. during Google auth), set JWT token & redirect to insights
+  if (request.nextUrl.searchParams.get(TOKEN_KEY) && request.nextUrl.searchParams.get(REFRESH_TOKEN_KEY)) {
+    const redirectUrl = new URL('/insights', request.url);
+    const response = NextResponse.redirect(redirectUrl);
+    response.cookies.set(TOKEN_KEY, request.nextUrl.searchParams.get(TOKEN_KEY) ?? 'error');
+    response.cookies.set(REFRESH_TOKEN_KEY, request.nextUrl.searchParams.get(REFRESH_TOKEN_KEY) ?? 'error');
+    return response;
   }
 
   // Redirect to correct route if visiting the root url
