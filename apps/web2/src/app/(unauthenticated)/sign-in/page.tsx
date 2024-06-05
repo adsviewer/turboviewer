@@ -42,7 +42,6 @@ export default function SignIn(): React.JSX.Element {
   useEffect(() => {
     void getLoginProviders()
       .then((res) => {
-        logger.info(res);
         setLoginProviders(res.loginProviders);
       })
       .catch((error: unknown) => {

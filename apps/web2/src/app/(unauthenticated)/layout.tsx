@@ -17,10 +17,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
-      <head>
-        <ColorSchemeScript />
-      </head>
       <body>
+        <ColorSchemeScript />
         <NextIntlClientProvider messages={messages}>
           <MantineProvider forceColorScheme="light">
             <Flex align="center" justify="center" my="xl">
