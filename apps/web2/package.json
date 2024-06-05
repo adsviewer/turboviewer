@@ -60,7 +60,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.3",
     "react-toastify": "^10.0.5",
-    "recharts": "2",
+    "recharts": "2.13.0-alpha.4",
     "urql": "^4.0.7",
     "zod": "^3.23.5"
   },
