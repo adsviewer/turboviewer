@@ -39,3 +39,5 @@ dist/
 # chatGPT
 .idea/copilot/chatSessions
 .vercel
+
+.idea/aws.xml
