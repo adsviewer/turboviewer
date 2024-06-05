@@ -48,6 +48,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_KEY)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value;
 
+  // In case of token in URL (e.g. during Google auth), set JWT token & redirect to root
+  if (request.nextUrl.searchParams.get('token') && request.nextUrl.searchParams.get('refreshToken')) {
+    const redirectUrl = new URL(`/api/auth/sign-in?${request.nextUrl.searchParams.toString()}`, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // Redirect to correct route if visiting the root url
   if (request.nextUrl.pathname === '/') {
     if (token) {
