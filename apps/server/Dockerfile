@@ -44,14 +44,4 @@ WORKDIR /app
 
 COPY --from=installer /app .
 RUN pnpm install --prod --ignore-scripts
-
-FROM base AS runner
-WORKDIR /app
-
-# Don't run production as root
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 serverjs
-USER serverjs
-COPY --from=stripper /app .
-
 CMD pnpm -C apps/server run start
