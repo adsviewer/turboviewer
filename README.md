@@ -18,7 +18,7 @@ A bunch of cool staff for viewing, optimizing and growing yor digital ad portfol
    ```env
    DATABASE_URL=postgresql://postgres@localhost:5432/adsviewer
    ```
-4. Copy
+4. Login to [development account](https://d-9067fd5baf.awsapps.com/start/#/?tab=accounts) and copy
    the [.env.server](https://eu-central-1.console.aws.amazon.com/s3/object/local-adsviewer?region=eu-central-1&bucketType=general&prefix=.env.server)
    in the `apps/server` directory. Look at [Configuring aws-cli](#configuring-aws-cli) if you don't have access.
 
