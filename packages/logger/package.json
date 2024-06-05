@@ -22,15 +22,15 @@
   },
   "dependencies": {
     "@slack/webhook": "^7.0.2",
-    "pino": "^9.0.0",
+    "pino": "^9.1.0",
     "pino-abstract-transport": "^1.2.0",
     "pino-lambda": "^4.4.0",
-    "pino-pretty": "^11.0.0"
+    "pino-pretty": "^11.1.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.14.2",
     "typescript": "^5.4.5"
   }
 }
