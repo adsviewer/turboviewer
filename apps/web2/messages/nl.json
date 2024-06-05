@@ -1,0 +1,73 @@
+{
+  "navbar": {
+    "insights": "Inzichten",
+    "integrations": "Integraties",
+    "settings": "Instellingen",
+    "signOut": "Uitloggen"
+  },
+  "insights": {
+    "title": "Inzichten",
+    "pageSize": "Paginagrootte",
+    "orderBy": "Sorteren op",
+    "spent": "Uitgegeven",
+    "impressions": "Vertoningen",
+    "descending": "Aflopend",
+    "ascending": "Oplopend",
+    "nextPage": "Volgende pagina",
+    "prevPage": "Vorige pagina",
+    "noResultsFound": "Geen resultaten gevonden",
+    "filters": {
+      "title": "Filters",
+      "accounts": "Accounts",
+      "selectAccounts": "Selecteer accounts",
+      "positions": "Posities",
+      "selectPositions": "Selecteer posities",
+      "devices": "Apparaten",
+      "selectDevices": "Selecteer apparaten",
+      "publishers": "Uitgevers",
+      "selectPublishers": "Selecteer uitgevers",
+      "groupBy": "Groepeer op",
+      "account": "Account",
+      "adId": "Advertentie-ID",
+      "device": "Apparaat",
+      "date": "Datum",
+      "publisher": "Uitgever",
+      "position": "Positie"
+    }
+  },
+  "integrations": {
+    "title": "Integraties",
+    "description": "Versterk je werk door de tools die je dagelijks gebruikt te verbinden om je advertenties op één plek te beheren!",
+    "connect": "Verbinden",
+    "revoke": "Intrekken",
+    "comingSoon": "Binnenkort beschikbaar",
+    "connected": "Verbonden",
+    "notConnected": "Niet verbonden"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "changeLanguage": "Taal wijzigen",
+    "changeColorScheme": "Kleurenthema"
+  },
+  "authentication": {
+    "noAccount": "Heb je geen account?",
+    "alreadyHaveAccount": "Heb je al een account?",
+    "signInNow": "Meld je nu aan",
+    "signIn": "Inloggen",
+    "signUp": "Registreren",
+    "password": "Wachtwoord",
+    "yourPassword": "Je wachtwoord",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "agree": "Akkoord met de",
+    "termsAndConditions": "Algemene voorwaarden",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "resetPassword": "Wachtwoord resetten",
+    "forgotPasswordHint": "Voer het e-mailadres van je account in",
+    "resetPasswordHint": "Voer je nieuwe wachtwoord in",
+    "sendResetLink": "Stuur resetlink",
+    "resetLinkSent": "We hebben een link om je wachtwoord te resetten naar je e-mail gestuurd",
+    "submit": "Verzenden",
+    "loginGoogle": "Verder met Google"
+  }
+}

@@ -29,13 +29,13 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
     .then((integrationType) => {
       if (isAError(integrationType)) {
         logger.warn('Failed to complete integration %s:', integrationType.message);
-        res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=${integrationType.message}`);
+        res.redirect(`${env.PUBLIC_URL}/integrations?error=${integrationType.message}`);
       } else {
-        res.redirect(`${env.PUBLIC_URL}/settings/integrations?type=${integrationType}&status=success`);
+        res.redirect(`${env.PUBLIC_URL}/integrations?type=${integrationType}&status=success`);
       }
     })
     .catch((_e: unknown) => {
-      res.redirect(`${env.PUBLIC_URL}/settings/integrations?error=unknown_error`);
+      res.redirect(`${env.PUBLIC_URL}/integrations?error=unknown_error`);
     });
 };
 

@@ -1,0 +1,28 @@
+query settingsChannels {
+  settingsChannels {
+    type
+    status
+    authUrl
+  }
+}
+
+mutation deAuthIntegration($type: IntegrationType!) {
+  deAuthIntegration(type: $type) {
+    ... on BaseError {
+      message
+    }
+    ... on MetaError {
+      message
+    }
+    ... on MutationDeAuthIntegrationSuccess {
+      data
+    }
+  }
+}
+
+subscription channelInitialSetupProgress {
+  channelInitialSetupProgress {
+    progress
+    channel
+  }
+}
