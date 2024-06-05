@@ -1,43 +1,73 @@
 {
+  "navbar": {
+    "insights": "Insights",
+    "integrations": "Integrations",
+    "settings": "Settings",
+    "signOut": "Sign Out"
+  },
   "insights": {
     "title": "Insights",
-    "tooltipPosition": "position"
+    "pageSize": "Page size",
+    "orderBy": "Order by",
+    "spent": "Spent",
+    "impressions": "Impressions",
+    "descending": "Descending",
+    "ascending": "Ascending",
+    "nextPage": "Next page",
+    "prevPage": "Prev page",
+    "noResultsFound": "No results found",
+    "filters": {
+      "title": "Filters",
+      "accounts": "Accounts",
+      "selectAccounts": "Select accounts",
+      "positions": "Positions",
+      "selectPositions": "Select positions",
+      "devices": "Devices",
+      "selectDevices": "Select devices",
+      "publishers": "Publishers",
+      "selectPublishers": "Select publishers",
+      "groupBy": "Group By",
+      "account": "Account",
+      "adId": "Ad ID",
+      "device": "Device",
+      "date": "Date",
+      "publisher": "Publisher",
+      "position": "Position"
+    }
   },
-  "filters": {
-    "account": "Account",
-    "adId": "Ad Id",
-    "date": "Date",
-    "device": "Device",
-    "groupedBy": "Grouped By",
-    "orderByDropDown": "{value, select, spend {spend} impressions {impressions} other {unknown}}",
-    "orderDropDown": "{value, select, asc {ascending} desc {descending} other {unknown}}",
-    "orderByLabel": "Order By",
-    "pageSize": "Page Size",
-    "pagination": {
-      "prev": "Previous",
-      "next": "Next",
-      "info": "Page {page, number}"
-    },
-    "position": "Position",
-    "publisher": "Publisher",
-    "select": "Select",
-    "title": "Filters"
+  "integrations": {
+    "title": "Integrations",
+    "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!",
+    "connect": "Connect",
+    "revoke": "Revoke",
+    "comingSoon": "Coming soon",
+    "connected": "Connected",
+    "notConnected": "Not Connected"
+  },
+  "settings": {
+    "title": "Settings",
+    "changeLanguage": "Change language",
+    "changeColorScheme": "Color theme"
   },
   "authentication": {
+    "noAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInNow": "Sign in now",
     "signIn": "Sign In",
     "signUp": "Sign Up",
+    "password": "Password",
+    "yourPassword": "Your password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "agree": "Agree to the",
+    "termsAndConditions": "Terms and Conditions",
     "forgotPassword": "Forgot Password?",
     "resetPassword": "Reset Password",
-    "backToSignIn": "Back to Sign In",
-    "checkYourEmail": "Check your email",
-    "forgotPasswordInstructions": "We have sent a password reset link to",
-    "resendCode": "Resend Code",
-    "tokenMissing": "Token missing",
-    "tokenExpired": "Token expired",
-    "tokenMissingMsg" : "The password reset link is missing the token. Please try again.",
-    "tokenExpiredMsg" : "The password reset link has expired. Please request a new one.",
-    "changePassword": "Change Password",
-    "loginWith": "Sign in with",
-    "signUpWith": "Sign up with"
+    "forgotPasswordHint": "Enter your account's email",
+    "resetPasswordHint": "Enter your new password",
+    "sendResetLink": "Send reset link",
+    "resetLinkSent": "We have sent a password reset link to your email",
+    "submit": "Submit",
+    "loginGoogle": "Continue with Google"
   }
 }

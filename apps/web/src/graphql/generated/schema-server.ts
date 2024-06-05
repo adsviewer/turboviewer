@@ -686,7 +686,6 @@ export type InsightsQuery = {
         impressions: number;
         cpm: number;
       }>;
-      iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
     }>;
   };
 };
@@ -818,7 +817,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
   __typename?: 'Query';
-  me: { __typename?: 'User'; firstName: string; lastName: string; email: string; photoUrl?: string | null };
+  me: { __typename?: 'User'; firstName: string; lastName: string; email: string };
 };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
@@ -909,11 +908,6 @@ export const InsightsDocument = gql`
         device
         publisher
         position
-        iFrame {
-          src
-          height
-          width
-        }
       }
     }
   }
@@ -1010,7 +1004,6 @@ export const MeDocument = gql`
       firstName
       lastName
       email
-      photoUrl
     }
   }
 `;

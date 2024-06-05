@@ -1,21 +1,21 @@
-import { notFound } from 'next/navigation';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- preserve the format of next-intl's docs */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment -- preserve the format of next-intl's docs */
 import { getRequestConfig } from 'next-intl/server';
-import el from '../messages/el.json';
-import en from '../messages/en.json';
+import { cookies } from 'next/headers';
 
 const localesMap = new Map([
-  ['en-us', en],
-  ['en-gb', en],
-  ['el', el],
+  ['en-us', 'en'],
+  ['en-gb', 'en'],
+  ['el', 'el'],
+  ['nl', 'nl'],
+  ['fr', 'fr'],
 ]);
 
-export const locales = Array.from(localesMap.keys());
-
-export default getRequestConfig(({ locale }) => {
-  // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale)) notFound();
+export default getRequestConfig(async () => {
+  const locale = cookies().get('NEXT_LOCALE')?.value ?? 'en-gb';
 
   return {
-    messages: localesMap.get(locale) ?? en,
+    locale,
+    messages: (await import(`../messages/${localesMap.get(locale) ?? 'en'}.json`)).default,
   };
 });

@@ -41,7 +41,6 @@ query me {
     firstName
     lastName
     email
-    photoUrl
   }
 }
 

@@ -57,11 +57,6 @@ query insights(
       device
       publisher
       position
-      iFrame {
-        src
-        height
-        width
-      }
     }
   }
 }

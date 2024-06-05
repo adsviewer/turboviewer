@@ -31,7 +31,7 @@ const config: CodegenConfig = {
       },
       documents: ['../web/src/graphql/*.graphql'],
     },
-    '../web2/src/graphql/generated/schema-server.ts': {
+    '../web-old/src/graphql/generated/schema-server.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
       config: {
         withHooks: true,
@@ -39,9 +39,9 @@ const config: CodegenConfig = {
           enumValues: 'keep',
         },
       },
-      documents: ['../web2/src/graphql/*.graphql'],
+      documents: ['../web-old/src/graphql/*.graphql'],
     },
-    '../web2/src/graphql/generated/schema-client.ts': {
+    '../web-old/src/graphql/generated/schema-client.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
       config: {
         withHooks: true,
@@ -50,7 +50,7 @@ const config: CodegenConfig = {
           enumValues: 'keep',
         },
       },
-      documents: ['../web2/src/graphql/*.graphql'],
+      documents: ['../web-old/src/graphql/*.graphql'],
     },
   },
   config: {
