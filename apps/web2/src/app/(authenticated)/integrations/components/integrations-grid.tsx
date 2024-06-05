@@ -53,6 +53,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
             <IntegrationCard
               title="LinkedIn"
               description="Connect your LinkedIn account and manage all your LinkedIn advertisments!"
+              authUrl={props.integrations[2].authUrl}
               integrationType={IntegrationType.LINKEDIN}
               isConnected={isIntegrationConnected(props.integrations[2].status)}
               isAvailable={isIntegrationAvailable(props.integrations[2].status)}

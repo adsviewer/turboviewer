@@ -1,19 +1,14 @@
 'use client';
 
-import { Card, Text, Badge, Group, Flex, useComputedColorScheme, useMantineTheme, Box } from '@mantine/core';
+import { Card, Text, Badge, Group, Box, Flex } from '@mantine/core';
 import { AreaChart } from '@mantine/charts';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
-import {
-  type CurrencyEnum,
-  type DeviceEnum,
-  type IFrame,
-  type InsightsDatapoints,
-} from '@/graphql/generated/schema-server';
+import { type CurrencyEnum, type DeviceEnum, type InsightsDatapoints } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
-import AdPopover from './ad-popover';
+// import AdPopover from './ad-popover';
 
 interface InsightCardProps {
   title: string | null | undefined;
@@ -22,7 +17,6 @@ interface InsightCardProps {
   rank: 'good' | 'mid' | 'bad' | 'unknown';
   currency: CurrencyEnum;
   datapoints: InsightsDatapoints[];
-  iframe: IFrame | null | undefined;
 }
 
 interface RankType {
@@ -40,19 +34,19 @@ interface Datapoint {
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const format = useFormatter();
   const t = useTranslations('insights');
-  const computedColorScheme = useComputedColorScheme();
-  const theme = useMantineTheme();
+  // const computedColorScheme = useComputedColorScheme();
+  // const theme = useMantineTheme();
   const [rank, setRank] = useState<RankType>({
     label: '-',
     color: 'gray',
   });
   const [datapoints, setDatapoints] = useState<Datapoint[]>([]);
 
-  // Set the correct color of the logo based on the current color scheme
-  let iconColor = theme.colors.dark[2];
-  if (computedColorScheme === 'dark') {
-    iconColor = theme.colors.gray[5];
-  }
+  // Set the correct color of the icons based on the current color scheme
+  // let iconColor = theme.colors.dark[2];
+  // if (computedColorScheme === 'dark') {
+  //   iconColor = theme.colors.gray[5];
+  // }
 
   const setupRank = useCallback(() => {
     switch (props.rank) {
@@ -124,7 +118,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
-          {props.iframe ? <AdPopover iconColor={iconColor} iframe={props.iframe} /> : null}
+          {/* {props.iframe ? <AdPopover iconColor={iconColor} iframe={props.iframe} /> : null} */}
           <Text fw={500}>{props.title}</Text>
         </Flex>
         <Badge color={rank.color}>{rank.label}</Badge>

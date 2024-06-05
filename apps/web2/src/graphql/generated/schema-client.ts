@@ -621,6 +621,7 @@ export type User = {
   lastName: Scalars['String']['output'];
   organization: Organization;
   organizationId: Scalars['ID']['output'];
+  photoUrl?: Maybe<Scalars['String']['output']>;
   roles: Array<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
 };
@@ -686,7 +687,6 @@ export type InsightsQuery = {
         impressions: number;
         cpm: number;
       }>;
-      iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
     }>;
   };
 };
@@ -913,11 +913,6 @@ export const InsightsDocument = gql`
         device
         publisher
         position
-        iFrame {
-          src
-          height
-          width
-        }
       }
     }
   }

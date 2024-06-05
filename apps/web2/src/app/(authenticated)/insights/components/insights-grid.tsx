@@ -37,7 +37,6 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                   rank="good" // TODO: Set rank according to CPM
                   currency={insight.currency}
                   datapoints={insight.datapoints}
-                  iframe={insight.iFrame}
                 />
               ))
             ) : (
