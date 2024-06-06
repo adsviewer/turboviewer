@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "extends": "@repo/typescript-config/base.json",
+  "include": ["src/**.*js", "src/**.ts"]
+}

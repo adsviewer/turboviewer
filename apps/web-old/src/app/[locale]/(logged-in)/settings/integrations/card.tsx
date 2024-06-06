@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as changeCase from 'change-case';
+import { getIntegrationTypeName } from '@repo/mappings';
 import { IntegrationStatus, type SettingsChannelsQuery } from '@/graphql/generated/schema-server';
 import { integrationTypeMap, type UnwrapArray } from '@/util/types';
 import { deAuthIntegration } from '@/app/[locale]/(logged-in)/settings/integrations/actions';
@@ -88,7 +89,7 @@ export default function Card({
               <ImageOff size={40} />
             )}
           </div>
-          <div className="grow text-md font-semibold">{integrationTypeMap.get(type)?.name ?? type}</div>
+          <div className="grow text-md font-semibold">{getIntegrationTypeName(type)}</div>
         </div>
         {cardStatus !== IntegrationStatus.ComingSoon && (
           <Badge
