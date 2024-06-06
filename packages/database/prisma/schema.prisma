@@ -143,7 +143,7 @@ model Ad {
 
   externalId String    @map("external_id")
   name       String
-  adAccount  AdAccount @relation(fields: [adAccountId], references: [id])
+  adAccount  AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
   insights   Insight[]
   creative   Creative? @relation(fields: [creativeId], references: [id])
 
@@ -175,7 +175,7 @@ model Creative {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
-  adAccount AdAccount @relation(fields: [adAccountId], references: [id])
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
   ads       Ad[]
 
   @@unique([adAccountId, name])
@@ -198,7 +198,7 @@ model Insight {
   position    String
 
   ad        Ad         @relation(fields: [adId], references: [id])
-  adAccount AdAccount? @relation(fields: [adAccountId], references: [id])
+  adAccount AdAccount? @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
 
   @@unique([adId, date, device, publisher, position])
   @@index([adAccountId])

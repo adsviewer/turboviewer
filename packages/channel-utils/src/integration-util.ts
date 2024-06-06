@@ -9,7 +9,8 @@ export const authEndpoint = '/channel/auth';
 export type AdAccountEssential = Pick<AdAccount, 'id' | 'externalId' | 'currency'>;
 
 export const revokeIntegration = async (externalId: string, type: IntegrationTypeEnum): Promise<void> => {
-  await prisma.integration.update({
+  const { adAccounts } = await prisma.integration.update({
+    select: { adAccounts: true },
     where: {
       externalId_type: {
         externalId,
@@ -18,6 +19,13 @@ export const revokeIntegration = async (externalId: string, type: IntegrationTyp
     },
     data: {
       status: IntegrationStatus.REVOKED,
+    },
+  });
+  await prisma.adAccount.deleteMany({
+    where: {
+      id: {
+        in: adAccounts.map((adAccount) => adAccount.id),
+      },
     },
   });
 };
