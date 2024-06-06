@@ -302,7 +302,7 @@ export type FilterInsightsInput = {
 
 export type GenerateGoogleAuthUrlResponse = {
   __typename?: 'GenerateGoogleAuthUrlResponse';
-  name: LoginProviderEnum;
+  type: LoginProviderEnum;
   url: Scalars['String']['output'];
 };
 
@@ -825,7 +825,7 @@ export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LoginProvidersQuery = {
   __typename?: 'Query';
-  loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; name: LoginProviderEnum }>;
+  loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
 export type UserFieldsFragment = {
@@ -1018,7 +1018,7 @@ export const LoginProvidersDocument = gql`
   query loginProviders {
     loginProviders {
       url
-      name
+      type
     }
   }
 `;

@@ -47,7 +47,7 @@ query me {
 query loginProviders {
   loginProviders {
     url
-    name
+    type
   }
 }
 

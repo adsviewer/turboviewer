@@ -46,7 +46,7 @@ export const TokenUserDto = builder
 export const GenerateGoogleAuthUrlResponseDto = builder.simpleObject('GenerateGoogleAuthUrlResponse', {
   fields: (t) => ({
     url: t.string({ nullable: false }),
-    name: t.field({ type: LoginProviderEnumDto, nullable: false }),
+    type: t.field({ type: LoginProviderEnumDto, nullable: false }),
   }),
 });
 

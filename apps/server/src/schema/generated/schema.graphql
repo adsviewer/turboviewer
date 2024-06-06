@@ -270,7 +270,7 @@ input FilterInsightsInput {
 }
 
 type GenerateGoogleAuthUrlResponse {
-  name: LoginProviderEnum!
+  type: LoginProviderEnum!
   url: String!
 }
 

@@ -9,8 +9,8 @@ export default async function LoginProvidersLinks({ message }: LoginProvidersLin
   return (
     <div>
       {loginProviders.map((provider) => (
-        <Link key={provider.name} className="text-center underline" href={provider.url}>
-          {message} {provider.name}
+        <Link key={provider.type} className="text-center underline" href={provider.url}>
+          {message} {provider.type}
         </Link>
       ))}
     </div>

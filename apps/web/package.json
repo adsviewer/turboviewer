@@ -33,6 +33,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@repo/logger": "workspace:*",
+    "@repo/mappings": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "@t3-oss/env-nextjs": "^0.10.1",
