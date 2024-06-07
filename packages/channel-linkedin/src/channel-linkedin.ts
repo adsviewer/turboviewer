@@ -24,7 +24,7 @@ const restliClient = new RestliClient();
 
 class LinkedIn implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
-    const scopes = ['r_basicprofile', 'r_ads'];
+    const scopes = ['r_basicprofile', 'r_ads', 'r_ads_reporting'];
     return { url: authClient.generateMemberAuthorizationUrl(scopes, state) };
   }
 
