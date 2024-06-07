@@ -196,11 +196,10 @@ class Meta implements ChannelInterface {
 
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const accounts = await this.getAdAccounts(integration);
+    const accounts = await this.getActiveAdAccounts(integration);
     if (isAError(accounts)) return accounts;
-    const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
-    logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(activeAccounts)} active accounts`);
-    const dbAccounts = await saveAccounts(activeAccounts, integration);
+    logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(accounts)} active accounts`);
+    const dbAccounts = await saveAccounts(accounts, integration);
 
     const adReportsAccountMap = await this.runAdInsightReports(dbAccounts, initial, integration);
     if (isAError(adReportsAccountMap)) return adReportsAccountMap;
@@ -241,7 +240,7 @@ class Meta implements ChannelInterface {
     return PublisherEnum.Facebook;
   }
 
-  private async getAdAccounts(integration: Integration): Promise<ChannelAdAccount[] | AError> {
+  private async getActiveAdAccounts(integration: Integration): Promise<ChannelAdAccount[] | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const user = new User('me');
 
@@ -267,17 +266,23 @@ class Meta implements ChannelInterface {
       ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
     });
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
-    const toAccount = (acc: z.infer<typeof accountSchema>) =>
-      ({
-        accountStatus: acc.account_status,
-        amountSpent: acc.amount_spent,
-        hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
-        externalId: acc.id.slice(4),
-        currency: acc.currency,
-        name: acc.name,
-      }) satisfies ChannelAdAccount;
+    const toAccount = (acc: z.infer<typeof accountSchema>) => ({
+      accountStatus: acc.account_status,
+      amountSpent: acc.amount_spent,
+      hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
+      externalId: acc.id.slice(4),
+      currency: acc.currency,
+      name: acc.name,
+    });
 
-    return await Meta.handlePagination(integration, getAdAccountsFn, accountSchema, toAccount);
+    const accounts = await Meta.handlePagination(integration, getAdAccountsFn, accountSchema, toAccount);
+    if (isAError(accounts)) return accounts;
+    const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
+    return activeAccounts.map((acc) => ({
+      name: acc.name,
+      currency: acc.currency,
+      externalId: acc.externalId,
+    })) satisfies ChannelAdAccount[];
   }
 
   private async getCreatives(

@@ -78,7 +78,7 @@ builder.queryFields((t) => ({
         adAccountId?: string;
         adAccountName?: string;
         adId?: string;
-        adName?: string;
+        adName?: string | null;
         position?: string;
         device?: DeviceEnum;
         publisher?: PublisherEnum;

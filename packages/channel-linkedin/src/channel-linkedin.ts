@@ -1,15 +1,24 @@
-import { DeviceEnum, type Integration, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
-import { addInterval, AError } from '@repo/utils';
-import { z } from 'zod';
+import { URLSearchParams } from 'node:url';
+import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
+import { addInterval, AError, extractDate, getBeforeXMonths, getYesterday, isAError } from '@repo/utils';
+import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
+  type AdAccountEssential,
   authEndpoint,
+  type ChannelAd,
+  type ChannelAdAccount,
+  type ChannelInsight,
   type ChannelInterface,
+  deleteOldInsights,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   revokeIntegrationById,
+  saveAccounts,
+  saveAds,
+  saveInsights,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { env } from './config';
@@ -21,6 +30,8 @@ const authClient = new AuthClient({
 });
 
 const restliClient = new RestliClient();
+const versionString = '202309';
+const baseUrl = 'https://api.linkedin.com';
 
 class LinkedIn implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
@@ -92,7 +103,20 @@ class LinkedIn implements ChannelInterface {
     return integration.externalId;
   }
 
-  async getChannelData(_integration: Integration, _initial: boolean): Promise<AError | undefined> {
+  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
+    const dbAccounts = await this.getAndSaveAdAccounts(integration);
+    if (isAError(dbAccounts)) return dbAccounts;
+
+    for (const dbAccount of dbAccounts) {
+      const analytics = await this.getAdAnalytics(integration, initial, dbAccount);
+      if (isAError(analytics)) return analytics;
+
+      const adExternalIdMap = await this.saveCreativesAsAds(integration, analytics.creativeIds, dbAccount);
+      if (isAError(adExternalIdMap)) return adExternalIdMap;
+
+      await deleteOldInsights(dbAccount.id, initial);
+      await saveInsights(analytics.insights, adExternalIdMap, dbAccount);
+    }
     return Promise.resolve(undefined);
   }
 
@@ -108,6 +132,184 @@ class LinkedIn implements ChannelInterface {
 
   getDefaultPublisher(): PublisherEnum {
     return PublisherEnum.Facebook;
+  }
+
+  private async getAndSaveAdAccounts(integration: Integration): Promise<AError | AdAccountEssential[]> {
+    const adAccountSchema = z.object({
+      test: z.boolean(),
+      type: z.enum(['BUSINESS', 'ENTERPRISE']),
+      reference: z.string().optional(),
+      status: z.enum(['ACTIVE', 'CANCELED', 'DRAFT', 'PENDING_DELETION', 'REMOVED']),
+      id: z.number().int(),
+      servingStatuses: z.array(
+        z.enum([
+          'RUNNABLE',
+          'BILLING_HOLD',
+          'STOPPED',
+          'ACCOUNT_TOTAL_BUDGET_HOLD',
+          'ACCOUNT_END_DATE_HOLD',
+          'RESTRICTED_HOLD',
+          'INTERNAL_HOLD',
+        ]),
+      ),
+      name: z.string(),
+      currency: z.nativeEnum(CurrencyEnum),
+    });
+    const adAccounts = await LinkedIn.handlePagination(
+      integration,
+      '/adAccounts?q=search&search=(status:(values:List(ACTIVE)))',
+      adAccountSchema,
+    );
+    if (isAError(adAccounts)) return adAccounts;
+    const channelAccounts: ChannelAdAccount[] = adAccounts.map((a) => ({
+      externalId: a.id.toString(),
+      name: a.name,
+      currency: a.currency,
+    }));
+    return await saveAccounts(channelAccounts, integration);
+  }
+
+  private async getAdAnalytics(
+    integration: Integration,
+    initial: boolean,
+    dbAccount: AdAccountEssential,
+  ): Promise<AError | { creativeIds: Set<string>; insights: ChannelInsight[] }> {
+    const params = {
+      q: 'statistics',
+      pivots: 'List(CREATIVE,IMPRESSION_DEVICE_TYPE)',
+      timeGranularity: 'DAILY',
+      accounts: `List(${encodeURIComponent(`urn:li:sponsoredAccount:${dbAccount.externalId}`)})`,
+      dateRange: await timeRange(initial, dbAccount.id),
+      fields: 'clicks,impressions,pivotValues,costInLocalCurrency,dateRange',
+    };
+    const adAnalytics = await LinkedIn.handlePagination(
+      integration,
+      `/adAnalytics?${queryParams(params)}`,
+      z.object({
+        clicks: z.number().int(),
+        impressions: z.number().int(),
+        costInLocalCurrency: z.coerce.number(),
+        pivotValues: z.array(z.string()),
+        dateRange: z.object({
+          start: z.object({ year: z.number().int(), month: z.number().int(), day: z.number().int() }),
+          end: z.object({ year: z.number().int(), month: z.number().int(), day: z.number().int() }),
+        }),
+      }),
+    );
+    if (isAError(adAnalytics)) return adAnalytics;
+    const creativeIds = new Set<string>();
+    const insights: ChannelInsight[] = adAnalytics
+      .map((a) => {
+        const creativeExternalId = a.pivotValues.find((v) => v.startsWith('urn:li:sponsoredCreative:'))?.split(':')[3];
+        if (!creativeExternalId) return undefined;
+        creativeIds.add(creativeExternalId);
+        const device = a.pivotValues.find((v) => Array.from(LinkedIn.deviceEnumMap.keys()).includes(v));
+        return {
+          externalAdId: creativeExternalId,
+          date: new Date(a.dateRange.start.year, a.dateRange.start.month - 1, a.dateRange.start.day),
+          externalAccountId: dbAccount.externalId,
+          impressions: a.impressions,
+          spend: a.costInLocalCurrency,
+          device: device ? LinkedIn.deviceEnumMap.get(device) ?? DeviceEnum.Unknown : DeviceEnum.Unknown,
+          publisher: PublisherEnum.LinkedIn,
+          position: '',
+        };
+      })
+      .flatMap((i) => (i ? [i] : []));
+    return { creativeIds, insights };
+  }
+
+  async saveCreativesAsAds(
+    integration: Integration,
+    creativeIds: Set<string>,
+    dbAccount: AdAccountEssential,
+  ): Promise<AError | Map<string, string>> {
+    const channelAds: ChannelAd[] = Array.from(creativeIds).map((c) => ({
+      externalAdAccountId: dbAccount.externalId,
+      externalId: c,
+    }));
+    const adExternalIdMap = new Map<string, string>();
+    await saveAds(integration, channelAds, dbAccount.id, adExternalIdMap);
+    return adExternalIdMap;
+  }
+
+  // This will prove useful when we will start saving campaigns
+  private async getAndSaveCampaigns(
+    integration: Integration,
+    campaignIds: Set<string>,
+    dbAccount: AdAccountEssential,
+  ): Promise<AError | z.infer<typeof schema>[]> {
+    const params = {
+      q: 'search',
+      search: `(id:(values:List(${Array.from(campaignIds).join(',')})))`,
+    };
+    const schema = z.object({ name: z.string(), id: z.number().int() });
+    return await LinkedIn.handlePagination(
+      integration,
+      `/adAccounts/${dbAccount.externalId}/adCampaigns?${queryParams(params)}`,
+      schema,
+    );
+  }
+
+  private static async handlePagination<T extends ZodTypeAny>(
+    integration: Integration,
+    queryParams: string,
+    schema: T,
+  ): Promise<AError | z.infer<typeof schema>[]> {
+    const headers = {
+      'LinkedIn-Version': versionString,
+      'X-Restli-Protocol-Version': '2.0.0',
+      Authorization: `Bearer ${integration.accessToken}`,
+    };
+    const res: T[] = [];
+    const responseP = fetch(`${baseUrl}/rest${queryParams}`, {
+      headers,
+    });
+    const response = await LinkedIn.parseLinkedInResponse(responseP, schema);
+    if (isAError(response)) return response;
+    res.push(...response.elements);
+    let next = response.next;
+    while (next) {
+      const nextResponse = fetch(`${baseUrl}${next.href}`, {
+        headers,
+      });
+      const nextResponseParsed = await LinkedIn.parseLinkedInResponse(nextResponse, schema);
+      if (isAError(nextResponseParsed)) return nextResponseParsed;
+      res.push(...nextResponseParsed.elements);
+      next = nextResponseParsed.next;
+    }
+    return res;
+  }
+
+  private static async parseLinkedInResponse<T extends ZodTypeAny>(
+    responseP: Promise<Response>,
+    schema: T,
+  ): Promise<AError | { next: { rel: string; href: string } | undefined; elements: T[] }> {
+    const response = await responseP.catch((error: unknown) => {
+      logger.error(error, 'Failed to fetch data in parseLinkedInResponse');
+      return new AError('Failed to fetch data');
+    });
+    if (isAError(response)) return response;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
+    const body = await response.json();
+    if (!response.ok) {
+      logger.error(body, 'Failed to fetch data');
+      return new AError('Failed to fetch data');
+    }
+    const bigSchema = z.object({
+      elements: schema.array(),
+      paging: z.object({
+        links: z.array(z.object({ rel: z.string(), href: z.string() })),
+      }),
+    });
+    const parsed = bigSchema.safeParse(body);
+    if (!parsed.success) {
+      const msg = 'Failed to parse data in linkedIn pagination call';
+      logger.error(parsed.error, msg);
+      return new AError(msg);
+    }
+    const next = parsed.data.paging.links.find((l) => l.rel === 'next');
+    return { next, elements: parsed.data.elements };
   }
 
   private static parseDeAuthRequest(json: unknown): AError {
@@ -133,16 +335,9 @@ class LinkedIn implements ChannelInterface {
   }
 
   private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([
-    ['mobile_app', DeviceEnum.MobileApp],
-    ['mobile_web', DeviceEnum.MobileWeb],
-    ['desktop', DeviceEnum.Desktop],
-  ]);
-
-  private static publisherEnumMap: Map<string, PublisherEnum> = new Map<string, PublisherEnum>([
-    ['facebook', PublisherEnum.Facebook],
-    ['instagram', PublisherEnum.Instagram],
-    ['messenger', PublisherEnum.Messenger],
-    ['audience_network', PublisherEnum.AudienceNetwork],
+    ['MOBILE_APP', DeviceEnum.MobileApp],
+    ['MOBILE_WEB', DeviceEnum.MobileWeb],
+    ['DESKTOP_WEB', DeviceEnum.Desktop],
   ]);
 }
 
@@ -157,6 +352,36 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
     return true;
   }
   return false;
+};
+
+const timeRange = async (initial: boolean, adAccountId: string): Promise<string> => {
+  const xMonthsAgo = (): string => {
+    const { year, month, day } = extractDate(getBeforeXMonths());
+    return `(start:(year:${String(year)},month:${month},day:${day}))`;
+  };
+
+  const prior1Day = (latestInsight: Date): string => {
+    const { year, month, day } = extractDate(getYesterday(latestInsight));
+    return `(start:(year:${String(year)},month:${month},day:${day}))`;
+  };
+
+  if (initial) {
+    return xMonthsAgo();
+  }
+  const latestInsight = await prisma.insight.findFirst({
+    select: { date: true },
+    where: { adAccountId },
+    orderBy: { date: 'desc' },
+  });
+  return latestInsight ? prior1Day(latestInsight.date) : xMonthsAgo();
+};
+
+const queryParams = (params: Record<string, string>): string => {
+  const qParams = Object.entries(params).reduce<string[]>((acc, [key, value]) => {
+    acc.push(`${key}=${value}`);
+    return acc;
+  }, []);
+  return qParams.join('&');
 };
 
 export const linkedIn = new LinkedIn();

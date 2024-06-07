@@ -28,7 +28,7 @@ export type Ad = {
   externalId: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insights: AdInsightsConnection;
-  name: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
 };
 
 export type AdInsightsArgs = {
@@ -695,7 +695,7 @@ export type LastThreeMonthsAdsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LastThreeMonthsAdsQuery = {
   __typename?: 'Query';
-  lastThreeMonthsAds: Array<{ __typename?: 'Ad'; id: string; name: string }>;
+  lastThreeMonthsAds: Array<{ __typename?: 'Ad'; id: string; name?: string | null }>;
 };
 
 export type SettingsChannelsQueryVariables = Exact<{ [key: string]: never }>;
