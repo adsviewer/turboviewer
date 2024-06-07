@@ -16,7 +16,7 @@ type Ad {
     positions: [String!]
     publishers: [PublisherEnum!]
   ): AdInsightsConnection!
-  name: String!
+  name: String
 }
 
 type AdAccount {

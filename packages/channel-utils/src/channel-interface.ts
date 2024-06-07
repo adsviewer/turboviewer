@@ -16,10 +16,6 @@ export interface TokensResponse {
 }
 
 export interface ChannelAdAccount {
-  accountStatus: number;
-  // in cents
-  amountSpent: number;
-  hasAdsRunningOrInReview: boolean;
   name: string;
   currency: CurrencyEnum;
   externalId: string;
@@ -28,7 +24,7 @@ export interface ChannelAdAccount {
 export interface ChannelAd {
   externalAdAccountId: string;
   externalId: string;
-  name: string;
+  name?: string;
 }
 
 export interface ChannelCreative {

@@ -142,7 +142,7 @@ model Ad {
   creativeId  String?
 
   externalId String    @map("external_id")
-  name       String
+  name       String?
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
   insights   Insight[]
   creative   Creative? @relation(fields: [creativeId], references: [id])
