@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbo",
-    "build": "next build",
-    "start": "next start",
+    "dev1": "next dev --turbo",
+    "build1": "next build",
+    "start1": "next start",
     "lint": "next lint --max-warnings 0",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",

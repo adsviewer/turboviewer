@@ -10,11 +10,13 @@ import {
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
+  type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
   deleteOldInsights,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
+  getIFrame,
   revokeIntegrationById,
   saveAccounts,
   saveAds,
@@ -30,7 +32,7 @@ const authClient = new AuthClient({
 });
 
 const restliClient = new RestliClient();
-const versionString = '202309';
+const versionString = '202405';
 const baseUrl = 'https://api.linkedin.com';
 
 class LinkedIn implements ChannelInterface {
@@ -120,14 +122,24 @@ class LinkedIn implements ChannelInterface {
     return Promise.resolve(undefined);
   }
 
-  getAdPreview(
-    _integration: Integration,
-    _adId: string,
-    _publisher?: PublisherEnum,
-    _device?: DeviceEnum,
-    _position?: string,
-  ): Promise<string | AError> {
-    throw new Error('Not implemeted yet');
+  async getAdPreview(integration: Integration, adId: string): Promise<ChannelIFrame | AError> {
+    const { externalId, adAccount } = await prisma.ad.findUniqueOrThrow({
+      include: { adAccount: true },
+      where: { id: adId },
+    });
+    const params = {
+      q: 'creative',
+      creative: encodeURIComponent(`urn:li:sponsoredCreative:${externalId}`),
+      account: encodeURIComponent(`urn:li:sponsoredAccount:${adAccount.externalId}`),
+    };
+    const adPreview = await LinkedIn.handlePagination(
+      integration,
+      `/adPreviews?${queryParams(params)}`,
+      z.object({ preview: z.string() }),
+    );
+    if (isAError(adPreview)) return adPreview;
+    if (adPreview.length !== 1) return new AError('getAdPreview: Elements should contain only one element');
+    return getIFrame(adPreview[0].preview);
   }
 
   getDefaultPublisher(): PublisherEnum {

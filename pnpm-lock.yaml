@@ -170,9 +170,6 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
-      node-html-parser:
-        specifier: ^6.1.13
-        version: 6.1.13
       sns-validator:
         specifier: ^0.3.5
         version: 0.3.5
@@ -716,6 +713,9 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+      node-html-parser:
+        specifier: ^6.1.13
+        version: 6.1.13
       zod:
         specifier: ^3.23.8
         version: 3.23.8

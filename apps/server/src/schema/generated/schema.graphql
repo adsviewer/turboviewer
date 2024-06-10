@@ -297,9 +297,9 @@ type GroupedInsights {
 }
 
 type IFrame {
-  height: String!
+  height: Int!
   src: String!
-  width: String!
+  width: Int!
 }
 
 type Insight {
@@ -496,6 +496,7 @@ enum PublisherEnum {
 
 type Query {
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
+  insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   lastThreeMonthsAds: [Ad!]!

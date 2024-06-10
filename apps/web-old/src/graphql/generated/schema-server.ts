@@ -332,9 +332,9 @@ export type GroupedInsights = {
 
 export type IFrame = {
   __typename?: 'IFrame';
-  height: Scalars['String']['output'];
+  height: Scalars['Int']['output'];
   src: Scalars['String']['output'];
-  width: Scalars['String']['output'];
+  width: Scalars['Int']['output'];
 };
 
 export type Insight = {
@@ -572,6 +572,7 @@ export enum PublisherEnum {
 export type Query = {
   __typename?: 'Query';
   insightDatapoints: Array<InsightsDatapoints>;
+  insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsight;
   integrations: Array<Integration>;
   lastThreeMonthsAds: Array<Ad>;
@@ -582,6 +583,13 @@ export type Query = {
 
 export type QueryInsightDatapointsArgs = {
   args: InsightsDatapointsInput;
+};
+
+export type QueryInsightIFrameArgs = {
+  adId: Scalars['String']['input'];
+  device?: InputMaybe<DeviceEnum>;
+  position?: InputMaybe<Scalars['String']['input']>;
+  publisher?: InputMaybe<PublisherEnum>;
 };
 
 export type QueryInsightsArgs = {
@@ -686,7 +694,7 @@ export type InsightsQuery = {
         impressions: number;
         cpm: number;
       }>;
-      iFrame?: { __typename?: 'IFrame'; src: string; height: string; width: string } | null;
+      iFrame?: { __typename?: 'IFrame'; src: string; height: number; width: number } | null;
     }>;
   };
 };
