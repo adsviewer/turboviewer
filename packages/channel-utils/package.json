@@ -24,6 +24,7 @@
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:*",
+    "node-html-parser": "^6.1.13",
     "zod": "^3.23.8"
   },
   "devDependencies": {

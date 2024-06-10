@@ -24,11 +24,13 @@ import {
   type ChannelAd,
   type ChannelAdAccount,
   type ChannelCreative,
+  type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
   deleteOldInsights,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
+  getIFrame,
   getIFrameAdFormat,
   MetaError,
   revokeIntegration,
@@ -214,7 +216,7 @@ class Meta implements ChannelInterface {
     publisher?: PublisherEnum,
     device?: DeviceEnum,
     position?: string,
-  ): Promise<string | AError> {
+  ): Promise<ChannelIFrame | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const { externalId } = await prisma.ad.findUniqueOrThrow({ where: { id: adId } });
     const ad = new Ad(externalId);
@@ -233,7 +235,7 @@ class Meta implements ChannelInterface {
     if (isAError(parsedPreviews)) return parsedPreviews;
     if (parsedPreviews.length === 0) return new AError('No ad preview found');
     if (parsedPreviews.length > 1) return new AError('More than one ad previews found');
-    return parsedPreviews[0];
+    return getIFrame(parsedPreviews[0]);
   }
 
   getDefaultPublisher(): PublisherEnum {

@@ -4,19 +4,21 @@ import { AError } from '@repo/utils';
 import { decryptTokens } from '@repo/channel-utils';
 import { getChannel } from './channel-helper';
 
-const getKey = (publisher: PublisherEnum, adId: string, format: string): string =>
-  `iFramePerInsight:${publisher}:${String(adId)}:${format}`;
+const getKey = (adId: string, publisher?: PublisherEnum, device?: DeviceEnum, position?: string): string =>
+  `iFramePerInsight:adId_${String(adId)}:publisher_${String(publisher)}:device_${String(device)}:position_${String(position)}`;
 
 export const iFramePerInsight = new Cacheable(
-  async ({ publisher, adId, format }: { adId: string; publisher?: PublisherEnum; format: string }) => {
-    if (publisher) return getKey(publisher, adId, format);
-    const ad = await prisma.ad.findUniqueOrThrow({
-      select: { adAccount: { select: { integration: true } } },
-      where: { id: adId },
-    });
-    const channel = getChannel(ad.adAccount.integration.type);
-    return getKey(channel.getDefaultPublisher(), adId, format);
-  },
+  ({
+    adId,
+    publisher,
+    device,
+    position,
+  }: {
+    adId: string;
+    publisher?: PublisherEnum;
+    device?: DeviceEnum;
+    position?: string;
+  }) => getKey(adId, publisher, device, position),
   async ({
     adId,
     publisher,
@@ -39,5 +41,5 @@ export const iFramePerInsight = new Cacheable(
     if (!decryptedIntegration) return new AError('Integration not found');
     return channel.getAdPreview(decryptedIntegration, adId, publisher, device, position);
   },
-  60 * 60 * 24,
+  60 * 60 * 3,
 );

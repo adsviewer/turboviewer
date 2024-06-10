@@ -1,12 +1,7 @@
 import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
 import { Kind } from 'graphql/language';
 import { isAError } from '@repo/utils';
-import { logger } from '@repo/logger';
-import { parse as htmlParse } from 'node-html-parser';
-import { GraphQLError } from 'graphql';
-import { z } from 'zod';
-import { iFramePerInsight } from '@repo/channel';
-import { getIFrameAdFormat } from '@repo/channel-utils';
+import { type ChannelIFrame, iFramePerInsight } from '@repo/channel';
 import * as changeCase from 'change-case';
 import { groupBy as groupByUtil, uniqueBy } from '../../utils/data-object-utils';
 import { builder } from '../builder';
@@ -172,6 +167,7 @@ builder.queryFields((t) => ({
       };
     },
   }),
+
   insightDatapoints: t.withAuth({ authenticated: true }).field({
     type: [InsightsDatapointsDto],
     args: {
@@ -182,6 +178,39 @@ builder.queryFields((t) => ({
         insightsDatapoints(args.args, ctx.organizationId),
       );
       return datapoints;
+    },
+  }),
+
+  insightIFrame: t.withAuth({ authenticated: true }).field({
+    type: IFrameDTO,
+    nullable: true,
+    args: {
+      adId: t.arg.string({ required: true }),
+      publisher: t.arg({ type: PublisherEnumDto, required: false }),
+      device: t.arg({ type: DeviceEnumDto, required: false }),
+      position: t.arg.string({ required: false }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      const ad = await prisma.ad.findUnique({
+        where: { id: args.adId, adAccount: { integration: { organizationId: ctx.organizationId } } },
+      });
+      if (!ad) return null;
+      const iFrame = await iFramePerInsight.getValue(
+        {
+          adId: args.adId,
+          publisher: args.publisher ?? undefined,
+          device: args.device ?? undefined,
+          position: args.position ?? undefined,
+        },
+        {
+          adId: args.adId,
+          publisher: args.publisher ?? undefined,
+          position: args.position ?? undefined,
+          device: args.device ?? undefined,
+        },
+      );
+      if (isAError(iFrame)) return null;
+      return iFrame;
     },
   }),
 }));
@@ -216,21 +245,11 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
   }),
 });
 
-const iFrameSchema = z.object({
-  title: z.string().optional(),
-  src: z.string(),
-  width: z.string(),
-  height: z.string(),
-  scrolling: z.string().optional(),
-});
-
-type IFrameType = z.infer<typeof iFrameSchema>;
-
-const IFrameDTO = builder.objectRef<IFrameType>('IFrame').implement({
+const IFrameDTO = builder.objectRef<ChannelIFrame>('IFrame').implement({
   fields: (t) => ({
     src: t.exposeString('src'),
-    width: t.exposeString('width'),
-    height: t.exposeString('height'),
+    width: t.exposeInt('width'),
+    height: t.exposeInt('height'),
   }),
 });
 
@@ -256,18 +275,12 @@ const GroupedInsightDto = builder.simpleObject(
       nullable: true,
       resolve: async (root, _args, _ctx, _info) => {
         if (!root.adId) return null;
-        const format = getIFrameAdFormat(root.publisher, root.device, root.position);
-        if (!format) {
-          logger.error(
-            `No format found for publisher: ${root.publisher ?? 'unknown'}, device: ${root.device ?? 'unknown'}, position: ${root.position ?? 'unknown'}`,
-          );
-          return null;
-        }
         const iFrame = await iFramePerInsight.getValue(
           {
             adId: root.adId,
             publisher: root.publisher ?? undefined,
-            format,
+            position: root.position ?? undefined,
+            device: root.device ?? undefined,
           },
           {
             adId: root.adId,
@@ -277,11 +290,7 @@ const GroupedInsightDto = builder.simpleObject(
           },
         );
         if (isAError(iFrame)) return null;
-        const htmlRoot = htmlParse(iFrame);
-        const attributes = htmlRoot.querySelector('iframe')?.attributes;
-        const iFrameData = iFrameSchema.safeParse(attributes);
-        if (!iFrameData.success) throw new GraphQLError('Invalid iFrame data found');
-        return iFrameData.data;
+        return iFrame;
       },
     }),
   }),

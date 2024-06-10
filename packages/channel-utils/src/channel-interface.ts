@@ -2,6 +2,7 @@ import { type AError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { type CurrencyEnum, type DeviceEnum, type Integration, type PublisherEnum } from '@repo/database';
 import { type MetaError } from './errors';
+import { type ChannelIFrame } from './iframe-helper';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -59,6 +60,6 @@ export interface ChannelInterface {
     publisher?: PublisherEnum,
     device?: DeviceEnum,
     position?: string,
-  ) => Promise<string | AError>;
+  ) => Promise<ChannelIFrame | AError>;
   getDefaultPublisher: () => PublisherEnum;
 }
