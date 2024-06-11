@@ -370,6 +370,7 @@ export type InsightsDatapoints = {
   cpm: Scalars['Int']['output'];
   date: Scalars['Date']['output'];
   impressions: Scalars['Int']['output'];
+  /** In Cents */
   spend: Scalars['Int']['output'];
 };
 
