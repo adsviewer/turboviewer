@@ -6,8 +6,8 @@ import { IconSettings } from '@tabler/icons-react';
 import React from 'react';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import LanguagePickerSimple from '../dropdowns/language-picker-simple/language-picker-simple';
 import ColorSchemePicker from '../dropdowns/color-scheme-picker/color-scheme-picker';
+import LanguagePicker from '../dropdowns/language-picker/language-picker';
 
 export default function SettingsButton(): ReactNode {
   const t = useTranslations('settings');
@@ -26,7 +26,7 @@ export default function SettingsButton(): ReactNode {
           <Text mr="auto" size="sm">
             {t('changeLanguage')}:{' '}
           </Text>
-          <LanguagePickerSimple />
+          <LanguagePicker />
         </Flex>
         <Flex align="center">
           <Text mr="auto" size="sm">

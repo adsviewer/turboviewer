@@ -8,10 +8,6 @@ const languages = [
     value: 'en',
   },
   {
-    label: 'French',
-    value: 'fr',
-  },
-  {
     label: 'Dutch',
     value: 'nl',
   },
@@ -21,7 +17,7 @@ const languages = [
   },
 ];
 
-export default function LanguagePickerSimple(): React.ReactNode {
+export default function LanguagePicker(): React.ReactNode {
   // const [locale, setLocale] = useState<string>('en');
 
   useEffect(() => {

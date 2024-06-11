@@ -7,6 +7,7 @@ const config = {
   reactStrictMode: true,
   experimental: {
     serverComponentsExternalPackages: ['pino'],
+    optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
   },
   rewrites: async () => {
     return {
@@ -35,7 +36,7 @@ const config = {
           destination: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
         },
       ],
-    }
+    };
   },
 };
 
