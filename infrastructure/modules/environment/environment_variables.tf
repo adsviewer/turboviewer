@@ -6,7 +6,7 @@ variable "domain" {
   type = string
 }
 
-variable "emailable_api" {
+variable "emailable_api_key" {
   type = string
 }
 

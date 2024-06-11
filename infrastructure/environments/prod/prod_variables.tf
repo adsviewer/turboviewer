@@ -17,7 +17,7 @@ variable "default_tags" {
   type = map(string)
 }
 
-variable "emailable_api" {
+variable "emailable_api_key" {
   type = string
 }
 
