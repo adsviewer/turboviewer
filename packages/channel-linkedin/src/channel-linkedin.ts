@@ -221,7 +221,7 @@ class LinkedIn implements ChannelInterface {
           date: new Date(a.dateRange.start.year, a.dateRange.start.month - 1, a.dateRange.start.day),
           externalAccountId: dbAccount.externalId,
           impressions: a.impressions,
-          spend: a.costInLocalCurrency,
+          spend: a.costInLocalCurrency * 100,
           device: device ? LinkedIn.deviceEnumMap.get(device) ?? DeviceEnum.Unknown : DeviceEnum.Unknown,
           publisher: PublisherEnum.LinkedIn,
           position: '',
