@@ -28,6 +28,7 @@ model Organization {
   users        User[]
   randomString String        @default(cuid())
   integrations Integration[]
+  domain       String?       @unique
 
   @@map("organizations")
 }
@@ -68,16 +69,17 @@ model LoginProviderUser {
 enum RoleEnum {
   USER
   ADMIN
+  ORG_ADMIN
 }
 
 model UserRole {
-  id        String   @id @default(cuid())
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
   role      RoleEnum
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
+  @@id([userId, role])
   @@map("user_roles")
 }
 

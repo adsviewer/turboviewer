@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { queryFromInfo } from '@pothos/plugin-prisma';
 import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { PasswordSchema } from '@repo/utils';
+import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { createJwt, createJwts } from '../../auth';
 import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
@@ -72,6 +72,7 @@ builder.mutationFields((t) => ({
       }
 
       const user = await createUser(args.args, query);
+      if (isAError(user)) throw new GraphQLError(user.message);
 
       // TODO: enable me
       // fireAndForget.add(() =>

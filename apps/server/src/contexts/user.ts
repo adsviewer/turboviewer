@@ -1,6 +1,10 @@
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { prisma, type Prisma } from '@repo/database';
+import { prisma, type Prisma, RoleEnum } from '@repo/database';
+import { AError, isAError } from '@repo/utils';
+import * as changeCase from 'change-case';
+import { logger } from '@repo/logger';
+import { validateEmail } from '../schema/user/emailble-helper';
 import { type SignUpInput } from '../schema/user/user-types';
 import { type LoginProviderUserData } from './login-provider/login-provider-types';
 
@@ -36,6 +40,11 @@ export const createUser = async (
   data: SignUpInput,
   query?: { include?: Prisma.UserInclude | undefined; select?: Prisma.UserSelect | undefined },
 ) => {
+  const emailValidation = await validateEmailProcess(data.firstName, data.email);
+  if (isAError(emailValidation)) {
+    return emailValidation;
+  }
+  const { isAdmin, organizationQuery } = emailValidation;
   const truthyQuery = query ?? {};
   const hashedPassword = await createPassword(data.password);
 
@@ -48,16 +57,18 @@ export const createUser = async (
       firstName: data.firstName,
       lastName: data.lastName,
       password: hashedPassword,
-      organization: {
-        create: {
-          name: `${data.firstName} ${data.lastName}`,
-        },
-      },
+      organization: organizationQuery,
+      ...(isAdmin && { roles: { create: { role: RoleEnum.ORG_ADMIN } } }),
     },
   });
 };
 
 export const createLoginProviderUser = async (data: LoginProviderUserData) => {
+  const emailValidation = await validateEmailProcess(data.firstName, data.email);
+  if (isAError(emailValidation)) {
+    return emailValidation;
+  }
+  const { isAdmin, organizationQuery } = emailValidation;
   return await prisma.user.create({
     include: { roles: { select: { role: true } } },
     data: {
@@ -71,11 +82,63 @@ export const createLoginProviderUser = async (data: LoginProviderUserData) => {
           provider: data.providerType,
         },
       },
-      organization: {
-        create: {
-          name: `${data.firstName} ${data.lastName}`,
-        },
-      },
+      organization: organizationQuery,
+      ...(isAdmin && { roles: { create: { role: RoleEnum.ORG_ADMIN } } }),
     },
   });
+};
+
+const validateEmailProcess = async (
+  firstName: string,
+  email: string,
+): Promise<
+  | AError
+  | {
+      isAdmin: boolean;
+      organizationQuery: Prisma.OrganizationCreateNestedOneWithoutUsersInput;
+    }
+> => {
+  const nonWorkName = `${firstName}'${firstName.endsWith('s') ? '' : 's'} organization`;
+  const defaultResponse = {
+    isAdmin: true,
+    organizationQuery: {
+      create: {
+        name: nonWorkName,
+      },
+    },
+  };
+  const emailValidation = await validateEmail(email).catch((e: unknown) => {
+    logger.error(e);
+    return new AError(e instanceof Error ? e.message : 'Unknown error during emailValidation');
+  });
+  if (isAError(emailValidation)) {
+    return defaultResponse;
+  }
+  if (emailValidation.disposable || emailValidation.state === 'undeliverable' || emailValidation.state === 'unknown') {
+    return new AError('Please provide a valid email address.');
+  }
+  if (!emailValidation.free) {
+    const organization = await prisma.organization.findUnique({
+      where: { domain: emailValidation.domain },
+    });
+    if (organization) {
+      return {
+        isAdmin: false,
+        organizationQuery: {
+          connect: { id: organization.id },
+        },
+      };
+    }
+    const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
+    return {
+      isAdmin: true,
+      organizationQuery: {
+        create: {
+          name: changeCase.capitalCase(domainName),
+          domain: emailValidation.domain,
+        },
+      },
+    };
+  }
+  return defaultResponse;
 };

@@ -144,6 +144,7 @@ const completeSocialLogin = async (
   }
 
   const user = await createLoginProviderUser(userdata);
+  if (isAError(user)) return user;
 
   const { token, refreshToken } = createJwts(
     user.id,
