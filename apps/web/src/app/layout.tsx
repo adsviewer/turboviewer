@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/charts/styles.css';
+import './globals.scss';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
@@ -16,7 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
-      <body style={{ userSelect: 'none' }}>
+      <body>
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages}>
           <MantineProvider>{children}</MantineProvider>
