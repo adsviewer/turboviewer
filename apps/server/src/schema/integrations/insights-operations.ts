@@ -298,7 +298,7 @@ const GroupedInsightDto = builder.simpleObject(
 
 const InsightsDatapointsDto = builder.simpleObject('InsightsDatapoints', {
   fields: (t) => ({
-    spend: t.field({ type: 'Int', nullable: false }),
+    spend: t.field({ type: 'Int', nullable: false, description: 'In Cents' }),
     impressions: t.field({ type: 'Int', nullable: false }),
     cpm: t.field({ type: 'Int', nullable: false }),
     date: t.field({ type: 'Date', nullable: false }),

@@ -332,6 +332,10 @@ type InsightsDatapoints {
   cpm: Int!
   date: Date!
   impressions: Int!
+
+  """
+  In Cents
+  """
   spend: Int!
 }
 
