@@ -17,6 +17,10 @@ variable "default_tags" {
   type = map(string)
 }
 
+variable "emailable_api" {
+  type = string
+}
+
 variable "environment" {
   type    = string
   default = "prod"

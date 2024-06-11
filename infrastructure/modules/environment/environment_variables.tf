@@ -6,6 +6,10 @@ variable "domain" {
   type = string
 }
 
+variable "emailable_api" {
+  type = string
+}
+
 variable "environment" {
   type = string
 }
