@@ -9,6 +9,7 @@ const schema = z
     CHANNEL_SECRET: z.string().min(1).default('channelSecret'),
     GOOGLE_APPLICATION_ID: z.string().min(1),
     GOOGLE_APPLICATION_SECRET: z.string().min(1),
+    EMAILABLE_API_KEY: z.string().min(1),
     PORT: z
       .string()
       .min(1)
