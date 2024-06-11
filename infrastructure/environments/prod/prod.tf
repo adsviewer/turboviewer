@@ -85,6 +85,7 @@ module "environment" {
   amplify_token               = var.amplify_token
   domain                      = local.domain
   environment                 = var.environment
+  emailable_api               = var.emailable_api
   fb_application_id           = var.fb_application_id
   fb_application_secret       = var.fb_application_secret
   google_application_id       = var.google_application_id
