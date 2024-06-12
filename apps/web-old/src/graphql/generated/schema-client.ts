@@ -481,6 +481,7 @@ export type Mutation = {
   refreshToken: Scalars['String']['output'];
   resetPassword: TokenDto;
   signup: TokenDto;
+  updateOrganization: Organization;
   updateUser: User;
 };
 
@@ -511,6 +512,10 @@ export type MutationSignupArgs = {
   args: SignUpInput;
 };
 
+export type MutationUpdateOrganizationArgs = {
+  name: Scalars['String']['input'];
+};
+
 export type MutationUpdateUserArgs = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -533,6 +538,7 @@ export enum OrderBy {
 export type Organization = {
   __typename?: 'Organization';
   createdAt: Scalars['Date']['output'];
+  domain?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   integrations: Array<Integration>;
   name: Scalars['String']['output'];

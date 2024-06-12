@@ -446,6 +446,7 @@ type Mutation {
   refreshToken: String!
   resetPassword(password: String!, token: String!): TokenDto!
   signup(args: SignUpInput!): TokenDto!
+  updateOrganization(name: String!): Organization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }
 
@@ -462,6 +463,7 @@ enum OrderBy {
 
 type Organization {
   createdAt: Date!
+  domain: String
   id: ID!
   integrations: [Integration!]!
   name: String!
