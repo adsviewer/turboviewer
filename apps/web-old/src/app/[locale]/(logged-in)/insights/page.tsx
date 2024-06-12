@@ -19,7 +19,7 @@ export default function Page({ searchParams }: InsightsProps): React.ReactElemen
               page={1}
               hasNext={false}
               pageSize={12}
-              orderBy={InsightsColumnsOrderBy.spend}
+              orderBy={InsightsColumnsOrderBy.spend_rel}
               searchParams={searchParams}
             />
             <Fallback height={96} className="mt-40" />

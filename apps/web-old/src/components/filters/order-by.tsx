@@ -6,7 +6,7 @@ export function OrderBy({ orderBy }: { orderBy: InsightsColumnsOrderBy }): React
   const t = useTranslations('filters');
   return (
     <SearchParamsSelect label={t('orderByLabel')} defaultValue={orderBy} searchParamKey="orderBy">
-      {[InsightsColumnsOrderBy.spend, InsightsColumnsOrderBy.impressions].map((value) => (
+      {[InsightsColumnsOrderBy.spend_rel, InsightsColumnsOrderBy.impressions_rel].map((value) => (
         <option key={value} value={value}>
           {t('orderByDropDown', { value })}
         </option>

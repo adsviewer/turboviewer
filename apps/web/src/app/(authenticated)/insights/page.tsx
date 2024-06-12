@@ -36,7 +36,7 @@ interface InsightsProps {
 
 export default async function Insights({ searchParams }: InsightsProps): Promise<ReactNode> {
   const t = await getTranslations('insights');
-  const orderBy = searchParams.orderBy ?? InsightsColumnsOrderBy.spend;
+  const orderBy = searchParams.orderBy ?? InsightsColumnsOrderBy.spend_rel;
   const order = searchParams.order ?? OrderBy.desc;
   const pageSize = parseInt(searchParams.pageSize ?? '12', 10);
   const page = parseInt(searchParams.page ?? '1', 10);

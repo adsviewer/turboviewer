@@ -12,7 +12,7 @@ type Ad {
     first: Int
     highestFirst: Boolean = true
     last: Int
-    orderBy: InsightsColumnsOrderBy! = spend
+    orderBy: InsightsColumnsOrderBy! = cpm_rel
     positions: [String!]
     publishers: [PublisherEnum!]
   ): AdInsightsConnection!
@@ -258,7 +258,7 @@ input FilterInsightsInput {
   groupBy: [InsightsColumnsGroupBy!]
   interval: InsightsInterval!
   order: OrderBy = desc
-  orderBy: InsightsColumnsOrderBy! = spend
+  orderBy: InsightsColumnsOrderBy! = cpm_rel
 
   """
   Starting at 1
@@ -323,9 +323,12 @@ enum InsightsColumnsGroupBy {
 }
 
 enum InsightsColumnsOrderBy {
-  spend
-  impressions
-  cpm
+  spend_abs
+  impressions_abs
+  cpm_abs
+  spend_rel
+  impressions_rel
+  cpm_rel
 }
 
 type InsightsDatapoints {

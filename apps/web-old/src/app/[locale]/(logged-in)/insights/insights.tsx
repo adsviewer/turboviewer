@@ -19,7 +19,7 @@ interface InsightsProps {
   searchParams?: SearchParams;
 }
 export async function Insights({ searchParams }: InsightsProps): Promise<React.ReactElement> {
-  const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend;
+  const orderBy = searchParams?.orderBy ?? InsightsColumnsOrderBy.spend_rel;
   const pageSize = parseInt(searchParams?.pageSize ?? '12', 10);
   const page = parseInt(searchParams?.page ?? '1', 10);
   const order = searchParams?.order ?? OrderBy.desc;

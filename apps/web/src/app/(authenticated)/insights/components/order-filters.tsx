@@ -34,12 +34,12 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const getOrderByValue = (): string => {
-    if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions)) {
-      return InsightsColumnsOrderBy.impressions;
-    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm)) {
-      return InsightsColumnsOrderBy.cpm;
+    if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions_rel)) {
+      return InsightsColumnsOrderBy.impressions_rel;
+    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_rel)) {
+      return InsightsColumnsOrderBy.cpm_rel;
     }
-    return InsightsColumnsOrderBy.spend; // default
+    return InsightsColumnsOrderBy.spend_rel; // default
   };
 
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
@@ -84,9 +84,9 @@ export default function OrderFilters(): React.ReactNode {
         <Select
           placeholder="Pick value"
           data={[
-            { value: InsightsColumnsOrderBy.spend, label: t('spent') },
-            { value: InsightsColumnsOrderBy.impressions, label: t('impressions') },
-            { value: InsightsColumnsOrderBy.cpm, label: 'CPM' },
+            { value: InsightsColumnsOrderBy.spend_rel, label: t('spent') },
+            { value: InsightsColumnsOrderBy.impressions_rel, label: t('impressions') },
+            { value: InsightsColumnsOrderBy.cpm_rel, label: 'CPM' },
           ]}
           value={getOrderByValue()}
           onChange={handleOrderByChange}
