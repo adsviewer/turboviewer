@@ -170,7 +170,7 @@ void describe('insights query builder tests', () => {
     const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'cpm', 10, 20);
     assert.strictEqual(
       insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS trend
+      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS trend
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -184,7 +184,7 @@ void describe('insights query builder tests', () => {
     const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'cpm', 10, 20, new Date('2024-05-28'));
     assert.strictEqual(
       insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS trend
+      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS trend
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
@@ -209,7 +209,7 @@ void describe('insights query builder tests', () => {
     const insights = lastInterval('ad_id, publisher', 'week', 'cpm');
     assert.strictEqual(
       insights,
-      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS cpm
+      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS cpm
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -243,7 +243,7 @@ void describe('insights query builder tests', () => {
     const insights = intervalBeforeLast('ad_id, publisher', 'week', 'cpm');
     assert.strictEqual(
       insights,
-      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS cpm
+      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS cpm
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
@@ -314,7 +314,7 @@ void describe('insights query builder tests', () => {
                                           > 0
                                       ORDER BY trend
                                       LIMIT 11 OFFSET 0)
-  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
+  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
     AND i.date < DATE_TRUNC('week', CURRENT_DATE)
@@ -351,7 +351,7 @@ void describe('insights query builder tests', () => {
                                       GROUP BY ad_id, publisher, currency
                                       ORDER BY trend DESC
                                       LIMIT 11 OFFSET 0)
-  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
+  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
     AND i.date < DATE_TRUNC('week', CURRENT_DATE)
@@ -401,7 +401,7 @@ void describe('insights query builder tests', () => {
                                           > 0
                                       ORDER BY trend
                                       LIMIT 11 OFFSET 0)
-  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
+  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS INTEGER) AS cpm 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
     AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
@@ -425,7 +425,7 @@ void describe('insights query builder tests', () => {
     const expected = `SELECT DATE_TRUNC('week', i.date)          AS date,
                              CAST(SUM(i.spend) AS INTEGER)                                      AS spend,
                              CAST(SUM(i.impressions) AS INTEGER)                                AS impressions,
-                             CAST(SUM(i.spend) * 1000 / SUM(i.impressions::decimal) AS INTEGER) AS cpm
+                             CAST(SUM(i.spend) * 10 / SUM(i.impressions::decimal) AS INTEGER)   AS cpm
                       FROM insights i
                                JOIN ads a on i.ad_id = a.id
                                JOIN ad_accounts aa on a.ad_account_id = aa.id
