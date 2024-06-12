@@ -18,6 +18,7 @@ export interface AuthenticatedContext extends GraphQLContext {
   currentUserId: NonNullable<GraphQLContext['currentUserId']>;
   organizationId: NonNullable<GraphQLContext['organizationId']>;
   isAdmin: NonNullable<GraphQLContext['isAdmin']>;
+  isOrgAdmin: NonNullable<GraphQLContext['isOrgAdmin']>;
 }
 
 export const builder = new SchemaBuilder<{
@@ -36,6 +37,7 @@ export const builder = new SchemaBuilder<{
   AuthScopes: {
     authenticated: boolean;
     isAdmin: boolean;
+    isOrgAdmin: boolean;
   };
   AuthContexts: {
     authenticated: AuthenticatedContext;
@@ -53,6 +55,7 @@ export const builder = new SchemaBuilder<{
   authScopes: (context) => ({
     authenticated: Boolean(context.currentUserId),
     isAdmin: Boolean(context.isAdmin),
+    isOrgAdmin: Boolean(context.isOrgAdmin),
   }),
   scopeAuthOptions: {
     // Recommended when using subscriptions

@@ -9,6 +9,7 @@ export interface GraphQLContext {
   organizationId: undefined | string;
   acceptedLanguage: Language;
   isAdmin: boolean | undefined;
+  isOrgAdmin: boolean | undefined;
   request: {
     operatingSystem: string;
     browserName: string;
@@ -26,6 +27,7 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
     currentUserId: token?.userId,
     organizationId: token?.organizationId,
     isAdmin: token?.roles.includes(RoleEnum.ADMIN),
+    isOrgAdmin: token?.roles.includes(RoleEnum.ORG_ADMIN),
     acceptedLanguage: acceptedLanguage(initialContext.request),
     request: {
       operatingSystem,
