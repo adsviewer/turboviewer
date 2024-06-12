@@ -360,9 +360,12 @@ export enum InsightsColumnsGroupBy {
 }
 
 export enum InsightsColumnsOrderBy {
-  spend = 'spend',
-  impressions = 'impressions',
-  cpm = 'cpm',
+  spend_abs = 'spend_abs',
+  impressions_abs = 'impressions_abs',
+  cpm_abs = 'cpm_abs',
+  spend_rel = 'spend_rel',
+  impressions_rel = 'impressions_rel',
+  cpm_rel = 'cpm_rel',
 }
 
 export type InsightsDatapoints = {

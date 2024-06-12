@@ -100,8 +100,14 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
   }),
 });
 
-type InsightsColumnsOrderByType = keyof Pick<Insight, 'spend' | 'impressions'> | 'cpm';
-const insightsColumnsOrderBy: InsightsColumnsOrderByType[] = ['spend', 'impressions', 'cpm'] as const;
+const insightsColumnsOrderBy = [
+  'spend_abs',
+  'impressions_abs',
+  'cpm_abs',
+  'spend_rel',
+  'impressions_rel',
+  'cpm_rel',
+] as const;
 export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderBy', {
   values: insightsColumnsOrderBy,
 });
@@ -136,7 +142,7 @@ export const AdDto = builder.prismaObject('Ad', {
         publishers: t.arg({ type: [PublisherEnumDto], required: false }),
         positions: t.arg.stringList({ required: false }),
         highestFirst: t.arg.boolean({ defaultValue: true }),
-        orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
+        orderBy: t.arg({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'cpm_rel' }),
       },
       totalCount: true,
       query: (args, _ctx) => ({
@@ -226,7 +232,7 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
     groupBy: t.field({ type: [InsightsColumnsGroupByDto], required: false }),
     interval: t.field({ type: InsightsIntervalDto, required: true }),
     order: t.field({ type: OrderByDto, defaultValue: 'desc' }),
-    orderBy: t.field({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'spend' }),
+    orderBy: t.field({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'cpm_rel' }),
     page: t.int({
       required: true,
       description: 'Starting at 1',
