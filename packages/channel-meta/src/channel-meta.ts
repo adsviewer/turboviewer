@@ -28,10 +28,12 @@ import {
   type ChannelInsight,
   type ChannelInterface,
   deleteOldInsights,
+  formatDimensionsMap,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   getIFrame,
   getIFrameAdFormat,
+  isMetaAdPosition,
   MetaError,
   revokeIntegration,
   revokeIntegrationById,
@@ -44,7 +46,7 @@ import { env } from './config';
 
 const fireAndForget = new FireAndForget();
 
-const apiVersion = 'v19.0';
+const apiVersion = 'v20.0';
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
@@ -218,6 +220,7 @@ class Meta implements ChannelInterface {
     position?: string,
   ): Promise<ChannelIFrame | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
+    if (!isMetaAdPosition(position)) return new AError('Invalid position');
     const { externalId } = await prisma.ad.findUniqueOrThrow({ where: { id: adId } });
     const ad = new Ad(externalId);
     const format = getIFrameAdFormat(publisher, device, position);
@@ -233,9 +236,19 @@ class Meta implements ChannelInterface {
     const toBody = (preview: z.infer<typeof previewSchema>) => preview.body;
     const parsedPreviews = await Meta.handlePagination(integration, previewsFn, previewSchema, toBody);
     if (isAError(parsedPreviews)) return parsedPreviews;
+
     if (parsedPreviews.length === 0) return new AError('No ad preview found');
     if (parsedPreviews.length > 1) return new AError('More than one ad previews found');
-    return getIFrame(parsedPreviews[0]);
+    const iFrame = getIFrame(parsedPreviews[0]);
+    if (isAError(iFrame)) return iFrame;
+
+    const overrideDimensions = formatDimensionsMap.get(format);
+    if (overrideDimensions) {
+      iFrame.width = overrideDimensions.width;
+      iFrame.height = overrideDimensions.height;
+    }
+
+    return iFrame;
   }
 
   getDefaultPublisher(): PublisherEnum {
