@@ -1,7 +1,9 @@
 import '@mantine/core/styles.css';
 import '@mantine/charts/styles.css';
+import '@mantine/notifications/styles.css';
 import './globals.scss';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
@@ -20,7 +22,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages}>
-          <MantineProvider>{children}</MantineProvider>
+          <MantineProvider>
+            <Notifications />
+            {children}
+          </MantineProvider>
         </NextIntlClientProvider>
       </body>
     </html>
