@@ -87,5 +87,19 @@
     "roleAdmin": "Beheerder",
     "roleOrganizationAdmin": "Organisatiebeheerder",
     "roleOrganizationUser": "Lid"
+  },
+  "profile": {
+    "title": "Profiel",
+    "description": "Beheer je profielgegevens om ervoor te zorgen dat al je persoonlijke informatie up-to-date is en nauwkeurig je huidige status weergeeft.",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "password": "Wachtwoord",
+    "oldPassword": "Oud wachtwoord",
+    "newPassword": "Nieuw wachtwoord",
+    "repeatPassword": "Herhaal wachtwoord",
+    "roleOrgAdmin": "Organisatiebeheerder",
+    "roleAdmin": "Beheerder",
+    "roleUser": "Lid",
+    "submit": "Indienen"
   }
 }
