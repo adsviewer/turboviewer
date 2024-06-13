@@ -1,9 +1,8 @@
 import React from 'react';
-import { Flex, Title, Text } from '@mantine/core';
+import { Title, Text } from '@mantine/core';
 import { getTranslations } from 'next-intl/server';
 import { getUserDetails } from '../actions';
-import { UserInfo } from './components/user-info/user-info';
-import EditProfileForm from './components/edit-profile-form';
+import UserSettings from './components/user-settings';
 
 export default async function Profile(): Promise<React.ReactNode> {
   const t = await getTranslations('profile');
@@ -13,11 +12,7 @@ export default async function Profile(): Promise<React.ReactNode> {
     <>
       <Title mb="md">{t('title')}</Title>
       <Text mb="xl">{t('description')}</Text>
-
-      <Flex direction="column" gap="md" w="100%">
-        <UserInfo userDetails={userDetails} />
-        <EditProfileForm userDetails={userDetails} />
-      </Flex>
+      <UserSettings userDetails={userDetails} />
     </>
   );
 }
