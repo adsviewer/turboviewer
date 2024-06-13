@@ -86,7 +86,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       formattedDatapoints.push({
         date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
         impressions: datapoint.impressions,
-        spend: datapoint.spend,
+        spend: datapoint.spend / 100,
         cpm: datapoint.cpm,
       });
     }
@@ -120,6 +120,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
             // @ts-expect-error - yAxisId works as intended
             { yAxisId: 'left', name: 'cpm', color: 'orange', label: 'CPM' },
           ]}
+          valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
           tooltipProps={{ wrapperStyle: { zIndex: 3 } }}
           yAxisProps={{ yAxisId: 'left' }}
           areaProps={(series) => series}
