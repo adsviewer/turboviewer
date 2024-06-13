@@ -42,7 +42,9 @@
     "revoke": "Intrekken",
     "comingSoon": "Binnenkort beschikbaar",
     "connected": "Verbonden",
-    "notConnected": "Niet verbonden"
+    "notConnected": "Niet verbonden",
+    "revokeWarning": "U staat op het punt om een herroepingsactie uit te voeren! Adsviewer zal alle gegevens met betrekking tot deze integratie wissen.",
+    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak"
   },
   "settings": {
     "title": "Instellingen",

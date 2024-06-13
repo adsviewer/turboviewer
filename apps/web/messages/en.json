@@ -42,7 +42,9 @@
     "revoke": "Revoke",
     "comingSoon": "Coming soon",
     "connected": "Connected",
-    "notConnected": "Not Connected"
+    "notConnected": "Not Connected",
+    "revokeWarning": "You are about to perform a revoke action! Adsviewer will erase all your data related to this integration.",
+    "revokeTip": "To confirm, type \"REVOKE\" in the box below"
   },
   "settings": {
     "title": "Settings",
