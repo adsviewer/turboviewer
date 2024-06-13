@@ -838,6 +838,7 @@ export type LoginMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      photoUrl?: string | null;
       allRoles: Array<AllRoles>;
       currentOrganizationId?: string | null;
     };
@@ -863,6 +864,7 @@ export type SignupMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      photoUrl?: string | null;
       allRoles: Array<AllRoles>;
       currentOrganizationId?: string | null;
     };
@@ -892,6 +894,7 @@ export type ResetPasswordMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      photoUrl?: string | null;
       allRoles: Array<AllRoles>;
       currentOrganizationId?: string | null;
     };
@@ -933,6 +936,7 @@ export type UserFieldsFragment = {
   firstName: string;
   lastName: string;
   email: string;
+  photoUrl?: string | null;
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
 };
@@ -946,12 +950,22 @@ export type UpdateOrganizationMutation = {
   updateOrganization: { __typename?: 'Organization'; id: string; name: string };
 };
 
+export type UpdateUserMutationVariables = Exact<{
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  oldPassword?: InputMaybe<Scalars['String']['input']>;
+  newPassword?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type UpdateUserMutation = { __typename?: 'Mutation'; updateUser: { __typename?: 'User'; id: string } };
+
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
     firstName
     lastName
     email
+    photoUrl
     allRoles
     currentOrganizationId
   }
@@ -1238,4 +1252,15 @@ export const UpdateOrganizationDocument = gql`
 
 export function useUpdateOrganizationMutation() {
   return Urql.useMutation<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(UpdateOrganizationDocument);
+}
+export const UpdateUserDocument = gql`
+  mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
+    updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
+      id
+    }
+  }
+`;
+
+export function useUpdateUserMutation() {
+  return Urql.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument);
 }

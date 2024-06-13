@@ -837,6 +837,7 @@ export type LoginMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      photoUrl?: string | null;
       allRoles: Array<AllRoles>;
       currentOrganizationId?: string | null;
     };
@@ -862,6 +863,7 @@ export type SignupMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      photoUrl?: string | null;
       allRoles: Array<AllRoles>;
       currentOrganizationId?: string | null;
     };
@@ -891,6 +893,7 @@ export type ResetPasswordMutation = {
       firstName: string;
       lastName: string;
       email: string;
+      photoUrl?: string | null;
       allRoles: Array<AllRoles>;
       currentOrganizationId?: string | null;
     };
@@ -932,6 +935,7 @@ export type UserFieldsFragment = {
   firstName: string;
   lastName: string;
   email: string;
+  photoUrl?: string | null;
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
 };
@@ -945,12 +949,22 @@ export type UpdateOrganizationMutation = {
   updateOrganization: { __typename?: 'Organization'; id: string; name: string };
 };
 
+export type UpdateUserMutationVariables = Exact<{
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  oldPassword?: InputMaybe<Scalars['String']['input']>;
+  newPassword?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type UpdateUserMutation = { __typename?: 'Mutation'; updateUser: { __typename?: 'User'; id: string } };
+
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
     firstName
     lastName
     email
+    photoUrl
     allRoles
     currentOrganizationId
   }
@@ -1154,6 +1168,13 @@ export const UpdateOrganizationDocument = gql`
     }
   }
 `;
+export const UpdateUserDocument = gql`
+  mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
+    updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
+      id
+    }
+  }
+`;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
@@ -1273,6 +1294,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpdateOrganizationMutation>;
+    },
+    updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
+      return requester<UpdateUserMutation, UpdateUserMutationVariables>(
+        UpdateUserDocument,
+        variables,
+        options,
+      ) as Promise<UpdateUserMutation>;
     },
   };
 }

@@ -65,6 +65,7 @@ fragment UserFields on User {
   firstName
   lastName
   email
+  photoUrl
   allRoles
   currentOrganizationId
 }

@@ -2,6 +2,7 @@
 
 import { Group, Avatar, Text, Flex } from '@mantine/core';
 import { useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { getUserDetails } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import classes from './user-button.module.scss';
@@ -13,6 +14,7 @@ interface UserDetailsType {
 }
 
 export default function UserButton(): ReactNode {
+  const router = useRouter();
   const [userDetails, setUserDetails] = useState<UserDetailsType>({
     firstName: '',
     lastName: '',
@@ -31,10 +33,14 @@ export default function UserButton(): ReactNode {
     });
   }, []);
 
+  const redirectToUser = (): void => {
+    router.push('profile');
+  };
+
   return (
     <Flex justify="flex-start" className={classes.user}>
       {isDataLoaded ? (
-        <Group>
+        <Group onClick={redirectToUser}>
           <Avatar
             src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-0.png"
             radius="xl"
