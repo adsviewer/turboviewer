@@ -89,6 +89,13 @@ export type AdInsightsConnectionEdge = {
   node: Insight;
 };
 
+export enum AllRoles {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+  ORG_ADMIN = 'ORG_ADMIN',
+  ORG_MEMBER = 'ORG_MEMBER',
+}
+
 export type BaseError = Error & {
   __typename?: 'BaseError';
   message: Scalars['String']['output'];
@@ -545,8 +552,13 @@ export type Organization = {
   integrations: Array<Integration>;
   name: Scalars['String']['output'];
   updatedAt: Scalars['Date']['output'];
-  users: Array<User>;
+  users: Array<UserOrganization>;
 };
+
+export enum OrganizationRoleEnum {
+  ORG_ADMIN = 'ORG_ADMIN',
+  ORG_MEMBER = 'ORG_MEMBER',
+}
 
 export type PageInfo = {
   __typename?: 'PageInfo';
@@ -631,17 +643,35 @@ export type TokenDto = {
 
 export type User = {
   __typename?: 'User';
+  allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
+  defaultOrganization: Organization;
+  defaultOrganizationId: Scalars['String']['output'];
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
-  organization: Organization;
-  organizationId: Scalars['ID']['output'];
+  organizations: Array<UserOrganization>;
   photoUrl?: Maybe<Scalars['String']['output']>;
-  roles: Array<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
+  userRoles: Array<Scalars['String']['output']>;
 };
+
+export type UserOrganization = {
+  __typename?: 'UserOrganization';
+  organization: Organization;
+  organizationId: Scalars['String']['output'];
+  role: OrganizationRoleEnum;
+  status: UserOrganizationStatus;
+  user: User;
+  userId: Scalars['ID']['output'];
+};
+
+export enum UserOrganizationStatus {
+  ACTIVE = 'ACTIVE',
+  NON_ACTIVE = 'NON_ACTIVE',
+  INVITED = 'INVITED',
+}
 
 export type ZodError = Error & {
   __typename?: 'ZodError';
@@ -767,8 +797,8 @@ export type LoginMutation = {
       firstName: string;
       lastName: string;
       email: string;
-      roles: Array<string>;
-      organizationId: string;
+      allRoles: Array<AllRoles>;
+      defaultOrganizationId: string;
     };
   };
 };
@@ -792,8 +822,8 @@ export type SignupMutation = {
       firstName: string;
       lastName: string;
       email: string;
-      roles: Array<string>;
-      organizationId: string;
+      allRoles: Array<AllRoles>;
+      defaultOrganizationId: string;
     };
   };
 };
@@ -821,8 +851,8 @@ export type ResetPasswordMutation = {
       firstName: string;
       lastName: string;
       email: string;
-      roles: Array<string>;
-      organizationId: string;
+      allRoles: Array<AllRoles>;
+      defaultOrganizationId: string;
     };
   };
 };
@@ -851,8 +881,8 @@ export type UserFieldsFragment = {
   firstName: string;
   lastName: string;
   email: string;
-  roles: Array<string>;
-  organizationId: string;
+  allRoles: Array<AllRoles>;
+  defaultOrganizationId: string;
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -861,8 +891,8 @@ export const UserFieldsFragmentDoc = gql`
     firstName
     lastName
     email
-    roles
-    organizationId
+    allRoles
+    defaultOrganizationId
   }
 `;
 export const AdAccountsDocument = gql`

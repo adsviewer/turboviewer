@@ -1,5 +1,5 @@
 import { type YogaInitialContext } from 'graphql-yoga';
-import { $Enums } from '@repo/database';
+import { $Enums, OrganizationRoleEnum } from '@repo/database';
 import { decodeJwt } from './auth';
 import { acceptedLanguage, type Language } from './language';
 import RoleEnum = $Enums.RoleEnum;
@@ -27,7 +27,7 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
     currentUserId: token?.userId,
     organizationId: token?.organizationId,
     isAdmin: token?.roles.includes(RoleEnum.ADMIN),
-    isOrgAdmin: token?.roles.includes(RoleEnum.ORG_ADMIN),
+    isOrgAdmin: token?.roles === OrganizationRoleEnum.ORG_ADMIN,
     acceptedLanguage: acceptedLanguage(initialContext.request),
     request: {
       operatingSystem,

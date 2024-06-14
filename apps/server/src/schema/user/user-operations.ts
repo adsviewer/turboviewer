@@ -6,8 +6,9 @@ import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
+import lodash from 'lodash';
 import { createJwt, createJwts } from '../../auth';
-import { createPassword, createUser, passwordsMatch } from '../../contexts/user';
+import { createPassword, createUser, passwordsMatch, userWithRoles } from '../../contexts/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
@@ -84,7 +85,7 @@ builder.mutationFields((t) => ({
 
       const { token, refreshToken } = createJwts(
         user.id,
-        user.organizationId,
+        user.defaultOrganizationId,
         user.roles.map((r) => r.role),
       );
       return { token, refreshToken, user };
@@ -104,8 +105,7 @@ builder.mutationFields((t) => ({
         path: ['user'],
       });
       const user = await prisma.user.findUnique({
-        ...query,
-        include: { roles: { select: { role: true } } },
+        ...lodash.merge({}, query, userWithRoles),
         where: { email: args.email },
       });
       if (!user) {
@@ -117,7 +117,7 @@ builder.mutationFields((t) => ({
       }
       const { token, refreshToken } = createJwts(
         user.id,
-        user.organizationId,
+        user.defaultOrganizationId,
         user.roles.map((r) => r.role),
       );
       return { token, refreshToken, user };
@@ -136,7 +136,7 @@ builder.mutationFields((t) => ({
       }
       return createJwt(
         user.id,
-        user.organizationId,
+        ctx.organizationId,
         user.roles.map((r) => r.role),
       );
     },
@@ -233,7 +233,7 @@ builder.mutationFields((t) => ({
       }),
     },
     resolve: async (_root, args, ctx, info) => {
-      const userId = await redisGet(`forget-password:${args.token}`);
+      const userId = await redisGet<string>(`forget-password:${args.token}`);
 
       if (!userId) {
         throw new GraphQLError('Token expired');
@@ -250,7 +250,7 @@ builder.mutationFields((t) => ({
         await prisma.user.update({
           ...query,
           where: { id: userId },
-          include: { roles: { select: { role: true } } },
+          ...userWithRoles,
           data: { password },
         }),
         await redisDel(`forget-password:${args.token}`),
@@ -258,7 +258,7 @@ builder.mutationFields((t) => ({
 
       const { token, refreshToken } = createJwts(
         user.id,
-        user.organizationId,
+        user.defaultOrganizationId,
         user.roles.map((r) => r.role),
       );
       return { token, refreshToken, user };

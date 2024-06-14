@@ -1,5 +1,11 @@
-import { LoginProviderEnum, type User } from '@repo/database';
+import { LoginProviderEnum, OrganizationRoleEnum, RoleEnum, type User } from '@repo/database';
 import { builder } from '../builder';
+import { OrganizationDto } from '../organization/org-types';
+
+const AllRolesEnum = { ...RoleEnum, ...OrganizationRoleEnum };
+const AllRolesDto = builder.enumType(AllRolesEnum, {
+  name: 'AllRoles',
+});
 
 export const UserDto = builder.prismaObject('User', {
   fields: (t) => ({
@@ -10,18 +16,32 @@ export const UserDto = builder.prismaObject('User', {
     photoUrl: t.exposeString('photoUrl', { nullable: true }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
-    roles: t.stringList({
+    userRoles: t.stringList({
       select: (_args, _ctx, nestedSelection) => ({
         roles: {
           select: {
             role: nestedSelection(true),
+            organizations: { select: { role: nestedSelection(true) } },
           },
         },
       }),
       resolve: (user) => user.roles.map(({ role }) => role),
     }),
-    organizationId: t.exposeID('organizationId'),
-    organization: t.relation('organization'),
+    allRoles: t.field({
+      type: [AllRolesDto],
+      select: (_args, _ctx, nestedSelection) => ({
+        roles: { select: { role: nestedSelection(true) } },
+        organizations: { select: { role: nestedSelection(true) }, where: { organizationId: _ctx.organizationId } },
+      }),
+      resolve: (user) => {
+        const userRoles = user.roles.map(({ role }) => role);
+        const organizationRoles = user.organizations.map(({ role }) => role);
+        return userRoles.concat(organizationRoles as unknown as RoleEnum[]);
+      },
+    }),
+    organizations: t.relation('organizations'),
+    defaultOrganizationId: t.exposeString('defaultOrganizationId', { nullable: false }),
+    defaultOrganization: t.relation('defaultOrganization', { nullable: false, type: OrganizationDto }),
   }),
 });
 

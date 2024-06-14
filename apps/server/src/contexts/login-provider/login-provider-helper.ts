@@ -7,7 +7,7 @@ import { LoginProviderEnum, prisma } from '@repo/database';
 import { redisExists, redisSet } from '@repo/redis';
 import { env } from '../../config';
 import { createJwts } from '../../auth';
-import { createLoginProviderUser } from '../user';
+import { createLoginProviderUser, userWithRoles } from '../user';
 import { googleLoginProvider } from './google-login-provider';
 import { isLoginProviderEnum, type LoginProviderInterface } from './login-provider-types';
 
@@ -101,7 +101,7 @@ const completeSocialLogin = async (
   const providerUser = await prisma.loginProviderUser
     .findUnique({
       include: {
-        user: { include: { roles: { select: { role: true } } } },
+        user: { ...userWithRoles },
       },
       where: {
         externalId_provider: {
@@ -115,7 +115,7 @@ const completeSocialLogin = async (
   if (providerUser) {
     const { token, refreshToken } = createJwts(
       providerUser.id,
-      providerUser.organizationId,
+      providerUser.defaultOrganizationId,
       providerUser.roles.map((r) => r.role),
     );
     return {
@@ -126,14 +126,14 @@ const completeSocialLogin = async (
   }
 
   const emailUser = await prisma.user.findUnique({
-    include: { roles: { select: { role: true } } },
+    ...userWithRoles,
     where: { email: userdata.email },
   });
 
   if (emailUser) {
     const { token, refreshToken } = createJwts(
       emailUser.id,
-      emailUser.organizationId,
+      emailUser.defaultOrganizationId,
       emailUser.roles.map((r) => r.role),
     );
     return {
@@ -148,7 +148,7 @@ const completeSocialLogin = async (
 
   const { token, refreshToken } = createJwts(
     user.id,
-    user.organizationId,
+    user.defaultOrganizationId,
     user.roles.map((r) => r.role),
   );
   return {
