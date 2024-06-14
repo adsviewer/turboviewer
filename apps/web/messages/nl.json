@@ -76,5 +76,9 @@
     "signUpEmailConfirm": "Bedankt voor uw registratie! Bevestig uw e-mailadres om het registratieproces te voltooien.",
     "resendConfirmEmail": "Email opnieuw verzenden",
     "returnToSignIn": "Terug naar de inlogpagina"
+  },
+  "organization": {
+    "title": "Organisatie",
+    "description": "Effectief management uitoefenen over de activiteiten en ontwikkeling van je organisatie."
   }
 }

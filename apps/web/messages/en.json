@@ -76,5 +76,9 @@
     "signUpEmailConfirm": "Thank you for signing up! Please confirm your email to complete the registration process.",
     "resendConfirmEmail": "Resend email",
     "returnToSignIn": "Return to sign in page"
+  },
+  "organization": {
+    "title": "Organization",
+    "description": "Exercise effective management over the operations and development of your organization."
   }
 }
