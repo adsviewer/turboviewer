@@ -80,6 +80,9 @@
   },
   "organization": {
     "title": "Organisatie",
-    "description": "Effectief management uitoefenen over de activiteiten en ontwikkeling van je organisatie."
+    "description": "Effectief management uitoefenen over de activiteiten en ontwikkeling van je organisatie.",
+    "submit": "Verzenden",
+    "save": "Opslaan",
+    "organizationName": "Naam organisatie"
   }
 }

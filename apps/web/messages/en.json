@@ -80,6 +80,9 @@
   },
   "organization": {
     "title": "Organization",
-    "description": "Exercise effective management over the operations and development of your organization."
+    "description": "Exercise effective management over the operations and development of your organization.",
+    "submit": "Submit",
+    "save": "Save",
+    "organizationName": "Organization name"
   }
 }

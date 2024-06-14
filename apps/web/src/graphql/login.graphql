@@ -45,6 +45,9 @@ query me {
     firstName
     lastName
     email
+    organization {
+      name
+    }
   }
 }
 
