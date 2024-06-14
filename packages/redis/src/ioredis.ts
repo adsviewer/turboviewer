@@ -3,16 +3,23 @@ import { env } from './config';
 
 export const ioredis = new Redis(env.REDIS_URL);
 
-export const redisSet = async (key: string, value: string | number, ttlSec?: number): Promise<void> => {
+export const redisSet = async (key: string, value: string | number | object, ttlSec?: number): Promise<void> => {
+  const serializedValue = typeof value === 'object' ? JSON.stringify(value) : value;
   if (!ttlSec) {
-    await ioredis.set(key, value);
+    await ioredis.set(key, serializedValue);
     return;
   }
-  await ioredis.psetex(key, ttlSec * 1000, value);
+  await ioredis.psetex(key, ttlSec * 1000, serializedValue);
 };
 
-export const redisGet = async (key: string): Promise<string | null> => {
-  return ioredis.get(key);
+export const redisGet = async <T extends object | string>(key: string): Promise<null | T> => {
+  const serializedValue = await ioredis.get(key);
+  if (!serializedValue) return null;
+  try {
+    return JSON.parse(serializedValue) as T;
+  } catch (e) {
+    return serializedValue as T;
+  }
 };
 
 export const redisExists = async (key: string): Promise<boolean> => {

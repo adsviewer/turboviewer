@@ -52,6 +52,13 @@ type AdInsightsConnectionEdge {
   node: Insight!
 }
 
+enum AllRoles {
+  USER
+  ADMIN
+  ORG_ADMIN
+  ORG_MEMBER
+}
+
 type BaseError implements Error {
   message: String!
 }
@@ -471,7 +478,12 @@ type Organization {
   integrations: [Integration!]!
   name: String!
   updatedAt: Date!
-  users: [User!]!
+  users: [UserOrganization!]!
+}
+
+enum OrganizationRoleEnum {
+  ORG_ADMIN
+  ORG_MEMBER
 }
 
 type PageInfo {
@@ -532,16 +544,33 @@ type TokenDto {
 }
 
 type User {
+  allRoles: [AllRoles!]!
   createdAt: Date!
+  defaultOrganization: Organization!
+  defaultOrganizationId: String!
   email: String!
   firstName: String!
   id: ID!
   lastName: String!
-  organization: Organization!
-  organizationId: ID!
+  organizations: [UserOrganization!]!
   photoUrl: String
-  roles: [String!]!
   updatedAt: Date!
+  userRoles: [String!]!
+}
+
+type UserOrganization {
+  organization: Organization!
+  organizationId: String!
+  role: OrganizationRoleEnum!
+  status: UserOrganizationStatus!
+  user: User!
+  userId: ID!
+}
+
+enum UserOrganizationStatus {
+  ACTIVE
+  NON_ACTIVE
+  INVITED
 }
 
 type ZodError implements Error {

@@ -21,32 +21,35 @@ generator pothos {
 }
 
 model Organization {
-  id           String        @id @default(cuid())
-  name         String
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
-  users        User[]
-  randomString String        @default(cuid())
-  integrations Integration[]
-  domain       String?       @unique
+  id                                          String             @id @default(cuid())
+  name                                        String
+  createdAt                                   DateTime           @default(now()) @map("created_at")
+  updatedAt                                   DateTime           @default(now()) @updatedAt @map("updated_at")
+  randomString                                String             @default(cuid())
+  integrations                                Integration[]
+  domain                                      String?            @unique
+  users                                       UserOrganization[]
+  usersThatHaveThisAsLastLoggedInOrganization User[]
 
   @@map("organizations")
 }
 
 model User {
-  id             String              @id @default(cuid())
-  firstName      String              @map("first_name")
-  lastName       String              @map("last_name")
-  email          String              @unique @db.Citext
-  password       String?
-  photoUrl       String?             @map("photo_url")
-  roles          UserRole[]
-  organization   Organization        @relation(fields: [organizationId], references: [id])
-  organizationId String              @map("organization_id")
-  createdAt      DateTime            @default(now()) @map("created_at")
-  updatedAt      DateTime            @default(now()) @updatedAt @map("updated_at")
-  loginProviders LoginProviderUser[]
+  id                    String              @id @default(cuid())
+  firstName             String              @map("first_name")
+  lastName              String              @map("last_name")
+  email                 String              @unique @db.Citext
+  password              String?
+  photoUrl              String?             @map("photo_url")
+  roles                 UserRole[]
+  defaultOrganization   Organization        @relation(fields: [defaultOrganizationId], references: [id])
+  defaultOrganizationId String              @map("default_organization_id")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @default(now()) @updatedAt @map("updated_at")
+  loginProviders        LoginProviderUser[]
+  organizations         UserOrganization[]
 
+  @@index([defaultOrganizationId])
   @@map("users")
 }
 
@@ -69,7 +72,11 @@ model LoginProviderUser {
 enum RoleEnum {
   USER
   ADMIN
+}
+
+enum OrganizationRoleEnum {
   ORG_ADMIN
+  ORG_MEMBER
 }
 
 model UserRole {
@@ -81,6 +88,25 @@ model UserRole {
 
   @@id([userId, role])
   @@map("user_roles")
+}
+
+enum UserOrganizationStatus {
+  ACTIVE
+  NON_ACTIVE
+  INVITED
+}
+
+model UserOrganization {
+  userId         String                 @map("user_id")
+  organizationId String                 @map("organization_id")
+  role           OrganizationRoleEnum
+  status         UserOrganizationStatus
+
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@id([userId, organizationId])
+  @@map("user_organizations")
 }
 
 enum IntegrationTypeEnum {

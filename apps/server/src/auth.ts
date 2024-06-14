@@ -5,14 +5,13 @@ import jwt, {
   type NotBeforeError,
   type TokenExpiredError,
 } from 'jsonwebtoken';
-import { $Enums } from '@repo/database';
+import { type OrganizationRoleEnum, type RoleEnum } from '@repo/database';
 import { Environment, MODE } from '@repo/utils';
 import { env } from './config';
-import RoleEnum = $Enums.RoleEnum;
 
 interface AJwtPayload extends JwtPayload {
   userId: string;
-  roles: RoleEnum[];
+  roles: RoleEnum[] | OrganizationRoleEnum;
   organizationId: string;
 }
 

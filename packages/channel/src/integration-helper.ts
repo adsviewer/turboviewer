@@ -119,9 +119,7 @@ export const saveOrgState = async (state: string, organizationId: string, userId
   await redisSet(integrationStateKey(state), JSON.stringify({ organizationId, userId }), 12 * 60 * 60);
 };
 const getOrgFromState = async (state: string): Promise<{ organizationId: string; userId: string } | null> => {
-  return await redisGet(integrationStateKey(state)).then((res) =>
-    res ? (JSON.parse(res) as { organizationId: string; userId: string }) : null,
-  );
+  return await redisGet<{ organizationId: string; userId: string }>(integrationStateKey(state));
 };
 
 const saveTokens = async (
