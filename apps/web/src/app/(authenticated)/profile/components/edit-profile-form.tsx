@@ -81,11 +81,12 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
           mb="md"
         />
         <TextInput
-          label="E-Mail"
+          label="Email"
           {...form.getInputProps('email')}
           placeholder="you@example.com"
           key={form.key('email')}
           mb="md"
+          autoComplete="username"
           style={{ display: 'none' }} // Is currently hidden so that browsers' password manager prompts for password update
         />
         <PasswordInput
