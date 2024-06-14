@@ -19,7 +19,4 @@ export const PasswordSchema = z
   })
   .refine(hasNumber, {
     message: 'Password needs to have at least 1 number',
-  })
-  .refine(hasSpecialCharacter, {
-    message: 'Password needs to have at least 1 special character',
   });
