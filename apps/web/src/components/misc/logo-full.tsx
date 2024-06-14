@@ -24,6 +24,7 @@ export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement
 
   return (
     <svg
+      style={{ cursor: 'pointer' }}
       stroke={colors.stroke}
       fill={colors.fill}
       width={200}
