@@ -72,6 +72,14 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
           placeholder="Doe"
           mb="md"
         />
+        <PasswordInput
+          label={t('oldPassword')}
+          key={form.key('oldPassword')}
+          {...form.getInputProps('oldPassword')}
+          placeholder={t('oldPassword')}
+          type="password"
+          mb="md"
+        />
         <TextInput
           label="E-Mail"
           {...form.getInputProps('email')}
@@ -81,20 +89,14 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
           style={{ display: 'none' }} // Is currently hidden so that browsers' password manager prompts for password update
         />
         <PasswordInput
-          label={t('oldPassword')}
-          key={form.key('oldPassword')}
-          {...form.getInputProps('oldPassword')}
-          placeholder={t('oldPassword')}
-          type="password"
-          mb="md"
-        />
-        <PasswordInput
           label={t('newPassword')}
           key={form.key('newPassword')}
           {...form.getInputProps('newPassword')}
           placeholder={t('newPassword')}
           type="password"
           mb="md"
+          // the input field before the one whose id is "password" is used as the "username" for the password manager
+          id="password"
         />
         <PasswordInput
           key={form.key('repeatPassword')}

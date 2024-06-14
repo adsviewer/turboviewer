@@ -1,18 +1,16 @@
 import React from 'react';
-import { Title, Text } from '@mantine/core';
-import { getTranslations } from 'next-intl/server';
+import { Flex } from '@mantine/core';
 import { getUserDetails } from '../actions';
-import UserSettings from './components/user-settings';
+import { UserInfo } from './components/user-info/user-info';
+import EditProfileForm from './components/edit-profile-form';
 
 export default async function Profile(): Promise<React.ReactNode> {
-  const t = await getTranslations('profile');
   const userDetails = await getUserDetails();
 
   return (
-    <>
-      <Title mb="md">{t('title')}</Title>
-      <Text mb="xl">{t('description')}</Text>
-      <UserSettings userDetails={userDetails} />
-    </>
+    <Flex direction="column" gap="md" w="100%">
+      <UserInfo userDetails={userDetails} />
+      <EditProfileForm userDetails={userDetails} />
+    </Flex>
   );
 }
