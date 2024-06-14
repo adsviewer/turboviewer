@@ -22,6 +22,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
     initialValues: {
       firstName: props.userDetails.firstName,
       lastName: props.userDetails.lastName,
+      email: props.userDetails.email,
       oldPassword: '',
       newPassword: '',
       repeatPassword: '',
@@ -33,25 +34,20 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
   const handleSubmit = (values: UpdateUserMutationVariables): void => {
     // Set unused fields as undefined
     const data = { ...values };
-    if (!data.newPassword && !data.oldPassword) {
-      data.oldPassword = undefined;
-      data.newPassword = undefined;
+    if (!data.newPassword || !data.oldPassword) {
+      delete data.oldPassword;
+      delete data.newPassword;
     }
 
     startTransition(() => {
-      updateUserDetails(data)
-        .then(() => {
-          startTransition(() => {
-            router.refresh();
-          });
-        })
-        .catch((error: unknown) => {
-          if (error instanceof Error) {
-            if (error.message) {
-              form.setFieldError('oldPassword', error.message);
-            }
-          }
-        });
+      void updateUserDetails(data).then((res) => {
+        if (!res.success) {
+          form.setFieldError('oldPassword', res.error);
+        } else {
+          form.reset();
+          router.refresh();
+        }
+      });
     });
   };
 
@@ -75,6 +71,14 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
           {...form.getInputProps('lastName')}
           placeholder="Doe"
           mb="md"
+        />
+        <TextInput
+          label="E-Mail"
+          {...form.getInputProps('email')}
+          placeholder="you@example.com"
+          key={form.key('email')}
+          mb="md"
+          style={{ display: 'none' }} // Is currently hidden so that browsers' password manager prompts for password update
         />
         <PasswordInput
           label={t('oldPassword')}
@@ -102,7 +106,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
         />
         <Group mt="md">
           <Button disabled={isPending} type="submit" w={200}>
-            Submit
+            {t('submit')}
           </Button>
         </Group>
       </Flex>

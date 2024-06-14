@@ -827,21 +827,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = {
   __typename?: 'Mutation';
-  login: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      photoUrl?: string | null;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  login: { __typename?: 'TokenDto'; token: string; refreshToken: string };
 };
 
 export type SignupMutationVariables = Exact<{
@@ -853,21 +839,7 @@ export type SignupMutationVariables = Exact<{
 
 export type SignupMutation = {
   __typename?: 'Mutation';
-  signup: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      photoUrl?: string | null;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  signup: { __typename?: 'TokenDto'; token: string; refreshToken: string };
 };
 
 export type ForgetPasswordMutationVariables = Exact<{
@@ -883,21 +855,7 @@ export type ResetPasswordMutationVariables = Exact<{
 
 export type ResetPasswordMutation = {
   __typename?: 'Mutation';
-  resetPassword: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      photoUrl?: string | null;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  resetPassword: { __typename?: 'TokenDto'; token: string; refreshToken: string };
 };
 
 export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
@@ -908,36 +866,11 @@ export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: ne
 
 export type ResendEmailConfirmationMutation = { __typename?: 'Mutation'; resendEmailConfirmation: boolean };
 
-export type MeQueryVariables = Exact<{ [key: string]: never }>;
-
-export type MeQuery = {
-  __typename?: 'Query';
-  me: {
-    __typename?: 'User';
-    firstName: string;
-    lastName: string;
-    email: string;
-    allRoles: Array<AllRoles>;
-    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
-  };
-};
-
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LoginProvidersQuery = {
   __typename?: 'Query';
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
-};
-
-export type UserFieldsFragment = {
-  __typename?: 'User';
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  photoUrl?: string | null;
-  allRoles: Array<AllRoles>;
-  currentOrganizationId?: string | null;
 };
 
 export type UpdateOrganizationMutationVariables = Exact<{
@@ -958,6 +891,32 @@ export type UpdateUserMutationVariables = Exact<{
 
 export type UpdateUserMutation = { __typename?: 'Mutation'; updateUser: { __typename?: 'User'; id: string } };
 
+export type MeQueryVariables = Exact<{ [key: string]: never }>;
+
+export type MeQuery = {
+  __typename?: 'Query';
+  me: {
+    __typename?: 'User';
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    photoUrl?: string | null;
+    allRoles: Array<AllRoles>;
+    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
+  };
+};
+
+export type UserFieldsFragment = {
+  __typename?: 'User';
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  photoUrl?: string | null;
+  allRoles: Array<AllRoles>;
+};
+
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
@@ -966,7 +925,6 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
-    currentOrganizationId
   }
 `;
 export const AdAccountsDocument = gql`
@@ -1092,24 +1050,16 @@ export const LoginDocument = gql`
     login(email: $email, password: $password) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 export const SignupDocument = gql`
   mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
     signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 export const ForgetPasswordDocument = gql`
   mutation forgetPassword($email: String!) {
@@ -1121,12 +1071,8 @@ export const ResetPasswordDocument = gql`
     resetPassword(token: $token, password: $password) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 export const RefreshTokenDocument = gql`
   mutation refreshToken {
@@ -1136,20 +1082,6 @@ export const RefreshTokenDocument = gql`
 export const ResendEmailConfirmationDocument = gql`
   mutation resendEmailConfirmation {
     resendEmailConfirmation
-  }
-`;
-export const MeDocument = gql`
-  query me {
-    me {
-      firstName
-      lastName
-      email
-      allRoles
-      currentOrganization {
-        id
-        name
-      }
-    }
   }
 `;
 export const LoginProvidersDocument = gql`
@@ -1174,6 +1106,18 @@ export const UpdateUserDocument = gql`
       id
     }
   }
+`;
+export const MeDocument = gql`
+  query me {
+    me {
+      ...UserFields
+      currentOrganization {
+        id
+        name
+      }
+    }
+  }
+  ${UserFieldsFragmentDoc}
 `;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
@@ -1275,9 +1219,6 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<ResendEmailConfirmationMutation>;
     },
-    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
-      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
-    },
     loginProviders(variables?: LoginProvidersQueryVariables, options?: C): Promise<LoginProvidersQuery> {
       return requester<LoginProvidersQuery, LoginProvidersQueryVariables>(
         LoginProvidersDocument,
@@ -1301,6 +1242,9 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpdateUserMutation>;
+    },
+    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
+      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
     },
   };
 }

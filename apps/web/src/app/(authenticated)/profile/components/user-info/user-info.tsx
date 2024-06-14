@@ -7,7 +7,7 @@ import classes from './user-info.module.scss';
 interface PropsType {
   userDetails: MeQuery['me'];
 }
-export function UserInfo(props: PropsType): React.ReactNode {
+export function UserInfo({ userDetails }: PropsType): React.ReactNode {
   const t = useTranslations('profile');
   const roleToRoleTitleMap: Record<string, string> = {
     USER: t('roleUser'),
@@ -15,37 +15,23 @@ export function UserInfo(props: PropsType): React.ReactNode {
     ORG_ADMIN: t('roleOrgAdmin'),
   };
 
-  const renderUserRoles = (roles: string[]): string => {
-    let userRole = '';
-    roles.forEach((role, index) => {
-      if (index === 0) {
-        userRole += roleToRoleTitleMap[role];
-      } else {
-        userRole += ` / ${roleToRoleTitleMap[role]}`;
-      }
-    });
-    return userRole;
-  };
+  const renderUserRoles = (roles: string[]): string => roles.map((role) => roleToRoleTitleMap[role]).join(' / ');
 
   return (
     <div>
       <Group wrap="nowrap">
-        <Avatar
-          src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-0.png"
-          size={94}
-          radius="md"
-        />
+        <Avatar src={userDetails.photoUrl} size={94} radius="md" />
         <div>
           <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
-            {renderUserRoles(props.userDetails.roles)}
+            {renderUserRoles(userDetails.roles)}
           </Text>
 
           <Text fz="lg" fw={500} className={classes.name}>
-            {`${props.userDetails.firstName} ${props.userDetails.lastName}`}
+            {`${userDetails.firstName} ${userDetails.lastName}`}
           </Text>
 
           <Text fz="xs" c="dimmed">
-            {props.userDetails.email}
+            {userDetails.email}
           </Text>
         </div>
       </Group>

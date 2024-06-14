@@ -3,3 +3,22 @@ mutation updateUser($firstName: String, $lastName: String, $oldPassword: String,
     id
   }
 }
+
+query me {
+  me {
+    ...UserFields
+    currentOrganization {
+      id
+      name
+    }
+  }
+}
+
+fragment UserFields on User {
+  id
+  firstName
+  lastName
+  email
+  photoUrl
+  allRoles
+}

@@ -2,9 +2,6 @@ mutation login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
     token
     refreshToken
-    user {
-      ...UserFields
-    }
   }
 }
 
@@ -12,9 +9,6 @@ mutation signup($email: String!, $firstName: String!, $lastName: String!, $passw
   signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
     token
     refreshToken
-    user {
-      ...UserFields
-    }
   }
 }
 
@@ -26,9 +20,6 @@ mutation resetPassword($token: String!, $password: String!) {
   resetPassword(token: $token, password: $password) {
     token
     refreshToken
-    user {
-      ...UserFields
-    }
   }
 }
 
@@ -40,32 +31,9 @@ mutation resendEmailConfirmation {
   resendEmailConfirmation
 }
 
-query me {
-  me {
-    firstName
-    lastName
-    email
-    allRoles
-    currentOrganization {
-      id
-      name
-    }
-  }
-}
-
 query loginProviders {
   loginProviders {
     url
     type
   }
-}
-
-fragment UserFields on User {
-  id
-  firstName
-  lastName
-  email
-  photoUrl
-  allRoles
-  currentOrganizationId
 }
