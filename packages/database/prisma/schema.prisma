@@ -34,11 +34,17 @@ model Organization {
   @@map("organizations")
 }
 
+enum EmailType {
+  PERSONAL
+  WORK
+}
+
 model User {
   id                    String              @id @default(cuid())
   firstName             String              @map("first_name")
   lastName              String              @map("last_name")
   email                 String              @unique @db.Citext
+  emailType             EmailType           @map("email_type")
   password              String?
   photoUrl              String?             @map("photo_url")
   roles                 UserRole[]
@@ -62,7 +68,7 @@ model LoginProviderUser {
   externalId String            @map("user_id")
   provider   LoginProviderEnum
 
-  user User @relation(fields: [id], references: [id])
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
 
   @@unique([id, provider])
   @@unique([externalId, provider])
@@ -102,8 +108,8 @@ model UserOrganization {
   role           OrganizationRoleEnum
   status         UserOrganizationStatus
 
-  user         User         @relation(fields: [userId], references: [id])
-  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@id([userId, organizationId])
   @@map("user_organizations")

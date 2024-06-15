@@ -445,7 +445,9 @@ type MetaError implements Error {
 }
 
 type Mutation {
+  createOrganization(name: String!): Organization!
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
+  deleteOrganization(organizationId: String!): Organization!
   forgetPassword(email: String!): Boolean!
   login(email: String!, password: String!): TokenDto!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
@@ -456,6 +458,7 @@ type Mutation {
   refreshToken: String!
   resetPassword(password: String!, token: String!): TokenDto!
   signup(args: SignUpInput!): TokenDto!
+  switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }
@@ -541,6 +544,11 @@ type TokenDto {
   refreshToken: String!
   token: String!
   user: User!
+}
+
+type Tokens {
+  refreshToken: String!
+  token: String!
 }
 
 type User {

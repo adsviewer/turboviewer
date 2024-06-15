@@ -5,13 +5,13 @@ import jwt, {
   type NotBeforeError,
   type TokenExpiredError,
 } from 'jsonwebtoken';
-import { type OrganizationRoleEnum, type RoleEnum } from '@repo/database';
+import { type OrganizationRoleEnum, prisma, type RoleEnum } from '@repo/database';
 import { Environment, MODE } from '@repo/utils';
 import { env } from './config';
 
 interface AJwtPayload extends JwtPayload {
   userId: string;
-  roles: RoleEnum[] | OrganizationRoleEnum;
+  roles: (RoleEnum | OrganizationRoleEnum)[];
   organizationId: string;
 }
 
@@ -22,10 +22,17 @@ const expiresIn = MODE === Environment.Local ? '365d' : '5m';
 export const createJwt = (userId: string, organizationId: string, roles: RoleEnum[]) =>
   sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn });
 
-export const createJwts = (userId: string, organizationId: string, roles: RoleEnum[]) => ({
-  token: sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn }),
-  refreshToken: sign({ userId, organizationId, roles }, env.REFRESH_SECRET, { expiresIn: '183d' }),
-});
+export const createJwts = async (userId: string, organizationId: string, roles: RoleEnum[]) => {
+  const { role } = await prisma.userOrganization.findUniqueOrThrow({
+    select: { role: true },
+    where: { userId_organizationId: { userId, organizationId } },
+  });
+  roles.push(role as RoleEnum);
+  return {
+    token: sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn }),
+    refreshToken: sign({ userId, organizationId, roles }, env.REFRESH_SECRET, { expiresIn: '183d' }),
+  };
+};
 
 export const decodeJwt = (request: Request): AJwtPayload | null => {
   const decode = safeDecode(request, env.AUTH_SECRET);
