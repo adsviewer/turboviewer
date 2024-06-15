@@ -5,8 +5,10 @@ import { useForm, zodResolver } from '@mantine/form';
 import React, { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useSetAtom } from 'jotai';
 import { EditProfileSchema } from '@/util/schemas/profile-schemas';
 import { type UpdateUserMutationVariables, type MeQuery } from '@/graphql/generated/schema-server';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { updateUserDetails } from '../actions';
 
 interface PropsType {
@@ -17,6 +19,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
   const t = useTranslations('profile');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const setUserDetails = useSetAtom(userDetailsAtom);
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -44,7 +47,16 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
         if (!res.success) {
           form.setFieldError('oldPassword', res.error);
         } else {
-          form.reset();
+          setUserDetails({
+            id: res.data.updateUser.id,
+            firstName: res.data.updateUser.firstName,
+            lastName: res.data.updateUser.lastName,
+            email: res.data.updateUser.email,
+            allRoles: res.data.updateUser.allRoles,
+            defaultOrganizationId: res.data.updateUser.defaultOrganizationId,
+            photoUrl: res.data.updateUser.photoUrl,
+          });
+          // form.reset();
           router.refresh();
         }
       });

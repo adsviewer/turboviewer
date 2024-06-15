@@ -890,7 +890,19 @@ export type UpdateUserMutationVariables = Exact<{
   newPassword?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-export type UpdateUserMutation = { __typename?: 'Mutation'; updateUser: { __typename?: 'User'; id: string } };
+export type UpdateUserMutation = {
+  __typename?: 'Mutation';
+  updateUser: {
+    __typename?: 'User';
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    photoUrl?: string | null;
+    allRoles: Array<AllRoles>;
+    defaultOrganizationId: string;
+  };
+};
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1187,9 +1199,10 @@ export function useUpdateOrganizationMutation() {
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
-      id
+      ...UserFields
     }
   }
+  ${UserFieldsFragmentDoc}
 `;
 
 export function useUpdateUserMutation() {
