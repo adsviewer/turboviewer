@@ -23,7 +23,7 @@ export function UserInfo({ userDetails }: PropsType): React.ReactNode {
         <Avatar src={userDetails.photoUrl} size={94} radius="md" />
         <div>
           <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
-            {renderUserRoles(userDetails.roles)}
+            {renderUserRoles(userDetails.allRoles)}
           </Text>
 
           <Text fz="lg" fw={500} className={classes.name}>

@@ -904,6 +904,7 @@ export type MeQuery = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
+    currentOrganizationId?: string | null;
     currentOrganization: { __typename?: 'Organization'; id: string; name: string };
   };
 };
@@ -916,6 +917,7 @@ export type UserFieldsFragment = {
   email: string;
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
+  currentOrganizationId?: string | null;
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -926,6 +928,7 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
+    currentOrganizationId
   }
 `;
 export const AdAccountsDocument = gql`
