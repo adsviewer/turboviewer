@@ -113,7 +113,7 @@ const completeSocialLogin = async (
     .then((u) => u?.user);
 
   if (providerUser) {
-    const { token, refreshToken } = createJwts(
+    const { token, refreshToken } = await createJwts(
       providerUser.id,
       providerUser.defaultOrganizationId,
       providerUser.roles.map((r) => r.role),
@@ -131,7 +131,7 @@ const completeSocialLogin = async (
   });
 
   if (emailUser) {
-    const { token, refreshToken } = createJwts(
+    const { token, refreshToken } = await createJwts(
       emailUser.id,
       emailUser.defaultOrganizationId,
       emailUser.roles.map((r) => r.role),
@@ -146,7 +146,7 @@ const completeSocialLogin = async (
   const user = await createLoginProviderUser(userdata);
   if (isAError(user)) return user;
 
-  const { token, refreshToken } = createJwts(
+  const { token, refreshToken } = await createJwts(
     user.id,
     user.defaultOrganizationId,
     user.roles.map((r) => r.role),

@@ -63,6 +63,13 @@ export const TokenUserDto = builder
     }),
   });
 
+export const TokensDto = builder.simpleObject('Tokens', {
+  fields: (t) => ({
+    token: t.string({ nullable: false }),
+    refreshToken: t.string({ nullable: false }),
+  }),
+});
+
 export const GenerateGoogleAuthUrlResponseDto = builder.simpleObject('GenerateGoogleAuthUrlResponse', {
   fields: (t) => ({
     url: t.string({ nullable: false }),

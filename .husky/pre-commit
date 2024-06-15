@@ -4,4 +4,4 @@ git add apps/server/src/schema/generated/*
 git add apps/web/src/graphql/generated/*
 git add apps/web-old/src/graphql/generated/*
 pnpm lint-staged
-pnpm lint
+pnpm lint:fix

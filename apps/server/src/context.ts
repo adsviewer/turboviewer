@@ -27,7 +27,7 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
     currentUserId: token?.userId,
     organizationId: token?.organizationId,
     isAdmin: token?.roles.includes(RoleEnum.ADMIN),
-    isOrgAdmin: token?.roles === OrganizationRoleEnum.ORG_ADMIN,
+    isOrgAdmin: token?.roles.includes(OrganizationRoleEnum.ORG_ADMIN),
     acceptedLanguage: acceptedLanguage(initialContext.request),
     request: {
       operatingSystem,

@@ -83,7 +83,7 @@ builder.mutationFields((t) => ({
       //   }),
       // );
 
-      const { token, refreshToken } = createJwts(
+      const { token, refreshToken } = await createJwts(
         user.id,
         user.defaultOrganizationId,
         user.roles.map((r) => r.role),
@@ -115,7 +115,7 @@ builder.mutationFields((t) => ({
       if (!valid) {
         throw new GraphQLError('Invalid credentials');
       }
-      const { token, refreshToken } = createJwts(
+      const { token, refreshToken } = await createJwts(
         user.id,
         user.defaultOrganizationId,
         user.roles.map((r) => r.role),
@@ -256,7 +256,7 @@ builder.mutationFields((t) => ({
         await redisDel(`forget-password:${args.token}`),
       ]);
 
-      const { token, refreshToken } = createJwts(
+      const { token, refreshToken } = await createJwts(
         user.id,
         user.defaultOrganizationId,
         user.roles.map((r) => r.role),

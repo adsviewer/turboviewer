@@ -483,7 +483,9 @@ export type MetaError = Error & {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createOrganization: Organization;
   deAuthIntegration: MutationDeAuthIntegrationResult;
+  deleteOrganization: Organization;
   forgetPassword: Scalars['Boolean']['output'];
   login: TokenDto;
   refreshData: Scalars['Boolean']['output'];
@@ -491,12 +493,21 @@ export type Mutation = {
   refreshToken: Scalars['String']['output'];
   resetPassword: TokenDto;
   signup: TokenDto;
+  switchOrganization: Tokens;
   updateOrganization: Organization;
   updateUser: User;
 };
 
+export type MutationCreateOrganizationArgs = {
+  name: Scalars['String']['input'];
+};
+
 export type MutationDeAuthIntegrationArgs = {
   type: IntegrationType;
+};
+
+export type MutationDeleteOrganizationArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 export type MutationForgetPasswordArgs = {
@@ -520,6 +531,10 @@ export type MutationResetPasswordArgs = {
 
 export type MutationSignupArgs = {
   args: SignUpInput;
+};
+
+export type MutationSwitchOrganizationArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 export type MutationUpdateOrganizationArgs = {
@@ -640,6 +655,12 @@ export type TokenDto = {
   refreshToken: Scalars['String']['output'];
   token: Scalars['String']['output'];
   user: User;
+};
+
+export type Tokens = {
+  __typename?: 'Tokens';
+  refreshToken: Scalars['String']['output'];
+  token: Scalars['String']['output'];
 };
 
 export type User = {
