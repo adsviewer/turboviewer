@@ -910,13 +910,7 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
   __typename?: 'Query';
-  me: {
-    __typename?: 'User';
-    firstName: string;
-    lastName: string;
-    email: string;
-    organization: { __typename?: 'Organization'; name: string };
-  };
+  me: { __typename?: 'User'; firstName: string; lastName: string; email: string; defaultOrganizationId: string };
 };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
@@ -1130,9 +1124,7 @@ export const MeDocument = gql`
       firstName
       lastName
       email
-      organization {
-        name
-      }
+      defaultOrganizationId
     }
   }
 `;

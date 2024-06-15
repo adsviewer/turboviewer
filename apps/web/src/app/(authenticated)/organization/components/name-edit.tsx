@@ -18,7 +18,7 @@ export default function NameEdit({ userDetails }: PropsType): React.ReactNode {
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-      name: userDetails.organization.name,
+      name: userDetails.firstName,
     },
   });
 

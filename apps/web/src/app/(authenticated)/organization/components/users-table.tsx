@@ -33,10 +33,16 @@ export function UsersTable({ members }: PropsType): React.ReactNode {
   const rolesData = [
     {
       value: String(Math.random()),
-      label: t('admin'),
+      label: t('roleOrganizationAdmin'),
     },
-    t('editor'),
-    t('viewer'),
+    {
+      value: String(Math.random()),
+      label: t('roleAdmin'),
+    },
+    {
+      value: String(Math.random()),
+      label: t('roleOrganizationUser'),
+    },
   ];
 
   const rows = data.map((item) => (
