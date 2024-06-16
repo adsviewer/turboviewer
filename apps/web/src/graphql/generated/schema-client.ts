@@ -937,7 +937,7 @@ export type UpdateOrganizationMutationVariables = Exact<{
 
 export type UpdateOrganizationMutation = {
   __typename?: 'Mutation';
-  updateOrganization: { __typename?: 'Organization'; id: string };
+  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -1221,6 +1221,7 @@ export const UpdateOrganizationDocument = gql`
   mutation updateOrganization($name: String!) {
     updateOrganization(name: $name) {
       id
+      name
     }
   }
 `;
