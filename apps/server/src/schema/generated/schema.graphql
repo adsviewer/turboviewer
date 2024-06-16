@@ -555,7 +555,7 @@ type User {
   allRoles: [AllRoles!]!
   createdAt: Date!
   defaultOrganization: Organization!
-  defaultOrganizationId: String!
+  defaultOrganizationId: String
   email: String!
   firstName: String!
   id: ID!

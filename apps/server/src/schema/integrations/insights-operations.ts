@@ -36,7 +36,7 @@ builder.queryFields((t) => ({
       });
     },
   }),
-  insights: t.withAuth({ authenticated: true }).field({
+  insights: t.withAuth({ isInOrg: true }).field({
     type: GroupedInsightsDto,
     args: {
       filter: t.arg({ type: FilterInsightsInput, required: true }),
@@ -168,7 +168,7 @@ builder.queryFields((t) => ({
     },
   }),
 
-  insightDatapoints: t.withAuth({ authenticated: true }).field({
+  insightDatapoints: t.withAuth({ isInOrg: true }).field({
     type: [InsightsDatapointsDto],
     args: {
       args: t.arg({ type: InsightsDatapointsInput, required: true }),

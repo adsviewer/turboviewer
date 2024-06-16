@@ -1,9 +1,10 @@
+import 'dotenv/config';
 import { printSchema } from 'graphql';
 import type { CodegenConfig } from '@graphql-codegen/cli';
-import { generate } from '@graphql-codegen/cli';
 import { schema } from '.';
 
 const config: CodegenConfig = {
+  watch: false,
   schema: printSchema(schema),
   emitLegacyCommonJSImports: false,
   generates: {
@@ -62,6 +63,5 @@ const config: CodegenConfig = {
   hooks: { afterAllFileWrite: ['prettier --write'] },
 };
 
-await generate(config);
-
-process.exit(0);
+// eslint-disable-next-line import/no-default-export -- This is needed  as per documentation: https://the-guild.dev/graphql/codegen/docs/getting-started/esm-typescript-usage#codegen-configuration
+export default config;

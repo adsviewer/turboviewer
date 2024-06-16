@@ -20,12 +20,14 @@ const { sign, verify } = jwt;
 
 const expiresIn = MODE === Environment.Local ? '365d' : '5m';
 
-export const createJwts = async (userId: string, organizationId: string, roles: RoleEnum[]) => {
-  const { role } = await prisma.userOrganization.findUniqueOrThrow({
-    select: { role: true },
-    where: { userId_organizationId: { userId, organizationId } },
-  });
-  roles.push(role as RoleEnum);
+export const createJwts = async (userId: string, organizationId: string | null, roles: RoleEnum[]) => {
+  if (organizationId) {
+    const { role } = await prisma.userOrganization.findUniqueOrThrow({
+      select: { role: true },
+      where: { userId_organizationId: { userId, organizationId } },
+    });
+    roles.push(role as RoleEnum);
+  }
   return {
     token: sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn }),
     refreshToken: sign({ userId, organizationId, type: 'refresh' }, env.REFRESH_SECRET, { expiresIn: '183d' }),

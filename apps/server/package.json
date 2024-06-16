@@ -7,14 +7,14 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development pnpm --filter=@repo/database start-dev && tsx watch --env-file=.env src/index.ts",
+    "dev": "cross-env NODE_ENV=development concurrently 'pnpm codegen --watch' 'pnpm --filter=@repo/database start-dev' 'tsx watch --env-file=.env src/index.ts'",
     "build": "tsc",
     "start": "node --conditions=javascript --import=extensionless/register dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest",
-    "codegen": "tsx --env-file=.env src/schema/codegen.ts",
+    "codegen": "graphql-codegen -c src/schema/codegen.ts",
     "test": "node --import tsx --test test/**/*.test.ts"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
     "body-parser": "^1.20.2",
     "change-case": "^5.4.4",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "extensionless": "^1.9.9",
     "google-auth-library": "^9.10.0",
@@ -72,6 +73,7 @@
     "@types/node": "20.14.2",
     "@types/qs": "^6.9.15",
     "@types/sns-validator": "^0.3.3",
+    "concurrently": "^8.2.2",
     "tsx": "^4.11.2",
     "typescript": "5.4.5"
   }
