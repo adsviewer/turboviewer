@@ -7,7 +7,7 @@ import { logger } from '@repo/logger';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import lodash from 'lodash';
-import { createJwt, createJwts } from '../../auth';
+import { createJwts } from '../../auth';
 import { createPassword, createUser, passwordsMatch, userWithRoles } from '../../contexts/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
@@ -123,7 +123,7 @@ builder.mutationFields((t) => ({
       return { token, refreshToken, user };
     },
   }),
-  refreshToken: t.withAuth({ authenticated: true }).field({
+  refreshToken: t.withAuth({ refresh: true }).field({
     description: 'Uses the refresh token to generate a new token',
     type: 'String',
     resolve: async (root, args, ctx, _info) => {
@@ -134,11 +134,12 @@ builder.mutationFields((t) => ({
       if (!user) {
         throw new GraphQLError('User not found');
       }
-      return createJwt(
+      const { token } = await createJwts(
         user.id,
         ctx.organizationId,
         user.roles.map((r) => r.role),
       );
+      return token;
     },
   }),
   updateUser: t.withAuth({ authenticated: true }).prismaField({

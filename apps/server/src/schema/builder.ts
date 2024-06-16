@@ -19,6 +19,13 @@ export interface AuthenticatedContext extends GraphQLContext {
   organizationId: NonNullable<GraphQLContext['organizationId']>;
   isAdmin: NonNullable<GraphQLContext['isAdmin']>;
   isOrgAdmin: NonNullable<GraphQLContext['isOrgAdmin']>;
+  isRefreshToken: NonNullable<GraphQLContext['isRefreshToken']>;
+}
+
+export interface RefreshContext extends GraphQLContext {
+  currentUserId: NonNullable<GraphQLContext['currentUserId']>;
+  organizationId: NonNullable<GraphQLContext['organizationId']>;
+  isRefreshToken: NonNullable<GraphQLContext['isRefreshToken']>;
 }
 
 export const builder = new SchemaBuilder<{
@@ -38,9 +45,13 @@ export const builder = new SchemaBuilder<{
     authenticated: boolean;
     isAdmin: boolean;
     isOrgAdmin: boolean;
+    refresh: boolean;
   };
   AuthContexts: {
     authenticated: AuthenticatedContext;
+    isAdmin: AuthenticatedContext;
+    isOrgAdmin: AuthenticatedContext;
+    refresh: RefreshContext;
   };
 }>({
   plugins: [ErrorsPlugin, RelayPlugin, ScopeAuthPlugin, PrismaPlugin, SimpleObjectsPlugin, ValidationPlugin],
@@ -53,9 +64,10 @@ export const builder = new SchemaBuilder<{
     cursorType: 'ID',
   },
   authScopes: (context) => ({
-    authenticated: Boolean(context.currentUserId),
-    isAdmin: Boolean(context.isAdmin),
-    isOrgAdmin: Boolean(context.isOrgAdmin),
+    authenticated: Boolean(context.currentUserId) && !context.isRefreshToken,
+    isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken,
+    isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken,
+    refresh: Boolean(context.isRefreshToken),
   }),
   scopeAuthOptions: {
     // Recommended when using subscriptions

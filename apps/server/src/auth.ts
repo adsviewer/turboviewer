@@ -1,4 +1,3 @@
-import { GraphQLError } from 'graphql';
 import jwt, {
   type JsonWebTokenError,
   type JwtPayload,
@@ -6,21 +5,20 @@ import jwt, {
   type TokenExpiredError,
 } from 'jsonwebtoken';
 import { type OrganizationRoleEnum, prisma, type RoleEnum } from '@repo/database';
-import { Environment, MODE } from '@repo/utils';
+import { AError, Environment, MODE } from '@repo/utils';
 import { env } from './config';
 
 interface AJwtPayload extends JwtPayload {
   userId: string;
-  roles: (RoleEnum | OrganizationRoleEnum)[];
-  organizationId: string;
+  roles?: (RoleEnum | OrganizationRoleEnum)[];
+  organizationId?: string;
+  refresh?: boolean;
 }
 
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
 const { sign, verify } = jwt;
 
 const expiresIn = MODE === Environment.Local ? '365d' : '5m';
-export const createJwt = (userId: string, organizationId: string, roles: RoleEnum[]) =>
-  sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn });
 
 export const createJwts = async (userId: string, organizationId: string, roles: RoleEnum[]) => {
   const { role } = await prisma.userOrganization.findUniqueOrThrow({
@@ -30,11 +28,11 @@ export const createJwts = async (userId: string, organizationId: string, roles: 
   roles.push(role as RoleEnum);
   return {
     token: sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn }),
-    refreshToken: sign({ userId, organizationId, roles }, env.REFRESH_SECRET, { expiresIn: '183d' }),
+    refreshToken: sign({ userId, organizationId, type: 'refresh' }, env.REFRESH_SECRET, { expiresIn: '183d' }),
   };
 };
 
-export const decodeJwt = (request: Request): AJwtPayload | null => {
+export const decodeJwt = (request: Request): AError | AJwtPayload | null => {
   const decode = safeDecode(request, env.AUTH_SECRET);
   if (!decode) return null;
   if (isGenericJsonWebTokenError(decode) && isJsonWebTokenError(decode)) {
@@ -42,12 +40,12 @@ export const decodeJwt = (request: Request): AJwtPayload | null => {
     const refreshDecode = safeDecode(request, env.REFRESH_SECRET);
     if (!refreshDecode) return null;
     if (refreshDecode instanceof Error) {
-      throw new GraphQLError(refreshDecode.message);
+      return new AError(refreshDecode.message);
     }
     return refreshDecode;
   }
   if (decode instanceof Error) {
-    throw new GraphQLError(decode.message);
+    return new AError(decode.message);
   }
   return decode;
 };
