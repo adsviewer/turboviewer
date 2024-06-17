@@ -12,6 +12,7 @@ export interface GraphQLContext {
   acceptedLanguage: Language;
   isAdmin: boolean | undefined;
   isOrgAdmin: boolean | undefined;
+  isInOrg: boolean | undefined;
   isRefreshToken: boolean | undefined;
   request: {
     operatingSystem: string;
@@ -33,7 +34,10 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
     currentUserId: token?.userId,
     organizationId: token?.organizationId,
     isAdmin: token?.roles?.includes(RoleEnum.ADMIN),
-    isOrgAdmin: token?.roles?.includes(OrganizationRoleEnum.ORG_ADMIN),
+    isOrgAdmin: token?.roles?.includes(OrganizationRoleEnum.ORG_MEMBER),
+    isInOrg: token?.roles?.some((r) =>
+      [OrganizationRoleEnum.ORG_ADMIN, OrganizationRoleEnum.ORG_MEMBER].includes(r as OrganizationRoleEnum),
+    ),
     acceptedLanguage: acceptedLanguage(initialContext.request),
     request: {
       operatingSystem,

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { createYoga } from 'graphql-yoga';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';

@@ -65,12 +65,13 @@ builder.mutationFields((t) => ({
       organizationId: t.arg.string({ required: true }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
-      const deleteOrg = prisma.organization.delete({
-        ...query,
-        where: { id: args.organizationId },
-      });
+      const deleteOrg = () =>
+        prisma.organization.delete({
+          ...query,
+          where: { id: args.organizationId },
+        });
       if (ctx.isOrgAdmin && ctx.organizationId === args.organizationId) {
-        return deleteOrg;
+        return deleteOrg();
       }
       const userOrg = await prisma.userOrganization.findUnique({
         where: {
@@ -81,7 +82,7 @@ builder.mutationFields((t) => ({
       if (!userOrg) {
         throw new GraphQLError('You do not have permission to delete this organization');
       }
-      return deleteOrg;
+      return deleteOrg();
     },
   }),
 

@@ -16,10 +16,13 @@ import JsonValue = Prisma.JsonValue;
 
 export interface AuthenticatedContext extends GraphQLContext {
   currentUserId: NonNullable<GraphQLContext['currentUserId']>;
+}
+
+export interface InOrganizationContext extends GraphQLContext {
+  currentUserId: NonNullable<GraphQLContext['currentUserId']>;
   organizationId: NonNullable<GraphQLContext['organizationId']>;
   isAdmin: NonNullable<GraphQLContext['isAdmin']>;
   isOrgAdmin: NonNullable<GraphQLContext['isOrgAdmin']>;
-  isRefreshToken: NonNullable<GraphQLContext['isRefreshToken']>;
 }
 
 export interface RefreshContext extends GraphQLContext {
@@ -45,12 +48,14 @@ export const builder = new SchemaBuilder<{
     authenticated: boolean;
     isAdmin: boolean;
     isOrgAdmin: boolean;
+    isInOrg: boolean;
     refresh: boolean;
   };
   AuthContexts: {
     authenticated: AuthenticatedContext;
     isAdmin: AuthenticatedContext;
-    isOrgAdmin: AuthenticatedContext;
+    isOrgAdmin: InOrganizationContext;
+    isInOrg: InOrganizationContext;
     refresh: RefreshContext;
   };
 }>({
@@ -67,6 +72,7 @@ export const builder = new SchemaBuilder<{
     authenticated: Boolean(context.currentUserId) && !context.isRefreshToken,
     isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken,
     isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken,
+    isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken,
     refresh: Boolean(context.isRefreshToken),
   }),
   scopeAuthOptions: {

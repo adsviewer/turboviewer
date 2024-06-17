@@ -48,8 +48,8 @@ model User {
   password              String?
   photoUrl              String?             @map("photo_url")
   roles                 UserRole[]
-  defaultOrganization   Organization        @relation(fields: [defaultOrganizationId], references: [id])
-  defaultOrganizationId String              @map("default_organization_id")
+  defaultOrganization   Organization?       @relation(fields: [defaultOrganizationId], references: [id])
+  defaultOrganizationId String?             @map("default_organization_id")
   createdAt             DateTime            @default(now()) @map("created_at")
   updatedAt             DateTime            @default(now()) @updatedAt @map("updated_at")
   loginProviders        LoginProviderUser[]

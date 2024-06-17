@@ -32,7 +32,7 @@ builder.queryFields((t) => ({
       });
     },
   }),
-  settingsChannels: t.withAuth({ authenticated: true }).field({
+  settingsChannels: t.withAuth({ isInOrg: true }).field({
     type: [IntegrationListItemDto],
     resolve: async (_root, _args, ctx, _info) => {
       const integrations = await prisma.integration.findMany({
@@ -58,7 +58,7 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
-  deAuthIntegration: t.withAuth({ authenticated: true }).field({
+  deAuthIntegration: t.withAuth({ isOrgAdmin: true }).field({
     type: 'String',
     errors: { types: [MetaError, AError] },
     args: {

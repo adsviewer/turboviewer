@@ -668,7 +668,7 @@ export type User = {
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
   defaultOrganization: Organization;
-  defaultOrganizationId: Scalars['String']['output'];
+  defaultOrganizationId?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -820,7 +820,7 @@ export type LoginMutation = {
       lastName: string;
       email: string;
       allRoles: Array<AllRoles>;
-      defaultOrganizationId: string;
+      defaultOrganizationId?: string | null;
     };
   };
 };
@@ -845,7 +845,7 @@ export type SignupMutation = {
       lastName: string;
       email: string;
       allRoles: Array<AllRoles>;
-      defaultOrganizationId: string;
+      defaultOrganizationId?: string | null;
     };
   };
 };
@@ -874,7 +874,7 @@ export type ResetPasswordMutation = {
       lastName: string;
       email: string;
       allRoles: Array<AllRoles>;
-      defaultOrganizationId: string;
+      defaultOrganizationId?: string | null;
     };
   };
 };
@@ -904,7 +904,7 @@ export type UserFieldsFragment = {
   lastName: string;
   email: string;
   allRoles: Array<AllRoles>;
-  defaultOrganizationId: string;
+  defaultOrganizationId?: string | null;
 };
 
 export const UserFieldsFragmentDoc = gql`

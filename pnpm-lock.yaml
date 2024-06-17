@@ -149,6 +149,9 @@ importers:
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
       express:
         specifier: ^4.19.2
         version: 4.19.2
@@ -234,6 +237,9 @@ importers:
       '@types/sns-validator':
         specifier: ^0.3.3
         version: 0.3.3
+      concurrently:
+        specifier: ^8.2.2
+        version: 8.2.2
       tsx:
         specifier: ^4.11.2
         version: 4.11.2
