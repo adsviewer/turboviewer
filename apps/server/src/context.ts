@@ -34,7 +34,7 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
     currentUserId: token?.userId,
     organizationId: token?.organizationId,
     isAdmin: token?.roles?.includes(RoleEnum.ADMIN),
-    isOrgAdmin: token?.roles?.includes(OrganizationRoleEnum.ORG_MEMBER),
+    isOrgAdmin: token?.roles?.includes(OrganizationRoleEnum.ORG_ADMIN),
     isInOrg: token?.roles?.some((r) =>
       [OrganizationRoleEnum.ORG_ADMIN, OrganizationRoleEnum.ORG_MEMBER].includes(r as OrganizationRoleEnum),
     ),
