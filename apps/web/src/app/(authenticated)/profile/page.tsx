@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { Flex } from '@mantine/core';
+import { useAtomValue } from 'jotai';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { UserInfo } from './components/user-info/user-info';
 import EditProfileForm from './components/edit-profile-form';
-import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { useAtomValue } from 'jotai';
 
 export default function Profile(): React.ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);

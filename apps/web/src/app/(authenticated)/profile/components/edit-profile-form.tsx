@@ -67,7 +67,6 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
             newPassword: '',
             repeatPassword: '',
           });
-          // router.refresh();
         }
       });
     });
