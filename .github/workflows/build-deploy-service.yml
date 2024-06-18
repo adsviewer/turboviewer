@@ -80,7 +80,7 @@ jobs:
           mask-password: true
 
       - name: Build server
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: true
           tags: |
