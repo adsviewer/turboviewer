@@ -2,8 +2,7 @@
 
 import { Button, Flex, Group, PasswordInput, TextInput } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import React, { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSetAtom } from 'jotai';
 import { EditProfileSchema } from '@/util/schemas/profile-schemas';
@@ -17,7 +16,6 @@ interface PropsType {
 
 export default function EditProfileForm(props: PropsType): React.ReactNode {
   const t = useTranslations('profile');
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const setUserDetails = useSetAtom(userDetailsAtom);
   const form = useForm({
@@ -33,7 +31,15 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
     validate: zodResolver(EditProfileSchema),
   });
 
-  // TODO: Use global state for user info so that we also update the user button on the sidebar!
+  // Load fetched data onto the form
+  useEffect(() => {
+    form.setValues({
+      firstName: props.userDetails.firstName,
+      lastName: props.userDetails.lastName,
+      email: props.userDetails.email,
+    });
+  }, [props.userDetails]);
+
   const handleSubmit = (values: UpdateUserMutationVariables): void => {
     // Set unused fields as undefined
     const data = { ...values };
@@ -56,8 +62,12 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
             defaultOrganizationId: res.data.updateUser.defaultOrganizationId,
             photoUrl: res.data.updateUser.photoUrl,
           });
-          // form.reset();
-          router.refresh();
+          form.setValues({
+            oldPassword: '',
+            newPassword: '',
+            repeatPassword: '',
+          });
+          // router.refresh();
         }
       });
     });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Text, Group } from '@mantine/core';
+import { Avatar, Text, Group, Skeleton, Flex } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { type MeQuery } from '@/graphql/generated/schema-server';
 import classes from './user-info.module.scss';
@@ -7,6 +7,7 @@ import classes from './user-info.module.scss';
 interface PropsType {
   userDetails: MeQuery['me'];
 }
+
 export function UserInfo({ userDetails }: PropsType): React.ReactNode {
   const t = useTranslations('profile');
   const roleToRoleTitleMap: Record<string, string> = {
@@ -21,19 +22,31 @@ export function UserInfo({ userDetails }: PropsType): React.ReactNode {
     <div>
       <Group wrap="nowrap">
         <Avatar src={userDetails.photoUrl} size={94} radius="md" />
-        <div>
-          <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
-            {renderUserRoles(userDetails.allRoles)}
-          </Text>
+        <Flex direction="column" w="35%">
+          {userDetails.allRoles.length ? (
+            <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
+              {renderUserRoles(userDetails.allRoles)}
+            </Text>
+          ) : (
+            <Skeleton height={20} my={2} animate />
+          )}
 
-          <Text fz="lg" fw={500} className={classes.name}>
-            {`${userDetails.firstName} ${userDetails.lastName}`}
-          </Text>
+          {userDetails.firstName && userDetails.lastName ? (
+            <Text fz="lg" fw={500} className={classes.name}>
+              {`${userDetails.firstName} ${userDetails.lastName}`}
+            </Text>
+          ) : (
+            <Skeleton height={20} my={2} animate />
+          )}
 
-          <Text fz="xs" c="dimmed">
-            {userDetails.email}
-          </Text>
-        </div>
+          {userDetails.email ? (
+            <Text fz="xs" c="dimmed">
+              {userDetails.email}
+            </Text>
+          ) : (
+            <Skeleton height={8} my={2} animate />
+          )}
+        </Flex>
       </Group>
     </div>
   );
