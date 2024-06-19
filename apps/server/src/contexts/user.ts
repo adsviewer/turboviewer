@@ -1,13 +1,26 @@
-import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { EmailType, OrganizationRoleEnum, prisma, Prisma, UserOrganizationStatus } from '@repo/database';
+import {
+  EmailType,
+  OrganizationRoleEnum,
+  prisma,
+  Prisma,
+  type User,
+  UserOrganizationStatus,
+  UserStatus,
+} from '@repo/database';
 import { AError, isAError } from '@repo/utils';
 import * as changeCase from 'change-case';
 import { logger } from '@repo/logger';
 import { createId } from '@paralleldrive/cuid2';
 import lodash from 'lodash';
+import { redisDel, redisGet, redisSet } from '@repo/redis';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { validateEmail } from '../schema/user/emailable-helper';
 import { type SignUpInput } from '../schema/user/user-types';
+import { env } from '../config';
+import { sendConfirmEmail } from '../email';
+import { createJwts, type TokensType } from '../auth';
 import { type LoginProviderUserData } from './login-provider/login-provider-types';
 
 const scryptAsync = promisify(scrypt);
@@ -49,7 +62,7 @@ export const createUser = async (
   const hashedPassword = await createPassword(data.password);
 
   // Create user with specified organization or default to creating a new organization
-  return await prisma.user.create({
+  const user = await prisma.user.create({
     include: lodash.merge({}, query?.include, userWithRoles.include),
     data: {
       email: data.email,
@@ -57,6 +70,7 @@ export const createUser = async (
       lastName: data.lastName,
       emailType: validData.emailType,
       password: hashedPassword,
+      status: UserStatus.EMAIL_UNCONFIRMED,
       organizations: {
         create: {
           status: UserOrganizationStatus.ACTIVE,
@@ -67,6 +81,9 @@ export const createUser = async (
       defaultOrganizationId: validData.orgId,
     },
   });
+  await confirmEmail(user);
+
+  return user;
 };
 
 export const createLoginProviderUser = async (data: LoginProviderUserData) => {
@@ -82,6 +99,7 @@ export const createLoginProviderUser = async (data: LoginProviderUserData) => {
       lastName: data.lastName,
       emailType: validData.emailType,
       photoUrl: data.photoUrl,
+      status: UserStatus.EMAIL_CONFIRMED,
       loginProviders: {
         create: {
           externalId: data.providerId,
@@ -98,6 +116,48 @@ export const createLoginProviderUser = async (data: LoginProviderUserData) => {
       defaultOrganizationId: validData.orgId,
     },
   });
+};
+
+export const authConfirmUserEmailEndpoint = '/user/confirm-email';
+
+export const authConfirmUserEmailCallback = (req: ExpressRequest, res: ExpressResponse): void => {
+  const { token } = req.query;
+  if (!token || typeof token !== 'string') {
+    res.redirect(`${env.PUBLIC_URL}?error=${encodeURIComponent('Missing parameters')}`);
+    return;
+  }
+  completeConfirmUserEmailCallback(token)
+    .then((response) => {
+      if (isAError(response)) {
+        res.redirect(`${env.PUBLIC_URL}?error=${encodeURIComponent(response.message)}`);
+      } else {
+        res.redirect(
+          `${env.PUBLIC_URL}/api/auth/sign-in?token=${response.token}&refreshToken=${response.refreshToken}`,
+        );
+      }
+    })
+    .catch((e: unknown) => {
+      logger.error(e, 'Failed to complete email confirmation');
+      res.redirect(`${env.PUBLIC_URL}?error=unknown_error`);
+    });
+};
+
+const confirmEmailRedisKey = (token: string) => `confirm-email:${token}`;
+const completeConfirmUserEmailCallback = async (token: string): Promise<TokensType | AError> => {
+  const key = confirmEmailRedisKey(token);
+  const userId = await redisGet<string>(key);
+  if (!userId) {
+    return new AError('Token expired');
+  }
+  const [user, _] = await Promise.all([
+    prisma.user.update({
+      ...userWithRoles,
+      where: { id: userId },
+      data: { status: UserStatus.EMAIL_CONFIRMED },
+    }),
+    redisDel(key),
+  ]);
+  return await createJwts(user);
 };
 
 const validateEmailProcess = async (
@@ -141,10 +201,44 @@ const validateEmailProcess = async (
   return { orgId, emailType: EmailType.PERSONAL };
 };
 
+export const confirmEmail = async (user: User): Promise<undefined | AError> => {
+  const confirmEmailDurationSec = 3600 * 24 * 15; // 15 days
+  const confirmEmailResendDurationSec = 60; // 1 minute
+  const resendKey = `confirm-email-resent:${user.email}`;
+
+  const resend = await redisGet<string>(resendKey);
+  const now = new Date();
+  if (resend) {
+    const resendDate = new Date(resend);
+    const resendExpires = (now.getTime() - resendDate.getTime()) / 1000;
+    return new AError(`Please wait ${String(resendExpires)} seconds before requesting another email confirmation.`);
+  }
+  const token = randomUUID();
+  const searchParams = new URLSearchParams();
+
+  searchParams.set('token', token);
+
+  const url = new URL(`${env.API_ENDPOINT}${authConfirmUserEmailEndpoint}`);
+  url.search = searchParams.toString();
+
+  logger.info(`Confirm email url for ${user.email}: ${url.toString()}`);
+
+  await Promise.all([
+    redisSet(confirmEmailRedisKey(token), user.id, confirmEmailDurationSec),
+    redisSet(resendKey, new Date(), confirmEmailResendDurationSec),
+    sendConfirmEmail({
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      action_url: url.toString(),
+    }),
+  ]);
+};
+
 export const userWithRoles = Prisma.validator<Prisma.UserDefaultArgs>()({
   include: {
     roles: { select: { role: true } },
   },
 });
 
-export type UserWithOrganizationAndRoles = Prisma.UserGetPayload<typeof userWithRoles>;
+export type UserWithRoles = Prisma.UserGetPayload<typeof userWithRoles>;

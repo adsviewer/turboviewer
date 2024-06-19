@@ -460,6 +460,7 @@ type Mutation {
   Uses the refresh token to generate a new token
   """
   refreshToken: String!
+  resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): TokenDto!
   signup(args: SignUpInput!): TokenDto!
   switchOrganization(organizationId: String!): Tokens!

@@ -1,5 +1,5 @@
 import { type YogaInitialContext } from 'graphql-yoga';
-import { $Enums, OrganizationRoleEnum } from '@repo/database';
+import { $Enums, OrganizationRoleEnum, UserStatus } from '@repo/database';
 import { isAError } from '@repo/utils';
 import { GraphQLError } from 'graphql/index';
 import { decodeJwt } from './auth';
@@ -8,7 +8,7 @@ import RoleEnum = $Enums.RoleEnum;
 
 export interface GraphQLContext {
   currentUserId: undefined | string;
-  organizationId: undefined | string;
+  organizationId: undefined | string | null;
   acceptedLanguage: Language;
   isAdmin: boolean | undefined;
   isOrgAdmin: boolean | undefined;
@@ -18,6 +18,7 @@ export interface GraphQLContext {
     operatingSystem: string;
     browserName: string;
   };
+  emailUnconfirmed: boolean | undefined;
 }
 
 export const createContext = (initialContext: YogaInitialContext): GraphQLContext => {
@@ -44,5 +45,6 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
       browserName,
     },
     isRefreshToken: token?.type === 'refresh',
+    emailUnconfirmed: token?.userStatus === UserStatus.EMAIL_UNCONFIRMED,
   };
 };

@@ -491,6 +491,7 @@ export type Mutation = {
   refreshData: Scalars['Boolean']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
+  resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: TokenDto;
   signup: TokenDto;
   switchOrganization: Tokens;

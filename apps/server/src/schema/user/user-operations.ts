@@ -8,7 +8,7 @@ import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import lodash from 'lodash';
 import { createJwts } from '../../auth';
-import { createPassword, createUser, passwordsMatch, userWithRoles } from '../../contexts/user';
+import { confirmEmail, createPassword, createUser, passwordsMatch, userWithRoles } from '../../contexts/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
@@ -18,7 +18,7 @@ const usernameSchema = z.string().min(2).max(30);
 const emailSchema = z.string().email();
 
 builder.queryFields((t) => ({
-  me: t.withAuth({ authenticated: true }).prismaField({
+  me: t.withAuth({ authenticated: true, emailUnconfirmed: true }).prismaField({
     type: UserDto,
     resolve: async (query, root, args, ctx, _info) => {
       return await prisma.user.findUniqueOrThrow({
@@ -83,11 +83,7 @@ builder.mutationFields((t) => ({
       //   }),
       // );
 
-      const { token, refreshToken } = await createJwts(
-        user.id,
-        user.defaultOrganizationId,
-        user.roles.map((r) => r.role),
-      );
+      const { token, refreshToken } = await createJwts(user);
       return { token, refreshToken, user };
     },
   }),
@@ -115,11 +111,7 @@ builder.mutationFields((t) => ({
       if (!valid) {
         throw new GraphQLError('Invalid credentials');
       }
-      const { token, refreshToken } = await createJwts(
-        user.id,
-        user.defaultOrganizationId,
-        user.roles.map((r) => r.role),
-      );
+      const { token, refreshToken } = await createJwts(user);
       return { token, refreshToken, user };
     },
   }),
@@ -134,11 +126,7 @@ builder.mutationFields((t) => ({
       if (!user) {
         throw new GraphQLError('User not found');
       }
-      const { token } = await createJwts(
-        user.id,
-        ctx.organizationId,
-        user.roles.map((r) => r.role),
-      );
+      const { token } = await createJwts(user);
       return token;
     },
   }),
@@ -215,8 +203,6 @@ builder.mutationFields((t) => ({
           firstName: user.firstName,
           lastName: user.lastName,
           action_url: url.toString(),
-          operating_system: _ctx.request.operatingSystem,
-          browser_name: _ctx.request.browserName,
         }),
       ]);
       return true;
@@ -256,12 +242,20 @@ builder.mutationFields((t) => ({
         await redisDel(`forget-password:${args.token}`),
       ]);
 
-      const { token, refreshToken } = await createJwts(
-        user.id,
-        user.defaultOrganizationId,
-        user.roles.map((r) => r.role),
-      );
+      const { token, refreshToken } = await createJwts(user);
       return { token, refreshToken, user };
+    },
+  }),
+  resendEmailConfirmation: t.withAuth({ emailUnconfirmed: true }).boolean({
+    resolve: async (_root, _args, ctx, _info) => {
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: ctx.currentUserId },
+      });
+      const emailSent = await confirmEmail(user);
+      if (isAError(emailSent)) {
+        throw new GraphQLError(emailSent.message);
+      }
+      return true;
     },
   }),
 }));
