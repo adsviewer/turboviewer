@@ -43,10 +43,7 @@ export default function UserButton(): ReactNode {
     <Flex justify="flex-start" className={classes.user}>
       {isDataLoaded ? (
         <Group onClick={redirectToUser}>
-          <Avatar
-            src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-0.png"
-            radius="xl"
-          />
+          <Avatar src={userDetails.photoUrl} radius="xl" />
 
           <div style={{ flex: 1 }}>
             <Text size="sm" fw={500}>

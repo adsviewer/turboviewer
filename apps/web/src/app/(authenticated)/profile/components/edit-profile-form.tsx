@@ -19,7 +19,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
   const [isPending, startTransition] = useTransition();
   const setUserDetails = useSetAtom(userDetailsAtom);
   const form = useForm({
-    mode: 'uncontrolled',
+    mode: 'controlled',
     initialValues: {
       firstName: props.userDetails.firstName,
       lastName: props.userDetails.lastName,
@@ -33,10 +33,13 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
 
   // Load fetched data onto the form
   useEffect(() => {
-    form.setValues({
+    form.initialize({
       firstName: props.userDetails.firstName,
       lastName: props.userDetails.lastName,
       email: props.userDetails.email,
+      oldPassword: '',
+      newPassword: '',
+      repeatPassword: '',
     });
   }, [props.userDetails]);
 
@@ -129,7 +132,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
           mb="md"
         />
         <Group mt="md">
-          <Button disabled={isPending} type="submit" w={200}>
+          <Button disabled={isPending || !form.isDirty()} type="submit" w={200}>
             {t('submit')}
           </Button>
         </Group>
