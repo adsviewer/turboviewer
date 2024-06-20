@@ -911,7 +911,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
   __typename?: 'Query';
-  me: { __typename?: 'User'; firstName: string; lastName: string; email: string; defaultOrganizationId: string };
+  me: {
+    __typename?: 'User';
+    firstName: string;
+    lastName: string;
+    email: string;
+    defaultOrganizationId?: string | null;
+  };
 };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
