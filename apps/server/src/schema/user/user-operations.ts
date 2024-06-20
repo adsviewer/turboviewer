@@ -249,9 +249,8 @@ builder.mutationFields((t) => ({
 
       const [user, _] = await Promise.all([
         await prisma.user.update({
-          ...query,
+          ...lodash.merge({}, query, userWithRoles),
           where: { id: userId },
-          ...userWithRoles,
           data: { password },
         }),
         await redisDel(`forget-password:${args.token}`),
