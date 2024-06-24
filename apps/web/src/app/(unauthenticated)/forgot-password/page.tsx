@@ -5,41 +5,43 @@ import { useForm, zodResolver } from '@mantine/form';
 import { TextInput, Paper, Title, Text, Container, Button, Flex, ActionIcon } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import React, { useState } from 'react';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { ForgotPasswordSchema, type ForgotPasswordSchemaType } from '@/util/schemas/login-schemas';
 
 export default function ForgotPasswordForm(): React.JSX.Element {
   const t = useTranslations('authentication');
   const [success, setSuccess] = useState<boolean>(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState<boolean>(false);
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
       email: '',
+      password: '',
     },
     validate: zodResolver(ForgotPasswordSchema),
   });
 
   const handleSubmit = (values: ForgotPasswordSchemaType): void => {
-    startTransition(() => {
-      fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify(values),
+    setIsPending(true);
+    fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(values),
+    })
+      .then((response) => {
+        return response.json();
       })
-        .then((response) => {
-          return response.json();
-        })
-        .then((data: { success: true } | { success: false }) => {
-          if (data.success) {
-            setSuccess(true);
-            logger.info(data);
-          }
-        })
-        .catch((error: unknown) => {
-          logger.error(error);
-        });
-    });
+      .then((data: { success: true } | { success: false }) => {
+        if (data.success) {
+          setSuccess(true);
+        }
+      })
+      .catch((error: unknown) => {
+        logger.error(error);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
   };
 
   return (
@@ -67,6 +69,7 @@ export default function ForgotPasswordForm(): React.JSX.Element {
               key={form.key('email')}
               {...form.getInputProps('email')}
               required
+              autoComplete="email"
             />
             <Button type="submit" fullWidth mt="xl" disabled={isPending}>
               {t('sendResetLink')}!
