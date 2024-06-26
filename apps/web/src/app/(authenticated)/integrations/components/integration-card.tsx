@@ -2,7 +2,7 @@
 
 import { Badge, Button, Card, Flex, Group, Text, useMantineTheme, Modal, Alert, Input } from '@mantine/core';
 import { useDisclosure, useInputState } from '@mantine/hooks';
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { IconAlertTriangle } from '@tabler/icons-react';
@@ -24,7 +24,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
   const [opened, { open, close }] = useDisclosure(false);
   const theme = useMantineTheme();
   const router = useRouter();
-
+  const [isRevokeDone, setIsRevokeDone] = useState<boolean>(true);
   const [revokeFieldValue, setRevokeFieldValue] = useInputState('');
 
   const handleConnect = (): void => {
@@ -34,7 +34,9 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
   };
 
   const revoke = (): void => {
+    setIsRevokeDone(false);
     void deAuthIntegration(props.integrationType).then(() => {
+      setIsRevokeDone(true);
       closeRevokeModal();
       router.refresh();
     });
@@ -95,6 +97,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
 
       {renderIntegrationButton()}
 
+      {/* Revoke Modal */}
       <Modal opened={opened} onClose={closeRevokeModal} title={t('revoke')}>
         <Flex direction="column" gap="sm">
           <Alert variant="light" color="yellow" icon={<IconAlertTriangle />}>
@@ -107,7 +110,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
               setRevokeFieldValue(event.currentTarget.value);
             }}
           />
-          <Button color="red" disabled={revokeFieldValue !== 'REVOKE'} onClick={revoke}>
+          <Button color="red" disabled={revokeFieldValue !== 'REVOKE' || !isRevokeDone} onClick={revoke}>
             {t('revoke')}
           </Button>
         </Flex>

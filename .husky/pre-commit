@@ -1,4 +1,5 @@
 pnpm --filter=server codegen
+pnpm --filter=database generate
 pnpm test
 git add apps/server/src/schema/generated/*
 git add apps/web/src/graphql/generated/*
