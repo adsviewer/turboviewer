@@ -33,7 +33,7 @@
       "date": "Date",
       "publisher": "Publisher",
       "position": "Position",
-      "syncedAt": "Synced at",
+      "syncedOn": "Synced on",
       "ads": "ads"
     }
   },
