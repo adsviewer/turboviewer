@@ -174,4 +174,5 @@ export const saveChannelData = async (integration: Integration, initial: boolean
   const channel = getChannel(integration.type);
   const data = await channel.getChannelData(integration, initial);
   if (isAError(data)) return data;
+  await prisma.integration.update({ where: { id: integration.id }, data: { lastSyncedAt: new Date() } });
 };

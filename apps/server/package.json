@@ -63,6 +63,7 @@
     "@graphql-codegen/typescript-react-query": "^6.1.0",
     "@graphql-codegen/typescript-urql": "^4.0.0",
     "@graphql-codegen/urql-introspection": "^3.0.0",
+    "@parcel/watcher": "^2.4.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/body-parser": "^1.19.5",

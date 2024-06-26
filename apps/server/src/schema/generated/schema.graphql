@@ -20,6 +20,7 @@ type Ad {
 }
 
 type AdAccount {
+  adCount: Int!
   advertisements(after: ID, before: ID, first: Int, last: Int): AdAccountAdvertisementsConnection!
   createdAt: Date!
   currency: CurrencyEnum!
@@ -399,13 +400,16 @@ enum InsightsPosition {
 
 type Integration {
   accessTokenExpiresAt: Date
-  adAccounts(currency: CurrencyEnum): [AdAccount!]!
+  adAccounts: [AdAccount!]!
+  createdAt: Date!
   externalId: String
   id: ID!
+  lastSyncedAt: Date
   organization: Organization!
   organizationId: String!
   refreshTokenExpiresAt: Date
   type: IntegrationType!
+  updatedAt: Date!
 }
 
 type IntegrationListItem {

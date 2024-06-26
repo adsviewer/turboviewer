@@ -47,6 +47,7 @@ export type AdInsightsArgs = {
 
 export type AdAccount = {
   __typename?: 'AdAccount';
+  adCount: Scalars['Int']['output'];
   advertisements: AdAccountAdvertisementsConnection;
   createdAt: Scalars['Date']['output'];
   currency: CurrencyEnum;
@@ -436,16 +437,15 @@ export type Integration = {
   __typename?: 'Integration';
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   adAccounts: Array<AdAccount>;
+  createdAt: Scalars['Date']['output'];
   externalId?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  lastSyncedAt?: Maybe<Scalars['Date']['output']>;
   organization: Organization;
   organizationId: Scalars['String']['output'];
   refreshTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   type: IntegrationType;
-};
-
-export type IntegrationAdAccountsArgs = {
-  currency?: InputMaybe<CurrencyEnum>;
+  updatedAt: Scalars['Date']['output'];
 };
 
 export type IntegrationListItem = {

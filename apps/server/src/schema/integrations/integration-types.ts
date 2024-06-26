@@ -1,4 +1,4 @@
-import { CurrencyEnum, DeviceEnum, type Insight, IntegrationTypeEnum, PublisherEnum } from '@repo/database';
+import { CurrencyEnum, DeviceEnum, type Insight, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
 import { MetaError } from '@repo/channel-utils';
 import { getEndOfDay, type IntervalType } from '@repo/utils';
 import { builder } from '../builder';
@@ -46,18 +46,12 @@ export const IntegrationDto = builder.prismaObject('Integration', {
 
     accessTokenExpiresAt: t.expose('accessTokenExpiresAt', { type: 'Date', nullable: true }),
     refreshTokenExpiresAt: t.expose('refreshTokenExpiresAt', { type: 'Date', nullable: true }),
+    updatedAt: t.expose('updatedAt', { type: 'Date' }),
+    createdAt: t.expose('createdAt', { type: 'Date' }),
+    lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true }),
 
     organization: t.relation('organization'),
-    adAccounts: t.relation('adAccounts', {
-      args: {
-        currency: t.arg({ type: CurrencyEnumDto, required: false }),
-      },
-      query: (args, _ctx) => ({
-        where: {
-          currency: args.currency ?? undefined,
-        },
-      }),
-    }),
+    adAccounts: t.relation('adAccounts'),
   }),
 });
 
@@ -94,7 +88,11 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
     name: t.exposeString('name'),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
-
+    adCount: t.int({
+      resolve: async (root, _args, _ctx) => {
+        return prisma.ad.count({ where: { adAccountId: root.id } });
+      },
+    }),
     integration: t.relation('integration'),
     advertisements: t.relatedConnection('advertisements', { cursor: 'id' }),
   }),
