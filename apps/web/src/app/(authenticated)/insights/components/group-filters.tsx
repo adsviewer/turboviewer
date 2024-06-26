@@ -1,7 +1,7 @@
 import { Checkbox, Flex, MultiSelect, ScrollArea, Text } from '@mantine/core';
 import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 import { sentenceCase } from 'change-case';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
@@ -15,7 +15,6 @@ import {
   publisherKey,
   accountKey,
 } from '@/util/url-query-utils';
-import { dateFormatOptions } from '@/util/format-utils';
 import getAccounts from '../../actions';
 
 interface MultiSelectDataType {
@@ -25,12 +24,10 @@ interface MultiSelectDataType {
 
 export default function GroupFilters(): ReactNode {
   const t = useTranslations('insights.filters');
-  const format = useFormatter();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [lastSyncedAt, setLastSyncedAt] = useState<string>('');
 
   // Dropdowns logic //
 
@@ -42,21 +39,17 @@ export default function GroupFilters(): ReactNode {
       const integrations = res.integrations;
       let adAccounts: MultiSelectDataType[] = [];
       for (const integration of integrations) {
-        // TODO: Discuss which integration's last synced date has priority.
-        if (integration.lastSyncedAt) {
-          setLastSyncedAt(format.dateTime(new Date(String(integration.lastSyncedAt)), dateFormatOptions));
-        }
         for (const adAccount of integration.adAccounts) {
           const newValue: MultiSelectDataType = {
             value: adAccount.id,
-            label: `${adAccount.name} (${String(adAccount.adCount)} ${t('ads')})`,
+            label: adAccount.name,
           };
           adAccounts = [...adAccounts, newValue];
         }
       }
       setAccounts(adAccounts);
     });
-  }, [format, t]);
+  }, []);
 
   const populateAccountsAvailableValues = (): MultiSelectDataType[] => {
     let data: MultiSelectDataType[] = [];
@@ -177,12 +170,7 @@ export default function GroupFilters(): ReactNode {
         <Text size="xl">{t('title')}</Text>
         {accounts.length ? (
           <>
-            <Flex mt="xs" align="center" justify="space-between">
-              <Text size="sm">{t('accounts')}</Text>
-              <Text size="xs" c="dimmed">
-                ({t('syncedAt')}: {lastSyncedAt})
-              </Text>
-            </Flex>
+            <Text size="sm">{t('accounts')}</Text>
 
             <MultiSelect
               disabled={isPending}

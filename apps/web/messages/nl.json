@@ -32,9 +32,7 @@
       "device": "Apparaat",
       "date": "Datum",
       "publisher": "Uitgever",
-      "position": "Positie",
-      "syncedAt": "Gesynchroniseerd op",
-      "ads": "advertenties"
+      "position": "Positie"
     }
   },
   "integrations": {
@@ -46,7 +44,9 @@
     "connected": "Verbonden",
     "notConnected": "Niet verbonden",
     "revokeWarning": "U staat op het punt om een herroepingsactie uit te voeren! Adsviewer zal alle gegevens met betrekking tot deze integratie wissen.",
-    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak"
+    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak",
+    "syncedOn": "Gesynchroniseerd op",
+    "ads": "advertenties"
   },
   "settings": {
     "title": "Instellingen",

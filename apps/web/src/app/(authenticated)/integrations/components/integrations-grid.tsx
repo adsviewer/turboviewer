@@ -2,8 +2,13 @@
 
 import Image from 'next/image';
 import { SimpleGrid, Transition } from '@mantine/core';
-import { useEffect, useState, type ReactNode } from 'react';
-import { IntegrationStatus, IntegrationType, type SettingsChannelsQuery } from '@/graphql/generated/schema-server';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import {
+  type IntegrationsQuery,
+  IntegrationStatus,
+  IntegrationType,
+  type SettingsChannelsQuery,
+} from '@/graphql/generated/schema-server';
 import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
 import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
 import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
@@ -11,19 +16,77 @@ import IntegrationCard from './integration-card';
 
 interface IntegrationProps {
   integrations: SettingsChannelsQuery['settingsChannels'];
+  metadata: IntegrationsQuery['integrations'];
 }
+
+interface IntegrationDataType {
+  adCount: number;
+  lastSyncedAt: Date | null | undefined;
+}
+
+type IntegrationsDataType = {
+  [key in IntegrationType]: IntegrationDataType;
+};
+
+const initialIntegrationsData: IntegrationsDataType = {
+  [IntegrationType.META]: {
+    adCount: 0,
+    lastSyncedAt: null,
+  },
+  [IntegrationType.LINKEDIN]: {
+    adCount: 0,
+    lastSyncedAt: null,
+  },
+  [IntegrationType.TIKTOK]: {
+    adCount: 0,
+    lastSyncedAt: null,
+  },
+};
 
 export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [integrationsData, setIntegrationsData] = useState<IntegrationsDataType>(initialIntegrationsData);
+
+  const updateIntegrationsData = useCallback(() => {
+    const newIntegrationsData = { ...initialIntegrationsData };
+    if (props.metadata.length) {
+      for (const integration of props.metadata) {
+        // At this point we can't use computed values as keys to our map so we're forced to do this...
+        switch (integration.type) {
+          case IntegrationType.META:
+            newIntegrationsData.META.lastSyncedAt = integration.lastSyncedAt;
+            for (const adAccount of integration.adAccounts) {
+              newIntegrationsData.META.adCount += adAccount.adCount;
+            }
+            break;
+          case IntegrationType.LINKEDIN:
+            newIntegrationsData.LINKEDIN.lastSyncedAt = integration.lastSyncedAt;
+            for (const adAccount of integration.adAccounts) {
+              newIntegrationsData.LINKEDIN.adCount += adAccount.adCount;
+            }
+            break;
+          case IntegrationType.TIKTOK:
+            newIntegrationsData.TIKTOK.lastSyncedAt = integration.lastSyncedAt;
+            for (const adAccount of integration.adAccounts) {
+              newIntegrationsData.TIKTOK.adCount += adAccount.adCount;
+            }
+            break;
+        }
+      }
+      setIntegrationsData(newIntegrationsData);
+    }
+  }, [props.metadata]);
 
   useEffect(() => {
+    updateIntegrationsData();
+
+    // Animation init
     setIsMounted(false); // Reset isMounted to false
     setTimeout(() => {
       setIsMounted(true); // Set isMounted to true after a delay to allow the transition to play
     }, 0);
-  }, []);
+  }, [updateIntegrationsData]);
 
-  // (backend response probably needs refactor to return object with IntegrationType as key)
   const isIntegrationAvailable = (status: IntegrationStatus): boolean => status !== IntegrationStatus.ComingSoon;
 
   const isIntegrationConnected = (status: IntegrationStatus): boolean => status === IntegrationStatus.Connected;
@@ -41,6 +104,8 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
               isConnected={isIntegrationConnected(props.integrations[0].status)}
               isAvailable={isIntegrationAvailable(props.integrations[0].status)}
               image={<Image src={metaLogo as string} alt="Meta" width={100} priority />}
+              adCount={integrationsData.META.adCount}
+              lastSyncedAt={integrationsData.META.lastSyncedAt}
             />
             <IntegrationCard
               title="TikTok"
@@ -49,6 +114,8 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
               isConnected={isIntegrationConnected(props.integrations[1].status)}
               isAvailable={isIntegrationAvailable(props.integrations[1].status)}
               image={<Image src={tiktokLogo as string} alt="TikTok" width={100} priority />}
+              adCount={integrationsData.TIKTOK.adCount}
+              lastSyncedAt={integrationsData.TIKTOK.lastSyncedAt}
             />
             <IntegrationCard
               title="LinkedIn"
@@ -58,6 +125,8 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
               isConnected={isIntegrationConnected(props.integrations[2].status)}
               isAvailable={isIntegrationAvailable(props.integrations[2].status)}
               image={<Image src={linkedinLogo as string} alt="LinkedIn" width={100} priority />}
+              adCount={integrationsData.LINKEDIN.adCount}
+              lastSyncedAt={integrationsData.LINKEDIN.lastSyncedAt}
             />
           </SimpleGrid>
         </div>

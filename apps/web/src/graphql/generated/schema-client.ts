@@ -780,6 +780,18 @@ export type SettingsChannelsQuery = {
   }>;
 };
 
+export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type IntegrationsQuery = {
+  __typename?: 'Query';
+  integrations: Array<{
+    __typename?: 'Integration';
+    type: IntegrationType;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; adCount: number }>;
+  }>;
+};
+
 export type DeAuthIntegrationMutationVariables = Exact<{
   type: IntegrationType;
 }>;
@@ -1025,6 +1037,21 @@ export function useSettingsChannelsQuery(options?: Omit<Urql.UseQueryArgs<Settin
     query: SettingsChannelsDocument,
     ...options,
   });
+}
+export const IntegrationsDocument = gql`
+  query integrations {
+    integrations {
+      type
+      lastSyncedAt
+      adAccounts {
+        adCount
+      }
+    }
+  }
+`;
+
+export function useIntegrationsQuery(options?: Omit<Urql.UseQueryArgs<IntegrationsQueryVariables>, 'query'>) {
+  return Urql.useQuery<IntegrationsQuery, IntegrationsQueryVariables>({ query: IntegrationsDocument, ...options });
 }
 export const DeAuthIntegrationDocument = gql`
   mutation deAuthIntegration($type: IntegrationType!) {

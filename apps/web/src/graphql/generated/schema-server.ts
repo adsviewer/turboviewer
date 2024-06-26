@@ -779,6 +779,18 @@ export type SettingsChannelsQuery = {
   }>;
 };
 
+export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type IntegrationsQuery = {
+  __typename?: 'Query';
+  integrations: Array<{
+    __typename?: 'Integration';
+    type: IntegrationType;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; adCount: number }>;
+  }>;
+};
+
 export type DeAuthIntegrationMutationVariables = Exact<{
   type: IntegrationType;
 }>;
@@ -1001,6 +1013,17 @@ export const SettingsChannelsDocument = gql`
     }
   }
 `;
+export const IntegrationsDocument = gql`
+  query integrations {
+    integrations {
+      type
+      lastSyncedAt
+      adAccounts {
+        adCount
+      }
+    }
+  }
+`;
 export const DeAuthIntegrationDocument = gql`
   mutation deAuthIntegration($type: IntegrationType!) {
     deAuthIntegration(type: $type) {
@@ -1117,6 +1140,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<SettingsChannelsQuery>;
+    },
+    integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
+      return requester<IntegrationsQuery, IntegrationsQueryVariables>(
+        IntegrationsDocument,
+        variables,
+        options,
+      ) as Promise<IntegrationsQuery>;
     },
     deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
       return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(
