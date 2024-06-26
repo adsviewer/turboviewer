@@ -567,6 +567,7 @@ type User {
   lastName: String!
   organizations: [UserOrganization!]!
   photoUrl: String
+  status: UserStatus!
   updatedAt: Date!
   userRoles: [String!]!
 }
@@ -584,6 +585,11 @@ enum UserOrganizationStatus {
   ACTIVE
   NON_ACTIVE
   INVITED
+}
+
+enum UserStatus {
+  EMAIL_UNCONFIRMED
+  EMAIL_CONFIRMED
 }
 
 type ZodError implements Error {

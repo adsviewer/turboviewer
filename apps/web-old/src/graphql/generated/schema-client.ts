@@ -676,6 +676,7 @@ export type User = {
   lastName: Scalars['String']['output'];
   organizations: Array<UserOrganization>;
   photoUrl?: Maybe<Scalars['String']['output']>;
+  status: UserStatus;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
 };
@@ -694,6 +695,11 @@ export enum UserOrganizationStatus {
   ACTIVE = 'ACTIVE',
   NON_ACTIVE = 'NON_ACTIVE',
   INVITED = 'INVITED',
+}
+
+export enum UserStatus {
+  EMAIL_UNCONFIRMED = 'EMAIL_UNCONFIRMED',
+  EMAIL_CONFIRMED = 'EMAIL_CONFIRMED',
 }
 
 export type ZodError = Error & {

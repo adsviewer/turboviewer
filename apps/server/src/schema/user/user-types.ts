@@ -1,4 +1,4 @@
-import { LoginProviderEnum, OrganizationRoleEnum, RoleEnum, type User } from '@repo/database';
+import { LoginProviderEnum, OrganizationRoleEnum, RoleEnum, type User, UserStatus } from '@repo/database';
 import { builder } from '../builder';
 import { OrganizationDto } from '../organization/org-types';
 
@@ -14,6 +14,7 @@ export const UserDto = builder.prismaObject('User', {
     lastName: t.exposeString('lastName'),
     email: t.exposeString('email'),
     photoUrl: t.exposeString('photoUrl', { nullable: true }),
+    status: t.expose('status', { type: UserStatus }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
     userRoles: t.stringList({
@@ -88,3 +89,5 @@ export const SignUpInputDto = builder.inputType('SignUpInput', {
 
 export type SignUpInput = typeof SignUpInputDto.$inferInput;
 export const LoginProviderEnumDto = builder.enumType(LoginProviderEnum, { name: 'LoginProviderEnum' });
+
+export const UserStatusDto = builder.enumType(UserStatus, { name: 'UserStatus' });
