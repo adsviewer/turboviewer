@@ -32,7 +32,9 @@
       "device": "Συσκευή",
       "date": "Ημερομηνία",
       "publisher": "Πλατφόρμα",
-      "position": "Θέση"
+      "position": "Θέση",
+      "syncedAt": "Συγχρονίστηκε στις",
+      "ads": "διαφημίσεις"
     }
   },
   "integrations": {

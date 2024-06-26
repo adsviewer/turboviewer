@@ -32,7 +32,9 @@
       "device": "Apparaat",
       "date": "Datum",
       "publisher": "Uitgever",
-      "position": "Positie"
+      "position": "Positie",
+      "syncedAt": "Gesynchroniseerd op",
+      "ads": "advertenties"
     }
   },
   "integrations": {

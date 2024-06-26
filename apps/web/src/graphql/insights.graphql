@@ -1,9 +1,11 @@
 query adAccounts {
   integrations {
+    lastSyncedAt
     adAccounts {
       id
       name
       currency
+      adCount
     }
   }
 }

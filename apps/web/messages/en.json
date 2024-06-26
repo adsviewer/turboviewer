@@ -32,7 +32,9 @@
       "device": "Device",
       "date": "Date",
       "publisher": "Publisher",
-      "position": "Position"
+      "position": "Position",
+      "syncedAt": "Synced at",
+      "ads": "ads"
     }
   },
   "integrations": {

@@ -712,7 +712,8 @@ export type AdAccountsQuery = {
   __typename?: 'Query';
   integrations: Array<{
     __typename?: 'Integration';
-    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum }>;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number }>;
   }>;
 };
 
@@ -919,10 +920,12 @@ export const UserFieldsFragmentDoc = gql`
 export const AdAccountsDocument = gql`
   query adAccounts {
     integrations {
+      lastSyncedAt
       adAccounts {
         id
         name
         currency
+        adCount
       }
     }
   }
