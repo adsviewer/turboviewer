@@ -889,6 +889,10 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
 
 export type RefreshTokenMutation = { __typename?: 'Mutation'; refreshToken: string };
 
+export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: never }>;
+
+export type ResendEmailConfirmationMutation = { __typename?: 'Mutation'; resendEmailConfirmation: boolean };
+
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
@@ -1074,6 +1078,11 @@ export const RefreshTokenDocument = gql`
     refreshToken
   }
 `;
+export const ResendEmailConfirmationDocument = gql`
+  mutation resendEmailConfirmation {
+    resendEmailConfirmation
+  }
+`;
 export const MeDocument = gql`
   query me {
     me {
@@ -1173,6 +1182,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<RefreshTokenMutation>;
+    },
+    resendEmailConfirmation(
+      variables?: ResendEmailConfirmationMutationVariables,
+      options?: C,
+    ): Promise<ResendEmailConfirmationMutation> {
+      return requester<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
+        ResendEmailConfirmationDocument,
+        variables,
+        options,
+      ) as Promise<ResendEmailConfirmationMutation>;
     },
     me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
       return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;

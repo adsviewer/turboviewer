@@ -890,6 +890,10 @@ export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
 
 export type RefreshTokenMutation = { __typename?: 'Mutation'; refreshToken: string };
 
+export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: never }>;
+
+export type ResendEmailConfirmationMutation = { __typename?: 'Mutation'; resendEmailConfirmation: boolean };
+
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
@@ -1133,6 +1137,17 @@ export const RefreshTokenDocument = gql`
 
 export function useRefreshTokenMutation() {
   return Urql.useMutation<RefreshTokenMutation, RefreshTokenMutationVariables>(RefreshTokenDocument);
+}
+export const ResendEmailConfirmationDocument = gql`
+  mutation resendEmailConfirmation {
+    resendEmailConfirmation
+  }
+`;
+
+export function useResendEmailConfirmationMutation() {
+  return Urql.useMutation<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
+    ResendEmailConfirmationDocument,
+  );
 }
 export const MeDocument = gql`
   query me {

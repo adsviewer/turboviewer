@@ -19,7 +19,7 @@ import {
 } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
 import LoginProviders from '../components/login-providers';
@@ -27,7 +27,8 @@ import { getLoginProviders } from '../sign-in/actions';
 
 export default function SignUp(): React.JSX.Element {
   const t = useTranslations('authentication');
-  const [isPending, startTransition] = useTransition();
+
+  const [isPending, setIsPending] = useState<boolean>(false);
   const [loginProviders, setLoginProviders] = useState<LoginProvidersQuery['loginProviders']>([]);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const form = useForm({
@@ -55,6 +56,7 @@ export default function SignUp(): React.JSX.Element {
   }, []);
 
   const handleSubmit = (values: SignUpSchemaType): void => {
+    setIsPending(true);
     fetch('/api/auth/sign-up', {
       method: 'POST',
       body: JSON.stringify(values),
@@ -64,13 +66,14 @@ export default function SignUp(): React.JSX.Element {
       })
       .then((data: { success: true } | { success: false }) => {
         if (data.success) {
-          startTransition(() => {
-            router.push('/insights');
-          });
+          router.push('/confirm-email');
         }
       })
       .catch((error: unknown) => {
         logger.error(error);
+      })
+      .finally(() => {
+        setIsPending(false);
       });
   };
 

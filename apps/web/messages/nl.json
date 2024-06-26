@@ -70,6 +70,8 @@
     "sendResetLink": "Stuur resetlink",
     "resetLinkSent": "We hebben een link om je wachtwoord te resetten naar je e-mail gestuurd",
     "submit": "Verzenden",
-    "loginGoogle": "Verder met Google"
+    "loginGoogle": "Verder met Google",
+    "signUpEmailConfirm": "Bedankt voor uw registratie! Bevestig uw e-mailadres om het registratieproces te voltooien.",
+    "resendConfirmEmail": "Email opnieuw verzenden"
   }
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { jwtVerify } from 'jose';
+import { jwtVerify, decodeJwt } from 'jose';
 import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
@@ -49,7 +49,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_KEY)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value;
 
-  // In case of token in URL (e.g. during Google auth), set JWT token & redirect to insights
+  // If user has not confirmed their email, redirect to confirm email hint page
+  if (token && request.nextUrl.pathname !== '/confirm-email') {
+    const tokenData = decodeJwt(token);
+    // TODO: Use enum for EMAIL_UNCONFIRMED once it's exposed from BE
+    if (tokenData.userStatus === 'EMAIL_UNCONFIRMED') {
+      const redirectUrl = new URL('/confirm-email', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // In case of token in URL (e.g. during Google auth or email confirmation), set JWT token & redirect to insights
   if (request.nextUrl.searchParams.get(TOKEN_KEY) && request.nextUrl.searchParams.get(REFRESH_TOKEN_KEY)) {
     const redirectUrl = new URL('/insights', request.url);
     const response = NextResponse.redirect(redirectUrl);

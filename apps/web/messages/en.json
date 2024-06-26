@@ -70,6 +70,8 @@
     "sendResetLink": "Send reset link",
     "resetLinkSent": "We have sent a password reset link to your email",
     "submit": "Submit",
-    "loginGoogle": "Continue with Google"
+    "loginGoogle": "Continue with Google",
+    "signUpEmailConfirm": "Thank you for signing up! Please confirm your email to complete the registration process.",
+    "resendConfirmEmail": "Resend email"
   }
 }
