@@ -5,7 +5,7 @@ import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
 import { env } from './env.mjs';
 import { groupedByKey } from './util/url-query-utils';
-import { InsightsColumnsGroupBy } from './graphql/generated/schema-server';
+import { InsightsColumnsGroupBy, UserStatus } from './graphql/generated/schema-server';
 
 const publicPaths = [
   '/',
@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (token && request.nextUrl.pathname !== '/confirm-email') {
     const tokenData = decodeJwt(token);
     // TODO: Use enum for EMAIL_UNCONFIRMED once it's exposed from BE
-    if (tokenData.userStatus === 'EMAIL_UNCONFIRMED') {
+    if (tokenData.userStatus === UserStatus.EMAIL_UNCONFIRMED) {
       const redirectUrl = new URL('/confirm-email', request.url);
       return NextResponse.redirect(redirectUrl);
     }
