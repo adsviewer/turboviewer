@@ -2,7 +2,6 @@
 
 import { Flex, Text, Button, TextInput } from '@mantine/core';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useForm } from '@mantine/form';
 import { type MeQuery, type UpdateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
 import { isOrgAdmin } from '@/util/access-utils';
@@ -14,7 +13,6 @@ interface PropsType {
 
 export default function NameEdit({ userDetails }: PropsType): React.ReactNode {
   const t = useTranslations('organization');
-  const router = useRouter();
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -26,8 +24,6 @@ export default function NameEdit({ userDetails }: PropsType): React.ReactNode {
     void updateOrganization(values).then((res) => {
       if (!res.success) {
         form.setFieldError('name', res.error);
-      } else {
-        router.refresh();
       }
     });
   };
@@ -40,7 +36,12 @@ export default function NameEdit({ userDetails }: PropsType): React.ReactNode {
     >
       <Flex align="center" gap="sm" wrap="wrap">
         <Text>{t('organizationName')}:</Text>
-        <TextInput placeholder={t('title')} key={form.key('name')} {...form.getInputProps('name')} />
+        <TextInput
+          placeholder={t('title')}
+          key={form.key('name')}
+          {...form.getInputProps('name')}
+          disabled={!isOrgAdmin(userDetails.allRoles)}
+        />
         <Button type="submit" variant="outline" disabled={!isOrgAdmin(userDetails.allRoles)}>
           {t('save')}
         </Button>

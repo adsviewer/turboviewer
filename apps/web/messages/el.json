@@ -83,6 +83,9 @@
     "description": "Εφαρμόστε αποτελεσματική διαχείριση των λειτουργιών και της ανάπτυξης του οργανισμού σας.",
     "submit": "Υποβολή",
     "save": "Αποθήκευση",
-    "organizationName": "Όνομα οργανισμού"
+    "organizationName": "Όνομα οργανισμού",
+    "roleAdmin": "Διαχειριστής",
+    "roleOrganizationAdmin": "Διαχειριστής Οργανισμού",
+    "roleOrganizationUser": "Μέλος"
   }
 }
