@@ -27,6 +27,7 @@ jobs:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
       turbo_team: ${{ vars.TURBO_TEAM }}
       turbo_token: ${{ secrets.TURBO_TOKEN }}
+      sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
     with:
       aws_region: ${{ vars.AWS_REGION }}
       environment: prod

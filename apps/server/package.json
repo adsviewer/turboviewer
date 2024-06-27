@@ -8,14 +8,15 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently 'pnpm codegen --watch' 'pnpm --filter=@repo/database start-dev' 'tsx watch src/index.ts'",
-    "build": "tsc",
+    "build": "tsc && pnpm sentry:sourcemaps",
     "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest",
     "codegen": "graphql-codegen -c src/schema/codegen.ts",
-    "test": "node --import tsx --test test/**/*.test.ts"
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project giorgos-server ./dist && sentry-cli sourcemaps upload --org adsviewer --project giorgos-server ./dist"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.590.0",
@@ -39,6 +40,7 @@
     "@repo/mappings": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@sentry/cli": "^2.32.1",
     "@sentry/node": "^8.12.0",
     "@sentry/profiling-node": "^8.12.0",
     "body-parser": "^1.20.2",

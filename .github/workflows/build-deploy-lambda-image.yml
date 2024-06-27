@@ -28,6 +28,8 @@ on:
         required: true
       turbo_token:
         required: true
+      sentry_auth_token:
+        required: true
 
 jobs:
 
@@ -90,6 +92,7 @@ jobs:
           build-args: |
             TURBO_TEAM=${{ secrets.turbo_team }}
             TURBO_TOKEN=${{ secrets.turbo_token }}
+            SENTRY_AUTH_TOKEN=${{ secrets.sentry_auth_token }}
             lambda=${{ inputs.lambda_name }}
           file: ./Lambda.Dockerfile
           platforms: ${{ matrix.platform }}

@@ -28,6 +28,8 @@ on:
         required: true
       turbo_token:
         required: true
+      sentry_auth_token:
+        required: true
 
 jobs:
 
@@ -90,6 +92,7 @@ jobs:
           build-args: |
             TURBO_TEAM=${{ secrets.turbo_team }}
             TURBO_TOKEN=${{ secrets.turbo_token }}
+            SENTRY_AUTH_TOKEN=${{ secrets.sentry_auth_token }}
           file: ./apps/${{ inputs.service_name }}/Dockerfile
           platforms: ${{ matrix.platform }}
           cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache
