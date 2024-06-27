@@ -4,9 +4,10 @@ import { Badge, Button, Card, Flex, Group, Text, useMantineTheme, Modal, Alert, 
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
+import { dateFormatOptions } from '@/util/format-utils';
 import { deAuthIntegration } from '../actions';
 
 interface IntegrationProps {
@@ -17,10 +18,13 @@ interface IntegrationProps {
   isConnected: boolean;
   isAvailable: boolean;
   image?: ReactNode;
+  adCount: number;
+  lastSyncedAt: Date | null | undefined;
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
   const t = useTranslations('integrations');
+  const format = useFormatter();
   const [opened, { open, close }] = useDisclosure(false);
   const theme = useMantineTheme();
   const router = useRouter();
@@ -94,6 +98,17 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
       <Text size="sm" c="dimmed" mb="auto">
         {props.description}
       </Text>
+
+      {props.lastSyncedAt ? (
+        <Flex direction="column" align="flex-end" mt="md">
+          <Text size="sm" c="dimmed" mb="auto" fs="italic">
+            {format.number(props.adCount)} {t('ads')}
+          </Text>
+          <Text size="sm" c="dimmed" mb="auto" fs="italic">
+            {t('syncedOn')}: {format.dateTime(new Date(String(props.lastSyncedAt)), dateFormatOptions)}
+          </Text>
+        </Flex>
+      ) : null}
 
       {renderIntegrationButton()}
 

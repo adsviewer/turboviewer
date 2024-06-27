@@ -6,6 +6,16 @@ query settingsChannels {
   }
 }
 
+query integrations {
+  integrations {
+    type
+    lastSyncedAt
+    adAccounts {
+      adCount
+    }
+  }
+}
+
 mutation deAuthIntegration($type: IntegrationType!) {
   deAuthIntegration(type: $type) {
     ... on BaseError {

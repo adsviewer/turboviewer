@@ -170,9 +170,7 @@ export default function GroupFilters(): ReactNode {
         <Text size="xl">{t('title')}</Text>
         {accounts.length ? (
           <>
-            <Text size="sm" mt="xs">
-              {t('accounts')}
-            </Text>
+            <Text size="sm">{t('accounts')}</Text>
 
             <MultiSelect
               disabled={isPending}
@@ -185,8 +183,9 @@ export default function GroupFilters(): ReactNode {
               onRemove={(value) => {
                 handleMultiFilterRemove(accountKey, value);
               }}
-              comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+              comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
               my={4}
+              styles={{ pill: { width: 200 } }}
             />
           </>
         ) : null}
@@ -204,7 +203,7 @@ export default function GroupFilters(): ReactNode {
           onRemove={(value) => {
             handleMultiFilterRemove(positionKey, value);
           }}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
         />
         <Text size="sm" mt="xs">
@@ -221,7 +220,7 @@ export default function GroupFilters(): ReactNode {
           onRemove={(value) => {
             handleMultiFilterRemove(deviceKey, value);
           }}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
         />
         <Text size="sm" mt="xs">
@@ -238,7 +237,7 @@ export default function GroupFilters(): ReactNode {
           onRemove={(value) => {
             handleMultiFilterRemove(publisherKey, value);
           }}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
         />
         <Text size="sm" mt="lg">

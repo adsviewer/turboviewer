@@ -713,7 +713,8 @@ export type AdAccountsQuery = {
   __typename?: 'Query';
   integrations: Array<{
     __typename?: 'Integration';
-    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum }>;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number }>;
   }>;
 };
 
@@ -776,6 +777,18 @@ export type SettingsChannelsQuery = {
     type: IntegrationType;
     status: IntegrationStatus;
     authUrl?: string | null;
+  }>;
+};
+
+export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type IntegrationsQuery = {
+  __typename?: 'Query';
+  integrations: Array<{
+    __typename?: 'Integration';
+    type: IntegrationType;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; adCount: number }>;
   }>;
 };
 
@@ -920,10 +933,12 @@ export const UserFieldsFragmentDoc = gql`
 export const AdAccountsDocument = gql`
   query adAccounts {
     integrations {
+      lastSyncedAt
       adAccounts {
         id
         name
         currency
+        adCount
       }
     }
   }
@@ -1022,6 +1037,21 @@ export function useSettingsChannelsQuery(options?: Omit<Urql.UseQueryArgs<Settin
     query: SettingsChannelsDocument,
     ...options,
   });
+}
+export const IntegrationsDocument = gql`
+  query integrations {
+    integrations {
+      type
+      lastSyncedAt
+      adAccounts {
+        adCount
+      }
+    }
+  }
+`;
+
+export function useIntegrationsQuery(options?: Omit<Urql.UseQueryArgs<IntegrationsQueryVariables>, 'query'>) {
+  return Urql.useQuery<IntegrationsQuery, IntegrationsQueryVariables>({ query: IntegrationsDocument, ...options });
 }
 export const DeAuthIntegrationDocument = gql`
   mutation deAuthIntegration($type: IntegrationType!) {

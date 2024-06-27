@@ -712,7 +712,8 @@ export type AdAccountsQuery = {
   __typename?: 'Query';
   integrations: Array<{
     __typename?: 'Integration';
-    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum }>;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number }>;
   }>;
 };
 
@@ -775,6 +776,18 @@ export type SettingsChannelsQuery = {
     type: IntegrationType;
     status: IntegrationStatus;
     authUrl?: string | null;
+  }>;
+};
+
+export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type IntegrationsQuery = {
+  __typename?: 'Query';
+  integrations: Array<{
+    __typename?: 'Integration';
+    type: IntegrationType;
+    lastSyncedAt?: Date | null;
+    adAccounts: Array<{ __typename?: 'AdAccount'; adCount: number }>;
   }>;
 };
 
@@ -919,10 +932,12 @@ export const UserFieldsFragmentDoc = gql`
 export const AdAccountsDocument = gql`
   query adAccounts {
     integrations {
+      lastSyncedAt
       adAccounts {
         id
         name
         currency
+        adCount
       }
     }
   }
@@ -995,6 +1010,17 @@ export const SettingsChannelsDocument = gql`
       type
       status
       authUrl
+    }
+  }
+`;
+export const IntegrationsDocument = gql`
+  query integrations {
+    integrations {
+      type
+      lastSyncedAt
+      adAccounts {
+        adCount
+      }
     }
   }
 `;
@@ -1114,6 +1140,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<SettingsChannelsQuery>;
+    },
+    integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
+      return requester<IntegrationsQuery, IntegrationsQueryVariables>(
+        IntegrationsDocument,
+        variables,
+        options,
+      ) as Promise<IntegrationsQuery>;
     },
     deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
       return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(

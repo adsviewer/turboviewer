@@ -44,7 +44,9 @@
     "connected": "Connected",
     "notConnected": "Not Connected",
     "revokeWarning": "You are about to perform a revoke action! Adsviewer will erase all your data related to this integration.",
-    "revokeTip": "To confirm, type \"REVOKE\" in the box below"
+    "revokeTip": "To confirm, type \"REVOKE\" in the box below",
+    "syncedOn": "Synced on",
+    "ads": "ads"
   },
   "settings": {
     "title": "Settings",

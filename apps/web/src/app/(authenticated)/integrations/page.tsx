@@ -7,12 +7,13 @@ import IntegrationsGrid from './components/integrations-grid';
 export default async function Integrations(): Promise<ReactNode> {
   const t = await getTranslations('integrations');
   const { settingsChannels } = await urqlClientSdk().settingsChannels();
+  const metadata = (await urqlClientSdk().integrations()).integrations;
 
   return (
     <>
       <Title mb="md">{t('title')}</Title>
       <Text mb="xl">{t('description')}</Text>
-      <IntegrationsGrid integrations={settingsChannels} />
+      <IntegrationsGrid integrations={settingsChannels} metadata={metadata} />
     </>
   );
 }
