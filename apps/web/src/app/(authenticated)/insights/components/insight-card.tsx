@@ -9,19 +9,17 @@ import { YAxis } from 'recharts';
 import { type CurrencyEnum, type DeviceEnum, type InsightsDatapoints } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
-// import AdPopover from './ad-popover';
 
 interface InsightCardProps {
   title: string | null | undefined;
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
-  rank: 'good' | 'mid' | 'bad' | 'unknown';
   currency: CurrencyEnum;
   datapoints: InsightsDatapoints[];
 }
 
 interface RankType {
-  label: 'GOOD' | 'CAUTION' | 'BAD' | '-';
+  label: 'GOOD' | 'CAUTION' | '-';
   color: 'green' | 'yellow' | 'red' | 'gray';
 }
 
@@ -35,50 +33,21 @@ interface Datapoint {
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const format = useFormatter();
   const t = useTranslations('insights');
-  // const computedColorScheme = useComputedColorScheme();
-  // const theme = useMantineTheme();
   const [rank, setRank] = useState<RankType>({
-    label: '-',
-    color: 'gray',
+    label: 'GOOD',
+    color: 'green',
   });
   const [datapoints, setDatapoints] = useState<Datapoint[]>([]);
 
-  // Set the correct color of the icons based on the current color scheme
-  // let iconColor = theme.colors.dark[2];
-  // if (computedColorScheme === 'dark') {
-  //   iconColor = theme.colors.gray[5];
-  // }
-
   const setupRank = useCallback(() => {
-    switch (props.rank) {
-      case 'good':
-        setRank({
-          label: 'GOOD',
-          color: 'green',
-        });
-        break;
-      case 'mid':
-        setRank({
-          label: 'CAUTION',
-          color: 'yellow',
-        });
-        break;
-      case 'bad':
-        setRank({
-          label: 'BAD',
-          color: 'red',
-        });
-        break;
-      case 'unknown':
-        setRank({
-          label: '-',
-          color: 'gray',
-        });
-        break;
-      default:
-        break;
+    // If the latest CPM is lower than the previous CPM, rank is set to CAUTION
+    if (props.datapoints[props.datapoints.length - 1].cpm < props.datapoints[props.datapoints.length - 2].cpm) {
+      setRank({
+        label: 'CAUTION',
+        color: 'yellow',
+      });
     }
-  }, [props.rank]);
+  }, [props.datapoints]);
 
   const setupDatapoints = useCallback(() => {
     const formattedDatapoints: Datapoint[] = [];
@@ -96,7 +65,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   useEffect(() => {
     setupRank();
     setupDatapoints();
-  }, [setupRank, setupDatapoints]);
+  }, [datapoints, setupDatapoints, setupRank]);
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -151,7 +120,6 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
-          {/* {props.iframe ? <AdPopover iconColor={iconColor} iframe={props.iframe} /> : null} */}
           <Text fw={500}>{props.title}</Text>
         </Flex>
         <Badge color={rank.color}>{rank.label}</Badge>
