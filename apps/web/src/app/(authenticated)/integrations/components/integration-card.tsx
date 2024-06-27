@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
-import { deAuthIntegration } from '../actions';
 import { dateFormatOptions } from '@/util/format-utils';
+import { deAuthIntegration } from '../actions';
 
 interface IntegrationProps {
   title: string;
