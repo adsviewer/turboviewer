@@ -52,7 +52,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // If user has not confirmed their email, redirect to confirm email hint page
   if (token && request.nextUrl.pathname !== '/confirm-email') {
     const tokenData = decodeJwt(token);
-    // TODO: Use enum for EMAIL_UNCONFIRMED once it's exposed from BE
     if (tokenData.userStatus === UserStatus.EMAIL_UNCONFIRMED) {
       const redirectUrl = new URL('/confirm-email', request.url);
       return NextResponse.redirect(redirectUrl);
