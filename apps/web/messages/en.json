@@ -72,6 +72,7 @@
     "submit": "Submit",
     "loginGoogle": "Continue with Google",
     "signUpEmailConfirm": "Thank you for signing up! Please confirm your email to complete the registration process.",
-    "resendConfirmEmail": "Resend email"
+    "resendConfirmEmail": "Resend email",
+    "returnToSignIn": "Return to sign in page"
   }
 }
