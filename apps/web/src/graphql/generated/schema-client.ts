@@ -916,7 +916,8 @@ export type MeQuery = {
     firstName: string;
     lastName: string;
     email: string;
-    defaultOrganizationId?: string | null;
+    allRoles: Array<AllRoles>;
+    defaultOrganization: { __typename?: 'Organization'; id: string; name: string };
   };
 };
 
@@ -1200,7 +1201,11 @@ export const MeDocument = gql`
       firstName
       lastName
       email
-      defaultOrganizationId
+      allRoles
+      defaultOrganization {
+        id
+        name
+      }
     }
   }
 `;
