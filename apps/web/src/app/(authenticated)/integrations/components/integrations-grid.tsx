@@ -51,27 +51,11 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     const newIntegrationsData = { ...initialIntegrationsData };
     if (props.metadata.length) {
       for (const integration of props.metadata) {
-        // At this point we can't use computed values as keys to our map so we're forced to do this...
-        switch (integration.type) {
-          case IntegrationType.META:
-            newIntegrationsData.META.lastSyncedAt = integration.lastSyncedAt;
-            for (const adAccount of integration.adAccounts) {
-              newIntegrationsData.META.adCount += adAccount.adCount;
-            }
-            break;
-          case IntegrationType.LINKEDIN:
-            newIntegrationsData.LINKEDIN.lastSyncedAt = integration.lastSyncedAt;
-            for (const adAccount of integration.adAccounts) {
-              newIntegrationsData.LINKEDIN.adCount += adAccount.adCount;
-            }
-            break;
-          case IntegrationType.TIKTOK:
-            newIntegrationsData.TIKTOK.lastSyncedAt = integration.lastSyncedAt;
-            for (const adAccount of integration.adAccounts) {
-              newIntegrationsData.TIKTOK.adCount += adAccount.adCount;
-            }
-            break;
-        }
+        newIntegrationsData[integration.type].lastSyncedAt = integration.lastSyncedAt;
+        newIntegrationsData[integration.type].adCount = integration.adAccounts.reduce(
+          (acc, adAccount) => acc + adAccount.adCount,
+          0,
+        );
       }
       setIntegrationsData(newIntegrationsData);
     }
