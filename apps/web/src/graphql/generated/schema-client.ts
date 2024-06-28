@@ -900,7 +900,8 @@ export type UpdateUserMutation = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
-    defaultOrganizationId: string;
+    currentOrganizationId?: string | null;
+    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
   };
 };
 
@@ -1200,6 +1201,10 @@ export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
       ...UserFields
+      currentOrganization {
+        id
+        name
+      }
     }
   }
   ${UserFieldsFragmentDoc}

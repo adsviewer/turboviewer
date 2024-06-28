@@ -8,7 +8,10 @@ const initialUserDetails: MeQuery['me'] = {
   email: '',
   photoUrl: '',
   allRoles: [],
-  defaultOrganizationId: '',
+  currentOrganization: {
+    id: '',
+    name: '',
+  },
 };
 
 export const userDetailsAtom = atom<MeQuery['me']>(initialUserDetails);
