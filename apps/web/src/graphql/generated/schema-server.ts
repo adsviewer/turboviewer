@@ -91,7 +91,6 @@ export type AdInsightsConnectionEdge = {
 };
 
 export enum AllRoles {
-  USER = 'USER',
   ADMIN = 'ADMIN',
   ORG_ADMIN = 'ORG_ADMIN',
   ORG_MEMBER = 'ORG_MEMBER',
@@ -667,8 +666,8 @@ export type User = {
   __typename?: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
-  defaultOrganization: Organization;
-  defaultOrganizationId?: Maybe<Scalars['String']['output']>;
+  currentOrganization: Organization;
+  currentOrganizationId?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -839,7 +838,7 @@ export type LoginMutation = {
       lastName: string;
       email: string;
       allRoles: Array<AllRoles>;
-      defaultOrganizationId?: string | null;
+      currentOrganizationId?: string | null;
     };
   };
 };
@@ -864,7 +863,7 @@ export type SignupMutation = {
       lastName: string;
       email: string;
       allRoles: Array<AllRoles>;
-      defaultOrganizationId?: string | null;
+      currentOrganizationId?: string | null;
     };
   };
 };
@@ -893,7 +892,7 @@ export type ResetPasswordMutation = {
       lastName: string;
       email: string;
       allRoles: Array<AllRoles>;
-      defaultOrganizationId?: string | null;
+      currentOrganizationId?: string | null;
     };
   };
 };
@@ -916,7 +915,7 @@ export type MeQuery = {
     lastName: string;
     email: string;
     allRoles: Array<AllRoles>;
-    defaultOrganization: { __typename?: 'Organization'; id: string; name: string };
+    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
   };
 };
 
@@ -934,7 +933,7 @@ export type UserFieldsFragment = {
   lastName: string;
   email: string;
   allRoles: Array<AllRoles>;
-  defaultOrganizationId?: string | null;
+  currentOrganizationId?: string | null;
 };
 
 export type UpdateOrganizationMutationVariables = Exact<{
@@ -953,7 +952,7 @@ export const UserFieldsFragmentDoc = gql`
     lastName
     email
     allRoles
-    defaultOrganizationId
+    currentOrganizationId
   }
 `;
 export const AdAccountsDocument = gql`
@@ -1132,7 +1131,7 @@ export const MeDocument = gql`
       lastName
       email
       allRoles
-      defaultOrganization {
+      currentOrganization {
         id
         name
       }

@@ -28,7 +28,7 @@ export interface TokensType {
 }
 
 export const createJwts = async ({
-  defaultOrganizationId: organizationId,
+  currentOrganizationId: organizationId,
   roles: userRoles,
   id: userId,
   status,

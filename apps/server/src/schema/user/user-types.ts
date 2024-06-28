@@ -41,8 +41,8 @@ export const UserDto = builder.prismaObject('User', {
       },
     }),
     organizations: t.relation('organizations'),
-    defaultOrganizationId: t.exposeString('defaultOrganizationId', { nullable: true }),
-    defaultOrganization: t.relation('defaultOrganization', { nullable: false, type: OrganizationDto }),
+    currentOrganizationId: t.exposeString('currentOrganizationId', { nullable: true }),
+    currentOrganization: t.relation('currentOrganization', { nullable: false, type: OrganizationDto }),
   }),
 });
 

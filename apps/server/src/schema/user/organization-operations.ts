@@ -105,7 +105,7 @@ builder.mutationFields((t) => ({
       const updatedUser = await prisma.user.update({
         ...userWithRoles,
         where: { id: user.id },
-        data: { defaultOrganizationId: args.organizationId },
+        data: { currentOrganizationId: args.organizationId },
       });
       const { token, refreshToken } = await createJwts(updatedUser);
       return { token, refreshToken };
