@@ -910,7 +910,14 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
   __typename?: 'Query';
-  me: { __typename?: 'User'; firstName: string; lastName: string; email: string };
+  me: {
+    __typename?: 'User';
+    firstName: string;
+    lastName: string;
+    email: string;
+    allRoles: Array<AllRoles>;
+    defaultOrganization: { __typename?: 'Organization'; id: string; name: string };
+  };
 };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
@@ -928,6 +935,15 @@ export type UserFieldsFragment = {
   email: string;
   allRoles: Array<AllRoles>;
   defaultOrganizationId?: string | null;
+};
+
+export type UpdateOrganizationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+export type UpdateOrganizationMutation = {
+  __typename?: 'Mutation';
+  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -1115,6 +1131,11 @@ export const MeDocument = gql`
       firstName
       lastName
       email
+      allRoles
+      defaultOrganization {
+        id
+        name
+      }
     }
   }
 `;
@@ -1123,6 +1144,14 @@ export const LoginProvidersDocument = gql`
     loginProviders {
       url
       type
+    }
+  }
+`;
+export const UpdateOrganizationDocument = gql`
+  mutation updateOrganization($name: String!) {
+    updateOrganization(name: $name) {
+      id
+      name
     }
   }
 `;
@@ -1235,6 +1264,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<LoginProvidersQuery>;
+    },
+    updateOrganization(
+      variables: UpdateOrganizationMutationVariables,
+      options?: C,
+    ): Promise<UpdateOrganizationMutation> {
+      return requester<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(
+        UpdateOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<UpdateOrganizationMutation>;
     },
   };
 }

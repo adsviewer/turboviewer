@@ -3,6 +3,7 @@
     "insights": "Διορατικότητες",
     "integrations": "Ενσωματώσεις",
     "settings": "Ρυθμίσεις",
+    "organization": "Οργανισμός",
     "signOut": "Αποσύνδεση"
   },
   "insights": {
@@ -76,5 +77,15 @@
     "signUpEmailConfirm": "Σας ευχαριστούμε για την εγγραφή σας! Επιβεβαιώστε το email σας για να ολοκληρώσετε τη διαδικασία εγγραφής.",
     "resendConfirmEmail": "Επαναποστολή email",
     "returnToSignIn": "Επιστροφή στη σελίδα σύνδεσης"
+  },
+  "organization": {
+    "title": "Οργανισμός",
+    "description": "Εφαρμόστε αποτελεσματική διαχείριση των λειτουργιών και της ανάπτυξης του οργανισμού σας.",
+    "submit": "Υποβολή",
+    "save": "Αποθήκευση",
+    "organizationName": "Όνομα οργανισμού",
+    "roleAdmin": "Διαχειριστής",
+    "roleOrganizationAdmin": "Διαχειριστής Οργανισμού",
+    "roleOrganizationUser": "Μέλος"
   }
 }

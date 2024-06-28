@@ -3,6 +3,7 @@
     "insights": "Inzichten",
     "integrations": "Integraties",
     "settings": "Instellingen",
+    "organization": "Organisatie",
     "signOut": "Uitloggen"
   },
   "insights": {
@@ -76,5 +77,15 @@
     "signUpEmailConfirm": "Bedankt voor uw registratie! Bevestig uw e-mailadres om het registratieproces te voltooien.",
     "resendConfirmEmail": "Email opnieuw verzenden",
     "returnToSignIn": "Terug naar de inlogpagina"
+  },
+  "organization": {
+    "title": "Organisatie",
+    "description": "Effectief management uitoefenen over de activiteiten en ontwikkeling van je organisatie.",
+    "submit": "Verzenden",
+    "save": "Opslaan",
+    "organizationName": "Naam organisatie",
+    "roleAdmin": "Beheerder",
+    "roleOrganizationAdmin": "Organisatiebeheerder",
+    "roleOrganizationUser": "Lid"
   }
 }

@@ -45,6 +45,11 @@ query me {
     firstName
     lastName
     email
+    allRoles
+    defaultOrganization {
+      id
+      name
+    }
   }
 }
 

@@ -3,6 +3,7 @@
     "insights": "Insights",
     "integrations": "Integrations",
     "settings": "Settings",
+    "organization": "Organization",
     "signOut": "Sign Out"
   },
   "insights": {
@@ -76,5 +77,15 @@
     "signUpEmailConfirm": "Thank you for signing up! Please confirm your email to complete the registration process.",
     "resendConfirmEmail": "Resend email",
     "returnToSignIn": "Return to sign in page"
+  },
+  "organization": {
+    "title": "Organization",
+    "description": "Exercise effective management over the operations and development of your organization.",
+    "submit": "Submit",
+    "save": "Save",
+    "organizationName": "Organization name",
+    "roleAdmin": "Administrator",
+    "roleOrganizationAdmin": "Organization Administrator",
+    "roleOrganizationUser": "Member"
   }
 }

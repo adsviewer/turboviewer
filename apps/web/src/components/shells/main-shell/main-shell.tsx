@@ -12,7 +12,7 @@ import {
   NavLink,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
+import { IconBuilding, IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LogoFull } from '@/components/misc/logo-full';
@@ -38,6 +38,12 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
       label: t('integrations'),
       href: '/integrations',
       isActive: pathname === '/integrations',
+    },
+    {
+      iconNode: <IconBuilding />,
+      label: t('organization'),
+      href: '/organization',
+      isActive: pathname === '/organization',
     },
   ];
 
