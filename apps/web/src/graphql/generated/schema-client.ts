@@ -667,7 +667,7 @@ export type User = {
   __typename?: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
-  currentOrganization: Organization;
+  currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
@@ -828,20 +828,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = {
   __typename?: 'Mutation';
-  login: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  login: { __typename?: 'TokenDto'; token: string; refreshToken: string };
 };
 
 export type SignupMutationVariables = Exact<{
@@ -853,20 +840,7 @@ export type SignupMutationVariables = Exact<{
 
 export type SignupMutation = {
   __typename?: 'Mutation';
-  signup: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  signup: { __typename?: 'TokenDto'; token: string; refreshToken: string };
 };
 
 export type ForgetPasswordMutationVariables = Exact<{
@@ -882,20 +856,7 @@ export type ResetPasswordMutationVariables = Exact<{
 
 export type ResetPasswordMutation = {
   __typename?: 'Mutation';
-  resetPassword: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  resetPassword: { __typename?: 'TokenDto'; token: string; refreshToken: string };
 };
 
 export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
@@ -906,35 +867,11 @@ export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: ne
 
 export type ResendEmailConfirmationMutation = { __typename?: 'Mutation'; resendEmailConfirmation: boolean };
 
-export type MeQueryVariables = Exact<{ [key: string]: never }>;
-
-export type MeQuery = {
-  __typename?: 'Query';
-  me: {
-    __typename?: 'User';
-    firstName: string;
-    lastName: string;
-    email: string;
-    allRoles: Array<AllRoles>;
-    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
-  };
-};
-
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LoginProvidersQuery = {
   __typename?: 'Query';
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
-};
-
-export type UserFieldsFragment = {
-  __typename?: 'User';
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  allRoles: Array<AllRoles>;
-  currentOrganizationId?: string | null;
 };
 
 export type UpdateOrganizationMutationVariables = Exact<{
@@ -946,12 +883,63 @@ export type UpdateOrganizationMutation = {
   updateOrganization: { __typename?: 'Organization'; id: string; name: string };
 };
 
+export type UpdateUserMutationVariables = Exact<{
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  oldPassword?: InputMaybe<Scalars['String']['input']>;
+  newPassword?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type UpdateUserMutation = {
+  __typename?: 'Mutation';
+  updateUser: {
+    __typename?: 'User';
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    photoUrl?: string | null;
+    allRoles: Array<AllRoles>;
+    currentOrganizationId?: string | null;
+    currentOrganization?: { __typename?: 'Organization'; id: string; name: string } | null;
+  };
+};
+
+export type MeQueryVariables = Exact<{ [key: string]: never }>;
+
+export type MeQuery = {
+  __typename?: 'Query';
+  me: {
+    __typename?: 'User';
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    photoUrl?: string | null;
+    allRoles: Array<AllRoles>;
+    currentOrganizationId?: string | null;
+    currentOrganization?: { __typename?: 'Organization'; id: string; name: string } | null;
+  };
+};
+
+export type UserFieldsFragment = {
+  __typename?: 'User';
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  photoUrl?: string | null;
+  allRoles: Array<AllRoles>;
+  currentOrganizationId?: string | null;
+};
+
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
     firstName
     lastName
     email
+    photoUrl
     allRoles
     currentOrganizationId
   }
@@ -1122,12 +1110,8 @@ export const LoginDocument = gql`
     login(email: $email, password: $password) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 
 export function useLoginMutation() {
@@ -1138,12 +1122,8 @@ export const SignupDocument = gql`
     signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 
 export function useSignupMutation() {
@@ -1163,12 +1143,8 @@ export const ResetPasswordDocument = gql`
     resetPassword(token: $token, password: $password) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 
 export function useResetPasswordMutation() {
@@ -1193,24 +1169,6 @@ export function useResendEmailConfirmationMutation() {
   return Urql.useMutation<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
     ResendEmailConfirmationDocument,
   );
-}
-export const MeDocument = gql`
-  query me {
-    me {
-      firstName
-      lastName
-      email
-      allRoles
-      currentOrganization {
-        id
-        name
-      }
-    }
-  }
-`;
-
-export function useMeQuery(options?: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'>) {
-  return Urql.useQuery<MeQuery, MeQueryVariables>({ query: MeDocument, ...options });
 }
 export const LoginProvidersDocument = gql`
   query loginProviders {
@@ -1238,4 +1196,36 @@ export const UpdateOrganizationDocument = gql`
 
 export function useUpdateOrganizationMutation() {
   return Urql.useMutation<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(UpdateOrganizationDocument);
+}
+export const UpdateUserDocument = gql`
+  mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
+    updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
+      ...UserFields
+      currentOrganization {
+        id
+        name
+      }
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+
+export function useUpdateUserMutation() {
+  return Urql.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument);
+}
+export const MeDocument = gql`
+  query me {
+    me {
+      ...UserFields
+      currentOrganization {
+        id
+        name
+      }
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+
+export function useMeQuery(options?: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'>) {
+  return Urql.useQuery<MeQuery, MeQueryVariables>({ query: MeDocument, ...options });
 }

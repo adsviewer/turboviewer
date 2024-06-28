@@ -667,7 +667,7 @@ export type User = {
   __typename?: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
-  currentOrganization: Organization;
+  currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];

@@ -87,5 +87,19 @@
     "roleAdmin": "Administrator",
     "roleOrganizationAdmin": "Organization Administrator",
     "roleOrganizationUser": "Member"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Manage your profile details to ensure all your personal information is up-to-date and accurately reflects your current status.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "password": "Password",
+    "oldPassword": "Old Password",
+    "newPassword": "New Password",
+    "repeatPassword": "Repeat Password",
+    "roleOrgAdmin": "Organization Administrator",
+    "roleAdmin": "Administrator",
+    "roleUser": "Member",
+    "submit": "Submit"
   }
 }
