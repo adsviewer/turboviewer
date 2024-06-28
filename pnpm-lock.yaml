@@ -58,9 +58,6 @@ importers:
       '@sentry/aws-serverless':
         specifier: ^8.13.0
         version: 8.13.0(@opentelemetry/api@1.9.0)
-      '@sentry/cli':
-        specifier: ^2.32.1
-        version: 2.32.1
       '@sentry/profiling-node':
         specifier: ^8.12.0
         version: 8.12.0
@@ -74,6 +71,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
+      '@sentry/cli':
+        specifier: ^2.32.1
+        version: 2.32.1
       '@types/aws-lambda':
         specifier: ^8.10.138
         version: 8.10.138
@@ -149,9 +149,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      '@sentry/cli':
-        specifier: ^2.32.1
-        version: 2.32.1
       '@sentry/node':
         specifier: ^8.12.0
         version: 8.12.0
@@ -234,6 +231,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
+      '@sentry/cli':
+        specifier: ^2.32.1
+        version: 2.32.1
       '@types/body-parser':
         specifier: ^1.19.5
         version: 1.19.5
