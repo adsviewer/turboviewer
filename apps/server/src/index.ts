@@ -8,6 +8,7 @@ import { IntegrationTypeEnum } from '@repo/database';
 import { Environment, FireAndForget, MODE } from '@repo/utils';
 import { authCallback, getChannel } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
+import * as Sentry from '@sentry/node';
 import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
@@ -41,14 +42,6 @@ const index = (): void => {
     plugins: MODE !== Environment.Production ? [] : [useDisableIntrospection()],
   });
 
-  app.use((_, res, next) => {
-    res.removeHeader('X-Powered-By');
-    next();
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
-  app.use(yoga.graphqlEndpoint, yoga);
-
   app.get(`/api${authEndpoint}`, authCallback);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.get(`/api${authLoginEndpoint}`, loginProviderRateLimiter, authLoginCallback);
@@ -60,6 +53,16 @@ const index = (): void => {
     bodyParser.urlencoded({ extended: true }),
     getChannel(IntegrationTypeEnum.META).signOutCallback,
   );
+
+  Sentry.setupExpressErrorHandler(app);
+
+  app.use((_, res, next) => {
+    res.removeHeader('X-Powered-By');
+    next();
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
+  app.use(yoga.graphqlEndpoint, yoga);
 
   const port = env.PORT;
   app.listen(port, () => {

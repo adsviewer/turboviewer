@@ -10,13 +10,15 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
-    "update": "pnpm update --latest && pnpm install"
+    "update": "pnpm update --latest && pnpm install",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project channel-ingress ./dist && sentry-cli sourcemaps upload --org adsviewer --project channel-ingress ./dist"
   },
   "author": "",
   "license": "UNLICENCED",
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@sentry/cli": "^2.32.1",
     "@types/aws-lambda": "^8.10.138",
     "@types/node": "20.14.2",
     "typescript": "5.4.5"
@@ -26,6 +28,8 @@
     "@repo/database": "workspace:*",
     "@repo/lambda-types": "workspace:*",
     "@repo/logger": "workspace:*",
+    "@sentry/aws-serverless": "^8.13.0",
+    "@sentry/profiling-node": "^8.12.0",
     "zod": "^3.23.8"
   }
 }
