@@ -1,6 +1,5 @@
 import { Suspense, type ReactNode } from 'react';
-import { getTranslations } from 'next-intl/server';
-import { Flex, Title } from '@mantine/core';
+import { Flex } from '@mantine/core';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
@@ -35,7 +34,6 @@ interface InsightsProps {
 }
 
 export default async function Insights({ searchParams }: InsightsProps): Promise<ReactNode> {
-  const t = await getTranslations('insights');
   const orderBy = searchParams.orderBy ?? InsightsColumnsOrderBy.spend_rel;
   const order = searchParams.order ?? OrderBy.desc;
   const pageSize = parseInt(searchParams.pageSize ?? '12', 10);
@@ -59,7 +57,6 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
 
   return (
     <>
-      <Title mb="md">{t('title')}</Title>
       <OrderFilters />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <Flex direction="column">
