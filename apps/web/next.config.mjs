@@ -46,7 +46,7 @@ export default withSentryConfig(withNextIntl(config), {
 // https://github.com/getsentry/sentry-webpack-plugin#options
 
 org: "adsviewer",
-project: "giorgos-nextjs",
+project: "web",
 
 // Only print logs for uploading source maps in CI
 silent: !process.env.CI,

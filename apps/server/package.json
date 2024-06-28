@@ -16,7 +16,7 @@
     "update": "pnpm update --latest",
     "codegen": "graphql-codegen -c src/schema/codegen.ts",
     "test": "node --import tsx --test test/**/*.test.ts",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project giorgos-server ./dist && sentry-cli sourcemaps upload --org adsviewer --project giorgos-server ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project server ./dist && sentry-cli sourcemaps upload --org adsviewer --project server ./dist"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.590.0",
