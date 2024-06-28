@@ -33,15 +33,18 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
 
   // Load fetched data onto the form
   useEffect(() => {
-    form.initialize({
-      firstName: props.userDetails.firstName,
-      lastName: props.userDetails.lastName,
-      email: props.userDetails.email,
-      oldPassword: '',
-      newPassword: '',
-      repeatPassword: '',
-    });
-  }, [props.userDetails]);
+    // Ensure profile data has been fetched before initialization
+    if (props.userDetails.firstName) {
+      form.initialize({
+        firstName: props.userDetails.firstName,
+        lastName: props.userDetails.lastName,
+        email: props.userDetails.email,
+        oldPassword: '',
+        newPassword: '',
+        repeatPassword: '',
+      });
+    }
+  }, [form, props.userDetails]);
 
   const handleSubmit = (values: UpdateUserMutationVariables): void => {
     // Set unused fields as undefined
