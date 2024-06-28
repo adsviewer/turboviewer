@@ -7,7 +7,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development concurrently 'pnpm --filter=@repo/database start-dev' 'pnpm codegen' && 'tsx watch src/index.ts'",
+    "dev": "cross-env NODE_ENV=development concurrently 'pnpm --filter=@repo/database start-dev' 'pnpm codegen' && tsx watch src/index.ts",
     "build": "tsc",
     "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
