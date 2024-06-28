@@ -9,7 +9,7 @@ export const redisSet = async (key: string, value: string | number | object, ttl
     await ioredis.set(key, serializedValue);
     return;
   }
-  await ioredis.psetex(key, ttlSec * 1000, serializedValue);
+  await ioredis.set(key, serializedValue, 'EX', ttlSec);
 };
 
 export const redisGet = async <T extends object | string | boolean>(key: string): Promise<null | T> => {
