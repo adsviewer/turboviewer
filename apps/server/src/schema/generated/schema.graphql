@@ -558,7 +558,7 @@ type Tokens {
 type User {
   allRoles: [AllRoles!]!
   createdAt: Date!
-  currentOrganization: Organization!
+  currentOrganization: Organization
   currentOrganizationId: String
   email: String!
   firstName: String!

@@ -667,7 +667,7 @@ export type User = {
   __typename?: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
-  currentOrganization: Organization;
+  currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
@@ -901,7 +901,7 @@ export type UpdateUserMutation = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
-    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
+    currentOrganization?: { __typename?: 'Organization'; id: string; name: string } | null;
   };
 };
 
@@ -918,7 +918,7 @@ export type MeQuery = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
-    currentOrganization: { __typename?: 'Organization'; id: string; name: string };
+    currentOrganization?: { __typename?: 'Organization'; id: string; name: string } | null;
   };
 };
 
