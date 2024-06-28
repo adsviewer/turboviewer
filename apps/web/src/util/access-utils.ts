@@ -9,5 +9,5 @@ export const isAdmin = (roles: AllRoles[]): boolean => {
 };
 
 export const isMember = (roles: AllRoles[]): boolean => {
-  return roles.includes(AllRoles.ORG_MEMBER) || roles.includes(AllRoles.USER);
+  return roles.includes(AllRoles.ORG_MEMBER);
 };

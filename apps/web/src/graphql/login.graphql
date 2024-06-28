@@ -46,7 +46,7 @@ query me {
     lastName
     email
     allRoles
-    defaultOrganization {
+    currentOrganization {
       id
       name
     }
@@ -66,5 +66,5 @@ fragment UserFields on User {
   lastName
   email
   allRoles
-  defaultOrganizationId
+  currentOrganizationId
 }

@@ -78,7 +78,7 @@ export const createUser = async (
           organizationId: validData.orgId,
         },
       },
-      defaultOrganizationId: validData.orgId,
+      currentOrganizationId: validData.orgId,
     },
   });
   await confirmEmail(user);
@@ -113,7 +113,7 @@ export const createLoginProviderUser = async (data: LoginProviderUserData) => {
           organizationId: validData.orgId,
         },
       },
-      defaultOrganizationId: validData.orgId,
+      currentOrganizationId: validData.orgId,
     },
   });
 };

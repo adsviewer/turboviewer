@@ -54,7 +54,6 @@ type AdInsightsConnectionEdge {
 }
 
 enum AllRoles {
-  USER
   ADMIN
   ORG_ADMIN
   ORG_MEMBER
@@ -559,8 +558,8 @@ type Tokens {
 type User {
   allRoles: [AllRoles!]!
   createdAt: Date!
-  defaultOrganization: Organization!
-  defaultOrganizationId: String
+  currentOrganization: Organization!
+  currentOrganizationId: String
   email: String!
   firstName: String!
   id: ID!
