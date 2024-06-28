@@ -50,6 +50,7 @@ export const builder = new SchemaBuilder<{
     isOrgAdmin: boolean;
     isInOrg: boolean;
     refresh: boolean;
+    emailUnconfirmed: boolean;
   };
   AuthContexts: {
     authenticated: AuthenticatedContext;
@@ -57,6 +58,7 @@ export const builder = new SchemaBuilder<{
     isOrgAdmin: InOrganizationContext;
     isInOrg: InOrganizationContext;
     refresh: RefreshContext;
+    emailUnconfirmed: InOrganizationContext;
   };
 }>({
   plugins: [ErrorsPlugin, RelayPlugin, ScopeAuthPlugin, PrismaPlugin, SimpleObjectsPlugin, ValidationPlugin],
@@ -69,11 +71,12 @@ export const builder = new SchemaBuilder<{
     cursorType: 'ID',
   },
   authScopes: (context) => ({
-    authenticated: Boolean(context.currentUserId) && !context.isRefreshToken,
-    isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken,
-    isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken,
-    isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken,
+    authenticated: Boolean(context.currentUserId) && !context.isRefreshToken && !context.emailUnconfirmed,
+    isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
+    isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
+    isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken && !context.emailUnconfirmed,
     refresh: Boolean(context.isRefreshToken),
+    emailUnconfirmed: Boolean(context.emailUnconfirmed),
   }),
   scopeAuthOptions: {
     // Recommended when using subscriptions

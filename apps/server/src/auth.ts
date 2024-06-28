@@ -4,15 +4,17 @@ import jwt, {
   type NotBeforeError,
   type TokenExpiredError,
 } from 'jsonwebtoken';
-import { type OrganizationRoleEnum, prisma, type RoleEnum } from '@repo/database';
+import { type OrganizationRoleEnum, prisma, type RoleEnum, type UserStatus } from '@repo/database';
 import { AError, Environment, MODE } from '@repo/utils';
 import { env } from './config';
+import { type UserWithRoles } from './contexts/user';
 
 interface AJwtPayload extends JwtPayload {
   userId: string;
   roles?: (RoleEnum | OrganizationRoleEnum)[];
-  organizationId?: string;
+  organizationId?: string | null;
   refresh?: boolean;
+  userStatus: UserStatus;
 }
 
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
@@ -20,7 +22,18 @@ const { sign, verify } = jwt;
 
 const expiresIn = MODE === Environment.Local ? '365d' : '5m';
 
-export const createJwts = async (userId: string, organizationId: string | null, roles: RoleEnum[]) => {
+export interface TokensType {
+  token: string;
+  refreshToken: string;
+}
+
+export const createJwts = async ({
+  defaultOrganizationId: organizationId,
+  roles: userRoles,
+  id: userId,
+  status,
+}: UserWithRoles): Promise<TokensType> => {
+  const roles = userRoles.map((r) => r.role);
   if (organizationId) {
     const { role } = await prisma.userOrganization.findUniqueOrThrow({
       select: { role: true },
@@ -29,8 +42,14 @@ export const createJwts = async (userId: string, organizationId: string | null, 
     roles.push(role as RoleEnum);
   }
   return {
-    token: sign({ userId, organizationId, roles }, env.AUTH_SECRET, { expiresIn }),
-    refreshToken: sign({ userId, organizationId, type: 'refresh' }, env.REFRESH_SECRET, { expiresIn: '183d' }),
+    token: sign({ userId, organizationId, roles, userStatus: status } satisfies AJwtPayload, env.AUTH_SECRET, {
+      expiresIn,
+    }),
+    refreshToken: sign(
+      { userId, organizationId, userStatus: status, type: 'refresh' } satisfies AJwtPayload,
+      env.REFRESH_SECRET,
+      { expiresIn: '183d' },
+    ),
   };
 };
 

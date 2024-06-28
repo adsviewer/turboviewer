@@ -10,23 +10,21 @@ const client = new SESClient({ region: env.AWS_REGION });
 const url = MODE === Environment.Local ? new URL('https://adsviewer.io') : new URL(env.PUBLIC_URL);
 const baseDomain = () => `${MODE === Environment.Production ? '' : `${MODE}.`}${url.hostname}`;
 
-interface ForgotPasswordEmailData {
+interface ActionEmailData {
   email: string;
   firstName: string;
   lastName: string;
   action_url: string;
-  operating_system: string;
-  browser_name: string;
 }
 
-export const sendForgetPasswordEmail = async (data: ForgotPasswordEmailData) => {
+export const sendForgetPasswordEmail = async (data: ActionEmailData) => {
   const command = await client
     .send(
       new SendEmailCommand({
         Destination: {
           ToAddresses: [data.email],
         },
-        Source: `hello@${baseDomain()}`,
+        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
         Message: {
           Subject: {
             Data: 'Action required to reset your password',
@@ -52,6 +50,39 @@ export const sendForgetPasswordEmail = async (data: ForgotPasswordEmailData) => 
   logger.info(JSON.stringify(command));
 };
 
+export const sendConfirmEmail = async (data: ActionEmailData) => {
+  const command = await client
+    .send(
+      new SendEmailCommand({
+        Destination: {
+          ToAddresses: [data.email],
+        },
+        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
+        Message: {
+          Subject: {
+            Data: 'Please confirm your email',
+          },
+          Body: {
+            Html: {
+              Data: `<p>${[
+                `Hi ${data.firstName} ${data.lastName},`,
+                'Thank you for registering in adsviewer.io. Please click the link below to confirm your email and access your account.',
+                `<a href="${data.action_url}">Confirm my email</a>`,
+                '',
+                "If you didn't request this, please ignore this email.",
+                "You won't be able to access adsviewer.io dashboard until you confirm your email through the link above.",
+              ].join('<br />')}</p>`,
+            },
+          },
+        },
+      }),
+    )
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
+  logger.info(JSON.stringify(command));
+};
+
 interface SignupEmailData {
   firstName: string;
   email: string;
@@ -64,7 +95,7 @@ export const sendSignupEmail = async (data: SignupEmailData) => {
         Destination: {
           ToAddresses: [data.email],
         },
-        Source: `Team AdsViewer <hello@${baseDomain()}>`,
+        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
         Message: {
           Subject: {
             Data: 'Welcome to AdsViewer',

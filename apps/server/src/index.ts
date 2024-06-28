@@ -15,7 +15,8 @@ import { snsMiddleware } from './utils/sns-subscription-utils';
 import { invokeChannelIngress } from './utils/lambda-utils';
 import { authLoginCallback } from './contexts/login-provider/login-provider-helper';
 import { authLoginEndpoint } from './contexts/login-provider/login-provider-types';
-import { loginProviderRateLimiter } from './utils/rate-limiter';
+import { authConfirmUserEmailRateLimiter, loginProviderRateLimiter } from './utils/rate-limiter';
+import { authConfirmUserEmailCallback, authConfirmUserEmailEndpoint } from './contexts/user';
 
 const fireAndForget = new FireAndForget();
 
@@ -51,6 +52,8 @@ const index = (): void => {
   app.get(`/api${authEndpoint}`, authCallback);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.get(`/api${authLoginEndpoint}`, loginProviderRateLimiter, authLoginCallback);
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
+  app.get(`/api${authConfirmUserEmailEndpoint}`, authConfirmUserEmailRateLimiter, authConfirmUserEmailCallback);
   app.post('/api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
   app.post(
     '/api/fb/sign-out',

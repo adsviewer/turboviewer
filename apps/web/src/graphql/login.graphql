@@ -36,6 +36,10 @@ mutation refreshToken {
   refreshToken
 }
 
+mutation resendEmailConfirmation {
+  resendEmailConfirmation
+}
+
 query me {
   me {
     firstName

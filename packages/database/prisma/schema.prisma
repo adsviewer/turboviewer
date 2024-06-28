@@ -39,21 +39,28 @@ enum EmailType {
   WORK
 }
 
+enum UserStatus {
+  EMAIL_UNCONFIRMED
+  EMAIL_CONFIRMED
+}
+
 model User {
-  id                    String              @id @default(cuid())
-  firstName             String              @map("first_name")
-  lastName              String              @map("last_name")
-  email                 String              @unique @db.Citext
-  emailType             EmailType           @map("email_type")
+  id                    String        @id @default(cuid())
+  firstName             String        @map("first_name")
+  lastName              String        @map("last_name")
+  email                 String        @unique @db.Citext
+  emailType             EmailType     @map("email_type")
   password              String?
-  photoUrl              String?             @map("photo_url")
+  photoUrl              String?       @map("photo_url")
   roles                 UserRole[]
-  defaultOrganization   Organization?       @relation(fields: [defaultOrganizationId], references: [id])
-  defaultOrganizationId String?             @map("default_organization_id")
-  createdAt             DateTime            @default(now()) @map("created_at")
-  updatedAt             DateTime            @default(now()) @updatedAt @map("updated_at")
-  loginProviders        LoginProviderUser[]
-  organizations         UserOrganization[]
+  defaultOrganization   Organization? @relation(fields: [defaultOrganizationId], references: [id])
+  defaultOrganizationId String?       @map("default_organization_id")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @default(now()) @updatedAt @map("updated_at")
+  status                UserStatus
+
+  loginProviders LoginProviderUser[]
+  organizations  UserOrganization[]
 
   @@index([defaultOrganizationId])
   @@map("users")

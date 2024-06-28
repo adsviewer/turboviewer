@@ -19,7 +19,7 @@ import InsightWhereInput = Prisma.InsightWhereInput;
 import InsightScalarFieldEnum = Prisma.InsightScalarFieldEnum;
 
 builder.queryFields((t) => ({
-  lastThreeMonthsAds: t.withAuth({ authenticated: true }).prismaField({
+  lastThreeMonthsAds: t.withAuth({ isInOrg: true }).prismaField({
     type: [AdDto],
     resolve: async (query, _root, _args, ctx) => {
       return await prisma.ad.findMany({
@@ -181,7 +181,7 @@ builder.queryFields((t) => ({
     },
   }),
 
-  insightIFrame: t.withAuth({ authenticated: true }).field({
+  insightIFrame: t.withAuth({ isInOrg: true }).field({
     type: IFrameDTO,
     nullable: true,
     args: {

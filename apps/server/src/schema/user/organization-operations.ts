@@ -102,17 +102,12 @@ builder.mutationFields((t) => ({
       if (!user) {
         throw new GraphQLError('You do not have permission to switch to this organization');
       }
-      const [{ token, refreshToken }] = await Promise.all([
-        createJwts(
-          user.id,
-          args.organizationId,
-          user.roles.map((r) => r.role),
-        ),
-        prisma.user.update({
-          where: { id: user.id },
-          data: { defaultOrganizationId: args.organizationId },
-        }),
-      ]);
+      const updatedUser = await prisma.user.update({
+        ...userWithRoles,
+        where: { id: user.id },
+        data: { defaultOrganizationId: args.organizationId },
+      });
+      const { token, refreshToken } = await createJwts(updatedUser);
       return { token, refreshToken };
     },
   }),

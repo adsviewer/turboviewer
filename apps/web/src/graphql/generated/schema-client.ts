@@ -491,6 +491,7 @@ export type Mutation = {
   refreshData: Scalars['Boolean']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
+  resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: TokenDto;
   signup: TokenDto;
   switchOrganization: Tokens;
@@ -675,6 +676,7 @@ export type User = {
   lastName: Scalars['String']['output'];
   organizations: Array<UserOrganization>;
   photoUrl?: Maybe<Scalars['String']['output']>;
+  status: UserStatus;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
 };
@@ -693,6 +695,11 @@ export enum UserOrganizationStatus {
   ACTIVE = 'ACTIVE',
   NON_ACTIVE = 'NON_ACTIVE',
   INVITED = 'INVITED',
+}
+
+export enum UserStatus {
+  EMAIL_UNCONFIRMED = 'EMAIL_UNCONFIRMED',
+  EMAIL_CONFIRMED = 'EMAIL_CONFIRMED',
 }
 
 export type ZodError = Error & {
@@ -895,6 +902,10 @@ export type ResetPasswordMutation = {
 export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
 
 export type RefreshTokenMutation = { __typename?: 'Mutation'; refreshToken: string };
+
+export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: never }>;
+
+export type ResendEmailConfirmationMutation = { __typename?: 'Mutation'; resendEmailConfirmation: boolean };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1156,6 +1167,17 @@ export const RefreshTokenDocument = gql`
 
 export function useRefreshTokenMutation() {
   return Urql.useMutation<RefreshTokenMutation, RefreshTokenMutationVariables>(RefreshTokenDocument);
+}
+export const ResendEmailConfirmationDocument = gql`
+  mutation resendEmailConfirmation {
+    resendEmailConfirmation
+  }
+`;
+
+export function useResendEmailConfirmationMutation() {
+  return Urql.useMutation<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
+    ResendEmailConfirmationDocument,
+  );
 }
 export const MeDocument = gql`
   query me {

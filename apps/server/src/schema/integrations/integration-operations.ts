@@ -17,7 +17,7 @@ import {
 const fireAndForget = new FireAndForget();
 
 builder.queryFields((t) => ({
-  integrations: t.withAuth({ authenticated: true }).prismaField({
+  integrations: t.withAuth({ isInOrg: true }).prismaField({
     type: [IntegrationDto],
     args: {
       type: t.arg({ type: IntegrationTypeDto, required: false }),
