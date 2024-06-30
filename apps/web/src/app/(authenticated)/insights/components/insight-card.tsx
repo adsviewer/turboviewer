@@ -20,7 +20,7 @@ interface InsightCardProps {
 
 interface RankType {
   label: 'GOOD' | 'CAUTION' | '-';
-  color: 'green' | 'yellow' | 'red' | 'gray';
+  color: 'green' | 'yellow' | 'gray';
 }
 
 interface Datapoint {
@@ -65,7 +65,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   useEffect(() => {
     setupRank();
     setupDatapoints();
-  }, [datapoints, setupDatapoints, setupRank]);
+  }, [setupDatapoints, setupRank]);
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
