@@ -1,6 +1,10 @@
+'use client';
+
 import { Select } from '@mantine/core';
-import React, { useEffect } from 'react';
-import { getCookie, setCookie } from '@/app/actions';
+import React, { useEffect, useState } from 'react';
+// import { logger } from '@repo/logger';
+import Cookies from 'js-cookie';
+import { setCookie } from '@/app/actions';
 
 const languages = [
   {
@@ -17,19 +21,19 @@ const languages = [
   },
 ];
 
-export default function LanguagePicker(): React.ReactNode {
-  // const [locale, setLocale] = useState<string>('en');
+export default function LanguagePicker(): React.ReactElement {
+  const [language, setLanguage] = useState<string>('en');
 
   useEffect(() => {
-    void getCookie('NEXT_LOCALE').then(() => {
-      // setLocale(cookieData?.value ?? 'en');
-    });
+    const currLanguage: string = Cookies.get('NEXT_LOCALE') ?? 'en';
+    setLanguage(currLanguage);
   }, []);
 
   const handleLanguageChange = (value: string | null): void => {
-    void setCookie('NEXT_LOCALE', String(value)).then(() => {
-      // setLocale(value ?? 'en');
-    });
+    if (value) {
+      setLanguage(value);
+      void setCookie('NEXT_LOCALE', value);
+    }
   };
 
   return (
@@ -38,6 +42,7 @@ export default function LanguagePicker(): React.ReactNode {
       data={languages}
       onChange={handleLanguageChange}
       comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+      value={language}
       my={4}
     />
   );
