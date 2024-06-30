@@ -6,6 +6,18 @@ import { userWithRoles } from '../../contexts/user';
 import { createJwts } from '../../auth';
 import { TokensDto } from './user-types';
 
+builder.queryFields((t) => ({
+  organization: t.withAuth({ isInOrg: true }).prismaField({
+    type: OrganizationDto,
+    resolve: (query, _root, _args, ctx, _info) => {
+      return prisma.organization.findUniqueOrThrow({
+        ...query,
+        where: { id: ctx.organizationId },
+      });
+    },
+  }),
+}));
+
 builder.mutationFields((t) => ({
   updateOrganization: t.withAuth({ isOrgAdmin: true }).prismaField({
     type: OrganizationDto,

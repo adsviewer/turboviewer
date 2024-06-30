@@ -1,19 +1,62 @@
-import { LoginProviderEnum, OrganizationRoleEnum, RoleEnum, type User, UserStatus } from '@repo/database';
+import {
+  LoginProviderEnum,
+  OrganizationRoleEnum,
+  prisma,
+  RoleEnum,
+  type User,
+  UserOrganizationStatus,
+  UserStatus,
+} from '@repo/database';
+import { type InputShapeFromFields } from '@pothos/core';
 import { builder } from '../builder';
 import { OrganizationDto } from '../organization/org-types';
+import { type GraphQLContext } from '../../context';
 
 const AllRolesEnum = { ...RoleEnum, ...OrganizationRoleEnum };
 const AllRolesDto = builder.enumType(AllRolesEnum, {
   name: 'AllRoles',
 });
 
+const baseUserDtoAuthScopes = (user: User, ctx: GraphQLContext): boolean | undefined => {
+  if (ctx.currentUserId === user.id) return true;
+  if (ctx.isAdmin) return true;
+  if (!ctx.organizationId) return false;
+  return undefined;
+};
+
+const commonOrgAuthScopes = async (user: User, ctx: GraphQLContext): Promise<boolean> => {
+  const baseScopes = baseUserDtoAuthScopes(user, ctx);
+  if (baseScopes !== undefined) return baseScopes;
+  const commonOrg = await prisma.userOrganization.findUnique({
+    where: {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked in baseScopes
+      userId_organizationId: { userId: user.id, organizationId: ctx.organizationId! },
+      status: UserOrganizationStatus.ACTIVE,
+    },
+  });
+  return Boolean(commonOrg);
+};
+
+const commonOrgFieldProps = {
+  skipTypeScopes: true,
+  description: 'Caller is permitted to view this field if they are in a common organization',
+  authScopes: (user: User, _args: InputShapeFromFields<NonNullable<unknown>>, ctx: GraphQLContext) =>
+    commonOrgAuthScopes(user, ctx),
+};
+
 export const UserDto = builder.prismaObject('User', {
+  authScopes: (user, ctx) => {
+    const baseScopes = baseUserDtoAuthScopes(user, ctx);
+    return baseScopes ?? false;
+  },
+  description:
+    'Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization',
   fields: (t) => ({
-    id: t.exposeID('id'),
-    firstName: t.exposeString('firstName'),
-    lastName: t.exposeString('lastName'),
-    email: t.exposeString('email'),
-    photoUrl: t.exposeString('photoUrl', { nullable: true }),
+    id: t.exposeID('id', commonOrgFieldProps),
+    firstName: t.exposeString('firstName', commonOrgFieldProps),
+    lastName: t.exposeString('lastName', commonOrgFieldProps),
+    email: t.exposeString('email', commonOrgFieldProps),
+    photoUrl: t.exposeString('photoUrl', { nullable: true, ...commonOrgFieldProps }),
     status: t.expose('status', { type: UserStatusDto }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
