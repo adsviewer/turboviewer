@@ -3,10 +3,10 @@ import '@mantine/charts/styles.css';
 import '@mantine/notifications/styles.css';
 import './globals.scss';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import NotificationsHandler from '@/components/misc/notifications-handler';
 
 export const metadata: Metadata = {
   title: 'AdsViewer',
@@ -23,7 +23,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages}>
           <MantineProvider>
-            <Notifications />
+            <NotificationsHandler />
             {children}
           </MantineProvider>
         </NextIntlClientProvider>
