@@ -1,4 +1,7 @@
 {
+  "generic": {
+    "error": "Σφάλμα"
+  },
   "navbar": {
     "insights": "Διορατικότητες",
     "integrations": "Ενσωματώσεις",
