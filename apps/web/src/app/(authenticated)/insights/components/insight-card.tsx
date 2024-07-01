@@ -41,7 +41,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
   const setupRank = useCallback(() => {
     // If the latest CPM is lower than the previous CPM, rank is set to CAUTION
-    if (props.datapoints[props.datapoints.length - 1].cpm < props.datapoints[props.datapoints.length - 2].cpm) {
+    if (props.datapoints[props.datapoints.length - 1].cpm > props.datapoints[props.datapoints.length - 2].cpm) {
       setRank({
         label: 'CAUTION',
         color: 'yellow',
