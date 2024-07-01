@@ -567,7 +567,7 @@ export type Organization = {
   integrations: Array<Integration>;
   name: Scalars['String']['output'];
   updatedAt: Scalars['Date']['output'];
-  users: Array<UserOrganization>;
+  userOrganizations: Array<UserOrganization>;
 };
 
 export enum OrganizationRoleEnum {
@@ -615,6 +615,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
+  organization: Organization;
   settingsChannels: Array<IntegrationListItem>;
 };
 
@@ -662,17 +663,23 @@ export type Tokens = {
   token: Scalars['String']['output'];
 };
 
+/** Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization */
 export type User = {
   __typename?: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
   currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
+  /** Caller is permitted to view this field if they are in a common organization */
   email: Scalars['String']['output'];
+  /** Caller is permitted to view this field if they are in a common organization */
   firstName: Scalars['String']['output'];
+  /** Caller is permitted to view this field if they are in a common organization */
   id: Scalars['ID']['output'];
+  /** Caller is permitted to view this field if they are in a common organization */
   lastName: Scalars['String']['output'];
   organizations: Array<UserOrganization>;
+  /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
   status: UserStatus;
   updatedAt: Scalars['Date']['output'];

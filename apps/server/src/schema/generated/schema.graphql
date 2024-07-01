@@ -485,7 +485,7 @@ type Organization {
   integrations: [Integration!]!
   name: String!
   updatedAt: Date!
-  users: [UserOrganization!]!
+  userOrganizations: [UserOrganization!]!
 }
 
 enum OrganizationRoleEnum {
@@ -530,6 +530,7 @@ type Query {
   lastThreeMonthsAds: [Ad!]!
   loginProviders: [GenerateGoogleAuthUrlResponse!]!
   me: User!
+  organization: Organization!
   settingsChannels: [IntegrationListItem!]!
 }
 
@@ -555,16 +556,39 @@ type Tokens {
   token: String!
 }
 
+"""
+Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization
+"""
 type User {
   allRoles: [AllRoles!]!
   createdAt: Date!
   currentOrganization: Organization
   currentOrganizationId: String
+
+  """
+  Caller is permitted to view this field if they are in a common organization
+  """
   email: String!
+
+  """
+  Caller is permitted to view this field if they are in a common organization
+  """
   firstName: String!
+
+  """
+  Caller is permitted to view this field if they are in a common organization
+  """
   id: ID!
+
+  """
+  Caller is permitted to view this field if they are in a common organization
+  """
   lastName: String!
   organizations: [UserOrganization!]!
+
+  """
+  Caller is permitted to view this field if they are in a common organization
+  """
   photoUrl: String
   status: UserStatus!
   updatedAt: Date!
