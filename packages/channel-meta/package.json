@@ -25,7 +25,7 @@
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:*",
-    "facebook-nodejs-business-sdk": "^19.0.3",
+    "facebook-nodejs-business-sdk": "^20.0.0",
     "lodash": "^4.17.21",
     "zod": "^3.23.8"
   },
@@ -33,9 +33,9 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^4.17.21",
-    "@types/facebook-nodejs-business-sdk": "^18.0.0",
-    "@types/lodash": "^4.17.4",
-    "@types/node": "^20.14.2",
-    "typescript": "^5.4.5"
+    "@types/facebook-nodejs-business-sdk": "^20.0.0",
+    "@types/lodash": "^4.17.6",
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.2"
   }
 }
