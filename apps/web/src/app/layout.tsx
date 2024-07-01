@@ -22,7 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages}>
-          <MantineProvider>
+          <MantineProvider defaultColorScheme="auto">
             <NotificationsHandler />
             {children}
           </MantineProvider>

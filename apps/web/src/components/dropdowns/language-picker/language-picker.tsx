@@ -2,7 +2,6 @@
 
 import { Select } from '@mantine/core';
 import React, { useEffect, useState } from 'react';
-// import { logger } from '@repo/logger';
 import Cookies from 'js-cookie';
 import { setCookie } from '@/app/actions';
 
