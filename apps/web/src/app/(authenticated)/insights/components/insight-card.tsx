@@ -109,15 +109,12 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           dataKey="date"
           series={[
             {
-              // @ts-expect-error - yAxisId works as intended
               yAxisId: 'right',
               name: 'spend',
               color: 'teal.6',
               label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
             },
-            // @ts-expect-error - yAxisId works as intended
             { yAxisId: 'right', name: 'impressions', color: 'blue.6', label: t('impressions') },
-            // @ts-expect-error - yAxisId works as intended
             { yAxisId: 'left', name: 'cpm', color: 'orange', label: 'CPM' },
           ]}
           valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}

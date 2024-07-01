@@ -34,8 +34,8 @@
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
-    "@radix-ui/react-label": "^2.0.2",
-    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
@@ -43,12 +43,12 @@
     "@types/react-dom": "^18.3.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.383.0",
-    "postcss": "^8.4.38",
+    "lucide-react": "^0.399.0",
+    "postcss": "^8.4.39",
     "react": "^18.3.1",
-    "react-hook-form": "^7.51.5",
+    "react-hook-form": "^7.52.0",
     "tailwind-merge": "^2.3.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "dependencies": {
     "react-dom": "^18.3.1"

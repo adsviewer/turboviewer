@@ -222,7 +222,7 @@ class Meta implements ChannelInterface {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     if (!isMetaAdPosition(position)) return new AError('Invalid position');
     const { externalId } = await prisma.ad.findUniqueOrThrow({ where: { id: adId } });
-    const ad = new Ad(externalId);
+    const ad = new Ad(externalId, {}, undefined, undefined);
     const format = getIFrameAdFormat(publisher, device, position);
     if (!format) {
       logger.error('Invalid ad format %o', { publisher, device, position, adId });
@@ -257,7 +257,7 @@ class Meta implements ChannelInterface {
 
   private async getActiveAdAccounts(integration: Integration): Promise<ChannelAdAccount[] | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const user = new User('me');
+    const user = new User('me', {}, undefined, undefined);
 
     const getAdAccountsFn = user.getAdAccounts(
       [
@@ -320,7 +320,7 @@ class Meta implements ChannelInterface {
     });
 
     for (const acc of accounts) {
-      const account = new AdAccount(`act_${acc.externalId}`);
+      const account = new AdAccount(`act_${acc.externalId}`, {}, undefined, undefined);
       const getAdsFn = account.getAds(
         [Ad.Fields.id, Ad.Fields.account_id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`],
         {
@@ -343,7 +343,7 @@ class Meta implements ChannelInterface {
     const adReportRunSchema = z.object({ id: z.string() });
 
     for (const acc of accounts) {
-      const account = new AdAccount(`act_${acc.externalId}`);
+      const account = new AdAccount(`act_${acc.externalId}`, {}, undefined, undefined);
       const resp = await Meta.sdk(
         async () =>
           account.getInsightsAsync(
@@ -401,7 +401,7 @@ class Meta implements ChannelInterface {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
     while (true) {
       for (const [reportId, dbAccount] of adReportsAccountMapCopy) {
-        const report = new AdReportRun(reportId, { report_run_id: reportId });
+        const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
         const resp = await Meta.sdk(
           () => report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]),
           integration,
@@ -479,7 +479,7 @@ class Meta implements ChannelInterface {
 
     logger.info('Getting insights for report %s', reportId);
 
-    const report = new AdReportRun(reportId, { report_run_id: reportId });
+    const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
     const getInsightsFn = report.getInsights(
       [
         AdsInsights.Fields.account_id,
@@ -533,7 +533,7 @@ class Meta implements ChannelInterface {
 
   private static async handlePagination<T, U extends ZodTypeAny>(
     integration: Integration,
-    fn: Promise<Cursor | AError>,
+    fn: Promise<Cursor | AError> | Cursor | AError,
     schema: U,
     parseCallback: (result: z.infer<U>) => T,
   ): Promise<AError | T[]> {
@@ -548,7 +548,7 @@ class Meta implements ChannelInterface {
     const results = parsed.data.map(parseCallback);
     while (cursor.hasNext()) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Will catch error
-      const next = await this.sdk(() => cursor.next(), integration);
+      const next = await this.sdk<T>(() => cursor.next(), integration);
       const parsedNext = arraySchema.safeParse(next);
       if (parsedNext.success) {
         results.push(...parsedNext.data.map(parseCallback));
@@ -561,7 +561,7 @@ class Meta implements ChannelInterface {
 
   private static async handlePaginationFn<T, U extends ZodTypeAny, V>(
     integration: Integration,
-    fn: Promise<Cursor>,
+    fn: Promise<Cursor> | Cursor,
     schema: U,
     parseCallback: (result: z.infer<U>) => T,
     processCallback: (result: T[]) => Promise<V[] | undefined> | V[] | undefined,
@@ -577,7 +577,7 @@ class Meta implements ChannelInterface {
     const resultsP = processCallback(parsed.data.map(parseCallback));
     while (cursor.hasNext()) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Will catch error
-      const next = await this.sdk(() => cursor.next(), integration);
+      const next = await this.sdk<T>(() => cursor.next(), integration);
       const parsedNext = arraySchema.safeParse(next);
       if (parsedNext.success) {
         const processed = await processCallback(parsedNext.data.map(parseCallback));
@@ -590,7 +590,7 @@ class Meta implements ChannelInterface {
     return resultsP;
   }
 
-  private static async sdk<T>(fn: () => Promise<T>, integration: Integration): Promise<T | AError> {
+  private static async sdk<T>(fn: () => Promise<T> | T | AError, integration: Integration): Promise<T | AError> {
     try {
       return await fn();
     } catch (error) {

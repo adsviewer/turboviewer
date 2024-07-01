@@ -18,22 +18,22 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "husky": "^9.0.11",
-    "lint-staged": "^15.2.5",
-    "prettier": "^3.3.1",
-    "prettier-plugin-tailwindcss": "^0.6.1",
-    "prisma": "^5.15.0",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.2",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "prisma": "^5.16.1",
     "terraform": "^1.23.0",
-    "tsx": "^4.11.2",
-    "turbo": "^2.0.5"
+    "tsx": "^4.16.0",
+    "turbo": "^2.0.6"
   },
   "packageManager": "pnpm@9.4.0",
   "engines": {
     "node": ">=20"
   },
+  "name": "turboviewer",
   "pnpm": {
     "patchedDependencies": {
-      "graphql@16.8.1": "patches/graphql@16.8.1.patch"
+      "graphql@16.9.0": "patches/graphql@16.9.0.patch"
     }
-  },
-  "name": "turboviewer"
+  }
 }
