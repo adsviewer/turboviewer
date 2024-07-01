@@ -3,8 +3,10 @@
 import { useSearchParams } from 'next/navigation';
 import { Notifications, notifications } from '@mantine/notifications';
 import { useEffect, type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function IntegrationsGrid(): ReactNode {
+  const t = useTranslations('generic');
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -12,11 +14,12 @@ export default function IntegrationsGrid(): ReactNode {
     const error = searchParams.get('error');
     if (error) {
       notifications.show({
+        title: t('error'),
         message: error,
         color: 'red',
       });
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   return <Notifications />;
 }
