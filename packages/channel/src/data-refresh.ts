@@ -3,6 +3,7 @@ import { type Integration, prisma } from '@repo/database';
 import { decryptTokens, getAllConnectedIntegrations } from '@repo/channel-utils';
 import type { z } from 'zod';
 import { type channelIngressInput, type channelIngressOutput } from '@repo/lambda-types';
+import { isAError } from '@repo/utils';
 import { saveChannelData } from './integration-helper';
 
 const refreshDataOf = async (integration: Integration, initial: boolean): Promise<void> => {
@@ -31,7 +32,13 @@ export const refreshData = async ({
       .findMany({
         where: { id: { in: integrationIds } },
       })
-      .then((ints) => ints.map(decryptTokens).flatMap((integration) => integration ?? []));
+      .then((ints) =>
+        ints.map(decryptTokens).flatMap((integration) => {
+          if (!integration) return [];
+          if (isAError(integration)) return [];
+          return integration;
+        }),
+      );
     for (const integration of integrations) {
       await refreshDataOf(integration, initial);
     }

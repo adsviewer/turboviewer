@@ -1,6 +1,7 @@
 import type { AdAccount, Integration, IntegrationTypeEnum } from '@repo/database';
 import { IntegrationStatus, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
+import { AError, isAError } from '@repo/utils';
 import { env } from './config';
 import { decryptAesGcm } from './aes-util';
 
@@ -33,18 +34,28 @@ export const revokeIntegration = async (externalId: string, type: IntegrationTyp
 export const getConnectedIntegrationByOrg = async (
   organizationId: string,
   type: IntegrationTypeEnum,
-): Promise<Integration | null> => {
-  return await prisma.integration
-    .findUnique({
-      where: {
-        organizationId_type: {
-          organizationId,
-          type,
-        },
-        status: IntegrationStatus.CONNECTED,
+): Promise<Integration | null | AError> => {
+  const encryptedIntegration = await prisma.integration.findUnique({
+    where: {
+      organizationId_type: {
+        organizationId,
+        type,
       },
-    })
-    .then(decryptTokens);
+      status: IntegrationStatus.CONNECTED,
+    },
+  });
+
+  if (!encryptedIntegration) return null;
+  const integration = decryptTokens(encryptedIntegration);
+
+  if (isAError(integration)) {
+    if (encryptedIntegration.id) {
+      await revokeIntegrationById(encryptedIntegration.id, false);
+    }
+    return integration;
+  }
+
+  return integration;
 };
 
 export const getAllConnectedIntegrations = async (): Promise<Integration[]> => {
@@ -54,20 +65,29 @@ export const getAllConnectedIntegrations = async (): Promise<Integration[]> => {
         status: IntegrationStatus.CONNECTED,
       },
     })
-    .then((integrations) => integrations.map(decryptTokens).flatMap((integration) => integration ?? []));
+    .then((integrations) =>
+      integrations.map(decryptTokens).flatMap((integration) => {
+        if (!integration) return [];
+        if (isAError(integration)) return [];
+        return integration;
+      }),
+    );
 };
 
-export const decryptTokens = (integration: Integration | null): null | Integration => {
+export const decryptTokens = (integration: Integration | null): null | AError | Integration => {
   if (integration) {
     const accessToken = decryptAesGcm(integration.accessToken, env.CHANNEL_SECRET);
     if (typeof accessToken !== 'string') {
       logger.warn(`Failed to decrypt access token for integration ${integration.id}`);
-      return null;
+      return new AError('Failed to decrypt access token');
     }
     integration.accessToken = accessToken;
     if (integration.refreshToken) {
       const refreshToken = decryptAesGcm(integration.refreshToken, env.CHANNEL_SECRET);
-      if (typeof refreshToken !== 'string') return null;
+      if (typeof refreshToken !== 'string') {
+        logger.warn(`Failed to decrypt refresh token for integration ${integration.id}`);
+        return new AError('Failed to decrypt refresh token');
+      }
       integration.refreshToken = refreshToken;
     }
   }

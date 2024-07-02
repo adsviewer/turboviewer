@@ -147,6 +147,7 @@ class Meta implements ChannelInterface {
   async deAuthorize(organizationId: string): Promise<string | AError | MetaError> {
     const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.META);
     if (!integration) return new AError('No integration found');
+    if (isAError(integration)) return integration;
 
     const response = await fetch(
       `${baseGraphFbUrl}/${integration.externalId}/permissions?access_token=${integration.accessToken}`,

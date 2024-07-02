@@ -109,6 +109,7 @@ const completeIntegration = async (
   fireAndForget.add(async () => {
     const integration = decryptTokens(dbIntegration);
     if (!integration) return new AError('Failed to decrypt integration');
+    if (isAError(integration)) return integration;
     await saveChannelData(integration, true);
   });
   return integrationType;

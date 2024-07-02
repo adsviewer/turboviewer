@@ -74,6 +74,7 @@ class LinkedIn implements ChannelInterface {
   async deAuthorize(organizationId: string): Promise<string | AError> {
     const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.LINKEDIN);
     if (!integration) return new AError('No integration found');
+    if (isAError(integration)) return integration;
 
     const response = await fetch('https://www.linkedin.com/oauth/v2/revoke', {
       method: 'POST',
