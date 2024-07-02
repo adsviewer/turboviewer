@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Text, Select, type ComboboxItem } from '@mantine/core';
+import { Flex, Text, Select, type ComboboxItem, Switch } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -58,55 +58,63 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   return (
-    <Flex w="100%" mb="lg" align="center" wrap="wrap">
-      {/* Filters */}
-      <Flex align="center" mr="sm" my="md">
+    <Flex w="100%" mb="lg" wrap="wrap" direction="column">
+      {/* FIlters */}
+      <Flex>
         {/* Page size filter */}
-        <Text size="md" mr="sm">
-          {t('pageSize')}:
-        </Text>
-        <Select
-          placeholder="Pick value"
-          data={['6', '12', '18', '50', '100']}
-          value={getPageSizeValue()}
-          onChange={handlePageSizeChange}
-          allowDeselect={false}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          maw={90}
-        />
+        <Flex align="center" mr="sm" my="md">
+          <Text size="md" mr="sm">
+            {t('pageSize')}:
+          </Text>
+          <Select
+            placeholder="Pick value"
+            data={['6', '12', '18', '50', '100']}
+            value={getPageSizeValue()}
+            onChange={handlePageSizeChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={90}
+          />
+        </Flex>
+
+        {/* Order filter */}
+        <Flex align="center">
+          <Text size="md" mr="sm">
+            {t('orderBy')}:
+          </Text>
+          <Select
+            placeholder="Pick value"
+            data={[
+              { value: InsightsColumnsOrderBy.spend_rel, label: t('spent') },
+              { value: InsightsColumnsOrderBy.impressions_rel, label: t('impressions') },
+              { value: InsightsColumnsOrderBy.cpm_rel, label: 'CPM' },
+            ]}
+            value={getOrderByValue()}
+            onChange={handleOrderByChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={150}
+            mr="sm"
+          />
+          <Select
+            placeholder="Pick value"
+            data={[
+              { value: OrderDirection.asc, label: t('ascending') },
+              { value: OrderDirection.desc, label: t('descending') },
+            ]}
+            value={getOrderDirectionValue()}
+            onChange={handleOrderDirectionChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={150}
+          />
+        </Flex>
       </Flex>
 
-      <Flex align="center">
-        {/* Order filter */}
-        <Text size="md" mr="sm">
-          {t('orderBy')}:
-        </Text>
-        <Select
-          placeholder="Pick value"
-          data={[
-            { value: InsightsColumnsOrderBy.spend_rel, label: t('spent') },
-            { value: InsightsColumnsOrderBy.impressions_rel, label: t('impressions') },
-            { value: InsightsColumnsOrderBy.cpm_rel, label: 'CPM' },
-          ]}
-          value={getOrderByValue()}
-          onChange={handleOrderByChange}
-          allowDeselect={false}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          maw={150}
-          mr="sm"
-        />
-        <Select
-          placeholder="Pick value"
-          data={[
-            { value: OrderDirection.asc, label: t('ascending') },
-            { value: OrderDirection.desc, label: t('descending') },
-          ]}
-          value={getOrderDirectionValue()}
-          onChange={handleOrderDirectionChange}
-          allowDeselect={false}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          maw={150}
-        />
+      {/* Misc. controls */}
+      <Flex>
+        {/* Toggle ad previews */}
+        <Switch label={t('showAdPreviews')} />
       </Flex>
     </Flex>
   );
