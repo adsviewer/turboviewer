@@ -5,7 +5,7 @@ import { Notifications, notifications } from '@mantine/notifications';
 import { useEffect, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
-export default function IntegrationsGrid(): ReactNode {
+export default function NotificationsHandler(): ReactNode {
   const t = useTranslations('generic');
   const searchParams = useSearchParams();
 
