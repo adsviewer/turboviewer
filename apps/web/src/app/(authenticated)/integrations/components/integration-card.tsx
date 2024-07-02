@@ -99,7 +99,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
         {props.description}
       </Text>
 
-      {props.lastSyncedAt ? (
+      {props.lastSyncedAt && props.isConnected ? (
         <Flex direction="column" align="flex-end" mt="md">
           <Text size="sm" c="dimmed" mb="auto" fs="italic">
             {format.number(props.adCount)} {t('ads')}
