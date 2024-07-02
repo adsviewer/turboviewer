@@ -1,6 +1,6 @@
 import { Cacheable } from '@repo/redis';
 import { type DeviceEnum, prisma, type PublisherEnum } from '@repo/database';
-import { AError } from '@repo/utils';
+import { AError, isAError } from '@repo/utils';
 import { decryptTokens } from '@repo/channel-utils';
 import { getChannel } from './channel-helper';
 
@@ -39,6 +39,7 @@ export const iFramePerInsight = new Cacheable(
     const channel = getChannel(ad.adAccount.integration.type);
     const decryptedIntegration = decryptTokens(ad.adAccount.integration);
     if (!decryptedIntegration) return new AError('Integration not found');
+    if (isAError(decryptedIntegration)) return decryptedIntegration;
     return channel.getAdPreview(decryptedIntegration, adId, publisher, device, position);
   },
   60 * 60 * 3,
