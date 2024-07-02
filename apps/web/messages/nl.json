@@ -1,4 +1,7 @@
 {
+  "generic": {
+    "error": "Fout"
+  },
   "navbar": {
     "insights": "Inzichten",
     "integrations": "Integraties",

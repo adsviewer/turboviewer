@@ -1,33 +1,6 @@
-import '@mantine/core/styles.css';
-import React, { Suspense } from 'react';
-import { ColorSchemeScript, Flex, MantineProvider, Loader } from '@mantine/core';
-import type { Metadata } from 'next';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
-import { LogoFull } from '@/components/misc/logo-full';
+import { Suspense } from 'react';
+import LoaderCentered from '@/components/misc/loader-centered';
 
-export const metadata: Metadata = {
-  title: 'AdsViewer',
-  description: 'Get granular insights into your ads performance',
-};
-
-export default async function RootLayout({ children }: { children: React.ReactNode }): Promise<React.ReactNode> {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
-  return (
-    <html lang={locale}>
-      <body>
-        <ColorSchemeScript />
-        <NextIntlClientProvider messages={messages}>
-          <MantineProvider forceColorScheme="light">
-            <Flex align="center" justify="center" my="xl">
-              <LogoFull />
-            </Flex>
-            <Suspense fallback={<Loader />}>{children}</Suspense>
-          </MantineProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: { children: React.ReactNode }): React.ReactNode {
+  return <Suspense fallback={<LoaderCentered />}>{children}</Suspense>;
 }

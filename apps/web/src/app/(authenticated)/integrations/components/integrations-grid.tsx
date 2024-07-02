@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { SimpleGrid, Transition } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
@@ -44,6 +45,7 @@ const initialIntegrationsData: IntegrationsDataType = {
 };
 
 export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
+  const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [integrationsData, setIntegrationsData] = useState<IntegrationsDataType>(initialIntegrationsData);
 
@@ -69,7 +71,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     setTimeout(() => {
       setIsMounted(true); // Set isMounted to true after a delay to allow the transition to play
     }, 0);
-  }, [updateIntegrationsData]);
+  }, [searchParams, updateIntegrationsData]);
 
   const isIntegrationAvailable = (status: IntegrationStatus): boolean => status !== IntegrationStatus.ComingSoon;
 

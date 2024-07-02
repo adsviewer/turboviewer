@@ -1,5 +1,7 @@
 import { Select, useMantineColorScheme, useComputedColorScheme, type MantineColorScheme } from '@mantine/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { setCookie } from '@/app/actions';
 
 const colorSchemes = [
   {
@@ -19,12 +21,19 @@ const colorSchemes = [
 export default function ColorSchemePicker(): React.ReactNode {
   const { setColorScheme } = useMantineColorScheme();
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
-  const [scheme, setScheme] = useState<MantineColorScheme>(computedColorScheme);
+  const [scheme, setScheme] = useState<string>(computedColorScheme);
+
+  useEffect(() => {
+    const currColorScheme = Cookies.get('color_scheme') ?? 'auto';
+    setScheme(currColorScheme);
+    void setCookie('color_scheme', currColorScheme);
+  }, []);
 
   const handleColorSchemeChange = (value: string | null): void => {
     if (value) {
       setColorScheme(value as MantineColorScheme);
       setScheme(value as MantineColorScheme);
+      void setCookie('color_scheme', value);
     }
   };
 

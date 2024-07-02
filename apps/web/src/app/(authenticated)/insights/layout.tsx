@@ -1,11 +1,14 @@
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
+import { Title } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 import LoaderCentered from '@/components/misc/loader-centered';
-import { MainAppShell } from '@/components/shells/main-shell/main-shell';
 
 export default function RootLayout({ children }: { children: React.ReactNode }): React.ReactNode {
+  const t = useTranslations('insights');
   return (
-    <MainAppShell>
+    <>
+      <Title mb="md">{t('title')}</Title>
       <Suspense fallback={<LoaderCentered />}>{children}</Suspense>
-    </MainAppShell>
+    </>
   );
 }

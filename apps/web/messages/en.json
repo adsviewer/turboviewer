@@ -1,4 +1,7 @@
 {
+  "generic": {
+    "error": "Error"
+  },
   "navbar": {
     "insights": "Insights",
     "integrations": "Integrations",
