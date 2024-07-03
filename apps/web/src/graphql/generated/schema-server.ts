@@ -572,8 +572,11 @@ export type Organization = {
 };
 
 export enum OrganizationRoleEnum {
+  /** Ability to manage organization settings, integrations and members */
   ORG_ADMIN = 'ORG_ADMIN',
+  /** Does not have any special permissions */
   ORG_MEMBER = 'ORG_MEMBER',
+  /** Ability to manage organization settings and members. */
   ORG_OPERATOR = 'ORG_OPERATOR',
 }
 

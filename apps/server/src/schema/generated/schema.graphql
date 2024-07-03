@@ -490,8 +490,19 @@ type Organization {
 }
 
 enum OrganizationRoleEnum {
+  """
+  Ability to manage organization settings, integrations and members
+  """
   ORG_ADMIN
+
+  """
+  Does not have any special permissions
+  """
   ORG_MEMBER
+
+  """
+  Ability to manage organization settings and members.
+  """
   ORG_OPERATOR
 }
 

@@ -13,7 +13,20 @@ export const OrganizationDto = builder.prismaObject('Organization', {
   }),
 });
 
-export const OrganizationRoleEnumDto = builder.enumType(OrganizationRoleEnum, { name: 'OrganizationRoleEnum' });
+const orgRoleDescriptionMap = new Map<OrganizationRoleEnum, string>([
+  [OrganizationRoleEnum.ORG_ADMIN, 'Ability to manage organization settings, integrations and members'],
+  [OrganizationRoleEnum.ORG_MEMBER, 'Does not have any special permissions'],
+  [OrganizationRoleEnum.ORG_OPERATOR, 'Ability to manage organization settings and members.'],
+]);
+
+export const OrganizationRoleEnumDto = builder.enumType('OrganizationRoleEnum', {
+  values: Object.fromEntries(
+    Object.entries(OrganizationRoleEnum).map(([name, value]) => [
+      name,
+      { value, description: orgRoleDescriptionMap.get(value) },
+    ]),
+  ),
+});
 export const UserOrganizationStatusDto = builder.enumType(UserOrganizationStatus, { name: 'UserOrganizationStatus' });
 
 export const UserOrganizationDto = builder.prismaObject('UserOrganization', {

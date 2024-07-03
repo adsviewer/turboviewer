@@ -29,7 +29,7 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
-  updateOrganization: t.withAuth({ isOrgAdmin: true }).prismaField({
+  updateOrganization: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).prismaField({
     type: OrganizationDto,
     args: {
       name: t.arg.string({ required: true }),
