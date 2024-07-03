@@ -48,24 +48,29 @@ export default function OrderFilters(): React.ReactNode {
     return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
   };
 
-  const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
+  const handlePageSizeChange = (option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
     router.replace(newURL);
   };
 
-  const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
+  const handleOrderByChange = (option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
     router.replace(newURL);
   };
 
-  const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
+  const handleOrderDirectionChange = (option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderDirectionKey, option.value);
     router.replace(newURL);
   };
 
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, String(e.target.checked));
-    router.replace(newURL);
+    if (e.target.checked) {
+      const newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, 'true');
+      router.replace(newURL);
+    } else {
+      const newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey);
+      router.replace(newURL);
+    }
   };
 
   return (

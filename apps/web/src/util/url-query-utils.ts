@@ -60,7 +60,7 @@ export const addOrReplaceURLParams = (
   pathname: string,
   searchParams: ReadonlyURLSearchParams,
   key: string,
-  newValue: string,
+  newValue?: string,
 ): string => {
   const multiKeyParams = [groupedByKey, publisherKey, deviceKey, positionKey, accountKey];
   const newParams = new URLSearchParams(searchParams.toString());
@@ -81,7 +81,11 @@ export const addOrReplaceURLParams = (
   }
 
   // Generic logic (replace value or add param if it doesn't exist)
-  newParams.set(key, newValue);
+  if (newValue) {
+    newParams.set(key, newValue);
+  } else {
+    newParams.delete(key);
+  }
   return `${pathname}?${newParams.toString()}`;
 };
 
