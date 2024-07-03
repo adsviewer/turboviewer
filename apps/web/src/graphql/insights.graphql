@@ -24,6 +24,7 @@ query insights(
   $groupBy: [InsightsColumnsGroupBy!]
   $pageSize: Int!
   $page: Int!
+  $fetchPreviews: Boolean!
 ) {
   insights(
     filter: {
@@ -50,11 +51,16 @@ query insights(
       adId
       adName
       currency
-      datapoints {
+      datapoints @skip(if: $fetchPreviews) {
         date
         spend
         impressions
         cpm
+      }
+      iFrame @include(if: $fetchPreviews) {
+        src
+        width
+        height
       }
       device
       publisher

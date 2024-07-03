@@ -27,6 +27,7 @@ export interface SearchParams {
   publisher?: PublisherEnum;
   position?: InsightsPosition;
   interval?: InsightsInterval;
+  fetchPreviews?: string;
 }
 
 interface InsightsProps {
@@ -51,6 +52,7 @@ export default async function Insights({ searchParams }: InsightsProps): Promise
     positions: searchParams.position,
     publishers: searchParams.publisher,
     interval: InsightsInterval.week,
+    fetchPreviews: Boolean(searchParams.fetchPreviews),
   });
   const insights = resp.insights.edges;
   const hasNextPage = resp.insights.hasNext;

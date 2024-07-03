@@ -36,6 +36,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                   device={insight.device}
                   currency={insight.currency}
                   datapoints={insight.datapoints}
+                  iframe={insight.iFrame}
                 />
               ))
             ) : (

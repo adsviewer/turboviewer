@@ -10,6 +10,7 @@ export const pageKey = 'page';
 export const pageSizeKey = 'pageSize';
 export const orderDirectionKey = 'order';
 export const orderByKey = 'orderBy';
+export const fetchPreviewsKey = 'fetchPreviews';
 
 export const positions = [
   'an_classic',

@@ -3,6 +3,7 @@
 import { Flex, Text, Select, type ComboboxItem, Switch } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { type ChangeEvent } from 'react';
 import {
   OrderDirection,
   addOrReplaceURLParams,
@@ -10,6 +11,7 @@ import {
   orderByKey,
   orderDirectionKey,
   pageSizeKey,
+  fetchPreviewsKey,
 } from '@/util/url-query-utils';
 import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 
@@ -42,6 +44,10 @@ export default function OrderFilters(): React.ReactNode {
     return InsightsColumnsOrderBy.spend_rel; // default
   };
 
+  const getAdPreviewValue = (): boolean => {
+    return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
+  };
+
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
     router.replace(newURL);
@@ -54,6 +60,11 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderDirectionKey, option.value);
+    router.replace(newURL);
+  };
+
+  const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, String(e.target.checked));
     router.replace(newURL);
   };
 
@@ -114,7 +125,7 @@ export default function OrderFilters(): React.ReactNode {
       {/* Misc. controls */}
       <Flex>
         {/* Toggle ad previews */}
-        <Switch label={t('showAdPreviews')} />
+        <Switch label={t('showAdPreviews')} checked={getAdPreviewValue()} onChange={handleAdPreviewChange} />
       </Flex>
     </Flex>
   );
