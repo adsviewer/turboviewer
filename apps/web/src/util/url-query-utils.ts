@@ -1,5 +1,6 @@
 import { type ReadonlyURLSearchParams } from 'next/navigation';
 import { sentenceCase } from 'change-case';
+import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-client';
 
 export const groupedByKey = 'groupedBy';
 export const publisherKey = 'publisher';
@@ -77,6 +78,12 @@ export const addOrReplaceURLParams = (
     }
     // If it already exists, remove it!
     newParams.delete(key, newValue);
+
+    // (Special case) Don't allow preview fetching if adId is not in group filters!
+    if (!newParams.has(groupedByKey, InsightsColumnsGroupBy.adId)) {
+      newParams.delete(fetchPreviewsKey);
+    }
+
     return `${pathname}?${newParams.toString()}`;
   }
 
@@ -86,6 +93,7 @@ export const addOrReplaceURLParams = (
   } else {
     newParams.delete(key);
   }
+
   return `${pathname}?${newParams.toString()}`;
 };
 

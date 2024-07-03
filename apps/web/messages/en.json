@@ -21,6 +21,7 @@
     "prevPage": "Prev page",
     "noResultsFound": "No results found",
     "showAdPreviews": "Show ad previews",
+    "adPreviewsTooltip": "Previews can be viewed only via filtering by Ad ID",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",

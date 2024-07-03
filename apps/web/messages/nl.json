@@ -21,6 +21,7 @@
     "prevPage": "Vorige pagina",
     "noResultsFound": "Geen resultaten gevonden",
     "showAdPreviews": "Advertenties weergeven",
+    "adPreviewsTooltip": "Voorbeelden kunnen alleen worden bekeken via filteren op advertentie-ID",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",

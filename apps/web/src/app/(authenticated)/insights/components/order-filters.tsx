@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Text, Select, type ComboboxItem, Switch } from '@mantine/core';
+import { Flex, Text, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ChangeEvent, useTransition } from 'react';
@@ -12,8 +12,9 @@ import {
   orderDirectionKey,
   pageSizeKey,
   fetchPreviewsKey,
+  groupedByKey,
 } from '@/util/url-query-utils';
-import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import { InsightsColumnsGroupBy, InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -142,12 +143,20 @@ export default function OrderFilters(): React.ReactNode {
       {/* Misc. controls */}
       <Flex>
         {/* Toggle ad previews */}
-        <Switch
-          label={t('showAdPreviews')}
-          checked={getAdPreviewValue()}
-          onChange={handleAdPreviewChange}
-          disabled={isPending}
-        />
+        <Tooltip
+          withArrow
+          label={t('adPreviewsTooltip')}
+          refProp="rootRef"
+          position="top-start"
+          disabled={!isPending && isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
+        >
+          <Switch
+            label={t('showAdPreviews')}
+            checked={getAdPreviewValue()}
+            onChange={handleAdPreviewChange}
+            disabled={isPending || !isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
+          />
+        </Tooltip>
       </Flex>
     </Flex>
   );
