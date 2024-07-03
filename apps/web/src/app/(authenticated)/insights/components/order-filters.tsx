@@ -3,7 +3,7 @@
 import { Flex, Text, Select, type ComboboxItem, Switch } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { type ChangeEvent } from 'react';
+import { type ChangeEvent, useTransition } from 'react';
 import {
   OrderDirection,
   addOrReplaceURLParams,
@@ -20,6 +20,7 @@ export default function OrderFilters(): React.ReactNode {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const getPageSizeValue = (): string => {
     if (isParamInSearchParams(searchParams, pageSizeKey, searchParams.get(pageSizeKey) ?? '12')) {
@@ -48,29 +49,37 @@ export default function OrderFilters(): React.ReactNode {
     return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
   };
 
-  const handlePageSizeChange = (option: ComboboxItem): void => {
+  const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
-    router.replace(newURL);
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
-  const handleOrderByChange = (option: ComboboxItem): void => {
+  const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
-    router.replace(newURL);
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
-  const handleOrderDirectionChange = (option: ComboboxItem): void => {
+  const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderDirectionKey, option.value);
-    router.replace(newURL);
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    let newURL: string;
     if (e.target.checked) {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, 'true');
-      router.replace(newURL);
+      newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, 'true');
     } else {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey);
-      router.replace(newURL);
+      newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey);
     }
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
   return (
@@ -90,6 +99,7 @@ export default function OrderFilters(): React.ReactNode {
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             maw={90}
+            disabled={isPending}
           />
         </Flex>
 
@@ -111,6 +121,7 @@ export default function OrderFilters(): React.ReactNode {
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             maw={150}
             mr="sm"
+            disabled={isPending}
           />
           <Select
             placeholder="Pick value"
@@ -123,6 +134,7 @@ export default function OrderFilters(): React.ReactNode {
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             maw={150}
+            disabled={isPending}
           />
         </Flex>
       </Flex>
@@ -130,7 +142,12 @@ export default function OrderFilters(): React.ReactNode {
       {/* Misc. controls */}
       <Flex>
         {/* Toggle ad previews */}
-        <Switch label={t('showAdPreviews')} checked={getAdPreviewValue()} onChange={handleAdPreviewChange} />
+        <Switch
+          label={t('showAdPreviews')}
+          checked={getAdPreviewValue()}
+          onChange={handleAdPreviewChange}
+          disabled={isPending}
+        />
       </Flex>
     </Flex>
   );

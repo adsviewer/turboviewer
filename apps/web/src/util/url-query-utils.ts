@@ -71,7 +71,7 @@ export const addOrReplaceURLParams = (
     newParams.delete(pageKey);
 
     // If it doesn't exist, just add it
-    if (!newParams.has(key, newValue)) {
+    if (!newParams.has(key, newValue) && newValue) {
       newParams.append(key, newValue);
       return `${pathname}?${newParams.toString()}`;
     }
