@@ -2,17 +2,29 @@ import { randomUUID } from 'node:crypto';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';
 import { queryFromInfo } from '@pothos/plugin-prisma';
-import { prisma } from '@repo/database';
+import { $Enums, prisma, UserOrganizationStatus } from '@repo/database';
 import { logger } from '@repo/logger';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import lodash from 'lodash';
 import { createJwts } from '../../auth';
-import { confirmEmail, createPassword, createUser, passwordsMatch, userWithRoles } from '../../contexts/user';
+import {
+  confirmEmail,
+  type ConfirmInvitedUser,
+  confirmInvitedUserRedisKey,
+  createPassword,
+  createUser,
+  passwordsMatch,
+  userWithRoles,
+} from '../../contexts/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
-import { SignUpInputDto, TokenUserDto, UserDto } from './user-types';
+import { EmailTypeDto } from '../organization/org-types';
+import { SignUpInputDto, TokensDto, TokenUserDto, UserDto } from './user-types';
+import { validateEmail } from './emailable-helper';
+import EmailType = $Enums.EmailType;
+import UserStatus = $Enums.UserStatus;
 
 const usernameSchema = z.string().min(2).max(30);
 const emailSchema = z.string().email();
@@ -25,6 +37,39 @@ builder.queryFields((t) => ({
         ...query,
         where: { id: ctx.currentUserId },
       });
+    },
+  }),
+
+  checkEmailType: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+    type: EmailTypeDto,
+    args: {
+      email: t.arg.string({ required: true, validate: { email: true } }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const emailValidation = await validateEmail(args.email);
+      if (isAError(emailValidation)) {
+        throw new GraphQLError(emailValidation.message);
+      }
+      if (
+        emailValidation.disposable ||
+        emailValidation.state === 'undeliverable' ||
+        emailValidation.state === 'unknown'
+      ) {
+        throw new GraphQLError('Please provide a valid email address.');
+      }
+      return emailValidation.free ? EmailType.PERSONAL : EmailType.WORK;
+    },
+  }),
+
+  checkConfirmInvitedUserTokenValidity: t.field({
+    type: 'Boolean',
+    args: {
+      token: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const key = confirmInvitedUserRedisKey(args.token);
+      const redisVal = await redisGet<ConfirmInvitedUser>(key);
+      return Boolean(redisVal);
     },
   }),
 }));
@@ -202,7 +247,7 @@ builder.mutationFields((t) => ({
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          action_url: url.toString(),
+          actionUrl: url.toString(),
         }),
       ]);
       return true;
@@ -256,6 +301,35 @@ builder.mutationFields((t) => ({
         throw new GraphQLError(emailSent.message);
       }
       return true;
+    },
+  }),
+  signUpInvitedUser: t.field({
+    type: TokensDto,
+    args: {
+      password: t.arg.string({ required: true }),
+      token: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const key = confirmInvitedUserRedisKey(args.token);
+      const redisVal = await redisGet<ConfirmInvitedUser>(key);
+      if (!redisVal) {
+        throw new GraphQLError('User invitation expired');
+      }
+      const { userId, organizationId } = redisVal;
+      const [user] = await Promise.all([
+        prisma.user.update({
+          ...userWithRoles,
+          where: { id: userId },
+          data: { password: await createPassword(args.password), status: UserStatus.EMAIL_CONFIRMED },
+        }),
+        prisma.userOrganization.update({
+          where: { userId_organizationId: { userId, organizationId } },
+          data: { status: UserOrganizationStatus.ACTIVE },
+        }),
+        redisDel(key),
+      ]);
+      const { token, refreshToken } = await createJwts(user);
+      return { token, refreshToken };
     },
   }),
 }));

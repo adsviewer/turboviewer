@@ -286,6 +286,11 @@ export enum DeviceEnum {
   Unknown = 'Unknown',
 }
 
+export enum EmailType {
+  PERSONAL = 'PERSONAL',
+  WORK = 'WORK',
+}
+
 export type Error = {
   message: Scalars['String']['output'];
 };
@@ -468,6 +473,13 @@ export enum IntegrationType {
   LINKEDIN = 'LINKEDIN',
 }
 
+export type InviteUsers = {
+  email: Scalars['String']['input'];
+  emailType: EmailType;
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+};
+
 export enum LoginProviderEnum {
   GOOGLE = 'GOOGLE',
 }
@@ -486,12 +498,14 @@ export type Mutation = {
   deAuthIntegration: MutationDeAuthIntegrationResult;
   deleteOrganization: Organization;
   forgetPassword: Scalars['Boolean']['output'];
+  inviteUsers: Scalars['Boolean']['output'];
   login: TokenDto;
   refreshData: Scalars['Boolean']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: TokenDto;
+  signUpInvitedUser: Tokens;
   signup: TokenDto;
   switchOrganization: Tokens;
   updateOrganization: Organization;
@@ -514,6 +528,11 @@ export type MutationForgetPasswordArgs = {
   email: Scalars['String']['input'];
 };
 
+export type MutationInviteUsersArgs = {
+  role: OrganizationRoleEnum;
+  users: Array<InviteUsers>;
+};
+
 export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -525,6 +544,11 @@ export type MutationRefreshDataArgs = {
 };
 
 export type MutationResetPasswordArgs = {
+  password: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type MutationSignUpInvitedUserArgs = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
 };
@@ -613,6 +637,8 @@ export enum PublisherEnum {
 
 export type Query = {
   __typename?: 'Query';
+  checkConfirmInvitedUserTokenValidity: Scalars['Boolean']['output'];
+  checkEmailType: EmailType;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsight;
@@ -623,6 +649,14 @@ export type Query = {
   organization: Organization;
   settingsChannels: Array<IntegrationListItem>;
   userOrganizations: Array<Organization>;
+};
+
+export type QueryCheckConfirmInvitedUserTokenValidityArgs = {
+  token: Scalars['String']['input'];
+};
+
+export type QueryCheckEmailTypeArgs = {
+  email: Scalars['String']['input'];
 };
 
 export type QueryInsightDatapointsArgs = {

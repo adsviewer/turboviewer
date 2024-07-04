@@ -252,6 +252,11 @@ enum DeviceEnum {
   Unknown
 }
 
+enum EmailType {
+  PERSONAL
+  WORK
+}
+
 interface Error {
   message: String!
 }
@@ -432,6 +437,13 @@ enum IntegrationType {
   LINKEDIN
 }
 
+input InviteUsers {
+  email: String!
+  emailType: EmailType!
+  firstName: String!
+  lastName: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -453,6 +465,7 @@ type Mutation {
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
   deleteOrganization(organizationId: String!): Organization!
   forgetPassword(email: String!): Boolean!
+  inviteUsers(role: OrganizationRoleEnum!, users: [InviteUsers!]!): Boolean!
   login(email: String!, password: String!): TokenDto!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
 
@@ -462,6 +475,7 @@ type Mutation {
   refreshToken: String!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): TokenDto!
+  signUpInvitedUser(password: String!, token: String!): Tokens!
   signup(args: SignUpInput!): TokenDto!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
@@ -536,6 +550,8 @@ enum PublisherEnum {
 }
 
 type Query {
+  checkConfirmInvitedUserTokenValidity(token: String!): Boolean!
+  checkEmailType(email: String!): EmailType!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsight!

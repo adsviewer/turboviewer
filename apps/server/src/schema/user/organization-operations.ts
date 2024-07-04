@@ -1,9 +1,20 @@
+import { randomUUID } from 'node:crypto';
 import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus } from '@repo/database';
 import { GraphQLError } from 'graphql';
+import { logger } from '@repo/logger';
+import { redisSet } from '@repo/redis';
 import { builder } from '../builder';
-import { OrganizationDto } from '../organization/org-types';
-import { userWithRoles } from '../../contexts/user';
+import { InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from '../organization/org-types';
+import {
+  authConfirmInvitedUserEndpoint,
+  type ConfirmInvitedUser,
+  confirmInvitedUserRedisKey,
+  createInvitedUser,
+  userWithRoles,
+} from '../../contexts/user';
 import { createJwts } from '../../auth';
+import { sendOrganizationInviteConfirmEmail } from '../../email';
+import { env } from '../../config';
 import { TokensDto } from './user-types';
 
 builder.queryFields((t) => ({
@@ -131,6 +142,107 @@ builder.mutationFields((t) => ({
       });
       const { token, refreshToken } = await createJwts(updatedUser);
       return { token, refreshToken };
+    },
+  }),
+
+  inviteUsers: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+    type: 'Boolean',
+    args: {
+      users: t.arg({ type: [InviteUsersDto], required: true }),
+      role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      const setConfirmInvitedUserRedis = async (token: string, userId: string) => {
+        await redisSet(
+          confirmInvitedUserRedisKey(token),
+          { userId, organizationId: ctx.organizationId } satisfies ConfirmInvitedUser,
+          3600 * 24 * 15, // 15 days
+        );
+      };
+
+      const frontEndInvitedUserUrl = new URL(`${env.PUBLIC_URL}/invited-user`);
+
+      const [usersMap, organization] = await Promise.all([
+        prisma.user
+          .findMany({
+            where: {
+              email: { in: args.users.map((u) => u.email) },
+            },
+            include: { organizations: true, loginProviders: true },
+          })
+          .then((users) => new Map(users.map((user) => [user.email, user]))),
+        prisma.organization.findUniqueOrThrow({ where: { id: ctx.organizationId } }),
+      ]);
+
+      await Promise.all(
+        args.users.map(async (user) => {
+          const token = randomUUID();
+          const dbUser = usersMap.get(user.email);
+          if (dbUser) {
+            if (
+              // Don't re-invite users that are already active in the organization
+              dbUser.organizations.find((o) => o.organizationId === ctx.organizationId)?.status ===
+              UserOrganizationStatus.ACTIVE
+            ) {
+              return;
+            }
+            // Create the action url. If the user has no password and no login providers, it means the user needs to create a password or link a login provider
+            const url =
+              !dbUser.password && dbUser.loginProviders.length === 0
+                ? frontEndInvitedUserUrl
+                : new URL(`${env.API_ENDPOINT}${authConfirmInvitedUserEndpoint}`);
+            const searchParams = new URLSearchParams();
+            searchParams.set('token', token);
+            searchParams.set('email', user.email);
+            url.search = searchParams.toString();
+            logger.info(`Confirm invited user email url for ${user.email}: ${url.toString()}`);
+
+            await Promise.all([
+              prisma.userOrganization.upsert({
+                create: {
+                  userId: dbUser.id,
+                  organizationId: ctx.organizationId,
+                  role: args.role,
+                  status: UserOrganizationStatus.INVITED,
+                },
+                update: {
+                  role: args.role,
+                  status: UserOrganizationStatus.INVITED,
+                },
+                where: { userId_organizationId: { userId: dbUser.id, organizationId: ctx.organizationId } },
+              }),
+              sendOrganizationInviteConfirmEmail({
+                firstName: dbUser.firstName,
+                lastName: dbUser.lastName,
+                email: user.email,
+                organizationName: organization.name,
+                actionUrl: url.toString(),
+              }),
+              setConfirmInvitedUserRedis(token, dbUser.id),
+            ]);
+          } else {
+            // Create the action url for new users
+            const searchParams = new URLSearchParams();
+            searchParams.set('token', token);
+            searchParams.set('email', user.email);
+            frontEndInvitedUserUrl.search = searchParams.toString();
+            logger.info(`Confirm invited non-existing user ${user.email}: ${frontEndInvitedUserUrl.toString()}`);
+
+            const newUser = await createInvitedUser({ ...user, role: args.role, organizationId: ctx.organizationId });
+            await Promise.all([
+              sendOrganizationInviteConfirmEmail({
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email: user.email,
+                organizationName: organization.name,
+                actionUrl: frontEndInvitedUserUrl.toString(),
+              }),
+              setConfirmInvitedUserRedis(token, newUser.id),
+            ]);
+          }
+        }),
+      );
+      return true;
     },
   }),
 }));

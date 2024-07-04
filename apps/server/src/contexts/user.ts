@@ -21,6 +21,7 @@ import { type SignUpInput } from '../schema/user/user-types';
 import { env } from '../config';
 import { sendConfirmEmail } from '../email';
 import { createJwts, type TokensType } from '../auth';
+import { type InviteUserInput } from '../schema/organization/org-types';
 import { type LoginProviderUserData } from './login-provider/login-provider-types';
 
 const scryptAsync = promisify(scrypt);
@@ -84,6 +85,28 @@ export const createUser = async (
   await confirmEmail(user);
 
   return user;
+};
+
+export const createInvitedUser = async (
+  data: InviteUserInput & { role: OrganizationRoleEnum; organizationId: string },
+) => {
+  return await prisma.user.create({
+    data: {
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      emailType: data.emailType,
+      status: UserStatus.EMAIL_UNCONFIRMED,
+      organizations: {
+        create: {
+          status: UserOrganizationStatus.INVITED,
+          role: data.role,
+          organizationId: data.organizationId,
+        },
+      },
+      currentOrganizationId: data.organizationId,
+    },
+  });
 };
 
 export const createLoginProviderUser = async (data: LoginProviderUserData) => {
@@ -160,6 +183,56 @@ const completeConfirmUserEmailCallback = async (token: string): Promise<TokensTy
   return await createJwts(user);
 };
 
+export const authConfirmInvitedUserEndpoint = '/user/confirm-invited-user';
+
+export const authConfirmInvitedUserCallback = (req: ExpressRequest, res: ExpressResponse): void => {
+  const { token } = req.query;
+  if (!token || typeof token !== 'string') {
+    res.redirect(`${env.PUBLIC_URL}?error=${encodeURIComponent('Missing parameters')}`);
+    return;
+  }
+  completeConfirmInvitedUserCallback(token)
+    .then((response) => {
+      if (isAError(response)) {
+        res.redirect(`${env.PUBLIC_URL}?error=${encodeURIComponent(response.message)}`);
+      } else {
+        res.redirect(
+          `${env.PUBLIC_URL}/api/auth/sign-in?token=${response.token}&refreshToken=${response.refreshToken}`,
+        );
+      }
+    })
+    .catch((e: unknown) => {
+      logger.error(e, 'Failed to complete email confirmation');
+      res.redirect(`${env.PUBLIC_URL}?error=unknown_error`);
+    });
+};
+
+export const confirmInvitedUserRedisKey = (token: string) => `confirm-invited-user:${token}`;
+export interface ConfirmInvitedUser {
+  userId: string;
+  organizationId: string;
+}
+const completeConfirmInvitedUserCallback = async (token: string): Promise<TokensType | AError> => {
+  const key = confirmInvitedUserRedisKey(token);
+  const redisVal = await redisGet<ConfirmInvitedUser>(key);
+  if (!redisVal) {
+    return new AError('User invitation expired');
+  }
+  const { userId, organizationId } = redisVal;
+  const [_, user] = await Promise.all([
+    prisma.userOrganization.update({
+      where: { userId_organizationId: { userId, organizationId } },
+      data: { status: UserOrganizationStatus.ACTIVE },
+    }),
+    prisma.user.findUniqueOrThrow({
+      ...userWithRoles,
+      where: { id: userId },
+    }),
+    redisDel(key),
+  ]);
+  return await createJwts(user);
+};
+
 const validateEmailProcess = async (
   firstName: string,
   email: string,
@@ -230,7 +303,7 @@ export const confirmEmail = async (user: User): Promise<undefined | AError> => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      action_url: url.toString(),
+      actionUrl: url.toString(),
     }),
   ]);
 };
