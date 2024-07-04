@@ -4,7 +4,6 @@ import { GraphQLError } from 'graphql';
 import { logger } from '@repo/logger';
 import { redisSet } from '@repo/redis';
 import { builder } from '../builder';
-import { InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from '../organization/org-types';
 import {
   authConfirmInvitedUserEndpoint,
   type ConfirmInvitedUser,
@@ -15,7 +14,8 @@ import {
 import { createJwts } from '../../auth';
 import { sendOrganizationInviteConfirmEmail } from '../../email';
 import { env } from '../../config';
-import { TokensDto } from './user-types';
+import { TokensDto } from '../user/user-types';
+import { InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from './org-types';
 
 builder.queryFields((t) => ({
   organization: t.withAuth({ isInOrg: true }).prismaField({
