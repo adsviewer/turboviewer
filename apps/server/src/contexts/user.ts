@@ -239,39 +239,30 @@ const validateEmailProcess = async (
 ): Promise<AError | { orgId: string; emailType: EmailType }> => {
   const nonWorkName = `${firstName}'${firstName.endsWith('s') ? '' : 's'} organization`;
   const orgId = createId();
-  const emailValidation = await validateEmail(email).catch((e: unknown) => {
-    logger.error(e);
-    return new AError(e instanceof Error ? e.message : 'Unknown error during emailValidation');
-  });
+  const emailValidation = await validateEmail(email);
   if (isAError(emailValidation)) {
+    return emailValidation;
+  }
+  if (emailValidation.emailType === EmailType.PERSONAL) {
     await prisma.organization.create({
       data: { id: orgId, name: nonWorkName },
     });
     return { orgId, emailType: EmailType.PERSONAL };
   }
-  if (emailValidation.disposable || emailValidation.state === 'undeliverable' || emailValidation.state === 'unknown') {
-    return new AError('Please provide a valid email address.');
-  }
-  if (!emailValidation.free) {
-    const organization = await prisma.organization.findUnique({
-      where: { domain: emailValidation.domain },
-    });
-    if (organization) {
-      await prisma.organization.create({
-        data: { id: orgId, name: nonWorkName },
-      });
-    } else {
-      const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
-      await prisma.organization.create({
-        data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain },
-      });
-    }
-    return { orgId, emailType: EmailType.WORK };
-  }
-  await prisma.organization.create({
-    data: { id: orgId, name: nonWorkName },
+  const organization = await prisma.organization.findUnique({
+    where: { domain: emailValidation.domain },
   });
-  return { orgId, emailType: EmailType.PERSONAL };
+  if (organization) {
+    await prisma.organization.create({
+      data: { id: orgId, name: nonWorkName },
+    });
+  } else {
+    const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
+    await prisma.organization.create({
+      data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain },
+    });
+  }
+  return { orgId, emailType: EmailType.WORK };
 };
 
 export const confirmEmail = async (user: User): Promise<undefined | AError> => {

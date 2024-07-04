@@ -3,11 +3,11 @@ import { AError, FireAndForget, isAError, isMode, MODE, REFRESH_TOKEN_KEY, TOKEN
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
 import type QueryString from 'qs';
-import { LoginProviderEnum, prisma } from '@repo/database';
-import { redisExists, redisSet } from '@repo/redis';
+import { LoginProviderEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
+import { redisDel, redisExists, redisGet, redisSet } from '@repo/redis';
 import { env } from '../../config';
 import { createJwts } from '../../auth';
-import { createLoginProviderUser, userWithRoles } from '../user';
+import { type ConfirmInvitedUser, confirmInvitedUserRedisKey, createLoginProviderUser, userWithRoles } from '../user';
 import { googleLoginProvider } from './google-login-provider';
 import { isLoginProviderEnum, type LoginProviderInterface } from './login-provider-types';
 
@@ -22,9 +22,9 @@ export const getLoginProvider = (provider: LoginProviderEnum): LoginProviderInte
   }
 };
 
-export const generateAuthUrl = (providerType: LoginProviderEnum): string => {
+export const generateAuthUrl = (providerType: LoginProviderEnum, token: string | undefined | null): string => {
   const provider = getLoginProvider(providerType);
-  const state = `${MODE}_${providerType}_${randomUUID()}`;
+  const state = `${MODE}_${providerType}_${randomUUID()}_${token ?? ''}`;
   fireAndForget.add(() => saveState(state));
   return provider.generateAuthUrl(state);
 };
@@ -59,6 +59,57 @@ export const authLoginCallback = (req: ExpressRequest, res: ExpressResponse): vo
     });
 };
 
+const handleInvitedUserCase = async (
+  token: string,
+  email: string,
+  providerId: string,
+  providerType: LoginProviderEnum,
+): Promise<AError | { provider: LoginProviderEnum; token: string; refreshToken: string }> => {
+  const key = confirmInvitedUserRedisKey(token);
+  const redisVal = await redisGet<ConfirmInvitedUser>(key);
+  if (!redisVal) {
+    return new AError('User invitation expired');
+  }
+  const { userId, organizationId } = redisVal;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+  if (!user) {
+    return new AError('User not found');
+  }
+  if (email !== user.email) {
+    return new AError('User email does not match invitation email');
+  }
+
+  const [updatedUser] = await Promise.all([
+    prisma.user.update({
+      ...userWithRoles,
+      where: { id: user.id },
+      data: {
+        status: UserStatus.EMAIL_CONFIRMED,
+        loginProviders: {
+          create: {
+            externalId: providerId,
+            provider: providerType,
+          },
+        },
+      },
+    }),
+    prisma.userOrganization.update({
+      where: { userId_organizationId: { userId: user.id, organizationId } },
+      data: { status: UserOrganizationStatus.ACTIVE },
+    }),
+    redisDel(confirmInvitedUserRedisKey(token)),
+  ]);
+
+  const { token: jwtToken, refreshToken } = await createJwts(updatedUser);
+  return {
+    token: jwtToken,
+    refreshToken,
+    provider: providerType,
+  };
+};
+
 const completeSocialLogin = async (
   code: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
   stateArg: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
@@ -72,7 +123,7 @@ const completeSocialLogin = async (
     return new AError('invalid_code');
   }
 
-  const [mode, providerType, state] = stateArg.split('_');
+  const [mode, providerType, state, confirmedUserToken] = stateArg.split('_');
 
   // mode should only be uuid
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(state)) {
@@ -94,9 +145,10 @@ const completeSocialLogin = async (
 
   const provider = getLoginProvider(providerType);
   const userdata = await provider.exchangeCodeForUserDate(code);
-  if (isAError(userdata)) {
-    return userdata;
-  }
+  if (isAError(userdata)) return userdata;
+
+  if (confirmedUserToken)
+    return await handleInvitedUserCase(confirmedUserToken, userdata.email, userdata.providerId, providerType);
 
   const providerUser = await prisma.loginProviderUser
     .findUnique({

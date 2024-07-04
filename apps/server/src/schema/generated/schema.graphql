@@ -557,7 +557,7 @@ type Query {
   insights(filter: FilterInsightsInput!): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
   lastThreeMonthsAds: [Ad!]!
-  loginProviders: [GenerateGoogleAuthUrlResponse!]!
+  loginProviders(confirmedUserToken: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!
   organization: Organization!
   settingsChannels: [IntegrationListItem!]!

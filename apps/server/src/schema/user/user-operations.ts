@@ -23,7 +23,6 @@ import { env } from '../../config';
 import { EmailTypeDto } from '../organization/org-types';
 import { SignUpInputDto, TokensDto, TokenUserDto, UserDto } from './user-types';
 import { validateEmail } from './emailable-helper';
-import EmailType = $Enums.EmailType;
 import UserStatus = $Enums.UserStatus;
 
 const usernameSchema = z.string().min(2).max(30);
@@ -50,14 +49,7 @@ builder.queryFields((t) => ({
       if (isAError(emailValidation)) {
         throw new GraphQLError(emailValidation.message);
       }
-      if (
-        emailValidation.disposable ||
-        emailValidation.state === 'undeliverable' ||
-        emailValidation.state === 'unknown'
-      ) {
-        throw new GraphQLError('Please provide a valid email address.');
-      }
-      return emailValidation.free ? EmailType.PERSONAL : EmailType.WORK;
+      return emailValidation.emailType;
     },
   }),
 

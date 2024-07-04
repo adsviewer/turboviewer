@@ -678,6 +678,10 @@ export type QueryIntegrationsArgs = {
   type?: InputMaybe<IntegrationType>;
 };
 
+export type QueryLoginProvidersArgs = {
+  confirmedUserToken?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type SignUpInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];

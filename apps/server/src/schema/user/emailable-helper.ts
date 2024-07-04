@@ -1,12 +1,13 @@
-import { AError } from '@repo/utils';
+import { AError, isAError } from '@repo/utils';
 import { logger } from '@repo/logger';
 import { z } from 'zod';
+import { EmailType } from '@repo/database';
 import { env } from '../../config';
 
 const emailableStats = ['deliverable', 'undeliverable', 'risky', 'unknown', 'duplicate'] as const;
 type EmailableState = (typeof emailableStats)[number];
 
-export const validateEmail = async (
+const validateEmailApiCall = async (
   email: string,
 ): Promise<
   | AError
@@ -18,7 +19,15 @@ export const validateEmail = async (
     }
 > => {
   logger.info('Validating email', { email });
-  const response = await fetch(`https://api.emailable.com/v1/verify?email=${email}&api_key=${env.EMAILABLE_API_KEY}`);
+  const response = await fetch(
+    `https://api.emailable.com/v1/verify?email=${email}&api_key=${env.EMAILABLE_API_KEY}`,
+  ).catch((e: unknown) => {
+    logger.error(e, 'Error validating email');
+    return new AError('Error validating email');
+  });
+  if (isAError(response)) {
+    return response;
+  }
   if (!response.ok) {
     logger.error(await response.json(), 'Error validating email', { email, response });
     return new AError('Error validating email');
@@ -36,4 +45,17 @@ export const validateEmail = async (
   }
   logger.info(parsedData.data, 'Email validated');
   return parsedData.data;
+};
+
+export const validateEmail = async (
+  email: string,
+): Promise<AError | { emailType: 'PERSONAL' } | { domain: string; emailType: EmailType }> => {
+  const emailValidation = await validateEmailApiCall(email);
+  if (isAError(emailValidation)) {
+    return { emailType: EmailType.PERSONAL };
+  }
+  if (emailValidation.disposable || emailValidation.state === 'undeliverable' || emailValidation.state === 'unknown') {
+    return new AError('Please provide a valid email address.');
+  }
+  return { domain: emailValidation.domain, emailType: emailValidation.free ? EmailType.PERSONAL : EmailType.WORK };
 };
