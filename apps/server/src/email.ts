@@ -1,6 +1,6 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { logger } from '@repo/logger';
-import { Environment, MODE } from '@repo/utils';
+import { Environment, MODE, type Optional } from '@repo/utils';
 import { env } from './config';
 
 // Import the SignupEmailData interface from the appropriate module
@@ -14,7 +14,7 @@ interface ActionEmailData {
   email: string;
   firstName: string;
   lastName: string;
-  action_url: string;
+  actionUrl: string;
 }
 
 export const sendForgetPasswordEmail = async (data: ActionEmailData) => {
@@ -34,7 +34,7 @@ export const sendForgetPasswordEmail = async (data: ActionEmailData) => {
               Data: `<p>${[
                 `Hi ${data.firstName} ${data.lastName},`,
                 'Someone has requested a link to change your password. You can do this through the button below.',
-                `<a href="${data.action_url}">Change my password</a>`,
+                `<a href="${data.actionUrl}">Change my password</a>`,
                 '',
                 "If you didn't request this, please ignore this email.",
                 "Your password won't change until you access the link above and create a new one.",
@@ -50,7 +50,10 @@ export const sendForgetPasswordEmail = async (data: ActionEmailData) => {
   logger.info(JSON.stringify(command));
 };
 
-export const sendConfirmEmail = async (data: ActionEmailData) => {
+interface ConfirmEmailData extends ActionEmailData {
+  expirationInDays: number;
+}
+export const sendConfirmEmail = async (data: ConfirmEmailData) => {
   const command = await client
     .send(
       new SendEmailCommand({
@@ -67,10 +70,47 @@ export const sendConfirmEmail = async (data: ActionEmailData) => {
               Data: `<p>${[
                 `Hi ${data.firstName} ${data.lastName},`,
                 'Thank you for registering in adsviewer.io. Please click the link below to confirm your email and access your account.',
-                `<a href="${data.action_url}">Confirm my email</a>`,
+                `<a href="${data.actionUrl}">Confirm my email</a>`,
                 '',
                 "If you didn't request this, please ignore this email.",
                 "You won't be able to access adsviewer.io dashboard until you confirm your email through the link above.",
+                '',
+                `This link will expire in ${String(data.expirationInDays)} days.`,
+              ].join('<br />')}</p>`,
+            },
+          },
+        },
+      }),
+    )
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
+  logger.info(JSON.stringify(command));
+};
+
+interface InviteEmailData extends Optional<ConfirmEmailData, 'firstName' | 'lastName'> {
+  organizationName: string;
+}
+export const sendOrganizationInviteConfirmEmail = async (data: InviteEmailData) => {
+  const command = await client
+    .send(
+      new SendEmailCommand({
+        Destination: {
+          ToAddresses: [data.email],
+        },
+        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
+        Message: {
+          Subject: {
+            Data: 'You have been invited to an AdsViewer organization!',
+          },
+          Body: {
+            Html: {
+              Data: `<p>${[
+                `Hi${data.firstName ? ` ${data.firstName}` : ''}${data.lastName ? ` ${data.lastName}` : ''},`,
+                `You have been invited in ${data.organizationName} organization to <a href="adsviewer.io">AdsViewer</a>. Please click the link below to accept the invite.`,
+                `<a href="${data.actionUrl}">Accept Invitation</a>`,
+                '',
+                `The invitation will expire in ${String(data.expirationInDays)} days.`,
               ].join('<br />')}</p>`,
             },
           },

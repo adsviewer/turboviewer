@@ -1,7 +1,7 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import { redisExpire, redisIncr } from '@repo/redis';
 import { authLoginEndpoint } from '../contexts/login-provider/login-provider-types';
-import { authConfirmUserEmailEndpoint } from '../contexts/user';
+import { authConfirmInvitedUserEndpoint, authConfirmUserEmailEndpoint } from '../contexts/user/user';
 
 interface RateLimiterRule {
   endpoint: string;
@@ -21,6 +21,14 @@ const signInProviderLimitRule: RateLimiterRule = {
 
 const authConfirmUserEmailLimitRule: RateLimiterRule = {
   endpoint: `/api${authConfirmUserEmailEndpoint}`,
+  rateLimit: {
+    time: 60,
+    limit: 20,
+  },
+};
+
+const authConfirmInvitedUserLimitRule: RateLimiterRule = {
+  endpoint: `/api${authConfirmInvitedUserEndpoint}`,
   rateLimit: {
     time: 60,
     limit: 20,
@@ -50,3 +58,4 @@ const rateLimiter = (rule: RateLimiterRule) => {
 
 export const loginProviderRateLimiter = rateLimiter(signInProviderLimitRule);
 export const authConfirmUserEmailRateLimiter = rateLimiter(authConfirmUserEmailLimitRule);
+export const authConfirmInvitedUserRateLimiter = rateLimiter(authConfirmInvitedUserLimitRule);

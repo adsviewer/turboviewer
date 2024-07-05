@@ -7,7 +7,7 @@ import jwt, {
 import { type OrganizationRoleEnum, prisma, type RoleEnum, type UserStatus } from '@repo/database';
 import { AError, Environment, MODE } from '@repo/utils';
 import { env } from './config';
-import { type UserWithRoles } from './contexts/user';
+import { type UserWithRoles, userWithRoles } from './contexts/user/user-roles';
 
 interface AJwtPayload extends JwtPayload {
   userId: string;
@@ -26,6 +26,16 @@ export interface TokensType {
   token: string;
   refreshToken: string;
 }
+
+export const createJwtsFromUserId = async (userId: string): Promise<TokensType & { user: UserWithRoles }> => {
+  const user = await prisma.user.findUniqueOrThrow({ ...userWithRoles, where: { id: userId } });
+  return { ...(await createJwts(user)), user };
+};
+
+export const createJwtsFromEmail = async (email: string): Promise<TokensType> => {
+  const user = await prisma.user.findUniqueOrThrow({ ...userWithRoles, where: { email } });
+  return createJwts(user);
+};
 
 export const createJwts = async ({
   currentOrganizationId: organizationId,

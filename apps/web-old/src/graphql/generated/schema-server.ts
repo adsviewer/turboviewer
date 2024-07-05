@@ -93,8 +93,8 @@ export type AdInsightsConnectionEdge = {
 export enum AllRoles {
   ADMIN = 'ADMIN',
   ORG_ADMIN = 'ORG_ADMIN',
-  ORG_MEMBER = 'ORG_MEMBER',
   ORG_OPERATOR = 'ORG_OPERATOR',
+  ORG_MEMBER = 'ORG_MEMBER',
 }
 
 export type BaseError = Error & {
@@ -286,6 +286,11 @@ export enum DeviceEnum {
   Unknown = 'Unknown',
 }
 
+export enum EmailType {
+  PERSONAL = 'PERSONAL',
+  WORK = 'WORK',
+}
+
 export type Error = {
   message: Scalars['String']['output'];
 };
@@ -468,6 +473,19 @@ export enum IntegrationType {
   LINKEDIN = 'LINKEDIN',
 }
 
+export type InviteLinks = {
+  __typename?: 'InviteLinks';
+  role: OrganizationRoleEnum;
+  url: Scalars['String']['output'];
+};
+
+export type InviteUsers = {
+  email: Scalars['String']['input'];
+  emailType: EmailType;
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
+};
+
 export enum LoginProviderEnum {
   GOOGLE = 'GOOGLE',
 }
@@ -482,20 +500,37 @@ export type MetaError = Error & {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** Use this mutation after the user has clicked on the non-personalized invite link and they have an account already */
+  acceptLinkInvitationExistingUser: Tokens;
+  /** Creates a link for the signed in org for a specific role */
+  createInvitationLink: Scalars['String']['output'];
   createOrganization: Organization;
   deAuthIntegration: MutationDeAuthIntegrationResult;
+  /** Deletes the invitation link for the given role */
+  deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
   forgetPassword: Scalars['Boolean']['output'];
-  login: TokenDto;
+  inviteUsers: Scalars['Boolean']['output'];
+  login: Tokens;
   refreshData: Scalars['Boolean']['output'];
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
-  resetPassword: TokenDto;
-  signup: TokenDto;
+  resetPassword: Tokens;
+  /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
+  signUpInvitedUser: Tokens;
+  signup: Tokens;
   switchOrganization: Tokens;
   updateOrganization: Organization;
   updateUser: User;
+};
+
+export type MutationAcceptLinkInvitationExistingUserArgs = {
+  token: Scalars['String']['input'];
+};
+
+export type MutationCreateInvitationLinkArgs = {
+  role: OrganizationRoleEnum;
 };
 
 export type MutationCreateOrganizationArgs = {
@@ -506,6 +541,10 @@ export type MutationDeAuthIntegrationArgs = {
   type: IntegrationType;
 };
 
+export type MutationDeleteInvitationLinkArgs = {
+  role: OrganizationRoleEnum;
+};
+
 export type MutationDeleteOrganizationArgs = {
   organizationId: Scalars['String']['input'];
 };
@@ -514,9 +553,15 @@ export type MutationForgetPasswordArgs = {
   email: Scalars['String']['input'];
 };
 
+export type MutationInviteUsersArgs = {
+  role: OrganizationRoleEnum;
+  users: Array<InviteUsers>;
+};
+
 export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationRefreshDataArgs = {
@@ -525,6 +570,11 @@ export type MutationRefreshDataArgs = {
 };
 
 export type MutationResetPasswordArgs = {
+  password: Scalars['String']['input'];
+  token: Scalars['String']['input'];
+};
+
+export type MutationSignUpInvitedUserArgs = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
 };
@@ -572,9 +622,12 @@ export type Organization = {
 };
 
 export enum OrganizationRoleEnum {
+  /** Ability to manage organization settings, integrations and members */
   ORG_ADMIN = 'ORG_ADMIN',
-  ORG_MEMBER = 'ORG_MEMBER',
+  /** Ability to manage organization settings and members. */
   ORG_OPERATOR = 'ORG_OPERATOR',
+  /** Does not have any special permissions */
+  ORG_MEMBER = 'ORG_MEMBER',
 }
 
 export type PageInfo = {
@@ -610,16 +663,28 @@ export enum PublisherEnum {
 
 export type Query = {
   __typename?: 'Query';
+  checkConfirmInvitedUserTokenValidity: Scalars['Boolean']['output'];
+  checkEmailType: EmailType;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsight;
   integrations: Array<Integration>;
+  /** Returns the invitation links for the signed in org */
+  inviteLinks: Array<InviteLinks>;
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
   organization: Organization;
   settingsChannels: Array<IntegrationListItem>;
   userOrganizations: Array<Organization>;
+};
+
+export type QueryCheckConfirmInvitedUserTokenValidityArgs = {
+  token: Scalars['String']['input'];
+};
+
+export type QueryCheckEmailTypeArgs = {
+  email: Scalars['String']['input'];
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -641,11 +706,16 @@ export type QueryIntegrationsArgs = {
   type?: InputMaybe<IntegrationType>;
 };
 
+export type QueryLoginProvidersArgs = {
+  inviteToken?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type SignUpInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Subscription = {
@@ -825,20 +895,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = {
   __typename?: 'Mutation';
-  login: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  login: { __typename?: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type SignupMutationVariables = Exact<{
@@ -850,20 +907,7 @@ export type SignupMutationVariables = Exact<{
 
 export type SignupMutation = {
   __typename?: 'Mutation';
-  signup: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  signup: { __typename?: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type ForgetPasswordMutationVariables = Exact<{
@@ -879,20 +923,7 @@ export type ResetPasswordMutationVariables = Exact<{
 
 export type ResetPasswordMutation = {
   __typename?: 'Mutation';
-  resetPassword: {
-    __typename?: 'TokenDto';
-    token: string;
-    refreshToken: string;
-    user: {
-      __typename?: 'User';
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      allRoles: Array<AllRoles>;
-      currentOrganizationId?: string | null;
-    };
-  };
+  resetPassword: { __typename?: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
@@ -1048,24 +1079,16 @@ export const LoginDocument = gql`
     login(email: $email, password: $password) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 export const SignupDocument = gql`
   mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
     signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 export const ForgetPasswordDocument = gql`
   mutation forgetPassword($email: String!) {
@@ -1077,12 +1100,8 @@ export const ResetPasswordDocument = gql`
     resetPassword(token: $token, password: $password) {
       token
       refreshToken
-      user {
-        ...UserFields
-      }
     }
   }
-  ${UserFieldsFragmentDoc}
 `;
 export const RefreshTokenDocument = gql`
   mutation refreshToken {

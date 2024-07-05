@@ -23,6 +23,7 @@ export interface InOrganizationContext extends GraphQLContext {
   organizationId: NonNullable<GraphQLContext['organizationId']>;
   isAdmin: NonNullable<GraphQLContext['isAdmin']>;
   isOrgAdmin: NonNullable<GraphQLContext['isOrgAdmin']>;
+  isOrgOperator: NonNullable<GraphQLContext['isOrgOperator']>;
 }
 
 export interface RefreshContext extends GraphQLContext {
@@ -48,6 +49,7 @@ export const builder = new SchemaBuilder<{
     authenticated: boolean;
     isAdmin: boolean;
     isOrgAdmin: boolean;
+    isOrgOperator: boolean;
     isInOrg: boolean;
     refresh: boolean;
     emailUnconfirmed: boolean;
@@ -56,6 +58,7 @@ export const builder = new SchemaBuilder<{
     authenticated: AuthenticatedContext;
     isAdmin: AuthenticatedContext;
     isOrgAdmin: InOrganizationContext;
+    isOrgOperator: InOrganizationContext;
     isInOrg: InOrganizationContext;
     refresh: RefreshContext;
     emailUnconfirmed: InOrganizationContext;
@@ -74,6 +77,7 @@ export const builder = new SchemaBuilder<{
     authenticated: Boolean(context.currentUserId) && !context.isRefreshToken && !context.emailUnconfirmed,
     isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
     isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
+    isOrgOperator: Boolean(context.isOrgOperator) && !context.isRefreshToken && !context.emailUnconfirmed,
     isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken && !context.emailUnconfirmed,
     refresh: Boolean(context.isRefreshToken),
     emailUnconfirmed: Boolean(context.emailUnconfirmed),

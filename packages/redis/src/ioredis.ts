@@ -22,6 +22,8 @@ export const redisGet = async <T extends object | string | boolean>(key: string)
   }
 };
 
+export const redisGetKeys = (key: string): Promise<string[]> => ioredis.keys(`${key}*`);
+
 export const redisExists = async (key: string): Promise<boolean> => {
   return ioredis.exists(key).then((res) => res === 1);
 };
