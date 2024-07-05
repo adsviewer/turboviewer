@@ -50,7 +50,10 @@ export const sendForgetPasswordEmail = async (data: ActionEmailData) => {
   logger.info(JSON.stringify(command));
 };
 
-export const sendConfirmEmail = async (data: ActionEmailData) => {
+interface ConfirmEmailData extends ActionEmailData {
+  expirationInDays: number;
+}
+export const sendConfirmEmail = async (data: ConfirmEmailData) => {
   const command = await client
     .send(
       new SendEmailCommand({
@@ -71,6 +74,8 @@ export const sendConfirmEmail = async (data: ActionEmailData) => {
                 '',
                 "If you didn't request this, please ignore this email.",
                 "You won't be able to access adsviewer.io dashboard until you confirm your email through the link above.",
+                '',
+                `This link will expire in ${String(data.expirationInDays)} days.`,
               ].join('<br />')}</p>`,
             },
           },
@@ -83,7 +88,7 @@ export const sendConfirmEmail = async (data: ActionEmailData) => {
   logger.info(JSON.stringify(command));
 };
 
-interface InviteEmailData extends Optional<ActionEmailData, 'firstName' | 'lastName'> {
+interface InviteEmailData extends Optional<ConfirmEmailData, 'firstName' | 'lastName'> {
   organizationName: string;
 }
 export const sendOrganizationInviteConfirmEmail = async (data: InviteEmailData) => {
@@ -104,6 +109,8 @@ export const sendOrganizationInviteConfirmEmail = async (data: InviteEmailData) 
                 `Hi${data.firstName ? ` ${data.firstName}` : ''}${data.lastName ? ` ${data.lastName}` : ''},`,
                 `You have been invited in ${data.organizationName} organization to <a href="adsviewer.io">AdsViewer</a>. Please click the link below to accept the invite.`,
                 `<a href="${data.actionUrl}">Accept Invitation</a>`,
+                '',
+                `The invitation will expire in ${String(data.expirationInDays)} days.`,
               ].join('<br />')}</p>`,
             },
           },

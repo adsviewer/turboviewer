@@ -52,3 +52,10 @@ export const InviteUsersDto = builder.inputType('InviteUsers', {
 export const EmailTypeDto = builder.enumType(EmailType, { name: 'EmailType' });
 
 export type InviteUserInput = typeof InviteUsersDto.$inferInput;
+
+export const inviteLinkDto = builder.simpleObject('InviteLinks', {
+  fields: (t) => ({
+    url: t.string({ nullable: false }),
+    role: t.field({ type: OrganizationRoleEnumDto, nullable: false }),
+  }),
+});

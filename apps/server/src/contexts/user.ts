@@ -266,7 +266,8 @@ const validateEmailProcess = async (
 };
 
 export const confirmEmail = async (user: User): Promise<undefined | AError> => {
-  const confirmEmailDurationSec = 3600 * 24 * 15; // 15 days
+  const confirmEmailExpirationInDays = 15;
+  const confirmEmailDurationSec = 3600 * 24 * confirmEmailExpirationInDays;
   const confirmEmailResendDurationSec = 60; // 1 minute
   const resendKey = `confirm-email-resent:${user.email}`;
 
@@ -294,6 +295,7 @@ export const confirmEmail = async (user: User): Promise<undefined | AError> => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      expirationInDays: confirmEmailExpirationInDays,
       actionUrl: url.toString(),
     }),
   ]);

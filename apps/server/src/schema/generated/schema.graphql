@@ -437,6 +437,11 @@ enum IntegrationType {
   LINKEDIN
 }
 
+type InviteLinks {
+  role: OrganizationRoleEnum!
+  url: String!
+}
+
 input InviteUsers {
   email: String!
   emailType: EmailType!
@@ -461,8 +466,10 @@ type MetaError implements Error {
 }
 
 type Mutation {
+  createInvitationLink(role: OrganizationRoleEnum!): String!
   createOrganization(name: String!): Organization!
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
+  deleteInvitationLink(role: OrganizationRoleEnum!): Boolean!
   deleteOrganization(organizationId: String!): Organization!
   forgetPassword(email: String!): Boolean!
   inviteUsers(role: OrganizationRoleEnum!, users: [InviteUsers!]!): Boolean!
@@ -556,6 +563,7 @@ type Query {
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsight!
   integrations(type: IntegrationType): [Integration!]!
+  inviteLinks: [InviteLinks!]!
   lastThreeMonthsAds: [Ad!]!
   loginProviders(confirmedUserToken: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!

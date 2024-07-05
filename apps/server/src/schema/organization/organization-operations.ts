@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus } from '@repo/database';
 import { GraphQLError } from 'graphql';
 import { logger } from '@repo/logger';
-import { redisSet } from '@repo/redis';
+import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
+import { FireAndForget } from '@repo/utils';
 import { builder } from '../builder';
 import {
   authConfirmInvitedUserEndpoint,
@@ -15,7 +16,19 @@ import { createJwts } from '../../auth';
 import { sendOrganizationInviteConfirmEmail } from '../../email';
 import { env } from '../../config';
 import { TokensDto } from '../user/user-types';
-import { InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from './org-types';
+import { inviteLinkDto, InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from './org-types';
+
+const fireAndForget = new FireAndForget();
+
+const generateInvitationLink = (token: string, organizationId: string, role: OrganizationRoleEnum) => {
+  const url = new URL(`${env.PUBLIC_URL}/invitation-link`);
+  const searchParams = new URLSearchParams();
+  searchParams.set('token', token);
+  searchParams.set('organizationId', organizationId);
+  searchParams.set('role', role);
+  url.search = searchParams.toString();
+  return url;
+};
 
 builder.queryFields((t) => ({
   organization: t.withAuth({ isInOrg: true }).prismaField({
@@ -25,6 +38,27 @@ builder.queryFields((t) => ({
         ...query,
         where: { id: ctx.organizationId },
       });
+    },
+  }),
+
+  inviteLinks: t.withAuth({ isInOrg: true, isOrgOperator: true }).field({
+    type: [inviteLinkDto],
+    resolve: async (_root, _args, ctx, _info) => {
+      const roleTokenMap = await redisGetKeys(`${invitationLinkRedisStaticKey}:${ctx.organizationId}:`).then(
+        (keys) =>
+          new Map<OrganizationRoleEnum, string>(keys.map((key) => [key.split(':')[2] as OrganizationRoleEnum, key])),
+      );
+      if (ctx.isOrgOperator) {
+        roleTokenMap.delete(OrganizationRoleEnum.ORG_ADMIN);
+      }
+
+      return await Promise.all(
+        Array.from(roleTokenMap.entries()).map(async ([role, key]) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the key exists
+          const token = (await redisGet<string>(key))!;
+          return { role, url: generateInvitationLink(token, ctx.organizationId, role).toString() };
+        }),
+      );
     },
   }),
 
@@ -152,11 +186,17 @@ builder.mutationFields((t) => ({
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
     },
     resolve: async (_root, args, ctx, _info) => {
+      if (ctx.isOrgOperator && args.role === OrganizationRoleEnum.ORG_ADMIN) {
+        throw new GraphQLError('Only organization administrators can invite organization administrators');
+      }
+
+      const invitationExpirationInDays = 15;
+
       const setConfirmInvitedUserRedis = async (token: string, userId: string) => {
         await redisSet(
           confirmInvitedUserRedisKey(token),
           { userId, organizationId: ctx.organizationId } satisfies ConfirmInvitedUser,
-          3600 * 24 * 15, // 15 days
+          3600 * 24 * invitationExpirationInDays,
         );
       };
 
@@ -216,6 +256,7 @@ builder.mutationFields((t) => ({
                 lastName: dbUser.lastName,
                 email: user.email,
                 organizationName: organization.name,
+                expirationInDays: invitationExpirationInDays,
                 actionUrl: url.toString(),
               }),
               setConfirmInvitedUserRedis(token, dbUser.id),
@@ -235,6 +276,7 @@ builder.mutationFields((t) => ({
                 lastName: newUser.lastName,
                 email: user.email,
                 organizationName: organization.name,
+                expirationInDays: invitationExpirationInDays,
                 actionUrl: frontEndInvitedUserUrl.toString(),
               }),
               setConfirmInvitedUserRedis(token, newUser.id),
@@ -245,4 +287,50 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
+
+  createInvitationLink: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+    type: 'String',
+    args: {
+      role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      if (ctx.isOrgOperator && args.role === OrganizationRoleEnum.ORG_ADMIN) {
+        throw new GraphQLError('Only organization administrators can invite organization administrators');
+      }
+      const existingToken = await redisGet<string>(invitationLinkRedisKey(ctx.organizationId, args.role));
+      const token = existingToken ?? randomUUID();
+      const url = generateInvitationLink(token, ctx.organizationId, args.role);
+      logger.info(`Invite ${args.role} link: ${url.toString()}`);
+
+      if (!existingToken) {
+        fireAndForget.add(() => redisSet(invitationLinkRedisKey(ctx.organizationId, args.role), token));
+      }
+
+      return url.toString();
+    },
+  }),
+
+  deleteInvitationLink: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+    type: 'Boolean',
+    args: {
+      role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      if (ctx.isOrgOperator && args.role === OrganizationRoleEnum.ORG_ADMIN) {
+        throw new GraphQLError(
+          'Only organization administrators can delete organization administrators invitation links',
+        );
+      }
+      const existingToken = await redisGet<string>(invitationLinkRedisKey(ctx.organizationId, args.role));
+      if (!existingToken) {
+        return false;
+      }
+      await redisDel(invitationLinkRedisKey(ctx.organizationId, args.role));
+      return true;
+    },
+  }),
 }));
+
+const invitationLinkRedisStaticKey = `organization-invitation-link`;
+const invitationLinkRedisKey = (organizationId: string, role: OrganizationRoleEnum) =>
+  `${invitationLinkRedisStaticKey}:${organizationId}:${role}`;

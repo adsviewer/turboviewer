@@ -473,6 +473,12 @@ export enum IntegrationType {
   LINKEDIN = 'LINKEDIN',
 }
 
+export type InviteLinks = {
+  __typename?: 'InviteLinks';
+  role: OrganizationRoleEnum;
+  url: Scalars['String']['output'];
+};
+
 export type InviteUsers = {
   email: Scalars['String']['input'];
   emailType: EmailType;
@@ -494,8 +500,10 @@ export type MetaError = Error & {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createInvitationLink: Scalars['String']['output'];
   createOrganization: Organization;
   deAuthIntegration: MutationDeAuthIntegrationResult;
+  deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: Scalars['Boolean']['output'];
@@ -512,12 +520,20 @@ export type Mutation = {
   updateUser: User;
 };
 
+export type MutationCreateInvitationLinkArgs = {
+  role: OrganizationRoleEnum;
+};
+
 export type MutationCreateOrganizationArgs = {
   name: Scalars['String']['input'];
 };
 
 export type MutationDeAuthIntegrationArgs = {
   type: IntegrationType;
+};
+
+export type MutationDeleteInvitationLinkArgs = {
+  role: OrganizationRoleEnum;
 };
 
 export type MutationDeleteOrganizationArgs = {
@@ -643,6 +659,7 @@ export type Query = {
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsight;
   integrations: Array<Integration>;
+  inviteLinks: Array<InviteLinks>;
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
