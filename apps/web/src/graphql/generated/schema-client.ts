@@ -95,6 +95,7 @@ export enum AllRoles {
   ADMIN = 'ADMIN',
   ORG_ADMIN = 'ORG_ADMIN',
   ORG_MEMBER = 'ORG_MEMBER',
+  ORG_OPERATOR = 'ORG_OPERATOR',
 }
 
 export type BaseError = Error & {
@@ -574,6 +575,7 @@ export type Organization = {
 export enum OrganizationRoleEnum {
   ORG_ADMIN = 'ORG_ADMIN',
   ORG_MEMBER = 'ORG_MEMBER',
+  ORG_OPERATOR = 'ORG_OPERATOR',
 }
 
 export type PageInfo = {
@@ -618,6 +620,7 @@ export type Query = {
   me: User;
   organization: Organization;
   settingsChannels: Array<IntegrationListItem>;
+  userOrganizations: Array<Organization>;
 };
 
 export type QueryInsightDatapointsArgs = {

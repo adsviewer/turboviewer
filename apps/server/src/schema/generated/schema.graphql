@@ -57,6 +57,7 @@ enum AllRoles {
   ADMIN
   ORG_ADMIN
   ORG_MEMBER
+  ORG_OPERATOR
 }
 
 type BaseError implements Error {
@@ -491,6 +492,7 @@ type Organization {
 enum OrganizationRoleEnum {
   ORG_ADMIN
   ORG_MEMBER
+  ORG_OPERATOR
 }
 
 type PageInfo {
@@ -532,6 +534,7 @@ type Query {
   me: User!
   organization: Organization!
   settingsChannels: [IntegrationListItem!]!
+  userOrganizations: [Organization!]!
 }
 
 input SignUpInput {
