@@ -1,7 +1,7 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import { redisExpire, redisIncr } from '@repo/redis';
 import { authLoginEndpoint } from '../contexts/login-provider/login-provider-types';
-import { authConfirmInvitedUserEndpoint, authConfirmUserEmailEndpoint } from '../contexts/user';
+import { authConfirmInvitedUserEndpoint, authConfirmUserEmailEndpoint } from '../contexts/user/user';
 
 interface RateLimiterRule {
   endpoint: string;

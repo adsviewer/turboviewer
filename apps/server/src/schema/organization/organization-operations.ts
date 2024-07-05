@@ -8,24 +8,29 @@ import { builder } from '../builder';
 import {
   authConfirmInvitedUserEndpoint,
   type ConfirmInvitedUser,
+  confirmInvitedUserPrefix,
   confirmInvitedUserRedisKey,
   createInvitedUser,
-  userWithRoles,
-} from '../../contexts/user';
+} from '../../contexts/user/user';
 import { createJwts } from '../../auth';
 import { sendOrganizationInviteConfirmEmail } from '../../email';
 import { env } from '../../config';
 import { TokensDto } from '../user/user-types';
+import {
+  generateInvitationLinkToken,
+  invitationLinkRedisStaticKey,
+  redisDellInvitationLink,
+  redisSetInvitationLink,
+} from '../../contexts/user/user-invite';
+import { userWithRoles } from '../../contexts/user/user-roles';
 import { inviteLinkDto, InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from './org-types';
 
 const fireAndForget = new FireAndForget();
 
-const generateInvitationLink = (token: string, organizationId: string, role: OrganizationRoleEnum) => {
-  const url = new URL(`${env.PUBLIC_URL}/invitation-link`);
+const generateInvitationLink = (token: string) => {
+  const url = new URL(`${env.PUBLIC_URL}/organization-invitation-link`);
   const searchParams = new URLSearchParams();
   searchParams.set('token', token);
-  searchParams.set('organizationId', organizationId);
-  searchParams.set('role', role);
   url.search = searchParams.toString();
   return url;
 };
@@ -43,6 +48,7 @@ builder.queryFields((t) => ({
 
   inviteLinks: t.withAuth({ isInOrg: true, isOrgOperator: true }).field({
     type: [inviteLinkDto],
+    description: 'Returns the invitation links for the signed in org',
     resolve: async (_root, _args, ctx, _info) => {
       const roleTokenMap = await redisGetKeys(`${invitationLinkRedisStaticKey}:${ctx.organizationId}:`).then(
         (keys) =>
@@ -56,7 +62,7 @@ builder.queryFields((t) => ({
         Array.from(roleTokenMap.entries()).map(async ([role, key]) => {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the key exists
           const token = (await redisGet<string>(key))!;
-          return { role, url: generateInvitationLink(token, ctx.organizationId, role).toString() };
+          return { role, url: generateInvitationLink(token).toString() };
         }),
       );
     },
@@ -216,16 +222,19 @@ builder.mutationFields((t) => ({
 
       await Promise.all(
         args.users.map(async (user) => {
-          const token = randomUUID();
+          const token = `${confirmInvitedUserPrefix}${randomUUID()}`;
           const dbUser = usersMap.get(user.email);
           if (dbUser) {
+            // Don't re-invite users that are already active in the organization and in the same or higher role
+            const userOrganization = dbUser.organizations.find((o) => o.organizationId === ctx.organizationId);
+            const roles = Object.values(OrganizationRoleEnum);
             if (
-              // Don't re-invite users that are already active in the organization
-              dbUser.organizations.find((o) => o.organizationId === ctx.organizationId)?.status ===
-              UserOrganizationStatus.ACTIVE
+              userOrganization?.status === UserOrganizationStatus.ACTIVE &&
+              roles.indexOf(args.role) >= roles.indexOf(userOrganization.role)
             ) {
               return;
             }
+
             // Create the action url. If the user has no password and no login providers, it means the user needs to create a password or link a login provider
             const url =
               !dbUser.password && dbUser.loginProviders.length === 0
@@ -290,6 +299,7 @@ builder.mutationFields((t) => ({
 
   createInvitationLink: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: 'String',
+    description: 'Creates a link for the signed in org for a specific role',
     args: {
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
     },
@@ -297,13 +307,14 @@ builder.mutationFields((t) => ({
       if (ctx.isOrgOperator && args.role === OrganizationRoleEnum.ORG_ADMIN) {
         throw new GraphQLError('Only organization administrators can invite organization administrators');
       }
-      const existingToken = await redisGet<string>(invitationLinkRedisKey(ctx.organizationId, args.role));
-      const token = existingToken ?? randomUUID();
-      const url = generateInvitationLink(token, ctx.organizationId, args.role);
+      const existingToken = await redisGet<string>(invitationLinkRedisDbKey(ctx.organizationId, args.role));
+      const token = existingToken ?? generateInvitationLinkToken();
+      const url = generateInvitationLink(token);
       logger.info(`Invite ${args.role} link: ${url.toString()}`);
 
       if (!existingToken) {
-        fireAndForget.add(() => redisSet(invitationLinkRedisKey(ctx.organizationId, args.role), token));
+        fireAndForget.add(() => redisSet(invitationLinkRedisDbKey(ctx.organizationId, args.role), token));
+        fireAndForget.add(() => redisSetInvitationLink(token, ctx.organizationId, args.role));
       }
 
       return url.toString();
@@ -312,6 +323,7 @@ builder.mutationFields((t) => ({
 
   deleteInvitationLink: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: 'Boolean',
+    description: 'Deletes the invitation link for the given role',
     args: {
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
     },
@@ -321,16 +333,20 @@ builder.mutationFields((t) => ({
           'Only organization administrators can delete organization administrators invitation links',
         );
       }
-      const existingToken = await redisGet<string>(invitationLinkRedisKey(ctx.organizationId, args.role));
+      const existingToken = await redisGet<string>(invitationLinkRedisDbKey(ctx.organizationId, args.role));
       if (!existingToken) {
         return false;
       }
-      await redisDel(invitationLinkRedisKey(ctx.organizationId, args.role));
+      fireAndForget.add(() =>
+        Promise.all([
+          redisDel(invitationLinkRedisDbKey(ctx.organizationId, args.role)),
+          redisDellInvitationLink(existingToken),
+        ]),
+      );
       return true;
     },
   }),
 }));
 
-const invitationLinkRedisStaticKey = `organization-invitation-link`;
-const invitationLinkRedisKey = (organizationId: string, role: OrganizationRoleEnum) =>
+const invitationLinkRedisDbKey = (organizationId: string, role: OrganizationRoleEnum) =>
   `${invitationLinkRedisStaticKey}:${organizationId}:${role}`;

@@ -2,7 +2,7 @@ import { AError, isAError } from '@repo/utils';
 import { logger } from '@repo/logger';
 import { z } from 'zod';
 import { EmailType } from '@repo/database';
-import { env } from '../../config';
+import { env } from './config';
 
 const emailableStats = ['deliverable', 'undeliverable', 'risky', 'unknown', 'duplicate'] as const;
 type EmailableState = (typeof emailableStats)[number];

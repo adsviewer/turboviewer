@@ -26,7 +26,7 @@ import {
   authConfirmInvitedUserEndpoint,
   authConfirmUserEmailCallback,
   authConfirmUserEmailEndpoint,
-} from './contexts/user';
+} from './contexts/user/user';
 
 const fireAndForget = new FireAndForget();
 

@@ -8,12 +8,12 @@ builder.queryFields((t) => ({
   loginProviders: t.field({
     type: [GenerateGoogleAuthUrlResponseDto],
     args: {
-      confirmedUserToken: t.arg.string({ required: false }),
+      inviteToken: t.arg.string({ required: false }),
     },
     resolve: (_root, args, _ctx, _info) => {
       return Object.values(LoginProviderEnum).map((provider) => {
         return {
-          url: generateAuthUrl(provider, args.confirmedUserToken),
+          url: generateAuthUrl(provider, args.inviteToken),
           type: provider,
           name: camelCase(provider),
         };

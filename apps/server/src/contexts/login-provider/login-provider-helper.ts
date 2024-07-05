@@ -7,7 +7,14 @@ import { LoginProviderEnum, prisma, UserOrganizationStatus, UserStatus } from '@
 import { redisDel, redisExists, redisGet, redisSet } from '@repo/redis';
 import { env } from '../../config';
 import { createJwts } from '../../auth';
-import { type ConfirmInvitedUser, confirmInvitedUserRedisKey, createLoginProviderUser, userWithRoles } from '../user';
+import {
+  type ConfirmInvitedUser,
+  confirmInvitedUserPrefix,
+  confirmInvitedUserRedisKey,
+  createLoginProviderUser,
+} from '../user/user';
+import { userWithRoles } from '../user/user-roles';
+import { handleInvite, invitationLinkTokenPrefix, redisGetInvitationLink } from '../user/user-invite';
 import { googleLoginProvider } from './google-login-provider';
 import { isLoginProviderEnum, type LoginProviderInterface } from './login-provider-types';
 
@@ -123,7 +130,7 @@ const completeSocialLogin = async (
     return new AError('invalid_code');
   }
 
-  const [mode, providerType, state, confirmedUserToken] = stateArg.split('_');
+  const [mode, providerType, state, inviteToken] = stateArg.split('_');
 
   // mode should only be uuid
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(state)) {
@@ -147,8 +154,16 @@ const completeSocialLogin = async (
   const userdata = await provider.exchangeCodeForUserDate(code);
   if (isAError(userdata)) return userdata;
 
-  if (confirmedUserToken)
-    return await handleInvitedUserCase(confirmedUserToken, userdata.email, userdata.providerId, providerType);
+  if (inviteToken !== '' && inviteToken.startsWith(confirmInvitedUserPrefix))
+    return await handleInvitedUserCase(inviteToken, userdata.email, userdata.providerId, providerType);
+
+  const { organizationId, role } = await (async () => {
+    if (inviteToken !== '' && inviteToken.startsWith(invitationLinkTokenPrefix)) {
+      const redisVal = await redisGetInvitationLink(inviteToken);
+      return redisVal ?? { organizationId: undefined, role: undefined };
+    }
+    return { organizationId: undefined, role: undefined };
+  })();
 
   const providerUser = await prisma.loginProviderUser
     .findUnique({
@@ -165,12 +180,12 @@ const completeSocialLogin = async (
     .then((u) => u?.user);
 
   if (providerUser) {
+    if (organizationId) {
+      const jwts = await handleInvite(providerUser.id, organizationId, role);
+      if (!isAError(jwts)) return { ...jwts, provider: providerType };
+    }
     const { token, refreshToken } = await createJwts(providerUser);
-    return {
-      token,
-      refreshToken,
-      provider: providerType,
-    };
+    return { token, refreshToken, provider: providerType };
   }
 
   const emailUser = await prisma.user.findUnique({
@@ -179,15 +194,15 @@ const completeSocialLogin = async (
   });
 
   if (emailUser) {
+    if (organizationId) {
+      const jwts = await handleInvite(emailUser.id, organizationId, role);
+      if (!isAError(jwts)) return { ...jwts, provider: providerType };
+    }
     const { token, refreshToken } = await createJwts(emailUser);
-    return {
-      token,
-      refreshToken,
-      provider: providerType,
-    };
+    return { token, refreshToken, provider: providerType };
   }
 
-  const user = await createLoginProviderUser(userdata);
+  const user = await createLoginProviderUser(userdata, inviteToken);
   if (isAError(user)) return user;
 
   const { token, refreshToken } = await createJwts(user);

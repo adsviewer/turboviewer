@@ -89,9 +89,9 @@ enum RoleEnum {
 enum OrganizationRoleEnum {
   /// able to manage the organization
   ORG_ADMIN
-  ORG_MEMBER
   /// able to manage users in the organization
   ORG_OPERATOR
+  ORG_MEMBER
 }
 
 model UserRole {

@@ -5,6 +5,7 @@ import './integrations/insights-operations';
 import './organization/org-types';
 import './organization/organization-operations';
 import './user/social-login-operations';
+import './user/invite-operations';
 import './user/user-operations';
 
 builder.queryType({

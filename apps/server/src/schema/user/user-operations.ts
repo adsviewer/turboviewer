@@ -1,29 +1,20 @@
 import { randomUUID } from 'node:crypto';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';
-import { queryFromInfo } from '@pothos/plugin-prisma';
-import { $Enums, prisma, UserOrganizationStatus } from '@repo/database';
+import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
-import lodash from 'lodash';
 import { createJwts } from '../../auth';
-import {
-  confirmEmail,
-  type ConfirmInvitedUser,
-  confirmInvitedUserRedisKey,
-  createPassword,
-  createUser,
-  passwordsMatch,
-  userWithRoles,
-} from '../../contexts/user';
+import { confirmEmail, createPassword, createUser, passwordsMatch } from '../../contexts/user/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
 import { EmailTypeDto } from '../organization/org-types';
-import { SignUpInputDto, TokensDto, TokenUserDto, UserDto } from './user-types';
-import { validateEmail } from './emailable-helper';
-import UserStatus = $Enums.UserStatus;
+import { validateEmail } from '../../emailable-helper';
+import { handleLinkInvite } from '../../contexts/user/user-invite';
+import { userWithRoles } from '../../contexts/user/user-roles';
+import { SignUpInputDto, TokensDto, UserDto } from './user-types';
 
 const usernameSchema = z.string().min(2).max(30);
 const emailSchema = z.string().email();
@@ -52,18 +43,6 @@ builder.queryFields((t) => ({
       return emailValidation.emailType;
     },
   }),
-
-  checkConfirmInvitedUserTokenValidity: t.field({
-    type: 'Boolean',
-    args: {
-      token: t.arg.string({ required: true }),
-    },
-    resolve: async (_root, args, _ctx, _info) => {
-      const key = confirmInvitedUserRedisKey(args.token);
-      const redisVal = await redisGet<ConfirmInvitedUser>(key);
-      return Boolean(redisVal);
-    },
-  }),
 }));
 
 const signUpInputSchema = z.object({
@@ -90,18 +69,12 @@ const updateUserSchema = z.object({
 
 builder.mutationFields((t) => ({
   signup: t.field({
-    type: TokenUserDto,
+    type: TokensDto,
     args: {
       args: t.arg({ type: SignUpInputDto, required: true }),
     },
     validate: (args) => Boolean(signUpInputSchema.parse(args)),
-    resolve: async (root, args, ctx, info) => {
-      const query = queryFromInfo({
-        context: ctx,
-        info,
-        path: ['user'],
-      });
-
+    resolve: async (root, args, _ctx, _info) => {
       const existingUser = await prisma.user.findUnique({
         where: { email: args.args.email },
       });
@@ -109,7 +82,7 @@ builder.mutationFields((t) => ({
         throw new GraphQLError('User already exists');
       }
 
-      const user = await createUser(args.args, query);
+      const user = await createUser(args.args);
       if (isAError(user)) throw new GraphQLError(user.message);
 
       // TODO: enable me
@@ -120,25 +93,20 @@ builder.mutationFields((t) => ({
       //   }),
       // );
 
-      const { token, refreshToken } = await createJwts(user);
-      return { token, refreshToken, user };
+      return await createJwts(user);
     },
   }),
   login: t.field({
-    type: TokenUserDto,
+    type: TokensDto,
     args: {
       email: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
+      token: t.arg.string({ required: false }),
     },
     validate: (args) => Boolean(loginSchema.parse(args)),
-    resolve: async (root, args, ctx, info) => {
-      const query = queryFromInfo({
-        context: ctx,
-        info,
-        path: ['user'],
-      });
+    resolve: async (root, args, _ctx, _info) => {
       const user = await prisma.user.findUnique({
-        ...lodash.merge({}, query, userWithRoles),
+        ...userWithRoles,
         where: { email: args.email },
       });
       if (!user) {
@@ -148,8 +116,11 @@ builder.mutationFields((t) => ({
       if (!valid) {
         throw new GraphQLError('Invalid credentials');
       }
-      const { token, refreshToken } = await createJwts(user);
-      return { token, refreshToken, user };
+      const jwts = await handleLinkInvite(user, args.token);
+      if (isAError(jwts)) {
+        throw new GraphQLError(jwts.message);
+      }
+      return jwts;
     },
   }),
   refreshToken: t.withAuth({ refresh: true }).field({
@@ -246,7 +217,7 @@ builder.mutationFields((t) => ({
     },
   }),
   resetPassword: t.field({
-    type: TokenUserDto,
+    type: TokensDto,
     args: {
       token: t.arg.string({ required: true, validate: { uuid: true } }),
       password: t.arg.string({
@@ -256,7 +227,7 @@ builder.mutationFields((t) => ({
         },
       }),
     },
-    resolve: async (_root, args, ctx, info) => {
+    resolve: async (_root, args, _ctx, _info) => {
       const userId = await redisGet<string>(`forget-password:${args.token}`);
 
       if (!userId) {
@@ -264,23 +235,16 @@ builder.mutationFields((t) => ({
       }
 
       const password = await createPassword(args.password);
-      const query = queryFromInfo({
-        context: ctx,
-        info,
-        path: ['user'],
-      });
-
       const [user, _] = await Promise.all([
         await prisma.user.update({
-          ...lodash.merge({}, query, userWithRoles),
+          ...userWithRoles,
           where: { id: userId },
           data: { password },
         }),
         await redisDel(`forget-password:${args.token}`),
       ]);
 
-      const { token, refreshToken } = await createJwts(user);
-      return { token, refreshToken, user };
+      return await createJwts(user);
     },
   }),
   resendEmailConfirmation: t.withAuth({ emailUnconfirmed: true }).boolean({
@@ -293,35 +257,6 @@ builder.mutationFields((t) => ({
         throw new GraphQLError(emailSent.message);
       }
       return true;
-    },
-  }),
-  signUpInvitedUser: t.field({
-    type: TokensDto,
-    args: {
-      password: t.arg.string({ required: true }),
-      token: t.arg.string({ required: true }),
-    },
-    resolve: async (_root, args, _ctx, _info) => {
-      const key = confirmInvitedUserRedisKey(args.token);
-      const redisVal = await redisGet<ConfirmInvitedUser>(key);
-      if (!redisVal) {
-        throw new GraphQLError('User invitation expired');
-      }
-      const { userId, organizationId } = redisVal;
-      const [user] = await Promise.all([
-        prisma.user.update({
-          ...userWithRoles,
-          where: { id: userId },
-          data: { password: await createPassword(args.password), status: UserStatus.EMAIL_CONFIRMED },
-        }),
-        prisma.userOrganization.update({
-          where: { userId_organizationId: { userId, organizationId } },
-          data: { status: UserOrganizationStatus.ACTIVE },
-        }),
-        redisDel(key),
-      ]);
-      const { token, refreshToken } = await createJwts(user);
-      return { token, refreshToken };
     },
   }),
 }));

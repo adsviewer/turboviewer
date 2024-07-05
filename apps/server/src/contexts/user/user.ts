@@ -1,28 +1,21 @@
 import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import {
-  EmailType,
-  OrganizationRoleEnum,
-  prisma,
-  Prisma,
-  type User,
-  UserOrganizationStatus,
-  UserStatus,
-} from '@repo/database';
+import { EmailType, OrganizationRoleEnum, prisma, type User, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { AError, isAError } from '@repo/utils';
 import * as changeCase from 'change-case';
 import { logger } from '@repo/logger';
 import { createId } from '@paralleldrive/cuid2';
-import lodash from 'lodash';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { validateEmail } from '../schema/user/emailable-helper';
-import { type SignUpInput } from '../schema/user/user-types';
-import { env } from '../config';
-import { sendConfirmEmail } from '../email';
-import { createJwts, type TokensType } from '../auth';
-import { type InviteUserInput } from '../schema/organization/org-types';
-import { type LoginProviderUserData } from './login-provider/login-provider-types';
+import { validateEmail } from '../../emailable-helper';
+import { type SignUpInput } from '../../schema/user/user-types';
+import { env } from '../../config';
+import { sendConfirmEmail } from '../../email';
+import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
+import { type InviteUserInput } from '../../schema/organization/org-types';
+import { type LoginProviderUserData } from '../login-provider/login-provider-types';
+import { redisGetInvitationLink } from './user-invite';
+import { userWithRoles } from './user-roles';
 
 const scryptAsync = promisify(scrypt);
 
@@ -52,11 +45,8 @@ export const passwordsMatch = async (password: string, hashedPassword: string | 
   return await comparePassword(password, hashedPassword);
 };
 
-export const createUser = async (
-  data: SignUpInput,
-  query?: { include?: Prisma.UserInclude | undefined; select?: Prisma.UserSelect | undefined },
-) => {
-  const validData = await validateEmailProcess(data.firstName, data.email);
+export const createUser = async (data: SignUpInput) => {
+  const validData = await validateEmailProcess(data.firstName, data.email, data.token);
   if (isAError(validData)) {
     return validData;
   }
@@ -64,7 +54,7 @@ export const createUser = async (
 
   // Create user with specified organization or default to creating a new organization
   const user = await prisma.user.create({
-    include: lodash.merge({}, query?.include, userWithRoles.include),
+    ...userWithRoles,
     data: {
       email: data.email,
       firstName: data.firstName,
@@ -75,7 +65,7 @@ export const createUser = async (
       organizations: {
         create: {
           status: UserOrganizationStatus.ACTIVE,
-          role: OrganizationRoleEnum.ORG_ADMIN,
+          role: validData.role ?? OrganizationRoleEnum.ORG_ADMIN,
           organizationId: validData.orgId,
         },
       },
@@ -109,8 +99,8 @@ export const createInvitedUser = async (
   });
 };
 
-export const createLoginProviderUser = async (data: LoginProviderUserData) => {
-  const validData = await validateEmailProcess(data.firstName, data.email);
+export const createLoginProviderUser = async (data: LoginProviderUserData, inviteToken: string | undefined) => {
+  const validData = await validateEmailProcess(data.firstName, data.email, inviteToken);
   if (isAError(validData)) {
     return validData;
   }
@@ -207,6 +197,7 @@ export const authConfirmInvitedUserCallback = (req: ExpressRequest, res: Express
     });
 };
 
+export const confirmInvitedUserPrefix = `user-`;
 export const confirmInvitedUserRedisKey = (token: string) => `confirm-invited-user:${token}`;
 export interface ConfirmInvitedUser {
   userId: string;
@@ -219,26 +210,34 @@ const completeConfirmInvitedUserCallback = async (token: string): Promise<Tokens
     return new AError('User invitation expired');
   }
   const { userId, organizationId } = redisVal;
-  const [_, user] = await Promise.all([
+  await Promise.all([
     prisma.userOrganization.update({
       where: { userId_organizationId: { userId, organizationId } },
       data: { status: UserOrganizationStatus.ACTIVE },
     }),
-    prisma.user.findUniqueOrThrow({
-      ...userWithRoles,
-      where: { id: userId },
-    }),
     redisDel(key),
   ]);
-  return await createJwts(user);
+  return await createJwtsFromUserId(userId);
 };
 
 const validateEmailProcess = async (
   firstName: string,
   email: string,
-): Promise<AError | { orgId: string; emailType: EmailType }> => {
+  orgInviteToken?: string | null,
+): Promise<AError | { orgId: string; emailType: EmailType; role?: OrganizationRoleEnum }> => {
   const nonWorkName = `${firstName}'${firstName.endsWith('s') ? '' : 's'} organization`;
-  const orgId = createId();
+
+  const { orgId, role } = await (async () => {
+    if (!orgInviteToken) {
+      return { orgId: createId() };
+    }
+    const redisVal = await redisGetInvitationLink(orgInviteToken);
+    if (!redisVal) {
+      return { orgId: createId() };
+    }
+    return { orgId: redisVal.organizationId, role: redisVal.role };
+  })();
+
   const emailValidation = await validateEmail(email);
   if (isAError(emailValidation)) {
     return emailValidation;
@@ -247,7 +246,7 @@ const validateEmailProcess = async (
     await prisma.organization.create({
       data: { id: orgId, name: nonWorkName },
     });
-    return { orgId, emailType: EmailType.PERSONAL };
+    return { orgId, emailType: EmailType.PERSONAL, role };
   }
   const organization = await prisma.organization.findUnique({
     where: { domain: emailValidation.domain },
@@ -262,7 +261,7 @@ const validateEmailProcess = async (
       data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain },
     });
   }
-  return { orgId, emailType: EmailType.WORK };
+  return { orgId, emailType: EmailType.WORK, role };
 };
 
 export const confirmEmail = async (user: User): Promise<undefined | AError> => {
@@ -300,11 +299,3 @@ export const confirmEmail = async (user: User): Promise<undefined | AError> => {
     }),
   ]);
 };
-
-export const userWithRoles = Prisma.validator<Prisma.UserDefaultArgs>()({
-  include: {
-    roles: { select: { role: true } },
-  },
-});
-
-export type UserWithRoles = Prisma.UserGetPayload<typeof userWithRoles>;
