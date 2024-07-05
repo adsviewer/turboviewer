@@ -16,6 +16,16 @@ builder.queryFields((t) => ({
       });
     },
   }),
+
+  userOrganizations: t.withAuth({ isInOrg: true }).prismaField({
+    type: [OrganizationDto],
+    resolve: (query, _root, _args, ctx, _info) => {
+      return prisma.organization.findMany({
+        ...query,
+        where: { users: { some: { userId: ctx.currentUserId } } },
+      });
+    },
+  }),
 }));
 
 builder.mutationFields((t) => ({
