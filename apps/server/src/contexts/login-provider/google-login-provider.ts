@@ -13,8 +13,8 @@ interface GoogleJwtPayload extends JwtPayload {
   at_hash: string;
   name: string;
   picture: string;
-  given_name: string;
-  family_name: string;
+  given_name: string | undefined;
+  family_name: string | undefined;
 }
 
 const client = new OAuth2Client(
@@ -43,8 +43,8 @@ export const googleLoginProvider: LoginProviderInterface = {
       return {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know it's there
         providerId: decoded.sub!,
-        firstName: decoded.given_name,
-        lastName: decoded.family_name,
+        firstName: decoded.given_name ?? '',
+        lastName: decoded.family_name ?? '',
         email: decoded.email,
         photoUrl: decoded.picture,
         providerType: LoginProviderEnum.GOOGLE,
