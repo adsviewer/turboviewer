@@ -46,7 +46,8 @@ enum Position {
   VideoFeeds = 'video_feeds',
 }
 
-export const isMetaAdPosition = (value: unknown): value is Position => {
+export const isMetaAdPosition = (value: unknown): value is Position | undefined => {
+  if (!value) return true;
   return Object.values(Position).includes(value as Position);
 };
 
