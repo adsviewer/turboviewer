@@ -85,7 +85,7 @@ export default function OrderFilters(): React.ReactNode {
 
   return (
     <Flex w="100%" mb="lg" wrap="wrap" direction="column">
-      {/* FIlters */}
+      {/* Filters */}
       <Flex>
         {/* Page size filter */}
         <Flex align="center" mr="sm" my="md">
