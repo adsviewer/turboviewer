@@ -1001,15 +1001,6 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
-export type UpdateOrganizationMutationVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-export type UpdateOrganizationMutation = {
-  __typename?: 'Mutation';
-  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
-};
-
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1267,14 +1258,6 @@ export const LoginProvidersDocument = gql`
     }
   }
 `;
-export const UpdateOrganizationDocument = gql`
-  mutation updateOrganization($name: String!) {
-    updateOrganization(name: $name) {
-      id
-      name
-    }
-  }
-`;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -1397,16 +1380,6 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<LoginProvidersQuery>;
-    },
-    updateOrganization(
-      variables: UpdateOrganizationMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationMutation> {
-      return requester<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(
-        UpdateOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(

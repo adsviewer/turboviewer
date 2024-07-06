@@ -1002,15 +1002,6 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
-export type UpdateOrganizationMutationVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-export type UpdateOrganizationMutation = {
-  __typename?: 'Mutation';
-  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
-};
-
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1343,18 +1334,6 @@ export function useLoginProvidersQuery(options?: Omit<Urql.UseQueryArgs<LoginPro
     query: LoginProvidersDocument,
     ...options,
   });
-}
-export const UpdateOrganizationDocument = gql`
-  mutation updateOrganization($name: String!) {
-    updateOrganization(name: $name) {
-      id
-      name
-    }
-  }
-`;
-
-export function useUpdateOrganizationMutation() {
-  return Urql.useMutation<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(UpdateOrganizationDocument);
 }
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
