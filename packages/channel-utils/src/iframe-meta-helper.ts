@@ -46,8 +46,7 @@ enum Position {
   VideoFeeds = 'video_feeds',
 }
 
-export const isMetaAdPosition = (value: unknown): value is Position | undefined => {
-  if (!value) return true;
+export const isMetaAdPosition = (value: unknown): value is Position => {
   return Object.values(Position).includes(value as Position);
 };
 
@@ -120,7 +119,7 @@ enum FormatType {
 
 export const formatDimensionsMap = new Map<FormatType, { height: number; width: number }>([
   [FormatType.AudienceNetworkInstreamVideo, { height: 281, width: 500 }],
-  [FormatType.AudienceNetworkInstreamVideoMobile, { height: 570, width: 330 }],
+  [FormatType.AudienceNetworkInstreamVideoMobile, { height: 75, width: 280 }],
   [FormatType.AudienceNetworkOutstreamVideo, { height: 567, width: 320 }],
   [FormatType.AudienceNetworkRewardedVideo, { height: 567, width: 320 }],
   [FormatType.BizDiscoFeedMobile, { height: 580, width: 330 }],
@@ -130,10 +129,10 @@ export const formatDimensionsMap = new Map<FormatType, { height: number; width: 
   // [FormatType.FacebookProfileReelsMobile, { height: 0, width: 0 }],
   [FormatType.FacebookReelsBanner, { height: 580, width: 330 }],
   // [FormatType.FacebookReelsBannerDesktop, { height: 0, width: 0 }],
-  [FormatType.FacebookReelsMobile, { height: 460, width: 280 }],
+  [FormatType.FacebookReelsMobile, { height: 570, width: 324 }],
   // [FormatType.FacebookReelsPostloop, { height: 0, width: 0 }],
   // [FormatType.FacebookReelsSticker, { height: 0, width: 0 }],
-  [FormatType.FacebookStoryMobile, { height: 460, width: 280 }],
+  [FormatType.FacebookStoryMobile, { height: 570, width: 330 }],
   // [FormatType.FacebookStoryStickerMobile, { height: 0, width: 0 }],
   // [FormatType.InstagramExploreContextual, { height: 0, width: 0 }],
   [FormatType.InstagramExploreGridHome, { height: 570, width: 330 }],
@@ -176,7 +175,7 @@ export const formatDimensionsMap = new Map<FormatType, { height: number; width: 
   // [FormatType.MobileInterstitial, { height: 0, width: 0 }],
   // [FormatType.MobileMediumRectangle, { height: 0, width: 0 }],
   // [FormatType.MobileNative, { height: 0, width: 0 }],
-  [FormatType.RightColumnStandard, { height: 90, width: 220 }],
+  [FormatType.RightColumnStandard, { height: 92, width: 220 }],
   // [FormatType.SuggestedVideoDesktop, { height: 0, width: 0 }],
   // [FormatType.SuggestedVideoFullscreenMobile, { height: 0, width: 0 }],
   // [FormatType.SuggestedVideoImmersiveMobile, { height: 0, width: 0 }],

@@ -94,7 +94,6 @@ export type AdInsightsConnectionEdge = {
 export enum AllRoles {
   ADMIN = 'ADMIN',
   ORG_ADMIN = 'ORG_ADMIN',
-  ORG_OPERATOR = 'ORG_OPERATOR',
   ORG_MEMBER = 'ORG_MEMBER',
 }
 
@@ -625,8 +624,6 @@ export type Organization = {
 export enum OrganizationRoleEnum {
   /** Ability to manage organization settings, integrations and members */
   ORG_ADMIN = 'ORG_ADMIN',
-  /** Ability to manage organization settings and members. */
-  ORG_OPERATOR = 'ORG_OPERATOR',
   /** Does not have any special permissions */
   ORG_MEMBER = 'ORG_MEMBER',
 }

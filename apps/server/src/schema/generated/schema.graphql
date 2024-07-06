@@ -56,7 +56,6 @@ type AdInsightsConnectionEdge {
 enum AllRoles {
   ADMIN
   ORG_ADMIN
-  ORG_OPERATOR
   ORG_MEMBER
 }
 
@@ -531,11 +530,6 @@ enum OrganizationRoleEnum {
   Ability to manage organization settings, integrations and members
   """
   ORG_ADMIN
-
-  """
-  Ability to manage organization settings and members.
-  """
-  ORG_OPERATOR
 
   """
   Does not have any special permissions
