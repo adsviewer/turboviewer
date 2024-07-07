@@ -3,16 +3,17 @@
 import { Flex, Text, Button, TextInput } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { useForm } from '@mantine/form';
-import { type MeQuery, type UpdateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
+import { useAtom } from 'jotai';
+import { type UpdateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
 import { isOrgAdmin } from '@/util/access-utils';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { getUserDetails } from '@/app/(authenticated)/actions';
 import { updateOrganization } from '../actions';
 
-interface PropsType {
-  userDetails: MeQuery['me'];
-}
-
-export default function NameEdit({ userDetails }: PropsType): React.ReactNode {
+export default function NameEdit(): React.ReactNode {
   const t = useTranslations('organization');
+  const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -24,6 +25,19 @@ export default function NameEdit({ userDetails }: PropsType): React.ReactNode {
     void updateOrganization(values).then((res) => {
       if (!res.success) {
         form.setFieldError('name', res.error);
+      } else {
+        void getUserDetails().then((userRes) => {
+          setUserDetails({
+            id: userRes.id,
+            firstName: userRes.firstName,
+            lastName: userRes.lastName,
+            email: userRes.email,
+            allRoles: userRes.allRoles,
+            currentOrganization: userRes.currentOrganization,
+            organizations: userRes.organizations,
+            photoUrl: userRes.photoUrl,
+          });
+        });
       }
     });
   };

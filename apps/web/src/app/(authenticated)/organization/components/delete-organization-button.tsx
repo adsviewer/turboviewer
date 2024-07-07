@@ -5,6 +5,9 @@ import { useTranslations } from 'next-intl';
 import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState } from 'react';
+import { useAtomValue } from 'jotai';
+import { isOrgAdmin } from '@/util/access-utils';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 // import { deAuthIntegration } from '@/app/(authenticated)/integrations/actions';
 
 export default function DeleteOrganizationButton(): React.ReactNode {
@@ -13,6 +16,7 @@ export default function DeleteOrganizationButton(): React.ReactNode {
   const [opened, { open, close }] = useDisclosure(false);
   const [deleteFieldValue, setDeleteFieldValue] = useInputState('');
   const [isDeleteDone, setIsDeleteDone] = useState<boolean>(true);
+  const userDetails = useAtomValue(userDetailsAtom);
 
   const closeDeleteModal = (): void => {
     close();
@@ -30,7 +34,12 @@ export default function DeleteOrganizationButton(): React.ReactNode {
 
   return (
     <Flex my="md">
-      <Button leftSection={<IconTrash size={18} />} color={theme.colors.red[7]} onClick={open}>
+      <Button
+        leftSection={<IconTrash size={18} />}
+        color={theme.colors.red[7]}
+        onClick={open}
+        disabled={!isOrgAdmin(userDetails.allRoles)}
+      >
         {t('deleteOrganization')}
       </Button>
 

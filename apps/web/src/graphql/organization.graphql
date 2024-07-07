@@ -4,3 +4,10 @@ mutation updateOrganization($name: String!) {
     name
   }
 }
+
+mutation switchOrganization($organizationId: String!) {
+  switchOrganization(organizationId: $organizationId) {
+    token
+    refreshToken
+  }
+}

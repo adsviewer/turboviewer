@@ -2,10 +2,12 @@
 
 import { type ComboboxData, Select } from '@mantine/core';
 import React, { useEffect, useState } from 'react';
-import { useAtomValue } from 'jotai/index';
+import { useAtomValue } from 'jotai';
 import _ from 'lodash';
 import { logger } from '@repo/logger';
 import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
+import { switchOrganization } from '@/app/(authenticated)/organization/actions';
+import { changeJWT } from '@/app/(unauthenticated)/actions';
 
 export default function OrganizationSelect(): React.ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
@@ -24,8 +26,20 @@ export default function OrganizationSelect(): React.ReactNode {
     }
   }, [userDetails, userDetails.organizations]);
 
-  const handleOrganizationSelect = (value: string | null): void => {
-    logger.info(value);
+  const handleOrganizationSelect = (organizationId: string | null): void => {
+    if (organizationId) {
+      void switchOrganization({ organizationId })
+        .then((res) => {
+          if (res.success) {
+            void changeJWT(res.data.switchOrganization.token, res.data.switchOrganization.refreshToken).then(() => {
+              window.location.reload();
+            });
+          }
+        })
+        .catch((err: unknown) => {
+          logger.error(err);
+        });
+    }
   };
 
   return (

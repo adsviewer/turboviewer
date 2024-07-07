@@ -9,3 +9,9 @@ export const signOut = (): void => {
   cookies().delete(REFRESH_TOKEN_KEY);
   redirect('/sign-in');
 };
+
+export const changeJWT = async (token: string, refreshToken: string): Promise<void> => {
+  cookies().set(TOKEN_KEY, token);
+  cookies().set(REFRESH_TOKEN_KEY, refreshToken);
+  return Promise.resolve();
+};
