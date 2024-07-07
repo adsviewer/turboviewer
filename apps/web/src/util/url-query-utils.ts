@@ -1,5 +1,6 @@
 import { type ReadonlyURLSearchParams } from 'next/navigation';
 import { sentenceCase } from 'change-case';
+import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-client';
 
 export const groupedByKey = 'groupedBy';
 export const publisherKey = 'publisher';
@@ -10,6 +11,7 @@ export const pageKey = 'page';
 export const pageSizeKey = 'pageSize';
 export const orderDirectionKey = 'order';
 export const orderByKey = 'orderBy';
+export const fetchPreviewsKey = 'fetchPreviews';
 
 export const positions = [
   'an_classic',
@@ -59,7 +61,7 @@ export const addOrReplaceURLParams = (
   pathname: string,
   searchParams: ReadonlyURLSearchParams,
   key: string,
-  newValue: string,
+  newValue?: string,
 ): string => {
   const multiKeyParams = [groupedByKey, publisherKey, deviceKey, positionKey, accountKey];
   const newParams = new URLSearchParams(searchParams.toString());
@@ -70,17 +72,28 @@ export const addOrReplaceURLParams = (
     newParams.delete(pageKey);
 
     // If it doesn't exist, just add it
-    if (!newParams.has(key, newValue)) {
+    if (!newParams.has(key, newValue) && newValue) {
       newParams.append(key, newValue);
       return `${pathname}?${newParams.toString()}`;
     }
     // If it already exists, remove it!
     newParams.delete(key, newValue);
+
+    // (Special case) Don't allow preview fetching if adId is not in group filters!
+    if (!newParams.has(groupedByKey, InsightsColumnsGroupBy.adId)) {
+      newParams.delete(fetchPreviewsKey);
+    }
+
     return `${pathname}?${newParams.toString()}`;
   }
 
   // Generic logic (replace value or add param if it doesn't exist)
-  newParams.set(key, newValue);
+  if (newValue) {
+    newParams.set(key, newValue);
+  } else {
+    newParams.delete(key);
+  }
+
   return `${pathname}?${newParams.toString()}`;
 };
 

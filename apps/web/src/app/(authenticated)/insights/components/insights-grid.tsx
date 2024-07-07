@@ -31,11 +31,12 @@ export default function InsightsGrid(props: PropsType): ReactNode {
               props.insights.map((insight) => (
                 <InsightCard
                   key={insight.id as Key}
-                  title={insight.publisher}
+                  title={insight.adName ? insight.adName : insight.publisher}
                   description={insight.position}
                   device={insight.device}
                   currency={insight.currency}
                   datapoints={insight.datapoints}
+                  iframe={insight.iFrame}
                 />
               ))
             ) : (

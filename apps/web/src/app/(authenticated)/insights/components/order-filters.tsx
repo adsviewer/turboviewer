@@ -1,8 +1,9 @@
 'use client';
 
-import { Flex, Text, Select, type ComboboxItem } from '@mantine/core';
+import { Flex, Text, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { type ChangeEvent, useTransition } from 'react';
 import {
   OrderDirection,
   addOrReplaceURLParams,
@@ -10,14 +11,17 @@ import {
   orderByKey,
   orderDirectionKey,
   pageSizeKey,
+  fetchPreviewsKey,
+  groupedByKey,
 } from '@/util/url-query-utils';
-import { InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import { InsightsColumnsGroupBy, InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const getPageSizeValue = (): string => {
     if (isParamInSearchParams(searchParams, pageSizeKey, searchParams.get(pageSizeKey) ?? '12')) {
@@ -42,71 +46,117 @@ export default function OrderFilters(): React.ReactNode {
     return InsightsColumnsOrderBy.spend_rel; // default
   };
 
+  const getAdPreviewValue = (): boolean => {
+    return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
+  };
+
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
-    router.replace(newURL);
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
-    router.replace(newURL);
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
   const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderDirectionKey, option.value);
-    router.replace(newURL);
+    startTransition(() => {
+      router.replace(newURL);
+    });
+  };
+
+  const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    let newURL: string;
+    if (e.target.checked) {
+      newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, 'true');
+    } else {
+      newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey);
+    }
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
   return (
-    <Flex w="100%" mb="lg" align="center" wrap="wrap">
+    <Flex w="100%" mb="lg" wrap="wrap" direction="column">
       {/* Filters */}
-      <Flex align="center" mr="sm" my="md">
+      <Flex>
         {/* Page size filter */}
-        <Text size="md" mr="sm">
-          {t('pageSize')}:
-        </Text>
-        <Select
-          placeholder="Pick value"
-          data={['6', '12', '18', '50', '100']}
-          value={getPageSizeValue()}
-          onChange={handlePageSizeChange}
-          allowDeselect={false}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          maw={90}
-        />
+        <Flex align="center" mr="sm" my="md">
+          <Text size="md" mr="sm">
+            {t('pageSize')}:
+          </Text>
+          <Select
+            placeholder="Pick value"
+            data={['6', '12', '18', '50', '100']}
+            value={getPageSizeValue()}
+            onChange={handlePageSizeChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={90}
+            disabled={isPending}
+          />
+        </Flex>
+
+        {/* Order filter */}
+        <Flex align="center">
+          <Text size="md" mr="sm">
+            {t('orderBy')}:
+          </Text>
+          <Select
+            placeholder="Pick value"
+            data={[
+              { value: InsightsColumnsOrderBy.spend_rel, label: t('spent') },
+              { value: InsightsColumnsOrderBy.impressions_rel, label: t('impressions') },
+              { value: InsightsColumnsOrderBy.cpm_rel, label: 'CPM' },
+            ]}
+            value={getOrderByValue()}
+            onChange={handleOrderByChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={150}
+            mr="sm"
+            disabled={isPending}
+          />
+          <Select
+            placeholder="Pick value"
+            data={[
+              { value: OrderDirection.asc, label: t('ascending') },
+              { value: OrderDirection.desc, label: t('descending') },
+            ]}
+            value={getOrderDirectionValue()}
+            onChange={handleOrderDirectionChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={150}
+            disabled={isPending}
+          />
+        </Flex>
       </Flex>
 
-      <Flex align="center">
-        {/* Order filter */}
-        <Text size="md" mr="sm">
-          {t('orderBy')}:
-        </Text>
-        <Select
-          placeholder="Pick value"
-          data={[
-            { value: InsightsColumnsOrderBy.spend_rel, label: t('spent') },
-            { value: InsightsColumnsOrderBy.impressions_rel, label: t('impressions') },
-            { value: InsightsColumnsOrderBy.cpm_rel, label: 'CPM' },
-          ]}
-          value={getOrderByValue()}
-          onChange={handleOrderByChange}
-          allowDeselect={false}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          maw={150}
-          mr="sm"
-        />
-        <Select
-          placeholder="Pick value"
-          data={[
-            { value: OrderDirection.asc, label: t('ascending') },
-            { value: OrderDirection.desc, label: t('descending') },
-          ]}
-          value={getOrderDirectionValue()}
-          onChange={handleOrderDirectionChange}
-          allowDeselect={false}
-          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-          maw={150}
-        />
+      {/* Misc. controls */}
+      <Flex>
+        {/* Toggle ad previews */}
+        <Tooltip
+          withArrow
+          label={t('adPreviewsTooltip')}
+          refProp="rootRef"
+          position="top-start"
+          disabled={!isPending && isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
+        >
+          <Switch
+            label={t('showAdPreviews')}
+            checked={getAdPreviewValue()}
+            onChange={handleAdPreviewChange}
+            disabled={isPending || !isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
+          />
+        </Tooltip>
       </Flex>
     </Flex>
   );

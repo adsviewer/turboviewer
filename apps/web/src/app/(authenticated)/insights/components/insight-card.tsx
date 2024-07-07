@@ -6,7 +6,12 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
 import { YAxis } from 'recharts';
-import { type CurrencyEnum, type DeviceEnum, type InsightsDatapoints } from '@/graphql/generated/schema-server';
+import {
+  type CurrencyEnum,
+  type DeviceEnum,
+  type IFrame,
+  type InsightsDatapoints,
+} from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 
@@ -15,7 +20,8 @@ interface InsightCardProps {
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
   currency: CurrencyEnum;
-  datapoints: InsightsDatapoints[];
+  datapoints?: InsightsDatapoints[];
+  iframe?: IFrame | null;
 }
 
 interface RankType {
@@ -41,85 +47,105 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
   const setupRank = useCallback(() => {
     // If the latest CPM is lower than the previous CPM, rank is set to CAUTION
-    if (props.datapoints[props.datapoints.length - 1].cpm > props.datapoints[props.datapoints.length - 2].cpm) {
-      setRank({
-        label: 'CAUTION',
-        color: 'yellow',
-      });
+    if (props.datapoints) {
+      if (props.datapoints[props.datapoints.length - 1].cpm > props.datapoints[props.datapoints.length - 2].cpm) {
+        setRank({
+          label: 'CAUTION',
+          color: 'yellow',
+        });
+      }
     }
   }, [props.datapoints]);
 
   const setupDatapoints = useCallback(() => {
     const formattedDatapoints: Datapoint[] = [];
-    for (const datapoint of props.datapoints) {
-      formattedDatapoints.push({
-        date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
-        impressions: datapoint.impressions,
-        spend: datapoint.spend / 100,
-        cpm: datapoint.cpm,
-      });
+    if (props.datapoints) {
+      for (const datapoint of props.datapoints) {
+        formattedDatapoints.push({
+          date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
+          impressions: datapoint.impressions,
+          spend: datapoint.spend / 100,
+          cpm: datapoint.cpm,
+        });
+      }
+      setDatapoints(formattedDatapoints);
     }
-    setDatapoints(formattedDatapoints);
   }, [props.datapoints, format]);
 
   useEffect(() => {
-    setupRank();
-    setupDatapoints();
-  }, [setupDatapoints, setupRank]);
+    if (props.datapoints) {
+      setupRank();
+      setupDatapoints();
+    }
+  }, [props.datapoints, setupDatapoints, setupRank]);
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Box>
-        <AreaChart
-          mt="md"
-          px="sm"
-          h={300}
-          data={datapoints}
-          dataKey="date"
-          series={[
-            {
-              yAxisId: 'right',
-              name: 'spend',
-              color: 'teal.6',
-              label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
-            },
-            { yAxisId: 'right', name: 'impressions', color: 'blue.6', label: t('impressions') },
-            { yAxisId: 'left', name: 'cpm', color: 'orange', label: 'CPM' },
-          ]}
-          valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
-          tooltipProps={{ wrapperStyle: { zIndex: 3 } }}
-          yAxisProps={{ yAxisId: 'left' }}
-          areaProps={(series) => series}
-          splitColors={['green', 'white']}
-          withLegend
-          curveType="natural"
-          strokeWidth={1.5}
-          tooltipAnimationDuration={200}
-        >
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            axisLine={false}
-            type="number"
-            tick={{
-              transform: 'translate(10, 0)',
-              fontSize: 12,
-              fill: 'currentColor',
-            }}
-            allowDecimals
-            tickLine={{
-              color: 'var(--chart-grid-color)',
-              stroke: 'var(--chart-grid-color)',
-            }}
+      {props.datapoints ? (
+        // Chart Analytics
+        <Box>
+          <AreaChart
+            mt="md"
+            px="sm"
+            h={300}
+            data={datapoints}
+            dataKey="date"
+            series={[
+              {
+                yAxisId: 'right',
+                name: 'spend',
+                color: 'teal.6',
+                label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
+              },
+              { yAxisId: 'right', name: 'impressions', color: 'blue.6', label: t('impressions') },
+              { yAxisId: 'left', name: 'cpm', color: 'orange', label: 'CPM' },
+            ]}
+            valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
+            tooltipProps={{ wrapperStyle: { zIndex: 3 } }}
+            yAxisProps={{ yAxisId: 'left' }}
+            areaProps={(series) => series}
+            splitColors={['green', 'white']}
+            withLegend
+            curveType="natural"
+            strokeWidth={1.5}
+            tooltipAnimationDuration={200}
+          >
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              axisLine={false}
+              type="number"
+              tick={{
+                transform: 'translate(10, 0)',
+                fontSize: 12,
+                fill: 'currentColor',
+              }}
+              allowDecimals
+              tickLine={{
+                color: 'var(--chart-grid-color)',
+                stroke: 'var(--chart-grid-color)',
+              }}
+            />
+          </AreaChart>
+        </Box>
+      ) : (
+        // IFrame ad preview
+        <Flex justify="center">
+          <iframe
+            scrolling="no"
+            src={props.iframe?.src}
+            width={props.iframe?.width}
+            height={props.iframe?.height}
+            title={props.iframe?.src}
           />
-        </AreaChart>
-      </Box>
+        </Flex>
+      )}
 
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
           <Text fw={500}>{props.title}</Text>
         </Flex>
-        <Badge color={rank.color}>{rank.label}</Badge>
+        {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
 
       <Text size="sm" c="dimmed">
