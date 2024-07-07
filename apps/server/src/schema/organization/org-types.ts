@@ -29,6 +29,14 @@ export const OrganizationRoleEnumDto = builder.enumType('OrganizationRoleEnum', 
 });
 export const UserOrganizationStatusDto = builder.enumType(UserOrganizationStatus, { name: 'UserOrganizationStatus' });
 
+export const UserOrganizationStatusNotInvitedDto = builder.enumType('UserOrganizationStatusNotInvited', {
+  values: Object.fromEntries(
+    Object.entries(UserOrganizationStatus)
+      .filter(([_, value]) => value !== UserOrganizationStatus.INVITED)
+      .map(([name, value]) => [name, { value }]),
+  ),
+});
+
 export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
   fields: (t) => ({
     userId: t.exposeID('userId'),

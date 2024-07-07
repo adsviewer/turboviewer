@@ -23,7 +23,14 @@ import {
   redisSetInvitationLink,
 } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
-import { inviteLinkDto, InviteUsersDto, OrganizationDto, OrganizationRoleEnumDto } from './org-types';
+import {
+  inviteLinkDto,
+  InviteUsersDto,
+  OrganizationDto,
+  OrganizationRoleEnumDto,
+  UserOrganizationDto,
+  UserOrganizationStatusNotInvitedDto,
+} from './org-types';
 
 const fireAndForget = new FireAndForget();
 
@@ -335,6 +342,49 @@ builder.mutationFields((t) => ({
         ]),
       );
       return true;
+    },
+  }),
+
+  updateOrganizationUser: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+    type: UserOrganizationDto,
+    args: {
+      status: t.arg({ type: UserOrganizationStatusNotInvitedDto, required: false }),
+      role: t.arg({ type: OrganizationRoleEnumDto, required: false }),
+      userId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      const userOrganization = await prisma.userOrganization.findUnique({
+        where: {
+          userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId },
+          status: UserOrganizationStatus.ACTIVE,
+        },
+      });
+      if (!userOrganization) {
+        throw new GraphQLError('User is not an active member of this organization');
+      }
+      if (ctx.isOrgOperator && userOrganization.role === OrganizationRoleEnum.ORG_ADMIN) {
+        throw new GraphQLError('Only organization administrators can update organization administrators');
+      }
+      if (ctx.currentUserId === args.userId && ctx.isOrgAdmin && args.status === UserOrganizationStatus.NON_ACTIVE) {
+        const otherAdmins = await prisma.userOrganization.count({
+          where: {
+            organizationId: ctx.organizationId,
+            userId: { not: ctx.currentUserId },
+            role: OrganizationRoleEnum.ORG_ADMIN,
+            status: UserOrganizationStatus.ACTIVE,
+          },
+        });
+        if (otherAdmins === 0) {
+          throw new GraphQLError('Cannot remove the last organization administrator');
+        }
+      }
+      return prisma.userOrganization.update({
+        where: { userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId } },
+        data: {
+          status: args.status ?? undefined,
+          role: args.role ?? undefined,
+        },
+      });
     },
   }),
 }));
