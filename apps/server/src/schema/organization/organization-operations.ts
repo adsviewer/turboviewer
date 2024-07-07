@@ -3,7 +3,7 @@ import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus } from 
 import { GraphQLError } from 'graphql';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
-import { FireAndForget } from '@repo/utils';
+import { AError, FireAndForget, isAError } from '@repo/utils';
 import { builder } from '../builder';
 import {
   authConfirmInvitedUserEndpoint,
@@ -103,18 +103,18 @@ builder.mutationFields((t) => ({
         where: { id: ctx.currentUserId },
       });
 
-      const domain = user.emailType === EmailType.WORK ? RegExp(/.*@(?<domain>\S+)/).exec(user.email)?.[1] : undefined;
+      const domain = await (async () => {
+        const domainInner =
+          user.emailType === EmailType.WORK ? RegExp(/.*@(?<domain>\S+)/).exec(user.email)?.[1] : undefined;
 
-      if (domain) {
+        if (!domainInner) return undefined;
         const existingDomain = await prisma.organization.findUnique({
-          where: { domain },
+          where: { domain: domainInner },
         });
-        if (existingDomain) {
-          throw new GraphQLError(
-            'There is already an organization with that domain, please contact the organization administration for access',
-          );
-        }
-      }
+        if (existingDomain) return undefined;
+        return domainInner;
+      })();
+
       return prisma.organization.create({
         ...query,
         data: {
@@ -132,30 +132,21 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  deleteOrganization: t.withAuth({ authenticated: true }).prismaField({
+  deleteOrganization: t.withAuth({ isOrgAdmin: true, isAdmin: true }).prismaField({
     type: OrganizationDto,
     args: {
-      organizationId: t.arg.string({ required: true }),
+      organizationId: t.arg.string({ required: false }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
-      const deleteOrg = () =>
-        prisma.organization.delete({
-          ...query,
-          where: { id: args.organizationId },
-        });
-      if (ctx.isOrgAdmin && ctx.organizationId === args.organizationId) {
-        return deleteOrg();
+      const organizationId = args.organizationId ?? ctx.organizationId ?? new AError('No organizationId provided');
+      if (isAError(organizationId)) {
+        throw new GraphQLError('No organizationId provided');
       }
-      const userOrg = await prisma.userOrganization.findUnique({
-        where: {
-          userId_organizationId: { organizationId: args.organizationId, userId: ctx.currentUserId },
-          role: OrganizationRoleEnum.ORG_ADMIN,
-        },
-      });
-      if (!userOrg) {
-        throw new GraphQLError('You do not have permission to delete this organization');
+
+      if ((ctx.isOrgAdmin && ctx.organizationId === args.organizationId) ?? ctx.isAdmin) {
+        return prisma.organization.delete({ ...query, where: { id: organizationId } });
       }
-      return deleteOrg();
+      throw new GraphQLError('You do not have permission to delete this organization');
     },
   }),
 

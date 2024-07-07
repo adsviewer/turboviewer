@@ -546,7 +546,7 @@ export type MutationDeleteInvitationLinkArgs = {
 };
 
 export type MutationDeleteOrganizationArgs = {
-  organizationId: Scalars['String']['input'];
+  organizationId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationForgetPasswordArgs = {
