@@ -482,7 +482,7 @@ type Mutation {
   Deletes the invitation link for the given role
   """
   deleteInvitationLink(role: OrganizationRoleEnum!): Boolean!
-  deleteOrganization(organizationId: String!): Organization!
+  deleteOrganization(organizationId: String): Organization!
   forgetPassword(email: String!): Boolean!
   inviteUsers(role: OrganizationRoleEnum!, users: [InviteUsers!]!): Boolean!
   login(email: String!, password: String!, token: String): Tokens!
