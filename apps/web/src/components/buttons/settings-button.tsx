@@ -16,7 +16,7 @@ export default function SettingsButton(): ReactNode {
   return (
     <Group justify="center">
       {/* Icon Button */}
-      <ActionIcon onClick={open} variant="default" size="xl" aria-label="Settings">
+      <ActionIcon onClick={open} variant="default" size={35} aria-label="Settings">
         <IconSettings />
       </ActionIcon>
 

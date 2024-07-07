@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  AppShell,
-  AppShellHeader,
-  AppShellMain,
-  AppShellNavbar,
-  Burger,
-  Divider,
-  Flex,
-  Group,
-  NavLink,
-} from '@mantine/core';
+import { AppShell, AppShellHeader, AppShellMain, AppShellNavbar, Burger, Divider, Flex, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconBuilding, IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
@@ -20,6 +10,7 @@ import SettingsButton from '@/components/buttons/settings-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
 import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
+import OrganizationSelect from '@/components/dropdowns/organization-select/organization-select';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -54,13 +45,16 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
       padding="md"
     >
       <AppShellHeader>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <LogoFull />
+        <Flex h="100%" mx="md" align="center" justify="space-between">
+          <Flex mr="md" align="center">
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <LogoFull />
+          </Flex>
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
+            <OrganizationSelect />
             <SettingsButton />
           </Flex>
-        </Group>
+        </Flex>
       </AppShellHeader>
 
       {/* Navbar */}

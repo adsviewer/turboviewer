@@ -22,7 +22,8 @@ export default function UserButton(): ReactNode {
         lastName: res.lastName,
         email: res.email,
         allRoles: res.allRoles,
-        currentOrganizationId: res.currentOrganizationId,
+        currentOrganization: res.currentOrganization,
+        organizations: res.organizations,
         photoUrl: res.photoUrl,
         currentOrganization: res.currentOrganization,
       });

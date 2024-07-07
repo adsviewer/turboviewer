@@ -57,7 +57,7 @@
     "connected": "Verbonden",
     "notConnected": "Niet verbonden",
     "revokeWarning": "U staat op het punt om een herroepingsactie uit te voeren! Adsviewer zal alle gegevens met betrekking tot deze integratie wissen.",
-    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak",
+    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak.",
     "syncedOn": "Gesynchroniseerd op",
     "ads": "advertenties"
   },
@@ -98,7 +98,11 @@
     "organizationName": "Naam organisatie",
     "roleAdmin": "Beheerder",
     "roleOrganizationAdmin": "Organisatiebeheerder",
-    "roleOrganizationUser": "Lid"
+    "roleOrganizationUser": "Lid",
+    "deleteOrganization": "Organisatie verwijderen",
+    "delete": "Verwijderen",
+    "deleteTip": "Om te bevestigen typt u \"DELETE\" in het onderstaande vak.",
+    "deleteWarning": "WAARSCHUWING: Adsviewer zal alle gegevens met betrekking tot deze organisatie wissen!"
   },
   "profile": {
     "title": "Profiel",
