@@ -523,6 +523,7 @@ export type Mutation = {
   signup: Tokens;
   switchOrganization: Tokens;
   updateOrganization: Organization;
+  updateOrganizationUser: UserOrganization;
   updateUser: User;
 };
 
@@ -590,6 +591,12 @@ export type MutationSwitchOrganizationArgs = {
 
 export type MutationUpdateOrganizationArgs = {
   name: Scalars['String']['input'];
+};
+
+export type MutationUpdateOrganizationUserArgs = {
+  role?: InputMaybe<OrganizationRoleEnum>;
+  status?: InputMaybe<UserOrganizationStatusNotInvited>;
+  userId: Scalars['String']['input'];
 };
 
 export type MutationUpdateUserArgs = {
@@ -774,6 +781,11 @@ export enum UserOrganizationStatus {
   ACTIVE = 'ACTIVE',
   NON_ACTIVE = 'NON_ACTIVE',
   INVITED = 'INVITED',
+}
+
+export enum UserOrganizationStatusNotInvited {
+  ACTIVE = 'ACTIVE',
+  NON_ACTIVE = 'NON_ACTIVE',
 }
 
 export enum UserStatus {

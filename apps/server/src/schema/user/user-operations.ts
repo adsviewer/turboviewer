@@ -126,7 +126,7 @@ builder.mutationFields((t) => ({
   refreshToken: t.withAuth({ refresh: true }).field({
     description: 'Uses the refresh token to generate a new token',
     type: 'String',
-    resolve: async (root, args, ctx, _info) => {
+    resolve: async (_root, _args, ctx, _info) => {
       const user = await prisma.user.findUnique({
         where: { id: ctx.currentUserId },
         include: { roles: { select: { role: true } } },

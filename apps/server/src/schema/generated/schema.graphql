@@ -502,6 +502,11 @@ type Mutation {
   signup(args: SignUpInput!): Tokens!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
+  updateOrganizationUser(
+    role: OrganizationRoleEnum
+    status: UserOrganizationStatusNotInvited
+    userId: String!
+  ): UserOrganization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }
 
@@ -667,6 +672,11 @@ enum UserOrganizationStatus {
   ACTIVE
   NON_ACTIVE
   INVITED
+}
+
+enum UserOrganizationStatusNotInvited {
+  ACTIVE
+  NON_ACTIVE
 }
 
 enum UserStatus {
