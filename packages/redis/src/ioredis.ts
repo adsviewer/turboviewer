@@ -39,3 +39,16 @@ export const redisIncr = async (key: string): Promise<number> => {
 export const redisExpire = async (key: string, ttlSec: number): Promise<number> => {
   return ioredis.expire(key, ttlSec);
 };
+
+export const redisDelPattern = (pattern: string): void => {
+  const stream = ioredis.scanStream({ match: pattern });
+  stream.on('data', (keys: string[]) => {
+    if (keys.length) {
+      const pipeline = ioredis.pipeline();
+      keys.forEach((key: string) => {
+        pipeline.del(key);
+      });
+      void pipeline.exec();
+    }
+  });
+};

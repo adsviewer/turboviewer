@@ -5,6 +5,7 @@ import type { z } from 'zod';
 import { type channelIngressInput, type channelIngressOutput } from '@repo/lambda-types';
 import { isAError } from '@repo/utils';
 import { saveChannelData } from './integration-helper';
+import { deleteInsightsCache } from './insights-cache';
 
 const refreshDataOf = async (integration: Integration, initial: boolean): Promise<void> => {
   await saveChannelData(integration, initial).catch((e: unknown) => {
@@ -41,9 +42,11 @@ export const refreshData = async ({
       );
     for (const integration of integrations) {
       await refreshDataOf(integration, initial);
+      deleteInsightsCache(integration.organizationId);
     }
   } else {
     await refreshDataAll(initial);
+    deleteInsightsCache();
   }
   return {
     statusCode: 200,

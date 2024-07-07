@@ -1,7 +1,7 @@
 import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
 import { Kind } from 'graphql/language';
-import { isAError } from '@repo/utils';
-import { type ChannelIFrame, iFramePerInsight } from '@repo/channel';
+import { FireAndForget, isAError } from '@repo/utils';
+import { type ChannelIFrame, getInsightsCache, iFramePerInsight, setInsightsCache } from '@repo/channel';
 import * as changeCase from 'change-case';
 import { groupBy as groupByUtil, uniqueBy } from '../../utils/data-object-utils';
 import { builder } from '../builder';
@@ -17,6 +17,8 @@ import {
 } from './integration-types';
 import InsightWhereInput = Prisma.InsightWhereInput;
 import InsightScalarFieldEnum = Prisma.InsightScalarFieldEnum;
+
+const fireAndForget = new FireAndForget();
 
 builder.queryFields((t) => ({
   lastThreeMonthsAds: t.withAuth({ isInOrg: true }).prismaField({
@@ -42,6 +44,9 @@ builder.queryFields((t) => ({
       filter: t.arg({ type: FilterInsightsInput, required: true }),
     },
     resolve: async (_root, args, ctx, info) => {
+      const redisValue = await getInsightsCache<GroupedInsightsType>(ctx.organizationId, args.filter);
+      if (redisValue) return redisValue;
+
       const where: InsightWhereInput = {
         adAccountId: { in: args.filter.adAccountIds ?? undefined },
         adId: { in: args.filter.adIds ?? undefined },
@@ -158,13 +163,15 @@ builder.queryFields((t) => ({
         });
       }
 
-      return {
+      const retVal = {
         totalCount: await totalElementsP,
         hasNext,
         page: args.filter.page,
         pageSize: args.filter.pageSize,
         edges: ret,
       };
+      fireAndForget.add(() => setInsightsCache(ctx.organizationId, args.filter, retVal));
+      return retVal;
     },
   }),
 
@@ -244,6 +251,7 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
     edges: t.field({ type: [GroupedInsightDto] }),
   }),
 });
+type GroupedInsightsType = typeof GroupedInsightsDto.$inferType;
 
 const IFrameDTO = builder.objectRef<ChannelIFrame>('IFrame').implement({
   fields: (t) => ({
