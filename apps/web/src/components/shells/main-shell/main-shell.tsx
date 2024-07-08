@@ -11,6 +11,7 @@ import GroupFilters from '@/app/(authenticated)/insights/components/group-filter
 import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
 import OrganizationSelect from '@/components/dropdowns/organization-select/organization-select';
+import CreateOrganizationButton from '@/components/buttons/create-organization-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -52,6 +53,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           </Flex>
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
             <OrganizationSelect />
+            <CreateOrganizationButton />
             <SettingsButton />
           </Flex>
         </Flex>

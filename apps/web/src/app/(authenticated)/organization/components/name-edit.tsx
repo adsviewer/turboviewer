@@ -56,6 +56,7 @@ export default function NameEdit(): React.ReactNode {
           {...form.getInputProps('name')}
           disabled={!isOrgAdmin(userDetails.allRoles)}
         />
+        {/*<Button type="submit" variant="outline" disabled={userDetails.allRoles.length ? true : false}>*/}
         <Button type="submit" variant="outline" disabled={!isOrgAdmin(userDetails.allRoles)}>
           {t('save')}
         </Button>

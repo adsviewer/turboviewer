@@ -1,7 +1,7 @@
 'use client';
 
 import { useDisclosure } from '@mantine/hooks';
-import { ActionIcon, Flex, Group, Modal, Text } from '@mantine/core';
+import { ActionIcon, Flex, Group, Modal, Text, Tooltip } from '@mantine/core';
 import { IconSettings } from '@tabler/icons-react';
 import React from 'react';
 import { type ReactNode } from 'react';
@@ -16,9 +16,11 @@ export default function SettingsButton(): ReactNode {
   return (
     <Group justify="center">
       {/* Icon Button */}
-      <ActionIcon onClick={open} variant="default" size={35} aria-label="Settings">
-        <IconSettings />
-      </ActionIcon>
+      <Tooltip label={t('title')}>
+        <ActionIcon onClick={open} variant="default" size={35} aria-label="Settings">
+          <IconSettings />
+        </ActionIcon>
+      </Tooltip>
 
       {/* Modal */}
       <Modal opened={opened} onClose={close} title={t('title')} size="md" centered>

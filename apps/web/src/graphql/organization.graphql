@@ -1,3 +1,10 @@
+mutation createOrganization($name: String!) {
+  createOrganization(name: $name) {
+    id
+    name
+  }
+}
+
 mutation updateOrganization($name: String!) {
   updateOrganization(name: $name) {
     id
