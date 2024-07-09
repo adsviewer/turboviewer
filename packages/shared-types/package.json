@@ -1,0 +1,35 @@
+{
+  "name": "@repo/shared-types",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared Types",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "files": [
+    "dist/**"
+  ],
+  "exports": {
+    "javascript": "./dist/index.js",
+    "default": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier . --check",
+    "prettier:fix": "prettier . --write",
+    "clean": "rm -rf .turbo .next node_modules dist",
+    "update": "pnpm update --latest"
+  },
+  "author": "",
+  "license": "UNLICENCED",
+  "devDependencies": {
+    "@repo/database": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.2"
+  }
+}
