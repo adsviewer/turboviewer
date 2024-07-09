@@ -28,7 +28,7 @@ export function UserInfo({ userDetails }: PropsType): React.ReactNode {
               {renderUserRoles(userDetails.allRoles)}
             </Text>
           ) : (
-            <Skeleton height={20} my={2} radius={12} animate />
+            <Skeleton width={220} height={20} my={2} radius={12} animate />
           )}
 
           {userDetails.firstName && userDetails.lastName ? (
@@ -36,16 +36,14 @@ export function UserInfo({ userDetails }: PropsType): React.ReactNode {
               {`${userDetails.firstName} ${userDetails.lastName}`}
             </Text>
           ) : (
-            <Skeleton height={20} my={2} radius={12} animate />
+            <Skeleton width={180} height={20} my={2} radius={12} animate />
           )}
 
           {userDetails.email ? (
             <Text fz="xs" c="dimmed">
               {userDetails.email}
             </Text>
-          ) : (
-            <Skeleton height={8} my={2} radius={12} animate />
-          )}
+          ) : null}
         </Flex>
       </Group>
     </div>
