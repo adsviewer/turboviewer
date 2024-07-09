@@ -104,7 +104,8 @@
     "delete": "Διαγραφή",
     "deleteTip": "Για επιβεβαίωση, γράψτε \"DELETE\" στο παρακάτω πεδίο.",
     "deleteWarning": "ΠΡΟΕΙΔΟΠΟΙΗΣΗ: Το Adsviewer θα διαγράψει όλα τα δεδομένα που σχετίζονται με αυτόν τον οργανισμό!",
-    "createOrganization": "Δημιουργία οργανισμού"
+    "createOrganization": "Δημιουργία οργανισμού",
+    "selectOrganization": "Επιλογή οργανισμού"
   },
   "profile": {
     "title": "Προφίλ",

@@ -5,11 +5,13 @@ import React, { useEffect, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import _ from 'lodash';
 import { logger } from '@repo/logger';
+import { useTranslations } from 'next-intl';
 import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
 import { switchOrganization } from '@/app/(authenticated)/organization/actions';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
 
 export default function OrganizationSelect(): React.ReactNode {
+  const t = useTranslations('organization');
   const userDetails = useAtomValue(userDetailsAtom);
   const [organizations, setOrganizations] = useState<ComboboxData>([]);
 
@@ -44,9 +46,9 @@ export default function OrganizationSelect(): React.ReactNode {
 
   return (
     <Select
-      placeholder="Select organization"
+      placeholder={t('selectOrganization')}
       data={organizations}
-      value={userDetails.currentOrganization?.id}
+      value={userDetails.currentOrganization?.id ?? null}
       onChange={handleOrganizationSelect}
       withCheckIcon
       comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}

@@ -104,7 +104,8 @@
     "delete": "Verwijderen",
     "deleteTip": "Om te bevestigen typt u \"DELETE\" in het onderstaande vak.",
     "deleteWarning": "WAARSCHUWING: Adsviewer zal alle gegevens met betrekking tot deze organisatie wissen!",
-    "createOrganization": "Creëer organisatie"
+    "createOrganization": "Creëer organisatie",
+    "selectOrganization": "Selecteer organisatie"
   },
   "profile": {
     "title": "Profiel",
