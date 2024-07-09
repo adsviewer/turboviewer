@@ -7,7 +7,7 @@ import { useAtom } from 'jotai';
 import { type UpdateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { getUserDetails } from '@/app/(authenticated)/actions';
-import { isOrgAdmin } from '@/util/access-utils';
+import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { updateOrganization } from '../actions';
 
 export default function NameEdit(): React.ReactNode {
@@ -54,9 +54,13 @@ export default function NameEdit(): React.ReactNode {
           placeholder={t('title')}
           key={form.key('name')}
           {...form.getInputProps('name')}
-          disabled={!isOrgAdmin(userDetails.allRoles)}
+          disabled={!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)}
         />
-        <Button type="submit" variant="outline" disabled={!isOrgAdmin(userDetails.allRoles)}>
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)}
+        >
           {t('save')}
         </Button>
       </Flex>
