@@ -1,21 +1,9 @@
-import jwt, {
-  type JsonWebTokenError,
-  type JwtPayload,
-  type NotBeforeError,
-  type TokenExpiredError,
-} from 'jsonwebtoken';
-import { type OrganizationRoleEnum, prisma, type RoleEnum, type UserStatus } from '@repo/database';
+import jwt, { type JsonWebTokenError, type NotBeforeError, type TokenExpiredError } from 'jsonwebtoken';
+import { prisma, type RoleEnum } from '@repo/database';
 import { AError, Environment, MODE } from '@repo/utils';
+import { type AJwtPayload } from '@repo/shared-types';
 import { env } from './config';
 import { type UserWithRoles, userWithRoles } from './contexts/user/user-roles';
-
-interface AJwtPayload extends JwtPayload {
-  userId: string;
-  roles?: (RoleEnum | OrganizationRoleEnum)[];
-  organizationId?: string | null;
-  refresh?: boolean;
-  userStatus: UserStatus;
-}
 
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
 const { sign, verify } = jwt;

@@ -65,7 +65,6 @@ export const UserDto = builder.prismaObject('User', {
         roles: {
           select: {
             role: nestedSelection(true),
-            organizations: { select: { role: nestedSelection(true) } },
           },
         },
       }),
@@ -73,14 +72,23 @@ export const UserDto = builder.prismaObject('User', {
     }),
     allRoles: t.field({
       type: [AllRolesDto],
-      select: (_args, _ctx, nestedSelection) => ({
+      select: (_args, ctx, nestedSelection) => ({
         roles: { select: { role: nestedSelection(true) } },
-        organizations: { select: { role: nestedSelection(true) }, where: { organizationId: _ctx.organizationId } },
+        ...(ctx.organizationId
+          ? {
+              organizations: {
+                select: { role: nestedSelection(true) },
+                where: { organizationId: ctx.organizationId },
+              },
+            }
+          : {}),
       }),
       resolve: (user) => {
         const userRoles = user.roles.map(({ role }) => role);
-        const organizationRoles = user.organizations.map(({ role }) => role);
-        return userRoles.concat(organizationRoles as unknown as RoleEnum[]);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- it can be null since we may not be selecting organizations on top
+        const organizationRoles = user.organizations?.map(({ role }) => role);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- it can be null since we may not be selecting organizations on top
+        return organizationRoles ? userRoles.concat(organizationRoles as unknown as RoleEnum[]) : userRoles;
       },
     }),
     organizations: t.relation('organizations'),
