@@ -487,11 +487,6 @@ type Mutation {
   inviteUsers(role: OrganizationRoleEnum!, users: [InviteUsers!]!): Boolean!
   login(email: String!, password: String!, token: String): Tokens!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
-
-  """
-  Uses the refresh token to generate a new token
-  """
-  refreshToken: String!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
 
@@ -593,6 +588,11 @@ type Query {
   loginProviders(inviteToken: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!
   organization: Organization!
+
+  """
+  Uses the refresh token to generate a new token
+  """
+  refreshToken: String!
   settingsChannels: [IntegrationListItem!]!
   userOrganizations: [Organization!]!
 }

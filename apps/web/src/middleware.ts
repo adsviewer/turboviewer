@@ -135,7 +135,7 @@ const tryRefreshToken = async (
         'Content-Type': 'application/json',
         Authorization: `Bearer ${refreshToken}`,
       },
-      body: JSON.stringify({ query: 'mutation {refreshToken}' }),
+      body: JSON.stringify({ query: 'query {refreshToken}' }),
     })
       .then((response) => response.json())
       .catch((error: unknown) => {

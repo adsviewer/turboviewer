@@ -513,8 +513,6 @@ export type Mutation = {
   inviteUsers: Scalars['Boolean']['output'];
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
-  /** Uses the refresh token to generate a new token */
-  refreshToken: Scalars['String']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
   /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
@@ -682,6 +680,8 @@ export type Query = {
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
   organization: Organization;
+  /** Uses the refresh token to generate a new token */
+  refreshToken: Scalars['String']['output'];
   settingsChannels: Array<IntegrationListItem>;
   userOrganizations: Array<Organization>;
 };
@@ -952,9 +952,9 @@ export type ResetPasswordMutation = {
   resetPassword: { __typename?: 'Tokens'; token: string; refreshToken: string };
 };
 
-export type RefreshTokenMutationVariables = Exact<{ [key: string]: never }>;
+export type RefreshTokenQueryVariables = Exact<{ [key: string]: never }>;
 
-export type RefreshTokenMutation = { __typename?: 'Mutation'; refreshToken: string };
+export type RefreshTokenQuery = { __typename?: 'Query'; refreshToken: string };
 
 export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: never }>;
 
@@ -1191,7 +1191,7 @@ export const ResetPasswordDocument = gql`
   }
 `;
 export const RefreshTokenDocument = gql`
-  mutation refreshToken {
+  query refreshToken {
     refreshToken
   }
 `;
@@ -1323,12 +1323,12 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<ResetPasswordMutation>;
     },
-    refreshToken(variables?: RefreshTokenMutationVariables, options?: C): Promise<RefreshTokenMutation> {
-      return requester<RefreshTokenMutation, RefreshTokenMutationVariables>(
+    refreshToken(variables?: RefreshTokenQueryVariables, options?: C): Promise<RefreshTokenQuery> {
+      return requester<RefreshTokenQuery, RefreshTokenQueryVariables>(
         RefreshTokenDocument,
         variables,
         options,
-      ) as Promise<RefreshTokenMutation>;
+      ) as Promise<RefreshTokenQuery>;
     },
     resendEmailConfirmation(
       variables?: ResendEmailConfirmationMutationVariables,
