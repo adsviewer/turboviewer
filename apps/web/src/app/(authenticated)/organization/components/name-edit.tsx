@@ -5,9 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useForm } from '@mantine/form';
 import { useAtom } from 'jotai';
 import { type UpdateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
-import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { getUserDetails } from '@/app/(authenticated)/actions';
+import { isOrgAdmin } from '@/util/access-utils';
 import { updateOrganization } from '../actions';
 
 export default function NameEdit(): React.ReactNode {
@@ -56,7 +56,6 @@ export default function NameEdit(): React.ReactNode {
           {...form.getInputProps('name')}
           disabled={!isOrgAdmin(userDetails.allRoles)}
         />
-        {/*<Button type="submit" variant="outline" disabled={userDetails.allRoles.length ? true : false}>*/}
         <Button type="submit" variant="outline" disabled={!isOrgAdmin(userDetails.allRoles)}>
           {t('save')}
         </Button>

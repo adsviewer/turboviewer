@@ -14,11 +14,11 @@ export default function UserButton(): ReactNode {
   const router = useRouter();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
-
   useEffect(() => {
     void getUserDetails()
       .then((res) => {
         logger.info(res);
+
         setUserDetails({
           id: res.id,
           firstName: res.firstName,
@@ -36,14 +36,14 @@ export default function UserButton(): ReactNode {
       });
   }, [setUserDetails]);
 
-  const redirectToUser = (): void => {
+  const redirectToProfile = (): void => {
     router.push('profile');
   };
 
   return (
     <Flex justify="flex-start" className={classes.user}>
       {isDataLoaded ? (
-        <Group onClick={redirectToUser}>
+        <Group onClick={redirectToProfile}>
           <Avatar src={userDetails.photoUrl} radius="xl" />
 
           <div style={{ flex: 1 }}>
