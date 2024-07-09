@@ -43,6 +43,22 @@ builder.queryFields((t) => ({
       return emailValidation.emailType;
     },
   }),
+
+  refreshToken: t.withAuth({ refresh: true }).field({
+    description: 'Uses the refresh token to generate a new token',
+    type: 'String',
+    resolve: async (_root, _args, ctx, _info) => {
+      const user = await prisma.user.findUnique({
+        where: { id: ctx.currentUserId },
+        include: { roles: { select: { role: true } } },
+      });
+      if (!user) {
+        throw new GraphQLError('User not found');
+      }
+      const { token } = await createJwts(user);
+      return token;
+    },
+  }),
 }));
 
 const signUpInputSchema = z.object({
@@ -121,21 +137,6 @@ builder.mutationFields((t) => ({
         throw new GraphQLError(jwts.message);
       }
       return jwts;
-    },
-  }),
-  refreshToken: t.withAuth({ refresh: true }).field({
-    description: 'Uses the refresh token to generate a new token',
-    type: 'String',
-    resolve: async (_root, _args, ctx, _info) => {
-      const user = await prisma.user.findUnique({
-        where: { id: ctx.currentUserId },
-        include: { roles: { select: { role: true } } },
-      });
-      if (!user) {
-        throw new GraphQLError('User not found');
-      }
-      const { token } = await createJwts(user);
-      return token;
     },
   }),
   updateUser: t.withAuth({ authenticated: true }).prismaField({
