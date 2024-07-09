@@ -11,8 +11,10 @@ export const signOut = async (): Promise<void> => {
   return Promise.resolve();
 };
 
-export const changeJWT = async (token: string, refreshToken: string): Promise<void> => {
+export const changeJWT = async (token: string, refreshToken?: string): Promise<void> => {
   cookies().set(TOKEN_KEY, token);
-  cookies().set(REFRESH_TOKEN_KEY, refreshToken);
+  if (refreshToken) {
+    cookies().set(REFRESH_TOKEN_KEY, refreshToken);
+  }
   return Promise.resolve();
 };

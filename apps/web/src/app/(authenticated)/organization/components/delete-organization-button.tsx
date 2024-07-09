@@ -9,7 +9,8 @@ import { useAtomValue } from 'jotai';
 import { logger } from '@repo/logger';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { signOut } from '@/app/(unauthenticated)/actions';
+import { refreshJWTToken } from '@/app/(authenticated)/actions';
+import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { deleteOrganization } from '../actions';
 
 export default function DeleteOrganizationButton(): React.ReactNode {
@@ -27,7 +28,6 @@ export default function DeleteOrganizationButton(): React.ReactNode {
 
   const performDeletion = (): void => {
     setIsDeleteDone(false);
-    logger.info(userDetails);
     void deleteOrganization({ organizationId: userDetails.currentOrganization?.id ?? '' })
       .then((res) => {
         if (res.error) {
@@ -35,8 +35,16 @@ export default function DeleteOrganizationButton(): React.ReactNode {
           return res.error;
         }
 
-        void signOut().then(() => {
-          setIsDeleteDone(true);
+        void refreshJWTToken().then((tokenRes) => {
+          const newToken = tokenRes.refreshToken;
+          void changeJWT(newToken)
+            .then(() => {
+              setIsDeleteDone(true);
+              window.location.reload();
+            })
+            .catch((error: unknown) => {
+              logger.error(error);
+            });
         });
       })
       .catch((error: unknown) => {
