@@ -4,6 +4,7 @@ import { Group, Avatar, Text, Flex } from '@mantine/core';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
+import { logger } from '@repo/logger';
 import { getUserDetails } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
@@ -15,20 +16,24 @@ export default function UserButton(): ReactNode {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    void getUserDetails().then((res) => {
-      setUserDetails({
-        id: res.id,
-        firstName: res.firstName,
-        lastName: res.lastName,
-        email: res.email,
-        allRoles: res.allRoles,
-        currentOrganization: res.currentOrganization,
-        organizations: res.organizations,
-        photoUrl: res.photoUrl,
-        currentOrganization: res.currentOrganization,
+    void getUserDetails()
+      .then((res) => {
+        logger.info(res);
+        setUserDetails({
+          id: res.id,
+          firstName: res.firstName,
+          lastName: res.lastName,
+          email: res.email,
+          allRoles: res.allRoles,
+          currentOrganization: res.currentOrganization,
+          organizations: res.organizations,
+          photoUrl: res.photoUrl,
+        currentOrganization: res.currentOrganization,});
+        setIsDataLoaded(true);
+      })
+      .catch((error: unknown) => {
+        logger.error(error);
       });
-      setIsDataLoaded(true);
-    });
   }, [setUserDetails]);
 
   const redirectToUser = (): void => {

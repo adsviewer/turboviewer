@@ -14,7 +14,8 @@
     "integrations": "Integrations",
     "settings": "Settings",
     "organization": "Organization",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "noOrganizationData": "No organization data"
   },
   "insights": {
     "title": "Insights",

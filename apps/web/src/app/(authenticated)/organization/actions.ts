@@ -7,6 +7,8 @@ import {
   type SwitchOrganizationMutationVariables,
   type UpdateOrganizationMutation,
   type UpdateOrganizationMutationVariables,
+  type DeleteOrganizationMutation,
+  type DeleteOrganizationMutationVariables,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -27,4 +29,10 @@ export async function switchOrganization(
   values: SwitchOrganizationMutationVariables,
 ): Promise<UrqlResult<SwitchOrganizationMutation, string>> {
   return await handleUrqlRequest(urqlClientSdk().switchOrganization(values));
+}
+
+export async function deleteOrganization(
+  values: DeleteOrganizationMutationVariables,
+): Promise<UrqlResult<DeleteOrganizationMutation, string>> {
+  return await handleUrqlRequest(urqlClientSdk().deleteOrganization(values));
 }

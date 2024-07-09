@@ -14,7 +14,8 @@
     "integrations": "Ενσωματώσεις",
     "settings": "Ρυθμίσεις",
     "organization": "Οργανισμός",
-    "signOut": "Αποσύνδεση"
+    "signOut": "Αποσύνδεση",
+    "noOrganizationData": "Δεν υπάρχουν δεδομένα οργανισμού."
   },
   "insights": {
     "title": "Διορατικότητες",

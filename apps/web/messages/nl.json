@@ -14,7 +14,8 @@
     "integrations": "Integraties",
     "settings": "Instellingen",
     "organization": "Organisatie",
-    "signOut": "Uitloggen"
+    "signOut": "Uitloggen",
+    "noOrganizationData": "Geen organisatiegegevens"
   },
   "insights": {
     "title": "Inzichten",

@@ -18,3 +18,9 @@ mutation switchOrganization($organizationId: String!) {
     refreshToken
   }
 }
+
+mutation deleteOrganization($organizationId: String!) {
+  deleteOrganization(organizationId: $organizationId) {
+    id
+  }
+}

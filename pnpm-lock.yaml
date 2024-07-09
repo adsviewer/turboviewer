@@ -436,6 +436,9 @@ importers:
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config-eslint
+      '@repo/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@repo/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/config-tailwind

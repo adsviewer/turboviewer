@@ -6,9 +6,11 @@ import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
+import { logger } from '@repo/logger';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-// import { deAuthIntegration } from '@/app/(authenticated)/integrations/actions';
+import { signOut } from '@/app/(unauthenticated)/actions';
+import { deleteOrganization } from '../actions';
 
 export default function DeleteOrganizationButton(): React.ReactNode {
   const t = useTranslations('organization');
@@ -23,13 +25,23 @@ export default function DeleteOrganizationButton(): React.ReactNode {
     setDeleteFieldValue('');
   };
 
-  const deleteOrganization = (): void => {
+  const performDeletion = (): void => {
     setIsDeleteDone(false);
-    // void deAuthIntegration(props.integrationType).then(() => {
-    //   setIsRevokeDone(true);
-    //   closeRevokeModal();
-    //   router.refresh();
-    // });
+    logger.info(userDetails);
+    void deleteOrganization({ organizationId: userDetails.currentOrganization?.id ?? '' })
+      .then((res) => {
+        if (res.error) {
+          logger.error(res.error);
+          return res.error;
+        }
+
+        void signOut().then(() => {
+          setIsDeleteDone(true);
+        });
+      })
+      .catch((error: unknown) => {
+        logger.error(error);
+      });
   };
 
   return (
@@ -56,8 +68,8 @@ export default function DeleteOrganizationButton(): React.ReactNode {
               setDeleteFieldValue(event.currentTarget.value);
             }}
           />
-          <Button color="red" disabled={deleteFieldValue !== 'DELETE' || !isDeleteDone} onClick={deleteOrganization}>
-            {t('delete')}
+          <Button color="red" disabled={deleteFieldValue !== 'DELETE' || !isDeleteDone} onClick={performDeletion}>
+            {t('delete')} {userDetails.currentOrganization?.name}
           </Button>
         </Flex>
       </Modal>
