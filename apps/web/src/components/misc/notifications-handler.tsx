@@ -5,6 +5,7 @@ import { Notifications, notifications } from '@mantine/notifications';
 import { useEffect, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
+import { errorKey } from '@/util/url-query-utils';
 
 export default function NotificationsHandler(): ReactNode {
   const t = useTranslations('generic');
@@ -21,8 +22,10 @@ export default function NotificationsHandler(): ReactNode {
         message: sentenceCase(error),
         color: 'red',
       });
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete(errorKey);
+      router.replace(`${pathname}?${newSearchParams.toString()}`);
     }
-    router.replace(pathname);
   }, [pathname, router, searchParams, t]);
 
   return <Notifications />;
