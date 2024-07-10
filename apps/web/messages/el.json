@@ -2,6 +2,11 @@
   "generic": {
     "error": "Σφάλμα"
   },
+  "errors": {
+    "errorPageTitle": "Er is iets fout gegaan...",
+    "errorPageDescription": "Onze servers konden uw verzoek niet verwerken. Maak je geen zorgen, ons team is al op de hoogte gebracht. Probeer de pagina te vernieuwen.",
+    "refreshHint": "Pagina hernieuwen"
+  },
   "navbar": {
     "insights": "Διορατικότητες",
     "integrations": "Ενσωματώσεις",

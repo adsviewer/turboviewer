@@ -2,6 +2,11 @@
   "generic": {
     "error": "Fout"
   },
+  "errors": {
+    "errorPageTitle": "Something bad just happened...",
+    "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
+    "refreshHint": "Refresh the page"
+  },
   "navbar": {
     "insights": "Inzichten",
     "integrations": "Integraties",
