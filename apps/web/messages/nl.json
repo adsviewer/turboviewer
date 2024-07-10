@@ -3,9 +3,9 @@
     "error": "Fout"
   },
   "errors": {
-    "errorPageTitle": "Something bad just happened...",
-    "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
-    "refreshHint": "Refresh the page"
+    "errorPageTitle": "Er is iets fout gegaan...",
+    "errorPageDescription": "Onze servers konden uw verzoek niet verwerken. Maak je geen zorgen, ons team is al op de hoogte gebracht. Probeer de pagina te vernieuwen.",
+    "refreshHint": "Pagina hernieuwen"
   },
   "navbar": {
     "insights": "Inzichten",
