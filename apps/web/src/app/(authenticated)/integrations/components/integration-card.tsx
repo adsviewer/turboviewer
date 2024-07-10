@@ -1,13 +1,16 @@
 'use client';
 
-import { Badge, Button, Card, Flex, Group, Text, useMantineTheme, Modal, Alert, Input } from '@mantine/core';
+import { Badge, Button, Card, Flex, Group, Text, useMantineTheme, Modal, Alert, Input, Tooltip } from '@mantine/core';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle } from '@tabler/icons-react';
+import { useAtomValue } from 'jotai/index';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { isOrgAdmin } from '@/util/access-utils';
 import { deAuthIntegration } from '../actions';
 
 interface IntegrationProps {
@@ -24,10 +27,12 @@ interface IntegrationProps {
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
   const t = useTranslations('integrations');
+  const tGeneric = useTranslations('generic');
   const format = useFormatter();
   const [opened, { open, close }] = useDisclosure(false);
   const theme = useMantineTheme();
   const router = useRouter();
+  const userDetails = useAtomValue(userDetailsAtom);
   const [isRevokeDone, setIsRevokeDone] = useState<boolean>(true);
   const [revokeFieldValue, setRevokeFieldValue] = useInputState('');
 
@@ -55,20 +60,25 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
     if (props.isAvailable) {
       if (!props.isConnected) {
         return (
-          <Button
-            mt="lg"
-            onClick={() => {
-              handleConnect();
-            }}
-          >
-            {t('connect')}
-          </Button>
+          <Tooltip label={tGeneric('accessOrgAdmin')} disabled={isOrgAdmin(userDetails.allRoles)}>
+            <Button
+              mt="lg"
+              onClick={() => {
+                handleConnect();
+              }}
+              disabled={!isOrgAdmin(userDetails.allRoles)}
+            >
+              {t('connect')}
+            </Button>
+          </Tooltip>
         );
       }
       return (
-        <Button mt="lg" color={theme.colors.red[7]} onClick={open}>
-          {t('revoke')}
-        </Button>
+        <Tooltip label={tGeneric('accessOrgAdmin')} disabled={isOrgAdmin(userDetails.allRoles)}>
+          <Button mt="lg" color={theme.colors.red[7]} onClick={open} disabled={!isOrgAdmin(userDetails.allRoles)}>
+            {t('revoke')}
+          </Button>
+        </Tooltip>
       );
     }
     return (

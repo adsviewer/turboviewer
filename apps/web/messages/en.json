@@ -1,6 +1,7 @@
 {
   "generic": {
-    "error": "Error"
+    "error": "Error",
+    "accessOrgAdmin": "Only organization admins may perform this action!"
   },
 "errors": {
   "errorPageTitle": "Something bad just happened...",
