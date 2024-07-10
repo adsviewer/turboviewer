@@ -1,6 +1,14 @@
 import { createHmac } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
-import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
+import {
+  CurrencyEnum,
+  DeviceEnum,
+  type Integration,
+  IntegrationTypeEnum,
+  prisma,
+  PublisherEnum,
+  type AdAccount as DbAdAccount,
+} from '@repo/database';
 import { AError, FireAndForget, getDayPriorTillTomorrow, getLastXMonths, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -19,7 +27,6 @@ import {
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import _ from 'lodash';
 import {
-  type AdAccountEssential,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -201,10 +208,9 @@ class Meta implements ChannelInterface {
 
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const accounts = await this.getActiveAdAccounts(integration);
-    if (isAError(accounts)) return accounts;
-    logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(accounts)} active accounts`);
-    const dbAccounts = await saveAccounts(accounts, integration);
+    const dbAccounts = await this.saveAdAccounts(integration);
+    if (isAError(dbAccounts)) return dbAccounts;
+    logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(dbAccounts)} active accounts`);
 
     const adReportsAccountMap = await this.runAdInsightReports(dbAccounts, initial, integration);
     if (isAError(adReportsAccountMap)) return adReportsAccountMap;
@@ -256,7 +262,7 @@ class Meta implements ChannelInterface {
     return PublisherEnum.Facebook;
   }
 
-  private async getActiveAdAccounts(integration: Integration): Promise<ChannelAdAccount[] | AError> {
+  async saveAdAccounts(integration: Integration): Promise<DbAdAccount[] | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const user = new User('me', {}, undefined, undefined);
 
@@ -294,11 +300,13 @@ class Meta implements ChannelInterface {
     const accounts = await Meta.handlePagination(integration, getAdAccountsFn, accountSchema, toAccount);
     if (isAError(accounts)) return accounts;
     const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
-    return activeAccounts.map((acc) => ({
+    const channelAccounts = activeAccounts.map((acc) => ({
       name: acc.name,
       currency: acc.currency,
       externalId: acc.externalId,
     })) satisfies ChannelAdAccount[];
+
+    return await saveAccounts(channelAccounts, integration);
   }
 
   private async getCreatives(
@@ -335,12 +343,12 @@ class Meta implements ChannelInterface {
   }
 
   private async runAdInsightReports(
-    accounts: AdAccountEssential[],
+    accounts: DbAdAccount[],
     initial: boolean,
     integration: Integration,
-  ): Promise<AError | Map<string, AdAccountEssential>> {
+  ): Promise<AError | Map<string, DbAdAccount>> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const adReportsAccountMap = new Map<string, AdAccountEssential>();
+    const adReportsAccountMap = new Map<string, DbAdAccount>();
     const adReportRunSchema = z.object({ id: z.string() });
 
     for (const acc of accounts) {
@@ -383,7 +391,7 @@ class Meta implements ChannelInterface {
   }
 
   private async waitAndProcessReports(
-    adReportsAccountMap: Map<string, AdAccountEssential>,
+    adReportsAccountMap: Map<string, DbAdAccount>,
     integration: Integration,
     adExternalIdMap: Map<string, string>,
     initial: boolean,
@@ -446,7 +454,7 @@ class Meta implements ChannelInterface {
     reportId: string,
     integration: Integration,
     adExternalIdMap: Map<string, string>,
-    dbAccount: AdAccountEssential,
+    dbAccount: DbAdAccount,
   ): Promise<AError | undefined> {
     const insightSchema = z.object({
       account_id: z.string(),
@@ -515,7 +523,7 @@ class Meta implements ChannelInterface {
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd }[],
     adExternalIdMap: Map<string, string>,
     integration: Integration,
-    dbAccount: AdAccountEssential,
+    dbAccount: DbAdAccount,
   ): Promise<void> {
     const [insights, ads] = accountInsightsAndAds.reduce(
       (acc, item) => {

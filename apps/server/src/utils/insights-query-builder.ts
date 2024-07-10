@@ -35,8 +35,8 @@ export const getOrganizationalInsights = (organizationId: string, filter: Filter
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = '${organizationId}'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = '${organizationId}'
                                                 ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, filter.dataPointsPerInterval, filter.interval)}
@@ -164,8 +164,8 @@ export const insightsDatapoints = (args: InsightsDatapointsInputType, organizati
    FROM insights i
             JOIN ads a on i.ad_id = a.id
             JOIN ad_accounts aa on a.ad_account_id = aa.id
-            JOIN integrations int on aa.integration_id = int.id
-   WHERE int.organization_id = '${organizationId}'
+            JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+   WHERE ao."B" = '${organizationId}'
      AND i.date >= DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateFrom.toISOString()}')
      AND i.date < DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateTo.toISOString()}')
        ${args.adAccountId ? `AND i.ad_account_id = '${args.adAccountId}'` : ''}

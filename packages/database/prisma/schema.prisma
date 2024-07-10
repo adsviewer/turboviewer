@@ -21,15 +21,20 @@ generator pothos {
 }
 
 model Organization {
-  id                                          String             @id @default(cuid())
-  name                                        String
-  createdAt                                   DateTime           @default(now()) @map("created_at")
-  updatedAt                                   DateTime           @default(now()) @updatedAt @map("updated_at")
-  randomString                                String             @default(cuid())
-  integrations                                Integration[]
-  domain                                      String?            @unique
-  users                                       UserOrganization[]
-  usersThatHaveThisAsLastLoggedInOrganization User[]
+  id           String   @id @default(cuid())
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  randomString String   @default(cuid())
+  domain       String?  @unique
+  parentId     String?  @map("parent_id")
+
+  integrations    Integration[]
+  users           UserOrganization[]
+  currentOrgUsers User[]
+  parent          Organization?      @relation("children", fields: [parentId], references: [id])
+  children        Organization[]     @relation("children")
+  adAccounts      AdAccount[]
 
   @@map("organizations")
 }
@@ -164,18 +169,21 @@ model AdAccount {
   id            String @id @default(cuid())
   integrationId String @map("integration_id")
 
-  externalId String       @map("external_id")
+  type       IntegrationTypeEnum @default(META) // TODO: remove default value
+  externalId String              @map("external_id")
   name       String
   currency   CurrencyEnum
 
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  integration    Integration @relation(fields: [integrationId], references: [id])
+  integration    Integration    @relation(fields: [integrationId], references: [id])
   advertisements Ad[]
   creatives      Creative[]
-  Insight        Insight[]
+  insights       Insight[]
+  organizations  Organization[]
 
+  @@unique([externalId, type])
   @@unique([integrationId, externalId])
   @@map("ad_accounts")
 }
