@@ -9,12 +9,6 @@ import LoaderCentered from '@/components/misc/loader-centered';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import classes from './user-button.module.scss';
 
-export interface UserDetailsType {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
 export default function UserButton(): ReactNode {
   const router = useRouter();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
