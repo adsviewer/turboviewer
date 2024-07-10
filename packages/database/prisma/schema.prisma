@@ -169,7 +169,7 @@ model AdAccount {
   id            String @id @default(cuid())
   integrationId String @map("integration_id")
 
-  type       IntegrationTypeEnum @default(META) // TODO: remove default value
+  type       IntegrationTypeEnum
   externalId String              @map("external_id")
   name       String
   currency   CurrencyEnum
