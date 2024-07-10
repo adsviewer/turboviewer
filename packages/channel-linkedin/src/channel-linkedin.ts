@@ -1,12 +1,19 @@
 import { URLSearchParams } from 'node:url';
-import { CurrencyEnum, DeviceEnum, type Integration, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
+import {
+  type AdAccount,
+  CurrencyEnum,
+  DeviceEnum,
+  type Integration,
+  IntegrationTypeEnum,
+  prisma,
+  PublisherEnum,
+} from '@repo/database';
 import { addInterval, AError, extractDate, getBeforeXMonths, getYesterday, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
-  type AdAccountEssential,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -107,7 +114,7 @@ class LinkedIn implements ChannelInterface {
   }
 
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
-    const dbAccounts = await this.getAndSaveAdAccounts(integration);
+    const dbAccounts = await this.saveAdAccounts(integration);
     if (isAError(dbAccounts)) return dbAccounts;
 
     for (const dbAccount of dbAccounts) {
@@ -147,7 +154,7 @@ class LinkedIn implements ChannelInterface {
     return PublisherEnum.Facebook;
   }
 
-  private async getAndSaveAdAccounts(integration: Integration): Promise<AError | AdAccountEssential[]> {
+  async saveAdAccounts(integration: Integration): Promise<AError | AdAccount[]> {
     const adAccountSchema = z.object({
       test: z.boolean(),
       type: z.enum(['BUSINESS', 'ENTERPRISE']),
@@ -174,18 +181,19 @@ class LinkedIn implements ChannelInterface {
       adAccountSchema,
     );
     if (isAError(adAccounts)) return adAccounts;
-    const channelAccounts: ChannelAdAccount[] = adAccounts.map((a) => ({
+    const channelAccounts = adAccounts.map((a) => ({
       externalId: a.id.toString(),
       name: a.name,
       currency: a.currency,
-    }));
+    })) satisfies ChannelAdAccount[];
+
     return await saveAccounts(channelAccounts, integration);
   }
 
   private async getAdAnalytics(
     integration: Integration,
     initial: boolean,
-    dbAccount: AdAccountEssential,
+    dbAccount: AdAccount,
   ): Promise<AError | { creativeIds: Set<string>; insights: ChannelInsight[] }> {
     const params = {
       q: 'statistics',
@@ -235,7 +243,7 @@ class LinkedIn implements ChannelInterface {
   async saveCreativesAsAds(
     integration: Integration,
     creativeIds: Set<string>,
-    dbAccount: AdAccountEssential,
+    dbAccount: AdAccount,
   ): Promise<AError | Map<string, string>> {
     const channelAds: ChannelAd[] = Array.from(creativeIds).map((c) => ({
       externalAdAccountId: dbAccount.externalId,
@@ -250,7 +258,7 @@ class LinkedIn implements ChannelInterface {
   private async getAndSaveCampaigns(
     integration: Integration,
     campaignIds: Set<string>,
-    dbAccount: AdAccountEssential,
+    dbAccount: AdAccount,
   ): Promise<AError | z.infer<typeof schema>[]> {
     const params = {
       q: 'search',

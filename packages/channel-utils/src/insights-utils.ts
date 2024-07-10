@@ -1,18 +1,16 @@
-import type { Integration } from '@repo/database';
+import type { AdAccount, Integration } from '@repo/database';
 import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { getBeforeXMonths, getYesterday } from '@repo/utils';
 import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
-import { type AdAccountEssential } from './integration-util';
 
 export const saveAccounts = async (
   activeAccounts: ChannelAdAccount[],
   integration: Integration,
-): Promise<AdAccountEssential[]> =>
+): Promise<AdAccount[]> =>
   await Promise.all(
     activeAccounts.map((acc) =>
       prisma.adAccount.upsert({
-        select: { id: true, externalId: true, currency: true },
         where: {
           integrationId_externalId: {
             integrationId: integration.id,
@@ -25,6 +23,8 @@ export const saveAccounts = async (
           externalId: acc.externalId,
           currency: acc.currency,
           name: acc.name,
+          type: integration.type,
+          organizations: { connect: { id: integration.organizationId } },
         },
       }),
     ),
@@ -73,7 +73,7 @@ export const saveAds = async (
 export const saveInsights = async (
   insights: ChannelInsight[],
   adExternalIdMap: Map<string, string>,
-  dbAccount: AdAccountEssential,
+  dbAccount: AdAccount,
 ): Promise<void> => {
   logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
   await prisma.insight.createMany({

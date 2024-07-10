@@ -12,6 +12,7 @@ import ValidationPlugin from '@pothos/plugin-validation';
 import { prisma, Prisma } from '@repo/database';
 import { AError } from '@repo/utils';
 import { type GraphQLContext } from '../context';
+import { getRootOrganizationId } from '../contexts/organization';
 import JsonValue = Prisma.JsonValue;
 
 export interface AuthenticatedContext extends GraphQLContext {
@@ -50,6 +51,7 @@ export const builder = new SchemaBuilder<{
     isAdmin: boolean;
     isOrgAdmin: boolean;
     isOrgOperator: boolean;
+    isRootOrg: boolean;
     isInOrg: boolean;
     refresh: boolean;
     emailUnconfirmed: boolean;
@@ -78,6 +80,10 @@ export const builder = new SchemaBuilder<{
     isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
     isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
     isOrgOperator: Boolean(context.isOrgOperator) && !context.isRefreshToken && !context.emailUnconfirmed,
+    isRootOrg: async () =>
+      Boolean(
+        context.organizationId && context.organizationId === (await getRootOrganizationId(context.organizationId)),
+      ),
     isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken && !context.emailUnconfirmed,
     refresh: Boolean(context.isRefreshToken),
     emailUnconfirmed: Boolean(context.emailUnconfirmed),

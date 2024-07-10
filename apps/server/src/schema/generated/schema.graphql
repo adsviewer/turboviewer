@@ -26,9 +26,17 @@ type AdAccount {
   currency: CurrencyEnum!
   externalId: String!
   id: ID!
+  insights: [Insight!]!
   integration: Integration!
   integrationId: String!
+
+  """
+  Whether the ad account is connected to the current organization
+  """
+  isConnectedToCurrentOrg: Boolean!
   name: String!
+  organizations: [Organization!]!
+  type: IntegrationType!
   updatedAt: Date!
 }
 
@@ -404,16 +412,47 @@ enum InsightsPosition {
 }
 
 type Integration {
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   accessTokenExpiresAt: Date
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   adAccounts: [AdAccount!]!
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   createdAt: Date!
   externalId: String
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   id: ID!
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   lastSyncedAt: Date
   organization: Organization!
   organizationId: String!
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   refreshTokenExpiresAt: Date
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   type: IntegrationType!
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   updatedAt: Date!
 }
 
@@ -497,6 +536,7 @@ type Mutation {
   signup(args: SignUpInput!): Tokens!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
+  updateOrganizationAdAccounts(adAccountIds: [String!]!): Organization!
   updateOrganizationUser(
     role: OrganizationRoleEnum
     status: UserOrganizationStatusNotInvited
@@ -517,6 +557,7 @@ enum OrderBy {
 }
 
 type Organization {
+  adAccounts: [AdAccount!]!
   createdAt: Date!
   domain: String
   id: ID!
@@ -573,6 +614,10 @@ enum PublisherEnum {
 }
 
 type Query {
+  """
+  Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel.
+  """
+  availableOrganizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
   checkConfirmInvitedUserTokenValidity(token: String!): Boolean!
   checkEmailType(email: String!): EmailType!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
@@ -588,6 +633,11 @@ type Query {
   loginProviders(inviteToken: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!
   organization: Organization!
+
+  """
+  Return the adAccounts for a channel that are associated with the organization.
+  """
+  organizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
 
   """
   Uses the refresh token to generate a new token

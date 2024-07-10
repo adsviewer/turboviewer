@@ -1,9 +1,20 @@
-import { CurrencyEnum, DeviceEnum, type Insight, IntegrationTypeEnum, prisma, PublisherEnum } from '@repo/database';
+import {
+  CurrencyEnum,
+  DeviceEnum,
+  type Insight,
+  type Integration,
+  IntegrationTypeEnum,
+  prisma,
+  PublisherEnum,
+} from '@repo/database';
 import { MetaError } from '@repo/channel-utils';
 import { getEndOfDay, type IntervalType } from '@repo/utils';
+import type { InputShapeFromFields } from '@pothos/core';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
+import type { GraphQLContext } from '../../context';
+import { getRootOrganizationId } from '../../contexts/organization';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
@@ -31,28 +42,73 @@ export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem'
   fields: (t) => ({
     type: t.field({ type: IntegrationTypeDto }),
     status: t.field({ type: IntegrationStatusDto }),
-    authUrl: t.string({ nullable: true }),
+    authUrl: t.string({
+      authScopes: { $all: { isRootOrg: true, isOrgAdmin: true } },
+      unauthorizedResolver: () => null,
+      nullable: true,
+    }),
   }),
 });
 
 export const IntegrationDto = builder.prismaObject('Integration', {
+  authScopes: (integration, ctx) => {
+    const baseScopes = baseIntegrationDtoAuthScopes(integration, ctx);
+    return baseScopes ?? false;
+  },
   fields: (t) => ({
-    id: t.exposeID('id'),
+    id: t.exposeID('id', offspringOrgFieldProps),
     organizationId: t.exposeString('organizationId'),
 
-    type: t.expose('type', { type: IntegrationTypeDto }),
+    type: t.expose('type', { type: IntegrationTypeDto, ...offspringOrgFieldProps }),
     externalId: t.exposeString('externalId', { nullable: true }),
 
-    accessTokenExpiresAt: t.expose('accessTokenExpiresAt', { type: 'Date', nullable: true }),
-    refreshTokenExpiresAt: t.expose('refreshTokenExpiresAt', { type: 'Date', nullable: true }),
-    updatedAt: t.expose('updatedAt', { type: 'Date' }),
-    createdAt: t.expose('createdAt', { type: 'Date' }),
-    lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true }),
+    accessTokenExpiresAt: t.expose('accessTokenExpiresAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
+    refreshTokenExpiresAt: t.expose('refreshTokenExpiresAt', {
+      type: 'Date',
+      nullable: true,
+      ...offspringOrgFieldProps,
+    }),
+    updatedAt: t.expose('updatedAt', { type: 'Date', ...offspringOrgFieldProps }),
+    createdAt: t.expose('createdAt', { type: 'Date', ...offspringOrgFieldProps }),
+    lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
 
     organization: t.relation('organization'),
-    adAccounts: t.relation('adAccounts'),
+    adAccounts: t.relation('adAccounts', {
+      ...offspringOrgFieldProps,
+      query: (args, ctx) =>
+        ctx.isAdmin
+          ? {}
+          : {
+              where: {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+                organizations: { some: { id: ctx.organizationId! } },
+              },
+            },
+    }),
   }),
 });
+
+const baseIntegrationDtoAuthScopes = (integration: Integration, ctx: GraphQLContext): boolean | undefined => {
+  if (ctx.isAdmin) return true;
+  if (!ctx.organizationId) return false;
+  if (integration.organizationId === ctx.organizationId) return true;
+  return undefined;
+};
+
+const offSpringOrgAuthScopes = async (integration: Integration, ctx: GraphQLContext): Promise<boolean> => {
+  const baseScopes = baseIntegrationDtoAuthScopes(integration, ctx);
+  if (baseScopes !== undefined) return baseScopes;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked in baseScopes
+  const rootOrgId = await getRootOrganizationId(ctx.organizationId!);
+  return rootOrgId === integration.organizationId;
+};
+
+const offspringOrgFieldProps = {
+  skipTypeScopes: true,
+  description: 'Caller is permitted to view this field if they are in an offspring organization',
+  authScopes: (integration: Integration, _args: InputShapeFromFields<NonNullable<unknown>>, ctx: GraphQLContext) =>
+    offSpringOrgAuthScopes(integration, ctx),
+};
 
 builder.objectType(MetaError, {
   name: 'MetaError',
@@ -78,11 +134,13 @@ export const CurrencyEnumDto = builder.enumType(CurrencyEnum, {
 });
 
 export const AdAccountDto = builder.prismaObject('AdAccount', {
+  authScopes: { isInOrg: true },
   fields: (t) => ({
     id: t.exposeID('id'),
     integrationId: t.exposeString('integrationId'),
     externalId: t.exposeString('externalId'),
 
+    type: t.expose('type', { type: IntegrationTypeDto }),
     currency: t.expose('currency', { type: CurrencyEnumDto }),
     name: t.exposeString('name'),
     updatedAt: t.expose('updatedAt', { type: 'Date' }),
@@ -92,8 +150,30 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
         return prisma.ad.count({ where: { adAccountId: root.id } });
       },
     }),
-    integration: t.relation('integration'),
     advertisements: t.relatedConnection('advertisements', { cursor: 'id' }),
+    insights: t.relation('insights'),
+    integration: t.relation('integration'),
+    organizations: t.relation('organizations', {
+      query: (args, ctx) =>
+        ctx.isAdmin
+          ? {}
+          : {
+              where: {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+                id: ctx.organizationId!,
+              },
+            },
+    }),
+    isConnectedToCurrentOrg: t.boolean({
+      description: 'Whether the ad account is connected to the current organization',
+      resolve: async (root, _args, ctx) => {
+        if (!ctx.organizationId) return false;
+        const organization = await prisma.organization.findUnique({
+          where: { id: ctx.organizationId, adAccounts: { some: { id: root.id } } },
+        });
+        return Boolean(organization);
+      },
+    }),
   }),
 });
 

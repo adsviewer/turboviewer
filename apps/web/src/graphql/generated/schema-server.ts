@@ -52,9 +52,14 @@ export type AdAccount = {
   currency: CurrencyEnum;
   externalId: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  insights: Array<Insight>;
   integration: Integration;
   integrationId: Scalars['String']['output'];
+  /** Whether the ad account is connected to the current organization */
+  isConnectedToCurrentOrg: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
+  organizations: Array<Organization>;
+  type: IntegrationType;
   updatedAt: Scalars['Date']['output'];
 };
 
@@ -439,16 +444,24 @@ export enum InsightsPosition {
 
 export type Integration = {
   __typename?: 'Integration';
+  /** Caller is permitted to view this field if they are in an offspring organization */
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   adAccounts: Array<AdAccount>;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   createdAt: Scalars['Date']['output'];
   externalId?: Maybe<Scalars['String']['output']>;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   id: Scalars['ID']['output'];
+  /** Caller is permitted to view this field if they are in an offspring organization */
   lastSyncedAt?: Maybe<Scalars['Date']['output']>;
   organization: Organization;
   organizationId: Scalars['String']['output'];
+  /** Caller is permitted to view this field if they are in an offspring organization */
   refreshTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   type: IntegrationType;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   updatedAt: Scalars['Date']['output'];
 };
 
@@ -520,6 +533,7 @@ export type Mutation = {
   signup: Tokens;
   switchOrganization: Tokens;
   updateOrganization: Organization;
+  updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
   updateUser: User;
 };
@@ -590,6 +604,10 @@ export type MutationUpdateOrganizationArgs = {
   name: Scalars['String']['input'];
 };
 
+export type MutationUpdateOrganizationAdAccountsArgs = {
+  adAccountIds: Array<Scalars['String']['input']>;
+};
+
 export type MutationUpdateOrganizationUserArgs = {
   role?: InputMaybe<OrganizationRoleEnum>;
   status?: InputMaybe<UserOrganizationStatusNotInvited>;
@@ -617,6 +635,7 @@ export enum OrderBy {
 
 export type Organization = {
   __typename?: 'Organization';
+  adAccounts: Array<AdAccount>;
   createdAt: Scalars['Date']['output'];
   domain?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -668,6 +687,8 @@ export enum PublisherEnum {
 
 export type Query = {
   __typename?: 'Query';
+  /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
+  availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserTokenValidity: Scalars['Boolean']['output'];
   checkEmailType: EmailType;
   insightDatapoints: Array<InsightsDatapoints>;
@@ -680,10 +701,16 @@ export type Query = {
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
   organization: Organization;
+  /** Return the adAccounts for a channel that are associated with the organization. */
+  organizationAdAccounts: Array<AdAccount>;
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   settingsChannels: Array<IntegrationListItem>;
   userOrganizations: Array<Organization>;
+};
+
+export type QueryAvailableOrganizationAdAccountsArgs = {
+  channel: IntegrationType;
 };
 
 export type QueryCheckConfirmInvitedUserTokenValidityArgs = {
@@ -715,6 +742,10 @@ export type QueryIntegrationsArgs = {
 
 export type QueryLoginProvidersArgs = {
   inviteToken?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type QueryOrganizationAdAccountsArgs = {
+  channel: IntegrationType;
 };
 
 export type SignUpInput = {

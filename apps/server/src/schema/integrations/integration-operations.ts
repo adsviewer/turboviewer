@@ -5,6 +5,7 @@ import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { builder } from '../builder';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
+import { getRootOrganizationId } from '../../contexts/organization';
 import {
   ChannelInitialProgressPayloadDto,
   IntegrationDto,
@@ -23,10 +24,11 @@ builder.queryFields((t) => ({
       type: t.arg({ type: IntegrationTypeDto, required: false }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
+      const rootOrganization = await getRootOrganizationId(ctx.organizationId);
       return await prisma.integration.findMany({
         ...query,
         where: {
-          organizationId: ctx.organizationId,
+          organizationId: rootOrganization,
           type: args.type ?? undefined,
         },
       });
@@ -58,7 +60,7 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
-  deAuthIntegration: t.withAuth({ isOrgAdmin: true }).field({
+  deAuthIntegration: t.withAuth({ $all: { isRootOrg: true, isInOrg: true } }).field({
     type: 'String',
     errors: { types: [MetaError, AError] },
     args: {

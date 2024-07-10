@@ -84,8 +84,8 @@ void describe('insights query builder tests', () => {
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               )`,
     );
@@ -109,8 +109,8 @@ void describe('insights query builder tests', () => {
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               )`,
@@ -141,8 +141,8 @@ void describe('insights query builder tests', () => {
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
                                                 AND a.id IN ('clwnqvgwx000008mlbmkchjwg')
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
@@ -293,8 +293,8 @@ void describe('insights query builder tests', () => {
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               ), 
   last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend
@@ -340,8 +340,8 @@ void describe('insights query builder tests', () => {
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               ), 
   order_column_trend AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS trend
@@ -379,8 +379,8 @@ void describe('insights query builder tests', () => {
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN integrations int on aa.integration_id = int.id
-                                              WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                               ), 
@@ -429,8 +429,8 @@ void describe('insights query builder tests', () => {
                       FROM insights i
                                JOIN ads a on i.ad_id = a.id
                                JOIN ad_accounts aa on a.ad_account_id = aa.id
-                               JOIN integrations int on aa.integration_id = int.id
-                      WHERE int.organization_id = 'clwkdrdn7000008k708vfchyr'
+                               JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                      WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                         AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-04-01T00:00:00.000Z')
                         AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-27T00:00:00.000Z')
                         AND i.ad_account_id = 'clwnaip1s000008k00nuu3xez'

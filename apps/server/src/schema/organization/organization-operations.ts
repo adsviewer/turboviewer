@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError } from '@repo/utils';
+import { deleteInsightsCache } from '@repo/channel';
 import { builder } from '../builder';
 import {
   authConfirmInvitedUserEndpoint,
@@ -23,6 +24,7 @@ import {
   redisSetInvitationLink,
 } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
+import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-types';
 import {
   inviteLinkDto,
   InviteUsersDto,
@@ -84,6 +86,36 @@ builder.queryFields((t) => ({
       });
     },
   }),
+
+  organizationAdAccounts: t.withAuth({ isInOrg: true }).prismaField({
+    description: 'Return the adAccounts for a channel that are associated with the organization.',
+    type: [AdAccountDto],
+    args: {
+      channel: t.arg({ type: IntegrationTypeDto, required: true }),
+    },
+    resolve: (query, _root, args, ctx, _info) => {
+      return prisma.adAccount.findMany({
+        ...query,
+        where: { type: args.channel, organizations: { some: { id: ctx.organizationId } } },
+      });
+    },
+  }),
+
+  availableOrganizationAdAccounts: t.withAuth({ isOrgAdmin: true }).prismaField({
+    description:
+      'Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel.',
+    type: [AdAccountDto],
+    args: {
+      channel: t.arg({ type: IntegrationTypeDto, required: true }),
+    },
+    resolve: async (query, _root, args, ctx, _info) => {
+      const { parentId } = await prisma.organization.findUniqueOrThrow({ where: { id: ctx.organizationId } });
+      return await prisma.adAccount.findMany({
+        ...query,
+        where: { type: args.channel, organizations: { some: { id: parentId ?? ctx.organizationId } } },
+      });
+    },
+  }),
 }));
 
 builder.mutationFields((t) => ({
@@ -127,6 +159,7 @@ builder.mutationFields((t) => ({
         data: {
           name: args.name,
           domain,
+          parentId: ctx.organizationId,
           users: {
             create: {
               userId: ctx.currentUserId,
@@ -150,10 +183,17 @@ builder.mutationFields((t) => ({
         throw new GraphQLError('No organizationId provided');
       }
 
-      if ((ctx.isOrgAdmin && ctx.organizationId === args.organizationId) ?? ctx.isAdmin) {
-        return prisma.organization.delete({ ...query, where: { id: organizationId } });
+      if (!((ctx.isOrgAdmin && ctx.organizationId === args.organizationId) ?? ctx.isAdmin)) {
+        throw new GraphQLError('You do not have permission to delete this organization');
       }
-      throw new GraphQLError('You do not have permission to delete this organization');
+      const org = await prisma.organization.findUniqueOrThrow({
+        include: { children: true },
+        where: { id: organizationId },
+      });
+      if (org.children.length > 0) {
+        throw new GraphQLError('Cannot delete an organization that has sub-organizations');
+      }
+      return prisma.organization.delete({ ...query, where: { id: organizationId } });
     },
   }),
 
@@ -384,6 +424,21 @@ builder.mutationFields((t) => ({
           status: args.status ?? undefined,
           role: args.role ?? undefined,
         },
+      });
+    },
+  }),
+
+  updateOrganizationAdAccounts: t.withAuth({ isOrgAdmin: true }).prismaField({
+    type: OrganizationDto,
+    args: {
+      adAccountIds: t.arg.stringList({ required: true }),
+    },
+    resolve: (query, _root, args, ctx, _info) => {
+      deleteInsightsCache();
+      return prisma.organization.update({
+        ...query,
+        where: { id: ctx.organizationId },
+        data: { adAccounts: { set: args.adAccountIds.map((id) => ({ id })) } },
       });
     },
   }),

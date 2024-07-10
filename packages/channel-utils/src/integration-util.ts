@@ -1,4 +1,4 @@
-import type { AdAccount, Integration, IntegrationTypeEnum } from '@repo/database';
+import type { Integration, IntegrationTypeEnum } from '@repo/database';
 import { IntegrationStatus, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
@@ -6,8 +6,6 @@ import { env } from './config';
 import { decryptAesGcm } from './aes-util';
 
 export const authEndpoint = '/channel/auth';
-
-export type AdAccountEssential = Pick<AdAccount, 'id' | 'externalId' | 'currency'>;
 
 export const revokeIntegration = async (externalId: string, type: IntegrationTypeEnum): Promise<void> => {
   const { adAccounts } = await prisma.integration.update({

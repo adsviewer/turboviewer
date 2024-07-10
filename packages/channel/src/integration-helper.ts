@@ -157,7 +157,7 @@ const saveTokens = async (
     status: IntegrationStatus.CONNECTED,
     organizationId,
   };
-  return await prisma.integration.upsert({
+  const integration = await prisma.integration.upsert({
     create: integrationData,
     update: integrationData,
     where: {
@@ -167,6 +167,14 @@ const saveTokens = async (
       },
     },
   });
+  const adAccounts = await getChannel(type).saveAdAccounts(integration);
+  if (!isAError(adAccounts)) {
+    await prisma.organization.update({
+      where: { id: integration.id },
+      data: { adAccounts: { set: adAccounts.map(({ id }) => ({ id })) } },
+    });
+  }
+  return integration;
 };
 
 export const saveChannelData = async (integration: Integration, initial: boolean): Promise<AError | undefined> => {
