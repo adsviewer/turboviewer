@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Flex } from '@mantine/core';
 import { useAtomValue } from 'jotai/index';
 import _ from 'lodash';
@@ -12,13 +12,15 @@ import NameEdit from './components/name-edit';
 
 export default function Organization(): React.ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
+  const [isPending, setIsPending] = useState<boolean>(false);
+
   return (
     <Flex direction="column" gap="md" w="100%">
       {!_.isEqual(userDetails, initialUserDetails) ? (
         <>
-          <NameEdit />
+          <NameEdit isPending={isPending} setIsPending={setIsPending} />
           {/*<UsersTable members={members} />*/}
-          <DeleteOrganizationButton />
+          <DeleteOrganizationButton isPending={isPending} />
         </>
       ) : (
         <LoaderCentered />

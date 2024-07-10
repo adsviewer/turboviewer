@@ -13,7 +13,11 @@ import { refreshJWTToken } from '@/app/(authenticated)/actions';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { deleteOrganization } from '../actions';
 
-export default function DeleteOrganizationButton(): React.ReactNode {
+export interface PropsType {
+  isPending: boolean;
+}
+
+export default function DeleteOrganizationButton(props: PropsType): React.ReactNode {
   const t = useTranslations('organization');
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
@@ -58,7 +62,7 @@ export default function DeleteOrganizationButton(): React.ReactNode {
         leftSection={<IconTrash size={18} />}
         color={theme.colors.red[7]}
         onClick={open}
-        disabled={!isOrgAdmin(userDetails.allRoles)}
+        disabled={!isOrgAdmin(userDetails.allRoles) || props.isPending}
       >
         {t('deleteOrganization')}
       </Button>
