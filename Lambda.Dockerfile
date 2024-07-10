@@ -39,7 +39,7 @@ ARG lambda
 
 COPY --from=installer /app .
 RUN pnpm install --prod --ignore-scripts --filter=$lambda
-RUN pnpm install --prod --workspace-root extensionless
+RUN pnpm install --prod --ignore-scripts --workspace-root extensionless
 
 FROM base AS runner
 ARG lambda
