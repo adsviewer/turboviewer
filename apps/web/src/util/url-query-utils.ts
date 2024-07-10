@@ -2,6 +2,14 @@ import { type ReadonlyURLSearchParams } from 'next/navigation';
 import { sentenceCase } from 'change-case';
 import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-client';
 
+export interface GenericRequestResponseBody {
+  success: boolean;
+  error: {
+    message: string;
+  };
+}
+
+export const errorKey = 'error';
 export const groupedByKey = 'groupedBy';
 export const publisherKey = 'publisher';
 export const deviceKey = 'device';

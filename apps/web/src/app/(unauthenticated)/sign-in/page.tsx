@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useForm, zodResolver } from '@mantine/form';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   TextInput,
   PasswordInput,
@@ -20,12 +20,14 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
 import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
+import { addOrReplaceURLParams, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from './actions';
 
 export default function SignIn(): React.JSX.Element {
   const t = useTranslations('authentication');
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [loginProviders, setLoginProviders] = useState<LoginProvidersQuery['loginProviders']>([]);
@@ -64,13 +66,18 @@ export default function SignIn(): React.JSX.Element {
         .then((response) => {
           return response.json();
         })
-        .then((data: { success: true } | { success: false }) => {
+        .then((data: GenericRequestResponseBody) => {
           if (data.success) {
             startTransition(() => {
               const redirect = searchParams.get('redirect');
               router.push(redirect ?? '/insights');
             });
+            return null;
           }
+
+          // Show errors
+          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, data.error.message);
+          router.replace(newURL);
         })
         .catch((error: unknown) => {
           logger.error(error);

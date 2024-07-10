@@ -1,7 +1,7 @@
 'use client';
 
 import { useForm, zodResolver } from '@mantine/form';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   TextInput,
   PasswordInput,
@@ -22,11 +22,15 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
+import { addOrReplaceURLParams, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from '../sign-in/actions';
 
 export default function SignUp(): React.JSX.Element {
   const t = useTranslations('authentication');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [isPending, setIsPending] = useState<boolean>(false);
   const [loginProviders, setLoginProviders] = useState<LoginProvidersQuery['loginProviders']>([]);
@@ -41,7 +45,6 @@ export default function SignUp(): React.JSX.Element {
     },
     validate: zodResolver(SignUpSchema),
   });
-  const router = useRouter();
 
   useEffect(() => {
     void getLoginProviders().then((res) => {
@@ -64,10 +67,15 @@ export default function SignUp(): React.JSX.Element {
       .then((response) => {
         return response.json();
       })
-      .then((data: { success: true } | { success: false }) => {
+      .then((data: GenericRequestResponseBody) => {
         if (data.success) {
           router.push('/confirm-email');
+          return null;
         }
+
+        // Show errors
+        const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, data.error.message);
+        router.replace(newURL);
       })
       .catch((error: unknown) => {
         logger.error(error);
