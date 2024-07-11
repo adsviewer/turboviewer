@@ -10,6 +10,7 @@ export const OrganizationDto = builder.prismaObject('Organization', {
   },
   fields: (t) => ({
     id: t.exposeID('id'),
+    parentId: t.exposeString('parentId', { nullable: true }),
     name: t.exposeString('name'),
     domain: t.exposeString('domain', { nullable: true }),
     createdAt: t.expose('createdAt', { type: 'Date' }),
@@ -17,6 +18,9 @@ export const OrganizationDto = builder.prismaObject('Organization', {
     userOrganizations: t.relation('users'),
     integrations: t.relation('integrations'),
     adAccounts: t.relation('adAccounts'),
+    isRoot: t.boolean({
+      resolve: (root, _args, _ctx) => root.parentId === null,
+    }),
   }),
 });
 

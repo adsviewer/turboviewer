@@ -562,7 +562,9 @@ type Organization {
   domain: String
   id: ID!
   integrations: [Integration!]!
+  isRoot: Boolean!
   name: String!
+  parentId: String
   updatedAt: Date!
   userOrganizations: [UserOrganization!]!
 }
