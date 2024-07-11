@@ -1,5 +1,5 @@
 @function rem($px) {
-  @return #{$px / 16}rem;
+  @return #{calc($px / 16)}rem;
 }
 .root {
   padding-top: rem(80px);
