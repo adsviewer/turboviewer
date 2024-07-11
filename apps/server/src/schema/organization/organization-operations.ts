@@ -434,7 +434,7 @@ builder.mutationFields((t) => ({
       adAccountIds: t.arg.stringList({ required: true }),
     },
     resolve: (query, _root, args, ctx, _info) => {
-      deleteInsightsCache();
+      deleteInsightsCache(ctx.organizationId);
       return prisma.organization.update({
         ...query,
         where: { id: ctx.organizationId },

@@ -641,7 +641,9 @@ export type Organization = {
   domain?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   integrations: Array<Integration>;
+  isRoot: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
+  parentId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
   userOrganizations: Array<UserOrganization>;
 };
