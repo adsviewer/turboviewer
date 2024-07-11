@@ -6,7 +6,7 @@ import { redisGet, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError, isMode, MODE } from '@repo/utils';
 import type QueryString from 'qs';
 import { z } from 'zod';
-import { decryptTokens, encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
+import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
@@ -87,7 +87,7 @@ const completeIntegration = async (
     return tokens;
   }
 
-  const dbIntegration = await saveTokens(tokens, organizationId, integrationType).catch((e: unknown) => {
+  const decryptedIntegration = await saveTokens(tokens, organizationId, integrationType).catch((e: unknown) => {
     if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
       const metaSchema = z.object({ modelName: z.string(), target: z.array(z.string()) });
       const parsed = metaSchema.safeParse(e.meta);
@@ -104,14 +104,9 @@ const completeIntegration = async (
     }
     return new AError('Failed to save tokens to database');
   });
-  if (isAError(dbIntegration)) return dbIntegration;
+  if (isAError(decryptedIntegration)) return decryptedIntegration;
 
-  fireAndForget.add(async () => {
-    const integration = decryptTokens(dbIntegration);
-    if (!integration) return new AError('Failed to decrypt integration');
-    if (isAError(integration)) return integration;
-    await saveChannelData(integration, true);
-  });
+  fireAndForget.add(async () => await saveChannelData(decryptedIntegration, true));
   return integrationType;
 };
 
@@ -167,14 +162,14 @@ const saveTokens = async (
       },
     },
   });
-  const adAccounts = await getChannel(type).saveAdAccounts(integration);
-  if (!isAError(adAccounts)) {
-    await prisma.organization.update({
-      where: { id: integration.id },
-      data: { adAccounts: { set: adAccounts.map(({ id }) => ({ id })) } },
-    });
-  }
-  return integration;
+
+  const decryptedIntegration = {
+    ...integration,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken ?? null,
+  };
+  await getChannel(type).saveAdAccounts(decryptedIntegration);
+  return decryptedIntegration;
 };
 
 export const saveChannelData = async (integration: Integration, initial: boolean): Promise<AError | undefined> => {
