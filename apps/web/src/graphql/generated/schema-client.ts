@@ -1002,6 +1002,42 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
+export type CreateOrganizationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+export type CreateOrganizationMutation = {
+  __typename?: 'Mutation';
+  createOrganization: { __typename?: 'Organization'; id: string; name: string };
+};
+
+export type UpdateOrganizationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+export type UpdateOrganizationMutation = {
+  __typename?: 'Mutation';
+  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
+};
+
+export type SwitchOrganizationMutationVariables = Exact<{
+  organizationId: Scalars['String']['input'];
+}>;
+
+export type SwitchOrganizationMutation = {
+  __typename?: 'Mutation';
+  switchOrganization: { __typename?: 'Tokens'; token: string; refreshToken: string };
+};
+
+export type DeleteOrganizationMutationVariables = Exact<{
+  organizationId: Scalars['String']['input'];
+}>;
+
+export type DeleteOrganizationMutation = {
+  __typename?: 'Mutation';
+  deleteOrganization: { __typename?: 'Organization'; id: string };
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1020,6 +1056,10 @@ export type UpdateUserMutation = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
+    organizations: Array<{
+      __typename?: 'UserOrganization';
+      organization: { __typename?: 'Organization'; id: string; name: string };
+    }>;
     currentOrganization?: {
       __typename?: 'Organization';
       id: string;
@@ -1043,6 +1083,10 @@ export type MeQuery = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
+    organizations: Array<{
+      __typename?: 'UserOrganization';
+      organization: { __typename?: 'Organization'; id: string; name: string };
+    }>;
     currentOrganization?: {
       __typename?: 'Organization';
       id: string;
@@ -1062,6 +1106,10 @@ export type UserFieldsFragment = {
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
+  organizations: Array<{
+    __typename?: 'UserOrganization';
+    organization: { __typename?: 'Organization'; id: string; name: string };
+  }>;
   currentOrganization?: {
     __typename?: 'Organization';
     id: string;
@@ -1079,6 +1127,12 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
+    organizations {
+      organization {
+        id
+        name
+      }
+    }
     currentOrganizationId
     currentOrganization {
       id
@@ -1334,6 +1388,53 @@ export function useLoginProvidersQuery(options?: Omit<Urql.UseQueryArgs<LoginPro
     query: LoginProvidersDocument,
     ...options,
   });
+}
+export const CreateOrganizationDocument = gql`
+  mutation createOrganization($name: String!) {
+    createOrganization(name: $name) {
+      id
+      name
+    }
+  }
+`;
+
+export function useCreateOrganizationMutation() {
+  return Urql.useMutation<CreateOrganizationMutation, CreateOrganizationMutationVariables>(CreateOrganizationDocument);
+}
+export const UpdateOrganizationDocument = gql`
+  mutation updateOrganization($name: String!) {
+    updateOrganization(name: $name) {
+      id
+      name
+    }
+  }
+`;
+
+export function useUpdateOrganizationMutation() {
+  return Urql.useMutation<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(UpdateOrganizationDocument);
+}
+export const SwitchOrganizationDocument = gql`
+  mutation switchOrganization($organizationId: String!) {
+    switchOrganization(organizationId: $organizationId) {
+      token
+      refreshToken
+    }
+  }
+`;
+
+export function useSwitchOrganizationMutation() {
+  return Urql.useMutation<SwitchOrganizationMutation, SwitchOrganizationMutationVariables>(SwitchOrganizationDocument);
+}
+export const DeleteOrganizationDocument = gql`
+  mutation deleteOrganization($organizationId: String!) {
+    deleteOrganization(organizationId: $organizationId) {
+      id
+    }
+  }
+`;
+
+export function useDeleteOrganizationMutation() {
+  return Urql.useMutation<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(DeleteOrganizationDocument);
 }
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {

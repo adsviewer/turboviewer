@@ -1001,6 +1001,42 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
+export type CreateOrganizationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+export type CreateOrganizationMutation = {
+  __typename?: 'Mutation';
+  createOrganization: { __typename?: 'Organization'; id: string; name: string };
+};
+
+export type UpdateOrganizationMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+}>;
+
+export type UpdateOrganizationMutation = {
+  __typename?: 'Mutation';
+  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
+};
+
+export type SwitchOrganizationMutationVariables = Exact<{
+  organizationId: Scalars['String']['input'];
+}>;
+
+export type SwitchOrganizationMutation = {
+  __typename?: 'Mutation';
+  switchOrganization: { __typename?: 'Tokens'; token: string; refreshToken: string };
+};
+
+export type DeleteOrganizationMutationVariables = Exact<{
+  organizationId: Scalars['String']['input'];
+}>;
+
+export type DeleteOrganizationMutation = {
+  __typename?: 'Mutation';
+  deleteOrganization: { __typename?: 'Organization'; id: string };
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1019,6 +1055,10 @@ export type UpdateUserMutation = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
+    organizations: Array<{
+      __typename?: 'UserOrganization';
+      organization: { __typename?: 'Organization'; id: string; name: string };
+    }>;
     currentOrganization?: {
       __typename?: 'Organization';
       id: string;
@@ -1042,6 +1082,10 @@ export type MeQuery = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
+    organizations: Array<{
+      __typename?: 'UserOrganization';
+      organization: { __typename?: 'Organization'; id: string; name: string };
+    }>;
     currentOrganization?: {
       __typename?: 'Organization';
       id: string;
@@ -1061,6 +1105,10 @@ export type UserFieldsFragment = {
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
+  organizations: Array<{
+    __typename?: 'UserOrganization';
+    organization: { __typename?: 'Organization'; id: string; name: string };
+  }>;
   currentOrganization?: {
     __typename?: 'Organization';
     id: string;
@@ -1078,6 +1126,12 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
+    organizations {
+      organization {
+        id
+        name
+      }
+    }
     currentOrganizationId
     currentOrganization {
       id
@@ -1258,6 +1312,37 @@ export const LoginProvidersDocument = gql`
     }
   }
 `;
+export const CreateOrganizationDocument = gql`
+  mutation createOrganization($name: String!) {
+    createOrganization(name: $name) {
+      id
+      name
+    }
+  }
+`;
+export const UpdateOrganizationDocument = gql`
+  mutation updateOrganization($name: String!) {
+    updateOrganization(name: $name) {
+      id
+      name
+    }
+  }
+`;
+export const SwitchOrganizationDocument = gql`
+  mutation switchOrganization($organizationId: String!) {
+    switchOrganization(organizationId: $organizationId) {
+      token
+      refreshToken
+    }
+  }
+`;
+export const DeleteOrganizationDocument = gql`
+  mutation deleteOrganization($organizationId: String!) {
+    deleteOrganization(organizationId: $organizationId) {
+      id
+    }
+  }
+`;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -1380,6 +1465,46 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<LoginProvidersQuery>;
+    },
+    createOrganization(
+      variables: CreateOrganizationMutationVariables,
+      options?: C,
+    ): Promise<CreateOrganizationMutation> {
+      return requester<CreateOrganizationMutation, CreateOrganizationMutationVariables>(
+        CreateOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<CreateOrganizationMutation>;
+    },
+    updateOrganization(
+      variables: UpdateOrganizationMutationVariables,
+      options?: C,
+    ): Promise<UpdateOrganizationMutation> {
+      return requester<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(
+        UpdateOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<UpdateOrganizationMutation>;
+    },
+    switchOrganization(
+      variables: SwitchOrganizationMutationVariables,
+      options?: C,
+    ): Promise<SwitchOrganizationMutation> {
+      return requester<SwitchOrganizationMutation, SwitchOrganizationMutationVariables>(
+        SwitchOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<SwitchOrganizationMutation>;
+    },
+    deleteOrganization(
+      variables: DeleteOrganizationMutationVariables,
+      options?: C,
+    ): Promise<DeleteOrganizationMutation> {
+      return requester<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(
+        DeleteOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<DeleteOrganizationMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(

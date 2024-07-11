@@ -6,12 +6,13 @@ import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle } from '@tabler/icons-react';
+import Link from 'next/link';
+import { useAtomValue } from 'jotai';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { isOrgAdmin } from '@/util/access-utils';
 import { deAuthIntegration } from '../actions';
-import Link from 'next/link';
 
 interface IntegrationProps {
   title: string;
@@ -64,7 +65,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             label={tGeneric('accessOrgAdminRoot')}
             disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
           >
-            <Link href={props.authUrl} passHref>
+            <Link href={props.authUrl ?? ''} passHref>
               <Button
                 w="100%"
                 mt="lg"

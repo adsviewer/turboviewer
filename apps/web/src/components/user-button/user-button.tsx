@@ -28,7 +28,7 @@ export default function UserButton(): ReactNode {
           currentOrganization: res.currentOrganization,
           organizations: res.organizations,
           photoUrl: res.photoUrl,
-        currentOrganization: res.currentOrganization,});
+        });
         setIsDataLoaded(true);
       })
       .catch((error: unknown) => {
