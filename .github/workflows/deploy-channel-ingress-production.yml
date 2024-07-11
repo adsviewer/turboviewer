@@ -11,6 +11,7 @@ on:
       - packages/utils/**
       - infrastructure/**
       - .github/workflows/**
+      - Lambda.Dockerfile
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-channel-ingress
