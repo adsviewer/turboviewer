@@ -1,20 +1,12 @@
 mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
   updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
     ...UserFields
-    currentOrganization {
-      id
-      name
-    }
   }
 }
 
 query me {
   me {
     ...UserFields
-    currentOrganization {
-      id
-      name
-    }
   }
 }
 
@@ -26,4 +18,10 @@ fragment UserFields on User {
   photoUrl
   allRoles
   currentOrganizationId
+  currentOrganization {
+    id
+    name
+    isRoot
+    parentId
+  }
 }

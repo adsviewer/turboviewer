@@ -64,9 +64,10 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
             firstName: res.data.updateUser.firstName,
             lastName: res.data.updateUser.lastName,
             email: res.data.updateUser.email,
-            photoUrl: res.data.updateUser.photoUrl,
             allRoles: res.data.updateUser.allRoles,
+            currentOrganizationId: res.data.updateUser.currentOrganizationId,
             currentOrganization: res.data.updateUser.currentOrganization,
+            photoUrl: res.data.updateUser.photoUrl,
           });
           form.setValues({
             oldPassword: '',

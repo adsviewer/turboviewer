@@ -1028,7 +1028,13 @@ export type UpdateUserMutation = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
-    currentOrganization?: { __typename?: 'Organization'; id: string; name: string } | null;
+    currentOrganization?: {
+      __typename?: 'Organization';
+      id: string;
+      name: string;
+      isRoot: boolean;
+      parentId?: string | null;
+    } | null;
   };
 };
 
@@ -1045,7 +1051,13 @@ export type MeQuery = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
-    currentOrganization?: { __typename?: 'Organization'; id: string; name: string } | null;
+    currentOrganization?: {
+      __typename?: 'Organization';
+      id: string;
+      name: string;
+      isRoot: boolean;
+      parentId?: string | null;
+    } | null;
   };
 };
 
@@ -1058,6 +1070,13 @@ export type UserFieldsFragment = {
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
+  currentOrganization?: {
+    __typename?: 'Organization';
+    id: string;
+    name: string;
+    isRoot: boolean;
+    parentId?: string | null;
+  } | null;
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -1069,6 +1088,12 @@ export const UserFieldsFragmentDoc = gql`
     photoUrl
     allRoles
     currentOrganizationId
+    currentOrganization {
+      id
+      name
+      isRoot
+      parentId
+    }
   }
 `;
 export const AdAccountsDocument = gql`
@@ -1334,10 +1359,6 @@ export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
       ...UserFields
-      currentOrganization {
-        id
-        name
-      }
     }
   }
   ${UserFieldsFragmentDoc}
@@ -1350,10 +1371,6 @@ export const MeDocument = gql`
   query me {
     me {
       ...UserFields
-      currentOrganization {
-        id
-        name
-      }
     }
   }
   ${UserFieldsFragmentDoc}

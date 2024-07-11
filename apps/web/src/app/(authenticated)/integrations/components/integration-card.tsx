@@ -60,13 +60,16 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
     if (props.isAvailable) {
       if (!props.isConnected) {
         return (
-          <Tooltip label={tGeneric('accessOrgAdmin')} disabled={isOrgAdmin(userDetails.allRoles)}>
+          <Tooltip
+            label={tGeneric('accessOrgAdminRoot')}
+            disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
+          >
             <Button
               mt="lg"
               onClick={() => {
                 handleConnect();
               }}
-              disabled={!isOrgAdmin(userDetails.allRoles)}
+              disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
             >
               {t('connect')}
             </Button>
@@ -74,8 +77,16 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
         );
       }
       return (
-        <Tooltip label={tGeneric('accessOrgAdmin')} disabled={isOrgAdmin(userDetails.allRoles)}>
-          <Button mt="lg" color={theme.colors.red[7]} onClick={open} disabled={!isOrgAdmin(userDetails.allRoles)}>
+        <Tooltip
+          label={tGeneric('accessOrgAdminRoot')}
+          disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
+        >
+          <Button
+            mt="lg"
+            color={theme.colors.red[7]}
+            onClick={open}
+            disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+          >
             {t('revoke')}
           </Button>
         </Tooltip>
