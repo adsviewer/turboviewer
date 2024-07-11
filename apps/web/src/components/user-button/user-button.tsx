@@ -24,6 +24,7 @@ export default function UserButton(): ReactNode {
         allRoles: res.allRoles,
         currentOrganizationId: res.currentOrganizationId,
         photoUrl: res.photoUrl,
+        currentOrganization: res.currentOrganization,
       });
       setIsDataLoaded(true);
     });

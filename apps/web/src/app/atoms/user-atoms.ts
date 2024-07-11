@@ -11,6 +11,8 @@ const initialUserDetails: MeQuery['me'] = {
   currentOrganization: {
     id: '',
     name: '',
+    isRoot: false,
+    parentId: null,
   },
 };
 

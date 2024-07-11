@@ -1,6 +1,8 @@
 {
   "generic": {
-    "error": "Fout"
+    "error": "Fout",
+    "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
+    "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
