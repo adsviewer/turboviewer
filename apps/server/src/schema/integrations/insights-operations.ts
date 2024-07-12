@@ -3,7 +3,7 @@ import { Kind } from 'graphql/language';
 import { FireAndForget, isAError } from '@repo/utils';
 import { type ChannelIFrame, getInsightsCache, iFramePerInsight, setInsightsCache } from '@repo/channel';
 import * as changeCase from 'change-case';
-import { groupBy as groupByUtil, uniqueBy } from '../../utils/data-object-utils';
+import { groupBy as groupByUtil } from '../../utils/data-object-utils';
 import { builder } from '../builder';
 import { invokeChannelIngress } from '../../utils/lambda-utils';
 import { groupedInsights, insightsDatapoints } from '../../utils/insights-query-builder';
@@ -115,54 +115,6 @@ builder.queryFields((t) => ({
             .then((ins) => ins.length)
         : 0;
 
-      if (
-        args.filter.groupBy?.includes('adId') &&
-        info.fieldNodes.some((f) =>
-          f.selectionSet?.selections.some(
-            (s) =>
-              s.kind === Kind.FIELD &&
-              s.name.value === 'edges' &&
-              s.selectionSet?.selections.some((sel) => sel.kind === Kind.FIELD && sel.name.value === 'adName'),
-          ),
-        )
-      ) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it is checked above
-        const uniqueAdIds = uniqueBy(ret, (edge) => edge.adId!);
-        const adNamesMap = await prisma.ad
-          .findMany({
-            select: { id: true, name: true },
-            where: { id: { in: Array.from(uniqueAdIds) } },
-          })
-          .then((ads) => new Map(ads.map((ad) => [ad.id, ad.name])));
-        ret.forEach((edge) => {
-          edge.adName = edge.adName ? adNamesMap.get(edge.adName) : undefined;
-        });
-      }
-
-      if (
-        args.filter.groupBy?.includes('adAccountId') &&
-        info.fieldNodes.some((f) =>
-          f.selectionSet?.selections.some(
-            (s) =>
-              s.kind === Kind.FIELD &&
-              s.name.value === 'edges' &&
-              s.selectionSet?.selections.some((sel) => sel.kind === Kind.FIELD && sel.name.value === 'adAccountName'),
-          ),
-        )
-      ) {
-        const adAccountNamesMap = await prisma.adAccount
-          .findMany({
-            select: { id: true, name: true },
-            where: {
-              id: { in: Array.from(new Set(ret.map((e) => e.adAccountId))).flatMap((i) => i ?? []) },
-            },
-          })
-          .then((ads) => new Map(ads.map((ad) => [ad.id, ad.name])));
-        ret.forEach((edge) => {
-          edge.adAccountName = edge.adAccountId ? adAccountNamesMap.get(edge.adAccountId) : undefined;
-        });
-      }
-
       const retVal = {
         totalCount: await totalElementsP,
         hasNext,
@@ -269,8 +221,6 @@ const GroupedInsightDto = builder.simpleObject(
       id: t.string({ nullable: false }),
       adId: t.string({ nullable: true }),
       adAccountId: t.string({ nullable: true }),
-      adAccountName: t.string({ nullable: true }),
-      adName: t.string({ nullable: true }),
       currency: t.field({ type: CurrencyEnumDto, nullable: false }),
       device: t.field({ type: DeviceEnumDto, nullable: true }),
       publisher: t.field({ type: PublisherEnumDto, nullable: true }),
@@ -278,6 +228,35 @@ const GroupedInsightDto = builder.simpleObject(
     }),
   },
   (t) => ({
+    adAccountName: t.field({
+      type: 'String',
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) => {
+        if (root.adAccountId) {
+          const { name } = await prisma.adAccount.findUniqueOrThrow({ where: { id: root.adAccountId } });
+          return name;
+        }
+        if (root.adId) {
+          const { adAccount } = await prisma.ad.findUniqueOrThrow({
+            include: { adAccount: true },
+            where: { id: root.adId },
+          });
+          return adAccount.name;
+        }
+        return null;
+      },
+    }),
+    adName: t.field({
+      type: 'String',
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) => {
+        if (root.adId) {
+          const { name } = await prisma.ad.findUniqueOrThrow({ where: { id: root.adId } });
+          return name;
+        }
+        return null;
+      },
+    }),
     iFrame: t.field({
       type: IFrameDTO,
       nullable: true,
