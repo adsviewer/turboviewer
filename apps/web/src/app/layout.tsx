@@ -9,6 +9,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { getLocale, getMessages } from 'next-intl/server';
 import NotificationsHandler from '@/components/misc/notifications-handler';
+import UserLocaleSetter from '@/app/user-locale-setter';
 
 export const metadata: Metadata = {
   title: 'AdsViewer',
@@ -24,6 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages}>
+          <UserLocaleSetter />
           <MantineProvider defaultColorScheme="auto">
             <NotificationsHandler />
             {children}
