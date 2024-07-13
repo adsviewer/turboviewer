@@ -53,7 +53,7 @@ export default function ConfirmEmail(): React.ReactNode {
       </Button>
       <Text
         onClick={() => {
-          void signOut().then();
+          void signOut();
         }}
         td="underline"
         size="xs"
