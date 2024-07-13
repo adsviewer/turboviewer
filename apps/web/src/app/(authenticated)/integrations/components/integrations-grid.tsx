@@ -77,44 +77,46 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
 
   const isIntegrationConnected = (status: IntegrationStatus): boolean => status === IntegrationStatus.Connected;
 
+  const map = new Map<IntegrationType, { title: string; description?: string; imageSrc: string }>([
+    [
+      IntegrationType.META,
+      {
+        title: 'Meta',
+        description:
+          'Connect your Meta account and view analytics for your ad campaigns on every Meta Platforms application!',
+        imageSrc: metaLogo as string,
+      },
+    ],
+    [IntegrationType.TIKTOK, { title: 'TikTok', imageSrc: tiktokLogo as string }],
+    [IntegrationType.LINKEDIN, { title: 'LinkedIn', imageSrc: linkedinLogo as string }],
+  ]);
+
   return (
     <Transition mounted={isMounted} transition="fade" duration={400} timingFunction="ease">
       {(styles) => (
         <div style={styles}>
           <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-            <IntegrationCard
-              title="Meta"
-              description="Connect your Meta account and view analytics for your ad campaigns on every Meta Platforms application!"
-              authUrl={props.integrations[0].authUrl}
-              integrationType={IntegrationType.META}
-              isConnected={isIntegrationConnected(props.integrations[0].status)}
-              isAvailable={isIntegrationAvailable(props.integrations[0].status)}
-              image={<Image src={metaLogo as string} alt="Meta" width={100} priority />}
-              adCount={integrationsData.META.adCount}
-              lastSyncedAt={integrationsData.META.lastSyncedAt}
-            />
-            <IntegrationCard
-              title="TikTok"
-              description="Connect your TikTok account and manage all your TikTok advertisments!"
-              authUrl={props.integrations[1].authUrl}
-              integrationType={IntegrationType.TIKTOK}
-              isConnected={isIntegrationConnected(props.integrations[1].status)}
-              isAvailable={isIntegrationAvailable(props.integrations[1].status)}
-              image={<Image src={tiktokLogo as string} alt="TikTok" width={100} priority />}
-              adCount={integrationsData.TIKTOK.adCount}
-              lastSyncedAt={integrationsData.TIKTOK.lastSyncedAt}
-            />
-            <IntegrationCard
-              title="LinkedIn"
-              description="Connect your LinkedIn account and manage all your LinkedIn advertisments!"
-              authUrl={props.integrations[2].authUrl}
-              integrationType={IntegrationType.LINKEDIN}
-              isConnected={isIntegrationConnected(props.integrations[2].status)}
-              isAvailable={isIntegrationAvailable(props.integrations[2].status)}
-              image={<Image src={linkedinLogo as string} alt="LinkedIn" width={100} priority />}
-              adCount={integrationsData.LINKEDIN.adCount}
-              lastSyncedAt={integrationsData.LINKEDIN.lastSyncedAt}
-            />
+            {props.integrations.map((integration) => {
+              const info = map.get(integration.type);
+              if (!info) return null;
+              const { title, description, imageSrc } = info;
+              return (
+                <IntegrationCard
+                  key={integration.type}
+                  title={title}
+                  description={
+                    description ?? `Connect your ${title} account and manage all your ${title} advertisments!`
+                  }
+                  authUrl={integration.authUrl}
+                  integrationType={integration.type}
+                  isConnected={isIntegrationConnected(integration.status)}
+                  isAvailable={isIntegrationAvailable(integration.status)}
+                  image={<Image src={imageSrc} alt={title} width={100} priority />}
+                  adCount={integrationsData[integration.type].adCount}
+                  lastSyncedAt={integrationsData[integration.type].lastSyncedAt}
+                />
+              );
+            })}
           </SimpleGrid>
         </div>
       )}
