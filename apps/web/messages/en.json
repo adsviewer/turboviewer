@@ -107,7 +107,8 @@
     "deleteTip": "To confirm, type \"DELETE\" in the box below.",
     "deleteWarning": "WARNING: Adsviewer will erase all data related to this organization!",
     "createOrganization": "Create organization",
-    "selectOrganization": "Select organization"
+    "selectOrganization": "Select organization",
+    "updateOrganizationSuccess": "The organization was updated successfully!"
   },
   "profile": {
     "title": "Profile",
