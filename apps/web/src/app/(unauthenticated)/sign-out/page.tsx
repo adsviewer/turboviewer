@@ -6,7 +6,7 @@ import { signOut } from '../actions';
 
 export default function SignOut(): ReactNode {
   useEffect(() => {
-    void signOut().then();
+    void signOut();
   }, []);
 
   return (
