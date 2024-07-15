@@ -1,26 +1,33 @@
 import { URLSearchParams } from 'node:url';
+import { Readable } from 'node:stream';
 import {
   type AdAccount,
   CurrencyEnum,
-  type DeviceEnum,
+  DeviceEnum,
   type Integration,
   IntegrationTypeEnum,
   PublisherEnum,
 } from '@repo/database';
-import { AError, isAError } from '@repo/utils';
-import { z } from 'zod';
+import { AError, formatYYYMMDDDate, isAError } from '@repo/utils';
+import { type Writeable, z, type ZodEnum } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   authEndpoint,
+  type ChannelAd,
   type ChannelAdAccount,
   type ChannelIFrame,
+  type ChannelInsight,
   type ChannelInterface,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   saveAccounts,
+  saveAds,
+  saveInsights,
+  timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
+import csvParser from 'csv-parser';
 import { env } from './config';
 
 const apiVersion = 'v1.3';
@@ -137,8 +144,14 @@ class Tiktok implements ChannelInterface {
     return await saveAccounts(activeAccounts, integration);
   }
 
-  async getChannelData(_integration: Integration, _initial: boolean): Promise<AError | undefined> {
-    return Promise.resolve(new AError('Not implemented'));
+  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
+    const dbAccounts = await this.saveAdAccounts(integration);
+    if (isAError(dbAccounts)) return dbAccounts;
+    const taskIdAdAccount = await Tiktok.runAdInsightReports(dbAccounts, integration, initial);
+    const processingTasks = await Tiktok.waitAndProcessReports(taskIdAdAccount, integration);
+    if (isAError(processingTasks)) return processingTasks;
+
+    return undefined;
   }
 
   getAdPreview(
@@ -211,7 +224,7 @@ class Tiktok implements ChannelInterface {
     }
     if (!response.ok) {
       logger.error(await response.text(), 'Failed to execute tik-tok request');
-      return new AError('Uknown error');
+      return new AError('Unknown error');
     }
     return response;
   };
@@ -234,12 +247,254 @@ class Tiktok implements ChannelInterface {
     response: Response | Error,
   ): Promise<AError | ApiBaseValidationSchema> => {
     if (response instanceof Error) return response;
-    const parsed = apiBaseValidationSchema.safeParse(await response.json());
-    if (!parsed.success) {
-      logger.error(parsed.error, 'Failed to parse base tik-tok response');
-      return new AError('Failed to parse response');
+    const contentType = response.headers.get('content-type');
+    if (!contentType) return new AError('No content type');
+    switch (contentType) {
+      case 'application/json': {
+        const parsed = apiBaseValidationSchema.safeParse(await response.json());
+        if (!parsed.success) {
+          logger.error(parsed.error, 'Failed to parse base tik-tok response');
+          return new AError('Failed to parse response');
+        }
+        return parsed.data;
+      }
+      case 'application/octet-stream':
+        return { code: 0, data: await Tiktok.csvParse(response), message: '', request_id: '' };
+      default:
+        logger.error(contentType, 'Failed to parse base tik-tok response');
+        return new AError('Failed to parse response');
     }
-    return parsed.data;
+  };
+
+  private static csvParse = async (response: Response): Promise<AError | unknown[]> => {
+    const parsedRows: unknown[] = [];
+
+    return new Promise<AError | unknown[]>((resolve, reject) => {
+      if (!response.body) {
+        reject(new AError('No body in response'));
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const stream = new Readable({
+        read() {
+          reader
+            .read()
+            .then(({ done, value }) => {
+              if (done) {
+                this.push(null);
+              } else {
+                this.push(Buffer.from(value));
+              }
+            })
+            .catch((err: unknown) => {
+              this.emit('error', err);
+            });
+        },
+      });
+
+      stream
+        .pipe(csvParser())
+        .on('data', (row) => parsedRows.push(row))
+        .on('end', () => {
+          resolve(parsedRows);
+        })
+        .on('error', (error) => {
+          logger.error(error, 'Failed to parse CSV data');
+          reject(new AError('Failed to parse CSV data'));
+        });
+    });
+  };
+
+  /**
+   * Run reports for each account
+   * @returns Map of task id to Ad account
+   */
+  private static runAdInsightReports = async (
+    dbAccounts: AdAccount[],
+    integration: Integration,
+    initial: boolean,
+  ): Promise<Map<string, AdAccount>> => {
+    const taskIdAdAccount = new Map<string, AdAccount>();
+    await Promise.all(
+      dbAccounts.map(async (account) => {
+        const tikTokTimeRange = await Tiktok.timeRange(initial, account.id);
+        const response = await Tiktok.tikTokFetch(integration.accessToken, `${baseUrl}/report/task/create`, {
+          method: 'POST',
+          body: JSON.stringify({
+            ...tikTokTimeRange,
+            advertiser_id: account.externalId,
+            data_level: 'AUCTION_AD',
+            dimensions: ['ad_id', 'placement', 'stat_time_day'],
+            report_type: 'AUDIENCE',
+            metrics: ['ad_name', 'ad_id', 'placement_type', 'impressions', 'spend'],
+          }),
+        });
+        const data = await Tiktok.baseValidation(response);
+        if (isAError(data)) return data;
+        const schema = z.object({ task_id: z.string() });
+        const parsed = schema.safeParse(data);
+        if (!parsed.success) {
+          logger.error(parsed.error, 'Failed to create task');
+          return;
+        }
+        taskIdAdAccount.set(parsed.data.task_id, account);
+      }),
+    );
+    return taskIdAdAccount;
+  };
+
+  private static timeRange = async (
+    initial: boolean,
+    adAccountId: string,
+  ): Promise<{ start_date: string; end_date: string }> => {
+    const range = await timeRange(initial, adAccountId);
+    return {
+      start_date: formatYYYMMDDDate(range.since),
+      end_date: formatYYYMMDDDate(range.until),
+    };
+  };
+
+  /**
+   * Wait for reports to be processed and process them
+   * @param taskIdAdAccount - Map of task id to Ad account
+   * @param integration - Integration
+   */
+  private static waitAndProcessReports = async (
+    taskIdAdAccount: Map<string, AdAccount>,
+    integration: Integration,
+  ): Promise<(AError | undefined)[]> => {
+    const processingTasks: Promise<AError | undefined>[] = [];
+    const jobStatusEnum = z.enum(['QUEUING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELED']);
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
+    while (true) {
+      const statuses = await this.getProcessStatus(taskIdAdAccount, integration, jobStatusEnum);
+
+      // Filter out tasks based on their status and log if necessary
+      for (const [taskId, adAccount] of taskIdAdAccount) {
+        const taskStatus = statuses.find((status) => status.taskId === taskId);
+        if (!taskStatus) {
+          taskIdAdAccount.delete(taskId);
+          continue;
+        }
+
+        switch (taskStatus.status) {
+          case jobStatusEnum.enum.SUCCESS:
+            processingTasks.push(Tiktok.processReport(taskId, integration, adAccount));
+            taskIdAdAccount.delete(taskId);
+            continue;
+          case jobStatusEnum.enum.FAILED:
+            logger.warn(`Task ${taskId} failed`);
+            taskIdAdAccount.delete(taskId);
+            continue;
+          case jobStatusEnum.enum.CANCELED:
+            logger.error(`Task ${taskId} was canceled`);
+            taskIdAdAccount.delete(taskId);
+            continue;
+          default:
+            break;
+        }
+      }
+
+      if (taskIdAdAccount.size === 0) break;
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 5000);
+      });
+    }
+
+    return await Promise.all(processingTasks);
+  };
+
+  private static getProcessStatus = async (
+    taskIdAdAccount: Map<string, AdAccount>,
+    integration: Integration,
+    jobStatusEnum: ZodEnum<Writeable<[string, string, string, string, string]>>,
+  ): Promise<{ taskId: string; status: string }[]> => {
+    return await Promise.all(
+      Array.from(taskIdAdAccount.keys()).map(async (taskId) => {
+        const params = new URLSearchParams({
+          advertiser_id: integration.externalId,
+          task_id: taskId,
+        });
+        const response = await Tiktok.tikTokFetch(
+          integration.accessToken,
+          `${baseUrl}/report/task/check?${params.toString()}`,
+        );
+        const data = await Tiktok.baseValidation(response);
+        if (isAError(data)) {
+          logger.error(data, `Failed to get status for task ${taskId} and integration ${integration.id}`);
+          return { taskId, status: 'ERROR' };
+        }
+        const schema = z.object({ status: jobStatusEnum });
+        const parsed = schema.safeParse(data);
+        if (!parsed.success) {
+          logger.error(parsed.error, `Failed to get status for task ${taskId} and integration ${integration.id}`);
+          return { taskId, status: 'ERROR' };
+        }
+        return { taskId, status: parsed.data.status };
+      }),
+    );
+  };
+
+  private static processReport = async (
+    taskId: string,
+    integration: Integration,
+    adAccount: AdAccount,
+  ): Promise<AError | undefined> => {
+    const params = new URLSearchParams({
+      advertiser_id: integration.externalId,
+      task_id: taskId,
+    });
+    const response = await Tiktok.tikTokFetch(
+      integration.accessToken,
+      `${baseUrl}/report/task/download?${params.toString()}`,
+    );
+    const data = await Tiktok.baseValidation(response);
+    const schema = z.array(
+      z.object({
+        '﻿Ad ID': z.string(),
+        'Ad Name': z.string(),
+        Placements: z.string(),
+        Date: z.coerce.date(),
+        'Placements Types': z.string(),
+        Impression: z.coerce.number().int(),
+        Cost: z.coerce.number(),
+      }),
+    );
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      logger.error(parsed.error, `Failed to parse report for task ${taskId} and integration ${integration.id}`);
+      return new AError('Failed to parse report');
+    }
+
+    const insights: ChannelInsight[] = [];
+    const adsMap = new Map<string, ChannelAd>();
+    parsed.data.forEach((row) => {
+      const insight: ChannelInsight = {
+        externalAdId: row['﻿Ad ID'],
+        date: row.Date,
+        externalAccountId: adAccount.externalId,
+        impressions: row.Impression,
+        spend: Math.floor(row.Cost * 100),
+        device: DeviceEnum.Unknown,
+        publisher: PublisherEnum.TikTok,
+        position: row.Placements,
+      };
+      insights.push(insight);
+      adsMap.set(insight.externalAdId, {
+        externalAdAccountId: adAccount.externalId,
+        externalId: insight.externalAdId,
+        name: row['Ad Name'],
+      });
+    });
+    const ads = Array.from(adsMap.values());
+    const adExternalIdMap = new Map<string, string>();
+    await saveAds(integration, ads, adAccount.id, adExternalIdMap);
+    await saveInsights(insights, adExternalIdMap, adAccount);
+
+    return undefined;
   };
 }
 

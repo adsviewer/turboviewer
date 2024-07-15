@@ -8,7 +8,7 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
-import { addInterval, AError, extractDate, getBeforeXMonths, getYesterday, isAError } from '@repo/utils';
+import { addInterval, AError, extractDate, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { AuthClient, RestliClient } from 'linkedin-api-client';
@@ -28,6 +28,7 @@ import {
   saveAccounts,
   saveAds,
   saveInsights,
+  timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { env } from './config';
@@ -200,7 +201,7 @@ class LinkedIn implements ChannelInterface {
       pivots: 'List(CREATIVE,IMPRESSION_DEVICE_TYPE)',
       timeGranularity: 'DAILY',
       accounts: `List(${encodeURIComponent(`urn:li:sponsoredAccount:${dbAccount.externalId}`)})`,
-      dateRange: await timeRange(initial, dbAccount.id),
+      dateRange: await linkedInTimeRange(initial, dbAccount.id),
       fields: 'clicks,impressions,pivotValues,costInLocalCurrency,dateRange',
     };
     const adAnalytics = await LinkedIn.handlePagination(
@@ -375,26 +376,10 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
   return false;
 };
 
-const timeRange = async (initial: boolean, adAccountId: string): Promise<string> => {
-  const xMonthsAgo = (): string => {
-    const { year, month, day } = extractDate(getBeforeXMonths());
-    return `(start:(year:${String(year)},month:${month},day:${day}))`;
-  };
-
-  const prior1Day = (latestInsight: Date): string => {
-    const { year, month, day } = extractDate(getYesterday(latestInsight));
-    return `(start:(year:${String(year)},month:${month},day:${day}))`;
-  };
-
-  if (initial) {
-    return xMonthsAgo();
-  }
-  const latestInsight = await prisma.insight.findFirst({
-    select: { date: true },
-    where: { adAccountId },
-    orderBy: { date: 'desc' },
-  });
-  return latestInsight ? prior1Day(latestInsight.date) : xMonthsAgo();
+const linkedInTimeRange = async (initial: boolean, adAccountId: string): Promise<string> => {
+  const range = await timeRange(initial, adAccountId);
+  const { year, month, day } = extractDate(range.since);
+  return `(start:(year:${String(year)},month:${month},day:${day}))`;
 };
 
 const queryParams = (params: Record<string, string>): string => {

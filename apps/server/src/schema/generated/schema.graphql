@@ -612,6 +612,8 @@ enum PublisherEnum {
   AudienceNetwork
   LinkedIn
   TikTok
+  GlobalAppBundle
+  Pangle
   Unknown
 }
 

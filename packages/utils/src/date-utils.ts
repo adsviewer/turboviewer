@@ -9,31 +9,31 @@ export const extractDate = (date: Date): { year: number; month: string; day: str
   return { year, month, day };
 };
 
-const formatYYYMMDDDate = (date: Date): string => {
+export const formatYYYMMDDDate = (date: Date): string => {
   const { year, month, day } = extractDate(date);
   return `${String(year)}-${month}-${day}`;
 };
 
-export const getLastXMonths = (): { until: string; since: string } => {
+export const getLastXMonths = (): { until: Date; since: Date } => {
   const today = new Date();
   const lastXMonths = new Date(today);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
   lastXMonths.setMonth(today.getMonth() - xMonths);
   return {
-    since: formatYYYMMDDDate(lastXMonths),
-    until: formatYYYMMDDDate(tomorrow),
+    since: lastXMonths,
+    until: tomorrow,
   };
 };
 
-export const getDayPriorTillTomorrow = (date?: Date): { until: string; since: string } => {
+export const getDayPriorTillTomorrow = (date?: Date): { until: Date; since: Date } => {
   const dayPrior = new Date(date ? date : new Date());
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   dayPrior.setDate(dayPrior.getDate() - 1);
   return {
-    since: formatYYYMMDDDate(dayPrior),
-    until: formatYYYMMDDDate(tomorrow),
+    since: dayPrior,
+    until: tomorrow,
   };
 };
 
