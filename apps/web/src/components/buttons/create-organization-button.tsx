@@ -27,6 +27,7 @@ export default function CreateOrganizationButton(): ReactNode {
     setIsPending(true);
     void createOrganization(values)
       .then((res) => {
+        logger.info(res);
         if (!res.success) {
           logger.error(res.error);
           return new Error(res.error);
@@ -35,6 +36,7 @@ export default function CreateOrganizationButton(): ReactNode {
         // On success, switch to the newly created organization!
         void switchOrganization({ organizationId: res.data.createOrganization.id })
           .then((switchRes) => {
+            logger.info(switchRes);
             if (switchRes.success) {
               void changeJWT(
                 switchRes.data.switchOrganization.token,
