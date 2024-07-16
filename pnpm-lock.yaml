@@ -611,6 +611,9 @@ importers:
       '@repo/channel-meta':
         specifier: workspace:*
         version: link:../channel-meta
+      '@repo/channel-tiktok':
+        specifier: workspace:*
+        version: link:../channel-tiktok
       '@repo/channel-utils':
         specifier: workspace:*
         version: link:../channel-utils
@@ -739,6 +742,46 @@ importers:
         version: 20.14.9
       typescript:
         specifier: ^5.5.2
+        version: 5.5.2
+
+  packages/channel-tiktok:
+    dependencies:
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../channel-utils
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      zod:
+        specifier: ^3.23.5
+        version: 3.23.8
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.21
+      '@types/lodash':
+        specifier: ^4.17.0
+        version: 4.17.6
+      '@types/node':
+        specifier: ^20.12.7
+        version: 20.14.9
+      typescript:
+        specifier: ^5.4.5
         version: 5.5.2
 
   packages/channel-utils:

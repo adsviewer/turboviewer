@@ -17,7 +17,7 @@ export interface GenerateAuthUrlResp {
 export interface TokensResponse {
   accessToken: string;
   refreshToken?: string;
-  accessTokenExpiresAt: Date;
+  accessTokenExpiresAt: Date | null;
   refreshTokenExpiresAt?: Date;
   externalId?: string;
 }

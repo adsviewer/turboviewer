@@ -1,5 +1,6 @@
 import PQueue from 'p-queue';
 import { logger } from '@repo/logger';
+import { isAError } from './error-helper';
 
 interface FireAndForgetOpts {
   concurrency?: number;
@@ -27,11 +28,18 @@ export class FireAndForget {
         return undefined;
       });
 
-    this._queue.add(wrappedFun).catch((e: unknown) => {
-      if (e instanceof Error && e.message !== "Cannot read properties of undefined (reading 'catch')") {
-        logger.error(e.message);
-      }
-    });
+    this._queue
+      .add(wrappedFun)
+      .then((f) => {
+        if (isAError(f)) {
+          logger.error(f.message);
+        }
+      })
+      .catch((e: unknown) => {
+        if (e instanceof Error && e.message !== "Cannot read properties of undefined (reading 'catch')") {
+          logger.error(e.message);
+        }
+      });
   }
 
   stop(): void {

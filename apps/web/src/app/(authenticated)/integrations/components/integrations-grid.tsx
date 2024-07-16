@@ -96,6 +96,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
             <IntegrationCard
               title="TikTok"
               description="Connect your TikTok account and manage all your TikTok advertisments!"
+              authUrl={props.integrations[1].authUrl}
               integrationType={IntegrationType.TIKTOK}
               isConnected={isIntegrationConnected(props.integrations[1].status)}
               isAvailable={isIntegrationAvailable(props.integrations[1].status)}
