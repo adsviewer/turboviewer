@@ -6,6 +6,7 @@ import {
   DeviceEnum,
   type Integration,
   IntegrationTypeEnum,
+  prisma,
   PublisherEnum,
 } from '@repo/database';
 import { AError, formatYYYMMDDDate, isAError } from '@repo/utils';
@@ -19,6 +20,7 @@ import {
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
+  deleteOldInsights,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   saveAccounts,
@@ -148,20 +150,41 @@ class Tiktok implements ChannelInterface {
     const dbAccounts = await this.saveAdAccounts(integration);
     if (isAError(dbAccounts)) return dbAccounts;
     const taskIdAdAccount = await Tiktok.runAdInsightReports(dbAccounts, integration, initial);
-    const processingTasks = await Tiktok.waitAndProcessReports(taskIdAdAccount, integration);
+    const processingTasks = await Tiktok.waitAndProcessReports(taskIdAdAccount, integration, initial);
     if (isAError(processingTasks)) return processingTasks;
 
     return undefined;
   }
 
-  getAdPreview(
-    _integration: Integration,
-    _adId: string,
+  async getAdPreview(
+    integration: Integration,
+    adId: string,
     _publisher: PublisherEnum | undefined,
     _device: DeviceEnum | undefined,
     _position: string | undefined,
   ): Promise<ChannelIFrame | AError> {
-    return Promise.resolve(new AError('Not implemented'));
+    const ad = await prisma.ad.findUniqueOrThrow({ include: { adAccount: true }, where: { id: adId } });
+    const response = await Tiktok.tikTokFetch(integration.accessToken, `${baseUrl}/creative/ads_preview/create`, {
+      method: 'POST',
+      body: JSON.stringify({
+        advertiser_id: ad.adAccount.externalId,
+        preview_type: 'AD',
+        ad_id: ad.externalId,
+      }),
+    });
+    const data = await Tiktok.baseValidation(response);
+    if (isAError(data)) return data;
+    const schema = z.object({ preview_link: z.string() });
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to get ad preview');
+      return new AError('Failed to get ad preview');
+    }
+    return {
+      src: parsed.data.preview_link,
+      width: 261,
+      height: 561,
+    };
   }
 
   getDefaultPublisher(): PublisherEnum {
@@ -359,10 +382,12 @@ class Tiktok implements ChannelInterface {
    * Wait for reports to be processed and process them
    * @param taskIdAdAccount - Map of task id to Ad account
    * @param integration - Integration
+   * @param initial - If this is the first time the data is being fetched
    */
   private static waitAndProcessReports = async (
     taskIdAdAccount: Map<string, AdAccount>,
     integration: Integration,
+    initial: boolean,
   ): Promise<(AError | undefined)[]> => {
     const processingTasks: Promise<AError | undefined>[] = [];
     const jobStatusEnum = z.enum(['QUEUING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELED']);
@@ -381,7 +406,7 @@ class Tiktok implements ChannelInterface {
 
         switch (taskStatus.status) {
           case jobStatusEnum.enum.SUCCESS:
-            processingTasks.push(Tiktok.processReport(taskId, integration, adAccount));
+            processingTasks.push(Tiktok.processReport(taskId, integration, adAccount, initial));
             taskIdAdAccount.delete(taskId);
             continue;
           case jobStatusEnum.enum.FAILED:
@@ -442,6 +467,7 @@ class Tiktok implements ChannelInterface {
     taskId: string,
     integration: Integration,
     adAccount: AdAccount,
+    initial: boolean,
   ): Promise<AError | undefined> => {
     const params = new URLSearchParams({
       advertiser_id: integration.externalId,
@@ -451,12 +477,22 @@ class Tiktok implements ChannelInterface {
       integration.accessToken,
       `${baseUrl}/report/task/download?${params.toString()}`,
     );
+    enum PlacementsEnum {
+      TikTok = 'TikTok',
+      GlobalAppBundle = 'Global App Bundle',
+      Pangle = 'Pangle',
+    }
+    const placementPublisherMap = new Map<PlacementsEnum, PublisherEnum>([
+      [PlacementsEnum.TikTok, PublisherEnum.TikTok],
+      [PlacementsEnum.GlobalAppBundle, PublisherEnum.GlobalAppBundle],
+      [PlacementsEnum.Pangle, PublisherEnum.Pangle],
+    ]);
     const data = await Tiktok.baseValidation(response);
     const schema = z.array(
       z.object({
         '﻿Ad ID': z.string(),
         'Ad Name': z.string(),
-        Placements: z.string(),
+        Placements: z.nativeEnum(PlacementsEnum),
         Date: z.coerce.date(),
         'Placements Types': z.string(),
         Impression: z.coerce.number().int(),
@@ -479,8 +515,8 @@ class Tiktok implements ChannelInterface {
         impressions: row.Impression,
         spend: Math.floor(row.Cost * 100),
         device: DeviceEnum.Unknown,
-        publisher: PublisherEnum.TikTok,
-        position: row.Placements,
+        publisher: placementPublisherMap.get(row.Placements) ?? PublisherEnum.TikTok,
+        position: row['Placements Types'],
       };
       insights.push(insight);
       adsMap.set(insight.externalAdId, {
@@ -492,6 +528,7 @@ class Tiktok implements ChannelInterface {
     const ads = Array.from(adsMap.values());
     const adExternalIdMap = new Map<string, string>();
     await saveAds(integration, ads, adAccount.id, adExternalIdMap);
+    await deleteOldInsights(adAccount.id, initial);
     await saveInsights(insights, adExternalIdMap, adAccount);
 
     return undefined;
