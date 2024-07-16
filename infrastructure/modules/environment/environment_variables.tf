@@ -63,6 +63,13 @@ variable "slack_workspace_id" {
   type = string
 }
 
+variable "tiktok_application_id" {
+  type = string
+}
+variable "tiktok_application_secret" {
+  type = string
+}
+
 variable "vercel_team" {
   type = string
 }

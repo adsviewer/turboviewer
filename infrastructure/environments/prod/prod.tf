@@ -99,6 +99,8 @@ module "environment" {
   service_subnet_ids          = module.workspace.private_subnet_ids
   slack_webhook_url           = var.slack_webhook_url
   slack_workspace_id          = var.slack_workspace_id
+  tiktok_application_id       = var.tiktok_application_id
+  tiktok_application_secret   = var.tiktok_application_secret
   vercel_api_token            = var.vercel_api_token
   vercel_team                 = var.vercel_team
   vpc_id                      = module.workspace.vpc_id
