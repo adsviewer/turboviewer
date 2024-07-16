@@ -17,19 +17,19 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.42.0"
+      version = "~> 5.58.0"
     }
     vercel = {
       source  = "vercel/vercel"
-      version = "~> 1.4.0"
+      version = "~> 1.12.0"
     }
     awscc = {
       source  = "hashicorp/awscc"
-      version = "0.77.0"
+      version = "1.5.0"
     }
   }
 
-  required_version = ">= 1.6.6"
+  required_version = ">= 1.9.2"
 }
 
 data "tfe_outputs" "management_outputs" {
