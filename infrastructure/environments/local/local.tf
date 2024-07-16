@@ -16,11 +16,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.42.0"
+      version = "~> 5.58.0"
     }
   }
 
-  required_version = ">= 1.6.6"
+  required_version = ">= 1.9.2"
 }
 
 data "tfe_outputs" "management_outputs" {
