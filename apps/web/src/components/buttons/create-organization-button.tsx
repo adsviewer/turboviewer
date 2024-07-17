@@ -9,8 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from '@mantine/form';
 import { logger } from '@repo/logger';
 import { type CreateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
-import { createOrganization, switchOrganization } from '@/app/(authenticated)/organization/actions';
-import { changeJWT } from '@/app/(unauthenticated)/actions';
+import { createAndSwitchOrganization } from '@/app/(authenticated)/organization/actions';
 
 export default function CreateOrganizationButton(): ReactNode {
   const t = useTranslations('organization');
@@ -25,38 +24,13 @@ export default function CreateOrganizationButton(): ReactNode {
 
   const handleSubmit = (values: CreateOrganizationMutationVariables): void => {
     setIsPending(true);
-    void createOrganization(values)
-      .then((res) => {
-        logger.info(res);
-        if (!res.success) {
-          logger.error(res.error);
-          return new Error(res.error);
-        }
 
-        // On success, switch to the newly created organization!
-        void switchOrganization({ organizationId: res.data.createOrganization.id })
-          .then((switchRes) => {
-            logger.info(switchRes);
-            if (switchRes.success) {
-              void changeJWT(
-                switchRes.data.switchOrganization.token,
-                switchRes.data.switchOrganization.refreshToken,
-              ).then(() => {
-                window.location.reload();
-              });
-            }
-          })
-          .catch((error: unknown) => {
-            logger.error(error);
-          });
-      })
-      .catch((error: unknown) => {
-        logger.error(error);
-      })
-      .finally(() => {
-        setIsPending(false);
-        form.reset();
-      });
+    void createAndSwitchOrganization(values).then((success) => {
+      if (!success) {
+        logger.error(success);
+      }
+      window.location.reload();
+    });
   };
 
   const closeModal = (): void => {
