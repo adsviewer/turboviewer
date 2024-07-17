@@ -96,6 +96,8 @@
   "organization": {
     "title": "Organization",
     "description": "Exercise effective management over the operations and development of your organization.",
+    "titleWarning": "Missing organization",
+    "descriptionWarning": "You currently don't have an active organization. Either switch to an organization or create a new one!",
     "submit": "Submit",
     "save": "Save",
     "organizationName": "Organization name",

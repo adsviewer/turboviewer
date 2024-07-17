@@ -8,6 +8,7 @@ import { env } from './env.mjs';
 import { groupedByKey } from './util/url-query-utils';
 import { InsightsColumnsGroupBy, UserStatus } from './graphql/generated/schema-server';
 
+const defaultMissingOrgURL = '/organization-warning';
 const publicPaths = [
   '/',
   '/sign-in',
@@ -95,7 +96,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // If attempting to visit a public URL while already signed in, redirect to insights/profile
+  // If attempting to visit a public URL or the defaultMissingOrgURL while already signed in, redirect to default page
   if (isPublic(request.nextUrl.pathname) && token) {
     const redirectUrl = getDefaultRedirectURL(request, tokenData);
     return NextResponse.redirect(redirectUrl);
@@ -116,14 +117,21 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If user has no current org, redirect to profile
+  // If user has no current org, redirect to defaultMissingOrgURL
   if (
     tokenData &&
     !tokenData.organizationId &&
     request.nextUrl.pathname !== '/sign-out' &&
-    request.nextUrl.pathname !== '/profile'
+    request.nextUrl.pathname !== defaultMissingOrgURL
   ) {
-    const redirectUrl = new URL('/profile', request.url);
+    const redirectUrl = new URL(defaultMissingOrgURL, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // If user has a current org and tries to visit the missing org screen, redirect to insights
+  if (request.nextUrl.pathname === defaultMissingOrgURL && tokenData?.organizationId) {
+    logger.info('VALID BRO');
+    const redirectUrl = new URL('/insights', request.url);
     return NextResponse.redirect(redirectUrl);
   }
   return NextResponse.next();
@@ -172,12 +180,12 @@ const tryRefreshToken = async (
   return signOut(request);
 };
 
-// The default redirect in on insights, but if no current org exists then the user should be redirected to profile
+// The default redirect is on insights, but if no current org exists then the user should be redirected to the org warning page
 const getDefaultRedirectURL = (request: NextRequest, tokenData: JWTPayload | undefined): URL => {
   if (tokenData?.organizationId) {
     return new URL('/insights', request.url);
   }
-  return new URL('/profile', request.url);
+  return new URL(defaultMissingOrgURL, request.url);
 };
 
 const isPublic = (path: string): boolean => {

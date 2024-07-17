@@ -40,28 +40,24 @@ export async function deleteOrganization(
 }
 
 export async function createAndSwitchOrganization(values: CreateOrganizationMutationVariables): Promise<boolean> {
-  void createOrganization(values)
-    .then((res) => {
-      if (!res.success) {
-        return;
-      }
-      void switchOrganization({ organizationId: res.data.createOrganization.id })
-        .then((switchRes) => {
-          logger.info('sever data bro');
-          if (!switchRes.success) {
-            return;
-          }
-          void changeJWT(switchRes.data.switchOrganization.refreshToken).then(() => {
-            return Promise.resolve(true);
-          });
-        })
-        .catch((error: unknown) => {
-          logger.error(error);
-        });
-    })
-    .catch((error: unknown) => {
-      logger.error(error);
-    });
+  try {
+    const res = await createOrganization(values);
 
-  return Promise.resolve(false);
+    if (!res.success) {
+      return false;
+    }
+
+    const switchRes = await switchOrganization({ organizationId: res.data.createOrganization.id });
+
+    if (!switchRes.success) {
+      return false;
+    }
+
+    await changeJWT(switchRes.data.switchOrganization.refreshToken);
+
+    return true;
+  } catch (error) {
+    logger.error(error);
+    return false;
+  }
 }
