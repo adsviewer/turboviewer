@@ -137,6 +137,8 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
             width={props.iframe?.width}
             height={props.iframe?.height}
             title={props.iframe?.src}
+            loading="lazy"
+            style={{ border: 'none' }}
           />
         </Flex>
       )}
