@@ -5,4 +5,6 @@ export const dateFormatOptions: DateTimeFormatOptions = {
   day: 'numeric',
 };
 
-export const impressionsFormatOptions = { style: 'decimal' };
+export const truncateString = (text: string, maxLength: number): string => {
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+};

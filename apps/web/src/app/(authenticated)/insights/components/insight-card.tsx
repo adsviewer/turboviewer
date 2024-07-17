@@ -12,7 +12,7 @@ import {
   type IFrame,
   type InsightsDatapoints,
 } from '@/graphql/generated/schema-server';
-import { dateFormatOptions } from '@/util/format-utils';
+import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 
 interface InsightCardProps {
@@ -145,7 +145,9 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
-          <Text fw={500}>{props.title}</Text>
+          <Text fw={500} title={String(props.title)}>
+            {truncateString(String(props.title), 22)}
+          </Text>
         </Flex>
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
