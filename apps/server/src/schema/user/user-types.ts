@@ -83,10 +83,10 @@ export const UserDto = builder.prismaObject('User', {
             }
           : {}),
       }),
-      resolve: (user) => {
+      resolve: (user, _args, ctx) => {
         const userRoles = user.roles.map(({ role }) => role);
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- it can be null since we may not be selecting organizations on top
-        const organizationRoles = user.organizations?.map(({ role }) => role);
+        const organizationRoles = ctx.organizationId ? user.organizations?.map(({ role }) => role) : [];
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- it can be null since we may not be selecting organizations on top
         return organizationRoles ? userRoles.concat(organizationRoles as unknown as RoleEnum[]) : userRoles;
       },

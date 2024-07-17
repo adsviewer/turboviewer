@@ -2,11 +2,11 @@ import { EmailType, OrganizationRoleEnum, UserOrganizationStatus } from '@repo/d
 import { builder } from '../builder';
 
 export const OrganizationDto = builder.prismaObject('Organization', {
-  authScopes: (organization, ctx) => {
-    if (ctx.organizationId === organization.id) return true;
-    if (ctx.isAdmin) return true;
-    if (!ctx.organizationId) return false;
-    return false;
+  authScopes: (_organization, _ctx) => {
+    // if (ctx.organizationId && ctx.organizationId === organization.id) return true;
+    // if (ctx.isAdmin) return true;
+    // if (!ctx.organizationId) return false;
+    return true;
   },
   fields: (t) => ({
     id: t.exposeID('id'),
