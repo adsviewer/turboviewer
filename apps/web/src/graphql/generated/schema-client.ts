@@ -711,7 +711,6 @@ export type Query = {
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   settingsChannels: Array<IntegrationListItem>;
-  userOrganizations: Array<Organization>;
 };
 
 export type QueryAvailableOrganizationAdAccountsArgs = {

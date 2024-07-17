@@ -648,7 +648,6 @@ type Query {
   """
   refreshToken: String!
   settingsChannels: [IntegrationListItem!]!
-  userOrganizations: [Organization!]!
 }
 
 input SignUpInput {
