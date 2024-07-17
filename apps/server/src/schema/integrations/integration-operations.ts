@@ -3,6 +3,7 @@ import { logger } from '@repo/logger';
 import { AError, FireAndForget } from '@repo/utils';
 import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
+import { GraphQLError } from 'graphql/index';
 import { builder } from '../builder';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import { getRootOrganizationId } from '../../contexts/organization';
@@ -73,7 +74,8 @@ builder.mutationFields((t) => ({
       logger.info(`De-authorizing integration ${args.type} for organization ${ctx.organizationId}`);
       const externalId = await getChannel(args.type).deAuthorize(ctx.organizationId);
       if (externalId instanceof AError) {
-        throw externalId;
+        logger.error(externalId);
+        throw new GraphQLError(externalId.message);
       }
       fireAndForget.add(() => revokeIntegration(externalId, args.type));
       const authUrl = getIntegrationAuthUrl(args.type, ctx.organizationId, ctx.currentUserId);
@@ -92,12 +94,17 @@ builder.subscriptionFields((t) => ({
 }));
 
 const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatusEnum => {
-  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [IntegrationTypeEnum.META, IntegrationTypeEnum.LINKEDIN];
+  const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [
+    IntegrationTypeEnum.META,
+    IntegrationTypeEnum.TIKTOK,
+    IntegrationTypeEnum.LINKEDIN,
+  ];
   if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
   const integration = integrations.find((i) => i.type === type);
   if (!integration) return IntegrationStatusEnum.NotConnected;
   if (integration.status === IntegrationStatus.REVOKED) return IntegrationStatusEnum.Revoked;
+  if (!integration.accessTokenExpiresAt) return IntegrationStatusEnum.Connected;
   if (
     (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??
     (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())

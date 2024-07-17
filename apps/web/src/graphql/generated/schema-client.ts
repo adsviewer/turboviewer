@@ -685,6 +685,8 @@ export enum PublisherEnum {
   AudienceNetwork = 'AudienceNetwork',
   LinkedIn = 'LinkedIn',
   TikTok = 'TikTok',
+  GlobalAppBundle = 'GlobalAppBundle',
+  Pangle = 'Pangle',
   Unknown = 'Unknown',
 }
 

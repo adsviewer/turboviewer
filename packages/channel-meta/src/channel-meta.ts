@@ -1,15 +1,15 @@
 import { createHmac } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
 import {
+  type AdAccount as DbAdAccount,
   CurrencyEnum,
   DeviceEnum,
   type Integration,
   IntegrationTypeEnum,
   prisma,
   PublisherEnum,
-  type AdAccount as DbAdAccount,
 } from '@repo/database';
-import { AError, FireAndForget, getDayPriorTillTomorrow, getLastXMonths, isAError } from '@repo/utils';
+import { AError, FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -47,6 +47,7 @@ import {
   saveAccounts,
   saveAds,
   saveInsights,
+  timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { env } from './config';
@@ -374,7 +375,7 @@ class Meta implements ChannelInterface {
                 AdsInsights.Breakdowns.platform_position,
               ],
               level: AdsInsights.Level.ad,
-              time_range: await timeRange(initial, acc.id),
+              time_range: await metaTimeRange(initial, acc.id),
             },
           ),
         integration,
@@ -678,14 +679,12 @@ class Meta implements ChannelInterface {
   ]);
 }
 
-const timeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {
-  if (initial) return getLastXMonths();
-  const latestInsight = await prisma.insight.findFirst({
-    select: { date: true },
-    where: { adAccountId },
-    orderBy: { date: 'desc' },
-  });
-  return latestInsight ? getDayPriorTillTomorrow(latestInsight.date) : getLastXMonths();
+const metaTimeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {
+  const range = await timeRange(initial, adAccountId);
+  return {
+    until: formatYYYMMDDDate(range.until),
+    since: formatYYYMMDDDate(range.since),
+  };
 };
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {

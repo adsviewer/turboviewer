@@ -24,7 +24,6 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
   } = req.query;
 
   const error = errorDescription ?? channelError;
-
   completeIntegration(code, stateArg, error)
     .then((integrationType) => {
       if (isAError(integrationType)) {
@@ -102,6 +101,7 @@ const completeIntegration = async (
         );
       return new AError('Failed to save tokens to database');
     }
+    logger.error(e, 'Failed to save tokens to database');
     return new AError('Failed to save tokens to database');
   });
   if (isAError(decryptedIntegration)) return decryptedIntegration;
@@ -168,7 +168,8 @@ const saveTokens = async (
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken ?? null,
   };
-  await getChannel(type).saveAdAccounts(decryptedIntegration);
+  const adAccounts = await getChannel(type).saveAdAccounts(decryptedIntegration);
+  if (isAError(adAccounts)) return adAccounts;
   return decryptedIntegration;
 };
 
