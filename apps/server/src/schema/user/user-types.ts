@@ -91,7 +91,9 @@ export const UserDto = builder.prismaObject('User', {
         return organizationRoles ? userRoles.concat(organizationRoles as unknown as RoleEnum[]) : userRoles;
       },
     }),
-    organizations: t.relation('organizations'),
+    organizations: t.relation('organizations', {
+      query: { where: { status: UserOrganizationStatus.ACTIVE } },
+    }),
     currentOrganizationId: t.exposeString('currentOrganizationId', { nullable: true }),
     currentOrganization: t.relation('currentOrganization', { nullable: true, type: OrganizationDto }),
   }),
