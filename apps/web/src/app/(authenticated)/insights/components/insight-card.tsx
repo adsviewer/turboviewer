@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
 import { YAxis } from 'recharts';
 import {
+  type PublisherEnum,
   type CurrencyEnum,
   type DeviceEnum,
   type IFrame,
@@ -14,12 +15,14 @@ import {
 } from '@/graphql/generated/schema-server';
 import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
+import { publisherToIconMap } from '@/util/publisher-utils';
 
 interface InsightCardProps {
   title: string | null | undefined;
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
   currency: CurrencyEnum;
+  publisher: PublisherEnum | null | undefined;
   datapoints?: InsightsDatapoints[];
   iframe?: IFrame | null;
 }
@@ -152,9 +155,19 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
 
-      <Text size="sm" c="dimmed">
-        {sentenceCase(props.description ?? '')}
-      </Text>
+      <Flex justify="space-between">
+        <Text size="sm" c="dimmed">
+          {sentenceCase(props.description ?? '')}
+        </Text>
+        {props.publisher ? (
+          <div style={{ opacity: 0.3 }} title={props.publisher}>
+            {(() => {
+              const PublisherIcon = publisherToIconMap.get(props.publisher);
+              return PublisherIcon ? <PublisherIcon /> : null;
+            })()}
+          </div>
+        ) : null}
+      </Flex>
     </Card>
   );
 }

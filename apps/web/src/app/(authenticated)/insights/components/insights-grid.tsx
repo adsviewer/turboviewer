@@ -33,11 +33,12 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                 description={insight.position}
                 device={insight.device}
                 currency={insight.currency}
-                datapoints={insight.datapoints}
-                iframe={insight.iFrame}
-              />
-            ))
-          : null}
+                publisher={insight.publisher}
+                  datapoints={insight.datapoints}
+                  iframe={insight.iFrame}
+                />
+              ))
+            : null}
       </SimpleGrid>
     </>
   );
