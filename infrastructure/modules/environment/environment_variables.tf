@@ -2,6 +2,10 @@ variable "amplify_token" {
   type = string
 }
 
+variable "base_tags" {
+  type = map(string)
+}
+
 variable "domain" {
   type = string
 }

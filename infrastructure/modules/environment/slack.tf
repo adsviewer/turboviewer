@@ -5,6 +5,13 @@ resource "awscc_chatbot_slack_channel_configuration" "error_slack_channel_config
   slack_channel_id   = "errors"
   slack_workspace_id = var.slack_workspace_id
   sns_topic_arns     = [module.server.sns_app_runner_error_topic_arn, aws_sns_topic.channel_ingress_error_topic.arn]
+
+  tags = [
+    for key, value in var.base_tags : {
+      key   = key
+      value = value
+    }
+  ]
 }
 
 data "aws_iam_policy_document" "logs_policy" {

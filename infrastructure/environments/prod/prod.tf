@@ -25,7 +25,7 @@ terraform {
     }
     awscc = {
       source  = "hashicorp/awscc"
-      version = "1.0.0"
+      version = "1.5.0"
     }
   }
 
@@ -83,6 +83,7 @@ module "environment" {
   }
 
   amplify_token               = var.amplify_token
+  base_tags                   = var.default_tags
   domain                      = local.domain
   environment                 = var.environment
   emailable_api_key           = var.emailable_api_key
