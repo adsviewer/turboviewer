@@ -5,11 +5,9 @@ export const OrganizationDto = builder.prismaObject('Organization', {
   authScopes: (organization, ctx) => {
     if (ctx.organizationId && ctx.organizationId === organization.id) return true;
     if (ctx.isAdmin) return true;
-    if (!ctx.organizationId)
-      return {
-        $granted: 'userOrganization',
-      };
-    return false;
+    return {
+      $granted: 'userOrganization',
+    };
   },
   fields: (t) => ({
     id: t.exposeID('id'),
