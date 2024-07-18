@@ -6,14 +6,12 @@ import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
-import { logger } from '@repo/logger';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { refreshJWTToken } from '@/app/(authenticated)/actions';
-import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
-import { deleteOrganization } from '../actions';
+import { deleteOrganizationAndRefreshJWT } from '../actions';
+import { logger } from '@repo/logger';
 
 export interface PropsType {
   isPending: boolean;
@@ -37,30 +35,18 @@ export default function DeleteOrganizationButton(props: PropsType): React.ReactN
 
   const performDeletion = (): void => {
     setIsDeleteDone(false);
-    void deleteOrganization({ organizationId: userDetails.currentOrganization?.id ?? '' })
-      .then((res) => {
-        if (res.error) {
+    if (userDetails.currentOrganization?.id.length) {
+      void deleteOrganizationAndRefreshJWT({ organizationId: userDetails.currentOrganization.id }).then((res) => {
+        if (res.success) {
+          window.location.reload();
+        } else {
+          setIsDeleteDone(true);
           logger.error(res.error);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, res.error);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
           router.replace(newURL);
-          return res.error;
         }
-
-        void refreshJWTToken().then((tokenRes) => {
-          const newToken = tokenRes.refreshToken;
-          void changeJWT(newToken)
-            .then(() => {
-              setIsDeleteDone(true);
-              window.location.reload();
-            })
-            .catch((error: unknown) => {
-              logger.error(error);
-            });
-        });
-      })
-      .catch((error: unknown) => {
-        logger.error(error);
       });
+    }
   };
 
   return (

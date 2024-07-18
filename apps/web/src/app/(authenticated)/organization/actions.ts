@@ -14,6 +14,7 @@ import {
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
+import { refreshJWTToken } from '@/app/(authenticated)/actions';
 
 async function createOrganization(
   values: CreateOrganizationMutationVariables,
@@ -27,13 +28,13 @@ export async function updateOrganization(
   return await handleUrqlRequest(urqlClientSdk().updateOrganization(values));
 }
 
-export async function switchOrganization(
+async function switchOrganization(
   values: SwitchOrganizationMutationVariables,
 ): Promise<UrqlResult<SwitchOrganizationMutation, string>> {
   return await handleUrqlRequest(urqlClientSdk().switchOrganization(values));
 }
 
-export async function deleteOrganization(
+async function deleteOrganization(
   values: DeleteOrganizationMutationVariables,
 ): Promise<UrqlResult<DeleteOrganizationMutation, string>> {
   return await handleUrqlRequest(urqlClientSdk().deleteOrganization(values));
@@ -61,5 +62,65 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
   } catch (error) {
     logger.error(error);
     return false;
+  }
+}
+
+export async function deleteOrganizationAndRefreshJWT(values: DeleteOrganizationMutationVariables): Promise<{
+  success: boolean;
+  error?: unknown;
+}> {
+  try {
+    const res = await deleteOrganization(values);
+
+    if (!res.success) {
+      logger.error(res.error);
+      return {
+        success: false,
+        error: res.error,
+      };
+    }
+
+    const refreshRes = await refreshJWTToken();
+
+    await changeJWT(refreshRes.refreshToken);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    logger.error(error);
+    return {
+      success: false,
+      error,
+    };
+  }
+}
+
+export async function switchOrganizationAndChangeJWT(values: SwitchOrganizationMutationVariables): Promise<{
+  success: boolean;
+  error?: unknown;
+}> {
+  try {
+    const res = await switchOrganization(values);
+
+    if (!res.success) {
+      logger.error(res.error);
+      return {
+        success: false,
+        error: res.error,
+      };
+    }
+
+    await changeJWT(res.data.switchOrganization.token, res.data.switchOrganization.refreshToken);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    logger.error(error);
+    return {
+      success: false,
+      error,
+    };
   }
 }

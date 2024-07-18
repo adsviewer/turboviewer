@@ -7,8 +7,7 @@ import _ from 'lodash';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
-import { switchOrganization } from '@/app/(authenticated)/organization/actions';
-import { changeJWT } from '@/app/(unauthenticated)/actions';
+import { switchOrganizationAndChangeJWT } from '@/app/(authenticated)/organization/actions';
 
 export default function OrganizationSelect(): React.ReactNode {
   const t = useTranslations('organization');
@@ -30,12 +29,10 @@ export default function OrganizationSelect(): React.ReactNode {
 
   const handleOrganizationSelect = (organizationId: string | null): void => {
     if (organizationId) {
-      void switchOrganization({ organizationId })
+      void switchOrganizationAndChangeJWT({ organizationId })
         .then((res) => {
           if (res.success) {
-            void changeJWT(res.data.switchOrganization.token, res.data.switchOrganization.refreshToken).then(() => {
-              window.location.reload();
-            });
+            window.location.reload();
           }
         })
         .catch((err: unknown) => {
