@@ -2,14 +2,14 @@ import { cacheExchange, type Client, createClient, fetchExchange } from '@urql/c
 import { cookies } from 'next/headers';
 // eslint-disable-next-line import/named -- this should work
 import { cache } from 'react';
-import { TOKEN_KEY } from '@repo/utils';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { createUrqlRequester } from '@/util/create-urql-requester';
 import { getSdk } from '@/graphql/generated/schema-server';
 import { env } from '@/env.mjs';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
-const makeClient = (): Client => {
-  const token = cookies().get(TOKEN_KEY)?.value;
+const makeClient = (refresh?: boolean): Client => {
+  const token = refresh ? cookies().get(REFRESH_TOKEN_KEY)?.value : cookies().get(TOKEN_KEY)?.value;
   return createClient({
     url: env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
     exchanges: [cacheExchange, makeAuthExchange(token), fetchExchange],
@@ -19,3 +19,4 @@ const makeClient = (): Client => {
 };
 
 export const urqlClientSdk = cache(() => getSdk(createUrqlRequester(makeClient())));
+export const urqlClientSdkRefresh = cache(() => getSdk(createUrqlRequester(makeClient(true))));

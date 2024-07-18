@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { type MeQuery } from '@/graphql/generated/schema-server';
 
-const initialUserDetails: MeQuery['me'] = {
+export const initialUserDetails: MeQuery['me'] = {
   id: '',
   firstName: '',
   lastName: '',
@@ -14,6 +14,7 @@ const initialUserDetails: MeQuery['me'] = {
     isRoot: false,
     parentId: null,
   },
+  organizations: [],
 };
 
 export const userDetailsAtom = atom<MeQuery['me']>(initialUserDetails);

@@ -11,3 +11,6 @@ export const isAdmin = (roles: AllRoles[]): boolean => {
 export const isMember = (roles: AllRoles[]): boolean => {
   return roles.includes(AllRoles.ORG_MEMBER);
 };
+export const isOperator = (roles: AllRoles[]): boolean => {
+  return roles.includes(AllRoles.ORG_OPERATOR);
+};

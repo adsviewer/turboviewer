@@ -6,7 +6,8 @@ import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle } from '@tabler/icons-react';
-import { useAtomValue } from 'jotai/index';
+import Link from 'next/link';
+import { useAtomValue } from 'jotai';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
@@ -64,15 +65,18 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             label={tGeneric('accessOrgAdminRoot')}
             disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
           >
-            <Button
-              mt="lg"
-              onClick={() => {
-                handleConnect();
-              }}
-              disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
-            >
-              {t('connect')}
-            </Button>
+            <Link href={props.authUrl ?? ''} passHref>
+              <Button
+                w="100%"
+                mt="lg"
+                component="a"
+                onClick={() => {
+                  handleConnect();
+                }}
+              >
+                {t('connect')}
+              </Button>
+            </Link>
           </Tooltip>
         );
       }

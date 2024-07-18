@@ -1,3 +1,7 @@
+query refreshToken {
+  refreshToken
+}
+
 mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
   updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
     ...UserFields
@@ -17,6 +21,12 @@ fragment UserFields on User {
   email
   photoUrl
   allRoles
+  organizations {
+    organization {
+      id
+      name
+    }
+  }
   currentOrganizationId
   currentOrganization {
     id

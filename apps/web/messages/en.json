@@ -1,6 +1,8 @@
 {
   "generic": {
     "error": "Error",
+    "success": "Success!",
+    "warning": "Warning!",
     "accessOrgAdmin": "Only organization admins may perform this action!",
     "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!"
   },
@@ -14,7 +16,8 @@
     "integrations": "Integrations",
     "settings": "Settings",
     "organization": "Organization",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "noOrganizationData": "No organization data"
   },
   "insights": {
     "title": "Insights",
@@ -58,7 +61,7 @@
     "connected": "Connected",
     "notConnected": "Not Connected",
     "revokeWarning": "You are about to perform a revoke action! Adsviewer will erase all your data related to this integration.",
-    "revokeTip": "To confirm, type \"REVOKE\" in the box below",
+    "revokeTip": "To confirm, type \"REVOKE\" in the box below.",
     "syncedOn": "Synced on",
     "ads": "ads"
   },
@@ -94,12 +97,21 @@
   "organization": {
     "title": "Organization",
     "description": "Exercise effective management over the operations and development of your organization.",
+    "titleWarning": "Missing organization",
+    "descriptionWarning": "You currently don't have an active organization. Either switch to an organization or create a new one!",
     "submit": "Submit",
     "save": "Save",
     "organizationName": "Organization name",
     "roleAdmin": "Administrator",
     "roleOrganizationAdmin": "Organization Administrator",
-    "roleOrganizationUser": "Member"
+    "roleOrganizationUser": "Member",
+    "deleteOrganization": "Delete organization",
+    "delete": "Delete",
+    "deleteTip": "To confirm, type \"DELETE\" in the box below.",
+    "deleteWarning": "WARNING: Adsviewer will erase all data related to this organization!",
+    "createOrganization": "Create organization",
+    "selectOrganization": "Select organization",
+    "updateOrganizationSuccess": "The organization was updated successfully!"
   },
   "profile": {
     "title": "Profile",

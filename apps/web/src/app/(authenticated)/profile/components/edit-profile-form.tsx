@@ -5,9 +5,10 @@ import { useForm, zodResolver } from '@mantine/form';
 import React, { useEffect, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSetAtom } from 'jotai';
+import _ from 'lodash';
 import { EditProfileSchema } from '@/util/schemas/profile-schemas';
 import { type UpdateUserMutationVariables, type MeQuery } from '@/graphql/generated/schema-server';
-import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
 import { updateUserDetails } from '../actions';
 
 interface PropsType {
@@ -34,7 +35,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
   // Load fetched data onto the form
   useEffect(() => {
     // Ensure profile data has been fetched before initialization
-    if (props.userDetails.firstName) {
+    if (!_.isEqual(props.userDetails, initialUserDetails)) {
       form.initialize({
         firstName: props.userDetails.firstName,
         lastName: props.userDetails.lastName,
@@ -59,16 +60,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
         if (!res.success) {
           form.setFieldError('oldPassword', res.error);
         } else {
-          setUserDetails({
-            id: res.data.updateUser.id,
-            firstName: res.data.updateUser.firstName,
-            lastName: res.data.updateUser.lastName,
-            email: res.data.updateUser.email,
-            allRoles: res.data.updateUser.allRoles,
-            currentOrganizationId: res.data.updateUser.currentOrganizationId,
-            currentOrganization: res.data.updateUser.currentOrganization,
-            photoUrl: res.data.updateUser.photoUrl,
-          });
+          setUserDetails(res.data.updateUser);
           form.setValues({
             oldPassword: '',
             newPassword: '',

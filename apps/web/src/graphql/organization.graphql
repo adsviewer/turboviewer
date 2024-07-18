@@ -1,6 +1,26 @@
+mutation createOrganization($name: String!) {
+  createOrganization(name: $name) {
+    id
+    name
+  }
+}
+
 mutation updateOrganization($name: String!) {
   updateOrganization(name: $name) {
     id
     name
+  }
+}
+
+mutation switchOrganization($organizationId: String!) {
+  switchOrganization(organizationId: $organizationId) {
+    token
+    refreshToken
+  }
+}
+
+mutation deleteOrganization($organizationId: String!) {
+  deleteOrganization(organizationId: $organizationId) {
+    id
   }
 }

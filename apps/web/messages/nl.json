@@ -1,6 +1,8 @@
 {
   "generic": {
     "error": "Fout",
+    "success": "Succes!",
+    "warning": "Waarschuwing!",
     "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!"
   },
@@ -14,7 +16,8 @@
     "integrations": "Integraties",
     "settings": "Instellingen",
     "organization": "Organisatie",
-    "signOut": "Uitloggen"
+    "signOut": "Uitloggen",
+    "noOrganizationData": "Geen organisatiegegevens"
   },
   "insights": {
     "title": "Inzichten",
@@ -58,7 +61,7 @@
     "connected": "Verbonden",
     "notConnected": "Niet verbonden",
     "revokeWarning": "U staat op het punt om een herroepingsactie uit te voeren! Adsviewer zal alle gegevens met betrekking tot deze integratie wissen.",
-    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak",
+    "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak.",
     "syncedOn": "Gesynchroniseerd op",
     "ads": "advertenties"
   },
@@ -94,12 +97,21 @@
   "organization": {
     "title": "Organisatie",
     "description": "Effectief management uitoefenen over de activiteiten en ontwikkeling van je organisatie.",
+    "titleWarning": "Ontbrekende organisatie",
+    "descriptionWarning": "U heeft momenteel geen actieve organisatie. Schakel over naar een organisatie of maak een nieuwe aan!",
     "submit": "Verzenden",
     "save": "Opslaan",
     "organizationName": "Naam organisatie",
     "roleAdmin": "Beheerder",
     "roleOrganizationAdmin": "Organisatiebeheerder",
-    "roleOrganizationUser": "Lid"
+    "roleOrganizationUser": "Lid",
+    "deleteOrganization": "Organisatie verwijderen",
+    "delete": "Verwijderen",
+    "deleteTip": "Om te bevestigen typt u \"DELETE\" in het onderstaande vak.",
+    "deleteWarning": "WAARSCHUWING: Adsviewer zal alle gegevens met betrekking tot deze organisatie wissen!",
+    "createOrganization": "Creëer organisatie",
+    "selectOrganization": "Selecteer organisatie",
+    "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!"
   },
   "profile": {
     "title": "Profiel",

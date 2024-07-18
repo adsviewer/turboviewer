@@ -8,23 +8,28 @@ import {
   Burger,
   Divider,
   Flex,
-  Group,
   NavLink,
+  Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconBuilding, IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useAtomValue } from 'jotai/index';
 import { LogoFull } from '@/components/misc/logo-full';
 import SettingsButton from '@/components/buttons/settings-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
 import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
+import OrganizationSelect from '@/components/dropdowns/organization-select/organization-select';
+import CreateOrganizationButton from '@/components/buttons/create-organization-button';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
+  const userDetails = useAtomValue(userDetailsAtom);
 
   const navLinksData = [
     {
@@ -54,30 +59,38 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
       padding="md"
     >
       <AppShellHeader>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <LogoFull />
+        <Flex h="100%" mx="md" align="center" justify="space-between">
+          <Flex mr="md" align="center">
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <LogoFull />
+          </Flex>
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
+            {userDetails.organizations.length ? <OrganizationSelect /> : null}
+            <CreateOrganizationButton />
             <SettingsButton />
           </Flex>
-        </Group>
+        </Flex>
       </AppShellHeader>
 
       {/* Navbar */}
       <AppShellNavbar p="md">
         <Flex direction="column" h="100%">
           {/* Navigation */}
-          {navLinksData.length
-            ? navLinksData.map((navLink) => (
-                <NavlinkButton
-                  key={navLink.href}
-                  iconNode={navLink.iconNode}
-                  label={navLink.label}
-                  href={navLink.href}
-                  isActive={pathname === navLink.href}
-                />
-              ))
-            : null}
+          {navLinksData.length && userDetails.currentOrganization?.id ? (
+            navLinksData.map((navLink) => (
+              <NavlinkButton
+                key={navLink.href}
+                iconNode={navLink.iconNode}
+                label={navLink.label}
+                href={navLink.href}
+                isActive={pathname === navLink.href}
+              />
+            ))
+          ) : (
+            <Text ta="center" c="dimmed">
+              {t('noOrganizationData')}
+            </Text>
+          )}
 
           {/* Group Filters (insights only) */}
           {pathname === '/insights' ? (
