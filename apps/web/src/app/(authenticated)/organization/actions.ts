@@ -53,7 +53,7 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
       return false;
     }
 
-    await changeJWT(switchRes.data.switchOrganization.refreshToken);
+    await changeJWT(switchRes.data.switchOrganization.token, switchRes.data.switchOrganization.refreshToken);
 
     return true;
   } catch (error) {
