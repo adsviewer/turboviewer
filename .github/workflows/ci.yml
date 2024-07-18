@@ -16,7 +16,7 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_AUTH_TOKEN: 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
 
     steps:
       - name: Check out code
@@ -60,5 +60,7 @@ jobs:
         run: pnpm prettier
 
       - name: Build
-        run: pnpm build
+        run: |
+          echo $SENTRY_AUTH_TOKEN
+          pnpm build
 
