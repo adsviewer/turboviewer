@@ -30,16 +30,16 @@ export default function InsightsGrid(props: PropsType): ReactNode {
               <InsightCard
                 key={insight.id as Key}
                 // eslint-disable-next-line no-nested-ternary -- cleaner than writing an entire function
-                  title={insight.adName ? insight.adName : insight.publisher ? insight.publisher : t('insight')}
+                title={insight.adName ? insight.adName : insight.publisher ? insight.publisher : t('insight')}
                 description={insight.position}
                 device={insight.device}
                 currency={insight.currency}
                 publisher={insight.publisher}
-                  datapoints={insight.datapoints}
-                  iframe={insight.iFrame}
-                />
-              ))
-            : null}
+                datapoints={insight.datapoints}
+                iframe={insight.iFrame}
+              />
+            ))
+          : null}
       </SimpleGrid>
     </>
   );
