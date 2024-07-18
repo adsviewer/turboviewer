@@ -71,6 +71,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@sentry/cli':
         specifier: ^2.32.1
         version: 2.32.1
