@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently 'pnpm --filter=@repo/database start-dev' 'pnpm codegen' && tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && pnpm run sentry:sourcemaps",
     "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
@@ -16,7 +16,7 @@
     "update": "pnpm update --latest",
     "codegen": "graphql-codegen -c src/schema/codegen.ts",
     "test": "node --import tsx --test test/**/*.test.ts",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project server ./dist && sentry-cli sourcemaps upload --org adsviewer --project server ./dist"
+    "sentry:sourcemaps": "sentry-cli --log-level=debug sourcemaps inject --org adsviewer --project server ./dist && sentry-cli sourcemaps upload --org adsviewer --project server ./dist"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.606.0",
@@ -70,7 +70,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/shared-types": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@sentry/cli": "^2.32.1",
+    "@sentry/cli": "^2.32.2",
     "@types/body-parser": "^1.19.5",
     "@types/express": "^4.17.21",
     "@types/express-serve-static-core": "^4.19.5",
