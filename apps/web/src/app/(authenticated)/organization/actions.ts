@@ -15,7 +15,7 @@ import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
 
-export async function createOrganization(
+async function createOrganization(
   values: CreateOrganizationMutationVariables,
 ): Promise<UrqlResult<CreateOrganizationMutation, string>> {
   return await handleUrqlRequest(urqlClientSdk().createOrganization(values));
@@ -44,12 +44,14 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
     const res = await createOrganization(values);
 
     if (!res.success) {
+      logger.error(res.error);
       return false;
     }
 
     const switchRes = await switchOrganization({ organizationId: res.data.createOrganization.id });
 
     if (!switchRes.success) {
+      logger.error(switchRes.error);
       return false;
     }
 

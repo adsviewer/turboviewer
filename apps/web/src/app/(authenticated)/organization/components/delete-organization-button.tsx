@@ -7,10 +7,12 @@ import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { logger } from '@repo/logger';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { refreshJWTToken } from '@/app/(authenticated)/actions';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
+import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
 import { deleteOrganization } from '../actions';
 
 export interface PropsType {
@@ -20,6 +22,9 @@ export interface PropsType {
 export default function DeleteOrganizationButton(props: PropsType): React.ReactNode {
   const t = useTranslations('organization');
   const theme = useMantineTheme();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [opened, { open, close }] = useDisclosure(false);
   const [deleteFieldValue, setDeleteFieldValue] = useInputState('');
   const [isDeleteDone, setIsDeleteDone] = useState<boolean>(true);
@@ -36,6 +41,8 @@ export default function DeleteOrganizationButton(props: PropsType): React.ReactN
       .then((res) => {
         if (res.error) {
           logger.error(res.error);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, res.error);
+          router.replace(newURL);
           return res.error;
         }
 

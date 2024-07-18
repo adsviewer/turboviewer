@@ -130,7 +130,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // If user has a current org and tries to visit the missing org screen, redirect to insights
   if (request.nextUrl.pathname === defaultMissingOrgURL && tokenData?.organizationId) {
-    logger.info('VALID BRO');
     const redirectUrl = new URL('/insights', request.url);
     return NextResponse.redirect(redirectUrl);
   }

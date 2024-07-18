@@ -17,18 +17,7 @@ export default function UserButton(): ReactNode {
   useEffect(() => {
     void getUserDetails()
       .then((res) => {
-        logger.info(res);
-
-        setUserDetails({
-          id: res.id,
-          firstName: res.firstName,
-          lastName: res.lastName,
-          email: res.email,
-          allRoles: res.allRoles,
-          currentOrganization: res.currentOrganization,
-          organizations: res.organizations,
-          photoUrl: res.photoUrl,
-        });
+        setUserDetails(res);
         setIsDataLoaded(true);
       })
       .catch((error: unknown) => {
