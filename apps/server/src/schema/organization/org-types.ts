@@ -6,7 +6,7 @@ export const OrganizationDto = builder.prismaObject('Organization', {
     if (ctx.organizationId && ctx.organizationId === organization.id) return true;
     if (ctx.isAdmin) return true;
     return {
-      $granted: 'userOrganization',
+      $granted: 'readOrganization',
     };
   },
   fields: (t) => ({
@@ -56,7 +56,7 @@ export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
     role: t.expose('role', { type: OrganizationRoleEnumDto }),
     status: t.expose('status', { type: UserOrganizationStatusDto }),
     user: t.relation('user'),
-    organization: t.relation('organization', { grantScopes: ['userOrganization'] }),
+    organization: t.relation('organization', { grantScopes: ['readOrganization'] }),
   }),
 });
 
