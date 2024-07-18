@@ -30,8 +30,10 @@ jobs:
         run: pnpm install --global vercel@latest
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Generate prisma artifacts
-        run: pnpm --filter=database generate
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm --filter=database generate
       - name: Build Project Artifacts
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
