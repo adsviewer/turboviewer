@@ -18,6 +18,7 @@
   },
   "insights": {
     "title": "Insights",
+    "insight": "Insight",
     "pageSize": "Page size",
     "orderBy": "Order by",
     "spent": "Spent",
