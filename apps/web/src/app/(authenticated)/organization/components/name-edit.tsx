@@ -42,16 +42,7 @@ export default function NameEdit(props: PropsType): React.ReactNode {
         return res.error;
       }
       void getUserDetails().then((userRes) => {
-        setUserDetails({
-          id: userRes.id,
-          firstName: userRes.firstName,
-          lastName: userRes.lastName,
-          email: userRes.email,
-          allRoles: userRes.allRoles,
-          currentOrganization: userRes.currentOrganization,
-          organizations: userRes.organizations,
-          photoUrl: userRes.photoUrl,
-        });
+        setUserDetails(userRes);
         notifications.show({
           title: tGeneric('success'),
           message: t('updateOrganizationSuccess'),
