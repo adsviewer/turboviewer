@@ -7,11 +7,11 @@ import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { logger } from '@repo/logger';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
 import { deleteOrganizationAndRefreshJWT } from '../actions';
-import { logger } from '@repo/logger';
 
 export interface PropsType {
   isPending: boolean;
