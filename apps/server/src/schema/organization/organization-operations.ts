@@ -124,6 +124,7 @@ builder.mutationFields((t) => ({
   }),
   createOrganization: t.withAuth({ authenticated: true }).prismaField({
     type: OrganizationDto,
+    grantScopes: ['readOrganization'],
     args: {
       name: t.arg.string({ required: true }),
     },
