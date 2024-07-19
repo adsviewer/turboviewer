@@ -55,6 +55,9 @@ importers:
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@sentry/aws-serverless':
         specifier: ^8.13.0
         version: 8.13.0(@opentelemetry/api@1.9.0)
@@ -71,9 +74,6 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@sentry/cli':
         specifier: ^2.32.1
         version: 2.32.1
