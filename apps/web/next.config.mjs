@@ -80,4 +80,4 @@ const sentryConfig = (config) => withSentryConfig(nextIntlConfig, {
 
 const conditionalConfig = process.env.MODE === 'prod' ? sentryConfig(nextIntlConfig) : nextIntlConfig;
 
-export default conditionalConfig;
+export default nextIntlConfig;
