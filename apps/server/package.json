@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently 'pnpm --filter=@repo/database start-dev' 'pnpm codegen' && tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && pnpm run sentry:sourcemaps",
     "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
