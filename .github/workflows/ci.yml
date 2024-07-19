@@ -62,5 +62,6 @@ jobs:
       - name: Build
         run: |
           echo $SENTRY_AUTH_TOKEN
+          pnpm --filter=server printenv
           pnpm build
 
