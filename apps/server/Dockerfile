@@ -20,6 +20,9 @@ ENV TURBO_TEAM=$TURBO_TEAM
 ARG TURBO_TOKEN
 ENV TURBO_TOKEN=$TURBO_TOKEN
 
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+
 WORKDIR /app
 
 # First install dependencies (as they change less often)
@@ -44,4 +47,4 @@ WORKDIR /app
 
 COPY --from=installer /app .
 RUN pnpm install --prod --ignore-scripts
-CMD pnpm -C apps/server run start
+CMD ["pnpm", "-C", "apps/server", "run", "start"]
