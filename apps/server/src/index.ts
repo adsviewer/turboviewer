@@ -9,6 +9,7 @@ import { Environment, FireAndForget, MODE } from '@repo/utils';
 import { authCallback, getChannel } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
 import * as Sentry from '@sentry/node';
+import morgan from 'morgan';
 import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
@@ -66,6 +67,8 @@ const index = (): void => {
   );
 
   Sentry.setupExpressErrorHandler(app);
+
+  app.use(morgan('combined'));
 
   app.use((_, res, next) => {
     res.removeHeader('X-Powered-By');
