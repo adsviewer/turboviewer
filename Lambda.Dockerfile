@@ -14,6 +14,16 @@ RUN turbo prune --scope=$lambda --docker
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
 ARG lambda
+
+ARG TURBO_TEAM
+ENV TURBO_TEAM=$TURBO_TEAM
+
+ARG TURBO_TOKEN
+ENV TURBO_TOKEN=$TURBO_TOKEN
+
+ARG SENTRY_AUTH_TOKEN
+ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+
 WORKDIR /app
 
 # First install dependencies (as they change less often)
