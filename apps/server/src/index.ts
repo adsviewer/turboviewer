@@ -8,6 +8,7 @@ import { IntegrationTypeEnum } from '@repo/database';
 import { Environment, FireAndForget, MODE } from '@repo/utils';
 import { authCallback, getChannel } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
+import * as Sentry from '@sentry/node';
 import morgan from 'morgan';
 import { env } from './config';
 import { createContext } from './context';
@@ -65,7 +66,7 @@ const index = (): void => {
     getChannel(IntegrationTypeEnum.META).signOutCallback,
   );
 
-  // Sentry.setupExpressErrorHandler(app);
+  Sentry.setupExpressErrorHandler(app);
 
   app.use(morgan('combined'));
 
