@@ -7,6 +7,10 @@ locals {
 resource "aws_apprunner_service" "server" {
   service_name = "${var.environment}-${var.service_name}"
 
+  health_check_configuration {
+    path     = "/graphql"
+    protocol = "HTTP"
+  }
   instance_configuration {
     cpu               = 1024
     memory            = 4096
