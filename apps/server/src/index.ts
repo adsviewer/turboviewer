@@ -52,9 +52,6 @@ const index = (): void => {
   });
 
   // heartbeat
-  app.get('/', (req, res) => {
-    res.send('Pong!');
-  });
   app.get('/heartbeat', (req, res) => {
     res.send('Pong!');
   });

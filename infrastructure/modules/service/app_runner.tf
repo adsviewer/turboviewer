@@ -8,7 +8,7 @@ resource "aws_apprunner_service" "server" {
   service_name = "${var.environment}-${var.service_name}"
 
   health_check_configuration {
-    path     = "/graphql"
+    path     = "/heartbeat"
     protocol = "HTTP"
   }
   instance_configuration {
