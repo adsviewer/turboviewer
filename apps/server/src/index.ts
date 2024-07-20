@@ -55,6 +55,9 @@ const index = (): void => {
   app.get('/', (req, res) => {
     res.send('Pong!');
   });
+  app.get('/heartbeat', (req, res) => {
+    res.send('Pong!');
+  });
 
   app.get(`/api${authEndpoint}`, authCallback);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
