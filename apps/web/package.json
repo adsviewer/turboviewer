@@ -34,6 +34,7 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
+    "@repo/mode": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "@sentry/nextjs": "^8.13.0",

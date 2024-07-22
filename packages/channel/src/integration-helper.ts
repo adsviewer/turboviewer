@@ -3,10 +3,11 @@ import type { Request as ExpressRequest, Response as ExpressResponse } from 'exp
 import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisGet, redisSet } from '@repo/redis';
-import { AError, FireAndForget, isAError, isMode, MODE } from '@repo/utils';
+import { AError, FireAndForget, isAError } from '@repo/utils';
 import type QueryString from 'qs';
 import { z } from 'zod';
 import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
+import { isMode, MODE } from '@repo/mode';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;

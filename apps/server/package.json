@@ -38,6 +38,7 @@
     "@repo/lambda-types": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
+    "@repo/mode": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
     "@sentry/node": "^8.13.0",

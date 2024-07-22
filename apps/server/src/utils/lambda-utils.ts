@@ -1,9 +1,10 @@
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { type z, type ZodRawShape } from 'zod';
-import { AError, Environment, MODE } from '@repo/utils';
+import { AError } from '@repo/utils';
 import { type channelIngressInput, channelIngressOutput } from '@repo/lambda-types';
 import { logger } from '@repo/logger';
 import { refreshData } from '@repo/channel';
+import { Environment, MODE } from '@repo/mode';
 import { env } from '../config';
 
 const invoke = async <T, U extends ZodRawShape>(

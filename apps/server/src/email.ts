@@ -1,6 +1,7 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { logger } from '@repo/logger';
-import { Environment, MODE, type Optional } from '@repo/utils';
+import { type Optional } from '@repo/utils';
+import { Environment, MODE } from '@repo/mode';
 import { env } from './config';
 
 // Import the SignupEmailData interface from the appropriate module

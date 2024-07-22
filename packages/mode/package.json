@@ -1,12 +1,14 @@
 {
-  "name": "@repo/channel",
+  "name": "@repo/mode",
   "version": "1.0.0",
   "private": true,
-  "license": "UNLICENCED",
-  "description": "Channel business logic",
+  "description": "Shared Types",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "type": "module",
+  "files": [
+    "dist/**"
+  ],
   "exports": {
     "javascript": "./dist/index.js",
     "default": "./src/index.ts"
@@ -20,25 +22,12 @@
     "clean": "rm -rf .turbo .next node_modules dist",
     "update": "pnpm update --latest"
   },
-  "dependencies": {
-    "@repo/channel-linkedin": "workspace:*",
-    "@repo/channel-meta": "workspace:*",
-    "@repo/channel-tiktok": "workspace:*",
-    "@repo/channel-utils": "workspace:*",
-    "@repo/database": "workspace:*",
-    "@repo/lambda-types": "workspace:*",
-    "@repo/logger": "workspace:*",
-    "@repo/mode": "workspace:*",
-    "@repo/redis": "workspace:*",
-    "@repo/utils": "workspace:*",
-    "zod": "^3.23.8"
-  },
+  "author": "",
+  "license": "UNLICENCED",
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/express": "^4.17.21",
     "@types/node": "^20.14.9",
-    "@types/qs": "^6.9.15",
     "typescript": "^5.5.2"
   }
 }
