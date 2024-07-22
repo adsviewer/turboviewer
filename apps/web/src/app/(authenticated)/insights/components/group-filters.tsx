@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 import { sentenceCase } from 'change-case';
+import { useSetAtom } from 'jotai/index';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import {
   addOrReplaceURLParams,
@@ -15,6 +16,7 @@ import {
   publisherKey,
   accountKey,
 } from '@/util/url-query-utils';
+import { insightsAtom } from '@/app/atoms/insights-atoms';
 import getAccounts from '../../actions';
 
 interface MultiSelectDataType {
@@ -24,6 +26,7 @@ interface MultiSelectDataType {
 
 export default function GroupFilters(): ReactNode {
   const t = useTranslations('insights.filters');
+  const setInsights = useSetAtom(insightsAtom);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -50,6 +53,10 @@ export default function GroupFilters(): ReactNode {
       setAccounts(adAccounts);
     });
   }, []);
+
+  const resetInsights = (): void => {
+    setInsights([]);
+  };
 
   const populateAccountsAvailableValues = (): MultiSelectDataType[] => {
     let data: MultiSelectDataType[] = [];
@@ -135,12 +142,14 @@ export default function GroupFilters(): ReactNode {
 
   // Generic functions for handling changes in multi-dropdowns
   const handleMultiFilterAdd = (key: string, value: string): void => {
+    resetInsights();
     startTransition(() => {
       router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
     });
   };
 
   const handleMultiFilterRemove = (key: string, value: string): void => {
+    resetInsights();
     startTransition(() => {
       router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
     });
@@ -148,6 +157,7 @@ export default function GroupFilters(): ReactNode {
 
   // Checkboxes logic //
   const handleCheckboxFilter = (e: ChangeEvent<HTMLInputElement>): void => {
+    resetInsights();
     startTransition(() => {
       const isChecked = e.target.checked;
 

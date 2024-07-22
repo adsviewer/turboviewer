@@ -4,6 +4,7 @@ import { Flex, Text, Select, type ComboboxItem, Switch, Tooltip } from '@mantine
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ChangeEvent, useTransition } from 'react';
+import { useSetAtom } from 'jotai/index';
 import {
   OrderDirection,
   addOrReplaceURLParams,
@@ -15,6 +16,7 @@ import {
   groupedByKey,
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import { insightsAtom } from '@/app/atoms/insights-atoms';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -22,6 +24,11 @@ export default function OrderFilters(): React.ReactNode {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const setInsights = useSetAtom(insightsAtom);
+
+  const resetInsights = (): void => {
+    setInsights([]);
+  };
 
   const getPageSizeValue = (): string => {
     if (isParamInSearchParams(searchParams, pageSizeKey, searchParams.get(pageSizeKey) ?? '12')) {
@@ -51,6 +58,7 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
+    resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
     startTransition(() => {
       router.replace(newURL);
@@ -58,6 +66,7 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
+    resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
     startTransition(() => {
       router.replace(newURL);
@@ -65,6 +74,7 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
+    resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderDirectionKey, option.value);
     startTransition(() => {
       router.replace(newURL);
@@ -72,6 +82,7 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    resetInsights();
     let newURL: string;
     if (e.target.checked) {
       newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, 'true');

@@ -3,9 +3,11 @@
 import { type ReactNode, Suspense, useEffect, useState } from 'react';
 import { Box, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
-import { InsightsColumnsOrderBy, type InsightsQuery, OrderBy } from '@/graphql/generated/schema-server';
+import { useSetAtom } from 'jotai';
+import { InsightsColumnsOrderBy, OrderBy } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type SearchParams } from '@/app/(authenticated)/insights/actions';
+import { insightsAtom } from '@/app/atoms/insights-atoms';
 import InsightsGrid from './components/insights-grid';
 import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
@@ -19,7 +21,7 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
   const order = searchParams.order ?? OrderBy.desc;
   const pageSize = parseInt(searchParams.pageSize ?? '12', 10);
   const page = parseInt(searchParams.page ?? '1', 10);
-  const [insights, setInsights] = useState<InsightsQuery['insights']['edges']>([]);
+  const setInsights = useSetAtom(insightsAtom);
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
@@ -35,14 +37,14 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
       .catch((error: unknown) => {
         logger.error(error);
       });
-  }, [order, orderBy, page, pageSize, searchParams]);
+  }, [order, orderBy, page, pageSize, searchParams, setInsights]);
 
   return (
     <Box pos="relative">
       <OrderFilters />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <Flex direction="column">
-          <InsightsGrid insights={insights} isDataLoaded={isDataLoaded} />
+          <InsightsGrid isDataLoaded={isDataLoaded} />
           <PageControls hasNextPage={hasNextPage} />
         </Flex>
       </Suspense>
