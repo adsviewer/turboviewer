@@ -6,9 +6,12 @@ import React, { useEffect, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSetAtom } from 'jotai';
 import _ from 'lodash';
+import { logger } from '@repo/logger';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { EditProfileSchema } from '@/util/schemas/profile-schemas';
 import { type UpdateUserMutationVariables, type MeQuery } from '@/graphql/generated/schema-server';
 import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
+import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
 import { updateUserDetails } from '../actions';
 
 interface PropsType {
@@ -17,6 +20,9 @@ interface PropsType {
 
 export default function EditProfileForm(props: PropsType): React.ReactNode {
   const t = useTranslations('profile');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const setUserDetails = useSetAtom(userDetailsAtom);
   const form = useForm({
@@ -58,7 +64,9 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
     startTransition(() => {
       void updateUserDetails(data).then((res) => {
         if (!res.success) {
-          form.setFieldError('oldPassword', res.error);
+          logger.error(res.error);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          router.replace(newURL);
         } else {
           setUserDetails(res.data.updateUser);
           form.setValues({
