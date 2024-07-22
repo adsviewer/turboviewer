@@ -3,9 +3,11 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs';
+import { MODE } from '@repo/mode';
 
 Sentry.init({
   dsn: 'https://a4e338501accee2adf9e58d71b25367e@o4507502891040768.ingest.de.sentry.io/4507503305949264',
+  environment: MODE,
 
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 1.0,

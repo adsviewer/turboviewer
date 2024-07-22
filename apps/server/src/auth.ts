@@ -1,7 +1,8 @@
 import jwt, { type JsonWebTokenError, type NotBeforeError, type TokenExpiredError } from 'jsonwebtoken';
 import { prisma, type RoleEnum } from '@repo/database';
-import { AError, Environment, MODE } from '@repo/utils';
+import { AError } from '@repo/utils';
 import { type AJwtPayload } from '@repo/shared-types';
+import { Environment, MODE } from '@repo/mode';
 import { env } from './config';
 import { type UserWithRoles, userWithRoles } from './contexts/user/user-roles';
 

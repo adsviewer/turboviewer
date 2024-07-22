@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { AError, FireAndForget, isAError, isMode, MODE, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
+import { AError, FireAndForget, isAError, REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
 import type QueryString from 'qs';
 import { LoginProviderEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { redisDel, redisExists, redisGet, redisSet } from '@repo/redis';
+import { isMode, MODE } from '@repo/mode';
 import { env } from '../../config';
 import { createJwts } from '../../auth';
 import {
