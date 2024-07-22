@@ -78,6 +78,7 @@ const sentryConfig = (config) => withSentryConfig(nextIntlConfig, {
   automaticVercelMonitors: true,
 });
 
+console.log('process.env.MODE', process.env.MODE);
 const conditionalConfig = process.env.MODE === 'prod' ? sentryConfig(nextIntlConfig) : nextIntlConfig;
 
 export default conditionalConfig;
