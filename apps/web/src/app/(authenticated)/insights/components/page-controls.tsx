@@ -5,17 +5,16 @@ import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import { useAtomValue } from 'jotai/index';
 import { addOrReplaceURLParams, pageKey } from '@/util/url-query-utils';
+import { hasNextInsightsPageAtom } from '@/app/atoms/insights-atoms';
 
-interface PropsType {
-  hasNextPage: boolean;
-}
-
-export default function PageControls(props: PropsType): React.ReactNode {
+export default function PageControls(): React.ReactNode {
   const t = useTranslations('insights');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const hasNextInsightsPage = useAtomValue(hasNextInsightsPageAtom);
 
   const handlePageChange = (type: 'next' | 'prev'): void => {
     if (type === 'next') {
@@ -40,7 +39,7 @@ export default function PageControls(props: PropsType): React.ReactNode {
         {t('prevPage')}
       </Button>
       <Button
-        disabled={!props.hasNextPage}
+        disabled={!hasNextInsightsPage}
         rightSection={<IconArrowRight size={14} />}
         variant="default"
         onClick={() => {

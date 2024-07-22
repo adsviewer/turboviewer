@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai';
 import { InsightsColumnsOrderBy, OrderBy } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type SearchParams } from '@/app/(authenticated)/insights/actions';
-import { insightsAtom } from '@/app/atoms/insights-atoms';
+import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import InsightsGrid from './components/insights-grid';
 import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
@@ -22,7 +22,7 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
   const pageSize = parseInt(searchParams.pageSize ?? '12', 10);
   const page = parseInt(searchParams.page ?? '1', 10);
   const setInsights = useSetAtom(insightsAtom);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
+  const setHasNextInsightsPage = useSetAtom(hasNextInsightsPageAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -31,13 +31,13 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
     void getInsights(searchParams, orderBy, order, pageSize, page)
       .then((res) => {
         setInsights(res.insights.edges);
-        setHasNextPage(res.insights.hasNext);
+        setHasNextInsightsPage(res.insights.hasNext);
         setIsDataLoaded(true);
       })
       .catch((error: unknown) => {
         logger.error(error);
       });
-  }, [order, orderBy, page, pageSize, searchParams, setInsights]);
+  }, [order, orderBy, page, pageSize, searchParams, setHasNextInsightsPage, setInsights]);
 
   return (
     <Box pos="relative">
@@ -45,7 +45,7 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <Flex direction="column">
           <InsightsGrid isDataLoaded={isDataLoaded} />
-          <PageControls hasNextPage={hasNextPage} />
+          <PageControls />
         </Flex>
       </Suspense>
     </Box>

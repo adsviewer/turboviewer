@@ -16,7 +16,7 @@ import {
   groupedByKey,
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
-import { insightsAtom } from '@/app/atoms/insights-atoms';
+import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -25,9 +25,11 @@ export default function OrderFilters(): React.ReactNode {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const setInsights = useSetAtom(insightsAtom);
+  const setHasNextInsightsPageAtom = useSetAtom(hasNextInsightsPageAtom);
 
   const resetInsights = (): void => {
     setInsights([]);
+    setHasNextInsightsPageAtom(false);
   };
 
   const getPageSizeValue = (): string => {

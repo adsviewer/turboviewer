@@ -16,7 +16,7 @@ import {
   publisherKey,
   accountKey,
 } from '@/util/url-query-utils';
-import { insightsAtom } from '@/app/atoms/insights-atoms';
+import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import getAccounts from '../../actions';
 
 interface MultiSelectDataType {
@@ -27,6 +27,7 @@ interface MultiSelectDataType {
 export default function GroupFilters(): ReactNode {
   const t = useTranslations('insights.filters');
   const setInsights = useSetAtom(insightsAtom);
+  const setHasNextInsightsPageAtom = useSetAtom(hasNextInsightsPageAtom);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -56,6 +57,7 @@ export default function GroupFilters(): ReactNode {
 
   const resetInsights = (): void => {
     setInsights([]);
+    setHasNextInsightsPageAtom(false);
   };
 
   const populateAccountsAvailableValues = (): MultiSelectDataType[] => {
