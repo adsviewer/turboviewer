@@ -184,7 +184,6 @@ model AdAccount {
   organizations  Organization[]
 
   @@unique([externalId, type])
-  @@unique([integrationId, externalId])
   @@map("ad_accounts")
 }
 
