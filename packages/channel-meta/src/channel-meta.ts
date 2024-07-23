@@ -645,13 +645,14 @@ class Meta implements ChannelInterface {
 
   private static async getExpireAt(accessToken: string): Promise<AError | Date> {
     const debugToken = await fetch(
-      `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${accessToken}`,
+      `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${env.FB_APPLICATION_ID}|${env.FB_APPLICATION_SECRET}`,
     ).catch((error: unknown) => {
       logger.error('Failed to debug token %o', { error });
       return error instanceof Error ? error : new Error(JSON.stringify(error));
     });
     if (debugToken instanceof Error) return debugToken;
     if (!debugToken.ok) {
+      logger.error(await debugToken.json(), `Failed to debug token for accessToken: ${accessToken}`);
       return new AError(`Failed to debug token: ${debugToken.statusText}`);
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
