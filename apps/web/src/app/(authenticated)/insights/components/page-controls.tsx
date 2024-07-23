@@ -5,19 +5,25 @@ import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
+import { useSetAtom, useAtom } from 'jotai/index';
 import { addOrReplaceURLParams, pageKey } from '@/util/url-query-utils';
+import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 
-interface PropsType {
-  hasNextPage: boolean;
-}
-
-export default function PageControls(props: PropsType): React.ReactNode {
+export default function PageControls(): React.ReactNode {
   const t = useTranslations('insights');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const setInsights = useSetAtom(insightsAtom);
+  const [hasNextInsightsPage, setHasNextInsightsPageAtom] = useAtom(hasNextInsightsPageAtom);
+
+  const resetInsights = (): void => {
+    setInsights([]);
+    setHasNextInsightsPageAtom(false);
+  };
 
   const handlePageChange = (type: 'next' | 'prev'): void => {
+    resetInsights();
     if (type === 'next') {
       const nextPage = String(Number(searchParams.get(pageKey) ?? '1') + 1);
       router.replace(addOrReplaceURLParams(pathname, searchParams, pageKey, nextPage));
@@ -40,7 +46,7 @@ export default function PageControls(props: PropsType): React.ReactNode {
         {t('prevPage')}
       </Button>
       <Button
-        disabled={!props.hasNextPage}
+        disabled={!hasNextInsightsPage}
         rightSection={<IconArrowRight size={14} />}
         variant="default"
         onClick={() => {
