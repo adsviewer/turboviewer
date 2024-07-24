@@ -12,8 +12,8 @@ export const saveAccounts = async (
     activeAccounts.map((acc) =>
       prisma.adAccount.upsert({
         where: {
-          integrationId_externalId: {
-            integrationId: integration.id,
+          externalId_type: {
+            type: integration.type,
             externalId: acc.externalId,
           },
         },
@@ -47,8 +47,8 @@ export const saveAds = async (
             name: channelAd.name,
             adAccount: {
               connect: {
-                integrationId_externalId: {
-                  integrationId: integration.id,
+                externalId_type: {
+                  type: integration.type,
                   externalId: channelAd.externalAdAccountId,
                 },
               },

@@ -563,7 +563,7 @@ class Meta implements ChannelInterface {
       if (parsedNext.success) {
         results.push(...parsedNext.data.map(parseCallback));
       } else {
-        logger.error('Failed to parse paginated %o', next);
+        logger.error(next, 'Failed to parse paginated %o');
       }
     }
     return results;
