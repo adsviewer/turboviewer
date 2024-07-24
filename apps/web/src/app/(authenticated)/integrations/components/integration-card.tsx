@@ -70,6 +70,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
                 w="100%"
                 mt="lg"
                 component="a"
+                disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
                 onClick={() => {
                   handleConnect();
                 }}
