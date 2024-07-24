@@ -5,8 +5,8 @@ import { type channelIngressInput, channelIngressOutput } from '@repo/lambda-typ
 import { logger } from '@repo/logger';
 import { getAllConnectedIntegrations, refreshData } from '@repo/channel';
 import { Environment, MODE } from '@repo/mode';
-import { env } from '../config';
 import _ from 'lodash';
+import { env } from '../config';
 
 const invoke = async <T, U extends ZodRawShape>(
   funcName: string,
