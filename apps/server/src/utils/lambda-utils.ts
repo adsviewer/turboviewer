@@ -3,9 +3,10 @@ import { type z, type ZodRawShape } from 'zod';
 import { AError } from '@repo/utils';
 import { type channelIngressInput, channelIngressOutput } from '@repo/lambda-types';
 import { logger } from '@repo/logger';
-import { refreshData } from '@repo/channel';
+import { getAllConnectedIntegrations, refreshData } from '@repo/channel';
 import { Environment, MODE } from '@repo/mode';
 import { env } from '../config';
+import _ from 'lodash';
 
 const invoke = async <T, U extends ZodRawShape>(
   funcName: string,
@@ -35,9 +36,32 @@ const invoke = async <T, U extends ZodRawShape>(
 
 export const invokeChannelIngress = async (
   payload: z.infer<typeof channelIngressInput>,
-): Promise<z.infer<typeof channelIngressOutput> | AError> => {
+): Promise<(AError | z.infer<typeof channelIngressOutput>)[] | z.infer<typeof channelIngressOutput> | AError> => {
   if (MODE === Environment.Local) {
     return await refreshData(payload);
   }
-  return invoke(`${MODE}-channel-ingress`, payload, channelIngressOutput);
+  const funcName = `${MODE}-channel-ingress`;
+  if (payload.integrationIds) {
+    return await invoke(funcName, payload, channelIngressOutput);
+  }
+
+  const connectedIntegrations = await getAllConnectedIntegrations();
+  const slicedIntegrations = _.chunk(connectedIntegrations, 10);
+  const results: (AError | z.infer<typeof channelIngressOutput>)[] = [];
+  for (const integrations of slicedIntegrations) {
+    const invocations = await Promise.all(
+      integrations.map((integration) =>
+        invoke(
+          funcName,
+          {
+            initial: payload.initial,
+            integrationIds: [integration.id],
+          } satisfies z.infer<typeof channelIngressInput>,
+          channelIngressOutput,
+        ),
+      ),
+    );
+    results.push(...invocations);
+  }
+  return results;
 };
