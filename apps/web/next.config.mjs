@@ -79,4 +79,6 @@ const sentryConfig = (config) => withSentryConfig(nextIntlConfig, {
   automaticVercelMonitors: true,
 });
 
-export default sentryConfig(nextIntlConfig);
+const conditionalConfig = process.env.CI ? sentryConfig(nextIntlConfig) : nextIntlConfig;
+
+export default conditionalConfig;
