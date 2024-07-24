@@ -30,6 +30,7 @@ import {
   type TokensResponse,
 } from '@repo/channel-utils';
 import csvParser from 'csv-parser';
+import _ from 'lodash';
 import { env } from './config';
 
 const apiVersion = 'v1.3';
@@ -43,6 +44,23 @@ const apiBaseValidationSchema = z.object({
 });
 type ApiBaseValidationSchema = z.infer<typeof apiBaseValidationSchema>;
 
+enum PlacementsEnum {
+  TikTok = 'TikTok',
+  GlobalAppBundle = 'Global App Bundle',
+  Pangle = 'Pangle',
+}
+
+const insightsSchema = z.array(
+  z.object({
+    '﻿Ad ID': z.string(),
+    'Ad Name': z.string(),
+    Placements: z.nativeEnum(PlacementsEnum),
+    Date: z.coerce.date(),
+    'Placements Types': z.string(),
+    Impression: z.coerce.number().int(),
+    Cost: z.coerce.number(),
+  }),
+);
 class Tiktok implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const params = new URLSearchParams({
@@ -55,6 +73,7 @@ class Tiktok implements ChannelInterface {
       url: `https://business-api.tiktok.com/portal/auth?${params.toString()}`,
     };
   }
+
   async exchangeCodeForTokens(code: string): Promise<TokensResponse | AError> {
     const response = await Tiktok.tikTokFetch('', `${baseUrl}/oauth2/access_token/`, {
       method: 'POST',
@@ -281,18 +300,21 @@ class Tiktok implements ChannelInterface {
         }
         return parsed.data;
       }
-      case 'application/octet-stream':
-        return { code: 0, data: await Tiktok.csvParse(response), message: '', request_id: '' };
       default:
         logger.error(contentType, 'Failed to parse base tik-tok response');
         return new AError('Failed to parse response');
     }
   };
 
-  private static csvParse = async (response: Response): Promise<AError | unknown[]> => {
-    const parsedRows: unknown[] = [];
+  private static csvParseAndProcess = async (
+    response: Response,
+    processFn: (data: unknown[]) => Promise<AError | undefined>,
+  ): Promise<AError[] | undefined> => {
+    const tasks: Promise<undefined | AError>[] = [];
+    let batch: unknown[] = [];
+    let lineCounter = 0;
 
-    return new Promise<AError | unknown[]>((resolve, reject) => {
+    await new Promise<AError | undefined>((resolve, reject) => {
       if (!response.body) {
         reject(new AError('No body in response'));
         return;
@@ -304,6 +326,7 @@ class Tiktok implements ChannelInterface {
           reader
             .read()
             .then(({ done, value }) => {
+              logger.info({ done, length: value?.length }, 'TikTok report reading status');
               if (done) {
                 this.push(null);
               } else {
@@ -318,15 +341,27 @@ class Tiktok implements ChannelInterface {
 
       stream
         .pipe(csvParser())
-        .on('data', (row) => parsedRows.push(row))
+        .on('data', (row) => {
+          batch.push(row);
+          lineCounter++;
+          if (lineCounter === 500) {
+            tasks.push(processFn([...batch]));
+            batch = [];
+            lineCounter = 0;
+          }
+        })
         .on('end', () => {
-          resolve(parsedRows);
+          if (batch.length > 0) {
+            tasks.push(processFn([...batch]));
+          }
+          resolve(undefined);
         })
         .on('error', (error) => {
           logger.error(error, 'Failed to parse CSV data');
           reject(new AError('Failed to parse CSV data'));
         });
     });
+    return await Promise.all(tasks).then((results) => results.flatMap((result) => (result ? [result] : [])));
   };
 
   /**
@@ -477,36 +512,38 @@ class Tiktok implements ChannelInterface {
       integration.accessToken,
       `${baseUrl}/report/task/download?${params.toString()}`,
     );
-    enum PlacementsEnum {
-      TikTok = 'TikTok',
-      GlobalAppBundle = 'Global App Bundle',
-      Pangle = 'Pangle',
-    }
+
     const placementPublisherMap = new Map<PlacementsEnum, PublisherEnum>([
       [PlacementsEnum.TikTok, PublisherEnum.TikTok],
       [PlacementsEnum.GlobalAppBundle, PublisherEnum.GlobalAppBundle],
       [PlacementsEnum.Pangle, PublisherEnum.Pangle],
     ]);
-    const data = await Tiktok.baseValidation(response);
-    const schema = z.array(
-      z.object({
-        '﻿Ad ID': z.string(),
-        'Ad Name': z.string(),
-        Placements: z.nativeEnum(PlacementsEnum),
-        Date: z.coerce.date(),
-        'Placements Types': z.string(),
-        Impression: z.coerce.number().int(),
-        Cost: z.coerce.number(),
-      }),
-    );
-    const parsed = schema.safeParse(data);
+
+    const fn = (data: unknown[]): Promise<AError | undefined> =>
+      Tiktok.processReportChunk(taskId, integration, adAccount, data, placementPublisherMap, new Map(), new Map());
+    if (isAError(response)) return response;
+    await deleteOldInsights(adAccount.id, initial);
+    const processed = await Tiktok.csvParseAndProcess(response, fn);
+    if (processed) return processed[0];
+    return undefined;
+  };
+
+  private static processReportChunk = async (
+    taskId: string,
+    integration: Integration,
+    adAccount: AdAccount,
+    data: unknown[],
+    placementPublisherMap: Map<PlacementsEnum, PublisherEnum>,
+    adsMap: Map<string, ChannelAd>,
+    adExternalIdMap: Map<string, string>,
+  ): Promise<AError | undefined> => {
+    const parsed = insightsSchema.safeParse(data);
     if (!parsed.success) {
       logger.error(parsed.error, `Failed to parse report for task ${taskId} and integration ${integration.id}`);
       return new AError('Failed to parse report');
     }
 
     const insights: ChannelInsight[] = [];
-    const adsMap = new Map<string, ChannelAd>();
     parsed.data.forEach((row) => {
       const insight: ChannelInsight = {
         externalAdId: row['﻿Ad ID'],
@@ -526,12 +563,10 @@ class Tiktok implements ChannelInterface {
       });
     });
     const ads = Array.from(adsMap.values());
-    const adExternalIdMap = new Map<string, string>();
-    await saveAds(integration, ads, adAccount.id, adExternalIdMap);
-    await deleteOldInsights(adAccount.id, initial);
+    const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
+    const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
+    await saveAds(integration, newAds, adAccount.id, adExternalIdMap);
     await saveInsights(insights, adExternalIdMap, adAccount);
-
-    return undefined;
   };
 }
 
