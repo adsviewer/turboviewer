@@ -25,8 +25,11 @@ data "aws_iam_policy_document" "github_operating" {
       "ecr:PutImage",
       "ecr:UploadLayerPart"
     ]
-    effect    = "Allow"
-    resources = [aws_ecr_repository.channel_ingress_ecr_repo.arn]
+    effect = "Allow"
+    resources = [
+      aws_ecr_repository.channel_ingress_ecr_repo.arn, aws_ecr_repository.tiktok_report_requests_ecr_repo.arn,
+      aws_ecr_repository.tiktok_process_report_ecr_repo.arn
+    ]
   }
   statement {
     actions = [
@@ -61,11 +64,11 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 }
 
 resource "aws_iam_role" "channel_ingress_role" {
-  name               = "${var.environment}-iam-for-lambda"
+  name               = local.channel_ingress_name
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
-resource "aws_iam_role_policy_attachment" "channel_ingress_logging_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "channel_ingress_basic_policy_attachment" {
   role       = aws_iam_role.channel_ingress_role.id
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
@@ -117,7 +120,9 @@ data "aws_iam_policy_document" "channel_ingress_error_policy_document" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:cloudwatch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alarm:${local.channel_ingress_alarm_name}"]
+      values = [
+        "arn:aws:cloudwatch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alarm:${local.channel_ingress_alarm_name}"
+      ]
     }
   }
 }

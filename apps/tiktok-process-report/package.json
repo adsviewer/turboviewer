@@ -1,0 +1,33 @@
+{
+  "name": "tiktok-process-report",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TikTok check status of async reports",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && pnpm run sentry:sourcemaps",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "clean": "rm -rf dist node_modules .turbo",
+    "update": "pnpm update --latest && pnpm install",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project tiktok-process-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project tiktok-process-report ./dist"
+  },
+  "author": "",
+  "license": "UNLICENCED",
+  "devDependencies": {
+    "@aws-sdk/client-sqs": "^3.616.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@sentry/cli": "^2.32.1",
+    "@types/aws-lambda": "^8.10.140",
+    "@types/node": "20.14.9",
+    "typescript": "5.5.2"
+  },
+  "dependencies": {
+    "@repo/logger": "workspace:*",
+    "@repo/mode": "workspace:*",
+    "@sentry/aws-serverless": "^8.13.0",
+    "@sentry/profiling-node": "^8.13.0"
+  }
+}
