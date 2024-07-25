@@ -1,0 +1,40 @@
+name: Deploy TikTok process report lambda prod
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      # TODO: Update paths to match the tiktok-process-report lambda
+      - apps/tiktok-process-report/**
+      - packages/channel*/**
+      - packages/database/**
+      - packages/logger/**
+      - packages/utils/**
+      - infrastructure/**
+      - .github/workflows/**
+      - Lambda.Dockerfile
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-tiktok-process-report
+  cancel-in-progress: true
+
+jobs:
+  tiktok_process_report_lambda:
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    uses: ./.github/workflows/build-deploy-lambda-image.yml
+    secrets:
+      aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+      turbo_team: ${{ vars.TURBO_TEAM }}
+      turbo_token: ${{ secrets.TURBO_TOKEN }}
+      sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    with:
+      aws_region: ${{ vars.AWS_REGION }}
+      environment: prod
+      github_role: prod-github
+      github-organization: adsviewer
+      organization: adsviewer
+      lambda_name: tiktok-process-report

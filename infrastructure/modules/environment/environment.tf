@@ -26,6 +26,20 @@ module "ses" {
   zone_id     = aws_route53_zone.zone.zone_id
 }
 
+data "aws_iam_policy_document" "sqs_policy_document" {
+  statement {
+    actions = ["sqs:SendMessage"]
+    resources = [
+      aws_sqs_queue.tiktok_report_requests.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "sqs_policy" {
+  name   = "${var.environment}-sqs-policy"
+  policy = data.aws_iam_policy_document.sqs_policy_document.json
+}
+
 data "aws_iam_policy_document" "sns_policy_document" {
   statement {
     actions = ["sns:Subscribe", "sns:Unsubscribe"]
@@ -77,6 +91,7 @@ module "server" {
   instance_role_policies = {
     "ses"    = module.ses.send_email_policy_arn
     "sns"    = aws_iam_policy.sns_policy.arn
+    "sqs"    = aws_iam_policy.sqs_policy.arn
     "lambda" = aws_iam_policy.lambda_invoke_policy.arn
   }
   vpc_id = var.vpc_id
