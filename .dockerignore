@@ -3,6 +3,7 @@
 /.git/
 /.github/
 /.vscode/
+/infrastructure/
 
 **/.dist
 **/.next
