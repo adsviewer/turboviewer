@@ -8,12 +8,14 @@ import {
   DeleteMessageCommand,
   ReceiveMessageCommand,
   type ReceiveMessageResult,
+  SendMessageBatchCommand,
+  SendMessageCommand,
   SQSClient,
 } from '@aws-sdk/client-sqs';
 
 const withRequest = lambdaRequestTracker();
 
-const client = new SQSClient({});
+const client = new SQSClient({ region: process.env.AWS_REGION });
 
 const receiveMessage = (): Promise<ReceiveMessageResult> =>
   client.send(
@@ -21,7 +23,7 @@ const receiveMessage = (): Promise<ReceiveMessageResult> =>
       MessageSystemAttributeNames: ['All'],
       MaxNumberOfMessages: 10,
       MessageAttributeNames: ['All'],
-      QueueUrl: process.env.TIKTOK_REPORT_REQUESTS_QUEUE,
+      QueueUrl: process.env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
       WaitTimeSeconds: 20,
       VisibilityTimeout: 20,
     }),
@@ -50,10 +52,17 @@ export const handler = Sentry.wrapHandler(async (event: Handler, context: Contex
   }
 
   if (Messages.length === 1) {
-    logger.info(Messages[0].Body, 'Deleting message');
+    logger.info('Sending message');
+    await client.send(
+      new SendMessageCommand({
+        QueueUrl: process.env.TIKTOK_COMPLETE_REPORTS_QUEUE_URL,
+        MessageBody: 'ready',
+      }),
+    );
+    logger.info(Messages[0].Body);
     await client.send(
       new DeleteMessageCommand({
-        QueueUrl: process.env.TIKTOK_REPORT_REQUESTS_QUEUE,
+        QueueUrl: process.env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
         ReceiptHandle: Messages[0].ReceiptHandle,
       }),
     );
@@ -61,10 +70,20 @@ export const handler = Sentry.wrapHandler(async (event: Handler, context: Contex
     return 'Message deleted';
   }
 
+  logger.info('Sending Messages');
+  await client.send(
+    new SendMessageBatchCommand({
+      QueueUrl: process.env.TIKTOK_COMPLETE_REPORTS_QUEUE_URL,
+      Entries: Messages.map((message) => ({
+        Id: message.MessageId,
+        MessageBody: 'ready',
+      })),
+    }),
+  );
   logger.info(Messages, 'Deleting messages');
   await client.send(
     new DeleteMessageBatchCommand({
-      QueueUrl: process.env.TIKTOK_REPORT_REQUESTS_QUEUE,
+      QueueUrl: process.env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
       Entries: Messages.map((message) => ({
         Id: message.MessageId,
         ReceiptHandle: message.ReceiptHandle,
