@@ -1,6 +1,7 @@
 locals {
-  organization = "adsviewer"
-  domain       = "${var.environment}.${data.tfe_outputs.prod_outputs.values.domain}"
+  organization   = "adsviewer"
+  domain         = "${var.environment}.${data.tfe_outputs.prod_outputs.values.domain}"
+  git_repository = "${local.organization}/turboviewer"
 }
 
 data "aws_caller_identity" "current" {}
@@ -106,4 +107,21 @@ module "ses" {
 resource "aws_s3_bucket" "local_bucket" {
   bucket        = "${var.environment}-${local.organization}"
   force_destroy = var.environment == "prod" ? false : true
+}
+
+module "workspace" {
+  source = "../../modules/workspace"
+
+  base_tags      = var.default_tags
+  environment    = var.environment
+  git_repository = local.git_repository
+  organization   = local.organization
+}
+
+module "environment_potentially_local" {
+  for_each = var.developers
+  source   = "../../modules/environment_potentially_local"
+
+  environment      = "${var.environment}-${each.key}"
+  github_role_name = module.workspace.github_role_name
 }

@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "sqs_policy_document" {
   statement {
     actions = ["sqs:SendMessage"]
     resources = [
-      aws_sqs_queue.tiktok_report_requests.arn
+      module.environment_potentially_local.tiktok_report_requests_arn
     ]
   }
 }
@@ -95,4 +95,11 @@ module "server" {
     "lambda" = aws_iam_policy.lambda_invoke_policy.arn
   }
   vpc_id = var.vpc_id
+}
+
+module "environment_potentially_local" {
+  source = "../environment_potentially_local"
+
+  environment      = var.environment
+  github_role_name = var.github_role_name
 }

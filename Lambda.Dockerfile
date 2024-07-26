@@ -52,9 +52,6 @@ RUN pnpm install --prod --ignore-scripts
 RUN pnpm install --prod --ignore-scripts --workspace-root extensionless
 
 FROM base AS runner
-ARG lambda
 ENV NODE_OPTIONS="--conditions=javascript --import=extensionless/register $NODE_OPTIONS"
 
 COPY --from=stripper /app ${LAMBDA_TASK_ROOT}
-
-CMD [ "apps/channel-ingress/dist/index.handler" ]

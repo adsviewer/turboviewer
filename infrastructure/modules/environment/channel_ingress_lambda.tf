@@ -1,6 +1,7 @@
 locals {
-  channel_ingress_name       = "${var.environment}-channel-ingress"
-  channel_ingress_alarm_name = "${local.channel_ingress_name}-error-alarm"
+  channel_ingress_name-no-env = "channel-ingress"
+  channel_ingress_name        = "${var.environment}-${local.channel_ingress_name-no-env}"
+  channel_ingress_alarm_name  = "${local.channel_ingress_name}-error-alarm"
 }
 
 resource "aws_ecr_repository" "channel_ingress_ecr_repo" {
@@ -27,16 +28,17 @@ data "aws_iam_policy_document" "github_operating" {
     ]
     effect = "Allow"
     resources = [
-      aws_ecr_repository.channel_ingress_ecr_repo.arn, aws_ecr_repository.tiktok_report_requests_ecr_repo.arn,
-      aws_ecr_repository.tiktok_process_report_ecr_repo.arn
+      aws_ecr_repository.channel_ingress_ecr_repo.arn
     ]
   }
   statement {
     actions = [
       "lambda:UpdateFunctionCode"
     ]
-    effect    = "Allow"
-    resources = [aws_lambda_function.channel_ingress_lambda.arn]
+    effect = "Allow"
+    resources = [
+      aws_lambda_function.channel_ingress_lambda.arn
+    ]
   }
 }
 
@@ -89,7 +91,10 @@ resource "aws_lambda_function" "channel_ingress_lambda" {
     })
   }
   function_name = local.channel_ingress_name
-  image_uri     = "${aws_ecr_repository.channel_ingress_ecr_repo.repository_url}:arm-latest"
+  image_config {
+    command = ["apps/${local.channel_ingress_name}/dist/index.handler"]
+  }
+  image_uri = "${aws_ecr_repository.channel_ingress_ecr_repo.repository_url}:arm-latest"
   logging_config {
     log_format = "JSON"
   }

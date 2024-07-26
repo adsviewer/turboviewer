@@ -1,24 +1,16 @@
-name: Deploy channel ingress lambda prod
+name: Deploy lambdas prod
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
-    paths:
-      - apps/channel-ingress/**
-      - packages/channel*/**
-      - packages/database/**
-      - packages/logger/**
-      - packages/utils/**
-      - infrastructure/**
-      - .github/workflows/**
-      - Lambda.Dockerfile
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-channel-ingress
-  cancel-in-progress: true
 
 jobs:
-  channel_ingress_lambda:
+  tiktok_check_report_lambda:
+    strategy:
+      fail-fast: false
+      matrix:
+        lambda_name: [ tiktok-check-report, tiktok-process-report, channel-ingress ]
     permissions:
       id-token: write
       contents: read
@@ -35,4 +27,4 @@ jobs:
       github_role: prod-github
       github-organization: adsviewer
       organization: adsviewer
-      lambda_name: channel-ingress
+      lambda_name: ${{ matrix.lambda_name }}
