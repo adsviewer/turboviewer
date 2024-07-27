@@ -31,17 +31,17 @@ data "aws_iam_policy_document" "github_operating" {
       aws_ecr_repository.channel_report_requests_ecr_repo.arn
     ])
   }
-  #   statement {
-  #     actions = [
-  #       "lambda:UpdateFunctionCode"
-  #     ]
-  #     effect = "Allow"
-  #     resources = flatten([
-  #       aws_lambda_function.channel_check_report_lambda.arn,
-  #       length(aws_lambda_function.channel_process_report_lambda) > 0 ?
-  #       [aws_lambda_function.channel_process_report_lambda[0].arn] : []
-  #     ])
-  #   }
+  statement {
+    actions = [
+      "lambda:UpdateFunctionCode"
+    ]
+    effect = "Allow"
+    resources = flatten([
+      aws_lambda_function.channel_check_report_lambda.arn,
+      length(aws_lambda_function.channel_process_report_lambda) > 0 ?
+      [aws_lambda_function.channel_process_report_lambda[0].arn] : []
+    ])
+  }
 }
 
 resource "aws_iam_policy" "ecr_policy" {
