@@ -1,3 +1,3 @@
-output "tiktok_report_requests_arn" {
-  value = module.tiktok.tiktok_report_requests_arn
+output "report_requests_queue_arns" {
+  value = module.reports.report_requests_queue_arns
 }
