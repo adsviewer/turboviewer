@@ -6,6 +6,7 @@ const schema = z
   .object({
     TIKTOK_APPLICATION_ID: z.string().length(19),
     TIKTOK_APPLICATION_SECRET: z.string().length(40),
+    TIKTOK_REPORT_REQUESTS_QUEUE_URL: z.string().url(),
   })
   .merge(channelsSchema);
 

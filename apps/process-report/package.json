@@ -1,8 +1,8 @@
 {
-  "name": "tiktok-process-report",
+  "name": "process-report",
   "version": "1.0.0",
   "private": true,
-  "description": "TikTok check status of async reports",
+  "description": "Check status of async reports",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest && pnpm install",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project tiktok-process-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project tiktok-process-report ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project process-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project process-report ./dist"
   },
   "author": "",
   "license": "UNLICENCED",
