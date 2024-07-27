@@ -1,4 +1,4 @@
-name: Deploy TikTok check report lambda local
+name: Deploy lambdas local
 
 on:
   workflow_dispatch:
