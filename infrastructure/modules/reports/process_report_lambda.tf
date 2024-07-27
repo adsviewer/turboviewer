@@ -42,34 +42,34 @@ resource "aws_iam_role_policy_attachment" "channel_process_report_policy_attachm
   policy_arn = aws_iam_policy.channel_process_report_policy[0].arn
 }
 
-resource "aws_lambda_function" "channel_process_report_lambda" {
-  count         = strcontains(var.environment, "local") ? 0 : 1
-  architectures = ["arm64"]
-  description   = "Channel process report"
-  environment {
-    variables = merge({
-      for v in local.channels : "${upper(v)}_COMPLETE_REPORTS_QUEUE_URL" =>
-      aws_sqs_queue.channel_completed_reports[v].url
-      }, {
-      IS_LAMBDA = true
-    }, )
-  }
-  function_name = local.process_report_lambda
-  image_config {
-    command = ["apps/${local.process_report-no-env}/dist/index.handler"]
-  }
-  image_uri = "${aws_ecr_repository.channel_process_report_ecr_repo[0].repository_url}:arm-latest"
-  logging_config {
-    log_format = "JSON"
-  }
-  memory_size  = 3008
-  package_type = "Image"
-  role         = aws_iam_role.channel_process_report_role[0].arn
-  timeout      = 899
-}
+# resource "aws_lambda_function" "channel_process_report_lambda" {
+#   count         = strcontains(var.environment, "local") ? 0 : 1
+#   architectures = ["arm64"]
+#   description   = "Channel process report"
+#   environment {
+#     variables = merge({
+#       for v in local.channels : "${upper(v)}_COMPLETE_REPORTS_QUEUE_URL" =>
+#       aws_sqs_queue.channel_completed_reports[v].url
+#       }, {
+#       IS_LAMBDA = true
+#     }, )
+#   }
+#   function_name = local.process_report_lambda
+#   image_config {
+#     command = ["apps/${local.process_report-no-env}/dist/index.handler"]
+#   }
+#   image_uri = "${aws_ecr_repository.channel_process_report_ecr_repo[0].repository_url}:arm-latest"
+#   logging_config {
+#     log_format = "JSON"
+#   }
+#   memory_size  = 3008
+#   package_type = "Image"
+#   role         = aws_iam_role.channel_process_report_role[0].arn
+#   timeout      = 899
+# }
 
-resource "aws_lambda_event_source_mapping" "channel_process_report_event_source_mapping" {
-  for_each         = strcontains(var.environment, "local") ? [] : toset(local.channels)
-  event_source_arn = aws_sqs_queue.channel_completed_reports[each.key].arn
-  function_name    = aws_lambda_function.channel_process_report_lambda[0].arn
-}
+# resource "aws_lambda_event_source_mapping" "channel_process_report_event_source_mapping" {
+#   for_each         = strcontains(var.environment, "local") ? [] : toset(local.channels)
+#   event_source_arn = aws_sqs_queue.channel_completed_reports[each.key].arn
+#   function_name    = aws_lambda_function.channel_process_report_lambda[0].arn
+# }
