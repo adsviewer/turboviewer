@@ -6,11 +6,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  tiktok_check_report_lambda:
+  build_deploy:
     strategy:
       fail-fast: false
       matrix:
-        lambda_name: [ tiktok-check-report, tiktok-process-report, channel-ingress ]
+        lambda_name: [ check-report, process-report, channel-ingress ]
     permissions:
       id-token: write
       contents: read
