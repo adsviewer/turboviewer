@@ -87,6 +87,95 @@ importers:
         specifier: 5.5.2
         version: 5.5.2
 
+  apps/check-report:
+    dependencies:
+      '@repo/channel':
+        specifier: workspace:*
+        version: link:../../packages/channel
+      '@repo/channel-tiktok':
+        specifier: workspace:*
+        version: link:../../packages/channel-tiktok
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@repo/mode':
+        specifier: workspace:*
+        version: link:../../packages/mode
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../../packages/redis
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@sentry/aws-serverless':
+        specifier: ^8.13.0
+        version: 8.13.0(@opentelemetry/api@1.9.0)
+      '@sentry/profiling-node':
+        specifier: ^8.13.0
+        version: 8.13.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.616.0
+        version: 3.616.0
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/config-typescript
+      '@sentry/cli':
+        specifier: ^2.32.1
+        version: 2.32.1
+      '@types/aws-lambda':
+        specifier: ^8.10.140
+        version: 8.10.140
+      '@types/node':
+        specifier: 20.14.9
+        version: 20.14.9
+      typescript:
+        specifier: 5.5.2
+        version: 5.5.2
+
+  apps/process-report:
+    dependencies:
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@repo/mode':
+        specifier: workspace:*
+        version: link:../../packages/mode
+      '@sentry/aws-serverless':
+        specifier: ^8.13.0
+        version: 8.13.0(@opentelemetry/api@1.9.0)
+      '@sentry/profiling-node':
+        specifier: ^8.13.0
+        version: 8.13.0
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/config-typescript
+      '@sentry/cli':
+        specifier: ^2.32.1
+        version: 2.32.1
+      '@types/aws-lambda':
+        specifier: ^8.10.140
+        version: 8.10.140
+      '@types/node':
+        specifier: 20.14.9
+        version: 20.14.9
+      typescript:
+        specifier: 5.5.2
+        version: 5.5.2
+
   apps/server:
     dependencies:
       '@aws-sdk/client-lambda':
@@ -273,80 +362,6 @@ importers:
       tsx:
         specifier: ^4.16.0
         version: 4.16.0
-      typescript:
-        specifier: 5.5.2
-        version: 5.5.2
-
-  apps/tiktok-check-report:
-    dependencies:
-      '@repo/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@repo/mode':
-        specifier: workspace:*
-        version: link:../../packages/mode
-      '@sentry/aws-serverless':
-        specifier: ^8.13.0
-        version: 8.13.0(@opentelemetry/api@1.9.0)
-      '@sentry/profiling-node':
-        specifier: ^8.13.0
-        version: 8.13.0
-    devDependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.616.0
-        version: 3.616.0
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/config-eslint
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/config-typescript
-      '@sentry/cli':
-        specifier: ^2.32.1
-        version: 2.32.1
-      '@types/aws-lambda':
-        specifier: ^8.10.140
-        version: 8.10.140
-      '@types/node':
-        specifier: 20.14.9
-        version: 20.14.9
-      typescript:
-        specifier: 5.5.2
-        version: 5.5.2
-
-  apps/tiktok-process-report:
-    dependencies:
-      '@repo/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@repo/mode':
-        specifier: workspace:*
-        version: link:../../packages/mode
-      '@sentry/aws-serverless':
-        specifier: ^8.13.0
-        version: 8.13.0(@opentelemetry/api@1.9.0)
-      '@sentry/profiling-node':
-        specifier: ^8.13.0
-        version: 8.13.0
-    devDependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.616.0
-        version: 3.616.0
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/config-eslint
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/config-typescript
-      '@sentry/cli':
-        specifier: ^2.32.1
-        version: 2.32.1
-      '@types/aws-lambda':
-        specifier: ^8.10.140
-        version: 8.10.140
-      '@types/node':
-        specifier: 20.14.9
-        version: 20.14.9
       typescript:
         specifier: 5.5.2
         version: 5.5.2
@@ -838,6 +853,9 @@ importers:
 
   packages/channel-tiktok:
     dependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.616.0
+        version: 3.616.0
       '@repo/channel-utils':
         specifier: workspace:*
         version: link:../channel-utils
@@ -8390,7 +8408,7 @@ snapshots:
   '@aws-crypto/crc32@5.2.0':
     dependencies:
       '@aws-crypto/util': 5.2.0
-      '@aws-sdk/types': 3.598.0
+      '@aws-sdk/types': 3.609.0
       tslib: 2.6.3
 
   '@aws-crypto/sha256-browser@5.2.0':

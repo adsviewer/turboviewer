@@ -31,6 +31,7 @@ import {
 } from '@repo/channel-utils';
 import csvParser from 'csv-parser';
 import _ from 'lodash';
+import { SendMessageBatchCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { env } from './config';
 
 const apiVersion = 'v1.3';
@@ -61,7 +62,18 @@ const insightsSchema = z.array(
     Cost: z.coerce.number(),
   }),
 );
-class Tiktok implements ChannelInterface {
+
+export const reportRequestInput = z.object({
+  initial: z.boolean(),
+  accessToken: z.string(),
+  accountId: z.string(),
+  accountExternalId: z.string(),
+  channel: z.nativeEnum(IntegrationTypeEnum),
+});
+
+const sqsClient = new SQSClient({ region: process.env.AWS_REGION });
+
+export class Tiktok implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const params = new URLSearchParams({
       app_id: env.TIKTOK_APPLICATION_ID,
@@ -168,10 +180,7 @@ class Tiktok implements ChannelInterface {
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     const dbAccounts = await this.saveAdAccounts(integration);
     if (isAError(dbAccounts)) return dbAccounts;
-    const taskIdAdAccount = await Tiktok.runAdInsightReports(dbAccounts, integration, initial);
-    const processingTasks = await Tiktok.waitAndProcessReports(taskIdAdAccount, integration, initial);
-    if (isAError(processingTasks)) return processingTasks;
-
+    await Tiktok.runAdInsightReports(dbAccounts, integration, initial);
     return undefined;
   }
 
@@ -372,34 +381,51 @@ class Tiktok implements ChannelInterface {
     dbAccounts: AdAccount[],
     integration: Integration,
     initial: boolean,
-  ): Promise<Map<string, AdAccount>> => {
-    const taskIdAdAccount = new Map<string, AdAccount>();
-    await Promise.all(
-      dbAccounts.map(async (account) => {
-        const tikTokTimeRange = await Tiktok.timeRange(initial, account.id);
-        const response = await Tiktok.tikTokFetch(integration.accessToken, `${baseUrl}/report/task/create`, {
-          method: 'POST',
-          body: JSON.stringify({
-            ...tikTokTimeRange,
-            advertiser_id: account.externalId,
-            data_level: 'AUCTION_AD',
-            dimensions: ['ad_id', 'placement', 'stat_time_day'],
-            report_type: 'AUDIENCE',
-            metrics: ['ad_name', 'ad_id', 'placement_type', 'impressions', 'spend'],
-          }),
-        });
-        const data = await Tiktok.baseValidation(response);
-        if (isAError(data)) return data;
-        const schema = z.object({ task_id: z.string() });
-        const parsed = schema.safeParse(data);
-        if (!parsed.success) {
-          logger.error(parsed.error, 'Failed to create task');
-          return;
-        }
-        taskIdAdAccount.set(parsed.data.task_id, account);
+  ): Promise<void> => {
+    await sqsClient.send(
+      new SendMessageBatchCommand({
+        QueueUrl: env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
+        Entries: dbAccounts.map((account) => ({
+          Id: account.id,
+          MessageBody: JSON.stringify({
+            channel: IntegrationTypeEnum.TIKTOK,
+            initial,
+            accessToken: integration.accessToken,
+            accountId: account.id,
+            accountExternalId: account.externalId,
+          } satisfies z.infer<typeof reportRequestInput>),
+        })),
       }),
     );
-    return taskIdAdAccount;
+  };
+
+  public static runAdInsightReport = async ({
+    initial,
+    accountId,
+    accessToken,
+    accountExternalId,
+  }: z.infer<typeof reportRequestInput>): Promise<string | AError> => {
+    const tikTokTimeRange = await Tiktok.timeRange(initial, accountId);
+    const response = await Tiktok.tikTokFetch(accessToken, `${baseUrl}/report/task/create`, {
+      method: 'POST',
+      body: JSON.stringify({
+        ...tikTokTimeRange,
+        advertiser_id: accountExternalId,
+        data_level: 'AUCTION_AD',
+        dimensions: ['ad_id', 'placement', 'stat_time_day'],
+        report_type: 'AUDIENCE',
+        metrics: ['ad_name', 'ad_id', 'placement_type', 'impressions', 'spend'],
+      }),
+    });
+    const data = await Tiktok.baseValidation(response);
+    if (isAError(data)) return data;
+    const schema = z.object({ task_id: z.string() });
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to create task');
+      return new AError(parsed.error.message);
+    }
+    return parsed.data.task_id;
   };
 
   private static timeRange = async (
@@ -467,7 +493,7 @@ class Tiktok implements ChannelInterface {
     return await Promise.all(processingTasks);
   };
 
-  private static getProcessStatus = async (
+  public static getProcessStatus = async (
     taskIdAdAccount: Map<string, AdAccount>,
     integration: Integration,
     jobStatusEnum: ZodEnum<Writeable<[string, string, string, string, string]>>,

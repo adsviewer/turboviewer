@@ -33,18 +33,6 @@ on:
 
 jobs:
 
-  echo_inputs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo Inputs
-        run: |
-          echo "aws_region: ${{ inputs.aws_region }}"
-          echo "environment: ${{ inputs.environment }}"
-          echo "github_role: ${{ inputs.github_role }}"
-          echo "github-organization: ${{ inputs.github-organization }}"
-          echo "organization: ${{ inputs.organization }}"
-          echo "lambda_name: ${{ inputs.lambda_name }}"
-
   build:
 
     runs-on: ubuntu-latest

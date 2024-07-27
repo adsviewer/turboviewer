@@ -1,4 +1,4 @@
-name: Deploy TikTok check report lambda
+name: Deploy lambdas local
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ on:
       - Lambda.Dockerfile
 
 jobs:
-  tiktok_check_report_lambda:
+  build_deploy:
     strategy:
       fail-fast: false
       matrix:
@@ -27,7 +27,7 @@ jobs:
       packages: write
     uses: ./.github/workflows/build-deploy-lambda-image.yml
     secrets:
-      aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+      aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       turbo_team: ${{ vars.TURBO_TEAM }}
       turbo_token: ${{ secrets.TURBO_TOKEN }}
       sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}

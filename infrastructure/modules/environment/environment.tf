@@ -28,10 +28,8 @@ module "ses" {
 
 data "aws_iam_policy_document" "sqs_policy_document" {
   statement {
-    actions = ["sqs:SendMessage"]
-    resources = [
-      module.environment_potentially_local.tiktok_report_requests_arn
-    ]
+    actions   = ["sqs:SendMessage"]
+    resources = module.environment_potentially_local.report_requests_queue_arns
   }
 }
 
