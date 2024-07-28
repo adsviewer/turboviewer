@@ -20,11 +20,6 @@ resource "aws_iam_role_policy_attachment" "channel_check_report_basic_policy_att
 
 data "aws_iam_policy_document" "channel_check_report_policy_document" {
   statement {
-    actions   = ["sqs:SendMessage"]
-    resources = [for o in aws_sqs_queue.channel_completed_reports : o.arn]
-  }
-
-  statement {
     actions   = local.channel_lambda_queue_actions
     resources = [for o in aws_sqs_queue.channel_report_requests : o.arn]
   }
@@ -47,9 +42,6 @@ resource "aws_lambda_function" "channel_check_report_lambda" {
       aws_sqs_queue.channel_report_requests[v].url
       },
       {
-        for v in local.channels : "${upper(v)}_COMPLETE_REPORTS_QUEUE_URL" =>
-        aws_sqs_queue.channel_completed_reports[v].url
-        }, {
         IS_LAMBDA = true
     }, )
   }

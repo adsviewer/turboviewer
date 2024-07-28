@@ -26,8 +26,6 @@ data "aws_iam_policy_document" "github_operating" {
     ]
     effect = "Allow"
     resources = flatten([
-      length(aws_ecr_repository.channel_process_report_ecr_repo) > 0 ?
-      [aws_ecr_repository.channel_process_report_ecr_repo[0].arn] : [],
       aws_ecr_repository.channel_report_requests_ecr_repo.arn
     ])
   }
@@ -38,8 +36,6 @@ data "aws_iam_policy_document" "github_operating" {
     effect = "Allow"
     resources = flatten([
       aws_lambda_function.channel_check_report_lambda.arn,
-      length(aws_lambda_function.channel_process_report_lambda) > 0 ?
-      [aws_lambda_function.channel_process_report_lambda[0].arn] : []
     ])
   }
 }
