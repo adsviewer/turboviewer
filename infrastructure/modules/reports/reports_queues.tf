@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "channel_report_requests_policy_document" {
         test     = "ArnEquals"
         variable = "aws:SourceArn"
         values = [
-          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.check_report_lambda}"
+          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${local.channel_report_lambda}"
         ]
       }
     }

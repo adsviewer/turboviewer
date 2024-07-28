@@ -1,7 +1,7 @@
 locals {
   report_requests_queue        = "${var.environment}-report-requests"
-  check_report-no-env          = "check-report"
-  check_report_lambda          = "${var.environment}-${local.check_report-no-env}"
+  channel_report-no-env        = "channel-report"
+  channel_report_lambda        = "${var.environment}-${local.channel_report-no-env}"
   completed_reports_queue      = "${var.environment}-completed-reports"
   process_report-no-env        = "process-report"
   process_report_lambda        = "${var.environment}-${local.process_report-no-env}"
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "github_operating" {
     ]
     effect = "Allow"
     resources = flatten([
-      aws_lambda_function.channel_check_report_lambda.arn,
+      aws_lambda_function.channel_report_lambda.arn,
     ])
   }
 }
