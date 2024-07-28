@@ -29,6 +29,7 @@
     "@repo/channel-tiktok": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/database": "workspace:*",
+    "@repo/lambda-types": "workspace:*",
     "@repo/mode": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",

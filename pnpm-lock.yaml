@@ -98,6 +98,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@repo/lambda-types':
+        specifier: workspace:*
+        version: link:../../packages/lambda-types
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -862,6 +865,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../database
+      '@repo/lambda-types':
+        specifier: workspace:*
+        version: link:../lambda-types
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
@@ -902,6 +908,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../database
+      '@repo/lambda-types':
+        specifier: workspace:*
+        version: link:../lambda-types
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
@@ -1020,10 +1029,16 @@ importers:
 
   packages/lambda-types:
     dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       zod:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../config-eslint

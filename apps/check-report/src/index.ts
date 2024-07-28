@@ -3,27 +3,41 @@ import { lambdaRequestTracker, logger } from '@repo/logger';
 import * as Sentry from '@sentry/aws-serverless';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { MODE } from '@repo/mode';
-import { DeleteMessageCommand, ReceiveMessageCommand, type ReceiveMessageResult, SQSClient } from '@aws-sdk/client-sqs';
+import {
+  DeleteMessageCommand,
+  type Message,
+  ReceiveMessageCommand,
+  type ReceiveMessageResult,
+  SQSClient,
+} from '@aws-sdk/client-sqs';
 import { redisGet, redisSet } from '@repo/redis';
-import { type z } from 'zod';
-import { reportRequestInput, Tiktok } from '@repo/channel-tiktok';
+import { Tiktok } from '@repo/channel-tiktok';
 import { isAError } from '@repo/utils';
-import { type IntegrationTypeEnum } from '@repo/database';
+import { IntegrationTypeEnum } from '@repo/database';
+import {
+  JobStatusEnum,
+  type RedisReportRequest,
+  type ReportRequestInput,
+  reportRequestsQueueUrl,
+} from '@repo/lambda-types';
 import { env } from './config';
 
-interface RedisReportRequest extends z.infer<typeof reportRequestInput> {
-  taskId: string;
-}
+const reportChannels = [IntegrationTypeEnum.TIKTOK];
 
 const withRequest = lambdaRequestTracker();
 
 const client = new SQSClient({ region: env.AWS_REGION });
 
-const receiveMessage = (): Promise<ReceiveMessageResult> =>
+const _channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
+  [IntegrationTypeEnum.TIKTOK, 1],
+  [IntegrationTypeEnum.META, 10],
+]);
+
+const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageResult> =>
   client.send(
     new ReceiveMessageCommand({
-      MaxNumberOfMessages: 10,
-      QueueUrl: env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
+      MaxNumberOfMessages: 1,
+      QueueUrl: reportRequestsQueueUrl(channel),
       WaitTimeSeconds: 20,
       VisibilityTimeout: 20,
     }),
@@ -40,55 +54,67 @@ Sentry.init({
   profilesSampleRate: 1.0,
 });
 
-async function deleteMessage(handle: string): Promise<void> {
-  await client.send(
-    new DeleteMessageCommand({
-      QueueUrl: env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
-      ReceiptHandle: handle,
-    }),
-  );
-  logger.info('Message deleted');
+async function deleteMessage(msg: Message, channel: IntegrationTypeEnum): Promise<void> {
+  if (!msg.ReceiptHandle) {
+    await client.send(
+      new DeleteMessageCommand({
+        QueueUrl: reportRequestsQueueUrl(channel),
+        ReceiptHandle: msg.ReceiptHandle,
+      }),
+    );
+    logger.info('Message deleted');
+  }
 }
+
+const activeReportRedisKey = (channel: IntegrationTypeEnum): string => `active-report:${String(channel)}`;
 
 export const handler = Sentry.wrapHandler(async (event: Handler, context: Context): Promise<string> => {
   withRequest(event, context);
   logger.info(event);
 
-  const { Messages } = await receiveMessage();
+  for (const channel of reportChannels) {
+    const { Messages } = await receiveMessage(channel);
 
-  if (!Messages) {
-    logger.warn('No message in queue');
-    return 'No message in queue';
-  }
-  const body = Messages[0].Body;
-  if (!body) {
-    logger.warn('Empty message');
-    return 'Empty message';
-  }
-
-  const parsed = reportRequestInput.safeParse(JSON.parse(body));
-  if (!parsed.success) {
-    logger.error(parsed.error);
-    return `Error parsing message: ${parsed.error.message}`;
-  }
-
-  const activeReportRedisKey = (channel: IntegrationTypeEnum): string => `active-report:${String(channel)}`;
-  const activeReport = await redisGet<RedisReportRequest>(activeReportRedisKey(parsed.data.channel));
-
-  if (!activeReport) {
-    logger.info('No active report');
-    const taskId = await Tiktok.runAdInsightReport(parsed.data);
-    if (isAError(taskId)) {
-      logger.error(taskId);
-      return taskId.message;
+    if (!Messages) {
+      logger.warn('No message in queue');
+      continue;
     }
-    await redisSet(
-      activeReportRedisKey(parsed.data.channel),
-      { ...parsed.data, taskId } satisfies RedisReportRequest,
-      60 * 60 * 24,
-    );
-    if (Messages[0].ReceiptHandle) await deleteMessage(Messages[0].ReceiptHandle);
-    return 'No active report, started new report';
+    const body = Messages[0].Body;
+    if (!body) {
+      logger.warn('Empty message');
+      continue;
+    }
+
+    const parsed = JSON.parse(body) as ReportRequestInput;
+
+    const activeReport = await redisGet<RedisReportRequest>(activeReportRedisKey(channel));
+
+    if (!activeReport) {
+      logger.info('No active report');
+      const taskId = await Tiktok.runAdInsightReport(parsed);
+      if (isAError(taskId)) {
+        logger.error(taskId);
+        continue;
+      }
+      await redisSet(activeReportRedisKey(channel), { ...parsed, taskId } satisfies RedisReportRequest, 60 * 60 * 24);
+      await deleteMessage(Messages[0], channel);
+    } else {
+      logger.info('Active report');
+      const status = await Tiktok.getProcessStatus(activeReport);
+      logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
+      switch (status) {
+        case JobStatusEnum.SUCCESS:
+          await Promise.all([Tiktok.processReport(activeReport), deleteMessage(Messages[0], channel)]);
+          continue;
+        case JobStatusEnum.FAILED:
+        case JobStatusEnum.CANCELED:
+          logger.error(`Task ${activeReport.taskId} was canceled/failed`);
+          await deleteMessage(Messages[0], channel);
+          continue;
+        default:
+          break;
+      }
+    }
   }
 
   return 'Done';

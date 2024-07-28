@@ -10,7 +10,7 @@ import {
   PublisherEnum,
 } from '@repo/database';
 import { AError, formatYYYMMDDDate, isAError } from '@repo/utils';
-import { type Writeable, z, type ZodEnum } from 'zod';
+import { z } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
@@ -32,6 +32,12 @@ import {
 import csvParser from 'csv-parser';
 import _ from 'lodash';
 import { SendMessageBatchCommand, SQSClient } from '@aws-sdk/client-sqs';
+import {
+  JobStatusEnum,
+  type RedisReportRequest,
+  type ReportRequestInput,
+  reportRequestsQueueUrl,
+} from '@repo/lambda-types';
 import { env } from './config';
 
 const apiVersion = 'v1.3';
@@ -62,14 +68,6 @@ const insightsSchema = z.array(
     Cost: z.coerce.number(),
   }),
 );
-
-export const reportRequestInput = z.object({
-  initial: z.boolean(),
-  accessToken: z.string(),
-  accountId: z.string(),
-  accountExternalId: z.string(),
-  channel: z.nativeEnum(IntegrationTypeEnum),
-});
 
 const sqsClient = new SQSClient({ region: process.env.AWS_REGION });
 
@@ -384,16 +382,14 @@ export class Tiktok implements ChannelInterface {
   ): Promise<void> => {
     await sqsClient.send(
       new SendMessageBatchCommand({
-        QueueUrl: env.TIKTOK_REPORT_REQUESTS_QUEUE_URL,
+        QueueUrl: reportRequestsQueueUrl(IntegrationTypeEnum.TIKTOK),
         Entries: dbAccounts.map((account) => ({
           Id: account.id,
           MessageBody: JSON.stringify({
-            channel: IntegrationTypeEnum.TIKTOK,
             initial,
-            accessToken: integration.accessToken,
-            accountId: account.id,
-            accountExternalId: account.externalId,
-          } satisfies z.infer<typeof reportRequestInput>),
+            integration,
+            adAccount: account,
+          } satisfies ReportRequestInput),
         })),
       }),
     );
@@ -401,16 +397,15 @@ export class Tiktok implements ChannelInterface {
 
   public static runAdInsightReport = async ({
     initial,
-    accountId,
-    accessToken,
-    accountExternalId,
-  }: z.infer<typeof reportRequestInput>): Promise<string | AError> => {
-    const tikTokTimeRange = await Tiktok.timeRange(initial, accountId);
-    const response = await Tiktok.tikTokFetch(accessToken, `${baseUrl}/report/task/create`, {
+    adAccount,
+    integration,
+  }: ReportRequestInput): Promise<string | AError> => {
+    const tikTokTimeRange = await Tiktok.timeRange(initial, adAccount.id);
+    const response = await Tiktok.tikTokFetch(integration.accessToken, `${baseUrl}/report/task/create`, {
       method: 'POST',
       body: JSON.stringify({
         ...tikTokTimeRange,
-        advertiser_id: accountExternalId,
+        advertiser_id: adAccount.externalId,
         data_level: 'AUCTION_AD',
         dimensions: ['ad_id', 'placement', 'stat_time_day'],
         report_type: 'AUDIENCE',
@@ -445,91 +440,101 @@ export class Tiktok implements ChannelInterface {
    * @param integration - Integration
    * @param initial - If this is the first time the data is being fetched
    */
-  private static waitAndProcessReports = async (
-    taskIdAdAccount: Map<string, AdAccount>,
-    integration: Integration,
-    initial: boolean,
-  ): Promise<(AError | undefined)[]> => {
-    const processingTasks: Promise<AError | undefined>[] = [];
-    const jobStatusEnum = z.enum(['QUEUING', 'PROCESSING', 'SUCCESS', 'FAILED', 'CANCELED']);
+  // private static checkReportProgress = async (
+  //   taskIdAdAccount: Map<string, AdAccount>,
+  //   integration: Integration,
+  //   initial: boolean,
+  // ): Promise<(AError | undefined)[]> => {
+  //   const processingTasks: Promise<AError | undefined>[] = [];
+  //
+  //   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
+  //   while (true) {
+  //     const statuses = await this.getProcessStatusMany(taskIdAdAccount, integration);
+  //
+  //     // Filter out tasks based on their status and log if necessary
+  //     for (const [taskId, adAccount] of taskIdAdAccount) {
+  //       const taskStatus = statuses.find((status) => status.taskId === taskId);
+  //       if (!taskStatus) {
+  //         taskIdAdAccount.delete(taskId);
+  //         continue;
+  //       }
+  //
+  //       switch (taskStatus) {
+  //         case JobStatusEnum.SUCCESS:
+  //           processingTasks.push(Tiktok.processReport(taskId, integration, adAccount, initial));
+  //           taskIdAdAccount.delete(taskId);
+  //           continue;
+  //         case JobStatusEnum.FAILED:
+  //           logger.warn(`Task ${taskId} failed`);
+  //           taskIdAdAccount.delete(taskId);
+  //           continue;
+  //         case JobStatusEnum.CANCELED:
+  //           logger.error(`Task ${taskId} was canceled`);
+  //           taskIdAdAccount.delete(taskId);
+  //           continue;
+  //         default:
+  //           break;
+  //       }
+  //     }
+  //
+  //     if (taskIdAdAccount.size === 0) break;
+  //
+  //     await new Promise((resolve) => {
+  //       setTimeout(resolve, 5000);
+  //     });
+  //   }
+  //
+  //   return await Promise.all(processingTasks);
+  // };
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
-    while (true) {
-      const statuses = await this.getProcessStatus(taskIdAdAccount, integration, jobStatusEnum);
+  // public static getProcessStatusMany = async (
+  //   taskIdAdAccount: Map<string, AdAccount>,
+  //   integration: Integration,
+  // ): Promise<JobStatusEnum[]> =>
+  //   Promise.all(
+  //     Array.from(taskIdAdAccount.keys()).map((taskId) =>
+  //       Tiktok.getProcessStatus({
+  //         taskId,
+  //         accountId: integration.id,
+  //         accountExternalId: integration.externalId,
+  //         accessToken: integration.accessToken,
+  //       }),
+  //     ),
+  //   );
 
-      // Filter out tasks based on their status and log if necessary
-      for (const [taskId, adAccount] of taskIdAdAccount) {
-        const taskStatus = statuses.find((status) => status.taskId === taskId);
-        if (!taskStatus) {
-          taskIdAdAccount.delete(taskId);
-          continue;
-        }
-
-        switch (taskStatus.status) {
-          case jobStatusEnum.enum.SUCCESS:
-            processingTasks.push(Tiktok.processReport(taskId, integration, adAccount, initial));
-            taskIdAdAccount.delete(taskId);
-            continue;
-          case jobStatusEnum.enum.FAILED:
-            logger.warn(`Task ${taskId} failed`);
-            taskIdAdAccount.delete(taskId);
-            continue;
-          case jobStatusEnum.enum.CANCELED:
-            logger.error(`Task ${taskId} was canceled`);
-            taskIdAdAccount.delete(taskId);
-            continue;
-          default:
-            break;
-        }
-      }
-
-      if (taskIdAdAccount.size === 0) break;
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 5000);
-      });
-    }
-
-    return await Promise.all(processingTasks);
-  };
-
-  public static getProcessStatus = async (
-    taskIdAdAccount: Map<string, AdAccount>,
-    integration: Integration,
-    jobStatusEnum: ZodEnum<Writeable<[string, string, string, string, string]>>,
-  ): Promise<{ taskId: string; status: string }[]> => {
-    return await Promise.all(
-      Array.from(taskIdAdAccount.keys()).map(async (taskId) => {
-        const params = new URLSearchParams({
-          advertiser_id: integration.externalId,
-          task_id: taskId,
-        });
-        const response = await Tiktok.tikTokFetch(
-          integration.accessToken,
-          `${baseUrl}/report/task/check?${params.toString()}`,
-        );
-        const data = await Tiktok.baseValidation(response);
-        if (isAError(data)) {
-          logger.error(data, `Failed to get status for task ${taskId} and integration ${integration.id}`);
-          return { taskId, status: 'ERROR' };
-        }
-        const schema = z.object({ status: jobStatusEnum });
-        const parsed = schema.safeParse(data);
-        if (!parsed.success) {
-          logger.error(parsed.error, `Failed to get status for task ${taskId} and integration ${integration.id}`);
-          return { taskId, status: 'ERROR' };
-        }
-        return { taskId, status: parsed.data.status };
-      }),
+  public static getProcessStatus = async ({
+    taskId,
+    adAccount,
+    integration,
+  }: Omit<RedisReportRequest, 'initial'>): Promise<JobStatusEnum> => {
+    const params = new URLSearchParams({
+      advertiser_id: adAccount.externalId,
+      task_id: taskId,
+    });
+    const response = await Tiktok.tikTokFetch(
+      integration.accessToken,
+      `${baseUrl}/report/task/check?${params.toString()}`,
     );
+    const data = await Tiktok.baseValidation(response);
+    if (isAError(data)) {
+      logger.error(data, `Failed to get status for task ${taskId} and integration ${adAccount.id}`);
+      return JobStatusEnum.FAILED;
+    }
+    const schema = z.object({ status: z.nativeEnum(JobStatusEnum) });
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      logger.error(parsed.error, `Failed to get status for task ${taskId} and integration ${adAccount.id}`);
+      return JobStatusEnum.FAILED;
+    }
+    return parsed.data.status;
   };
 
-  private static processReport = async (
-    taskId: string,
-    integration: Integration,
-    adAccount: AdAccount,
-    initial: boolean,
-  ): Promise<AError | undefined> => {
+  public static processReport = async ({
+    taskId,
+    integration,
+    adAccount,
+    initial,
+  }: RedisReportRequest): Promise<AError | undefined> => {
     const params = new URLSearchParams({
       advertiser_id: integration.externalId,
       task_id: taskId,
