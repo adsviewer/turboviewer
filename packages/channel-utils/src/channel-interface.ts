@@ -9,6 +9,7 @@ import {
 } from '@repo/database';
 import { type MetaError } from './errors';
 import { type ChannelIFrame } from './iframe-helper';
+import { type JobStatusEnum, type ProcessReportReq, type RunAdInsightReportReq } from './send-messages';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -54,13 +55,9 @@ export interface ChannelInsight {
 }
 
 export interface ChannelInterface {
-  generateAuthUrl: (state: string) => GenerateAuthUrlResp;
-  exchangeCodeForTokens: (code: string) => Promise<TokensResponse | AError>;
-  getUserId: (accessToken: string) => Promise<string | AError>;
-  saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
-  signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   deAuthorize: (organizationId: string) => Promise<string | AError | MetaError>;
-  getChannelData: (integration: Integration, initial: boolean) => Promise<AError | undefined>;
+  exchangeCodeForTokens: (code: string) => Promise<TokensResponse | AError>;
+  generateAuthUrl: (state: string) => GenerateAuthUrlResp;
   getAdPreview: (
     integration: Integration,
     adId: string,
@@ -68,5 +65,12 @@ export interface ChannelInterface {
     device?: DeviceEnum,
     position?: string,
   ) => Promise<ChannelIFrame | AError>;
+  getChannelData: (integration: Integration, initial: boolean) => Promise<AError | undefined>;
   getDefaultPublisher: () => PublisherEnum;
+  getReportStatus: (input: Omit<ProcessReportReq, 'initial'>) => Promise<JobStatusEnum>;
+  getUserId: (accessToken: string) => Promise<string | AError>;
+  processReport: (input: ProcessReportReq) => Promise<AError | undefined>;
+  runAdInsightReport: (input: RunAdInsightReportReq) => Promise<string | AError>;
+  saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
+  signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
 }

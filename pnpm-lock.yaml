@@ -89,43 +89,22 @@ importers:
 
   apps/check-report:
     dependencies:
-      '@repo/channel':
+      '@repo/channel-utils':
         specifier: workspace:*
-        version: link:../../packages/channel
-      '@repo/channel-tiktok':
-        specifier: workspace:*
-        version: link:../../packages/channel-tiktok
-      '@repo/database':
-        specifier: workspace:*
-        version: link:../../packages/database
-      '@repo/lambda-types':
-        specifier: workspace:*
-        version: link:../../packages/lambda-types
+        version: link:../../packages/channel-utils
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
       '@repo/mode':
         specifier: workspace:*
         version: link:../../packages/mode
-      '@repo/redis':
-        specifier: workspace:*
-        version: link:../../packages/redis
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../packages/utils
       '@sentry/aws-serverless':
         specifier: ^8.13.0
         version: 8.13.0(@opentelemetry/api@1.9.0)
       '@sentry/profiling-node':
         specifier: ^8.13.0
         version: 8.13.0
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.616.0
-        version: 3.616.0
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config-eslint
@@ -746,6 +725,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.616.0
+        version: 3.616.0
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../config-eslint
@@ -856,18 +838,12 @@ importers:
 
   packages/channel-tiktok:
     dependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.616.0
-        version: 3.616.0
       '@repo/channel-utils':
         specifier: workspace:*
         version: link:../channel-utils
       '@repo/database':
         specifier: workspace:*
         version: link:../database
-      '@repo/lambda-types':
-        specifier: workspace:*
-        version: link:../lambda-types
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
@@ -905,12 +881,12 @@ importers:
 
   packages/channel-utils:
     dependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.616.0
+        version: 3.616.0
       '@repo/database':
         specifier: workspace:*
         version: link:../database
-      '@repo/lambda-types':
-        specifier: workspace:*
-        version: link:../lambda-types
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger

@@ -4,3 +4,4 @@ export * from './data-refresh';
 export * from './iframe-cacheable';
 export * from './insights-cache';
 export * from './integration-helper';
+export * from './report-process';

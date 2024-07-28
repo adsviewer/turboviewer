@@ -16,7 +16,6 @@
   "author": "",
   "license": "UNLICENCED",
   "devDependencies": {
-    "@aws-sdk/client-sqs": "^3.616.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@sentry/cli": "^2.32.1",
@@ -25,16 +24,10 @@
     "typescript": "5.5.2"
   },
   "dependencies": {
-    "@repo/channel": "workspace:*",
-    "@repo/channel-tiktok": "workspace:*",
+    "@repo/channel-utils": "workspace:*",
     "@repo/logger": "workspace:*",
-    "@repo/database": "workspace:*",
-    "@repo/lambda-types": "workspace:*",
     "@repo/mode": "workspace:*",
-    "@repo/redis": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@sentry/aws-serverless": "^8.13.0",
-    "@sentry/profiling-node": "^8.13.0",
-    "zod": "^3.23.8"
+    "@sentry/profiling-node": "^8.13.0"
   }
 }
