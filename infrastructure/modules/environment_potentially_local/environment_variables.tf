@@ -1,7 +1,15 @@
-variable "environment" {
+variable "channels" {
+  type = set(string)
+}
+
+variable "channel_lambda_queue_actions" {
+  type = set(string)
+}
+
+variable "channel_report_lambda_name" {
   type = string
 }
 
-variable "github_role_name" {
+variable "environment" {
   type = string
 }

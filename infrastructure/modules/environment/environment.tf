@@ -29,7 +29,7 @@ module "ses" {
 data "aws_iam_policy_document" "sqs_policy_document" {
   statement {
     actions   = ["sqs:SendMessage"]
-    resources = module.environment_potentially_local.report_requests_queue_arns
+    resources = module.environment_potentially_local.channel_report_arns
   }
 }
 
@@ -98,6 +98,8 @@ module "server" {
 module "environment_potentially_local" {
   source = "../environment_potentially_local"
 
-  environment      = var.environment
-  github_role_name = var.github_role_name
+  channel_lambda_queue_actions = local.channel_report_lambda_queue_actions
+  channel_report_lambda_name   = local.channel_report_lambda
+  channels                     = local.channels
+  environment                  = var.environment
 }

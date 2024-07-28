@@ -1,4 +1,11 @@
-resource "aws_ecr_repository" "channel_report_requests_ecr_repo" {
+locals {
+  channels                            = ["tiktok", "meta"] # these need to be the same with `IntegrationTypeEnum` if capitalized
+  channel_report-no-env               = "channel-report"
+  channel_report_lambda               = "${var.environment}-${local.channel_report-no-env}"
+  channel_report_lambda_queue_actions = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:DeleteMessageBatch"]
+}
+
+resource "aws_ecr_repository" "channel_report_ecr_repo" {
   name                 = local.channel_report_lambda
   image_tag_mutability = "MUTABLE"
   force_delete         = var.environment == "prod" ? false : true
@@ -20,8 +27,8 @@ resource "aws_iam_role_policy_attachment" "channel_report_basic_policy_attachmen
 
 data "aws_iam_policy_document" "channel_report_policy_document" {
   statement {
-    actions   = local.channel_lambda_queue_actions
-    resources = [for o in aws_sqs_queue.channel_report_requests : o.arn]
+    actions   = local.channel_report_lambda_queue_actions
+    resources = module.environment_potentially_local.channel_report_arns
   }
 }
 resource "aws_iam_policy" "channel_report_policy" {
@@ -37,19 +44,26 @@ resource "aws_lambda_function" "channel_report_lambda" {
   architectures = ["arm64"]
   description   = "Check status of async reports, start new if within concurrency limits and process the finished"
   environment {
-    variables = merge({
-      for v in local.channels : "${upper(v)}_REPORT_REQUESTS_QUEUE_URL" =>
-      aws_sqs_queue.channel_report_requests[v].url
-      },
+    variables = merge(
       {
-        IS_LAMBDA = true
-    }, )
+        for k, v in local.common_secrets : k => v.value
+        }, {
+        for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.value
+        }, {
+        AWS_REGION      = data.aws_region.current.name
+        AWS_ACCOUNT_ID  = data.aws_caller_identity.current.account_id
+        CHANNEL_SECRET  = aws_ssm_parameter.channel_secret.value
+        DATABASE_URL    = aws_ssm_parameter.database_url.value
+        DATABASE_RO_URL = aws_ssm_parameter.database_ro_url.value
+        IS_LAMBDA       = true
+      }
+    )
   }
   function_name = local.channel_report_lambda
   image_config {
     command = ["apps/${local.channel_report-no-env}/dist/index.handler"]
   }
-  image_uri = "${aws_ecr_repository.channel_report_requests_ecr_repo.repository_url}:arm-latest"
+  image_uri = "${aws_ecr_repository.channel_report_ecr_repo.repository_url}:arm-latest"
   logging_config {
     log_format = "JSON"
   }
@@ -78,3 +92,4 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_lambda" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.every_one_minute.arn
 }
+
