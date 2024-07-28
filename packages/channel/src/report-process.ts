@@ -7,7 +7,7 @@ import {
   type ReceiveMessageResult,
   SQSClient,
 } from '@aws-sdk/client-sqs';
-import { redisGet, redisSet } from '@repo/redis';
+import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { isAError } from '@repo/utils';
 import { Environment, MODE } from '@repo/mode';
 import {
@@ -16,17 +16,18 @@ import {
   reportRequestsQueueUrl,
   type RunAdInsightReportReq,
 } from '@repo/channel-utils';
+import _ from 'lodash';
 import { env } from './config';
 import { getChannel } from './channel-helper';
 
 const client = new SQSClient({ region: env.AWS_REGION });
 
-const reportChannels = [IntegrationTypeEnum.TIKTOK];
+const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageResult> =>
   client.send(
     new ReceiveMessageCommand({
-      MaxNumberOfMessages: 1,
+      MaxNumberOfMessages: channelConcurrencyReportMap.get(channel),
       QueueUrl: reportRequestsQueueUrl(channel),
       WaitTimeSeconds: 20,
       VisibilityTimeout: 20,
@@ -35,12 +36,12 @@ const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageRes
 
 const activeReportRedisKey = (channel: IntegrationTypeEnum): string => `active-report:${String(channel)}`;
 
-const _channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
+const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
   [IntegrationTypeEnum.TIKTOK, 1],
   [IntegrationTypeEnum.META, 10],
 ]);
 
-async function deleteMessage(msg: Message, channel: IntegrationTypeEnum): Promise<void> {
+async function deleteMessage(msg: Message, channel: IntegrationTypeEnum, redisValue: ProcessReportReq): Promise<void> {
   if (msg.ReceiptHandle) {
     await client.send(
       new DeleteMessageCommand({
@@ -50,54 +51,66 @@ async function deleteMessage(msg: Message, channel: IntegrationTypeEnum): Promis
     );
     logger.info('Message deleted');
   }
+  await redisRemoveFromSet(activeReportRedisKey(channel), redisValue);
 }
 
 const checkReports = async (): Promise<void> => {
-  for (const channelType of reportChannels) {
-    const channel = getChannel(channelType);
-    const { Messages } = await receiveMessage(channelType);
+  await Promise.all(
+    reportChannels.map(async (channelType) => {
+      const channel = getChannel(channelType);
+      const { Messages } = await receiveMessage(channelType);
 
-    if (!Messages) {
-      logger.info('No message in queue');
-      continue;
-    }
-    const body = Messages[0].Body;
-    if (!body) {
-      logger.warn('Empty message');
-      continue;
-    }
-
-    const parsed = JSON.parse(body) as RunAdInsightReportReq;
-
-    const activeReport = await redisGet<ProcessReportReq>(activeReportRedisKey(channelType));
-
-    if (!activeReport) {
-      logger.info('No active report');
-      const taskId = await channel.runAdInsightReport(parsed);
-      if (isAError(taskId)) {
-        logger.error(taskId);
-        continue;
+      if (!Messages) {
+        logger.info('No message in queue');
+        return;
       }
-      await redisSet(activeReportRedisKey(channelType), { ...parsed, taskId } satisfies ProcessReportReq, 60 * 60 * 24);
-    } else {
-      logger.info('Active report');
-      const status = await channel.getReportStatus(activeReport);
-      logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
-      switch (status) {
-        case JobStatusEnum.SUCCESS:
-          await Promise.all([channel.processReport(activeReport), deleteMessage(Messages[0], channelType)]);
-          await deleteMessage(Messages[0], channelType);
+
+      const activeReports = await getAllSet<ProcessReportReq>(activeReportRedisKey(channelType));
+
+      for (const msg of Messages) {
+        const body = msg.Body;
+        if (!body) {
+          logger.warn('Empty message');
           continue;
-        case JobStatusEnum.FAILED:
-        case JobStatusEnum.CANCELED:
-          logger.error(`Task ${activeReport.taskId} was canceled/failed`);
-          await deleteMessage(Messages[0], channelType);
-          continue;
-        default:
-          break;
+        }
+        const parsed = JSON.parse(body) as RunAdInsightReportReq;
+        const activeReport = activeReports.find((report) => _.isMatch(report, parsed));
+
+        if (!activeReport) {
+          logger.info('No active report');
+          const taskId = await channel.runAdInsightReport(parsed);
+          if (isAError(taskId)) {
+            logger.error(taskId);
+            continue;
+          }
+          await redisAddToSet(
+            activeReportRedisKey(channelType),
+            {
+              ...parsed,
+              taskId,
+            } satisfies ProcessReportReq,
+            60 * 60 * 24,
+          );
+        } else {
+          logger.info('Active report');
+          const status = await channel.getReportStatus(activeReport);
+          logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
+          switch (status) {
+            case JobStatusEnum.SUCCESS:
+              await Promise.all([channel.processReport(activeReport), deleteMessage(msg, channelType, activeReport)]);
+              continue;
+            case JobStatusEnum.FAILED:
+            case JobStatusEnum.CANCELED:
+              logger.error(`Task ${activeReport.taskId} was canceled/failed`);
+              await deleteMessage(msg, channelType, activeReport);
+              continue;
+            default:
+              break;
+          }
+        }
       }
-    }
-  }
+    }),
+  );
 };
 
 const periodicCheckReports = (): void => {

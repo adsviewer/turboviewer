@@ -25,6 +25,8 @@ import {
   getConnectedIntegrationByOrg,
   JobStatusEnum,
   type ProcessReportReq,
+  type ReportAdAccount,
+  type ReportIntegration,
   type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
@@ -451,8 +453,8 @@ export class Tiktok implements ChannelInterface {
 
   private static processReportChunk = async (
     taskId: string,
-    integration: Integration,
-    adAccount: AdAccount,
+    integration: ReportIntegration,
+    adAccount: ReportAdAccount,
     data: unknown[],
     placementPublisherMap: Map<PlacementsEnum, PublisherEnum>,
     adsMap: Map<string, ChannelAd>,
