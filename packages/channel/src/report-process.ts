@@ -54,7 +54,7 @@ async function deleteMessage(msg: Message, channel: IntegrationTypeEnum, redisVa
   await redisRemoveFromSet(activeReportRedisKey(channel), redisValue);
 }
 
-const checkReports = async (): Promise<void> => {
+export const checkReports = async (): Promise<void> => {
   await Promise.all(
     reportChannels.map(async (channelType) => {
       const channel = getChannel(channelType);

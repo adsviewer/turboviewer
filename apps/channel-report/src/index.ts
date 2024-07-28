@@ -1,13 +1,14 @@
-import { type Context, type SQSEvent } from 'aws-lambda';
+import { type Context, type Handler } from 'aws-lambda';
 import { lambdaRequestTracker, logger } from '@repo/logger';
 import * as Sentry from '@sentry/aws-serverless';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { MODE } from '@repo/mode';
+import { checkReports } from '@repo/channel';
 
 const withRequest = lambdaRequestTracker();
 
 Sentry.init({
-  dsn: 'https://fcb186d343920e1c2be891a1ee177864@o4507502891040768.ingest.de.sentry.io/4507661013614672',
+  dsn: 'https://37eb719907cfb78977edc3f2379987b9@o4507502891040768.ingest.de.sentry.io/4507661011189840',
   environment: MODE,
   integrations: [nodeProfilingIntegration(), Sentry.prismaIntegration()],
   // Performance Monitoring
@@ -17,10 +18,9 @@ Sentry.init({
   profilesSampleRate: 1.0,
 });
 
-// eslint-disable-next-line @typescript-eslint/require-await -- Lambda handler must be async
-export const handler = Sentry.wrapHandler(async (event: SQSEvent, context: Context): Promise<string> => {
+export const handler = Sentry.wrapHandler(async (event: Handler, context: Context): Promise<string> => {
   withRequest(event, context);
   logger.info(event);
-
-  throw new Error('Not implemented');
+  await checkReports();
+  return Promise.resolve('Done');
 });

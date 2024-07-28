@@ -89,9 +89,9 @@ importers:
 
   apps/check-report:
     dependencies:
-      '@repo/channel-utils':
+      '@repo/channel':
         specifier: workspace:*
-        version: link:../../packages/channel-utils
+        version: link:../../packages/channel
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
