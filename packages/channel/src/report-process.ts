@@ -62,7 +62,6 @@ export const checkReports = async (): Promise<void> => {
       const { Messages } = await receiveMessage(channelType);
 
       if (!Messages) {
-        logger.info('No message in queue');
         return;
       }
 
@@ -117,9 +116,7 @@ export const checkReports = async (): Promise<void> => {
 const periodicCheckReports = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- it's fine
   setTimeout(async () => {
-    logger.info('Checking reports');
     await checkReports();
-    logger.info('Reports checked');
     periodicCheckReports();
   }, 5000);
 };
