@@ -81,6 +81,7 @@ module "server" {
     AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
     AWS_REGION     = data.aws_region.current.name
     API_ENDPOINT   = local.server_api_endpoint
+    MODE           = var.environment
     PORT           = 4000,
     PUBLIC_URL     = local.full_domain
   }
