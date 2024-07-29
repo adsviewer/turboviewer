@@ -1,8 +1,6 @@
 locals {
-  channels                            = ["tiktok", "meta"] # these need to be the same with `IntegrationTypeEnum` if capitalized
-  channel_report-no-env               = "channel-report"
-  channel_report_lambda               = "${var.environment}-${local.channel_report-no-env}"
-  channel_report_lambda_queue_actions = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:DeleteMessageBatch"]
+  channel_report-no-env = "channel-report"
+  channel_report_lambda = "${var.environment}-${local.channel_report-no-env}"
 }
 
 resource "aws_ecr_repository" "channel_report_ecr_repo" {
@@ -27,7 +25,7 @@ resource "aws_iam_role_policy_attachment" "channel_report_basic_policy_attachmen
 
 data "aws_iam_policy_document" "channel_report_policy_document" {
   statement {
-    actions   = local.channel_report_lambda_queue_actions
+    actions   = module.environment_potentially_local.channel_lambda_queue_actions
     resources = module.environment_potentially_local.channel_report_arns
   }
 }

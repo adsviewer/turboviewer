@@ -98,8 +98,6 @@ module "server" {
 module "environment_potentially_local" {
   source = "../environment_potentially_local"
 
-  channel_lambda_queue_actions = local.channel_report_lambda_queue_actions
-  channel_report_lambda_name   = local.channel_report_lambda
-  channels                     = local.channels
-  environment                  = var.environment
+  channel_report_lambda_name = local.channel_report_lambda
+  environment                = var.environment
 }
