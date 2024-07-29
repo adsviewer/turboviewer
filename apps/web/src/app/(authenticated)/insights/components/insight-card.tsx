@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
 import { YAxis } from 'recharts';
+import { logger } from '@repo/logger';
+import { notifications } from '@mantine/notifications';
 import {
   type PublisherEnum,
   type CurrencyEnum,
@@ -43,11 +45,25 @@ interface Datapoint {
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const format = useFormatter();
   const t = useTranslations('insights');
+  const tGeneric = useTranslations('generic');
   const [rank, setRank] = useState<RankType>({
     label: 'GOOD',
     color: 'green',
   });
   const [datapoints, setDatapoints] = useState<Datapoint[]>([]);
+
+  const copyText = async (text: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      notifications.show({
+        title: tGeneric('success'),
+        message: sentenceCase(tGeneric('copied')),
+        color: 'blue',
+      });
+    } catch (error) {
+      logger.error(error);
+    }
+  };
 
   const setupRank = useCallback(() => {
     // If the latest CPM is lower than the previous CPM, rank is set to CAUTION
@@ -87,7 +103,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Flex gap="sm" align="center">
         <Title order={3} fw={500} title={String(props.title)}>
-          {truncateString(String(props.heading), 22)}
+          {props.heading}
         </Title>
       </Flex>
 
@@ -156,7 +172,15 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
           <Tooltip label={String(props.title)} disabled={String(props.title) === t('insight')}>
-            <Text fw={500}>{truncateString(String(props.title), 22)}</Text>
+            <Text
+              style={{ cursor: 'pointer' }}
+              fw={500}
+              onClick={() => {
+                void copyText(String(props.title));
+              }}
+            >
+              {truncateString(String(props.title), 22)}
+            </Text>
           </Tooltip>
         </Flex>
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
