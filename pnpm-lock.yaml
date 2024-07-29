@@ -87,45 +87,11 @@ importers:
         specifier: 5.5.2
         version: 5.5.2
 
-  apps/check-report:
+  apps/channel-report:
     dependencies:
       '@repo/channel':
         specifier: workspace:*
         version: link:../../packages/channel
-      '@repo/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@repo/mode':
-        specifier: workspace:*
-        version: link:../../packages/mode
-      '@sentry/aws-serverless':
-        specifier: ^8.13.0
-        version: 8.13.0(@opentelemetry/api@1.9.0)
-      '@sentry/profiling-node':
-        specifier: ^8.13.0
-        version: 8.13.0
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/config-eslint
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/config-typescript
-      '@sentry/cli':
-        specifier: ^2.32.1
-        version: 2.32.1
-      '@types/aws-lambda':
-        specifier: ^8.10.140
-        version: 8.10.140
-      '@types/node':
-        specifier: 20.14.9
-        version: 20.14.9
-      typescript:
-        specifier: 5.5.2
-        version: 5.5.2
-
-  apps/process-report:
-    dependencies:
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
