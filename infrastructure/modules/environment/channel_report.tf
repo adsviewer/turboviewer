@@ -53,6 +53,7 @@ resource "aws_lambda_function" "channel_report_lambda" {
         DATABASE_URL    = aws_ssm_parameter.database_url.value
         DATABASE_RO_URL = aws_ssm_parameter.database_ro_url.value
         IS_LAMBDA       = true
+        MODE            = var.environment
       }
     )
   }
