@@ -84,6 +84,7 @@ resource "aws_lambda_function" "channel_ingress_lambda" {
       }, {
       for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.value
       }, {
+      AWS_ACCOUNT_ID  = data.aws_caller_identity.current.account_id
       CHANNEL_SECRET  = aws_ssm_parameter.channel_secret.value
       DATABASE_URL    = aws_ssm_parameter.database_url.value
       DATABASE_RO_URL = aws_ssm_parameter.database_ro_url.value

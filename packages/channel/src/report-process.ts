@@ -11,9 +11,9 @@ import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { isAError } from '@repo/utils';
 import { Environment, MODE } from '@repo/mode';
 import {
+  channelReportQueueUrl,
   JobStatusEnum,
   type ProcessReportReq,
-  channelReportQueueUrl,
   type RunAdInsightReportReq,
 } from '@repo/channel-utils';
 import _ from 'lodash';
@@ -25,12 +25,10 @@ const client = new SQSClient({ region: env.AWS_REGION });
 const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageResult> => {
-  const queueUrl = channelReportQueueUrl(channel);
-  logger.info(`Receiving messages from ${queueUrl}`);
   return client.send(
     new ReceiveMessageCommand({
       MaxNumberOfMessages: channelConcurrencyReportMap.get(channel),
-      QueueUrl: queueUrl,
+      QueueUrl: channelReportQueueUrl(channel),
       WaitTimeSeconds: 20,
       VisibilityTimeout: 20,
     }),
