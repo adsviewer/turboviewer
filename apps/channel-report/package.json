@@ -16,6 +16,7 @@
   "author": "",
   "license": "UNLICENCED",
   "devDependencies": {
+    "@aws-sdk/client-sqs": "^3.616.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@sentry/cli": "^2.32.1",
