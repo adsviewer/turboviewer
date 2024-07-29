@@ -26,18 +26,6 @@ module "ses" {
   zone_id     = aws_route53_zone.zone.zone_id
 }
 
-data "aws_iam_policy_document" "sqs_policy_document" {
-  statement {
-    actions   = ["sqs:SendMessage"]
-    resources = module.environment_potentially_local.channel_report_arns
-  }
-}
-
-resource "aws_iam_policy" "sqs_policy" {
-  name   = "${var.environment}-sqs-policy"
-  policy = data.aws_iam_policy_document.sqs_policy_document.json
-}
-
 data "aws_iam_policy_document" "sns_policy_document" {
   statement {
     actions = ["sns:Subscribe", "sns:Unsubscribe"]
@@ -92,7 +80,6 @@ module "server" {
   instance_role_policies = {
     "ses"    = module.ses.send_email_policy_arn
     "sns"    = aws_iam_policy.sns_policy.arn
-    "sqs"    = aws_iam_policy.sqs_policy.arn
     "lambda" = aws_iam_policy.lambda_invoke_policy.arn
   }
   vpc_id = var.vpc_id
@@ -101,6 +88,7 @@ module "server" {
 module "environment_potentially_local" {
   source = "../environment_potentially_local"
 
-  channel_report_lambda_name = local.channel_report_lambda
-  environment                = var.environment
+  channel_ingress_lambda_name = local.channel_ingress_name
+  channel_report_lambda_name  = local.channel_report_lambda
+  environment                 = var.environment
 }

@@ -122,6 +122,7 @@ module "environment_potentially_local" {
   for_each = var.developers
   source   = "../../modules/environment_potentially_local"
 
-  environment                = "${var.environment}-${each.key}"
-  channel_report_lambda_name = "not_applicable"
+  channel_ingress_lambda_name = "not_applicable"
+  channel_report_lambda_name  = "not_applicable"
+  environment                 = "${var.environment}-${each.key}"
 }
