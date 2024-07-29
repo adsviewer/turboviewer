@@ -24,15 +24,18 @@ const client = new SQSClient({ region: env.AWS_REGION });
 
 const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
-const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageResult> =>
-  client.send(
+const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageResult> => {
+  const queueUrl = channelReportQueueUrl(channel);
+  logger.info(`Receiving messages from ${queueUrl}`);
+  return client.send(
     new ReceiveMessageCommand({
       MaxNumberOfMessages: channelConcurrencyReportMap.get(channel),
-      QueueUrl: channelReportQueueUrl(channel),
+      QueueUrl: queueUrl,
       WaitTimeSeconds: 20,
       VisibilityTimeout: 20,
     }),
   );
+};
 
 const activeReportRedisKey = (channel: IntegrationTypeEnum): string => `active-report:${String(channel)}`;
 
