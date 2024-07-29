@@ -258,6 +258,8 @@ export class Tiktok implements ChannelInterface {
   }
 
   async processReport({ taskId, integration, adAccount, initial }: ProcessReportReq): Promise<AError | undefined> {
+    const adsMap = new Map<string, ChannelAd>();
+    const adExternalIdMap = new Map<string, string>();
     const params = new URLSearchParams({
       advertiser_id: integration.externalId,
       task_id: taskId,
@@ -274,7 +276,7 @@ export class Tiktok implements ChannelInterface {
     ]);
 
     const fn = (data: unknown[]): Promise<AError | undefined> =>
-      Tiktok.processReportChunk(taskId, integration, adAccount, data, placementPublisherMap, new Map(), new Map());
+      Tiktok.processReportChunk(taskId, integration, adAccount, data, placementPublisherMap, adsMap, adExternalIdMap);
     if (isAError(response)) return response;
     await deleteOldInsights(adAccount.id, initial);
     const processed = await Tiktok.csvParseAndProcess(response, fn);

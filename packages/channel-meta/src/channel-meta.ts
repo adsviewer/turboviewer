@@ -44,12 +44,15 @@ import {
   JobStatusEnum,
   MetaError,
   type ProcessReportReq,
+  type ReportAdAccount,
+  type ReportIntegration,
   revokeIntegration,
   revokeIntegrationById,
   type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
   saveInsights,
+  sendReportRequestsMessage,
   timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
@@ -216,11 +219,7 @@ class Meta implements ChannelInterface {
     if (isAError(dbAccounts)) return dbAccounts;
     logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(dbAccounts)} active accounts`);
 
-    const adReportsAccountMap = await this.runAdInsightReports(dbAccounts, initial, integration);
-    if (isAError(adReportsAccountMap)) return adReportsAccountMap;
-
-    const adExternalIdMap = new Map<string, string>();
-    await this.waitAndProcessReports(adReportsAccountMap, integration, adExternalIdMap, initial);
+    await sendReportRequestsMessage(dbAccounts, integration, IntegrationTypeEnum.META, initial);
   }
 
   async getAdPreview(
@@ -346,61 +345,14 @@ class Meta implements ChannelInterface {
     return creatives;
   }
 
-  private async runAdInsightReports(
-    accounts: DbAdAccount[],
-    initial: boolean,
-    integration: Integration,
-  ): Promise<AError | Map<string, DbAdAccount>> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const adReportsAccountMap = new Map<string, DbAdAccount>();
-    const adReportRunSchema = z.object({ id: z.string() });
-
-    for (const acc of accounts) {
-      const account = new AdAccount(`act_${acc.externalId}`, {}, undefined, undefined);
-      const resp = await Meta.sdk(
-        async () =>
-          account.getInsightsAsync(
-            [
-              AdsInsights.Fields.account_id,
-              AdsInsights.Fields.ad_id,
-              AdsInsights.Fields.ad_name,
-              AdsInsights.Fields.date_start,
-              AdsInsights.Fields.spend,
-              AdsInsights.Fields.impressions,
-            ],
-            {
-              limit: 500,
-              time_increment: 1,
-              filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
-              breakdowns: [
-                AdsInsights.Breakdowns.device_platform,
-                AdsInsights.Breakdowns.publisher_platform,
-                AdsInsights.Breakdowns.platform_position,
-              ],
-              level: AdsInsights.Level.ad,
-              time_range: await metaTimeRange(initial, acc.id),
-            },
-          ),
-        integration,
-      );
-      if (isAError(resp)) return resp;
-      const parsed = adReportRunSchema.safeParse(resp);
-      if (!parsed.success) {
-        logger.error('Failed to parse ad report run %o', resp);
-        return new AError('Failed to parse meta ad report run');
-      }
-      adReportsAccountMap.set(resp.id, acc);
-    }
-    return adReportsAccountMap;
-  }
-
-  private async waitAndProcessReports(
-    adReportsAccountMap: Map<string, DbAdAccount>,
-    integration: Integration,
-    adExternalIdMap: Map<string, string>,
-    initial: boolean,
-  ): Promise<AError | undefined> {
-    const jobStatusEnum = z.enum([
+  async getReportStatus({ taskId, integration, adAccount }: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+    const reportId = taskId;
+    const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
+    const resp = await Meta.sdk(
+      () => report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]),
+      integration,
+    );
+    const metaJobStatusEnum = z.enum([
       'Job Not Started',
       'Job Started',
       'Job Running',
@@ -408,58 +360,29 @@ class Meta implements ChannelInterface {
       'Job Failed',
       'Job Skipped',
     ]);
-
-    const adReportsAccountMapCopy = new Map(adReportsAccountMap);
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition -- Uses break
-    while (true) {
-      for (const [reportId, dbAccount] of adReportsAccountMapCopy) {
-        const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
-        const resp = await Meta.sdk(
-          () => report.get([AdReportRun.Fields.async_status, AdReportRun.Fields.async_percent_completion]),
-          integration,
-        );
-        const reportSchema = z.object({
-          [AdReportRun.Fields.async_status]: jobStatusEnum,
-          [AdReportRun.Fields.async_percent_completion]: z.number(),
-        });
-        const parsed = reportSchema.safeParse(resp);
-        if (!parsed.success) {
-          logger.error('Failed to parse ad report %o', resp);
-          return new AError('Failed to parse meta ad report');
-        }
-        const item = {
-          percent: parsed.data.async_percent_completion,
-          status: parsed.data.async_status,
-        };
-        if (item.status === 'Job Failed') {
-          logger.error('Ad report failed %o', resp);
-          adReportsAccountMapCopy.delete(reportId);
-        }
-        if (item.status === 'Job Completed') {
-          await deleteOldInsights(dbAccount.id, initial);
-          await this.getAndSaveAdsAndInsights(reportId, integration, adExternalIdMap, dbAccount);
-          adReportsAccountMapCopy.delete(reportId);
-        }
-      }
-
-      if (adReportsAccountMapCopy.size === 0) {
-        logger.info('All reports completed');
-        break;
-      }
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 5000);
-      });
+    const reportSchema = z.object({
+      [AdReportRun.Fields.async_status]: metaJobStatusEnum,
+      [AdReportRun.Fields.async_percent_completion]: z.number(),
+    });
+    const parsed = reportSchema.safeParse(resp);
+    if (!parsed.success) {
+      logger.error(resp, `Failed to parse meta ad report for ${reportId} and ${adAccount.id}`);
+      return JobStatusEnum.FAILED;
     }
+    const metaJobStatusMap = new Map<z.infer<typeof metaJobStatusEnum>, JobStatusEnum>([
+      ['Job Not Started', JobStatusEnum.QUEUING],
+      ['Job Started', JobStatusEnum.PROCESSING],
+      ['Job Running', JobStatusEnum.PROCESSING],
+      ['Job Completed', JobStatusEnum.SUCCESS],
+      ['Job Failed', JobStatusEnum.FAILED],
+      ['Job Skipped', JobStatusEnum.CANCELED],
+    ]);
+    return metaJobStatusMap.get(parsed.data.async_status) ?? JobStatusEnum.FAILED;
   }
 
-  private async getAndSaveAdsAndInsights(
-    reportId: string,
-    integration: Integration,
-    adExternalIdMap: Map<string, string>,
-    dbAccount: DbAdAccount,
-  ): Promise<AError | undefined> {
+  async processReport({ integration, adAccount, taskId, initial }: ProcessReportReq): Promise<AError | undefined> {
+    const reportId = taskId;
+    const adExternalIdMap = new Map<string, string>();
     const insightSchema = z.object({
       account_id: z.string(),
       ad_id: z.string(),
@@ -510,9 +433,10 @@ class Meta implements ChannelInterface {
       },
     );
     const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]): Promise<undefined> => {
-      await this.saveAdsAndInsights(i, adExternalIdMap, integration, dbAccount);
+      await this.saveAdsAndInsights(i, adExternalIdMap, integration, adAccount);
       return undefined;
     };
+    await deleteOldInsights(adAccount.id, initial);
     const accountInsightsAndAds = await Meta.handlePaginationFn(
       integration,
       getInsightsFn,
@@ -523,11 +447,50 @@ class Meta implements ChannelInterface {
     if (isAError(accountInsightsAndAds)) return accountInsightsAndAds;
   }
 
+  async runAdInsightReport({ adAccount, integration, initial }: RunAdInsightReportReq): Promise<string | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
+    const adReportRunSchema = z.object({ id: z.string() });
+    const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
+    const resp = await Meta.sdk(
+      async () =>
+        account.getInsightsAsync(
+          [
+            AdsInsights.Fields.account_id,
+            AdsInsights.Fields.ad_id,
+            AdsInsights.Fields.ad_name,
+            AdsInsights.Fields.date_start,
+            AdsInsights.Fields.spend,
+            AdsInsights.Fields.impressions,
+          ],
+          {
+            limit: 500,
+            time_increment: 1,
+            filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
+            breakdowns: [
+              AdsInsights.Breakdowns.device_platform,
+              AdsInsights.Breakdowns.publisher_platform,
+              AdsInsights.Breakdowns.platform_position,
+            ],
+            level: AdsInsights.Level.ad,
+            time_range: await metaTimeRange(initial, adAccount.id),
+          },
+        ),
+      integration,
+    );
+    if (isAError(resp)) return resp;
+    const parsed = adReportRunSchema.safeParse(resp);
+    if (!parsed.success) {
+      logger.error('Failed to parse ad report run %o', resp);
+      return new AError('Failed to parse meta ad report run');
+    }
+    return parsed.data.id;
+  }
+
   private async saveAdsAndInsights(
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd }[],
     adExternalIdMap: Map<string, string>,
-    integration: Integration,
-    dbAccount: DbAdAccount,
+    integration: ReportIntegration,
+    dbAccount: ReportAdAccount,
   ): Promise<void> {
     const [insights, ads] = accountInsightsAndAds.reduce(
       (acc, item) => {
@@ -573,7 +536,7 @@ class Meta implements ChannelInterface {
   }
 
   private static async handlePaginationFn<T, U extends ZodTypeAny, V>(
-    integration: Integration,
+    integration: ReportIntegration,
     fn: Promise<Cursor> | Cursor,
     schema: U,
     parseCallback: (result: z.infer<U>) => T,
@@ -603,7 +566,7 @@ class Meta implements ChannelInterface {
     return resultsP;
   }
 
-  private static async sdk<T>(fn: () => Promise<T> | T | AError, integration: Integration): Promise<T | AError> {
+  private static async sdk<T>(fn: () => Promise<T> | T | AError, integration: ReportIntegration): Promise<T | AError> {
     try {
       return await fn();
     } catch (error) {
@@ -681,18 +644,6 @@ class Meta implements ChannelInterface {
     ['messenger', PublisherEnum.Messenger],
     ['audience_network', PublisherEnum.AudienceNetwork],
   ]);
-
-  getReportStatus(_input: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
-    return Promise.resolve(JobStatusEnum.FAILED);
-  }
-
-  processReport(_input: ProcessReportReq): Promise<AError | undefined> {
-    return Promise.resolve(new AError('Not implemented'));
-  }
-
-  runAdInsightReport(_input: RunAdInsightReportReq): Promise<string | AError> {
-    return Promise.resolve(new AError('Not implemented'));
-  }
 }
 
 const metaTimeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {
