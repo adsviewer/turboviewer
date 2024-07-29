@@ -1,18 +1,16 @@
 import { SendMessageBatchCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { type AdAccount, type Integration, type IntegrationTypeEnum } from '@repo/database';
 import { type Optional } from '@repo/utils';
+import { MODE } from '@repo/mode';
 import { env } from './config';
 
 const sqsClient = new SQSClient({ region: env.AWS_REGION });
 
 const queueUrl = (channel: IntegrationTypeEnum, queueName: string, isFifo: boolean): string =>
-  `https://sqs.eu-central-1.amazonaws.com/${env.AWS_ACCOUNT_ID}/${env.AWS_USERNAME ? `local-${env.AWS_USERNAME}-` : ''}${queueName}-${channel.toLowerCase()}${isFifo ? '.fifo' : ''}`;
+  `https://sqs.eu-central-1.amazonaws.com/${env.AWS_ACCOUNT_ID}/${MODE}-${env.AWS_USERNAME ? `${env.AWS_USERNAME}-` : ''}${queueName}-${channel.toLowerCase()}${isFifo ? '.fifo' : ''}`;
 
-export const reportRequestsQueueUrl = (channel: IntegrationTypeEnum): string =>
+export const channelReportQueueUrl = (channel: IntegrationTypeEnum): string =>
   queueUrl(channel, 'report-requests', false);
-
-export const completedReportsQueueUrl = (channel: IntegrationTypeEnum): string =>
-  queueUrl(channel, 'completed-reports', false);
 
 export interface RunAdInsightReportReq {
   initial: boolean;
@@ -47,7 +45,7 @@ export const sendReportRequestsMessage = async (
   });
   await sqsClient.send(
     new SendMessageBatchCommand({
-      QueueUrl: reportRequestsQueueUrl(channel),
+      QueueUrl: channelReportQueueUrl(channel),
       Entries: adAccounts.map((account) => ({
         Id: account.id,
         MessageBody: JSON.stringify({
