@@ -1,5 +1,2 @@
-module "reports" {
-  source           = "../reports"
-  environment      = var.environment
-  github_role_name = var.github_role_name
-}
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}

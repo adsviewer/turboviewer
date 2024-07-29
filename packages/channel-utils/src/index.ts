@@ -7,3 +7,4 @@ export * from './iframe-helper';
 export * from './iframe-meta-helper';
 export * from './insights-utils';
 export * from './integration-util';
+export * from './send-messages';

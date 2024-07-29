@@ -22,6 +22,30 @@ export const redisGet = async <T extends object | string | boolean>(key: string)
   }
 };
 
+export const getAllSet = async <T extends object | string | boolean>(key: string): Promise<T[]> => {
+  const serializedValue = await ioredis.smembers(key);
+  try {
+    return serializedValue.map((value) => JSON.parse(value) as T);
+  } catch (e) {
+    return serializedValue as T[];
+  }
+};
+
+export const redisAddToSet = async (key: string, value: string | number | object, ttlSec?: number): Promise<void> => {
+  const serializedValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const multiPipeline = ioredis.multi();
+  void multiPipeline.sadd(key, serializedValue);
+  if (ttlSec) {
+    void multiPipeline.expire(key, ttlSec);
+  }
+  await multiPipeline.exec();
+};
+
+export const redisRemoveFromSet = async (key: string, value: string | number | object): Promise<void> => {
+  const serializedValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  await ioredis.srem(key, serializedValue);
+};
+
 export const redisGetKeys = (key: string): Promise<string[]> => ioredis.keys(`${key}*`);
 
 export const redisExists = async (key: string): Promise<boolean> => {

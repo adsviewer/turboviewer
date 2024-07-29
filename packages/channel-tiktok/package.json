@@ -21,7 +21,6 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.616.0",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",

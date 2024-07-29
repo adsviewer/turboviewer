@@ -1,7 +1,7 @@
-variable "environment" {
+variable "channel_report_lambda_name" {
   type = string
 }
 
-variable "github_role_name" {
+variable "environment" {
   type = string
 }

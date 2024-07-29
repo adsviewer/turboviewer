@@ -1,8 +1,8 @@
 {
-  "name": "process-report",
+  "name": "channel-report",
   "version": "1.0.0",
   "private": true,
-  "description": "Check status of async reports",
+  "description": "Check status of async reports, start new if within concurrency limits and process the finished",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest && pnpm install",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project process-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project process-report ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project channel-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project channel-report ./dist"
   },
   "author": "",
   "license": "UNLICENCED",
@@ -24,6 +24,7 @@
     "typescript": "5.5.2"
   },
   "dependencies": {
+    "@repo/channel": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
     "@sentry/aws-serverless": "^8.13.0",

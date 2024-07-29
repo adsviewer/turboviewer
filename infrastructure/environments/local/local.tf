@@ -122,6 +122,6 @@ module "environment_potentially_local" {
   for_each = var.developers
   source   = "../../modules/environment_potentially_local"
 
-  environment      = "${var.environment}-${each.key}"
-  github_role_name = module.workspace.github_role_name
+  environment                = "${var.environment}-${each.key}"
+  channel_report_lambda_name = "not_applicable"
 }

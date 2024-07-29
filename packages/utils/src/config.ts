@@ -5,5 +5,11 @@ export const commonSchema = z.object({
   REFRESH_SECRET: z.string().min(1).default('refreshSecret'),
 });
 
+export const awsSchema = z.object({
+  AWS_ACCOUNT_ID: z.string().length(12),
+  AWS_REGION: z.string().default('eu-central-1'),
+  AWS_USERNAME: z.string(),
+});
+
 export const TOKEN_KEY = 'av_token';
 export const REFRESH_TOKEN_KEY = 'av_refresh_token';

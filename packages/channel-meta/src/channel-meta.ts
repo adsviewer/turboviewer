@@ -41,9 +41,12 @@ import {
   getIFrame,
   getIFrameAdFormat,
   isMetaAdPosition,
+  JobStatusEnum,
   MetaError,
+  type ProcessReportReq,
   revokeIntegration,
   revokeIntegrationById,
+  type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -678,6 +681,18 @@ class Meta implements ChannelInterface {
     ['messenger', PublisherEnum.Messenger],
     ['audience_network', PublisherEnum.AudienceNetwork],
   ]);
+
+  getReportStatus(_input: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+    return Promise.resolve(JobStatusEnum.FAILED);
+  }
+
+  processReport(_input: ProcessReportReq): Promise<AError | undefined> {
+    return Promise.resolve(new AError('Not implemented'));
+  }
+
+  runAdInsightReport(_input: RunAdInsightReportReq): Promise<string | AError> {
+    return Promise.resolve(new AError('Not implemented'));
+  }
 }
 
 const metaTimeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {

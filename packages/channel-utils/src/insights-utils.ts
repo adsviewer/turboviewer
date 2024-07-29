@@ -3,6 +3,7 @@ import { prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { getBeforeXMonths, getYesterday } from '@repo/utils';
 import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
+import { type ReportAdAccount, type ReportIntegration } from './send-messages';
 
 export const saveAccounts = async (
   activeAccounts: ChannelAdAccount[],
@@ -31,7 +32,7 @@ export const saveAccounts = async (
   );
 
 export const saveAds = async (
-  integration: Integration,
+  integration: ReportIntegration,
   ads: ChannelAd[],
   adAccountId: string,
   adExternalIdMap: Map<string, string>,
@@ -73,7 +74,7 @@ export const saveAds = async (
 export const saveInsights = async (
   insights: ChannelInsight[],
   adExternalIdMap: Map<string, string>,
-  dbAccount: AdAccount,
+  dbAccount: ReportAdAccount,
 ): Promise<void> => {
   logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
   await prisma.insight.createMany({

@@ -24,7 +24,10 @@ import {
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   getIFrame,
+  JobStatusEnum,
+  type ProcessReportReq,
   revokeIntegrationById,
+  type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -361,6 +364,18 @@ class LinkedIn implements ChannelInterface {
     ['MOBILE_WEB', DeviceEnum.MobileWeb],
     ['DESKTOP_WEB', DeviceEnum.Desktop],
   ]);
+
+  getReportStatus(_input: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+    return Promise.resolve(JobStatusEnum.FAILED);
+  }
+
+  processReport(_input: ProcessReportReq): Promise<AError | undefined> {
+    return Promise.resolve(new AError('Not implemented'));
+  }
+
+  runAdInsightReport(_input: RunAdInsightReportReq): Promise<string | AError> {
+    return Promise.resolve(new AError('Not implemented'));
+  }
 }
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
