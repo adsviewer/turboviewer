@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "channel_report_policy_document" {
         test     = "ArnLike"
         variable = "aws:SourceArn"
         values = [
-          "arn:aws:apprunner:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${var.environment}-server"
+          "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.channel_ingress_lambda_name}"
         ]
       }
     }

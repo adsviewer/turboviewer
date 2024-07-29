@@ -75,6 +75,21 @@ resource "aws_iam_role_policy_attachment" "channel_ingress_basic_policy_attachme
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+data "aws_iam_policy_document" "channel_ingress_policy_document" {
+  statement {
+    actions   = ["sqs:SendMessage"]
+    resources = module.environment_potentially_local.channel_report_arns
+  }
+}
+resource "aws_iam_policy" "channel_ingress_policy" {
+  name   = local.channel_ingress_name
+  policy = data.aws_iam_policy_document.channel_ingress_policy_document.json
+}
+resource "aws_iam_role_policy_attachment" "channel_ingress_policy_attachment" {
+  role       = aws_iam_role.channel_ingress_role.id
+  policy_arn = aws_iam_policy.channel_ingress_policy.arn
+}
+
 resource "aws_lambda_function" "channel_ingress_lambda" {
   architectures = ["arm64"]
   description   = "Ingests channel data"
