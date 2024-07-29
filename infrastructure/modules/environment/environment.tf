@@ -78,9 +78,11 @@ module "server" {
   domain_zone_id  = aws_route53_zone.zone.id
   environment     = var.environment
   environment_variables = {
-    API_ENDPOINT = local.server_api_endpoint
-    PORT         = 4000,
-    PUBLIC_URL   = local.full_domain
+    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+    AWS_REGION     = data.aws_region.current.name
+    API_ENDPOINT   = local.server_api_endpoint
+    PORT           = 4000,
+    PUBLIC_URL     = local.full_domain
   }
   github_role_name   = var.github_role_name
   mapped_secrets     = local.server_secrets
