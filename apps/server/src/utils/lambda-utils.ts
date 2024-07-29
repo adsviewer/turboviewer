@@ -28,8 +28,8 @@ const invoke = async <T, U extends ZodRawShape>(
   const result = Buffer.from(Payload).toString();
   const parsed = schema.safeParse(JSON.parse(result));
   if (!parsed.success) {
-    logger.error('Error parsing response', parsed.error);
-    return new AError('Error parsing response', parsed.error);
+    logger.error(parsed.error, 'Error parsing response');
+    return new AError('Error parsing response');
   }
   return parsed.data;
 };
