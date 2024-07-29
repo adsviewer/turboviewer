@@ -865,6 +865,9 @@ importers:
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
+      '@repo/mode':
+        specifier: workspace:*
+        version: link:../mode
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils

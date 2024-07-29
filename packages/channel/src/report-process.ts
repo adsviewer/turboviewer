@@ -13,7 +13,7 @@ import { Environment, MODE } from '@repo/mode';
 import {
   JobStatusEnum,
   type ProcessReportReq,
-  reportRequestsQueueUrl,
+  channelReportQueueUrl,
   type RunAdInsightReportReq,
 } from '@repo/channel-utils';
 import _ from 'lodash';
@@ -28,7 +28,7 @@ const receiveMessage = (channel: IntegrationTypeEnum): Promise<ReceiveMessageRes
   client.send(
     new ReceiveMessageCommand({
       MaxNumberOfMessages: channelConcurrencyReportMap.get(channel),
-      QueueUrl: reportRequestsQueueUrl(channel),
+      QueueUrl: channelReportQueueUrl(channel),
       WaitTimeSeconds: 20,
       VisibilityTimeout: 20,
     }),
@@ -45,7 +45,7 @@ async function deleteMessage(msg: Message, channel: IntegrationTypeEnum, redisVa
   if (msg.ReceiptHandle) {
     await client.send(
       new DeleteMessageCommand({
-        QueueUrl: reportRequestsQueueUrl(channel),
+        QueueUrl: channelReportQueueUrl(channel),
         ReceiptHandle: msg.ReceiptHandle,
       }),
     );

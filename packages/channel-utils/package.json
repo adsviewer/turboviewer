@@ -24,6 +24,7 @@
     "@aws-sdk/client-sqs": "^3.616.0",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
+    "@repo/mode": "workspace:*",
     "@repo/utils": "workspace:*",
     "node-html-parser": "^6.1.13",
     "zod": "^3.23.8"
