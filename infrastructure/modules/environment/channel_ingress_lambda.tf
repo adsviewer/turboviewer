@@ -93,7 +93,7 @@ resource "aws_lambda_function" "channel_ingress_lambda" {
   }
   function_name = local.channel_ingress_name
   image_config {
-    command = ["apps/${local.channel_ingress_name}/dist/index.handler"]
+    command = ["apps/${local.channel_ingress_name-no-env}/dist/index.handler"]
   }
   image_uri = "${aws_ecr_repository.channel_ingress_ecr_repo.repository_url}:arm-latest"
   logging_config {
