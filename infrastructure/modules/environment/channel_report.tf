@@ -68,6 +68,10 @@ resource "aws_lambda_function" "channel_report_lambda" {
   package_type = "Image"
   role         = aws_iam_role.channel_report_role.arn
   timeout      = 900
+
+  lifecycle {
+    ignore_changes = [image_uri]
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "every_one_minute" {

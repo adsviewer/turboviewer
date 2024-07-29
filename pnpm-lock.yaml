@@ -105,6 +105,9 @@ importers:
         specifier: ^8.13.0
         version: 8.13.0
     devDependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.616.0
+        version: 3.616.0
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config-eslint
@@ -657,6 +660,9 @@ importers:
 
   packages/channel:
     dependencies:
+      '@aws-sdk/client-sqs':
+        specifier: ^3.616.0
+        version: 3.616.0
       '@repo/channel-linkedin':
         specifier: workspace:*
         version: link:../channel-linkedin
@@ -694,9 +700,6 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.616.0
-        version: 3.616.0
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../config-eslint
