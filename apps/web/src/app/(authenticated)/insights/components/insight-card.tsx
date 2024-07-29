@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Text, Badge, Group, Box, Flex } from '@mantine/core';
+import { Card, Text, Badge, Group, Box, Flex, Title, Tooltip } from '@mantine/core';
 import { AreaChart } from '@mantine/charts';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -18,6 +18,7 @@ import { getCurrencySymbol } from '@/util/currency-utils';
 import { publisherToIconMap } from '@/util/publisher-utils';
 
 interface InsightCardProps {
+  heading: string | null | undefined;
   title: string | null | undefined;
   description: string | null | undefined;
   device: DeviceEnum | null | undefined;
@@ -84,6 +85,12 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
+      <Flex gap="sm" align="center">
+        <Title order={3} fw={500} title={String(props.title)}>
+          {truncateString(String(props.heading), 22)}
+        </Title>
+      </Flex>
+
       {props.datapoints ? (
         // Chart Analytics
         <Box>
@@ -148,9 +155,9 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
-          <Text fw={500} title={String(props.title)}>
-            {truncateString(String(props.title), 22)}
-          </Text>
+          <Tooltip label={String(props.title)} disabled={String(props.title) === t('insight')}>
+            <Text fw={500}>{truncateString(String(props.title), 22)}</Text>
+          </Tooltip>
         </Flex>
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
@@ -160,12 +167,14 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           {sentenceCase(props.description ?? '')}
         </Text>
         {props.publisher ? (
-          <div style={{ opacity: 0.3 }} title={props.publisher}>
-            {(() => {
-              const PublisherIcon = publisherToIconMap.get(props.publisher);
-              return PublisherIcon ? <PublisherIcon /> : null;
-            })()}
-          </div>
+          <Tooltip label={String(props.publisher)}>
+            <div style={{ opacity: 0.3 }}>
+              {(() => {
+                const PublisherIcon = publisherToIconMap.get(props.publisher);
+                return PublisherIcon ? <PublisherIcon /> : null;
+              })()}
+            </div>
+          </Tooltip>
         ) : null}
       </Flex>
     </Card>

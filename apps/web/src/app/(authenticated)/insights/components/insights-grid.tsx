@@ -30,7 +30,8 @@ export default function InsightsGrid(props: PropsType): ReactNode {
           ? insights.map((insight) => (
               <InsightCard
                 key={insight.id as Key}
-                title={insight.adName ?? insight.publisher ?? t('insight')}
+                heading={insight.publisher ?? t('insight')}
+                title={insight.adName ?? t('insight')}
                 description={insight.position}
                 device={insight.device}
                 currency={insight.currency}
