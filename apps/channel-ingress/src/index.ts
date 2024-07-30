@@ -2,7 +2,7 @@ import { type Context, type Handler } from 'aws-lambda';
 import { refreshData } from '@repo/channel';
 import { type z } from 'zod';
 import { lambdaRequestTracker, logger } from '@repo/logger';
-import { channelIngressInput, type channelIngressOutput } from '@repo/lambda-types';
+import { channelIngressInput, type channelIngressOutput } from '@repo/lambda-utils';
 import * as Sentry from '@sentry/aws-serverless';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { MODE } from '@repo/mode';

@@ -6,7 +6,7 @@ import { logger } from '@repo/logger';
 import bodyParser from 'body-parser';
 import { IntegrationTypeEnum } from '@repo/database';
 import { FireAndForget } from '@repo/utils';
-import { authCallback, getChannel } from '@repo/channel';
+import { authCallback, getChannel, invokeChannelIngress } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
 import * as Sentry from '@sentry/node';
 import { Environment, MODE } from '@repo/mode';
@@ -14,7 +14,6 @@ import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
 import { snsMiddleware } from './utils/sns-subscription-utils';
-import { invokeChannelIngress } from './utils/lambda-utils';
 import { authLoginCallback } from './contexts/login-provider/login-provider-helper';
 import { authLoginEndpoint } from './contexts/login-provider/login-provider-types';
 import {

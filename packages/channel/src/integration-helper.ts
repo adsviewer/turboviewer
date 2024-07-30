@@ -10,6 +10,7 @@ import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { isMode, MODE } from '@repo/mode';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
+import { invokeChannelIngress } from './data-refresh';
 import IntegrationUncheckedCreateInput = Prisma.IntegrationUncheckedCreateInput;
 import PrismaClientKnownRequestError = Prisma.PrismaClientKnownRequestError;
 
@@ -107,7 +108,9 @@ const completeIntegration = async (
   });
   if (isAError(decryptedIntegration)) return decryptedIntegration;
 
-  fireAndForget.add(async () => await saveChannelData(decryptedIntegration, true));
+  fireAndForget.add(
+    async () => await invokeChannelIngress({ initial: true, integrationIds: [decryptedIntegration.id] }),
+  );
   return integrationType;
 };
 
@@ -172,13 +175,4 @@ const saveTokens = async (
   const adAccounts = await getChannel(type).saveAdAccounts(decryptedIntegration);
   if (isAError(adAccounts)) return adAccounts;
   return decryptedIntegration;
-};
-
-export const saveChannelData = async (integration: Integration, initial: boolean): Promise<AError | undefined> => {
-  logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
-
-  const channel = getChannel(integration.type);
-  const data = await channel.getChannelData(integration, initial);
-  if (isAError(data)) return data;
-  await prisma.integration.update({ where: { id: integration.id }, data: { lastSyncedAt: new Date() } });
 };
