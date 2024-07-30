@@ -2,6 +2,7 @@ import { SendMessageBatchCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { type AdAccount, type Integration, type IntegrationTypeEnum } from '@repo/database';
 import { type Optional } from '@repo/utils';
 import { MODE } from '@repo/mode';
+import _ from 'lodash';
 import { env } from './config';
 
 const sqsClient = new SQSClient({ region: env.AWS_REGION });
@@ -43,17 +44,22 @@ export const sendReportRequestsMessage = async (
   adAccounts.forEach((account) => {
     delete account.updatedAt;
   });
-  await sqsClient.send(
-    new SendMessageBatchCommand({
-      QueueUrl: channelReportQueueUrl(channel),
-      Entries: adAccounts.map((account) => ({
-        Id: account.id,
-        MessageBody: JSON.stringify({
-          initial,
-          integration,
-          adAccount: account,
-        } satisfies RunAdInsightReportReq),
-      })),
-    }),
+  const chunkedAccounts = _.chunk(adAccounts, 10);
+  await Promise.all(
+    chunkedAccounts.map((accounts) =>
+      sqsClient.send(
+        new SendMessageBatchCommand({
+          QueueUrl: channelReportQueueUrl(channel),
+          Entries: accounts.map((account) => ({
+            Id: account.id,
+            MessageBody: JSON.stringify({
+              initial,
+              integration,
+              adAccount: account,
+            } satisfies RunAdInsightReportReq),
+          })),
+        }),
+      ),
+    ),
   );
 };
