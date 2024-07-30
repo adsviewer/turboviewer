@@ -9,6 +9,7 @@ import { YAxis } from 'recharts';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
+import { IconEye, IconCoins, IconChartLine } from '@tabler/icons-react';
 import {
   type PublisherEnum,
   type CurrencyEnum,
@@ -172,6 +173,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         </Flex>
       )}
 
+      {/* Title */}
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
           {String(props.title) !== t('insight') ? (
@@ -193,8 +195,18 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
 
+      {/* Descriptions */}
       <Flex justify="space-between">
-        <Text size="sm" c="dimmed">
+        <Text
+          size="sm"
+          c="dimmed"
+          onClick={() => {
+            if (props.description) {
+              void copyText(sentenceCase(props.description));
+            }
+          }}
+          style={{ cursor: 'pointer' }}
+        >
           {sentenceCase(props.description ?? '')}
         </Text>
         {props.publisher ? (
@@ -208,6 +220,69 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           </Tooltip>
         ) : null}
       </Flex>
+
+      {/* Stats */}
+      {props.datapoints ? (
+        <Flex gap="md" wrap="wrap">
+          {/* Impressions */}
+          <Tooltip label={t('impressions')}>
+            <Flex
+              align="center"
+              gap={3}
+              onClick={() => {
+                if (props.datapoints) {
+                  void copyText(String(props.datapoints[props.datapoints.length - 1].impressions));
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <IconEye />
+              <Text size="sm" c="dimmed">
+                {format.number(props.datapoints[props.datapoints.length - 1].impressions, { style: 'decimal' })}
+              </Text>
+            </Flex>
+          </Tooltip>
+          {/* Spend */}
+          <Tooltip label={t('spent')}>
+            <Flex
+              align="center"
+              gap="xs"
+              onClick={() => {
+                if (props.datapoints) {
+                  void copyText(String(props.datapoints[props.datapoints.length - 1].spend / 100));
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <IconCoins />
+              <Text size="sm" c="dimmed">
+                {format.number(props.datapoints[props.datapoints.length - 1].spend / 100, {
+                  style: 'currency',
+                  currency: props.currency,
+                })}
+              </Text>
+            </Flex>
+          </Tooltip>
+          {/* CPM */}
+          <Tooltip label="CPM">
+            <Flex
+              align="center"
+              gap="xs"
+              onClick={() => {
+                if (props.datapoints) {
+                  void copyText(String(props.datapoints[props.datapoints.length - 1].cpm));
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <IconChartLine />
+              <Text size="sm" c="dimmed">
+                {props.datapoints[props.datapoints.length - 1].cpm}
+              </Text>
+            </Flex>
+          </Tooltip>
+        </Flex>
+      ) : null}
     </Card>
   );
 }
