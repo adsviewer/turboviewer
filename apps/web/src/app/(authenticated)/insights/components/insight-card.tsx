@@ -8,6 +8,7 @@ import { sentenceCase } from 'change-case';
 import { YAxis } from 'recharts';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
+import { useSearchParams } from 'next/navigation';
 import {
   type PublisherEnum,
   type CurrencyEnum,
@@ -18,6 +19,7 @@ import {
 import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { publisherToIconMap } from '@/util/publisher-utils';
+import { fetchPreviewsKey } from '@/util/url-query-utils';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -46,6 +48,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const format = useFormatter();
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
+  const searchParams = useSearchParams();
   const [rank, setRank] = useState<RankType>({
     label: 'GOOD',
     color: 'green',
@@ -107,7 +110,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         </Title>
       </Flex>
 
-      {props.datapoints ? (
+      {!searchParams.has(fetchPreviewsKey) ? (
         // Chart Analytics
         <Box>
           <AreaChart
