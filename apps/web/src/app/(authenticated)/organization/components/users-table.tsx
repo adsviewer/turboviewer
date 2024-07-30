@@ -3,12 +3,6 @@
 import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select } from '@mantine/core';
 import { IconTrash, IconDots } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { logger } from '@repo/logger';
-import { type MeQuery } from '@/graphql/generated/schema-server';
-
-interface PropsType {
-  members: MeQuery['me'];
-}
 
 const data = [
   {
@@ -27,8 +21,7 @@ const data = [
   },
 ];
 
-export function UsersTable({ members }: PropsType): React.ReactNode {
-  logger.info(members);
+export function UsersTable(): React.ReactNode {
   const t = useTranslations('organization');
   const rolesData = [
     {
