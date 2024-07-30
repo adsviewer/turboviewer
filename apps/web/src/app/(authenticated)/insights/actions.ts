@@ -46,6 +46,5 @@ export default async function getInsights(
     positions: searchParams.position,
     publishers: searchParams.publisher,
     interval: InsightsInterval.week,
-    fetchPreviews: Boolean(searchParams.fetchPreviews),
   });
 }
