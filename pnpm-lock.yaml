@@ -49,9 +49,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@repo/lambda-types':
+      '@repo/lambda-utils':
         specifier: workspace:*
-        version: link:../../packages/lambda-types
+        version: link:../../packages/lambda-utils
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -129,9 +129,6 @@ importers:
 
   apps/server:
     dependencies:
-      '@aws-sdk/client-lambda':
-        specifier: ^3.606.0
-        version: 3.606.0
       '@aws-sdk/client-ses':
         specifier: ^3.606.0
         version: 3.606.0
@@ -177,9 +174,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@repo/lambda-types':
+      '@repo/lambda-utils':
         specifier: workspace:*
-        version: link:../../packages/lambda-types
+        version: link:../../packages/lambda-utils
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -678,9 +675,9 @@ importers:
       '@repo/database':
         specifier: workspace:*
         version: link:../database
-      '@repo/lambda-types':
+      '@repo/lambda-utils':
         specifier: workspace:*
-        version: link:../lambda-types
+        version: link:../lambda-utils
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
@@ -987,8 +984,17 @@ importers:
         specifier: ^5.5.2
         version: 5.5.2
 
-  packages/lambda-types:
+  packages/lambda-utils:
     dependencies:
+      '@aws-sdk/client-lambda':
+        specifier: ^3.606.0
+        version: 3.606.0
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/mode':
+        specifier: workspace:*
+        version: link:../mode
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
@@ -8432,34 +8438,34 @@ snapshots:
       '@aws-sdk/util-endpoints': 3.598.0
       '@aws-sdk/util-user-agent-browser': 3.598.0
       '@aws-sdk/util-user-agent-node': 3.598.0
-      '@smithy/config-resolver': 3.0.4
-      '@smithy/core': 2.2.4
+      '@smithy/config-resolver': 3.0.5
+      '@smithy/core': 2.3.0
       '@smithy/eventstream-serde-browser': 3.0.4
       '@smithy/eventstream-serde-config-resolver': 3.0.3
       '@smithy/eventstream-serde-node': 3.0.4
-      '@smithy/fetch-http-handler': 3.2.0
+      '@smithy/fetch-http-handler': 3.2.3
       '@smithy/hash-node': 3.0.3
       '@smithy/invalid-dependency': 3.0.3
-      '@smithy/middleware-content-length': 3.0.3
-      '@smithy/middleware-endpoint': 3.0.4
-      '@smithy/middleware-retry': 3.0.7
+      '@smithy/middleware-content-length': 3.0.5
+      '@smithy/middleware-endpoint': 3.1.0
+      '@smithy/middleware-retry': 3.0.12
       '@smithy/middleware-serde': 3.0.3
       '@smithy/middleware-stack': 3.0.3
-      '@smithy/node-config-provider': 3.1.3
-      '@smithy/node-http-handler': 3.1.1
-      '@smithy/protocol-http': 4.0.3
-      '@smithy/smithy-client': 3.1.5
+      '@smithy/node-config-provider': 3.1.4
+      '@smithy/node-http-handler': 3.1.4
+      '@smithy/protocol-http': 4.1.0
+      '@smithy/smithy-client': 3.1.10
       '@smithy/types': 3.3.0
       '@smithy/url-parser': 3.0.3
       '@smithy/util-base64': 3.0.0
       '@smithy/util-body-length-browser': 3.0.0
       '@smithy/util-body-length-node': 3.0.0
-      '@smithy/util-defaults-mode-browser': 3.0.7
-      '@smithy/util-defaults-mode-node': 3.0.7
-      '@smithy/util-endpoints': 2.0.4
+      '@smithy/util-defaults-mode-browser': 3.0.12
+      '@smithy/util-defaults-mode-node': 3.0.12
+      '@smithy/util-endpoints': 2.0.5
       '@smithy/util-middleware': 3.0.3
       '@smithy/util-retry': 3.0.3
-      '@smithy/util-stream': 3.0.5
+      '@smithy/util-stream': 3.1.2
       '@smithy/util-utf8': 3.0.0
       '@smithy/util-waiter': 3.1.2
       tslib: 2.6.3
@@ -8829,10 +8835,10 @@ snapshots:
 
   '@aws-sdk/core@3.598.0':
     dependencies:
-      '@smithy/core': 2.2.4
-      '@smithy/protocol-http': 4.0.3
+      '@smithy/core': 2.3.0
+      '@smithy/protocol-http': 4.1.0
       '@smithy/signature-v4': 3.1.2
-      '@smithy/smithy-client': 3.1.5
+      '@smithy/smithy-client': 3.1.10
       '@smithy/types': 3.3.0
       fast-xml-parser: 4.2.5
       tslib: 2.6.3

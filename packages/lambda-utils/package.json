@@ -1,5 +1,5 @@
 {
-  "name": "@repo/lambda-types",
+  "name": "@repo/lambda-utils",
   "version": "1.0.0",
   "private": true,
   "license": "UNLICENCED",
@@ -21,6 +21,9 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.606.0",
+    "@repo/logger": "workspace:*",
+    "@repo/mode": "workspace:*",
     "@repo/utils": "workspace:*",
     "zod": "^3.23.8"
   },

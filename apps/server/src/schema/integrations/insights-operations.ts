@@ -1,11 +1,16 @@
 import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
 import { Kind } from 'graphql/language';
 import { FireAndForget, isAError } from '@repo/utils';
-import { type ChannelIFrame, getInsightsCache, iFramePerInsight, setInsightsCache } from '@repo/channel';
+import {
+  type ChannelIFrame,
+  getInsightsCache,
+  iFramePerInsight,
+  invokeChannelIngress,
+  setInsightsCache,
+} from '@repo/channel';
 import * as changeCase from 'change-case';
 import { groupBy as groupByUtil } from '../../utils/data-object-utils';
 import { builder } from '../builder';
-import { invokeChannelIngress } from '../../utils/lambda-utils';
 import { groupedInsights, insightsDatapoints } from '../../utils/insights-query-builder';
 import {
   AdDto,

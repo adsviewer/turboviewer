@@ -19,7 +19,6 @@
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project server ./dist && sentry-cli sourcemaps upload --org adsviewer --project server ./dist"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.606.0",
     "@aws-sdk/client-ses": "^3.606.0",
     "@graphql-tools/schema": "10.0.4",
     "@graphql-yoga/plugin-disable-introspection": "^2.5.0",
@@ -35,7 +34,7 @@
     "@repo/channel": "workspace:*",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
-    "@repo/lambda-types": "workspace:*",
+    "@repo/lambda-utils": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",

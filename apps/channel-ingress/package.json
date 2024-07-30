@@ -26,7 +26,7 @@
   "dependencies": {
     "@repo/channel": "workspace:*",
     "@repo/database": "workspace:*",
-    "@repo/lambda-types": "workspace:*",
+    "@repo/lambda-utils": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
     "@sentry/aws-serverless": "^8.13.0",
