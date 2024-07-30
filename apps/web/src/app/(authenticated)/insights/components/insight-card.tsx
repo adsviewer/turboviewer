@@ -171,17 +171,21 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
-          <Tooltip label={String(props.title)} disabled={String(props.title) === t('insight')}>
-            <Text
-              style={{ cursor: 'pointer' }}
-              fw={500}
-              onClick={() => {
-                void copyText(String(props.title));
-              }}
-            >
-              {truncateString(String(props.title), 22)}
-            </Text>
-          </Tooltip>
+          {String(props.title) !== t('insight') ? (
+            <Tooltip label={String(props.title)}>
+              <Text
+                style={{ cursor: 'pointer' }}
+                fw={500}
+                onClick={() => {
+                  void copyText(String(props.title));
+                }}
+              >
+                {truncateString(String(props.title), 22)}
+              </Text>
+            </Tooltip>
+          ) : (
+            <Text fw={500}>{truncateString(String(props.title), 22)}</Text>
+          )}
         </Flex>
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
