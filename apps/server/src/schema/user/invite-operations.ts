@@ -29,6 +29,8 @@ builder.mutationFields((t) => ({
       "Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet",
     type: TokensDto,
     args: {
+      firstName: t.arg.string({ required: true }),
+      lastName: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
       token: t.arg.string({ required: true }),
     },
@@ -43,7 +45,12 @@ builder.mutationFields((t) => ({
         prisma.user.update({
           ...userWithRoles,
           where: { id: userId },
-          data: { password: await createPassword(args.password), status: UserStatus.EMAIL_CONFIRMED },
+          data: {
+            firstName: args.firstName,
+            lastName: args.lastName,
+            password: await createPassword(args.password),
+            status: UserStatus.EMAIL_CONFIRMED,
+          },
         }),
         prisma.userOrganization.update({
           where: { userId_organizationId: { userId, organizationId } },
