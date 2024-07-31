@@ -860,7 +860,6 @@ export type InsightsQueryVariables = Exact<{
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
   pageSize: Scalars['Int']['input'];
   page: Scalars['Int']['input'];
-  fetchPreviews: Scalars['Boolean']['input'];
 }>;
 
 export type InsightsQuery = {
@@ -879,7 +878,7 @@ export type InsightsQuery = {
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
       position?: string | null;
-      datapoints?: Array<{
+      datapoints: Array<{
         __typename?: 'InsightsDatapoints';
         date: Date;
         spend: number;
@@ -1170,7 +1169,6 @@ export const InsightsDocument = gql`
     $groupBy: [InsightsColumnsGroupBy!]
     $pageSize: Int!
     $page: Int!
-    $fetchPreviews: Boolean!
   ) {
     insights(
       filter: {
@@ -1197,13 +1195,13 @@ export const InsightsDocument = gql`
         adId
         adName
         currency
-        datapoints @skip(if: $fetchPreviews) {
+        datapoints {
           date
           spend
           impressions
           cpm
         }
-        iFrame @include(if: $fetchPreviews) {
+        iFrame {
           src
           width
           height
