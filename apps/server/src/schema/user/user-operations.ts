@@ -10,8 +10,6 @@ import { confirmEmail, createPassword, createUser, passwordsMatch } from '../../
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
-import { EmailTypeDto } from '../organization/org-types';
-import { validateEmail } from '../../emailable-helper';
 import { handleLinkInvite } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
 import { SignUpInputDto, TokensDto, UserDto } from './user-types';
@@ -27,20 +25,6 @@ builder.queryFields((t) => ({
         ...query,
         where: { id: ctx.currentUserId },
       });
-    },
-  }),
-
-  checkEmailType: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
-    type: EmailTypeDto,
-    args: {
-      email: t.arg.string({ required: true, validate: { email: true } }),
-    },
-    resolve: async (_root, args, _ctx, _info) => {
-      const emailValidation = await validateEmail(args.email);
-      if (isAError(emailValidation)) {
-        throw new GraphQLError(emailValidation.message);
-      }
-      return emailValidation.emailType;
     },
   }),
 

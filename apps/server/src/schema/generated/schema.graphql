@@ -481,11 +481,9 @@ type InviteLinks {
   url: String!
 }
 
-input InviteUsers {
+type InviteUsersResponse {
   email: String!
-  emailType: EmailType!
-  firstName: String!
-  lastName: String!
+  errorMessage: String!
 }
 
 """
@@ -523,7 +521,7 @@ type Mutation {
   deleteInvitationLink(role: OrganizationRoleEnum!): Boolean!
   deleteOrganization(organizationId: String): Organization!
   forgetPassword(email: String!): Boolean!
-  inviteUsers(role: OrganizationRoleEnum!, users: [InviteUsers!]!): Boolean!
+  inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): [InviteUsersResponse!]!
   login(email: String!, password: String!, token: String): Tokens!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
   resendEmailConfirmation: Boolean!
@@ -532,7 +530,7 @@ type Mutation {
   """
   Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet
   """
-  signUpInvitedUser(password: String!, token: String!): Tokens!
+  signUpInvitedUser(firstName: String!, lastName: String!, password: String!, token: String!): Tokens!
   signup(args: SignUpInput!): Tokens!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
@@ -623,7 +621,6 @@ type Query {
   """
   availableOrganizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
   checkConfirmInvitedUserTokenValidity(token: String!): Boolean!
-  checkEmailType(email: String!): EmailType!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsight!

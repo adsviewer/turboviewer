@@ -60,18 +60,14 @@ export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
   }),
 });
 
-export const InviteUsersDto = builder.inputType('InviteUsers', {
+export const InviteUserRespDto = builder.simpleObject('InviteUsersResponse', {
   fields: (t) => ({
-    email: t.string({ required: true, validate: { email: true } }),
-    emailType: t.field({ type: EmailTypeDto, required: true }),
-    firstName: t.string({ required: true }),
-    lastName: t.string({ required: true }),
+    email: t.string({ nullable: false }),
+    errorMessage: t.string({ nullable: false }),
   }),
 });
 
 export const EmailTypeDto = builder.enumType(EmailType, { name: 'EmailType' });
-
-export type InviteUserInput = typeof InviteUsersDto.$inferInput;
 
 export const inviteLinkDto = builder.simpleObject('InviteLinks', {
   fields: (t) => ({

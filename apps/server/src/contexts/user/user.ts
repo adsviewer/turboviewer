@@ -12,7 +12,6 @@ import { type SignUpInput } from '../../schema/user/user-types';
 import { env } from '../../config';
 import { sendConfirmEmail } from '../../email';
 import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
-import { type InviteUserInput } from '../../schema/organization/org-types';
 import { type LoginProviderUserData } from '../login-provider/login-provider-types';
 import { redisGetInvitationLink } from './user-invite';
 import { userWithRoles } from './user-roles';
@@ -78,23 +77,26 @@ export const createUser = async (data: SignUpInput) => {
 };
 
 export const createInvitedUser = async (
-  data: InviteUserInput & { role: OrganizationRoleEnum; organizationId: string },
+  email: string,
+  emailType: EmailType,
+  role: OrganizationRoleEnum,
+  organizationId: string,
 ) => {
   return await prisma.user.create({
     data: {
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      emailType: data.emailType,
+      email,
+      firstName: '',
+      lastName: '',
+      emailType,
       status: UserStatus.EMAIL_UNCONFIRMED,
       organizations: {
         create: {
           status: UserOrganizationStatus.INVITED,
-          role: data.role,
-          organizationId: data.organizationId,
+          role,
+          organizationId,
         },
       },
-      currentOrganizationId: data.organizationId,
+      currentOrganizationId: organizationId,
     },
   });
 };

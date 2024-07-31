@@ -25,9 +25,10 @@ import {
 } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
 import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-types';
+import { validateEmail } from '../../emailable-helper';
 import {
   inviteLinkDto,
-  InviteUsersDto,
+  InviteUserRespDto,
   OrganizationDto,
   OrganizationRoleEnumDto,
   UserOrganizationDto,
@@ -215,9 +216,9 @@ builder.mutationFields((t) => ({
   }),
 
   inviteUsers: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
-    type: 'Boolean',
+    type: [InviteUserRespDto],
     args: {
-      users: t.arg({ type: [InviteUsersDto], required: true }),
+      emails: t.arg.stringList({ required: true, validate: { items: { email: true } } }),
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
     },
     resolve: async (_root, args, ctx, _info) => {
@@ -241,7 +242,7 @@ builder.mutationFields((t) => ({
         prisma.user
           .findMany({
             where: {
-              email: { in: args.users.map((u) => u.email) },
+              email: { in: args.emails },
             },
             include: { organizations: true, loginProviders: true },
           })
@@ -249,10 +250,10 @@ builder.mutationFields((t) => ({
         prisma.organization.findUniqueOrThrow({ where: { id: ctx.organizationId } }),
       ]);
 
-      await Promise.all(
-        args.users.map(async (user) => {
+      const errors = await Promise.all(
+        args.emails.map(async (email) => {
           const token = `${confirmInvitedUserPrefix}${randomUUID()}`;
-          const dbUser = usersMap.get(user.email);
+          const dbUser = usersMap.get(email);
           if (dbUser) {
             // Don't re-invite users that are already active in the organization and in the same or higher role
             const userOrganization = dbUser.organizations.find((o) => o.organizationId === ctx.organizationId);
@@ -271,9 +272,9 @@ builder.mutationFields((t) => ({
                 : new URL(`${env.API_ENDPOINT}${authConfirmInvitedUserEndpoint}`);
             const searchParams = new URLSearchParams();
             searchParams.set('token', token);
-            searchParams.set('email', user.email);
+            searchParams.set('email', email);
             url.search = searchParams.toString();
-            logger.info(`Confirm invited user email url for ${user.email}: ${url.toString()}`);
+            logger.info(`Confirm invited user email url for ${email}: ${url.toString()}`);
 
             await Promise.all([
               prisma.userOrganization.upsert({
@@ -292,7 +293,7 @@ builder.mutationFields((t) => ({
               sendOrganizationInviteConfirmEmail({
                 firstName: dbUser.firstName,
                 lastName: dbUser.lastName,
-                email: user.email,
+                email,
                 organizationName: organization.name,
                 expirationInDays: invitationExpirationInDays,
                 actionUrl: url.toString(),
@@ -300,19 +301,22 @@ builder.mutationFields((t) => ({
               setConfirmInvitedUserRedis(token, dbUser.id),
             ]);
           } else {
+            const emailValidation = await validateEmail(email);
+            if (isAError(emailValidation)) return { email, errorMessage: emailValidation.message };
+            const emailType = emailValidation.emailType;
             // Create the action url for new users
             const searchParams = new URLSearchParams();
             searchParams.set('token', token);
-            searchParams.set('email', user.email);
+            searchParams.set('email', email);
             frontEndInvitedUserUrl.search = searchParams.toString();
-            logger.info(`Confirm invited non-existing user ${user.email}: ${frontEndInvitedUserUrl.toString()}`);
+            logger.info(`Confirm invited non-existing user ${email}: ${frontEndInvitedUserUrl.toString()}`);
 
-            const newUser = await createInvitedUser({ ...user, role: args.role, organizationId: ctx.organizationId });
+            const newUser = await createInvitedUser(email, emailType, args.role, ctx.organizationId);
             await Promise.all([
               sendOrganizationInviteConfirmEmail({
                 firstName: newUser.firstName,
                 lastName: newUser.lastName,
-                email: user.email,
+                email,
                 organizationName: organization.name,
                 expirationInDays: invitationExpirationInDays,
                 actionUrl: frontEndInvitedUserUrl.toString(),
@@ -322,7 +326,7 @@ builder.mutationFields((t) => ({
           }
         }),
       );
-      return true;
+      return errors.flatMap((e) => e ?? []);
     },
   }),
 

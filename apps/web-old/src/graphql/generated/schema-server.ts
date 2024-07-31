@@ -492,11 +492,10 @@ export type InviteLinks = {
   url: Scalars['String']['output'];
 };
 
-export type InviteUsers = {
-  email: Scalars['String']['input'];
-  emailType: EmailType;
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
+export type InviteUsersResponse = {
+  __typename?: 'InviteUsersResponse';
+  email: Scalars['String']['output'];
+  errorMessage: Scalars['String']['output'];
 };
 
 export enum LoginProviderEnum {
@@ -523,7 +522,7 @@ export type Mutation = {
   deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
   forgetPassword: Scalars['Boolean']['output'];
-  inviteUsers: Scalars['Boolean']['output'];
+  inviteUsers: Array<InviteUsersResponse>;
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
@@ -567,8 +566,8 @@ export type MutationForgetPasswordArgs = {
 };
 
 export type MutationInviteUsersArgs = {
+  emails: Array<Scalars['String']['input']>;
   role: OrganizationRoleEnum;
-  users: Array<InviteUsers>;
 };
 
 export type MutationLoginArgs = {
@@ -588,6 +587,8 @@ export type MutationResetPasswordArgs = {
 };
 
 export type MutationSignUpInvitedUserArgs = {
+  firstName: Scalars['String']['input'];
+  lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
 };
@@ -694,7 +695,6 @@ export type Query = {
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserTokenValidity: Scalars['Boolean']['output'];
-  checkEmailType: EmailType;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsight;
@@ -718,10 +718,6 @@ export type QueryAvailableOrganizationAdAccountsArgs = {
 
 export type QueryCheckConfirmInvitedUserTokenValidityArgs = {
   token: Scalars['String']['input'];
-};
-
-export type QueryCheckEmailTypeArgs = {
-  email: Scalars['String']['input'];
 };
 
 export type QueryInsightDatapointsArgs = {
