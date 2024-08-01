@@ -10,7 +10,6 @@ import LoaderCentered from '@/components/misc/loader-centered';
 import NameEdit from './components/name-edit';
 import { UsersTable } from './components/users-table';
 import InviteUsersButton from './components/invite-users-button';
-// import { UsersTable } from './components/users-table';
 
 export default function Organization(): React.ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
@@ -23,7 +22,7 @@ export default function Organization(): React.ReactNode {
           <NameEdit isPending={isPending} setIsPending={setIsPending} />
           <UsersTable />
           <InviteUsersButton isPending={isPending} />
-          <Divider mt="xl" />
+          <Divider variant="dashed" />
           <DeleteOrganizationButton isPending={isPending} />
         </>
       ) : (
