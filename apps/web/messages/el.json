@@ -117,7 +117,8 @@
     "createOrganization": "Δημιουργία οργανισμού",
     "selectOrganization": "Επιλογή οργανισμού",
     "updateOrganizationSuccess": "Ο οργανισμός ενημερώθηκε με επιτυχία!",
-    "organizationMembers": "Μέλη"
+    "organizationMembers": "Μέλη",
+    "inviteSuccess": "Οι προσκλήσεις στάλθηκαν με επιτυχία!"
   },
   "profile": {
     "title": "Προφίλ",

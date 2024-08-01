@@ -117,7 +117,8 @@
     "createOrganization": "Create organization",
     "selectOrganization": "Select organization",
     "updateOrganizationSuccess": "The organization was updated successfully!",
-    "organizationMembers": "Members"
+    "organizationMembers": "Members",
+    "inviteSuccess": "Invitation(s) sent successfully!"
   },
   "profile": {
     "title": "Profile",

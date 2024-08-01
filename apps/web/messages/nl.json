@@ -117,7 +117,8 @@
     "createOrganization": "Creëer organisatie",
     "selectOrganization": "Selecteer organisatie",
     "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!",
-    "organizationMembers": "Leden"
+    "organizationMembers": "Leden",
+    "inviteSuccess": "Ik denk dat het goed is!"
   },
   "profile": {
     "title": "Profiel",

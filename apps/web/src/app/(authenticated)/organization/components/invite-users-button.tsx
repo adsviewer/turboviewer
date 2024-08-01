@@ -8,6 +8,7 @@ import { useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { z } from 'zod';
 import { logger } from '@repo/logger';
+import { notifications } from '@mantine/notifications';
 import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
@@ -21,6 +22,7 @@ export interface PropsType {
 
 export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const t = useTranslations('organization');
+  const tGeneric = useTranslations('generic');
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const userDetails = useAtomValue(userDetailsAtom);
@@ -61,8 +63,40 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
     void inviteUsers({ emails, role: DEFAULT_ROLE })
       .then((res) => {
         logger.info(res);
+        if (res.data?.inviteUsers.length) {
+          for (const inviteData of res.data.inviteUsers) {
+            if (inviteData.errorMessage) {
+              const errorMessage = `${inviteData.email}: ${inviteData.errorMessage}`;
+              notifications.show({
+                title: tGeneric('error'),
+                message: errorMessage,
+                color: 'red',
+              });
+            }
+          }
+        }
+
+        // TODO: UNCOMMENT AFTER BACKEND FIXES FOR SUCCESS: FALSE ON EMAIL ERRORS!
         // if (!res.success) {
-        //   addOrReplaceURLParams
+        //   if (res.data?.inviteUsers.length) {
+        //     for (const inviteData of res.data.inviteUsers) {
+        //       if (inviteData.errorMessage) {
+        //        const errorMessage = `${inviteData.email}: ${inviteData.errorMessage}`;
+        //        notifications.show({
+        //          title: tGeneric('error'),
+        //          message: errorMessage,
+        //          color: 'red',
+        //         });
+        //       }
+        //     }
+        //   }
+        // } else {
+        // notifications.show({
+        //   title: tGeneric('success'),
+        //   message: t('inviteSuccess'),
+        //   color: 'blue',
+        // });
+        // closeModal();
         // }
       })
       .catch((err: unknown) => {
