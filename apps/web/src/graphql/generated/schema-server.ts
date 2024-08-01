@@ -1027,6 +1027,20 @@ export type GetOrganizationQuery = {
   };
 };
 
+export type UpdateOrganizationUserMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+  role?: InputMaybe<OrganizationRoleEnum>;
+}>;
+
+export type UpdateOrganizationUserMutation = {
+  __typename?: 'Mutation';
+  updateOrganizationUser: {
+    __typename?: 'UserOrganization';
+    role: OrganizationRoleEnum;
+    organization: { __typename?: 'Organization'; id: string };
+  };
+};
+
 export type CreateOrganizationMutationVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
@@ -1366,6 +1380,16 @@ export const GetOrganizationDocument = gql`
     }
   }
 `;
+export const UpdateOrganizationUserDocument = gql`
+  mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
+    updateOrganizationUser(userId: $userId, role: $role) {
+      role
+      organization {
+        id
+      }
+    }
+  }
+`;
 export const CreateOrganizationDocument = gql`
   mutation createOrganization($name: String!) {
     createOrganization(name: $name) {
@@ -1534,6 +1558,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<GetOrganizationQuery>;
+    },
+    updateOrganizationUser(
+      variables: UpdateOrganizationUserMutationVariables,
+      options?: C,
+    ): Promise<UpdateOrganizationUserMutation> {
+      return requester<UpdateOrganizationUserMutation, UpdateOrganizationUserMutationVariables>(
+        UpdateOrganizationUserDocument,
+        variables,
+        options,
+      ) as Promise<UpdateOrganizationUserMutation>;
     },
     createOrganization(
       variables: CreateOrganizationMutationVariables,

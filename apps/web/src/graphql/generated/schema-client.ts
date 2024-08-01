@@ -1028,6 +1028,20 @@ export type GetOrganizationQuery = {
   };
 };
 
+export type UpdateOrganizationUserMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+  role?: InputMaybe<OrganizationRoleEnum>;
+}>;
+
+export type UpdateOrganizationUserMutation = {
+  __typename?: 'Mutation';
+  updateOrganizationUser: {
+    __typename?: 'UserOrganization';
+    role: OrganizationRoleEnum;
+    organization: { __typename?: 'Organization'; id: string };
+  };
+};
+
 export type CreateOrganizationMutationVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
@@ -1449,6 +1463,22 @@ export function useGetOrganizationQuery(options?: Omit<Urql.UseQueryArgs<GetOrga
     query: GetOrganizationDocument,
     ...options,
   });
+}
+export const UpdateOrganizationUserDocument = gql`
+  mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
+    updateOrganizationUser(userId: $userId, role: $role) {
+      role
+      organization {
+        id
+      }
+    }
+  }
+`;
+
+export function useUpdateOrganizationUserMutation() {
+  return Urql.useMutation<UpdateOrganizationUserMutation, UpdateOrganizationUserMutationVariables>(
+    UpdateOrganizationUserDocument,
+  );
 }
 export const CreateOrganizationDocument = gql`
   mutation createOrganization($name: String!) {

@@ -16,6 +16,15 @@ query getOrganization {
   }
 }
 
+mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
+  updateOrganizationUser(userId: $userId, role: $role) {
+    role
+    organization {
+      id
+    }
+  }
+}
+
 mutation createOrganization($name: String!) {
   createOrganization(name: $name) {
     id

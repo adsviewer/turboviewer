@@ -12,6 +12,8 @@ import {
   type DeleteOrganizationMutationVariables,
   type InviteUsersMutationVariables,
   type InviteUsersMutation,
+  type UpdateOrganizationUserMutationVariables,
+  type UpdateOrganizationUserMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -27,6 +29,12 @@ async function createOrganization(
   values: CreateOrganizationMutationVariables,
 ): Promise<UrqlResult<CreateOrganizationMutation, string>> {
   return await handleUrqlRequest(urqlClientSdk().createOrganization(values));
+}
+
+export async function updateOrganizationUser(
+  values: UpdateOrganizationUserMutationVariables,
+): Promise<UrqlResult<UpdateOrganizationUserMutation, string>> {
+  return await handleUrqlRequest(urqlClientSdk().updateOrganizationUser(values));
 }
 
 export async function updateOrganization(

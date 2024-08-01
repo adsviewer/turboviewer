@@ -1,24 +1,31 @@
 'use client';
 
-import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select } from '@mantine/core';
+import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select, Box, LoadingOverlay } from '@mantine/core';
 import { IconTrash, IconDots } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
+import { logger } from '@repo/logger';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
-import getOrganization from '../actions';
+import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import getOrganization, { updateOrganizationUser } from '../actions';
 
 export function UsersTable(): React.ReactNode {
   const tGeneric = useTranslations('generic');
   const tOrganization = useTranslations('organization');
   const tProfile = useTranslations('profile');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [organization, setOrganization] = useAtom(organizationAtom);
   const roleToRoleTitleMap: Record<string, string> = {
     ORG_ADMIN: tProfile('roleAdmin'),
     ORG_OPERATOR: tProfile('roleOperator'),
     ORG_MEMBER: tProfile('roleUser'),
   };
+  const [isPending, setIsPending] = useState<boolean>(false);
 
   const rolesData = [
     {
@@ -36,12 +43,42 @@ export function UsersTable(): React.ReactNode {
   ];
 
   useEffect(() => {
+    setOrganization(null);
     void getOrganization().then((res) => {
       if (res.data) {
         setOrganization(res.data);
       }
     });
   }, [setOrganization]);
+
+  const changeUserRole = (userId: string, newRole: string | null): void => {
+    if (newRole) {
+      setIsPending(true);
+      void updateOrganizationUser({ userId, role: newRole as OrganizationRoleEnum })
+        .then((res) => {
+          logger.info(res);
+          if (!res.success) {
+            logger.error(res.error);
+            const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+            router.replace(newURL);
+          }
+
+          // Fetch members data again
+          setOrganization(null);
+          void getOrganization().then((orgRes) => {
+            if (orgRes.data) {
+              setOrganization(orgRes.data);
+            }
+          });
+        })
+        .catch((err: unknown) => {
+          logger.error(err);
+        })
+        .finally(() => {
+          setIsPending(false);
+        });
+    }
+  };
 
   const rows = organization?.organization.userOrganizations.map((userData) => (
     <Table.Tr key={userData.user.id}>
@@ -62,7 +99,15 @@ export function UsersTable(): React.ReactNode {
         <Text fz="sm">{userData.user.email}</Text>
       </Table.Td>
       <Table.Td>
-        <Select data={rolesData} defaultValue={userData.role} variant="filled" allowDeselect={false} />
+        <Select
+          data={rolesData}
+          defaultValue={userData.role}
+          variant="filled"
+          allowDeselect={false}
+          onChange={(value) => {
+            changeUserRole(userData.userId, value);
+          }}
+        />
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
@@ -89,11 +134,15 @@ export function UsersTable(): React.ReactNode {
   return (
     <>
       <Text mt="md">{tOrganization('organizationMembers')}</Text>
-      <Table.ScrollContainer minWidth={800}>
-        <Table verticalSpacing="sm" withTableBorder>
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
+
+      <Box pos="relative">
+        <LoadingOverlay visible={isPending} zIndex={1000} overlayProps={{ blur: 2 }} />
+        <Table.ScrollContainer minWidth={800}>
+          <Table verticalSpacing="sm" withTableBorder>
+            <Table.Tbody>{rows}</Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
+      </Box>
     </>
   );
 }
