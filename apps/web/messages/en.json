@@ -5,7 +5,8 @@
     "warning": "Warning!",
     "accessOrgAdmin": "Only organization admins may perform this action!",
     "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!",
-    "copied": "Copied to clipboard"
+    "copied": "Copied to clipboard",
+    "remove": "Remove"
   },
 "errors": {
   "errorPageTitle": "Something bad just happened...",
@@ -115,7 +116,8 @@
     "deleteWarning": "WARNING: Adsviewer will erase all data related to this organization!",
     "createOrganization": "Create organization",
     "selectOrganization": "Select organization",
-    "updateOrganizationSuccess": "The organization was updated successfully!"
+    "updateOrganizationSuccess": "The organization was updated successfully!",
+    "organizationMembers": "Members"
   },
   "profile": {
     "title": "Profile",
@@ -128,6 +130,7 @@
     "repeatPassword": "Repeat Password",
     "roleOrgAdmin": "Organization Administrator",
     "roleAdmin": "Administrator",
+    "roleOperator": "Operator",
     "roleUser": "Member",
     "submit": "Submit"
   }

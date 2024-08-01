@@ -7,8 +7,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { z } from 'zod';
+import { logger } from '@repo/logger';
 import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
+import { inviteUsers } from '../actions';
 
 const emailSchema = z.string().email();
 
@@ -23,11 +26,13 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInputValue, setEmailInputValue] = useState<string>('');
-  // const email
+  const [isPending, setIsPending] = useState<boolean>(false);
+  const DEFAULT_ROLE = OrganizationRoleEnum.ORG_MEMBER;
 
   const closeModal = (): void => {
     setEmails([]);
     setEmailInputValue('');
+    setIsPending(false);
     close();
   };
 
@@ -50,11 +55,30 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
     setEmails(emails.filter((email) => email !== emailToRemove));
   };
 
+  const performUserInvites = (): void => {
+    setIsPending(true);
+
+    void inviteUsers({ emails, role: DEFAULT_ROLE })
+      .then((res) => {
+        logger.info(res);
+        // if (!res.success) {
+        //   addOrReplaceURLParams
+        // }
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
+  };
+
   return (
-    <Flex my="md">
+    <Flex>
       <Button
         leftSection={<IconUserPlus size={18} />}
         color={theme.colors.blue[7]}
+        variant="outline"
         onClick={open}
         disabled={(!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)) || props.isPending}
       >
@@ -62,7 +86,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
       </Button>
 
       {/* Delete Modal */}
-      <Modal opened={opened} onClose={closeModal} title={t('inviteUsers')}>
+      <Modal opened={opened} onClose={closeModal} title={t('inviteUsers')} centered>
         <Flex direction="column" gap="sm">
           <PillsInput label={`${t('enterEmails')}:`} onChange={onEmailInputChanged} onKeyDown={onEmailInputConfirm}>
             <Pill.Group>
@@ -82,7 +106,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
               <PillsInput.Field placeholder={t('enterEmails')} value={emailInputValue} />
             </Pill.Group>
           </PillsInput>
-          <Button color="blue" disabled={!emails.length}>
+          <Button color="blue" disabled={!emails.length || isPending} onClick={performUserInvites}>
             {t('invite')}
           </Button>
         </Flex>

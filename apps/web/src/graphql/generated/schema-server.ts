@@ -1003,6 +1003,30 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
+export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetOrganizationQuery = {
+  __typename?: 'Query';
+  organization: {
+    __typename?: 'Organization';
+    id: string;
+    userOrganizations: Array<{
+      __typename?: 'UserOrganization';
+      userId: string;
+      role: OrganizationRoleEnum;
+      status: UserOrganizationStatus;
+      user: {
+        __typename?: 'User';
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        photoUrl?: string | null;
+      };
+    }>;
+  };
+};
+
 export type CreateOrganizationMutationVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
@@ -1037,6 +1061,16 @@ export type DeleteOrganizationMutationVariables = Exact<{
 export type DeleteOrganizationMutation = {
   __typename?: 'Mutation';
   deleteOrganization: { __typename?: 'Organization'; id: string };
+};
+
+export type InviteUsersMutationVariables = Exact<{
+  emails: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  role: OrganizationRoleEnum;
+}>;
+
+export type InviteUsersMutation = {
+  __typename?: 'Mutation';
+  inviteUsers: Array<{ __typename?: 'InviteUsersResponse'; email: string; errorMessage: string }>;
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1313,6 +1347,25 @@ export const LoginProvidersDocument = gql`
     }
   }
 `;
+export const GetOrganizationDocument = gql`
+  query getOrganization {
+    organization {
+      id
+      userOrganizations {
+        userId
+        role
+        status
+        user {
+          id
+          email
+          firstName
+          lastName
+          photoUrl
+        }
+      }
+    }
+  }
+`;
 export const CreateOrganizationDocument = gql`
   mutation createOrganization($name: String!) {
     createOrganization(name: $name) {
@@ -1341,6 +1394,14 @@ export const DeleteOrganizationDocument = gql`
   mutation deleteOrganization($organizationId: String!) {
     deleteOrganization(organizationId: $organizationId) {
       id
+    }
+  }
+`;
+export const InviteUsersDocument = gql`
+  mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
+    inviteUsers(emails: $emails, role: $role) {
+      email
+      errorMessage
     }
   }
 `;
@@ -1467,6 +1528,13 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<LoginProvidersQuery>;
     },
+    getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
+      return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(
+        GetOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<GetOrganizationQuery>;
+    },
     createOrganization(
       variables: CreateOrganizationMutationVariables,
       options?: C,
@@ -1506,6 +1574,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<DeleteOrganizationMutation>;
+    },
+    inviteUsers(variables: InviteUsersMutationVariables, options?: C): Promise<InviteUsersMutation> {
+      return requester<InviteUsersMutation, InviteUsersMutationVariables>(
+        InviteUsersDocument,
+        variables,
+        options,
+      ) as Promise<InviteUsersMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(

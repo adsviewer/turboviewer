@@ -1004,6 +1004,30 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
+export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetOrganizationQuery = {
+  __typename?: 'Query';
+  organization: {
+    __typename?: 'Organization';
+    id: string;
+    userOrganizations: Array<{
+      __typename?: 'UserOrganization';
+      userId: string;
+      role: OrganizationRoleEnum;
+      status: UserOrganizationStatus;
+      user: {
+        __typename?: 'User';
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        photoUrl?: string | null;
+      };
+    }>;
+  };
+};
+
 export type CreateOrganizationMutationVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
@@ -1038,6 +1062,16 @@ export type DeleteOrganizationMutationVariables = Exact<{
 export type DeleteOrganizationMutation = {
   __typename?: 'Mutation';
   deleteOrganization: { __typename?: 'Organization'; id: string };
+};
+
+export type InviteUsersMutationVariables = Exact<{
+  emails: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  role: OrganizationRoleEnum;
+}>;
+
+export type InviteUsersMutation = {
+  __typename?: 'Mutation';
+  inviteUsers: Array<{ __typename?: 'InviteUsersResponse'; email: string; errorMessage: string }>;
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1390,6 +1424,32 @@ export function useLoginProvidersQuery(options?: Omit<Urql.UseQueryArgs<LoginPro
     ...options,
   });
 }
+export const GetOrganizationDocument = gql`
+  query getOrganization {
+    organization {
+      id
+      userOrganizations {
+        userId
+        role
+        status
+        user {
+          id
+          email
+          firstName
+          lastName
+          photoUrl
+        }
+      }
+    }
+  }
+`;
+
+export function useGetOrganizationQuery(options?: Omit<Urql.UseQueryArgs<GetOrganizationQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetOrganizationQuery, GetOrganizationQueryVariables>({
+    query: GetOrganizationDocument,
+    ...options,
+  });
+}
 export const CreateOrganizationDocument = gql`
   mutation createOrganization($name: String!) {
     createOrganization(name: $name) {
@@ -1436,6 +1496,18 @@ export const DeleteOrganizationDocument = gql`
 
 export function useDeleteOrganizationMutation() {
   return Urql.useMutation<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(DeleteOrganizationDocument);
+}
+export const InviteUsersDocument = gql`
+  mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
+    inviteUsers(emails: $emails, role: $role) {
+      email
+      errorMessage
+    }
+  }
+`;
+
+export function useInviteUsersMutation() {
+  return Urql.useMutation<InviteUsersMutation, InviteUsersMutationVariables>(InviteUsersDocument);
 }
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {

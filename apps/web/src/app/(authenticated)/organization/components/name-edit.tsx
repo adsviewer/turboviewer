@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Text, Button, TextInput } from '@mantine/core';
+import { Flex, Button, TextInput } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { useForm } from '@mantine/form';
 import { useAtom } from 'jotai';
@@ -59,9 +59,9 @@ export default function NameEdit(props: PropsType): React.ReactNode {
         handleSubmit(values);
       })}
     >
-      <Flex align="center" gap="sm" wrap="wrap">
-        <Text>{t('organizationName')}:</Text>
+      <Flex align="flex-end" gap="sm" wrap="wrap">
         <TextInput
+          label={t('organizationName')}
           placeholder={t('title')}
           key={form.key('name')}
           {...form.getInputProps('name')}

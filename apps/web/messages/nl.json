@@ -5,7 +5,8 @@
     "warning": "Waarschuwing!",
     "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!",
-    "copied": "Kopiëren succesvol"
+    "copied": "Kopiëren succesvol",
+    "remove": "Verwijderen"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -115,7 +116,8 @@
     "deleteWarning": "WAARSCHUWING: Adsviewer zal alle gegevens met betrekking tot deze organisatie wissen!",
     "createOrganization": "Creëer organisatie",
     "selectOrganization": "Selecteer organisatie",
-    "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!"
+    "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!",
+    "organizationMembers": "Leden"
   },
   "profile": {
     "title": "Profiel",
@@ -128,6 +130,7 @@
     "repeatPassword": "Herhaal wachtwoord",
     "roleOrgAdmin": "Organisatiebeheerder",
     "roleAdmin": "Beheerder",
+    "roleOperator": "Bediende",
     "roleUser": "Lid",
     "submit": "Indienen"
   }

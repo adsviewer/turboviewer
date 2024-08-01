@@ -1,3 +1,21 @@
+query getOrganization {
+  organization {
+    id
+    userOrganizations {
+      userId
+      role
+      status
+      user {
+        id
+        email
+        firstName
+        lastName
+        photoUrl
+      }
+    }
+  }
+}
+
 mutation createOrganization($name: String!) {
   createOrganization(name: $name) {
     id
@@ -22,5 +40,12 @@ mutation switchOrganization($organizationId: String!) {
 mutation deleteOrganization($organizationId: String!) {
   deleteOrganization(organizationId: $organizationId) {
     id
+  }
+}
+
+mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
+  inviteUsers(emails: $emails, role: $role) {
+    email
+    errorMessage
   }
 }

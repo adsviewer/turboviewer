@@ -10,11 +10,18 @@ import {
   type UpdateOrganizationMutationVariables,
   type DeleteOrganizationMutation,
   type DeleteOrganizationMutationVariables,
+  type InviteUsersMutationVariables,
+  type InviteUsersMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { refreshJWTToken } from '@/app/(authenticated)/actions';
+import { type GetOrganizationQuery } from '@/graphql/generated/schema-client';
+
+export default async function getOrganization(): Promise<UrqlResult<GetOrganizationQuery>> {
+  return await handleUrqlRequest(urqlClientSdk().getOrganization());
+}
 
 async function createOrganization(
   values: CreateOrganizationMutationVariables,
@@ -123,4 +130,8 @@ export async function switchOrganizationAndChangeJWT(values: SwitchOrganizationM
       error,
     };
   }
+}
+
+export async function inviteUsers(values: InviteUsersMutationVariables): Promise<UrqlResult<InviteUsersMutation>> {
+  return await handleUrqlRequest(urqlClientSdk().inviteUsers(values));
 }

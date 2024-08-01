@@ -3,66 +3,66 @@
 import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select } from '@mantine/core';
 import { IconTrash, IconDots } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-
-const data = [
-  {
-    avatar: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png',
-    name: 'Robert Wolfkisser',
-    job: 'Engineer',
-    email: 'rob_wolf@gmail.com',
-    rate: 22,
-  },
-  {
-    avatar: 'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-5.png',
-    name: 'Jill Jailbreaker',
-    job: 'Engineer',
-    email: 'jj@breaker.com',
-    rate: 45,
-  },
-];
+import { useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { organizationAtom } from '@/app/atoms/organization-atoms';
+import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
+import getOrganization from '../actions';
 
 export function UsersTable(): React.ReactNode {
-  const t = useTranslations('organization');
+  const tGeneric = useTranslations('generic');
+  const tOrganization = useTranslations('organization');
+  const tProfile = useTranslations('profile');
+  const [organization, setOrganization] = useAtom(organizationAtom);
+  const roleToRoleTitleMap: Record<string, string> = {
+    ORG_ADMIN: tProfile('roleAdmin'),
+    ORG_OPERATOR: tProfile('roleOperator'),
+    ORG_MEMBER: tProfile('roleUser'),
+  };
+
   const rolesData = [
     {
-      value: String(Math.random()),
-      label: t('roleOrganizationAdmin'),
+      value: OrganizationRoleEnum.ORG_ADMIN,
+      label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_ADMIN],
     },
     {
-      value: String(Math.random()),
-      label: t('roleAdmin'),
+      value: OrganizationRoleEnum.ORG_OPERATOR,
+      label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_OPERATOR],
     },
     {
-      value: String(Math.random()),
-      label: t('roleOrganizationUser'),
+      value: OrganizationRoleEnum.ORG_MEMBER,
+      label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_MEMBER],
     },
   ];
 
-  const rows = data.map((item) => (
-    <Table.Tr key={item.name}>
+  useEffect(() => {
+    void getOrganization().then((res) => {
+      if (res.data) {
+        setOrganization(res.data);
+      }
+    });
+  }, [setOrganization]);
+
+  const rows = organization?.organization.userOrganizations.map((userData) => (
+    <Table.Tr key={userData.user.id}>
       <Table.Td>
         <Group gap="sm">
-          <Avatar size={40} src={item.avatar} radius={40} />
+          <Avatar size={40} src={userData.user.photoUrl} radius={40} />
           <div>
             <Text fz="sm" fw={500}>
-              {item.name}
+              {`${userData.user.firstName} ${userData.user.lastName}`}
             </Text>
             <Text c="dimmed" fz="xs">
-              {item.job}
+              {roleToRoleTitleMap[userData.role]}
             </Text>
           </div>
         </Group>
       </Table.Td>
       <Table.Td>
-        <Text fz="sm">{item.email}</Text>
+        <Text fz="sm">{userData.user.email}</Text>
       </Table.Td>
       <Table.Td>
-        <Select
-          data={rolesData}
-          // defaultValue={item.role}
-          variant="unstyled"
-          allowDeselect={false}
-        />
+        <Select data={rolesData} defaultValue={userData.role} variant="filled" allowDeselect={false} />
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
@@ -77,7 +77,7 @@ export function UsersTable(): React.ReactNode {
                 leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                 color="red"
               >
-                Remove
+                {tGeneric('remove')}
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>
@@ -87,10 +87,13 @@ export function UsersTable(): React.ReactNode {
   ));
 
   return (
-    <Table.ScrollContainer minWidth={800}>
-      <Table verticalSpacing="md">
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
-    </Table.ScrollContainer>
+    <>
+      <Text mt="md">{tOrganization('organizationMembers')}</Text>
+      <Table.ScrollContainer minWidth={800}>
+        <Table verticalSpacing="sm" withTableBorder>
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
+    </>
   );
 }
