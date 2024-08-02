@@ -54,7 +54,6 @@ export function UsersTable(): React.ReactNode {
 
   const setRolesDataOptions = useCallback(
     (userRoles: AllRoles[]): void => {
-      logger.info(userDetails.allRoles);
       // Members can't change any roles
       if (userRoles.includes(AllRoles.ORG_MEMBER)) {
         setRolesData([]);
@@ -90,7 +89,7 @@ export function UsersTable(): React.ReactNode {
         ]);
       }
     },
-    [roleToRoleTitleMap, userDetails.allRoles],
+    [roleToRoleTitleMap],
   );
 
   const refreshMembers = useCallback((): void => {
@@ -98,7 +97,6 @@ export function UsersTable(): React.ReactNode {
     setOrganization(null);
     void getOrganization()
       .then((orgRes) => {
-        logger.info(orgRes.data);
         if (orgRes.data) {
           // We need to re-fetch the logged in user's details since the user's role might've changed
           void getUserDetails()
@@ -188,8 +186,10 @@ export function UsersTable(): React.ReactNode {
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
-          {!isMember(userDetails.allRoles) &&
-          (isOrgAdmin(userDetails.allRoles) || (isOperator(userDetails.allRoles) && !isOrgAdmin([userData.role]))) ? (
+          {userDetails.id === userData.userId ||
+          (!isMember(userDetails.allRoles) &&
+            (isOrgAdmin(userDetails.allRoles) ||
+              (isOperator(userDetails.allRoles) && !isOrgAdmin([userData.role])))) ? (
             <Menu transitionProps={{ transition: 'pop' }} withArrow position="bottom-end" withinPortal>
               <Menu.Target>
                 <ActionIcon variant="subtle" color="gray">
@@ -213,10 +213,16 @@ export function UsersTable(): React.ReactNode {
 
   return (
     <>
-      <Flex align="flex-end" gap="xs" style={{ cursor: 'pointer' }}>
+      <Flex align="flex-end" gap="xs">
         <Text mt="md">{tOrganization('organizationMembers')}</Text>
         <Tooltip label={tGeneric('refresh')} disabled={isPending}>
-          <ActionIcon variant="default" size="md" disabled={isPending} onClick={refreshMembers}>
+          <ActionIcon
+            variant="default"
+            size="md"
+            disabled={isPending}
+            onClick={refreshMembers}
+            style={{ cursor: 'pointer' }}
+          >
             <IconRefresh size={20} />
           </ActionIcon>
         </Tooltip>
