@@ -43,7 +43,13 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   };
 
   const onEmailInputConfirm = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.code === 'Space' || e.code === 'Tab' || e.code === 'Enter' || e.code === 'Comma') {
+    if (
+      e.code === 'Space' ||
+      e.code === 'Tab' ||
+      e.code === 'Enter' ||
+      e.code === 'Comma' ||
+      e.code === 'NumpadEnter'
+    ) {
       e.preventDefault();
 
       if (emailSchema.safeParse(emailInputValue).success) {

@@ -1,14 +1,15 @@
 'use client';
 
-import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select, Box, LoadingOverlay } from '@mantine/core';
+import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select, Box, LoadingOverlay, Flex } from '@mantine/core';
 import { IconTrash, IconDots } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { sentenceCase } from 'change-case';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
-import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
+import { OrganizationRoleEnum, UserOrganizationStatus } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
 import getOrganization, { updateOrganizationUser } from '../actions';
 
@@ -45,6 +46,7 @@ export function UsersTable(): React.ReactNode {
   useEffect(() => {
     setOrganization(null);
     void getOrganization().then((res) => {
+      logger.info(res);
       if (res.data) {
         setOrganization(res.data);
       }
@@ -87,7 +89,9 @@ export function UsersTable(): React.ReactNode {
           <Avatar size={40} src={userData.user.photoUrl} radius={40} />
           <div>
             <Text fz="sm" fw={500}>
-              {`${userData.user.firstName} ${userData.user.lastName}`}
+              {userData.user.firstName && userData.user.lastName
+                ? `${userData.user.firstName} ${userData.user.lastName}`
+                : userData.user.email}
             </Text>
             <Text c="dimmed" fz="xs">
               {roleToRoleTitleMap[userData.role]}
@@ -99,15 +103,20 @@ export function UsersTable(): React.ReactNode {
         <Text fz="sm">{userData.user.email}</Text>
       </Table.Td>
       <Table.Td>
-        <Select
-          data={rolesData}
-          defaultValue={userData.role}
-          variant="filled"
-          allowDeselect={false}
-          onChange={(value) => {
-            changeUserRole(userData.userId, value);
-          }}
-        />
+        <Flex gap="sm" align="center">
+          <Select
+            data={rolesData}
+            defaultValue={userData.role}
+            variant="filled"
+            allowDeselect={false}
+            onChange={(value) => {
+              changeUserRole(userData.userId, value);
+            }}
+          />
+          {userData.status === UserOrganizationStatus.INVITED ? (
+            <Text fs="italic">{sentenceCase(UserOrganizationStatus.INVITED)}</Text>
+          ) : null}
+        </Flex>
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
