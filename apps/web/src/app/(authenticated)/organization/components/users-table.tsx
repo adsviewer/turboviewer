@@ -122,7 +122,7 @@ export function UsersTable(): React.ReactNode {
 
   useEffect(() => {
     refreshMembers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- workaround since infinite loop occurs when adding refreshMembers to deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- safe workaround since infinite loop occurs when adding refreshMembers to deps
   }, []);
 
   const changeUserRole = (userId: string, newRole: string | null): void => {
@@ -188,21 +188,24 @@ export function UsersTable(): React.ReactNode {
       </Table.Td>
       <Table.Td>
         <Group gap={0} justify="flex-end">
-          <Menu transitionProps={{ transition: 'pop' }} withArrow position="bottom-end" withinPortal>
-            <Menu.Target>
-              <ActionIcon variant="subtle" color="gray">
-                <IconDots style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
-              </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item
-                leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                color="red"
-              >
-                {tGeneric('remove')}
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
+          {!isMember(userDetails.allRoles) &&
+          (isOrgAdmin(userDetails.allRoles) || (isOperator(userDetails.allRoles) && !isOrgAdmin([userData.role]))) ? (
+            <Menu transitionProps={{ transition: 'pop' }} withArrow position="bottom-end" withinPortal>
+              <Menu.Target>
+                <ActionIcon variant="subtle" color="gray">
+                  <IconDots style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item
+                  leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                  color="red"
+                >
+                  {tGeneric('remove')}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          ) : null}
         </Group>
       </Table.Td>
     </Table.Tr>
