@@ -6,7 +6,8 @@
     "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!",
     "copied": "Kopiëren succesvol",
-    "remove": "Verwijderen"
+    "remove": "Verwijderen",
+    "refresh": "Vernieuwen"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -118,7 +119,8 @@
     "selectOrganization": "Selecteer organisatie",
     "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!",
     "organizationMembers": "Leden",
-    "inviteSuccess": "Ik denk dat het goed is!"
+    "inviteSuccess": "Ik denk dat het goed is!",
+    "invited": "Uitgenodigd"
   },
   "profile": {
     "title": "Profiel",

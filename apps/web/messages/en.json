@@ -6,7 +6,8 @@
     "accessOrgAdmin": "Only organization admins may perform this action!",
     "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!",
     "copied": "Copied to clipboard",
-    "remove": "Remove"
+    "remove": "Remove",
+    "refresh": "Refresh"
   },
 "errors": {
   "errorPageTitle": "Something bad just happened...",
@@ -118,7 +119,8 @@
     "selectOrganization": "Select organization",
     "updateOrganizationSuccess": "The organization was updated successfully!",
     "organizationMembers": "Members",
-    "inviteSuccess": "Invitation(s) sent successfully!"
+    "inviteSuccess": "Invitation(s) sent successfully!",
+    "invited": "Invited"
   },
   "profile": {
     "title": "Profile",

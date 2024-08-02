@@ -1,17 +1,37 @@
 'use client';
 
-import { Avatar, Table, Group, Text, ActionIcon, Menu, rem, Select, Box, LoadingOverlay, Flex } from '@mantine/core';
-import { IconTrash, IconDots } from '@tabler/icons-react';
+import {
+  Avatar,
+  Table,
+  Group,
+  Text,
+  ActionIcon,
+  Menu,
+  rem,
+  Select,
+  Box,
+  LoadingOverlay,
+  Flex,
+  Tooltip,
+} from '@mantine/core';
+import { IconTrash, IconDots, IconRefresh } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
-import { sentenceCase } from 'change-case';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
-import { OrganizationRoleEnum, UserOrganizationStatus } from '@/graphql/generated/schema-server';
+import { AllRoles, OrganizationRoleEnum, UserOrganizationStatus } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { isMember, isOperator, isOrgAdmin } from '@/util/access-utils';
 import getOrganization, { updateOrganizationUser } from '../actions';
+import { getUserDetails } from '../../actions';
+
+interface RolesDataType {
+  value: OrganizationRoleEnum;
+  label: string;
+}
 
 export function UsersTable(): React.ReactNode {
   const tGeneric = useTranslations('generic');
@@ -21,57 +41,101 @@ export function UsersTable(): React.ReactNode {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [organization, setOrganization] = useAtom(organizationAtom);
-  const roleToRoleTitleMap: Record<string, string> = {
-    ORG_ADMIN: tProfile('roleAdmin'),
-    ORG_OPERATOR: tProfile('roleOperator'),
-    ORG_MEMBER: tProfile('roleUser'),
-  };
+  const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+  const [rolesData, setRolesData] = useState<RolesDataType[]>([]);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const roleToRoleTitleMap = useMemo(() => {
+    return {
+      ORG_ADMIN: tProfile('roleAdmin'),
+      ORG_OPERATOR: tProfile('roleOperator'),
+      ORG_MEMBER: tProfile('roleUser'),
+    };
+  }, [tProfile]);
 
-  const rolesData = [
-    {
-      value: OrganizationRoleEnum.ORG_ADMIN,
-      label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_ADMIN],
+  const setRolesDataOptions = useCallback(
+    (userRoles: AllRoles[]): void => {
+      logger.info(userDetails.allRoles);
+      // Members can't change any roles
+      if (userRoles.includes(AllRoles.ORG_MEMBER)) {
+        setRolesData([]);
+      }
+      // Operators can only change role to member and operator
+      else if (userRoles.includes(AllRoles.ORG_OPERATOR)) {
+        setRolesData([
+          {
+            value: OrganizationRoleEnum.ORG_OPERATOR,
+            label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_OPERATOR],
+          },
+          {
+            value: OrganizationRoleEnum.ORG_MEMBER,
+            label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_MEMBER],
+          },
+        ]);
+      }
+      // Admins can change anyone to anything
+      else {
+        setRolesData([
+          {
+            value: OrganizationRoleEnum.ORG_ADMIN,
+            label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_ADMIN],
+          },
+          {
+            value: OrganizationRoleEnum.ORG_OPERATOR,
+            label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_OPERATOR],
+          },
+          {
+            value: OrganizationRoleEnum.ORG_MEMBER,
+            label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_MEMBER],
+          },
+        ]);
+      }
     },
-    {
-      value: OrganizationRoleEnum.ORG_OPERATOR,
-      label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_OPERATOR],
-    },
-    {
-      value: OrganizationRoleEnum.ORG_MEMBER,
-      label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_MEMBER],
-    },
-  ];
+    [roleToRoleTitleMap, userDetails.allRoles],
+  );
+
+  const refreshMembers = useCallback((): void => {
+    setIsPending(true);
+    setOrganization(null);
+    void getOrganization()
+      .then((orgRes) => {
+        logger.info(orgRes.data);
+        if (orgRes.data) {
+          // We need to re-fetch the logged in user's details since the user's role might've changed
+          void getUserDetails()
+            .then((userRes) => {
+              setUserDetails(userRes);
+              setRolesDataOptions(userRes.allRoles);
+              setOrganization(orgRes.data);
+            })
+            .catch((error: unknown) => {
+              logger.error(error);
+            });
+        }
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
+  }, [setOrganization, setRolesDataOptions, setUserDetails]);
 
   useEffect(() => {
-    setOrganization(null);
-    void getOrganization().then((res) => {
-      logger.info(res);
-      if (res.data) {
-        setOrganization(res.data);
-      }
-    });
-  }, [setOrganization]);
+    refreshMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- workaround since infinite loop occurs when adding refreshMembers to deps
+  }, []);
 
   const changeUserRole = (userId: string, newRole: string | null): void => {
     if (newRole) {
       setIsPending(true);
       void updateOrganizationUser({ userId, role: newRole as OrganizationRoleEnum })
         .then((res) => {
-          logger.info(res);
           if (!res.success) {
             logger.error(res.error);
             const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
             router.replace(newURL);
           }
-
-          // Fetch members data again
-          setOrganization(null);
-          void getOrganization().then((orgRes) => {
-            if (orgRes.data) {
-              setOrganization(orgRes.data);
-            }
-          });
+          refreshMembers();
         })
         .catch((err: unknown) => {
           logger.error(err);
@@ -104,17 +168,21 @@ export function UsersTable(): React.ReactNode {
       </Table.Td>
       <Table.Td>
         <Flex gap="sm" align="center">
-          <Select
-            data={rolesData}
-            defaultValue={userData.role}
-            variant="filled"
-            allowDeselect={false}
-            onChange={(value) => {
-              changeUserRole(userData.userId, value);
-            }}
-          />
+          {!isMember(userDetails.allRoles) &&
+          (isOrgAdmin(userDetails.allRoles) || (isOperator(userDetails.allRoles) && !isOrgAdmin([userData.role]))) ? (
+            <Select
+              data={rolesData}
+              defaultValue={userData.role}
+              variant="filled"
+              allowDeselect={false}
+              onChange={(value) => {
+                changeUserRole(userData.userId, value);
+              }}
+            />
+          ) : null}
+
           {userData.status === UserOrganizationStatus.INVITED ? (
-            <Text fs="italic">{sentenceCase(UserOrganizationStatus.INVITED)}</Text>
+            <Text fs="italic">{tOrganization('invited')}</Text>
           ) : null}
         </Flex>
       </Table.Td>
@@ -142,9 +210,16 @@ export function UsersTable(): React.ReactNode {
 
   return (
     <>
-      <Text mt="md">{tOrganization('organizationMembers')}</Text>
+      <Flex align="flex-end" gap="xs" style={{ cursor: 'pointer' }}>
+        <Text mt="md">{tOrganization('organizationMembers')}</Text>
+        <Tooltip label={tGeneric('refresh')} disabled={isPending}>
+          <ActionIcon variant="default" size="md" disabled={isPending} onClick={refreshMembers}>
+            <IconRefresh size={20} />
+          </ActionIcon>
+        </Tooltip>
+      </Flex>
 
-      <Box pos="relative">
+      <Box pos="relative" mih={120}>
         <LoadingOverlay visible={isPending} zIndex={1000} overlayProps={{ blur: 2 }} />
         <Table.ScrollContainer minWidth={800}>
           <Table verticalSpacing="sm" withTableBorder>
