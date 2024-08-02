@@ -28,7 +28,7 @@ import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-ty
 import { validateEmail } from '../../emailable-helper';
 import {
   inviteLinkDto,
-  InviteUserRespDto,
+  InviteUsersErrors,
   OrganizationDto,
   OrganizationRoleEnumDto,
   UserOrganizationDto,
@@ -215,7 +215,8 @@ builder.mutationFields((t) => ({
   }),
 
   inviteUsers: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
-    type: [InviteUserRespDto],
+    type: 'Boolean',
+    errors: { types: [InviteUsersErrors] },
     args: {
       emails: t.arg.stringList({ required: true, validate: { items: { email: true } } }),
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
@@ -301,7 +302,7 @@ builder.mutationFields((t) => ({
             ]);
           } else {
             const emailValidation = await validateEmail(email);
-            if (isAError(emailValidation)) return { email, errorMessage: emailValidation.message };
+            if (isAError(emailValidation)) return { email, message: emailValidation.message };
             const emailType = emailValidation.emailType;
             // Create the action url for new users
             const searchParams = new URLSearchParams();
@@ -325,7 +326,9 @@ builder.mutationFields((t) => ({
           }
         }),
       );
-      return errors.flatMap((e) => e ?? []);
+      const flattenErrors = errors.flatMap((e) => e ?? []);
+      if (!flattenErrors.length) return true;
+      throw new InviteUsersErrors(flattenErrors);
     },
   }),
 

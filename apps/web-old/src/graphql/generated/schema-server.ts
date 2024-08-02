@@ -291,11 +291,6 @@ export enum DeviceEnum {
   Unknown = 'Unknown',
 }
 
-export enum EmailType {
-  PERSONAL = 'PERSONAL',
-  WORK = 'WORK',
-}
-
 export type Error = {
   message: Scalars['String']['output'];
 };
@@ -492,10 +487,16 @@ export type InviteLinks = {
   url: Scalars['String']['output'];
 };
 
-export type InviteUsersResponse = {
-  __typename?: 'InviteUsersResponse';
+export type InviteUsersError = {
+  __typename?: 'InviteUsersError';
   email: Scalars['String']['output'];
-  errorMessage: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
+export type InviteUsersErrors = Error & {
+  __typename?: 'InviteUsersErrors';
+  errors: Array<InviteUsersError>;
+  message: Scalars['String']['output'];
 };
 
 export enum LoginProviderEnum {
@@ -522,7 +523,7 @@ export type Mutation = {
   deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
   forgetPassword: Scalars['Boolean']['output'];
-  inviteUsers: Array<InviteUsersResponse>;
+  inviteUsers: MutationInviteUsersResult;
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: UserOrganization;
@@ -631,6 +632,13 @@ export type MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDe
 export type MutationDeAuthIntegrationSuccess = {
   __typename?: 'MutationDeAuthIntegrationSuccess';
   data: Scalars['String']['output'];
+};
+
+export type MutationInviteUsersResult = InviteUsersErrors | MutationInviteUsersSuccess;
+
+export type MutationInviteUsersSuccess = {
+  __typename?: 'MutationInviteUsersSuccess';
+  data: Scalars['Boolean']['output'];
 };
 
 export enum OrderBy {
