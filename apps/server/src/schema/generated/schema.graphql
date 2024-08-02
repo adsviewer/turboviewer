@@ -524,6 +524,7 @@ type Mutation {
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): [InviteUsersResponse!]!
   login(email: String!, password: String!, token: String): Tokens!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
+  removeUserFromOrganization(userId: String!): UserOrganization!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
 
@@ -535,11 +536,7 @@ type Mutation {
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!): Organization!
-  updateOrganizationUser(
-    role: OrganizationRoleEnum
-    status: UserOrganizationStatusNotInvited
-    userId: String!
-  ): UserOrganization!
+  updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }
 
@@ -720,13 +717,7 @@ type UserOrganization {
 
 enum UserOrganizationStatus {
   ACTIVE
-  NON_ACTIVE
   INVITED
-}
-
-enum UserOrganizationStatusNotInvited {
-  ACTIVE
-  NON_ACTIVE
 }
 
 enum UserStatus {

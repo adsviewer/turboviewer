@@ -105,7 +105,10 @@ const handleInvitedUserCase = async (
     }),
     prisma.userOrganization.update({
       where: { userId_organizationId: { userId: user.id, organizationId } },
-      data: { status: UserOrganizationStatus.ACTIVE },
+      data: {
+        status: UserOrganizationStatus.ACTIVE,
+        user: { update: { currentOrganizationId: organizationId } },
+      },
     }),
     redisDel(confirmInvitedUserRedisKey(token)),
   ]);

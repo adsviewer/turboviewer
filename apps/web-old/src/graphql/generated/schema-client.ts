@@ -526,6 +526,7 @@ export type Mutation = {
   inviteUsers: Array<InviteUsersResponse>;
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
+  removeUserFromOrganization: UserOrganization;
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
   /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
@@ -582,6 +583,10 @@ export type MutationRefreshDataArgs = {
   integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type MutationRemoveUserFromOrganizationArgs = {
+  userId: Scalars['String']['input'];
+};
+
 export type MutationResetPasswordArgs = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
@@ -612,7 +617,6 @@ export type MutationUpdateOrganizationAdAccountsArgs = {
 
 export type MutationUpdateOrganizationUserArgs = {
   role?: InputMaybe<OrganizationRoleEnum>;
-  status?: InputMaybe<UserOrganizationStatusNotInvited>;
   userId: Scalars['String']['input'];
 };
 
@@ -809,13 +813,7 @@ export type UserOrganization = {
 
 export enum UserOrganizationStatus {
   ACTIVE = 'ACTIVE',
-  NON_ACTIVE = 'NON_ACTIVE',
   INVITED = 'INVITED',
-}
-
-export enum UserOrganizationStatusNotInvited {
-  ACTIVE = 'ACTIVE',
-  NON_ACTIVE = 'NON_ACTIVE',
 }
 
 export enum UserStatus {
