@@ -21,7 +21,7 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.616.0",
+    "@aws-sdk/client-sqs": "^3.623.0",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
@@ -35,7 +35,7 @@
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^4.17.21",
     "@types/lodash": "^4.17.7",
-    "@types/node": "^20.14.9",
-    "typescript": "^5.5.2"
+    "@types/node": "^22.1.0",
+    "typescript": "^5.5.4"
   }
 }
