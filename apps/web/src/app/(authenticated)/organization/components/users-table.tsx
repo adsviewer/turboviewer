@@ -144,6 +144,10 @@ export function UsersTable(): React.ReactNode {
     }
   };
 
+  const removeUser = (): void => {
+    logger.info('test');
+  };
+
   const rows = organization?.organization.userOrganizations.map((userData) => (
     <Table.Tr key={userData.user.id}>
       <Table.Td>
@@ -200,6 +204,7 @@ export function UsersTable(): React.ReactNode {
                 <Menu.Item
                   leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                   color="red"
+                  onClick={removeUser}
                 >
                   {tGeneric('remove')}
                 </Menu.Item>
