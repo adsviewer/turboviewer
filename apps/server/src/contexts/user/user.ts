@@ -215,7 +215,7 @@ const completeConfirmInvitedUserCallback = async (token: string): Promise<Tokens
   await Promise.all([
     prisma.userOrganization.update({
       where: { userId_organizationId: { userId, organizationId } },
-      data: { status: UserOrganizationStatus.ACTIVE },
+      data: { status: UserOrganizationStatus.ACTIVE, user: { update: { currentOrganizationId: organizationId } } },
     }),
     redisDel(key),
   ]);

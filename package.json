@@ -9,7 +9,7 @@
     "test": "turbo test",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
-    "update": "pnpm update --latest && turbo update --concurrency=1 && pnpm install",
+    "update": "pnpm update --latest && pnpm i && turbo update --concurrency=1 && pnpm install",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prettier": "prettier --check \"**/*.{ts,tsx,md}\"",
     "lint-staged": "lint-staged --no-hide-partially-staged",
@@ -24,7 +24,7 @@
     "prisma": "^5.16.1",
     "terraform": "^1.23.0",
     "tsx": "^4.16.0",
-    "turbo": "^2.0.9"
+    "turbo": "^2.0.11"
   },
   "packageManager": "pnpm@9.6.0",
   "engines": {

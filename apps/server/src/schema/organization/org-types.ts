@@ -1,5 +1,7 @@
-import { EmailType, OrganizationRoleEnum, UserOrganizationStatus } from '@repo/database';
+import { OrganizationRoleEnum, UserOrganizationStatus } from '@repo/database';
+import { AError } from '@repo/utils';
 import { builder } from '../builder';
+import { ErrorInterface } from '../errors';
 
 export const OrganizationDto = builder.prismaObject('Organization', {
   authScopes: (organization, ctx) => {
@@ -41,14 +43,6 @@ export const OrganizationRoleEnumDto = builder.enumType('OrganizationRoleEnum', 
 });
 export const UserOrganizationStatusDto = builder.enumType(UserOrganizationStatus, { name: 'UserOrganizationStatus' });
 
-export const UserOrganizationStatusNotInvitedDto = builder.enumType('UserOrganizationStatusNotInvited', {
-  values: Object.fromEntries(
-    Object.entries(UserOrganizationStatus)
-      .filter(([_, value]) => value !== UserOrganizationStatus.INVITED)
-      .map(([name, value]) => [name, { value }]),
-  ),
-});
-
 export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
   fields: (t) => ({
     userId: t.exposeID('userId'),
@@ -60,14 +54,30 @@ export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
   }),
 });
 
-export const InviteUserRespDto = builder.simpleObject('InviteUsersResponse', {
+export class InviteUsersErrors extends AError {
+  errors: { email: string; message: string }[];
+
+  constructor(errors: { email: string; message: string }[]) {
+    super('Some users were not invited');
+    this.errors = errors;
+    this.name = 'InviteUsersErrors';
+  }
+}
+
+export const InviteUsersErrorDto = builder.simpleObject('InviteUsersError', {
   fields: (t) => ({
     email: t.string({ nullable: false }),
-    errorMessage: t.string({ nullable: false }),
+    message: t.string({ nullable: false }),
   }),
 });
 
-export const EmailTypeDto = builder.enumType(EmailType, { name: 'EmailType' });
+export const InviteUsersErrorsDto = builder.objectType(InviteUsersErrors, {
+  name: 'InviteUsersErrors',
+  interfaces: [ErrorInterface],
+  fields: (t) => ({
+    errors: t.expose('errors', { type: [InviteUsersErrorDto], nullable: false }),
+  }),
+});
 
 export const inviteLinkDto = builder.simpleObject('InviteLinks', {
   fields: (t) => ({

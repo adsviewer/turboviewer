@@ -112,7 +112,6 @@ model UserRole {
 
 enum UserOrganizationStatus {
   ACTIVE
-  NON_ACTIVE
   INVITED
 }
 

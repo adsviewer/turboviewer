@@ -28,11 +28,10 @@ import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-ty
 import { validateEmail } from '../../emailable-helper';
 import {
   inviteLinkDto,
-  InviteUserRespDto,
+  InviteUsersErrors,
   OrganizationDto,
   OrganizationRoleEnumDto,
   UserOrganizationDto,
-  UserOrganizationStatusNotInvitedDto,
 } from './org-types';
 
 const fireAndForget = new FireAndForget();
@@ -216,7 +215,8 @@ builder.mutationFields((t) => ({
   }),
 
   inviteUsers: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
-    type: [InviteUserRespDto],
+    type: 'Boolean',
+    errors: { types: [InviteUsersErrors] },
     args: {
       emails: t.arg.stringList({ required: true, validate: { items: { email: true } } }),
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
@@ -302,7 +302,7 @@ builder.mutationFields((t) => ({
             ]);
           } else {
             const emailValidation = await validateEmail(email);
-            if (isAError(emailValidation)) return { email, errorMessage: emailValidation.message };
+            if (isAError(emailValidation)) return { email, message: emailValidation.message };
             const emailType = emailValidation.emailType;
             // Create the action url for new users
             const searchParams = new URLSearchParams();
@@ -326,7 +326,9 @@ builder.mutationFields((t) => ({
           }
         }),
       );
-      return errors.flatMap((e) => e ?? []);
+      const flattenErrors = errors.flatMap((e) => e ?? []);
+      if (!flattenErrors.length) return true;
+      throw new InviteUsersErrors(flattenErrors);
     },
   }),
 
@@ -380,10 +382,46 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  removeUserFromOrganization: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+    type: UserOrganizationDto,
+    args: {
+      userId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      const userOrganization = await prisma.userOrganization.findUnique({
+        where: {
+          userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId },
+          status: UserOrganizationStatus.ACTIVE,
+        },
+      });
+      if (!userOrganization) {
+        throw new GraphQLError('User is not an active member of this organization');
+      }
+      if (ctx.isOrgOperator && userOrganization.role === OrganizationRoleEnum.ORG_ADMIN) {
+        throw new GraphQLError('Only organization administrators can remove organization administrators');
+      }
+      if (ctx.currentUserId === args.userId && ctx.isOrgAdmin) {
+        const otherAdmins = await prisma.userOrganization.count({
+          where: {
+            organizationId: ctx.organizationId,
+            userId: { not: ctx.currentUserId },
+            role: OrganizationRoleEnum.ORG_ADMIN,
+            status: UserOrganizationStatus.ACTIVE,
+          },
+        });
+        if (otherAdmins === 0) {
+          throw new GraphQLError('Cannot remove the last organization administrator');
+        }
+      }
+      return prisma.userOrganization.delete({
+        where: { userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId } },
+      });
+    },
+  }),
+
   updateOrganizationUser: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: UserOrganizationDto,
     args: {
-      status: t.arg({ type: UserOrganizationStatusNotInvitedDto, required: false }),
       role: t.arg({ type: OrganizationRoleEnumDto, required: false }),
       userId: t.arg.string({ required: true }),
     },
@@ -400,23 +438,9 @@ builder.mutationFields((t) => ({
       if (ctx.isOrgOperator && userOrganization.role === OrganizationRoleEnum.ORG_ADMIN) {
         throw new GraphQLError('Only organization administrators can update organization administrators');
       }
-      if (ctx.currentUserId === args.userId && ctx.isOrgAdmin && args.status === UserOrganizationStatus.NON_ACTIVE) {
-        const otherAdmins = await prisma.userOrganization.count({
-          where: {
-            organizationId: ctx.organizationId,
-            userId: { not: ctx.currentUserId },
-            role: OrganizationRoleEnum.ORG_ADMIN,
-            status: UserOrganizationStatus.ACTIVE,
-          },
-        });
-        if (otherAdmins === 0) {
-          throw new GraphQLError('Cannot remove the last organization administrator');
-        }
-      }
       return prisma.userOrganization.update({
         where: { userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId } },
         data: {
-          status: args.status ?? undefined,
           role: args.role ?? undefined,
         },
       });
