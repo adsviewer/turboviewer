@@ -40,8 +40,8 @@ export const IntegrationTypeDto = builder.enumType(IntegrationTypeEnum, {
 
 export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem', {
   fields: (t) => ({
-    type: t.field({ type: IntegrationTypeDto }),
-    status: t.field({ type: IntegrationStatusDto }),
+    type: t.field({ type: IntegrationTypeDto, nullable: false }),
+    status: t.field({ type: IntegrationStatusDto, nullable: false }),
     authUrl: t.string({
       authScopes: { $all: { isRootOrg: true, isOrgAdmin: true } },
       unauthorizedResolver: () => null,
@@ -56,10 +56,10 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     return baseScopes ?? false;
   },
   fields: (t) => ({
-    id: t.exposeID('id', offspringOrgFieldProps),
-    organizationId: t.exposeString('organizationId'),
+    id: t.exposeID('id', { nullable: false, ...offspringOrgFieldProps }),
+    organizationId: t.exposeString('organizationId', { nullable: false }),
 
-    type: t.expose('type', { type: IntegrationTypeDto, ...offspringOrgFieldProps }),
+    type: t.expose('type', { type: IntegrationTypeDto, nullable: false, ...offspringOrgFieldProps }),
     externalId: t.exposeString('externalId', { nullable: true }),
 
     accessTokenExpiresAt: t.expose('accessTokenExpiresAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
@@ -68,12 +68,13 @@ export const IntegrationDto = builder.prismaObject('Integration', {
       nullable: true,
       ...offspringOrgFieldProps,
     }),
-    updatedAt: t.expose('updatedAt', { type: 'Date', ...offspringOrgFieldProps }),
-    createdAt: t.expose('createdAt', { type: 'Date', ...offspringOrgFieldProps }),
+    updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
+    createdAt: t.expose('createdAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
 
-    organization: t.relation('organization'),
+    organization: t.relation('organization', { nullable: false }),
     adAccounts: t.relation('adAccounts', {
+      nullable: false,
       ...offspringOrgFieldProps,
       query: (args, ctx) =>
         ctx.isAdmin
@@ -114,9 +115,9 @@ builder.objectType(MetaError, {
   name: 'MetaError',
   interfaces: [ErrorInterface],
   fields: (t) => ({
-    code: t.exposeInt('code'),
-    errorSubCode: t.exposeInt('errorSubCode'),
-    fbTraceId: t.exposeString('fbTraceId'),
+    code: t.exposeInt('code', { nullable: false }),
+    errorSubCode: t.exposeInt('errorSubCode', { nullable: false }),
+    fbTraceId: t.exposeString('fbTraceId', { nullable: false }),
   }),
 });
 
@@ -124,8 +125,8 @@ export const ChannelInitialProgressPayloadDto = builder
   .objectRef<ChannelInitialProgressPayload>('ChannelInitialProgressPayload')
   .implement({
     fields: (t) => ({
-      channel: t.expose('channel', { type: IntegrationTypeDto }),
-      progress: t.exposeFloat('progress'),
+      channel: t.expose('channel', { type: IntegrationTypeDto, nullable: false }),
+      progress: t.exposeFloat('progress', { nullable: false }),
     }),
   });
 
@@ -136,24 +137,31 @@ export const CurrencyEnumDto = builder.enumType(CurrencyEnum, {
 export const AdAccountDto = builder.prismaObject('AdAccount', {
   authScopes: { isInOrg: true },
   fields: (t) => ({
-    id: t.exposeID('id'),
-    integrationId: t.exposeString('integrationId'),
-    externalId: t.exposeString('externalId'),
+    id: t.exposeID('id', { nullable: false }),
+    integrationId: t.exposeString('integrationId', { nullable: false }),
+    externalId: t.exposeString('externalId', { nullable: false }),
 
-    type: t.expose('type', { type: IntegrationTypeDto }),
-    currency: t.expose('currency', { type: CurrencyEnumDto }),
-    name: t.exposeString('name'),
-    updatedAt: t.expose('updatedAt', { type: 'Date' }),
-    createdAt: t.expose('createdAt', { type: 'Date' }),
+    type: t.expose('type', { type: IntegrationTypeDto, nullable: false }),
+    currency: t.expose('currency', { type: CurrencyEnumDto, nullable: false }),
+    name: t.exposeString('name', { nullable: false }),
+    updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
+    createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
     adCount: t.int({
+      nullable: false,
       resolve: async (root, _args, _ctx) => {
         return prisma.ad.count({ where: { adAccountId: root.id } });
       },
     }),
-    advertisements: t.relatedConnection('advertisements', { cursor: 'id' }),
-    insights: t.relation('insights'),
-    integration: t.relation('integration'),
+    advertisements: t.relatedConnection('advertisements', {
+      cursor: 'id',
+      nullable: false,
+      edgesNullable: { list: false, items: true },
+      nodeNullable: false,
+    }),
+    insights: t.relation('insights', { nullable: false }),
+    integration: t.relation('integration', { nullable: false }),
     organizations: t.relation('organizations', {
+      nullable: false,
       query: (args, ctx) =>
         ctx.isAdmin
           ? {}
@@ -166,6 +174,7 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
     }),
     isConnectedToCurrentOrg: t.boolean({
       description: 'Whether the ad account is connected to the current organization',
+      nullable: false,
       resolve: async (root, _args, ctx) => {
         if (!ctx.organizationId) return false;
         const organization = await prisma.organization.findUnique({
@@ -204,14 +213,17 @@ export const InsightsColumnsGroupByDto = builder.enumType('InsightsColumnsGroupB
 
 export const AdDto = builder.prismaObject('Ad', {
   fields: (t) => ({
-    id: t.exposeID('id'),
-    adAccountId: t.exposeString('adAccountId'),
-    externalId: t.exposeString('externalId'),
+    id: t.exposeID('id', { nullable: false }),
+    adAccountId: t.exposeString('adAccountId', { nullable: false }),
+    externalId: t.exposeString('externalId', { nullable: false }),
     name: t.exposeString('name', { nullable: true }),
 
-    adAccount: t.relation('adAccount'),
+    adAccount: t.relation('adAccount', { nullable: false }),
     insights: t.relatedConnection('insights', {
       cursor: 'id',
+      nullable: false,
+      edgesNullable: { list: false, items: true },
+      nodeNullable: false,
       args: {
         dateFrom: t.arg({ type: 'Date', required: false }),
         dateTo: t.arg({ type: 'Date', required: false }),
@@ -249,17 +261,17 @@ export const PublisherEnumDto = builder.enumType(PublisherEnum, {
 
 export const InsightDto = builder.prismaObject('Insight', {
   fields: (t) => ({
-    id: t.exposeID('id'),
-    adId: t.exposeString('adId'),
+    id: t.exposeID('id', { nullable: false }),
+    adId: t.exposeString('adId', { nullable: false }),
 
-    date: t.expose('date', { type: 'Date' }),
-    impressions: t.exposeInt('impressions'),
-    spend: t.exposeInt('spend'),
-    device: t.expose('device', { type: DeviceEnumDto }),
-    publisher: t.expose('publisher', { type: PublisherEnum }),
-    position: t.exposeString('position'),
+    date: t.expose('date', { type: 'Date', nullable: false }),
+    impressions: t.exposeInt('impressions', { nullable: false }),
+    spend: t.exposeInt('spend', { nullable: false }),
+    device: t.expose('device', { type: DeviceEnumDto, nullable: false }),
+    publisher: t.expose('publisher', { type: PublisherEnum, nullable: false }),
+    position: t.exposeString('position', { nullable: false }),
 
-    ad: t.relation('ad'),
+    ad: t.relation('ad', { nullable: false }),
   }),
 });
 

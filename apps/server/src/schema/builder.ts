@@ -9,6 +9,7 @@ import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import SimpleObjectsPlugin from '@pothos/plugin-simple-objects';
 import ZodPlugin from '@pothos/plugin-zod';
 import { prisma, Prisma } from '@repo/database';
+import { Environment, MODE } from '@repo/mode';
 import { type GraphQLContext } from '../context';
 import { getRootOrganizationId } from '../contexts/organization';
 import JsonValue = Prisma.JsonValue;
@@ -32,7 +33,6 @@ export interface RefreshContext extends GraphQLContext {
 }
 
 export const builder = new SchemaBuilder<{
-  Defaults: 'v3';
   Context: GraphQLContext;
   Scalars: {
     Date: {
@@ -65,45 +65,38 @@ export const builder = new SchemaBuilder<{
     emailUnconfirmed: InOrganizationContext;
   };
 }>({
-  defaults: 'v3',
   plugins: [ErrorsPlugin, RelayPlugin, ScopeAuthPlugin, PrismaPlugin, SimpleObjectsPlugin, ZodPlugin],
-  errorOptions: {
-    defaultTypes: [],
-  },
-  relayOptions: {
-    // These will become the defaults in the next major version
-    clientMutationId: 'omit',
-    cursorType: 'ID',
-  },
-  authScopes: (context) => ({
-    authenticated: Boolean(context.currentUserId) && !context.isRefreshToken && !context.emailUnconfirmed,
-    isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
-    isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
-    isOrgOperator: Boolean(context.isOrgOperator) && !context.isRefreshToken && !context.emailUnconfirmed,
-    isRootOrg: async () =>
-      Boolean(
-        context.organizationId && context.organizationId === (await getRootOrganizationId(context.organizationId)),
-      ),
-    isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken && !context.emailUnconfirmed,
-    refresh: Boolean(context.isRefreshToken),
-    emailUnconfirmed: Boolean(context.emailUnconfirmed),
-  }),
-  scopeAuthOptions: {
+  scopeAuth: {
     // Recommended when using subscriptions
     // when this is not set, auth checks are run when event is resolved rather than when the subscription is created
     authorizeOnSubscribe: true,
     unauthorizedError: (_parent, _context, _info, _result) => new GraphQLError(`Not authorized`),
+    authScopes: (context) => ({
+      authenticated: Boolean(context.currentUserId) && !context.isRefreshToken && !context.emailUnconfirmed,
+      isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
+      isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
+      isOrgOperator: Boolean(context.isOrgOperator) && !context.isRefreshToken && !context.emailUnconfirmed,
+      isRootOrg: async () =>
+        Boolean(
+          context.organizationId && context.organizationId === (await getRootOrganizationId(context.organizationId)),
+        ),
+      isInOrg: Boolean(context.isInOrg) && !context.isRefreshToken && !context.emailUnconfirmed,
+      refresh: Boolean(context.isRefreshToken),
+      emailUnconfirmed: Boolean(context.emailUnconfirmed),
+    }),
   },
   prisma: {
     client: prisma,
     // defaults to false, uses /// comments from prisma schema as descriptions
     // for object types, relations and exposed fields.
     // descriptions can be omitted by setting description to false
-    // exposeDescriptions: boolean | { models: boolean, fields: boolean },
-    // use where clause from prismaRelatedConnection for totalCount (will true by default in next major version)
+    exposeDescriptions: true,
+    // use where clause from prismaRelatedConnection for totalCount (defaults to true)
     filterConnectionTotalCount: true,
+    // warn when not using a query parameter correctly
+    onUnusedQuery: MODE === Environment.Production ? null : 'warn',
   },
-  validationOptions: {
+  zod: {
     // optionally customize how errors are formatted
     validationError: (zodError, _args, _context, _info) => {
       // the default behavior is to just throw the zod error directly

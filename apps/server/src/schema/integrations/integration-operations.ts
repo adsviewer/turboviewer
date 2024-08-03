@@ -21,6 +21,7 @@ const fireAndForget = new FireAndForget();
 builder.queryFields((t) => ({
   integrations: t.withAuth({ isInOrg: true }).prismaField({
     type: [IntegrationDto],
+    nullable: false,
     args: {
       type: t.arg({ type: IntegrationTypeDto, required: false }),
     },
@@ -37,6 +38,7 @@ builder.queryFields((t) => ({
   }),
   settingsChannels: t.withAuth({ isInOrg: true }).field({
     type: [IntegrationListItemDto],
+    nullable: false,
     resolve: async (_root, _args, ctx, _info) => {
       const integrations = await prisma.integration.findMany({
         where: {
@@ -63,6 +65,7 @@ builder.queryFields((t) => ({
 builder.mutationFields((t) => ({
   deAuthIntegration: t.withAuth({ $all: { isRootOrg: true, isInOrg: true } }).field({
     type: 'String',
+    nullable: false,
     errors: { types: [MetaError, AError] },
     args: {
       type: t.arg({
@@ -88,6 +91,7 @@ builder.mutationFields((t) => ({
 builder.subscriptionFields((t) => ({
   channelInitialSetupProgress: t.withAuth({ authenticated: true }).field({
     type: ChannelInitialProgressPayloadDto,
+    nullable: false,
     resolve: (root: ChannelInitialProgressPayload, _args, _ctx, _info) => root,
     subscribe: (_root, _args, ctx) => pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId),
   }),

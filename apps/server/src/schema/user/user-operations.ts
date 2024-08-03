@@ -20,6 +20,7 @@ const emailSchema = z.string().email();
 builder.queryFields((t) => ({
   me: t.withAuth({ authenticated: true, emailUnconfirmed: true }).prismaField({
     type: UserDto,
+    nullable: false,
     resolve: async (query, root, args, ctx, _info) => {
       return await prisma.user.findUniqueOrThrow({
         ...query,
@@ -31,6 +32,7 @@ builder.queryFields((t) => ({
   refreshToken: t.withAuth({ refresh: true }).field({
     description: 'Uses the refresh token to generate a new token',
     type: 'String',
+    nullable: false,
     resolve: async (_root, _args, ctx, _info) => {
       const user = await prisma.user.findUnique({
         where: { id: ctx.currentUserId },
@@ -69,6 +71,7 @@ const updateUserSchema = z.object({
 
 builder.mutationFields((t) => ({
   signup: t.field({
+    nullable: false,
     type: TokensDto,
     args: {
       args: t.arg({ type: SignUpInputDto, required: true }),
@@ -98,6 +101,7 @@ builder.mutationFields((t) => ({
   }),
   login: t.field({
     type: TokensDto,
+    nullable: false,
     args: {
       email: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
@@ -125,6 +129,7 @@ builder.mutationFields((t) => ({
   }),
   updateUser: t.withAuth({ authenticated: true }).prismaField({
     type: UserDto,
+    nullable: false,
     args: {
       firstName: t.arg.string(),
       lastName: t.arg.string(),
@@ -162,6 +167,7 @@ builder.mutationFields((t) => ({
     },
   }),
   forgetPassword: t.boolean({
+    nullable: false,
     args: {
       email: t.arg.string({ required: true, validate: { email: true } }),
     },
@@ -202,6 +208,7 @@ builder.mutationFields((t) => ({
     },
   }),
   resetPassword: t.field({
+    nullable: false,
     type: TokensDto,
     args: {
       token: t.arg.string({ required: true, validate: { uuid: true } }),
@@ -233,6 +240,7 @@ builder.mutationFields((t) => ({
     },
   }),
   resendEmailConfirmation: t.withAuth({ emailUnconfirmed: true }).boolean({
+    nullable: false,
     resolve: async (_root, _args, ctx, _info) => {
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: ctx.currentUserId },

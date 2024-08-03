@@ -12,16 +12,17 @@ export const OrganizationDto = builder.prismaObject('Organization', {
     };
   },
   fields: (t) => ({
-    id: t.exposeID('id'),
+    id: t.exposeID('id', { nullable: false }),
     parentId: t.exposeString('parentId', { nullable: true }),
-    name: t.exposeString('name'),
+    name: t.exposeString('name', { nullable: false }),
     domain: t.exposeString('domain', { nullable: true }),
-    createdAt: t.expose('createdAt', { type: 'Date' }),
-    updatedAt: t.expose('updatedAt', { type: 'Date' }),
-    userOrganizations: t.relation('users'),
-    integrations: t.relation('integrations'),
-    adAccounts: t.relation('adAccounts'),
+    createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
+    updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
+    userOrganizations: t.relation('users', { nullable: false }),
+    integrations: t.relation('integrations', { nullable: false }),
+    adAccounts: t.relation('adAccounts', { nullable: false }),
     isRoot: t.boolean({
+      nullable: false,
       resolve: (root, _args, _ctx) => root.parentId === null,
     }),
   }),
@@ -45,12 +46,12 @@ export const UserOrganizationStatusDto = builder.enumType(UserOrganizationStatus
 
 export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
   fields: (t) => ({
-    userId: t.exposeID('userId'),
-    organizationId: t.exposeString('organizationId'),
-    role: t.expose('role', { type: OrganizationRoleEnumDto }),
-    status: t.expose('status', { type: UserOrganizationStatusDto }),
-    user: t.relation('user'),
-    organization: t.relation('organization', { grantScopes: ['readOrganization'] }),
+    userId: t.exposeID('userId', { nullable: false }),
+    organizationId: t.exposeString('organizationId', { nullable: false }),
+    role: t.expose('role', { type: OrganizationRoleEnumDto, nullable: false }),
+    status: t.expose('status', { type: UserOrganizationStatusDto, nullable: false }),
+    user: t.relation('user', { nullable: false }),
+    organization: t.relation('organization', { grantScopes: ['readOrganization'], nullable: false }),
   }),
 });
 

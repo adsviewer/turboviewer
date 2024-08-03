@@ -12,6 +12,7 @@ import { TokensDto } from './user-types';
 builder.queryFields((t) => ({
   checkConfirmInvitedUserTokenValidity: t.field({
     type: 'Boolean',
+    nullable: false,
     args: {
       token: t.arg.string({ required: true }),
     },
@@ -25,6 +26,7 @@ builder.queryFields((t) => ({
 
 builder.mutationFields((t) => ({
   signUpInvitedUser: t.field({
+    nullable: false,
     description:
       "Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet",
     type: TokensDto,
@@ -66,6 +68,7 @@ builder.mutationFields((t) => ({
     description:
       'Use this mutation after the user has clicked on the non-personalized invite link and they have an account already',
     type: TokensDto,
+    nullable: false,
     args: {
       token: t.arg.string({ required: true }),
     },
