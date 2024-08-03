@@ -4,16 +4,16 @@ import { logger } from '@repo/logger';
 import {
   type CreateOrganizationMutation,
   type CreateOrganizationMutationVariables,
+  type DeleteOrganizationMutation,
+  type DeleteOrganizationMutationVariables,
+  type InviteUsersMutation,
+  type InviteUsersMutationVariables,
   type SwitchOrganizationMutation,
   type SwitchOrganizationMutationVariables,
   type UpdateOrganizationMutation,
   type UpdateOrganizationMutationVariables,
-  type DeleteOrganizationMutation,
-  type DeleteOrganizationMutationVariables,
-  type InviteUsersMutationVariables,
-  type InviteUsersMutation,
-  type UpdateOrganizationUserMutationVariables,
   type UpdateOrganizationUserMutation,
+  type UpdateOrganizationUserMutationVariables,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -140,6 +140,13 @@ export async function switchOrganizationAndChangeJWT(values: SwitchOrganizationM
   }
 }
 
-export async function inviteUsers(values: InviteUsersMutationVariables): Promise<UrqlResult<InviteUsersMutation>> {
-  return await handleUrqlRequest(urqlClientSdk().inviteUsers(values));
+type InviteUsersMutationError = Extract<
+  InviteUsersMutation['inviteUsers'],
+  { __typename: 'InviteUsersErrors' }
+>['error'];
+
+export async function inviteUsers(
+  values: InviteUsersMutationVariables,
+): Promise<UrqlResult<InviteUsersMutation, InviteUsersMutationError | string>> {
+  return await handleUrqlRequest<InviteUsersMutation, InviteUsersMutationError>(urqlClientSdk().inviteUsers(values));
 }

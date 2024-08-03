@@ -496,7 +496,7 @@ export type InviteUsersError = {
 
 export type InviteUsersErrors = Error & {
   __typename?: 'InviteUsersErrors';
-  errors: Array<InviteUsersError>;
+  error: Array<InviteUsersError>;
   message: Scalars['String']['output'];
 };
 

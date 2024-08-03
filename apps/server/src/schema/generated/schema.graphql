@@ -486,7 +486,7 @@ type InviteUsersError {
 }
 
 type InviteUsersErrors implements Error {
-  errors: [InviteUsersError!]!
+  error: [InviteUsersError!]!
   message: String!
 }
 

@@ -58,7 +58,7 @@ mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
       data
     }
     ... on InviteUsersErrors {
-      errors {
+      error {
         email
         message
       }

@@ -22,7 +22,7 @@ export type Scalars = {
 };
 
 export type Ad = {
-  __typename?: 'Ad';
+  __typename: 'Ad';
   adAccount: AdAccount;
   adAccountId: Scalars['String']['output'];
   externalId: Scalars['String']['output'];
@@ -46,7 +46,7 @@ export type AdInsightsArgs = {
 };
 
 export type AdAccount = {
-  __typename?: 'AdAccount';
+  __typename: 'AdAccount';
   adCount: Scalars['Int']['output'];
   advertisements: AdAccountAdvertisementsConnection;
   createdAt: Scalars['Date']['output'];
@@ -72,26 +72,26 @@ export type AdAccountAdvertisementsArgs = {
 };
 
 export type AdAccountAdvertisementsConnection = {
-  __typename?: 'AdAccountAdvertisementsConnection';
+  __typename: 'AdAccountAdvertisementsConnection';
   edges: Array<Maybe<AdAccountAdvertisementsConnectionEdge>>;
   pageInfo: PageInfo;
 };
 
 export type AdAccountAdvertisementsConnectionEdge = {
-  __typename?: 'AdAccountAdvertisementsConnectionEdge';
+  __typename: 'AdAccountAdvertisementsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Ad;
 };
 
 export type AdInsightsConnection = {
-  __typename?: 'AdInsightsConnection';
+  __typename: 'AdInsightsConnection';
   edges: Array<Maybe<AdInsightsConnectionEdge>>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
 };
 
 export type AdInsightsConnectionEdge = {
-  __typename?: 'AdInsightsConnectionEdge';
+  __typename: 'AdInsightsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Insight;
 };
@@ -104,12 +104,12 @@ export enum AllRoles {
 }
 
 export type BaseError = Error & {
-  __typename?: 'BaseError';
+  __typename: 'BaseError';
   message: Scalars['String']['output'];
 };
 
 export type ChannelInitialProgressPayload = {
-  __typename?: 'ChannelInitialProgressPayload';
+  __typename: 'ChannelInitialProgressPayload';
   channel: IntegrationType;
   progress: Scalars['Float']['output'];
 };
@@ -315,13 +315,13 @@ export type FilterInsightsInput = {
 };
 
 export type GenerateGoogleAuthUrlResponse = {
-  __typename?: 'GenerateGoogleAuthUrlResponse';
+  __typename: 'GenerateGoogleAuthUrlResponse';
   type: LoginProviderEnum;
   url: Scalars['String']['output'];
 };
 
 export type GroupedInsight = Pagination & {
-  __typename?: 'GroupedInsight';
+  __typename: 'GroupedInsight';
   edges: Array<GroupedInsights>;
   hasNext: Scalars['Boolean']['output'];
   page: Scalars['Int']['output'];
@@ -330,7 +330,7 @@ export type GroupedInsight = Pagination & {
 };
 
 export type GroupedInsights = {
-  __typename?: 'GroupedInsights';
+  __typename: 'GroupedInsights';
   adAccountId?: Maybe<Scalars['String']['output']>;
   adAccountName?: Maybe<Scalars['String']['output']>;
   adId?: Maybe<Scalars['String']['output']>;
@@ -345,14 +345,14 @@ export type GroupedInsights = {
 };
 
 export type IFrame = {
-  __typename?: 'IFrame';
+  __typename: 'IFrame';
   height: Scalars['Int']['output'];
   src: Scalars['String']['output'];
   width: Scalars['Int']['output'];
 };
 
 export type Insight = {
-  __typename?: 'Insight';
+  __typename: 'Insight';
   ad: Ad;
   adId: Scalars['String']['output'];
   date: Scalars['Date']['output'];
@@ -383,7 +383,7 @@ export enum InsightsColumnsOrderBy {
 }
 
 export type InsightsDatapoints = {
-  __typename?: 'InsightsDatapoints';
+  __typename: 'InsightsDatapoints';
   cpm: Scalars['Int']['output'];
   date: Scalars['Date']['output'];
   impressions: Scalars['Int']['output'];
@@ -440,7 +440,7 @@ export enum InsightsPosition {
 }
 
 export type Integration = {
-  __typename?: 'Integration';
+  __typename: 'Integration';
   /** Caller is permitted to view this field if they are in an offspring organization */
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   /** Caller is permitted to view this field if they are in an offspring organization */
@@ -463,7 +463,7 @@ export type Integration = {
 };
 
 export type IntegrationListItem = {
-  __typename?: 'IntegrationListItem';
+  __typename: 'IntegrationListItem';
   authUrl?: Maybe<Scalars['String']['output']>;
   status: IntegrationStatus;
   type: IntegrationType;
@@ -484,20 +484,20 @@ export enum IntegrationType {
 }
 
 export type InviteLinks = {
-  __typename?: 'InviteLinks';
+  __typename: 'InviteLinks';
   role: OrganizationRoleEnum;
   url: Scalars['String']['output'];
 };
 
 export type InviteUsersError = {
-  __typename?: 'InviteUsersError';
+  __typename: 'InviteUsersError';
   email: Scalars['String']['output'];
   message: Scalars['String']['output'];
 };
 
 export type InviteUsersErrors = Error & {
-  __typename?: 'InviteUsersErrors';
-  errors: Array<InviteUsersError>;
+  __typename: 'InviteUsersErrors';
+  error: Array<InviteUsersError>;
   message: Scalars['String']['output'];
 };
 
@@ -506,7 +506,7 @@ export enum LoginProviderEnum {
 }
 
 export type MetaError = Error & {
-  __typename?: 'MetaError';
+  __typename: 'MetaError';
   code: Scalars['Int']['output'];
   errorSubCode: Scalars['Int']['output'];
   fbTraceId: Scalars['String']['output'];
@@ -514,7 +514,7 @@ export type MetaError = Error & {
 };
 
 export type Mutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   /** Use this mutation after the user has clicked on the non-personalized invite link and they have an account already */
   acceptLinkInvitationExistingUser: Tokens;
   /** Creates a link for the signed in org for a specific role */
@@ -632,14 +632,14 @@ export type MutationUpdateUserArgs = {
 export type MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDeAuthIntegrationSuccess;
 
 export type MutationDeAuthIntegrationSuccess = {
-  __typename?: 'MutationDeAuthIntegrationSuccess';
+  __typename: 'MutationDeAuthIntegrationSuccess';
   data: Scalars['String']['output'];
 };
 
 export type MutationInviteUsersResult = InviteUsersErrors | MutationInviteUsersSuccess;
 
 export type MutationInviteUsersSuccess = {
-  __typename?: 'MutationInviteUsersSuccess';
+  __typename: 'MutationInviteUsersSuccess';
   data: Scalars['Boolean']['output'];
 };
 
@@ -649,7 +649,7 @@ export enum OrderBy {
 }
 
 export type Organization = {
-  __typename?: 'Organization';
+  __typename: 'Organization';
   adAccounts: Array<AdAccount>;
   createdAt: Scalars['Date']['output'];
   domain?: Maybe<Scalars['String']['output']>;
@@ -672,7 +672,7 @@ export enum OrganizationRoleEnum {
 }
 
 export type PageInfo = {
-  __typename?: 'PageInfo';
+  __typename: 'PageInfo';
   endCursor?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
@@ -687,7 +687,7 @@ export type Pagination = {
 };
 
 export type PrismaClientKnownRequestError = Error & {
-  __typename?: 'PrismaClientKnownRequestError';
+  __typename: 'PrismaClientKnownRequestError';
   code: Scalars['String']['output'];
   message: Scalars['String']['output'];
 };
@@ -705,7 +705,7 @@ export enum PublisherEnum {
 }
 
 export type Query = {
-  __typename?: 'Query';
+  __typename: 'Query';
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
@@ -770,26 +770,26 @@ export type SignUpInput = {
 };
 
 export type Subscription = {
-  __typename?: 'Subscription';
+  __typename: 'Subscription';
   channelInitialSetupProgress: ChannelInitialProgressPayload;
 };
 
 export type TokenDto = {
-  __typename?: 'TokenDto';
+  __typename: 'TokenDto';
   refreshToken: Scalars['String']['output'];
   token: Scalars['String']['output'];
   user: User;
 };
 
 export type Tokens = {
-  __typename?: 'Tokens';
+  __typename: 'Tokens';
   refreshToken: Scalars['String']['output'];
   token: Scalars['String']['output'];
 };
 
 /** Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization */
 export type User = {
-  __typename?: 'User';
+  __typename: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
   currentOrganization?: Maybe<Organization>;
@@ -811,7 +811,7 @@ export type User = {
 };
 
 export type UserOrganization = {
-  __typename?: 'UserOrganization';
+  __typename: 'UserOrganization';
   organization: Organization;
   organizationId: Scalars['String']['output'];
   role: OrganizationRoleEnum;
@@ -831,13 +831,13 @@ export enum UserStatus {
 }
 
 export type ZodError = Error & {
-  __typename?: 'ZodError';
+  __typename: 'ZodError';
   fieldErrors: Array<ZodFieldError>;
   message: Scalars['String']['output'];
 };
 
 export type ZodFieldError = {
-  __typename?: 'ZodFieldError';
+  __typename: 'ZodFieldError';
   message: Scalars['String']['output'];
   path: Array<Scalars['String']['output']>;
 };
@@ -845,11 +845,11 @@ export type ZodFieldError = {
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AdAccountsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   integrations: Array<{
-    __typename?: 'Integration';
+    __typename: 'Integration';
     lastSyncedAt?: Date | null;
-    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number }>;
+    adAccounts: Array<{ __typename: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number }>;
   }>;
 };
 
@@ -870,12 +870,12 @@ export type InsightsQueryVariables = Exact<{
 }>;
 
 export type InsightsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   insights: {
-    __typename?: 'GroupedInsight';
+    __typename: 'GroupedInsight';
     hasNext: boolean;
     edges: Array<{
-      __typename?: 'GroupedInsights';
+      __typename: 'GroupedInsights';
       id: string;
       adAccountId?: string | null;
       adAccountName?: string | null;
@@ -886,13 +886,13 @@ export type InsightsQuery = {
       publisher?: PublisherEnum | null;
       position?: string | null;
       datapoints: Array<{
-        __typename?: 'InsightsDatapoints';
+        __typename: 'InsightsDatapoints';
         date: Date;
         spend: number;
         impressions: number;
         cpm: number;
       }>;
-      iFrame?: { __typename?: 'IFrame'; src: string; width: number; height: number } | null;
+      iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number } | null;
     }>;
   };
 };
@@ -900,16 +900,16 @@ export type InsightsQuery = {
 export type LastThreeMonthsAdsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LastThreeMonthsAdsQuery = {
-  __typename?: 'Query';
-  lastThreeMonthsAds: Array<{ __typename?: 'Ad'; id: string; name?: string | null }>;
+  __typename: 'Query';
+  lastThreeMonthsAds: Array<{ __typename: 'Ad'; id: string; name?: string | null }>;
 };
 
 export type SettingsChannelsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type SettingsChannelsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   settingsChannels: Array<{
-    __typename?: 'IntegrationListItem';
+    __typename: 'IntegrationListItem';
     type: IntegrationType;
     status: IntegrationStatus;
     authUrl?: string | null;
@@ -919,12 +919,12 @@ export type SettingsChannelsQuery = {
 export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type IntegrationsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   integrations: Array<{
-    __typename?: 'Integration';
+    __typename: 'Integration';
     type: IntegrationType;
     lastSyncedAt?: Date | null;
-    adAccounts: Array<{ __typename?: 'AdAccount'; adCount: number }>;
+    adAccounts: Array<{ __typename: 'AdAccount'; adCount: number }>;
   }>;
 };
 
@@ -933,19 +933,19 @@ export type DeAuthIntegrationMutationVariables = Exact<{
 }>;
 
 export type DeAuthIntegrationMutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   deAuthIntegration:
-    | { __typename?: 'BaseError'; message: string }
-    | { __typename?: 'MetaError'; message: string }
-    | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
+    | { __typename: 'BaseError'; message: string }
+    | { __typename: 'MetaError'; message: string }
+    | { __typename: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
 
 export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: string]: never }>;
 
 export type ChannelInitialSetupProgressSubscription = {
-  __typename?: 'Subscription';
+  __typename: 'Subscription';
   channelInitialSetupProgress: {
-    __typename?: 'ChannelInitialProgressPayload';
+    __typename: 'ChannelInitialProgressPayload';
     progress: number;
     channel: IntegrationType;
   };
@@ -957,8 +957,8 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 export type LoginMutation = {
-  __typename?: 'Mutation';
-  login: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  login: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type SignupMutationVariables = Exact<{
@@ -969,15 +969,15 @@ export type SignupMutationVariables = Exact<{
 }>;
 
 export type SignupMutation = {
-  __typename?: 'Mutation';
-  signup: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  signup: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type ForgetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
 
-export type ForgetPasswordMutation = { __typename?: 'Mutation'; forgetPassword: boolean };
+export type ForgetPasswordMutation = { __typename: 'Mutation'; forgetPassword: boolean };
 
 export type ResetPasswordMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -985,39 +985,39 @@ export type ResetPasswordMutationVariables = Exact<{
 }>;
 
 export type ResetPasswordMutation = {
-  __typename?: 'Mutation';
-  resetPassword: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  resetPassword: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type RefreshTokenQueryVariables = Exact<{ [key: string]: never }>;
 
-export type RefreshTokenQuery = { __typename?: 'Query'; refreshToken: string };
+export type RefreshTokenQuery = { __typename: 'Query'; refreshToken: string };
 
 export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: never }>;
 
-export type ResendEmailConfirmationMutation = { __typename?: 'Mutation'; resendEmailConfirmation: boolean };
+export type ResendEmailConfirmationMutation = { __typename: 'Mutation'; resendEmailConfirmation: boolean };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LoginProvidersQuery = {
-  __typename?: 'Query';
-  loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
+  __typename: 'Query';
+  loginProviders: Array<{ __typename: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
 export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetOrganizationQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   organization: {
-    __typename?: 'Organization';
+    __typename: 'Organization';
     id: string;
     userOrganizations: Array<{
-      __typename?: 'UserOrganization';
+      __typename: 'UserOrganization';
       userId: string;
       role: OrganizationRoleEnum;
       status: UserOrganizationStatus;
       user: {
-        __typename?: 'User';
+        __typename: 'User';
         id: string;
         email: string;
         firstName: string;
@@ -1034,11 +1034,11 @@ export type UpdateOrganizationUserMutationVariables = Exact<{
 }>;
 
 export type UpdateOrganizationUserMutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   updateOrganizationUser: {
-    __typename?: 'UserOrganization';
+    __typename: 'UserOrganization';
     role: OrganizationRoleEnum;
-    organization: { __typename?: 'Organization'; id: string };
+    organization: { __typename: 'Organization'; id: string };
   };
 };
 
@@ -1047,8 +1047,8 @@ export type CreateOrganizationMutationVariables = Exact<{
 }>;
 
 export type CreateOrganizationMutation = {
-  __typename?: 'Mutation';
-  createOrganization: { __typename?: 'Organization'; id: string; name: string };
+  __typename: 'Mutation';
+  createOrganization: { __typename: 'Organization'; id: string; name: string };
 };
 
 export type UpdateOrganizationMutationVariables = Exact<{
@@ -1056,8 +1056,8 @@ export type UpdateOrganizationMutationVariables = Exact<{
 }>;
 
 export type UpdateOrganizationMutation = {
-  __typename?: 'Mutation';
-  updateOrganization: { __typename?: 'Organization'; id: string; name: string };
+  __typename: 'Mutation';
+  updateOrganization: { __typename: 'Organization'; id: string; name: string };
 };
 
 export type SwitchOrganizationMutationVariables = Exact<{
@@ -1065,8 +1065,8 @@ export type SwitchOrganizationMutationVariables = Exact<{
 }>;
 
 export type SwitchOrganizationMutation = {
-  __typename?: 'Mutation';
-  switchOrganization: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  switchOrganization: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type DeleteOrganizationMutationVariables = Exact<{
@@ -1074,8 +1074,8 @@ export type DeleteOrganizationMutationVariables = Exact<{
 }>;
 
 export type DeleteOrganizationMutation = {
-  __typename?: 'Mutation';
-  deleteOrganization: { __typename?: 'Organization'; id: string };
+  __typename: 'Mutation';
+  deleteOrganization: { __typename: 'Organization'; id: string };
 };
 
 export type InviteUsersMutationVariables = Exact<{
@@ -1084,13 +1084,13 @@ export type InviteUsersMutationVariables = Exact<{
 }>;
 
 export type InviteUsersMutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   inviteUsers:
     | {
-        __typename?: 'InviteUsersErrors';
-        errors: Array<{ __typename?: 'InviteUsersError'; email: string; message: string }>;
+        __typename: 'InviteUsersErrors';
+        error: Array<{ __typename: 'InviteUsersError'; email: string; message: string }>;
       }
-    | { __typename?: 'MutationInviteUsersSuccess'; data: boolean };
+    | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1101,9 +1101,9 @@ export type UpdateUserMutationVariables = Exact<{
 }>;
 
 export type UpdateUserMutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   updateUser: {
-    __typename?: 'User';
+    __typename: 'User';
     id: string;
     firstName: string;
     lastName: string;
@@ -1112,11 +1112,11 @@ export type UpdateUserMutation = {
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
     organizations: Array<{
-      __typename?: 'UserOrganization';
-      organization: { __typename?: 'Organization'; id: string; name: string };
+      __typename: 'UserOrganization';
+      organization: { __typename: 'Organization'; id: string; name: string };
     }>;
     currentOrganization?: {
-      __typename?: 'Organization';
+      __typename: 'Organization';
       id: string;
       name: string;
       isRoot: boolean;
@@ -1128,9 +1128,9 @@ export type UpdateUserMutation = {
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   me: {
-    __typename?: 'User';
+    __typename: 'User';
     id: string;
     firstName: string;
     lastName: string;
@@ -1139,11 +1139,11 @@ export type MeQuery = {
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
     organizations: Array<{
-      __typename?: 'UserOrganization';
-      organization: { __typename?: 'Organization'; id: string; name: string };
+      __typename: 'UserOrganization';
+      organization: { __typename: 'Organization'; id: string; name: string };
     }>;
     currentOrganization?: {
-      __typename?: 'Organization';
+      __typename: 'Organization';
       id: string;
       name: string;
       isRoot: boolean;
@@ -1153,7 +1153,7 @@ export type MeQuery = {
 };
 
 export type UserFieldsFragment = {
-  __typename?: 'User';
+  __typename: 'User';
   id: string;
   firstName: string;
   lastName: string;
@@ -1162,11 +1162,11 @@ export type UserFieldsFragment = {
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
   organizations: Array<{
-    __typename?: 'UserOrganization';
-    organization: { __typename?: 'Organization'; id: string; name: string };
+    __typename: 'UserOrganization';
+    organization: { __typename: 'Organization'; id: string; name: string };
   }>;
   currentOrganization?: {
-    __typename?: 'Organization';
+    __typename: 'Organization';
     id: string;
     name: string;
     isRoot: boolean;
@@ -1539,7 +1539,7 @@ export const InviteUsersDocument = gql`
         data
       }
       ... on InviteUsersErrors {
-        errors {
+        error {
           email
           message
         }

@@ -69,27 +69,27 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
     void inviteUsers({ emails, role: DEFAULT_ROLE })
       .then((res) => {
         logger.info(res);
-        // This blows
-        if (res.data?.inviteUsers.__typename === 'InviteUsersErrors' && res.data.inviteUsers.errors.length) {
-          for (const inviteData of res.data.inviteUsers.errors) {
-            if (inviteData.message) {
-              const errorMessage = `${inviteData.email}: ${inviteData.message}`;
-              notifications.show({
-                title: tGeneric('error'),
-                message: errorMessage,
-                color: 'red',
-              });
+        if (!res.success) {
+          if (typeof res.error !== 'string' && res.error.length) {
+            for (const inviteData of res.error) {
+              if (inviteData.message) {
+                const errorMessage = `${inviteData.email}: ${inviteData.message}`;
+                notifications.show({
+                  title: tGeneric('error'),
+                  message: errorMessage,
+                  color: 'red',
+                });
+              }
             }
           }
-          return;
+        } else {
+          notifications.show({
+            title: tGeneric('success'),
+            message: t('inviteSuccess'),
+            color: 'blue',
+          });
+          closeModal();
         }
-
-        notifications.show({
-          title: tGeneric('success'),
-          message: t('inviteSuccess'),
-          color: 'blue',
-        });
-        closeModal();
 
         // TODO: UNCOMMENT AFTER BACKEND FIXES FOR SUCCESS: FALSE ON EMAIL ERRORS!
         // if (!res.success) {

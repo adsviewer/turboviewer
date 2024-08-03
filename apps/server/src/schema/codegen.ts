@@ -14,6 +14,7 @@ const config: CodegenConfig = {
     '../web/src/graphql/generated/schema-server.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
       config: {
+        nonOptionalTypename: true,
         withHooks: true,
         namingConvention: {
           enumValues: 'keep',
@@ -24,6 +25,7 @@ const config: CodegenConfig = {
     '../web/src/graphql/generated/schema-client.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
       config: {
+        nonOptionalTypename: true,
         withHooks: true,
         urqlImportFrom: '@urql/next',
         namingConvention: {
