@@ -47,6 +47,7 @@ const generateInvitationLink = (token: string) => {
 builder.queryFields((t) => ({
   organization: t.withAuth({ isInOrg: true }).prismaField({
     type: OrganizationDto,
+    nullable: false,
     resolve: (query, _root, _args, ctx, _info) => {
       return prisma.organization.findUniqueOrThrow({
         ...query,
@@ -57,6 +58,7 @@ builder.queryFields((t) => ({
 
   inviteLinks: t.withAuth({ isInOrg: true, isOrgOperator: true }).field({
     type: [inviteLinkDto],
+    nullable: false,
     description: 'Returns the invitation links for the signed in org',
     resolve: async (_root, _args, ctx, _info) => {
       const roleTokenMap = await redisGetKeys(`${invitationLinkRedisStaticKey}:${ctx.organizationId}:`).then(
@@ -80,6 +82,7 @@ builder.queryFields((t) => ({
   organizationAdAccounts: t.withAuth({ isInOrg: true }).prismaField({
     description: 'Return the adAccounts for a channel that are associated with the organization.',
     type: [AdAccountDto],
+    nullable: false,
     args: {
       channel: t.arg({ type: IntegrationTypeDto, required: true }),
     },
@@ -95,6 +98,7 @@ builder.queryFields((t) => ({
     description:
       'Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel.',
     type: [AdAccountDto],
+    nullable: false,
     args: {
       channel: t.arg({ type: IntegrationTypeDto, required: true }),
     },
@@ -111,6 +115,7 @@ builder.queryFields((t) => ({
 builder.mutationFields((t) => ({
   updateOrganization: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).prismaField({
     type: OrganizationDto,
+    nullable: false,
     args: {
       name: t.arg.string({ required: true }),
     },
@@ -124,6 +129,7 @@ builder.mutationFields((t) => ({
   }),
   createOrganization: t.withAuth({ authenticated: true }).prismaField({
     type: OrganizationDto,
+    nullable: false,
     grantScopes: ['readOrganization'],
     args: {
       name: t.arg.string({ required: true }),
@@ -165,6 +171,7 @@ builder.mutationFields((t) => ({
 
   deleteOrganization: t.withAuth({ isOrgAdmin: true, isAdmin: true }).prismaField({
     type: OrganizationDto,
+    nullable: false,
     args: {
       organizationId: t.arg.string({ required: false }),
     },
@@ -190,6 +197,7 @@ builder.mutationFields((t) => ({
 
   switchOrganization: t.withAuth({ authenticated: true }).field({
     type: TokensDto,
+    nullable: false,
     args: {
       organizationId: t.arg.string({ required: true }),
     },
@@ -216,6 +224,7 @@ builder.mutationFields((t) => ({
 
   inviteUsers: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: 'Boolean',
+    nullable: false,
     errors: { types: [InviteUsersErrors] },
     args: {
       emails: t.arg.stringList({ required: true, validate: { items: { email: true } } }),
@@ -334,6 +343,7 @@ builder.mutationFields((t) => ({
 
   createInvitationLink: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: 'String',
+    nullable: false,
     description: 'Creates a link for the signed in org for a specific role',
     args: {
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
@@ -358,6 +368,7 @@ builder.mutationFields((t) => ({
 
   deleteInvitationLink: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: 'Boolean',
+    nullable: false,
     description: 'Deletes the invitation link for the given role',
     args: {
       role: t.arg({ type: OrganizationRoleEnumDto, required: true }),
@@ -384,6 +395,7 @@ builder.mutationFields((t) => ({
 
   removeUserFromOrganization: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: UserOrganizationDto,
+    nullable: false,
     args: {
       userId: t.arg.string({ required: true }),
     },
@@ -421,6 +433,7 @@ builder.mutationFields((t) => ({
 
   updateOrganizationUser: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
     type: UserOrganizationDto,
+    nullable: false,
     args: {
       role: t.arg({ type: OrganizationRoleEnumDto, required: false }),
       userId: t.arg.string({ required: true }),
@@ -449,6 +462,7 @@ builder.mutationFields((t) => ({
 
   updateOrganizationAdAccounts: t.withAuth({ isOrgAdmin: true }).prismaField({
     type: OrganizationDto,
+    nullable: false,
     args: {
       adAccountIds: t.arg.stringList({ required: true }),
     },

@@ -32,8 +32,8 @@ export type Ad = {
 };
 
 export type AdInsightsArgs = {
-  after?: InputMaybe<Scalars['ID']['input']>;
-  before?: InputMaybe<Scalars['ID']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
@@ -65,8 +65,8 @@ export type AdAccount = {
 };
 
 export type AdAccountAdvertisementsArgs = {
-  after?: InputMaybe<Scalars['ID']['input']>;
-  before?: InputMaybe<Scalars['ID']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -79,7 +79,7 @@ export type AdAccountAdvertisementsConnection = {
 
 export type AdAccountAdvertisementsConnectionEdge = {
   __typename?: 'AdAccountAdvertisementsConnectionEdge';
-  cursor: Scalars['ID']['output'];
+  cursor: Scalars['String']['output'];
   node: Ad;
 };
 
@@ -92,7 +92,7 @@ export type AdInsightsConnection = {
 
 export type AdInsightsConnectionEdge = {
   __typename?: 'AdInsightsConnectionEdge';
-  cursor: Scalars['ID']['output'];
+  cursor: Scalars['String']['output'];
   node: Insight;
 };
 
@@ -361,6 +361,7 @@ export type Insight = {
   impressions: Scalars['Int']['output'];
   position: Scalars['String']['output'];
   publisher: PublisherEnum;
+  /** Amount of money spent on the ad in cents */
   spend: Scalars['Int']['output'];
 };
 
@@ -672,10 +673,10 @@ export enum OrganizationRoleEnum {
 
 export type PageInfo = {
   __typename?: 'PageInfo';
-  endCursor?: Maybe<Scalars['ID']['output']>;
+  endCursor?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
-  startCursor?: Maybe<Scalars['ID']['output']>;
+  startCursor?: Maybe<Scalars['String']['output']>;
 };
 
 export type Pagination = {

@@ -4,8 +4,8 @@ type Ad {
   externalId: String!
   id: ID!
   insights(
-    after: ID
-    before: ID
+    after: String
+    before: String
     dateFrom: Date
     dateTo: Date
     devices: [DeviceEnum!]
@@ -21,7 +21,7 @@ type Ad {
 
 type AdAccount {
   adCount: Int!
-  advertisements(after: ID, before: ID, first: Int, last: Int): AdAccountAdvertisementsConnection!
+  advertisements(after: String, before: String, first: Int, last: Int): AdAccountAdvertisementsConnection!
   createdAt: Date!
   currency: CurrencyEnum!
   externalId: String!
@@ -46,7 +46,7 @@ type AdAccountAdvertisementsConnection {
 }
 
 type AdAccountAdvertisementsConnectionEdge {
-  cursor: ID!
+  cursor: String!
   node: Ad!
 }
 
@@ -57,7 +57,7 @@ type AdInsightsConnection {
 }
 
 type AdInsightsConnectionEdge {
-  cursor: ID!
+  cursor: String!
   node: Insight!
 }
 
@@ -327,6 +327,10 @@ type Insight {
   impressions: Int!
   position: String!
   publisher: PublisherEnum!
+
+  """
+  Amount of money spent on the ad in cents
+  """
   spend: Int!
 }
 
@@ -588,10 +592,10 @@ enum OrganizationRoleEnum {
 }
 
 type PageInfo {
-  endCursor: ID
+  endCursor: String
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
-  startCursor: ID
+  startCursor: String
 }
 
 interface Pagination {

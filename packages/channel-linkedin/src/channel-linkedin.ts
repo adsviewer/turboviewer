@@ -235,7 +235,7 @@ class LinkedIn implements ChannelInterface {
           externalAccountId: dbAccount.externalId,
           impressions: a.impressions,
           spend: a.costInLocalCurrency * 100,
-          device: device ? LinkedIn.deviceEnumMap.get(device) ?? DeviceEnum.Unknown : DeviceEnum.Unknown,
+          device: device ? (LinkedIn.deviceEnumMap.get(device) ?? DeviceEnum.Unknown) : DeviceEnum.Unknown,
           publisher: PublisherEnum.LinkedIn,
           position: '',
         };

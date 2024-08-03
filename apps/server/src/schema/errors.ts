@@ -6,7 +6,7 @@ import { builder } from './builder';
 
 export const ErrorInterface = builder.interfaceRef<AError>('Error').implement({
   fields: (t) => ({
-    message: t.exposeString('message'),
+    message: t.exposeString('message', { nullable: false }),
   }),
 });
 
@@ -19,8 +19,7 @@ builder.objectType(Prisma.PrismaClientKnownRequestError, {
   name: 'PrismaClientKnownRequestError',
   interfaces: [ErrorInterface],
   fields: (t) => ({
-    message: t.exposeString('message'),
-    code: t.exposeString('code'),
+    code: t.exposeString('code', { nullable: false }),
   }),
 });
 
@@ -32,8 +31,8 @@ const ZodFieldError = builder
   }>('ZodFieldError')
   .implement({
     fields: (t) => ({
-      message: t.exposeString('message'),
-      path: t.exposeStringList('path'),
+      message: t.exposeString('message', { nullable: false }),
+      path: t.exposeStringList('path', { nullable: false }),
     }),
   });
 
@@ -43,6 +42,7 @@ builder.objectType(ZodError, {
   interfaces: [ErrorInterface],
   fields: (t) => ({
     fieldErrors: t.field({
+      nullable: false,
       type: [ZodFieldError],
       resolve: (err) => flattenErrors(err.format(), []),
     }),

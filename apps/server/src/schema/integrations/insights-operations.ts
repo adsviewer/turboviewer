@@ -28,6 +28,7 @@ const fireAndForget = new FireAndForget();
 builder.queryFields((t) => ({
   lastThreeMonthsAds: t.withAuth({ isInOrg: true }).prismaField({
     type: [AdDto],
+    nullable: false,
     resolve: async (query, _root, _args, ctx) => {
       return await prisma.ad.findMany({
         ...query,
@@ -45,6 +46,7 @@ builder.queryFields((t) => ({
   }),
   insights: t.withAuth({ isInOrg: true }).field({
     type: GroupedInsightsDto,
+    nullable: false,
     args: {
       filter: t.arg({ type: FilterInsightsInput, required: true }),
     },
@@ -134,6 +136,7 @@ builder.queryFields((t) => ({
 
   insightDatapoints: t.withAuth({ isInOrg: true }).field({
     type: [InsightsDatapointsDto],
+    nullable: false,
     args: {
       args: t.arg({ type: InsightsDatapointsInput, required: true }),
     },
@@ -182,6 +185,7 @@ builder.queryFields((t) => ({
 builder.mutationFields((t) => ({
   refreshData: t.withAuth({ isAdmin: true }).field({
     type: 'Boolean',
+    nullable: false,
     args: {
       integrationIds: t.arg.stringList({ required: false }),
       initial: t.arg.boolean({ required: true }),
@@ -195,26 +199,26 @@ builder.mutationFields((t) => ({
 
 export const PaginationDto = builder.simpleInterface('Pagination', {
   fields: (t) => ({
-    totalCount: t.int(),
-    hasNext: t.boolean(),
-    page: t.int(),
-    pageSize: t.int(),
+    totalCount: t.int({ nullable: false }),
+    hasNext: t.boolean({ nullable: false }),
+    page: t.int({ nullable: false }),
+    pageSize: t.int({ nullable: false }),
   }),
 });
 
 const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
   interfaces: [PaginationDto],
   fields: (t) => ({
-    edges: t.field({ type: [GroupedInsightDto] }),
+    edges: t.field({ type: [GroupedInsightDto], nullable: false }),
   }),
 });
 type GroupedInsightsType = typeof GroupedInsightsDto.$inferType;
 
 const IFrameDTO = builder.objectRef<ChannelIFrame>('IFrame').implement({
   fields: (t) => ({
-    src: t.exposeString('src'),
-    width: t.exposeInt('width'),
-    height: t.exposeInt('height'),
+    src: t.exposeString('src', { nullable: false }),
+    width: t.exposeInt('width', { nullable: false }),
+    height: t.exposeInt('height', { nullable: false }),
   }),
 });
 

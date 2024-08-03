@@ -7,6 +7,7 @@ import { GenerateGoogleAuthUrlResponseDto } from './user-types';
 builder.queryFields((t) => ({
   loginProviders: t.field({
     type: [GenerateGoogleAuthUrlResponseDto],
+    nullable: false,
     args: {
       inviteToken: t.arg.string({ required: false }),
     },

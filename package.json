@@ -17,13 +17,13 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "husky": "^9.0.11",
+    "husky": "^9.1.4",
     "lint-staged": "^15.2.7",
-    "prettier": "^3.3.2",
+    "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.5",
-    "prisma": "^5.16.1",
+    "prisma": "^5.17.0",
     "terraform": "^1.23.0",
-    "tsx": "^4.16.0",
+    "tsx": "^4.16.5",
     "turbo": "^2.0.11"
   },
   "packageManager": "pnpm@9.6.0",

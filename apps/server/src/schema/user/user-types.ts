@@ -52,15 +52,16 @@ export const UserDto = builder.prismaObject('User', {
   description:
     'Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization',
   fields: (t) => ({
-    id: t.exposeID('id', commonOrgFieldProps),
-    firstName: t.exposeString('firstName', commonOrgFieldProps),
-    lastName: t.exposeString('lastName', commonOrgFieldProps),
-    email: t.exposeString('email', commonOrgFieldProps),
+    id: t.exposeID('id', { nullable: false, ...commonOrgFieldProps }),
+    firstName: t.exposeString('firstName', { nullable: false, ...commonOrgFieldProps }),
+    lastName: t.exposeString('lastName', { nullable: false, ...commonOrgFieldProps }),
+    email: t.exposeString('email', { nullable: false, ...commonOrgFieldProps }),
     photoUrl: t.exposeString('photoUrl', { nullable: true, ...commonOrgFieldProps }),
-    status: t.expose('status', { type: UserStatusDto }),
-    createdAt: t.expose('createdAt', { type: 'Date' }),
-    updatedAt: t.expose('updatedAt', { type: 'Date' }),
+    status: t.expose('status', { type: UserStatusDto, nullable: false }),
+    createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
+    updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
     userRoles: t.stringList({
+      nullable: false,
       select: (_args, _ctx, nestedSelection) => ({
         roles: {
           select: {
@@ -72,6 +73,7 @@ export const UserDto = builder.prismaObject('User', {
     }),
     allRoles: t.field({
       type: [AllRolesDto],
+      nullable: false,
       select: (_args, ctx, nestedSelection) => ({
         roles: { select: { role: nestedSelection(true) } },
         ...(ctx.organizationId
@@ -92,6 +94,7 @@ export const UserDto = builder.prismaObject('User', {
       },
     }),
     organizations: t.relation('organizations', {
+      nullable: false,
       query: { where: { status: UserOrganizationStatus.ACTIVE } },
     }),
     currentOrganizationId: t.exposeString('currentOrganizationId', { nullable: true }),
