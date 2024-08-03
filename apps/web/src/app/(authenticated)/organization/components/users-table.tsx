@@ -192,6 +192,8 @@ export function UsersTable(): React.ReactNode {
               defaultValue={userData.role}
               variant="filled"
               allowDeselect={false}
+              withCheckIcon
+              comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
               onChange={(value) => {
                 changeUserRole(userData.userId, value);
               }}
