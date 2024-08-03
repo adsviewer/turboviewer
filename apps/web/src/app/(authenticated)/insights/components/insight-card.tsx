@@ -106,7 +106,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Flex gap="sm" align="center">
-        <Title order={3} fw={500} title={String(props.title)}>
+        <Title order={3} mb="md" fw={500} title={String(props.title)}>
           {props.heading}
         </Title>
       </Flex>
