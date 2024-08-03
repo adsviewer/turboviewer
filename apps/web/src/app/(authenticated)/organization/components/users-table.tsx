@@ -25,7 +25,7 @@ import { AllRoles, OrganizationRoleEnum, UserOrganizationStatus } from '@/graphq
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { isMember, isOperator, isOrgAdmin } from '@/util/access-utils';
-import getOrganization, { updateOrganizationUser } from '../actions';
+import getOrganization, { removeUserFromOrganization, updateOrganizationUser } from '../actions';
 import { getUserDetails } from '../../actions';
 
 interface RolesDataType {
@@ -94,7 +94,6 @@ export function UsersTable(): React.ReactNode {
 
   const refreshMembers = useCallback((): void => {
     setIsPending(true);
-    setOrganization(null);
     void getOrganization()
       .then((orgRes) => {
         if (orgRes.data) {
@@ -144,8 +143,24 @@ export function UsersTable(): React.ReactNode {
     }
   };
 
-  const removeUser = (): void => {
-    logger.info('test');
+  const removeUser = (userId: string): void => {
+    setIsPending(true);
+    void removeUserFromOrganization({ userId })
+      .then((res) => {
+        if (!res.success) {
+          logger.error(res.error);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          router.replace(newURL);
+          return;
+        }
+        refreshMembers();
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
   };
 
   const rows = organization?.organization.userOrganizations.map((userData) => (
@@ -204,7 +219,9 @@ export function UsersTable(): React.ReactNode {
                 <Menu.Item
                   leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                   color="red"
-                  onClick={removeUser}
+                  onClick={() => {
+                    removeUser(userData.userId);
+                  }}
                 >
                   {tGeneric('remove')}
                 </Menu.Item>

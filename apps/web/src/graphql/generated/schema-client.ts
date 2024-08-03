@@ -1093,6 +1093,15 @@ export type InviteUsersMutation = {
     | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
 };
 
+export type RemoveUserFromOrganizationMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+export type RemoveUserFromOrganizationMutation = {
+  __typename: 'Mutation';
+  removeUserFromOrganization: { __typename: 'UserOrganization'; user: { __typename: 'User'; id: string } };
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1550,6 +1559,21 @@ export const InviteUsersDocument = gql`
 
 export function useInviteUsersMutation() {
   return Urql.useMutation<InviteUsersMutation, InviteUsersMutationVariables>(InviteUsersDocument);
+}
+export const RemoveUserFromOrganizationDocument = gql`
+  mutation removeUserFromOrganization($userId: String!) {
+    removeUserFromOrganization(userId: $userId) {
+      user {
+        id
+      }
+    }
+  }
+`;
+
+export function useRemoveUserFromOrganizationMutation() {
+  return Urql.useMutation<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
+    RemoveUserFromOrganizationDocument,
+  );
 }
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {

@@ -2,6 +2,8 @@
 
 import { logger } from '@repo/logger';
 import {
+  RemoveUserFromOrganizationMutation,
+  RemoveUserFromOrganizationMutationVariables,
   type CreateOrganizationMutation,
   type CreateOrganizationMutationVariables,
   type DeleteOrganizationMutation,
@@ -149,4 +151,10 @@ export async function inviteUsers(
   values: InviteUsersMutationVariables,
 ): Promise<UrqlResult<InviteUsersMutation, InviteUsersMutationError | string>> {
   return await handleUrqlRequest<InviteUsersMutation, InviteUsersMutationError>(urqlClientSdk().inviteUsers(values));
+}
+
+export async function removeUserFromOrganization(
+  values: RemoveUserFromOrganizationMutationVariables,
+): Promise<UrqlResult<RemoveUserFromOrganizationMutation, string>> {
+  return await handleUrqlRequest(urqlClientSdk().removeUserFromOrganization(values));
 }

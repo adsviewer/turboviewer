@@ -1092,6 +1092,15 @@ export type InviteUsersMutation = {
     | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
 };
 
+export type RemoveUserFromOrganizationMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+export type RemoveUserFromOrganizationMutation = {
+  __typename: 'Mutation';
+  removeUserFromOrganization: { __typename: 'UserOrganization'; user: { __typename: 'User'; id: string } };
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1441,6 +1450,15 @@ export const InviteUsersDocument = gql`
     }
   }
 `;
+export const RemoveUserFromOrganizationDocument = gql`
+  mutation removeUserFromOrganization($userId: String!) {
+    removeUserFromOrganization(userId: $userId) {
+      user {
+        id
+      }
+    }
+  }
+`;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -1627,6 +1645,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<InviteUsersMutation>;
+    },
+    removeUserFromOrganization(
+      variables: RemoveUserFromOrganizationMutationVariables,
+      options?: C,
+    ): Promise<RemoveUserFromOrganizationMutation> {
+      return requester<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
+        RemoveUserFromOrganizationDocument,
+        variables,
+        options,
+      ) as Promise<RemoveUserFromOrganizationMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(
