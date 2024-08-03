@@ -69,10 +69,11 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
     void inviteUsers({ emails, role: DEFAULT_ROLE })
       .then((res) => {
         logger.info(res);
-        if (res.data?.inviteUsers.length) {
-          for (const inviteData of res.data.inviteUsers) {
-            if (inviteData.errorMessage) {
-              const errorMessage = `${inviteData.email}: ${inviteData.errorMessage}`;
+        // This blows
+        if (res.data?.inviteUsers.__typename === 'InviteUsersErrors' && res.data.inviteUsers.errors.length) {
+          for (const inviteData of res.data.inviteUsers.errors) {
+            if (inviteData.message) {
+              const errorMessage = `${inviteData.email}: ${inviteData.message}`;
               notifications.show({
                 title: tGeneric('error'),
                 message: errorMessage,
@@ -80,7 +81,15 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
               });
             }
           }
+          return;
         }
+
+        notifications.show({
+          title: tGeneric('success'),
+          message: t('inviteSuccess'),
+          color: 'blue',
+        });
+        closeModal();
 
         // TODO: UNCOMMENT AFTER BACKEND FIXES FOR SUCCESS: FALSE ON EMAIL ERRORS!
         // if (!res.success) {

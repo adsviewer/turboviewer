@@ -54,7 +54,14 @@ mutation deleteOrganization($organizationId: String!) {
 
 mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
   inviteUsers(emails: $emails, role: $role) {
-    email
-    errorMessage
+    ... on MutationInviteUsersSuccess {
+      data
+    }
+    ... on InviteUsersErrors {
+      errors {
+        email
+        message
+      }
+    }
   }
 }

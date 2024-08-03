@@ -1085,7 +1085,12 @@ export type InviteUsersMutationVariables = Exact<{
 
 export type InviteUsersMutation = {
   __typename?: 'Mutation';
-  inviteUsers: Array<{ __typename?: 'InviteUsersResponse'; email: string; errorMessage: string }>;
+  inviteUsers:
+    | {
+        __typename?: 'InviteUsersErrors';
+        errors: Array<{ __typename?: 'InviteUsersError'; email: string; message: string }>;
+      }
+    | { __typename?: 'MutationInviteUsersSuccess'; data: boolean };
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1530,8 +1535,15 @@ export function useDeleteOrganizationMutation() {
 export const InviteUsersDocument = gql`
   mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
     inviteUsers(emails: $emails, role: $role) {
-      email
-      errorMessage
+      ... on MutationInviteUsersSuccess {
+        data
+      }
+      ... on InviteUsersErrors {
+        errors {
+          email
+          message
+        }
+      }
     }
   }
 `;
