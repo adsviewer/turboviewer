@@ -155,6 +155,7 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
     advertisements: t.relatedConnection('advertisements', {
       cursor: 'id',
       nullable: false,
+      // @ts-expect-error -- this is probably a bug in the type definitions
       edgesNullable: { list: false, items: true },
       nodeNullable: false,
     }),
@@ -222,6 +223,7 @@ export const AdDto = builder.prismaObject('Ad', {
     insights: t.relatedConnection('insights', {
       cursor: 'id',
       nullable: false,
+      // @ts-expect-error -- this is probably a bug in the type definitions
       edgesNullable: { list: false, items: true },
       nodeNullable: false,
       args: {
