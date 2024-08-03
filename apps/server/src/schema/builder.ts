@@ -2,13 +2,12 @@ import { GraphQLError } from 'graphql';
 import { DateTimeResolver, JSONResolver } from 'graphql-scalars';
 import SchemaBuilder from '@pothos/core';
 import ErrorsPlugin from '@pothos/plugin-errors';
-// eslint-disable-next-line import/no-named-as-default -- This is a false positive
 import PrismaPlugin from '@pothos/plugin-prisma';
 import type PrismaTypes from '@pothos/plugin-prisma/generated';
 import RelayPlugin from '@pothos/plugin-relay';
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import SimpleObjectsPlugin from '@pothos/plugin-simple-objects';
-import ValidationPlugin from '@pothos/plugin-validation';
+import ZodPlugin from '@pothos/plugin-zod';
 import { prisma, Prisma } from '@repo/database';
 import { type GraphQLContext } from '../context';
 import { getRootOrganizationId } from '../contexts/organization';
@@ -33,6 +32,7 @@ export interface RefreshContext extends GraphQLContext {
 }
 
 export const builder = new SchemaBuilder<{
+  Defaults: 'v3';
   Context: GraphQLContext;
   Scalars: {
     Date: {
@@ -65,7 +65,8 @@ export const builder = new SchemaBuilder<{
     emailUnconfirmed: InOrganizationContext;
   };
 }>({
-  plugins: [ErrorsPlugin, RelayPlugin, ScopeAuthPlugin, PrismaPlugin, SimpleObjectsPlugin, ValidationPlugin],
+  defaults: 'v3',
+  plugins: [ErrorsPlugin, RelayPlugin, ScopeAuthPlugin, PrismaPlugin, SimpleObjectsPlugin, ZodPlugin],
   errorOptions: {
     defaultTypes: [],
   },

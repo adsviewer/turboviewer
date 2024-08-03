@@ -30,7 +30,7 @@
     "@pothos/plugin-relay": "^4.1.0",
     "@pothos/plugin-scope-auth": "^4.1.0",
     "@pothos/plugin-simple-objects": "^4.1.0",
-    "@pothos/plugin-validation": "^3.10.2",
+    "@pothos/plugin-zod": "^4.1.0",
     "@repo/channel": "workspace:*",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
