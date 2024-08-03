@@ -2,8 +2,8 @@
 
 import { logger } from '@repo/logger';
 import {
-  RemoveUserFromOrganizationMutation,
-  RemoveUserFromOrganizationMutationVariables,
+  type RemoveUserFromOrganizationMutation,
+  type RemoveUserFromOrganizationMutationVariables,
   type CreateOrganizationMutation,
   type CreateOrganizationMutationVariables,
   type DeleteOrganizationMutation,
