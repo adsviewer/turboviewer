@@ -2,6 +2,7 @@ import { type YogaInitialContext } from 'graphql-yoga';
 import { $Enums, OrganizationRoleEnum, UserStatus } from '@repo/database';
 import { isAError } from '@repo/utils';
 import { GraphQLError } from 'graphql/index';
+import { setContext, setUser } from '@sentry/node';
 import { decodeJwt } from './auth';
 import { acceptedLanguage, type Language } from './language';
 import RoleEnum = $Enums.RoleEnum;
@@ -27,6 +28,8 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
   if (isAError(token)) {
     throw new GraphQLError(token.message);
   }
+  setUser({ id: token?.userId });
+  setContext('user', { organizationId: token?.organizationId });
 
   const userAgent = initialContext.request.headers.get('user-agent') ?? '';
   const operatingSystem = userAgent.split('(')[1]?.split(')')[0] || 'Unknown';
