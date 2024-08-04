@@ -40,7 +40,8 @@
         "dist/**",
         ".next/**",
         "!.next/cache/**"
-      ]
+      ],
+      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"]
     },
     "lint": {},
     "lint:fix": {},
@@ -50,7 +51,7 @@
     "test": {},
     "type-check": {},
     "dev": {
-      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
       "persistent": true
     },
     "clean": {
