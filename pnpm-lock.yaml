@@ -132,6 +132,9 @@ importers:
       '@aws-sdk/client-ses':
         specifier: ^3.623.0
         version: 3.623.0
+      '@envelop/sentry':
+        specifier: ^9.0.0
+        version: 9.0.0(@envelop/core@5.0.1)(@sentry/node@8.22.0)(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
       '@graphql-tools/schema':
         specifier: 10.0.4
         version: 10.0.4(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
@@ -198,6 +201,9 @@ importers:
       '@sentry/profiling-node':
         specifier: ^8.22.0
         version: 8.22.0
+      '@sentry/tracing':
+        specifier: ^7.114.0
+        version: 7.114.0
       body-parser:
         specifier: ^1.20.2
         version: 1.20.2
@@ -1692,6 +1698,14 @@ packages:
   '@envelop/core@5.0.1':
     resolution: {integrity: sha512-wxA8EyE1fPnlbP0nC/SFI7uU8wSNf4YjxZhAPu0P63QbgIvqHtHsH4L3/u+rsTruzhk3OvNRgQyLsMfaR9uzAQ==}
     engines: {node: '>=18.0.0'}
+
+  '@envelop/sentry@9.0.0':
+    resolution: {integrity: sha512-R1qgYKOiaDGc1MXRfJCzNs8z5lVuRK3liHquwR72HxawgXP2wEPzTJgqMo1M7s7pZEHgf2RvO6mYAUExbZNYlg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@envelop/core': ^5.0.0
+      '@sentry/node': ^6 || ^7
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
   '@envelop/types@5.0.0':
     resolution: {integrity: sha512-IPjmgSc4KpQRlO4qbEDnBEixvtb06WDmjKfi/7fkZaryh5HuOmTtixe1EupQI5XfXO8joc3d27uUZ0QdC++euA==}
@@ -3436,6 +3450,10 @@ packages:
     resolution: {integrity: sha512-sF8RyMPJP1fSIyyBDAbtybvKCu0dy8ZAfMwLP7ZqEnWrhZqktVuqM7/++EAFMlD5YaWJXm1IDuOXjgSQjUtSIQ==}
     engines: {node: '>=14.18'}
 
+  '@sentry-internal/tracing@7.114.0':
+    resolution: {integrity: sha512-dOuvfJN7G+3YqLlUY4HIjyWHaRP8vbOgF+OsE5w2l7ZEn1rMAaUbPntAR8AF9GBA6j2zWNoSo8e7GjbJxVofSg==}
+    engines: {node: '>=8'}
+
   '@sentry/aws-serverless@8.22.0':
     resolution: {integrity: sha512-SaBz4C4s4bmvo5JhJ4QwoBxqNKhEQPUFO/xVlbTmbrtjLtqjGz0GGUx+vFR0HxIf2RJNU4UdaiI+quZKQJQFig==}
     engines: {node: '>=14.18'}
@@ -3498,6 +3516,10 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
+  '@sentry/core@7.114.0':
+    resolution: {integrity: sha512-YnanVlmulkjgZiVZ9BfY9k6I082n+C+LbZo52MTvx3FY6RE5iyiPMpaOh67oXEZRWcYQEGm+bKruRxLVP6RlbA==}
+    engines: {node: '>=8'}
+
   '@sentry/core@8.22.0':
     resolution: {integrity: sha512-fYPnxp7UkY2tckaOtivIySxnJvlbekuxs+Qi6rkUv9JpF+TYKpt7OPNUAbgVIhS0xazAEN6iKTfmnmpUbFRLmQ==}
     engines: {node: '>=14.18'}
@@ -3537,9 +3559,21 @@ packages:
     peerDependencies:
       react: ^16.14.0 || 17.x || 18.x || 19.x
 
+  '@sentry/tracing@7.114.0':
+    resolution: {integrity: sha512-eldEYGADReZ4jWdN5u35yxLUSTOvjsiZAYd4KBEpf+Ii65n7g/kYOKAjNl7tHbrEG1EsMW4nDPWStUMk1w+tfg==}
+    engines: {node: '>=8'}
+
+  '@sentry/types@7.114.0':
+    resolution: {integrity: sha512-tsqkkyL3eJtptmPtT0m9W/bPLkU7ILY7nvwpi1hahA5jrM7ppoU0IMaQWAgTD+U3rzFH40IdXNBFb8Gnqcva4w==}
+    engines: {node: '>=8'}
+
   '@sentry/types@8.22.0':
     resolution: {integrity: sha512-1MLK3xO+uF2oJaa+M98aLIrQsEHzV7xnVWPfE3MhejYLNQebj4rQnQKTut/xZNIF9W0Q+bRcakLarC3ce2a74g==}
     engines: {node: '>=14.18'}
+
+  '@sentry/utils@7.114.0':
+    resolution: {integrity: sha512-319N90McVpupQ6vws4+tfCy/03AdtsU0MurIE4+W5cubHME08HtiEWlfacvAxX+yuKFhvdsO4K4BB/dj54ideg==}
+    engines: {node: '>=8'}
 
   '@sentry/utils@8.22.0':
     resolution: {integrity: sha512-0ITG2+3EtyMtyc/nQG8aB9z9eIQ4L43nM/KuNgYSnM1vPl/zegbaLT0Ek/xkQB1OLIOLkEPQ6x9GWe+248/n3g==}
@@ -9165,6 +9199,13 @@ snapshots:
       '@envelop/types': 5.0.0
       tslib: 2.6.3
 
+  '@envelop/sentry@9.0.0(@envelop/core@5.0.1)(@sentry/node@8.22.0)(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))':
+    dependencies:
+      '@envelop/core': 5.0.1
+      '@sentry/node': 8.22.0
+      graphql: 16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je)
+      tslib: 2.6.3
+
   '@envelop/types@5.0.0':
     dependencies:
       tslib: 2.6.3
@@ -10954,6 +10995,12 @@ snapshots:
       '@sentry/types': 8.22.0
       '@sentry/utils': 8.22.0
 
+  '@sentry-internal/tracing@7.114.0':
+    dependencies:
+      '@sentry/core': 7.114.0
+      '@sentry/types': 7.114.0
+      '@sentry/utils': 7.114.0
+
   '@sentry/aws-serverless@8.22.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/instrumentation-aws-lambda': 0.43.0(@opentelemetry/api@1.9.0)
@@ -11032,6 +11079,11 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@sentry/core@7.114.0':
+    dependencies:
+      '@sentry/types': 7.114.0
+      '@sentry/utils': 7.114.0
 
   '@sentry/core@8.22.0':
     dependencies:
@@ -11133,7 +11185,17 @@ snapshots:
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
 
+  '@sentry/tracing@7.114.0':
+    dependencies:
+      '@sentry-internal/tracing': 7.114.0
+
+  '@sentry/types@7.114.0': {}
+
   '@sentry/types@8.22.0': {}
+
+  '@sentry/utils@7.114.0':
+    dependencies:
+      '@sentry/types': 7.114.0
 
   '@sentry/utils@8.22.0':
     dependencies:
@@ -15576,7 +15638,7 @@ snapshots:
 
   rxjs@7.8.1:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   safe-array-concat@1.1.2:
     dependencies:

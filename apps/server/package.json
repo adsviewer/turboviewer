@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.623.0",
+    "@envelop/sentry": "^9.0.0",
     "@graphql-tools/schema": "10.0.4",
     "@graphql-yoga/plugin-disable-introspection": "^2.6.2",
     "@graphql-yoga/redis-event-target": "^3.0.1",
@@ -42,6 +43,7 @@
     "@repo/utils": "workspace:*",
     "@sentry/node": "^8.22.0",
     "@sentry/profiling-node": "^8.22.0",
+    "@sentry/tracing": "^7.114.0",
     "body-parser": "^1.20.2",
     "change-case": "^5.4.4",
     "cross-env": "^7.0.3",

@@ -10,6 +10,7 @@ import { authCallback, getChannel, invokeChannelIngress } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
 import * as Sentry from '@sentry/node';
 import { Environment, MODE } from '@repo/mode';
+import { useSentry } from '@envelop/sentry';
 import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
@@ -43,12 +44,12 @@ const channelDataRefreshWebhook = (_req: Request, res: Response): void => {
 
 const index = (): void => {
   const app = express();
-
+  const plugins = [useSentry()];
   const yoga = createYoga({
     schema,
     context: createContext,
     graphiql: MODE !== Environment.Production,
-    plugins: MODE !== Environment.Production ? [] : [useDisableIntrospection()],
+    plugins: MODE !== Environment.Production ? plugins : [...plugins, useDisableIntrospection()],
   });
 
   // heartbeat
