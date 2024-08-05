@@ -8,5 +8,3 @@ export interface AJwtPayload extends JwtPayload {
   type?: 'refresh';
   userStatus: UserStatus;
 }
-
-export const inviteHashLabel = 'invite_hash';

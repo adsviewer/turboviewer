@@ -3,9 +3,8 @@ import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus } from 
 import { GraphQLError } from 'graphql';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
-import { AError, FireAndForget, isAError } from '@repo/utils';
+import { AError, FireAndForget, inviteHashLabel, isAError } from '@repo/utils';
 import { deleteInsightsCache } from '@repo/channel';
-import { inviteHashLabel } from '@repo/shared-types';
 import { builder } from '../builder';
 import {
   authConfirmInvitedUserEndpoint,
