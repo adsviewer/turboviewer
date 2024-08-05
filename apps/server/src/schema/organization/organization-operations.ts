@@ -401,10 +401,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, args, ctx, _info) => {
       const userOrganization = await prisma.userOrganization.findUnique({
-        where: {
-          userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId },
-          status: UserOrganizationStatus.ACTIVE,
-        },
+        where: { userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId } },
       });
       if (!userOrganization) {
         throw new GraphQLError('User is not an active member of this organization');
