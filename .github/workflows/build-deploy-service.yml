@@ -153,6 +153,5 @@ jobs:
           pnpm install
           pnpm --filter=database generate
 
-
       - name: Db migrate
         run:  pnpm --filter=database db:migrate:deploy
