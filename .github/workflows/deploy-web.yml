@@ -1,22 +1,22 @@
-name: Vercel Production Deployment
+name: Vercel Web Deployment
 env:
   VERCEL_ORG_ID: ${{ vars.TURBO_TEAM }}
-  VERCEL_PROJECT_ID: ${{ secrets.LANDING_PAGE_VERCEL_PROJECT_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.WEB_VERCEL_PROJECT_ID }}
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     paths:
-      - apps/landing-page/**
+      - apps/web/**
       - packages/**
       - .github/workflows/**
 
 jobs:
-  Deploy-Production:
+  deplo_web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install
+          pnpm --filter=database generate
       - name: Build Project Artifacts
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
