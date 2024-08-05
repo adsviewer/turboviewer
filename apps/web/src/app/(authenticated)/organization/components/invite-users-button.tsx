@@ -4,7 +4,7 @@ import { Flex, Button, Modal, useMantineTheme, PillsInput, Pill } from '@mantine
 import { useTranslations } from 'next-intl';
 import { IconUserPlus } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
 import { z } from 'zod';
 import { logger } from '@repo/logger';
@@ -12,7 +12,8 @@ import { notifications } from '@mantine/notifications';
 import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
-import { inviteUsers } from '../actions';
+import { organizationAtom } from '@/app/atoms/organization-atoms';
+import getOrganization, { inviteUsers } from '../actions';
 
 const emailSchema = z.string().email();
 
@@ -26,6 +27,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const userDetails = useAtomValue(userDetailsAtom);
+  const setOrganization = useSetAtom(organizationAtom);
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInputValue, setEmailInputValue] = useState<string>('');
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -63,6 +65,18 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
     setEmails(emails.filter((email) => email !== emailToRemove));
   };
 
+  const refreshMembers = (): void => {
+    void getOrganization()
+      .then((orgRes) => {
+        if (orgRes.data) {
+          setOrganization(orgRes.data);
+        }
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      });
+  };
+
   const performUserInvites = (): void => {
     setIsPending(true);
 
@@ -83,6 +97,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
             }
           }
         } else {
+          refreshMembers();
           notifications.show({
             title: tGeneric('success'),
             message: t('inviteSuccess'),
@@ -90,29 +105,6 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
           });
           closeModal();
         }
-
-        // TODO: UNCOMMENT AFTER BACKEND FIXES FOR SUCCESS: FALSE ON EMAIL ERRORS!
-        // if (!res.success) {
-        //   if (res.data?.inviteUsers.length) {
-        //     for (const inviteData of res.data.inviteUsers) {
-        //       if (inviteData.errorMessage) {
-        //        const errorMessage = `${inviteData.email}: ${inviteData.errorMessage}`;
-        //        notifications.show({
-        //          title: tGeneric('error'),
-        //          message: errorMessage,
-        //          color: 'red',
-        //         });
-        //       }
-        //     }
-        //   }
-        // } else {
-        // notifications.show({
-        //   title: tGeneric('success'),
-        //   message: t('inviteSuccess'),
-        //   color: 'blue',
-        // });
-        // closeModal();
-        // }
       })
       .catch((err: unknown) => {
         logger.error(err);
