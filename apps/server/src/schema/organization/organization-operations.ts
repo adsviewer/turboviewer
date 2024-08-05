@@ -5,6 +5,7 @@ import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError } from '@repo/utils';
 import { deleteInsightsCache } from '@repo/channel';
+import { inviteHashLabel } from '@repo/shared-types';
 import { builder } from '../builder';
 import {
   authConfirmInvitedUserEndpoint,
@@ -237,9 +238,9 @@ builder.mutationFields((t) => ({
 
       const invitationExpirationInDays = 15;
 
-      const setConfirmInvitedUserRedis = async (token: string, userId: string) => {
+      const setConfirmInvitedUserRedis = async (inviteHash: string, userId: string) => {
         await redisSet(
-          confirmInvitedUserRedisKey(token),
+          confirmInvitedUserRedisKey(inviteHash),
           { userId, organizationId: ctx.organizationId } satisfies ConfirmInvitedUser,
           3600 * 24 * invitationExpirationInDays,
         );
@@ -261,7 +262,7 @@ builder.mutationFields((t) => ({
 
       const errors = await Promise.all(
         args.emails.map(async (email) => {
-          const token = `${confirmInvitedUserPrefix}${randomUUID()}`;
+          const inviteHash = `${confirmInvitedUserPrefix}${randomUUID()}`;
           const dbUser = usersMap.get(email);
           if (dbUser) {
             // Don't re-invite users that are already active in the organization and in the same or higher role
@@ -280,7 +281,7 @@ builder.mutationFields((t) => ({
                 ? frontEndInvitedUserUrl
                 : new URL(`${env.API_ENDPOINT}${authConfirmInvitedUserEndpoint}`);
             const searchParams = new URLSearchParams();
-            searchParams.set('token', token);
+            searchParams.set(inviteHashLabel, inviteHash);
             searchParams.set('email', email);
             url.search = searchParams.toString();
             logger.info(`Confirm invited user email url for ${email}: ${url.toString()}`);
@@ -307,7 +308,7 @@ builder.mutationFields((t) => ({
                 expirationInDays: invitationExpirationInDays,
                 actionUrl: url.toString(),
               }),
-              setConfirmInvitedUserRedis(token, dbUser.id),
+              setConfirmInvitedUserRedis(inviteHash, dbUser.id),
             ]);
           } else {
             const emailValidation = await validateEmail(email);
@@ -315,7 +316,7 @@ builder.mutationFields((t) => ({
             const emailType = emailValidation.emailType;
             // Create the action url for new users
             const searchParams = new URLSearchParams();
-            searchParams.set('token', token);
+            searchParams.set(inviteHashLabel, inviteHash);
             searchParams.set('email', email);
             frontEndInvitedUserUrl.search = searchParams.toString();
             logger.info(`Confirm invited non-existing user ${email}: ${frontEndInvitedUserUrl.toString()}`);
@@ -330,7 +331,7 @@ builder.mutationFields((t) => ({
                 expirationInDays: invitationExpirationInDays,
                 actionUrl: frontEndInvitedUserUrl.toString(),
               }),
-              setConfirmInvitedUserRedis(token, newUser.id),
+              setConfirmInvitedUserRedis(inviteHash, newUser.id),
             ]);
           }
         }),
