@@ -595,9 +595,9 @@ export type MutationResetPasswordArgs = {
 
 export type MutationSignUpInvitedUserArgs = {
   firstName: Scalars['String']['input'];
+  inviteHash: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
-  token: Scalars['String']['input'];
 };
 
 export type MutationSignupArgs = {

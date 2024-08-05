@@ -34,10 +34,10 @@ builder.mutationFields((t) => ({
       firstName: t.arg.string({ required: true }),
       lastName: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
-      token: t.arg.string({ required: true }),
+      inviteHash: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, _ctx, _info) => {
-      const key = confirmInvitedUserRedisKey(args.token);
+      const key = confirmInvitedUserRedisKey(args.inviteHash);
       const redisVal = await redisGet<ConfirmInvitedUser>(key);
       if (!redisVal) {
         throw new GraphQLError('User invitation expired');

@@ -535,7 +535,7 @@ type Mutation {
   """
   Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet
   """
-  signUpInvitedUser(firstName: String!, lastName: String!, password: String!, token: String!): Tokens!
+  signUpInvitedUser(firstName: String!, inviteHash: String!, lastName: String!, password: String!): Tokens!
   signup(args: SignUpInput!): Tokens!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!

@@ -200,7 +200,7 @@ export const authConfirmInvitedUserCallback = (req: ExpressRequest, res: Express
 };
 
 export const confirmInvitedUserPrefix = `user-`;
-export const confirmInvitedUserRedisKey = (token: string) => `confirm-invited-user:${token}`;
+export const confirmInvitedUserRedisKey = (inviteHash: string) => `confirm-invited-user:${inviteHash}`;
 export interface ConfirmInvitedUser {
   userId: string;
   organizationId: string;
