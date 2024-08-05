@@ -1,7 +1,6 @@
 name: Deploy lambdas prod
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "main" ]
 
