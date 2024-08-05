@@ -89,7 +89,7 @@ resource "aws_route53_record" "github_pages" {
   count   = var.environment == "prod" ? 1 : 0
   zone_id = aws_route53_zone.zone.zone_id
   name    = "_github-pages-challenge-adsviewer"
-  type    = "CNAME"
+  type    = "TXT"
   ttl     = "300"
   records = ["1270166284b655e77717434e2d8714"]
 }
@@ -98,9 +98,9 @@ resource "aws_route53_record" "github_domain" {
   count   = var.environment == "prod" ? 1 : 0
   zone_id = aws_route53_zone.zone.zone_id
   name    = "_github-challenge-adsviewer-org"
-  type    = "CNAME"
+  type    = "TXT"
   ttl     = "300"
-  records = ["a39e0597d2"]
+  records = ["679b73641c"]
 }
 
 resource "aws_route53_record" "google_dkim" {
