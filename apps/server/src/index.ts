@@ -21,12 +21,8 @@ import {
   authConfirmUserEmailRateLimiter,
   loginProviderRateLimiter,
 } from './utils/rate-limiter';
-import {
-  authConfirmInvitedUserCallback,
-  authConfirmInvitedUserEndpoint,
-  authConfirmUserEmailCallback,
-  authConfirmUserEmailEndpoint,
-} from './contexts/user/user';
+import { authConfirmUserEmailCallback, authConfirmUserEmailEndpoint } from './contexts/user/user';
+import { authConfirmInvitedUserCallback, authConfirmInvitedUserEndpoint } from './contexts/user/user-invite';
 
 const fireAndForget = new FireAndForget();
 

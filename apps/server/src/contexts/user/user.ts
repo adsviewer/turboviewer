@@ -8,12 +8,17 @@ import { createId } from '@paralleldrive/cuid2';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { validateEmail } from '../../emailable-helper';
-import { type SignUpInput } from '../../schema/user/user-types';
 import { env } from '../../config';
 import { sendConfirmEmail } from '../../email';
-import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
-import { type LoginProviderUserData } from '../login-provider/login-provider-types';
-import { redisGetInvitationLink } from './user-invite';
+import { createJwts, type TokensType } from '../../auth';
+import {
+  type LoginDataPassword,
+  type LoginDataProvider,
+  type LoginProviderUserData,
+  type SignupDataPassword,
+  type SignupDataProvider,
+} from '../login-provider/login-provider-types';
+import { deleteRedisInvite, redisGetInvitationLink } from './user-invite';
 import { userWithRoles } from './user-roles';
 
 const scryptAsync = promisify(scrypt);
@@ -44,92 +49,82 @@ export const passwordsMatch = async (password: string, hashedPassword: string | 
   return await comparePassword(password, hashedPassword);
 };
 
-export const createUser = async (data: SignUpInput) => {
-  const validData = await validateEmailProcess(data.firstName, data.email, data.token);
-  if (isAError(validData)) {
-    return validData;
-  }
-  const hashedPassword = await createPassword(data.password);
+export const activateInvitedUser = async (args: LoginDataProvider | LoginDataPassword) => {
+  const { userId, firstName, lastName, organizationId } = args;
+  const [user] = await Promise.all([
+    prisma.user.update({
+      ...userWithRoles,
+      where: { id: userId },
+      data: {
+        firstName,
+        lastName,
+        status: UserStatus.EMAIL_CONFIRMED,
+        currentOrganizationId: organizationId,
+        ...('password' in args
+          ? { password: await createPassword(args.password) }
+          : {
+              loginProviders: {
+                create: {
+                  externalId: args.providerId,
+                  provider: args.providerType,
+                },
+              },
+            }),
+      },
+    }),
+    prisma.userOrganization.update({
+      where: { userId_organizationId: { userId, organizationId } },
+      data: {
+        status: UserOrganizationStatus.ACTIVE,
+      },
+    }),
+    deleteRedisInvite(userId, organizationId),
+  ]);
+  return await createJwts(user);
+};
 
-  // Create user with specified organization or default to creating a new organization
-  const user = await prisma.user.create({
+export const createUser = async (args: SignupDataProvider | SignupDataPassword) => {
+  const { organizationId, lastName, firstName, email, emailType, role } = args;
+  return await prisma.user.create({
     ...userWithRoles,
     data: {
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      emailType: validData.emailType,
-      password: hashedPassword,
-      status: UserStatus.EMAIL_UNCONFIRMED,
+      email,
+      firstName,
+      lastName,
+      emailType,
+      status: 'password' in args ? UserStatus.EMAIL_UNCONFIRMED : UserStatus.EMAIL_CONFIRMED,
+      currentOrganizationId: organizationId,
+      ...('password' in args
+        ? { password: await createPassword(args.password) }
+        : {
+            loginProviders: {
+              create: {
+                externalId: args.providerId,
+                provider: args.providerType,
+              },
+            },
+          }),
       organizations: {
         create: {
           status: UserOrganizationStatus.ACTIVE,
-          role: validData.role ?? OrganizationRoleEnum.ORG_ADMIN,
-          organizationId: validData.orgId,
-        },
-      },
-      currentOrganizationId: validData.orgId,
-    },
-  });
-  await confirmEmail(user);
-
-  return user;
-};
-
-export const createInvitedUser = async (
-  email: string,
-  emailType: EmailType,
-  role: OrganizationRoleEnum,
-  organizationId: string,
-) => {
-  return await prisma.user.create({
-    data: {
-      email,
-      firstName: '',
-      lastName: '',
-      emailType,
-      status: UserStatus.EMAIL_UNCONFIRMED,
-      organizations: {
-        create: {
-          status: UserOrganizationStatus.INVITED,
           role,
           organizationId,
         },
       },
-      currentOrganizationId: organizationId,
     },
   });
 };
 
-export const createLoginProviderUser = async (data: LoginProviderUserData, inviteToken: string | undefined) => {
-  const validData = await validateEmailProcess(data.firstName, data.email, inviteToken);
+export const createLoginProviderUser = async (data: LoginProviderUserData, inviteHash: string | undefined) => {
+  const validData = await validateEmailProcess(data.firstName, data.email, inviteHash);
   if (isAError(validData)) {
     return validData;
   }
-  return await prisma.user.create({
-    ...userWithRoles,
-    data: {
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      emailType: validData.emailType,
-      photoUrl: data.photoUrl,
-      status: UserStatus.EMAIL_CONFIRMED,
-      loginProviders: {
-        create: {
-          externalId: data.providerId,
-          provider: data.providerType,
-        },
-      },
-      organizations: {
-        create: {
-          status: UserOrganizationStatus.ACTIVE,
-          role: OrganizationRoleEnum.ORG_ADMIN,
-          organizationId: validData.orgId,
-        },
-      },
-      currentOrganizationId: validData.orgId,
-    },
+  return await createUser({
+    ...data,
+    ...validData,
+    role: OrganizationRoleEnum.ORG_ADMIN,
+    organizationId: validData.orgId,
   });
 };
 
@@ -175,65 +170,18 @@ const completeConfirmUserEmailCallback = async (token: string): Promise<TokensTy
   return await createJwts(user);
 };
 
-export const authConfirmInvitedUserEndpoint = '/user/confirm-invited-user';
-
-export const authConfirmInvitedUserCallback = (req: ExpressRequest, res: ExpressResponse): void => {
-  const { token } = req.query;
-  if (!token || typeof token !== 'string') {
-    res.redirect(`${env.PUBLIC_URL}?error=${encodeURIComponent('Missing parameters')}`);
-    return;
-  }
-  completeConfirmInvitedUserCallback(token)
-    .then((response) => {
-      if (isAError(response)) {
-        res.redirect(`${env.PUBLIC_URL}?error=${encodeURIComponent(response.message)}`);
-      } else {
-        res.redirect(
-          `${env.PUBLIC_URL}/api/auth/sign-in?token=${response.token}&refreshToken=${response.refreshToken}`,
-        );
-      }
-    })
-    .catch((e: unknown) => {
-      logger.error(e, 'Failed to complete email confirmation');
-      res.redirect(`${env.PUBLIC_URL}?error=unknown_error`);
-    });
-};
-
-export const confirmInvitedUserPrefix = `user-`;
-export const confirmInvitedUserRedisKey = (inviteHash: string) => `confirm-invited-user:${inviteHash}`;
-export interface ConfirmInvitedUser {
-  userId: string;
-  organizationId: string;
-}
-const completeConfirmInvitedUserCallback = async (token: string): Promise<TokensType | AError> => {
-  const key = confirmInvitedUserRedisKey(token);
-  const redisVal = await redisGet<ConfirmInvitedUser>(key);
-  if (!redisVal) {
-    return new AError('User invitation expired');
-  }
-  const { userId, organizationId } = redisVal;
-  await Promise.all([
-    prisma.userOrganization.update({
-      where: { userId_organizationId: { userId, organizationId } },
-      data: { status: UserOrganizationStatus.ACTIVE, user: { update: { currentOrganizationId: organizationId } } },
-    }),
-    redisDel(key),
-  ]);
-  return await createJwtsFromUserId(userId);
-};
-
 const validateEmailProcess = async (
   firstName: string,
   email: string,
-  orgInviteToken?: string | null,
+  inviteHash?: string | null,
 ): Promise<AError | { orgId: string; emailType: EmailType; role?: OrganizationRoleEnum }> => {
   const nonWorkName = `${firstName}'${firstName.endsWith('s') ? '' : 's'} organization`;
 
   const { orgId, role } = await (async () => {
-    if (!orgInviteToken) {
+    if (!inviteHash) {
       return { orgId: createId() };
     }
-    const redisVal = await redisGetInvitationLink(orgInviteToken);
+    const redisVal = await redisGetInvitationLink(inviteHash);
     if (!redisVal) {
       return { orgId: createId() };
     }
@@ -286,8 +234,6 @@ export const confirmEmail = async (user: User): Promise<undefined | AError> => {
 
   const url = new URL(`${env.API_ENDPOINT}${authConfirmUserEmailEndpoint}`);
   url.search = searchParams.toString();
-
-  logger.info(`Confirm email url for ${user.email}: ${url.toString()}`);
 
   await Promise.all([
     redisSet(confirmEmailRedisKey(token), user.id, confirmEmailDurationSec),

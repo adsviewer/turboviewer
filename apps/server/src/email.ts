@@ -19,6 +19,7 @@ interface ActionEmailData {
 }
 
 export const sendForgetPasswordEmail = async (data: ActionEmailData) => {
+  logger.info(`Forget password url for ${data.email}: ${data.actionUrl.toString()}`);
   const command = await client
     .send(
       new SendEmailCommand({
@@ -55,6 +56,7 @@ interface ConfirmEmailData extends ActionEmailData {
   expirationInDays: number;
 }
 export const sendConfirmEmail = async (data: ConfirmEmailData) => {
+  logger.info(`Confirm email url for ${data.email}: ${data.actionUrl.toString()}`);
   const command = await client
     .send(
       new SendEmailCommand({
@@ -93,6 +95,7 @@ interface InviteEmailData extends Optional<ConfirmEmailData, 'firstName' | 'last
   organizationName: string;
 }
 export const sendOrganizationInviteConfirmEmail = async (data: InviteEmailData) => {
+  logger.info(`Confirm invited user email url for ${data.email}: ${data.actionUrl.toString()}`);
   const command = await client
     .send(
       new SendEmailCommand({
