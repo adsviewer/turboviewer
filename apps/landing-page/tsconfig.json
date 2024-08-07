@@ -3,6 +3,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
+      "@public/*": ["./public/*"],
+      "react": [ "./node_modules/@types/react" ]
     },
     "plugins": [{ "name": "next" }]
   },

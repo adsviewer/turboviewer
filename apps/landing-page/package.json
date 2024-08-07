@@ -14,18 +14,25 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@repo/ui": "workspace:*",
+    "framer-motion": "^11.3.21",
     "next": "^14.2.5",
+    "next-themes": "^0.3.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.4.1",
+    "sharp": "^0.33.4",
+    "swiper": "^11.1.9"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^22.1.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "autoprefixer": "^10.4.19",
+    "autoprefixer": "^10.4.20",
     "postcss": "^8.4.40",
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
