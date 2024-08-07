@@ -68,8 +68,6 @@ mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
 
 mutation removeUserFromOrganization($userId: String!) {
   removeUserFromOrganization(userId: $userId) {
-    user {
-      id
-    }
+    __typename
   }
 }
