@@ -2,8 +2,10 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 function Footer(): ReactNode {
+  const t = useTranslations('footer');
   return (
     <footer className="border-t border-stroke bg-white dark:border-strokedark dark:bg-blacksection">
       <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
@@ -47,7 +49,7 @@ function Footer(): ReactNode {
                 />
               </a>
 
-              <p className="mb-10 mt-5">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+              <p className="mb-10 mt-5">{t('title')}</p>
 
               <p className="mb-1.5 text-sectiontitle uppercase tracking-[5px]">contact</p>
               <a href="/" className="text-itemtitle font-medium text-black dark:text-white">
@@ -79,22 +81,22 @@ function Footer(): ReactNode {
                 <ul>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Home
+                      {t('home')}
                     </a>
                   </li>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Product
+                      {t('product')}
                     </a>
                   </li>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Careers
+                      {t('careers')}
                     </a>
                   </li>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Pricing
+                      {t('pricing')}
                     </a>
                   </li>
                 </ul>
@@ -123,22 +125,22 @@ function Footer(): ReactNode {
                 <ul>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Company
+                      {t('company')}
                     </a>
                   </li>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Press media
+                      {t('pressMedia')}
                     </a>
                   </li>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Our Blog
+                      {t('ourBlog')}
                     </a>
                   </li>
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
-                      Contact Us
+                      {t('contactUs')}
                     </a>
                   </li>
                 </ul>
@@ -162,8 +164,8 @@ function Footer(): ReactNode {
                 viewport={{ once: true }}
                 className="animate_top"
               >
-                <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">Newsletter</h4>
-                <p className="mb-4 w-[90%]">Subscribe to receive future updates</p>
+                <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">{t('newsletter')}</h4>
+                <p className="mb-4 w-[90%]">{t('subscribeBody')}</p>
 
                 <form action="/">
                   <div className="relative">
@@ -227,17 +229,17 @@ function Footer(): ReactNode {
             <ul className="flex items-center gap-8">
               <li>
                 <a href="/" className="hover:text-primary">
-                  English
+                  {t('english')}
                 </a>
               </li>
               <li>
                 <a href="/" className="hover:text-primary">
-                  Privacy Policy
+                  {t('privacyPolicy')}
                 </a>
               </li>
               <li>
                 <a href="/" className="hover:text-primary">
-                  Support
+                  {t('support')}
                 </a>
               </li>
             </ul>

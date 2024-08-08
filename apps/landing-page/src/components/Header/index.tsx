@@ -12,7 +12,7 @@ function Header(): ReactNode {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [dropdownToggler, setDropdownToggler] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const t = useTranslations('HomePage');
+  const t = useTranslations('header');
 
   const pathUrl = usePathname();
 
@@ -163,14 +163,14 @@ function Header(): ReactNode {
               href="https://github.com/NextJSTemplates/solid-nextjs"
               className="text-regular font-medium text-waterloo hover:text-primary"
             >
-              GitHub Repo 🌟
+              {t('githubRepo')} 🌟
             </Link>
 
             <Link
               href="https://nextjstemplates.com/templates/solid"
               className="flex items-center justify-center rounded-full bg-primary px-7.5 py-2.5 text-regular text-white duration-300 ease-in-out hover:bg-primaryho"
             >
-              Get Pro 🔥
+              {t('getPro')} 🔥
             </Link>
           </div>
         </div>
