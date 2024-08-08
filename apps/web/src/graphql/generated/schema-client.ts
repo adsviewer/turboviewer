@@ -528,7 +528,7 @@ export type Mutation = {
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
-  removeUserFromOrganization: UserOrganization;
+  removeUserFromOrganization: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
   /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
@@ -1098,10 +1098,7 @@ export type RemoveUserFromOrganizationMutationVariables = Exact<{
   userId: Scalars['String']['input'];
 }>;
 
-export type RemoveUserFromOrganizationMutation = {
-  __typename: 'Mutation';
-  removeUserFromOrganization: { __typename: 'UserOrganization' };
-};
+export type RemoveUserFromOrganizationMutation = { __typename: 'Mutation'; removeUserFromOrganization: boolean };
 
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
@@ -1565,9 +1562,7 @@ export function useInviteUsersMutation() {
 }
 export const RemoveUserFromOrganizationDocument = gql`
   mutation removeUserFromOrganization($userId: String!) {
-    removeUserFromOrganization(userId: $userId) {
-      __typename
-    }
+    removeUserFromOrganization(userId: $userId)
   }
 `;
 
