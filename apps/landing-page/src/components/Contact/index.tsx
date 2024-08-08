@@ -2,8 +2,10 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React, { type ReactNode, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 function Contact(): ReactNode {
+  const t = useTranslations('contact');
   /**
    * Source: https://www.joshwcomeau.com/react/the-perils-of-rehydration/
    * Reason: To fix rehydration error
@@ -47,7 +49,7 @@ function Contact(): ReactNode {
               className="animate_top w-full rounded-lg bg-white p-7.5 shadow-solid-8 dark:border dark:border-strokedark dark:bg-black md:w-3/5 lg:w-3/4 xl:p-15"
             >
               <h2 className="mb-15 text-3xl font-semibold text-black dark:text-white xl:text-sectiontitle2">
-                Send a message
+                {t('title')}
               </h2>
 
               <form action="https://formbold.com/s/unique_form_id" method="POST">
@@ -55,14 +57,14 @@ function Contact(): ReactNode {
                   <input
                     id="name-send-msg"
                     type="text"
-                    placeholder="Full name"
+                    placeholder={t('fullName')}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
                   />
 
                   <input
                     id="email-send-msg"
                     type="email"
-                    placeholder="Email address"
+                    placeholder={t('email')}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
                   />
                 </div>
@@ -71,14 +73,14 @@ function Contact(): ReactNode {
                   <input
                     id="subject-send-msg"
                     type="text"
-                    placeholder="Subject"
+                    placeholder={t('subject')}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
                   />
 
                   <input
                     id="phone-send-msg"
                     type="text"
-                    placeholder="Phone number"
+                    placeholder={t('phoneNumber')}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
                   />
                 </div>
@@ -86,7 +88,7 @@ function Contact(): ReactNode {
                 <div className="mb-11.5 flex">
                   <textarea
                     id="message-send-msg"
-                    placeholder="Message"
+                    placeholder={t('message')}
                     rows={4}
                     className="w-full border-b border-stroke bg-transparent focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white"
                   />
@@ -113,7 +115,7 @@ function Contact(): ReactNode {
                       </svg>
                     </span>
                     <label htmlFor="default-checkbox" className="flex max-w-[425px] cursor-pointer select-none pl-5">
-                      By clicking Checkbox, you agree to use our “Form” terms And consent cookie usage in browser.
+                      {t('termsAndConditions')}
                     </label>
                   </div>
 
@@ -122,7 +124,7 @@ function Contact(): ReactNode {
                     aria-label="send message"
                     className="inline-flex items-center gap-2.5 rounded-full bg-black px-6 py-3 font-medium text-white duration-300 ease-in-out hover:bg-blackho dark:bg-btndark"
                   >
-                    Send Message
+                    {t('sendMsg')}
                     <svg
                       className="fill-white"
                       width="14"
@@ -160,15 +162,15 @@ function Contact(): ReactNode {
               className="animate_top w-full md:w-2/5 md:p-7.5 lg:w-[26%] xl:pt-15"
             >
               <h2 className="mb-12.5 text-3xl font-semibold text-black dark:text-white xl:text-sectiontitle2">
-                Find us
+                {t('findUs')}
               </h2>
 
               <div className="5 mb-7">
-                <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">Our Loaction</h3>
-                <p>290 Maryam Springs 260, Courbevoie, Paris, France</p>
+                <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('ourLocation')}</h3>
+                <p>{t('address')}</p>
               </div>
               <div className="5 mb-7">
-                <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">Email Address</h3>
+                <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
                 <p>
                   <a href="/">yourmail@domainname.com</a>
                 </p>

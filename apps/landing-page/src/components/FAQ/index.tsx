@@ -2,14 +2,16 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type ReactNode, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import FaqItem from './faq-item';
 import faqData from './faq-data';
 
 function FAQ(): ReactNode {
-  const [activeFaq, setActiveFaq] = useState(1);
+  const [activeFaq, setActiveFaq] = useState('faq1');
+  const t = useTranslations('faq');
 
-  const handleFaqToggle = (id: number): void => {
-    activeFaq === id ? setActiveFaq(0) : setActiveFaq(id);
+  const handleFaqToggle = (id: string): void => {
+    activeFaq === id ? setActiveFaq('faq1') : setActiveFaq(id);
   };
 
   return (
@@ -40,11 +42,11 @@ function FAQ(): ReactNode {
               viewport={{ once: true }}
               className="animate_left md:w-2/5 lg:w-1/2"
             >
-              <span className="font-medium uppercase text-black dark:text-white">OUR FAQS</span>
+              <span className="font-medium uppercase text-black dark:text-white">{t('superTitle')}</span>
               <h2 className="relative mb-6 text-3xl font-bold text-black dark:text-white xl:text-hero">
-                Frequently Asked
+                {t('title1stLine')}
                 <span className="relative inline-block before:absolute before:bottom-2.5 before:left-0 before:-z-1 before:h-3 before:w-full before:bg-titlebg2 dark:before:bg-titlebgdark">
-                  Questions
+                  {t('title2ndLine')}
                 </span>
               </h2>
 
@@ -52,7 +54,7 @@ function FAQ(): ReactNode {
                 href="/"
                 className="group mt-7.5 inline-flex items-center gap-2.5 text-black hover:text-primary dark:text-white dark:hover:text-primary"
               >
-                <span className="duration-300 group-hover:pr-2">Know More</span>
+                <span className="duration-300 group-hover:pr-2">{t('knowMore')}</span>
                 <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M10.4767 6.16701L6.00668 1.69701L7.18501 0.518677L13.6667 7.00034L7.18501 13.482L6.00668 12.3037L10.4767 7.83368H0.333344V6.16701H10.4767Z"

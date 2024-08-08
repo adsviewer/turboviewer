@@ -2,18 +2,20 @@
 import { motion } from 'framer-motion';
 import { type ReactNode } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import SectionHeader from '../Common/section-header';
 
 function Integration(): ReactNode {
+  const t = useTranslations('integrations');
   return (
     <section>
       <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
         {/* <!-- Section Title Start --> */}
         <SectionHeader
           headerInfo={{
-            title: `INTEGRATIONS`,
-            subtitle: `Remotely Maintain Your Data, From Anywhere, Anytime.`,
-            description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.`,
+            title: t('title'),
+            subtitle: t('subtitle'),
+            description: t('description'),
           }}
         />
 

@@ -25,7 +25,181 @@
   "features": {
     "title": "Solid Features",
     "subtitle": "Core Features of Solid",
-    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In\n            convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam\n            ante in maximus."
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In\n            convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam\n            ante in maximus.",
+    "saas": {
+      "title": "Crafted for SaaS",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+    },
+    "highQuality": {
+      "title": "High-quality Design",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+    },
+    "next13": {
+      "title": "Next.js 13 + TypeScript",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+    },
+    "sanity": {
+      "title": "Sanity Blog and Docs",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+    },
+    "dbAuthStripe": {
+      "title": "DB, Auth and Stripe",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+    },
+    "freeUpdates": {
+      "title": "Regular Free Updates",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+    }
+  },
+  "about": {
+    "new": "New",
+    "superTitle": "SaaS Boilerplate for Next.js",
+    "title1stLine": "A Complete Solution for",
+    "title2ndLine": "SaaS Startup",
+    "body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices.\nFusce consectetur le.",
+    "feature1Title": "React 18, Next.js 13 and TypeScript",
+    "feature1Body": "Ut ultricies lacus non fermentum ultrices.",
+    "feature2Title": "Fully Customizable",
+    "feature2Body": "consectetur adipiscing elit fermentum ultricies.",
+    "launchFast": "Launch Your SaaS Fast",
+    "packedAllEssentials": "Packed with All Essential",
+    "integrations": "Integrations",
+    "launchFastBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices.\nFusce consectetur le.",
+    "knowMore": "Know More"
+  },
+  "featuresTab": {
+    "cleanUI": "Clean User Interface",
+    "essentialPages": "Essential Business Pages",
+    "fullyFunctionalIntegrations": "Fully Functional Integrations",
+    "tabOne": {
+      "title": "Clean User Interface",
+      "desc1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices. Fusce consectetur le.",
+      "desc2": "    Nam id eleifend dui, id iaculis purus. Etiam lobortis neque nec finibus sagittis. Nulla ligula nunc egestas ut."
+    },
+    "tabTwo": {
+      "title": "Ready to Use Pages You Need for a SaaS Business.",
+      "desc1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices. Fusce consectetur le.",
+      "desc2": "    Nam id eleifend dui, id iaculis purus. Etiam lobortis neque nec finibus sagittis. Nulla ligula nunc egestas ut."
+    },
+    "tabThree": {
+      "title": "Functional Blog, DB, Auth and Many More",
+      "desc1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices. Fusce consectetur le.",
+      "desc2": "    Nam id eleifend dui, id iaculis purus. Etiam lobortis neque nec finibus sagittis. Nulla ligula nunc egestas ut."
+    }
+  },
+  "funFact": {
+    "title": "Trusted by Global Companies.",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor\nlacus. Phasellus aliquam ante in maximus.",
+    "worldWideClients": "World Wide Clients",
+    "downloads": "Downloads",
+    "winningAward": "Winning Award"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Remotely Maintain Your Data, From Anywhere, Anytime.",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus."
+  },
+  "cta": {
+    "title": "Join With Us Today & Increase Your Productivity",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor\nlacus. Phasellus aliquam ante in maximus."
+  },
+  "faq": {
+    "superTitle": "Our Faqs",
+    "title1stLine": "Frequently Asked",
+    "title2ndLine": "Questions",
+    "knowMore": "Know More",
+    "faq1": {
+      "quest": "Lorem ipsum dolor sit amet, consectetur",
+      "ans": "We provide digital experience services to startups and small businesses. We help our clients succeed by creating brand identities, digital experiences."
+    },
+    "faq2": {
+      "quest": "Lorem ipsum dolor sit amet, consectetur",
+      "ans": "We provide digital experience services to startups and small businesses. We help our clients succeed by creating brand identities, digital experiences."
+    },
+    "faq3": {
+      "quest": "Lorem ipsum dolor sit amet, consectetur",
+      "ans": "We provide digital experience services to startups and small businesses. We help our clients succeed by creating brand identities, digital experiences."
+    }
+  },
+  "testimonial": {
+    "title": "Testimonials",
+    "subtitle": "Client’s Testimonials",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.",
+    "david": {
+      "name": "Devid Smith",
+      "designation": "Founter @democompany",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris hendrerit, ligula sit amet cursus tincidunt, lorem sem elementum nisi, convallis fringilla ante nibh non urna."
+    },
+    "jhon": {
+      "name": "Jhon Abraham",
+      "designation": "Founter @democompany",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris hendrerit, ligula sit amet cursus tincidunt, lorem sem elementum nisi, convallis fringilla ante nibh non urna."
+    },
+    "smith": {
+      "name": "Devid Smith",
+      "designation": "Founter @democompany",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris hendrerit, ligula sit amet cursus tincidunt, lorem sem elementum nisi, convallis fringilla ante nibh non urna."
+    },
+    "abraham": {
+      "name": "Jhon Abraham",
+      "designation": "Founter @democompany",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris hendrerit, ligula sit amet cursus tincidunt, lorem sem elementum nisi, convallis fringilla ante nibh non urna."
+    }
+  },
+  "pricing": {
+    "title": "Pricing Plans",
+    "subtitle": "Simple Pricing",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.",
+    "month": "month",
+    "smallPack": "Small Pack",
+    "smallPackDescription": "Lorem ipsum dolor sit amet, consec adipisicing elit.",
+    "storage": "300 GB Storage",
+    "photosVideos": "Unlimited Photos and Videos",
+    "exclusiveSupport": "Exclusive Support",
+    "brandingStrategy": "Custom Branding Strategy",
+    "getThePlan": "Get the Plan",
+    "popular": "popular",
+    "mediumPack": "Medium Pack",
+    "mediumPackDescription": "Lorem ipsum dolor sit amet, consec adipisicing elit.",
+    "largePack": "Large Pack",
+    "largePackDescription": "Lorem ipsum dolor sit amet, consec adipisicing elit."
+  },
+  "contact": {
+    "title": "Send a message",
+    "fullName": "Full Name",
+    "email": "Email address",
+    "subject": "Subject",
+    "phoneNumber": "Phone number",
+    "message": "Message",
+    "termsAndConditions": "By clicking Checkbox, you agree to use our “Form” terms And consent cookie usage in browser.",
+    "sendMsg": "Send Message",
+    "findUs": "Find us",
+    "ourLocation": "Our Location",
+    "address": "290 Maryam Springs 260, Courbevoie, Paris, France"
+  },
+  "blog": {
+    "title": "News & Blogs",
+    "subtitle": "Latest News & Blogs",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.",
+    "readMore": "Read More",
+    "blog1": {
+      "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "date": "Jan 20, 2022",
+      "author": "Admin",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus."
+    },
+    "blog2": {
+      "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "date": "Jan 20, 2022",
+      "author": "Admin",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus."
+    },
+    "blog3": {
+      "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "date": "Jan 20, 2022",
+      "author": "Admin",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus."
+    }
   },
   "footer": {
     "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -41,6 +215,7 @@
     "privacyPolicy": "Privacy Policy",
     "support": "Support",
     "subscribeBody": "Subscribe to receive future updates",
-    "newsletter": "Newsletter"
+    "newsletter": "Newsletter",
+    "allRightsReserved": "All rights reserved"
   }
 }

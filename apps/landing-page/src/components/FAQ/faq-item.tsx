@@ -1,15 +1,15 @@
 import { type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface FaqData {
-  activeFaq: number;
-  id: number;
-  handleFaqToggle: (id: number) => void;
-  quest: string;
-  ans: string;
+  activeFaq: string;
+  id: string;
+  handleFaqToggle: (id: string) => void;
 }
 
 function FaqItem({ faqData }: { faqData: FaqData }): ReactNode {
-  const { activeFaq, id, handleFaqToggle, quest, ans } = faqData;
+  const { activeFaq, id, handleFaqToggle } = faqData;
+  const t = useTranslations('faq');
 
   return (
     <div className="flex flex-col border-b border-stroke last-of-type:border-none dark:border-strokedark">
@@ -20,7 +20,7 @@ function FaqItem({ faqData }: { faqData: FaqData }): ReactNode {
         }}
         className="flex cursor-pointer items-center justify-between px-6 py-5 text-metatitle3 font-medium text-black dark:text-white lg:px-9 lg:py-7.5"
       >
-        {quest}
+        {t(`${id}.quest`)}
 
         {activeFaq === id ? (
           <svg width="18" height="4" viewBox="0 0 18 4" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +43,7 @@ function FaqItem({ faqData }: { faqData: FaqData }): ReactNode {
           activeFaq === id ? 'block' : 'hidden'
         }`}
       >
-        {ans}
+        {t(`${id}.ans`)}
       </p>
     </div>
   );

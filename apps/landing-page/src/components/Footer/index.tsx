@@ -263,7 +263,9 @@ function Footer(): ReactNode {
             viewport={{ once: true }}
             className="animate_top"
           >
-            <p>&copy; {new Date().getFullYear()} Solid. All rights reserved</p>
+            <p>
+              &copy; {new Date().getFullYear()} Solid. {t('allRightsReserved')}
+            </p>
           </motion.div>
 
           <motion.div
