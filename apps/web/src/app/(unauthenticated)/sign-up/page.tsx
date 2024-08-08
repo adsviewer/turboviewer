@@ -71,7 +71,7 @@ export default function SignUp(): React.JSX.Element {
       })
       .then((data: GenericRequestResponseBody) => {
         if (data.success) {
-          router.push('/confirm-email');
+          router.push('/');
           return null;
         }
 
