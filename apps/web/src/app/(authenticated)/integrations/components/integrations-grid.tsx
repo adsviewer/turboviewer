@@ -13,6 +13,9 @@ import {
 import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
 import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
 import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
+import googleLogo from '../../../../../public/integrations/google-logo-icon.svg';
+import snapchatLogo from '../../../../../public/integrations/snapchat-logo-icon.svg';
+import redditLogo from '../../../../../public/integrations/reddit-logo-icon.svg';
 import IntegrationCard from './integration-card';
 
 interface IntegrationProps {
@@ -39,6 +42,18 @@ const initialIntegrationsData: IntegrationsDataType = {
     lastSyncedAt: null,
   },
   [IntegrationType.TIKTOK]: {
+    adCount: 0,
+    lastSyncedAt: null,
+  },
+  [IntegrationType.GOOGLE]: {
+    adCount: 0,
+    lastSyncedAt: null,
+  },
+  [IntegrationType.REDDIT]: {
+    adCount: 0,
+    lastSyncedAt: null,
+  },
+  [IntegrationType.SNAPCHAT]: {
     adCount: 0,
     lastSyncedAt: null,
   },
@@ -89,6 +104,9 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     ],
     [IntegrationType.TIKTOK, { title: 'TikTok', imageSrc: tiktokLogo as string }],
     [IntegrationType.LINKEDIN, { title: 'LinkedIn', imageSrc: linkedinLogo as string }],
+    [IntegrationType.GOOGLE, { title: 'Google', imageSrc: googleLogo as string }],
+    [IntegrationType.SNAPCHAT, { title: 'Snapchat', imageSrc: snapchatLogo as string }],
+    [IntegrationType.REDDIT, { title: 'Reddit', imageSrc: redditLogo as string }],
   ]);
 
   return (
