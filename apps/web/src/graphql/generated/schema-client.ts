@@ -966,6 +966,7 @@ export type SignupMutationVariables = Exact<{
   firstName: Scalars['String']['input'];
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
+  inviteHash?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type SignupMutation = {
@@ -1385,8 +1386,10 @@ export function useLoginMutation() {
   return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
 }
 export const SignupDocument = gql`
-  mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
-    signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
+  mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!, $inviteHash: String) {
+    signup(
+      args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password, inviteHash: $inviteHash }
+    ) {
       token
       refreshToken
     }

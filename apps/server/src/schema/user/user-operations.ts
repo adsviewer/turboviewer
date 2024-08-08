@@ -6,6 +6,7 @@ import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { createId } from '@paralleldrive/cuid2';
 import * as changeCase from 'change-case';
+import { logger } from '@repo/logger';
 import { createJwts } from '../../auth';
 import {
   activateInvitedUser,
@@ -117,6 +118,9 @@ builder.mutationFields((t) => ({
     },
     validate: (args) => Boolean(signUpInputSchema.parse(args)),
     resolve: async (root, args, _ctx, _info) => {
+      logger.info('TEST DEBUG123');
+      logger.info(args.args.email);
+      logger.info(args.args.inviteHash);
       const [existingUser, redisVal] = await Promise.all([
         prisma.user.findUnique({
           where: { email: args.args.email },

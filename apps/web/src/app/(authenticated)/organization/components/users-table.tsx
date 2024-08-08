@@ -190,7 +190,7 @@ export function UsersTable(): React.ReactNode {
           (isOrgAdmin(userDetails.allRoles) || (isOperator(userDetails.allRoles) && !isOrgAdmin([userData.role]))) ? (
             <Select
               data={rolesData}
-              defaultValue={userData.role}
+              value={userData.role}
               variant="filled"
               allowDeselect={false}
               withCheckIcon
