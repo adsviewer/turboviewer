@@ -1,4 +1,4 @@
-import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus } from '@repo/database';
+import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { GraphQLError } from 'graphql';
 import { AError, FireAndForget, isAError } from '@repo/utils';
 import { deleteInsightsCache } from '@repo/channel';
@@ -168,7 +168,7 @@ builder.mutationFields((t) => ({
   }),
 
   removeUserFromOrganization: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
-    type: UserOrganizationDto,
+    type: 'Boolean',
     nullable: false,
     args: {
       userId: t.arg.string({ required: true }),
@@ -196,10 +196,18 @@ builder.mutationFields((t) => ({
           throw new GraphQLError('Cannot remove the last organization administrator');
         }
       }
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: args.userId },
+      });
       fireAndForget.add(() => deleteRedisInvite(args.userId, ctx.organizationId));
-      return prisma.userOrganization.delete({
+      if (user.status === UserStatus.EMAIL_UNCONFIRMED) {
+        await prisma.user.delete({ where: { id: args.userId } });
+        return true;
+      }
+      await prisma.userOrganization.delete({
         where: { userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId } },
       });
+      return true;
     },
   }),
 
