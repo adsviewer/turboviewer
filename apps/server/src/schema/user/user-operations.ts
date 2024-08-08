@@ -1,17 +1,25 @@
 import { randomUUID } from 'node:crypto';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';
-import { prisma } from '@repo/database';
-import { logger } from '@repo/logger';
+import { EmailType, OrganizationRoleEnum, prisma } from '@repo/database';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
+import { createId } from '@paralleldrive/cuid2';
+import * as changeCase from 'change-case';
 import { createJwts } from '../../auth';
-import { confirmEmail, createPassword, createUser, passwordsMatch } from '../../contexts/user/user';
+import {
+  activateInvitedUser,
+  confirmEmail,
+  createPassword,
+  createUser,
+  passwordsMatch,
+} from '../../contexts/user/user';
 import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
-import { handleLinkInvite } from '../../contexts/user/user-invite';
+import { getInvitationRedis, handleLinkInvite, isConfirmInvitedUser } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
+import { validateEmail } from '../../emailable-helper';
 import { SignUpInputDto, TokensDto, UserDto } from './user-types';
 
 const usernameSchema = z.string().min(2).max(30);
@@ -69,6 +77,37 @@ const updateUserSchema = z.object({
   newPassword: PasswordSchema.optional(),
 });
 
+const createOrg = async (
+  emailValidation:
+    | { emailType: 'PERSONAL' }
+    | {
+        domain: string;
+        emailType: EmailType;
+      },
+  orgId: string,
+  nonWorkName: string,
+) => {
+  if (emailValidation.emailType === EmailType.PERSONAL) {
+    await prisma.organization.create({
+      data: { id: orgId, name: nonWorkName },
+    });
+  } else {
+    const organization = await prisma.organization.findUnique({
+      where: { domain: emailValidation.domain },
+    });
+    if (organization) {
+      await prisma.organization.create({
+        data: { id: orgId, name: nonWorkName },
+      });
+    } else {
+      const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
+      await prisma.organization.create({
+        data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain },
+      });
+    }
+  }
+};
+
 builder.mutationFields((t) => ({
   signup: t.field({
     nullable: false,
@@ -78,15 +117,48 @@ builder.mutationFields((t) => ({
     },
     validate: (args) => Boolean(signUpInputSchema.parse(args)),
     resolve: async (root, args, _ctx, _info) => {
-      const existingUser = await prisma.user.findUnique({
-        where: { email: args.args.email },
-      });
-      if (existingUser) {
+      const [existingUser, redisVal] = await Promise.all([
+        prisma.user.findUnique({
+          where: { email: args.args.email },
+        }),
+        getInvitationRedis(args.args.inviteHash),
+      ]);
+      if (isAError(redisVal)) {
+        throw new GraphQLError(redisVal.message);
+      }
+      if (existingUser && !isConfirmInvitedUser(redisVal)) {
         throw new GraphQLError('User already exists');
       }
 
-      const user = await createUser(args.args);
-      if (isAError(user)) throw new GraphQLError(user.message);
+      if (isConfirmInvitedUser(redisVal)) {
+        return await activateInvitedUser({
+          userId: redisVal.userId,
+          organizationId: redisVal.organizationId,
+          firstName: args.args.firstName,
+          lastName: args.args.lastName,
+          password: args.args.password,
+        });
+      }
+
+      const emailValidation = await validateEmail(args.args.email);
+      if (isAError(emailValidation)) throw new GraphQLError(emailValidation.message);
+
+      const nonWorkName = `${args.args.firstName}'${args.args.firstName.endsWith('s') ? '' : 's'} organization`;
+
+      const newOrgId = createId();
+
+      if (!redisVal) await createOrg(emailValidation, newOrgId, nonWorkName);
+
+      const user = await createUser({
+        email: args.args.email,
+        emailType: emailValidation.emailType,
+        firstName: args.args.firstName,
+        lastName: args.args.lastName,
+        password: args.args.password,
+        organizationId: redisVal?.organizationId ?? newOrgId,
+        role: redisVal?.role ?? OrganizationRoleEnum.ORG_ADMIN,
+      });
+      await confirmEmail(user);
 
       // TODO: enable me
       // fireAndForget.add(() =>
@@ -192,8 +264,6 @@ builder.mutationFields((t) => ({
 
       const url = new URL(`${env.PUBLIC_URL}/reset-password`);
       url.search = searchParams.toString();
-
-      logger.info(`Forget password url for ${user.email}: ${url.toString()}`);
 
       await Promise.all([
         redisSet(`forget-password:${token}`, user.id, forgotPasswordDurationSec),

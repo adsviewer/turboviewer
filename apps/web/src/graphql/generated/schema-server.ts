@@ -541,7 +541,7 @@ export type Mutation = {
 };
 
 export type MutationAcceptLinkInvitationExistingUserArgs = {
-  token: Scalars['String']['input'];
+  inviteHash: Scalars['String']['input'];
 };
 
 export type MutationCreateInvitationLinkArgs = {
@@ -707,7 +707,7 @@ export type Query = {
   __typename?: 'Query';
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
-  checkConfirmInvitedUserTokenValidity: Scalars['Boolean']['output'];
+  checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsight;
@@ -729,8 +729,8 @@ export type QueryAvailableOrganizationAdAccountsArgs = {
   channel: IntegrationType;
 };
 
-export type QueryCheckConfirmInvitedUserTokenValidityArgs = {
-  token: Scalars['String']['input'];
+export type QueryCheckConfirmInvitedUserHashValidityArgs = {
+  invitedHash: Scalars['String']['input'];
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -753,7 +753,7 @@ export type QueryIntegrationsArgs = {
 };
 
 export type QueryLoginProvidersArgs = {
-  inviteToken?: InputMaybe<Scalars['String']['input']>;
+  inviteHash?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryOrganizationAdAccountsArgs = {
@@ -763,9 +763,9 @@ export type QueryOrganizationAdAccountsArgs = {
 export type SignUpInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
+  inviteHash?: InputMaybe<Scalars['String']['input']>;
   lastName: Scalars['String']['input'];
   password: Scalars['String']['input'];
-  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Subscription = {

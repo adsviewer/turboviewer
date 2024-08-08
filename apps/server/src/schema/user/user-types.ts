@@ -140,7 +140,7 @@ export const SignUpInputDto = builder.inputType('SignUpInput', {
     password: t.string({ required: true }),
     firstName: t.string({ required: true }),
     lastName: t.string({ required: true }),
-    token: t.string({ required: false }),
+    inviteHash: t.string({ required: false }),
   }),
 });
 
