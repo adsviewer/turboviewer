@@ -132,6 +132,9 @@ enum IntegrationTypeEnum {
   META
   TIKTOK
   LINKEDIN
+  GOOGLE
+  SNAPCHAT
+  REDDIT
 }
 
 enum IntegrationStatus {

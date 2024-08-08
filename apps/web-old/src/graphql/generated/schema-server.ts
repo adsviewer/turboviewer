@@ -480,6 +480,9 @@ export enum IntegrationType {
   META = 'META',
   TIKTOK = 'TIKTOK',
   LINKEDIN = 'LINKEDIN',
+  GOOGLE = 'GOOGLE',
+  SNAPCHAT = 'SNAPCHAT',
+  REDDIT = 'REDDIT',
 }
 
 export type InviteLinks = {
