@@ -2,11 +2,13 @@
 import Image from 'next/image';
 import { type ReactNode, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import FeaturesTabItem from './features-tab-item';
 import featuresTabData from './features-tab-data';
 
 function FeaturesTab(): ReactNode {
   const [currentTab, setCurrentTab] = useState('tabOne');
+  const t = useTranslations('featuresTab');
 
   return (
     <>
@@ -52,9 +54,7 @@ function FeaturesTab(): ReactNode {
                 <p className="text-metatitle3 font-medium text-black dark:text-white">01</p>
               </div>
               <div className="md:w-3/5 lg:w-auto">
-                <div className="text-sm font-medium text-black dark:text-white xl:text-regular">
-                  Clean User Interface
-                </div>
+                <div className="text-sm font-medium text-black dark:text-white xl:text-regular">{t('cleanUI')}</div>
               </div>
             </button>
             <button
@@ -73,7 +73,7 @@ function FeaturesTab(): ReactNode {
               </div>
               <div className="md:w-3/5 lg:w-auto">
                 <div className="text-sm font-medium text-black dark:text-white xl:text-regular">
-                  Essential Business Pages
+                  {t('essentialPages')}
                 </div>
               </div>
             </button>
@@ -93,7 +93,7 @@ function FeaturesTab(): ReactNode {
               </div>
               <div className="md:w-3/5 lg:w-auto">
                 <div className="text-sm font-medium text-black dark:text-white xl:text-regular">
-                  Fully Functional Integrations
+                  {t('fullyFunctionalIntegrations')}
                 </div>
               </div>
             </button>

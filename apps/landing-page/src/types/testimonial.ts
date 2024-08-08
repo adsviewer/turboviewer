@@ -5,6 +5,4 @@ export interface Testimonial {
   name: string;
   destination?: string;
   image: string | StaticImport;
-  content: string;
-  designation: string;
 }

@@ -7,11 +7,13 @@ import 'swiper/css/pagination';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { motion } from 'framer-motion';
 import { type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import SectionHeader from '../Common/section-header';
 import SingleTestimonial from './single-testimonial';
 import { testimonialData } from './testimonial-data';
 
 function Testimonial(): ReactNode {
+  const t = useTranslations('testimonial');
   return (
     <section>
       <div className="mx-auto max-w-c-1315 px-4 md:px-8 xl:px-0">
@@ -19,9 +21,9 @@ function Testimonial(): ReactNode {
         <div className="animate_top mx-auto text-center">
           <SectionHeader
             headerInfo={{
-              title: `TESTIMONIALS`,
-              subtitle: `Client’s Testimonials`,
-              description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.`,
+              title: t('title'),
+              subtitle: t('subtitle'),
+              description: t('description'),
             }}
           />
         </div>

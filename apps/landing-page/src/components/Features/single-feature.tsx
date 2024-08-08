@@ -1,10 +1,12 @@
 import React, { type ReactNode } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { type Feature } from '@/types/feature';
 
 function SingleFeature({ feature }: { feature: Feature }): ReactNode {
-  const { icon, title, description } = feature;
+  const { icon, title } = feature;
+  const t = useTranslations('features');
 
   return (
     <motion.div
@@ -28,8 +30,10 @@ function SingleFeature({ feature }: { feature: Feature }): ReactNode {
       <div className="relative flex h-16 w-16 items-center justify-center rounded-[4px] bg-primary">
         <Image src={icon} width={36} height={36} alt="title" />
       </div>
-      <h3 className="mb-5 mt-7.5 text-xl font-semibold text-black dark:text-white xl:text-itemtitle">{title}</h3>
-      <p>{description}</p>
+      <h3 className="mb-5 mt-7.5 text-xl font-semibold text-black dark:text-white xl:text-itemtitle">
+        {t(`${title}.title`)}
+      </h3>
+      <p>{t(`${title}.description`)}</p>
     </motion.div>
   );
 }
