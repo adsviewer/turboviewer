@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect, useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
+import { useTranslations } from 'next-intl';
 import ThemeToggler from './theme-toggler';
 import menuData from './menu-data';
 
@@ -11,6 +12,7 @@ function Header(): ReactNode {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [dropdownToggler, setDropdownToggler] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const t = useTranslations('header');
 
   const pathUrl = usePathname();
 
@@ -121,7 +123,7 @@ function Header(): ReactNode {
                         }}
                         className="flex cursor-pointer items-center justify-between gap-3 hover:text-primary"
                       >
-                        {menuItem.title}
+                        {t(menuItem.title)}
                         <span>
                           <svg
                             className="h-3 w-3 cursor-pointer fill-waterloo group-hover:fill-primary"
@@ -136,7 +138,7 @@ function Header(): ReactNode {
                       <ul className={`dropdown ${dropdownToggler ? 'flex' : ''}`}>
                         {menuItem.submenu.map((item) => (
                           <li key={item.id} className="hover:text-primary">
-                            <Link href={item.path ?? '#'}>{item.title}</Link>
+                            <Link href={item.path ?? '#'}>{t(item.title)}</Link>
                           </li>
                         ))}
                       </ul>
@@ -146,7 +148,7 @@ function Header(): ReactNode {
                       href={String(menuItem.path)}
                       className={pathUrl === menuItem.path ? 'text-primary hover:text-primary' : 'hover:text-primary'}
                     >
-                      {menuItem.title}
+                      {t(menuItem.title)}
                     </Link>
                   )}
                 </li>
@@ -161,14 +163,14 @@ function Header(): ReactNode {
               href="https://github.com/NextJSTemplates/solid-nextjs"
               className="text-regular font-medium text-waterloo hover:text-primary"
             >
-              GitHub Repo 🌟
+              {t('githubRepo')} 🌟
             </Link>
 
             <Link
               href="https://nextjstemplates.com/templates/solid"
               className="flex items-center justify-center rounded-full bg-primary px-7.5 py-2.5 text-regular text-white duration-300 ease-in-out hover:bg-primaryho"
             >
-              Get Pro 🔥
+              {t('getPro')} 🔥
             </Link>
           </div>
         </div>

@@ -1,0 +1,46 @@
+{
+  "header": {
+    "Home": "Home",
+    "Features": "Features",
+    "Blog": "Blog",
+    "Docs": "Docs",
+    "Pages": "Pages",
+    "Blog Grid": "Blog Grid",
+    "Sign In": "Sign In",
+    "Sign Up": "Sign Up",
+    "Support": "Support",
+    "404": "404",
+    "githubRepo": "GitHub Repo",
+    "getPro": "Get Pro"
+  },
+  "hero": {
+    "superTitle": "Solid - A Complete SaaS Web Template",
+    "title1stLine": "Free Next.js Template for",
+    "title2ndLine": "SaaS",
+    "body": "Solid Pro - Packed with all the key integrations you need for swift SaaS startup launch, including - Auth,\n              Database, Sanity Blog, Essential Components, Pages and More. Built-winth - Next.js 13, React 18 and\n              TypeScript.",
+    "getStarted": "Get Started",
+    "enterEmail": "Enter your email address",
+    "tryForFree": "Try for free no credit card required."
+  },
+  "features": {
+    "title": "Solid Features",
+    "subtitle": "Core Features of Solid",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In\n            convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam\n            ante in maximus."
+  },
+  "footer": {
+    "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "home": "Home",
+    "product": "Product",
+    "careers": "Careers",
+    "pricing": "Pricing",
+    "company": "Company",
+    "pressMedia": "Press media",
+    "ourBlog": "Our Blog",
+    "contactUs": "Contact Us",
+    "english": "English",
+    "privacyPolicy": "Privacy Policy",
+    "support": "Support",
+    "subscribeBody": "Subscribe to receive future updates",
+    "newsletter": "Newsletter"
+  }
+}
