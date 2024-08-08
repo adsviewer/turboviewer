@@ -53,11 +53,14 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
       e.code === 'NumpadEnter'
     ) {
       e.preventDefault();
+      addEmail();
+    }
+  };
 
-      if (emailSchema.safeParse(emailInputValue).success) {
-        setEmails([...emails, emailInputValue]);
-        setEmailInputValue('');
-      }
+  const addEmail = (): void => {
+    if (emailSchema.safeParse(emailInputValue).success) {
+      setEmails([...emails, emailInputValue]);
+      setEmailInputValue('');
     }
   };
 
@@ -129,7 +132,12 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
       {/* Delete Modal */}
       <Modal opened={opened} onClose={closeModal} title={t('inviteUsers')} centered>
         <Flex direction="column" gap="sm">
-          <PillsInput label={`${t('enterEmails')}:`} onChange={onEmailInputChanged} onKeyDown={onEmailInputConfirm}>
+          <PillsInput
+            label={`${t('enterEmails')}:`}
+            onChange={onEmailInputChanged}
+            onKeyDown={onEmailInputConfirm}
+            onBlur={addEmail}
+          >
             <Pill.Group>
               {emails.length
                 ? emails.map((email) => (
