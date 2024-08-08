@@ -1098,7 +1098,7 @@ export type RemoveUserFromOrganizationMutationVariables = Exact<{
 
 export type RemoveUserFromOrganizationMutation = {
   __typename: 'Mutation';
-  removeUserFromOrganization: { __typename: 'UserOrganization'; user: { __typename: 'User'; id: string } };
+  removeUserFromOrganization: { __typename: 'UserOrganization' };
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1453,9 +1453,7 @@ export const InviteUsersDocument = gql`
 export const RemoveUserFromOrganizationDocument = gql`
   mutation removeUserFromOrganization($userId: String!) {
     removeUserFromOrganization(userId: $userId) {
-      user {
-        id
-      }
+      __typename
     }
   }
 `;

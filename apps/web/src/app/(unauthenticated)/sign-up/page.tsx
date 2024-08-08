@@ -20,9 +20,10 @@ import {
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { inviteHashLabel } from '@repo/utils';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
-import { addOrReplaceURLParams, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, emailKey, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from '../sign-in/actions';
 
@@ -40,8 +41,9 @@ export default function SignUp(): React.JSX.Element {
     initialValues: {
       firstName: '',
       lastName: '',
-      email: '',
+      email: searchParams.get(emailKey) ?? '',
       password: '',
+      inviteHash: searchParams.get(inviteHashLabel) ?? '',
     },
     validate: zodResolver(SignUpSchema),
   });
@@ -135,6 +137,7 @@ export default function SignUp(): React.JSX.Element {
                   {...form.getInputProps('email')}
                   required
                   mt="md"
+                  disabled={searchParams.has(emailKey)}
                 />
                 <PasswordInput
                   label={t('password')}
