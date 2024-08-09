@@ -207,6 +207,12 @@ builder.mutationFields((t) => ({
       await prisma.userOrganization.delete({
         where: { userId_organizationId: { userId: args.userId, organizationId: ctx.organizationId } },
       });
+      if (user.currentOrganizationId === ctx.organizationId) {
+        await prisma.user.update({
+          where: { id: args.userId },
+          data: { currentOrganizationId: null },
+        });
+      }
       return true;
     },
   }),
