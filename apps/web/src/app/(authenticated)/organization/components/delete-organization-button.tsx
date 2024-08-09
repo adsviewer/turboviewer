@@ -50,7 +50,7 @@ export default function DeleteOrganizationButton(props: PropsType): React.ReactN
   };
 
   return (
-    <Flex my="md">
+    <Flex my="md" justify="flex-end">
       <Button
         leftSection={<IconTrash size={18} />}
         color={theme.colors.red[7]}

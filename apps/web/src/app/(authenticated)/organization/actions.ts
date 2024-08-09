@@ -2,24 +2,41 @@
 
 import { logger } from '@repo/logger';
 import {
+  type RemoveUserFromOrganizationMutation,
+  type RemoveUserFromOrganizationMutationVariables,
   type CreateOrganizationMutation,
   type CreateOrganizationMutationVariables,
+  type DeleteOrganizationMutation,
+  type DeleteOrganizationMutationVariables,
+  type InviteUsersMutation,
+  type InviteUsersMutationVariables,
   type SwitchOrganizationMutation,
   type SwitchOrganizationMutationVariables,
   type UpdateOrganizationMutation,
   type UpdateOrganizationMutationVariables,
-  type DeleteOrganizationMutation,
-  type DeleteOrganizationMutationVariables,
+  type UpdateOrganizationUserMutation,
+  type UpdateOrganizationUserMutationVariables,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { refreshJWTToken } from '@/app/(authenticated)/actions';
+import { type GetOrganizationQuery } from '@/graphql/generated/schema-client';
+
+export default async function getOrganization(): Promise<UrqlResult<GetOrganizationQuery>> {
+  return await handleUrqlRequest(urqlClientSdk().getOrganization());
+}
 
 async function createOrganization(
   values: CreateOrganizationMutationVariables,
 ): Promise<UrqlResult<CreateOrganizationMutation, string>> {
   return await handleUrqlRequest(urqlClientSdk().createOrganization(values));
+}
+
+export async function updateOrganizationUser(
+  values: UpdateOrganizationUserMutationVariables,
+): Promise<UrqlResult<UpdateOrganizationUserMutation, string>> {
+  return await handleUrqlRequest(urqlClientSdk().updateOrganizationUser(values));
 }
 
 export async function updateOrganization(
@@ -123,4 +140,21 @@ export async function switchOrganizationAndChangeJWT(values: SwitchOrganizationM
       error,
     };
   }
+}
+
+type InviteUsersMutationError = Extract<
+  InviteUsersMutation['inviteUsers'],
+  { __typename: 'InviteUsersErrors' }
+>['error'];
+
+export async function inviteUsers(
+  values: InviteUsersMutationVariables,
+): Promise<UrqlResult<InviteUsersMutation, InviteUsersMutationError | string>> {
+  return await handleUrqlRequest<InviteUsersMutation, InviteUsersMutationError>(urqlClientSdk().inviteUsers(values));
+}
+
+export async function removeUserFromOrganization(
+  values: RemoveUserFromOrganizationMutationVariables,
+): Promise<UrqlResult<RemoveUserFromOrganizationMutation, string>> {
+  return await handleUrqlRequest(urqlClientSdk().removeUserFromOrganization(values));
 }

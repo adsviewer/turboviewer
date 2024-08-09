@@ -1,1 +1,1 @@
-export const inviteHashLabel = 'invite_hash';
+export const inviteHashLabel = 'inviteHash';

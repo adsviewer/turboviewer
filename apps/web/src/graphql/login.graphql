@@ -5,8 +5,10 @@ mutation login($email: String!, $password: String!) {
   }
 }
 
-mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!) {
-  signup(args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password }) {
+mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!, $inviteHash: String) {
+  signup(
+    args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password, inviteHash: $inviteHash }
+  ) {
     token
     refreshToken
   }

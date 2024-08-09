@@ -489,7 +489,7 @@ type InviteUsersError {
 }
 
 type InviteUsersErrors implements Error {
-  errors: [InviteUsersError!]!
+  error: [InviteUsersError!]!
   message: String!
 }
 
@@ -531,7 +531,7 @@ type Mutation {
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): MutationInviteUsersResult!
   login(email: String!, password: String!, token: String): Tokens!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
-  removeUserFromOrganization(userId: String!): UserOrganization!
+  removeUserFromOrganization(userId: String!): Boolean!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
 

@@ -56,11 +56,11 @@ export const UserOrganizationDto = builder.prismaObject('UserOrganization', {
 });
 
 export class InviteUsersErrors extends AError {
-  errors: { email: string; message: string }[];
+  error: { email: string; message: string }[];
 
-  constructor(errors: { email: string; message: string }[]) {
+  constructor(error: { email: string; message: string }[]) {
     super('Some users were not invited');
-    this.errors = errors;
+    this.error = error;
     this.name = 'InviteUsersErrors';
   }
 }
@@ -76,7 +76,7 @@ export const InviteUsersErrorsDto = builder.objectType(InviteUsersErrors, {
   name: 'InviteUsersErrors',
   interfaces: [ErrorInterface],
   fields: (t) => ({
-    errors: t.expose('errors', { type: [InviteUsersErrorDto], nullable: false }),
+    error: t.expose('error', { type: [InviteUsersErrorDto], nullable: false }),
   }),
 });
 
