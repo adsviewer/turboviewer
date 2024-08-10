@@ -125,9 +125,12 @@ export default function OrderFilters(): React.ReactNode {
           <Select
             placeholder="Pick value"
             data={[
-              { value: InsightsColumnsOrderBy.spend_rel, label: t('spent') },
-              { value: InsightsColumnsOrderBy.impressions_rel, label: t('impressions') },
-              { value: InsightsColumnsOrderBy.cpm_rel, label: 'CPM' },
+              { value: InsightsColumnsOrderBy.spend_rel, label: `${t('spent')} (${t('relative')})` },
+              { value: InsightsColumnsOrderBy.impressions_rel, label: `${t('impressions')} (${t('relative')})` },
+              { value: InsightsColumnsOrderBy.cpm_rel, label: `CPM (${t('relative')})` },
+              { value: InsightsColumnsOrderBy.spend_abs, label: t('spent') },
+              { value: InsightsColumnsOrderBy.impressions_abs, label: t('impressions') },
+              { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
             ]}
             value={getOrderByValue()}
             onChange={handleOrderByChange}
