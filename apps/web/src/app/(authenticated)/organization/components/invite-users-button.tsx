@@ -45,15 +45,22 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   };
 
   const onEmailInputConfirm = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (
-      e.code === 'Space' ||
-      e.code === 'Tab' ||
-      e.code === 'Enter' ||
-      e.code === 'Comma' ||
-      e.code === 'NumpadEnter'
-    ) {
-      e.preventDefault();
-      addEmail();
+    if (emailInputValue !== '') {
+      if (
+        e.code === 'Space' ||
+        e.code === 'Tab' ||
+        e.code === 'Enter' ||
+        e.code === 'Comma' ||
+        e.code === 'NumpadEnter'
+      ) {
+        e.preventDefault();
+        addEmail();
+        return;
+      }
+    }
+
+    if (!isPending && emails.length && (e.code === 'Enter' || e.code === 'NumpadEnter')) {
+      performUserInvites();
     }
   };
 
@@ -129,7 +136,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
         {t('inviteUsers')}
       </Button>
 
-      {/* Delete Modal */}
+      {/* Invite Modal */}
       <Modal opened={opened} onClose={closeModal} title={t('inviteUsers')} centered>
         <Flex direction="column" gap="sm">
           <PillsInput
