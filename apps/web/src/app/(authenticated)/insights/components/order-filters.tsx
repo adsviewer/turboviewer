@@ -14,8 +14,9 @@ import {
   pageSizeKey,
   fetchPreviewsKey,
   groupedByKey,
+  intervalKey,
 } from '@/util/url-query-utils';
-import { InsightsColumnsGroupBy, InsightsColumnsOrderBy } from '@/graphql/generated/schema-server';
+import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 
 export default function OrderFilters(): React.ReactNode {
@@ -59,6 +60,15 @@ export default function OrderFilters(): React.ReactNode {
     return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
   };
 
+  const getIntervalValue = (): string => {
+    if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.month)) {
+      return InsightsInterval.month;
+    } else if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.week)) {
+      return InsightsInterval.week;
+    }
+    return InsightsInterval.day;
+  };
+
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
@@ -83,6 +93,14 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
+  const handleIntervalChange = (value: string | null, option: ComboboxItem): void => {
+    resetInsights();
+    const newURL = addOrReplaceURLParams(pathname, searchParams, intervalKey, option.value);
+    startTransition(() => {
+      router.replace(newURL);
+    });
+  };
+
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
     resetInsights();
     let newURL: string;
@@ -97,11 +115,11 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   return (
-    <Flex w="100%" mb="lg" wrap="wrap" direction="column">
+    <Flex w="100%" wrap="wrap" direction="column">
       {/* Filters */}
-      <Flex>
+      <Flex wrap="wrap" mb="md">
         {/* Page size filter */}
-        <Flex align="center" mr="sm" my="md">
+        <Flex align="center" mr="sm">
           <Text size="md" mr="sm">
             {t('pageSize')}:
           </Text>
@@ -118,10 +136,8 @@ export default function OrderFilters(): React.ReactNode {
         </Flex>
 
         {/* Order filter */}
-        <Flex align="center">
-          <Text size="md" mr="sm">
-            {t('orderBy')}:
-          </Text>
+        <Flex align="center" gap="md">
+          <Text size="md">{t('orderBy')}:</Text>
           <Select
             placeholder="Pick value"
             data={[
@@ -137,7 +153,6 @@ export default function OrderFilters(): React.ReactNode {
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             maw={150}
-            mr="sm"
             disabled={isPending}
           />
           <Select
@@ -153,11 +168,25 @@ export default function OrderFilters(): React.ReactNode {
             maw={150}
             disabled={isPending}
           />
+          <Select
+            placeholder="Pick value"
+            data={[
+              { value: InsightsInterval.day, label: t('daily') },
+              // { value: InsightsInterval.week, label: t('weekly') }, // commented this out since the issue doesn't include week
+              { value: InsightsInterval.month, label: t('monthly') },
+            ]}
+            value={getIntervalValue()}
+            onChange={handleIntervalChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={150}
+            disabled={isPending}
+          />
         </Flex>
       </Flex>
 
       {/* Misc. controls */}
-      <Flex>
+      <Flex align="center" gap="md" mb="md">
         {/* Toggle ad previews */}
         <Tooltip
           withArrow
