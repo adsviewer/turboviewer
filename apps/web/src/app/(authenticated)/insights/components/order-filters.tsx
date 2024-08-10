@@ -195,6 +195,20 @@ export default function OrderFilters(): React.ReactNode {
             maw={150}
             disabled={isPending}
           />
+          <Select
+            placeholder="Pick value"
+            data={[
+              { value: InsightsInterval.day, label: t('daily') },
+              // { value: InsightsInterval.week, label: t('weekly') }, // commented this out since the issue doesn't include week
+              { value: InsightsInterval.month, label: t('monthly') },
+            ]}
+            value={getIntervalValue()}
+            onChange={handleIntervalChange}
+            allowDeselect={false}
+            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            maw={150}
+            disabled={isPending}
+          />
         </Flex>
       </Flex>
 
