@@ -1110,12 +1110,7 @@ export type OrganizationAdAccountsQueryVariables = Exact<{
 
 export type OrganizationAdAccountsQuery = {
   __typename?: 'Query';
-  organizationAdAccounts: Array<{
-    __typename?: 'AdAccount';
-    id: string;
-    adCount: number;
-    insights: Array<{ __typename?: 'Insight'; id: string }>;
-  }>;
+  organizationAdAccounts: Array<{ __typename?: 'AdAccount'; id: string; adCount: number; name: string }>;
 };
 
 export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
@@ -1617,9 +1612,7 @@ export const OrganizationAdAccountsDocument = gql`
     organizationAdAccounts(channel: $channel) {
       id
       adCount
-      insights {
-        id
-      }
+      name
     }
   }
 `;

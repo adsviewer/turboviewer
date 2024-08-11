@@ -14,8 +14,8 @@ import {
   type SwitchOrganizationMutationVariables,
   type UpdateOrganizationMutation,
   type UpdateOrganizationMutationVariables,
-  type UpdateOrganizationUserMutation,
-  type UpdateOrganizationUserMutationVariables,
+  type DeleteOrganizationMutation,
+  type DeleteOrganizationMutationVariables,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -140,6 +140,12 @@ export async function switchOrganizationAndChangeJWT(values: SwitchOrganizationM
       error,
     };
   }
+}
+
+export async function getOrganizationAdAccounts(
+  channel: IntegrationType,
+): Promise<UrqlResult<OrganizationAdAccountsQuery>> {
+  return await handleUrqlRequest(urqlClientSdk().organizationAdAccounts({ channel }));
 }
 
 type InviteUsersMutationError = Extract<

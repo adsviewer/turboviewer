@@ -84,9 +84,7 @@ query organizationAdAccounts($channel: IntegrationType!) {
   organizationAdAccounts(channel: $channel) {
     id
     adCount
-    insights {
-      id
-    }
+    name
   }
 }
 
