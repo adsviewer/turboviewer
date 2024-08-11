@@ -60,6 +60,8 @@ export default function ViewAdAccountsButton(props: PropsType): ReactNode {
   const closeModal = (): void => {
     close();
     clearSearch();
+    setAdAccounts([]);
+    setAdAccountsToShow([]);
   };
 
   const clearSearch = (): void => {
@@ -104,23 +106,24 @@ export default function ViewAdAccountsButton(props: PropsType): ReactNode {
           mb="lg"
         />
         <ScrollArea.Autosize offsetScrollbars type="always" mah={300}>
-          {adAccountsToShow.length ? (
-            adAccountsToShow.map((adAccount) => {
-              return (
-                <Flex align="center" key={adAccount.id} gap="sm">
-                  <Text>{adAccount.name}</Text>
-                  <Text size="sm" c="dimmed" fs="italic">
-                    ({format.number(adAccount.adCount)} {t('ads')})
-                  </Text>
-                </Flex>
-              );
-            })
-          ) : (
+          {adAccountsToShow.length
+            ? adAccountsToShow.map((adAccount) => {
+                return (
+                  <Flex align="center" key={adAccount.id} gap="sm">
+                    <Text>{adAccount.name}</Text>
+                    <Text size="sm" c="dimmed" fs="italic">
+                      ({format.number(adAccount.adCount)} {t('ads')})
+                    </Text>
+                  </Flex>
+                );
+              })
+            : null}
+
+          {!adAccountsToShow.length && !isPending ? (
             <Text size="sm" c="dimmed" fs="italic" ta="center">
               {t('noAdAccountsFound')}
             </Text>
-          )}
-
+          ) : null}
           {isPending ? <LoaderCentered /> : null}
         </ScrollArea.Autosize>
       </Modal>

@@ -37,7 +37,7 @@ export default function UpdateAdAccountsButton(props: PropsType): ReactNode {
         title={`${t('updateAdAccountsTitle')} (${props.integrationTitle})`}
         size="md"
         centered
-      ></Modal>
+      />
     </>
   );
 }
