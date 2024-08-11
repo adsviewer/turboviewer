@@ -1089,26 +1089,42 @@ export type DeleteOrganizationMutation = {
   deleteOrganization: { __typename: 'Organization'; id: string };
 };
 
-export type InviteUsersMutationVariables = Exact<{
-  emails: Array<Scalars['String']['input']> | Scalars['String']['input'];
-  role: OrganizationRoleEnum;
+export type AvailableOrganizationAdAccountsQueryVariables = Exact<{
+  channel: IntegrationType;
 }>;
 
-export type InviteUsersMutation = {
-  __typename: 'Mutation';
-  inviteUsers:
-    | {
-        __typename: 'InviteUsersErrors';
-        error: Array<{ __typename: 'InviteUsersError'; email: string; message: string }>;
-      }
-    | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
+export type AvailableOrganizationAdAccountsQuery = {
+  __typename?: 'Query';
+  availableOrganizationAdAccounts: Array<{
+    __typename?: 'AdAccount';
+    id: string;
+    adCount: number;
+    insights: Array<{ __typename?: 'Insight'; id: string }>;
+  }>;
 };
 
-export type RemoveUserFromOrganizationMutationVariables = Exact<{
-  userId: Scalars['String']['input'];
+export type OrganizationAdAccountsQueryVariables = Exact<{
+  channel: IntegrationType;
 }>;
 
-export type RemoveUserFromOrganizationMutation = { __typename: 'Mutation'; removeUserFromOrganization: boolean };
+export type OrganizationAdAccountsQuery = {
+  __typename?: 'Query';
+  organizationAdAccounts: Array<{
+    __typename?: 'AdAccount';
+    id: string;
+    adCount: number;
+    insights: Array<{ __typename?: 'Insight'; id: string }>;
+  }>;
+};
+
+export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
+  adAccountIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+export type UpdateOrganizationAdAccountsMutation = {
+  __typename?: 'Mutation';
+  updateOrganizationAdAccounts: { __typename?: 'Organization'; id: string };
+};
 
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
@@ -1470,24 +1486,33 @@ export const DeleteOrganizationDocument = gql`
     }
   }
 `;
-export const InviteUsersDocument = gql`
-  mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
-    inviteUsers(emails: $emails, role: $role) {
-      ... on MutationInviteUsersSuccess {
-        data
-      }
-      ... on InviteUsersErrors {
-        error {
-          email
-          message
-        }
+export const AvailableOrganizationAdAccountsDocument = gql`
+  query availableOrganizationAdAccounts($channel: IntegrationType!) {
+    availableOrganizationAdAccounts(channel: $channel) {
+      id
+      adCount
+      insights {
+        id
       }
     }
   }
 `;
-export const RemoveUserFromOrganizationDocument = gql`
-  mutation removeUserFromOrganization($userId: String!) {
-    removeUserFromOrganization(userId: $userId)
+export const OrganizationAdAccountsDocument = gql`
+  query organizationAdAccounts($channel: IntegrationType!) {
+    organizationAdAccounts(channel: $channel) {
+      id
+      adCount
+      insights {
+        id
+      }
+    }
+  }
+`;
+export const UpdateOrganizationAdAccountsDocument = gql`
+  mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
+    updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
+      id
+    }
   }
 `;
 export const UpdateUserDocument = gql`
@@ -1670,22 +1695,35 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<DeleteOrganizationMutation>;
     },
-    inviteUsers(variables: InviteUsersMutationVariables, options?: C): Promise<InviteUsersMutation> {
-      return requester<InviteUsersMutation, InviteUsersMutationVariables>(
-        InviteUsersDocument,
-        variables,
-        options,
-      ) as Promise<InviteUsersMutation>;
-    },
-    removeUserFromOrganization(
-      variables: RemoveUserFromOrganizationMutationVariables,
+    availableOrganizationAdAccounts(
+      variables: AvailableOrganizationAdAccountsQueryVariables,
       options?: C,
-    ): Promise<RemoveUserFromOrganizationMutation> {
-      return requester<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
-        RemoveUserFromOrganizationDocument,
+    ): Promise<AvailableOrganizationAdAccountsQuery> {
+      return requester<AvailableOrganizationAdAccountsQuery, AvailableOrganizationAdAccountsQueryVariables>(
+        AvailableOrganizationAdAccountsDocument,
         variables,
         options,
-      ) as Promise<RemoveUserFromOrganizationMutation>;
+      ) as Promise<AvailableOrganizationAdAccountsQuery>;
+    },
+    organizationAdAccounts(
+      variables: OrganizationAdAccountsQueryVariables,
+      options?: C,
+    ): Promise<OrganizationAdAccountsQuery> {
+      return requester<OrganizationAdAccountsQuery, OrganizationAdAccountsQueryVariables>(
+        OrganizationAdAccountsDocument,
+        variables,
+        options,
+      ) as Promise<OrganizationAdAccountsQuery>;
+    },
+    updateOrganizationAdAccounts(
+      variables: UpdateOrganizationAdAccountsMutationVariables,
+      options?: C,
+    ): Promise<UpdateOrganizationAdAccountsMutation> {
+      return requester<UpdateOrganizationAdAccountsMutation, UpdateOrganizationAdAccountsMutationVariables>(
+        UpdateOrganizationAdAccountsDocument,
+        variables,
+        options,
+      ) as Promise<UpdateOrganizationAdAccountsMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(

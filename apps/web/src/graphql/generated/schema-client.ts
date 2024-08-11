@@ -1090,26 +1090,42 @@ export type DeleteOrganizationMutation = {
   deleteOrganization: { __typename: 'Organization'; id: string };
 };
 
-export type InviteUsersMutationVariables = Exact<{
-  emails: Array<Scalars['String']['input']> | Scalars['String']['input'];
-  role: OrganizationRoleEnum;
+export type AvailableOrganizationAdAccountsQueryVariables = Exact<{
+  channel: IntegrationType;
 }>;
 
-export type InviteUsersMutation = {
-  __typename: 'Mutation';
-  inviteUsers:
-    | {
-        __typename: 'InviteUsersErrors';
-        error: Array<{ __typename: 'InviteUsersError'; email: string; message: string }>;
-      }
-    | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
+export type AvailableOrganizationAdAccountsQuery = {
+  __typename?: 'Query';
+  availableOrganizationAdAccounts: Array<{
+    __typename?: 'AdAccount';
+    id: string;
+    adCount: number;
+    insights: Array<{ __typename?: 'Insight'; id: string }>;
+  }>;
 };
 
-export type RemoveUserFromOrganizationMutationVariables = Exact<{
-  userId: Scalars['String']['input'];
+export type OrganizationAdAccountsQueryVariables = Exact<{
+  channel: IntegrationType;
 }>;
 
-export type RemoveUserFromOrganizationMutation = { __typename: 'Mutation'; removeUserFromOrganization: boolean };
+export type OrganizationAdAccountsQuery = {
+  __typename?: 'Query';
+  organizationAdAccounts: Array<{
+    __typename?: 'AdAccount';
+    id: string;
+    adCount: number;
+    insights: Array<{ __typename?: 'Insight'; id: string }>;
+  }>;
+};
+
+export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
+  adAccountIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+export type UpdateOrganizationAdAccountsMutation = {
+  __typename?: 'Mutation';
+  updateOrganizationAdAccounts: { __typename?: 'Organization'; id: string };
+};
 
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
@@ -1576,34 +1592,57 @@ export const DeleteOrganizationDocument = gql`
 export function useDeleteOrganizationMutation() {
   return Urql.useMutation<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(DeleteOrganizationDocument);
 }
-export const InviteUsersDocument = gql`
-  mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
-    inviteUsers(emails: $emails, role: $role) {
-      ... on MutationInviteUsersSuccess {
-        data
-      }
-      ... on InviteUsersErrors {
-        error {
-          email
-          message
-        }
+export const AvailableOrganizationAdAccountsDocument = gql`
+  query availableOrganizationAdAccounts($channel: IntegrationType!) {
+    availableOrganizationAdAccounts(channel: $channel) {
+      id
+      adCount
+      insights {
+        id
       }
     }
   }
 `;
 
-export function useInviteUsersMutation() {
-  return Urql.useMutation<InviteUsersMutation, InviteUsersMutationVariables>(InviteUsersDocument);
+export function useAvailableOrganizationAdAccountsQuery(
+  options: Omit<Urql.UseQueryArgs<AvailableOrganizationAdAccountsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<AvailableOrganizationAdAccountsQuery, AvailableOrganizationAdAccountsQueryVariables>({
+    query: AvailableOrganizationAdAccountsDocument,
+    ...options,
+  });
 }
-export const RemoveUserFromOrganizationDocument = gql`
-  mutation removeUserFromOrganization($userId: String!) {
-    removeUserFromOrganization(userId: $userId)
+export const OrganizationAdAccountsDocument = gql`
+  query organizationAdAccounts($channel: IntegrationType!) {
+    organizationAdAccounts(channel: $channel) {
+      id
+      adCount
+      insights {
+        id
+      }
+    }
   }
 `;
 
-export function useRemoveUserFromOrganizationMutation() {
-  return Urql.useMutation<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
-    RemoveUserFromOrganizationDocument,
+export function useOrganizationAdAccountsQuery(
+  options: Omit<Urql.UseQueryArgs<OrganizationAdAccountsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<OrganizationAdAccountsQuery, OrganizationAdAccountsQueryVariables>({
+    query: OrganizationAdAccountsDocument,
+    ...options,
+  });
+}
+export const UpdateOrganizationAdAccountsDocument = gql`
+  mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
+    updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
+      id
+    }
+  }
+`;
+
+export function useUpdateOrganizationAdAccountsMutation() {
+  return Urql.useMutation<UpdateOrganizationAdAccountsMutation, UpdateOrganizationAdAccountsMutationVariables>(
+    UpdateOrganizationAdAccountsDocument,
   );
 }
 export const UpdateUserDocument = gql`
