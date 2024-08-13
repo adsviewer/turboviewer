@@ -114,7 +114,7 @@ class Meta implements ChannelInterface {
     if (parsed.data.expires_in) {
       return {
         accessToken: parsed.data.access_token,
-        accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
+        accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 700),
       };
     }
     const accessTokenExpiresAt = await Meta.getExpireAt(parsed.data.access_token);
@@ -346,6 +346,7 @@ class Meta implements ChannelInterface {
   }
 
   async getReportStatus({ taskId, integration, adAccount }: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const reportId = taskId;
     const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
     const resp = await Meta.sdk(
@@ -381,6 +382,7 @@ class Meta implements ChannelInterface {
   }
 
   async processReport({ integration, adAccount, taskId, initial }: ProcessReportReq): Promise<AError | undefined> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const reportId = taskId;
     const adExternalIdMap = new Map<string, string>();
     const insightSchema = z.object({
@@ -429,7 +431,7 @@ class Meta implements ChannelInterface {
         AdsInsights.Breakdowns.platform_position,
       ],
       {
-        limit: 500,
+        limit: 700,
       },
     );
     const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]): Promise<undefined> => {
@@ -463,7 +465,7 @@ class Meta implements ChannelInterface {
             AdsInsights.Fields.impressions,
           ],
           {
-            limit: 500,
+            limit: 700,
             time_increment: 1,
             filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
             breakdowns: [
@@ -529,7 +531,7 @@ class Meta implements ChannelInterface {
       if (parsedNext.success) {
         results.push(...parsedNext.data.map(parseCallback));
       } else {
-        logger.error(next, 'Failed to parse paginated %o');
+        logger.error(parsedNext, 'Failed to parse paginated');
       }
     }
     return results;
@@ -560,7 +562,7 @@ class Meta implements ChannelInterface {
         const results = await resultsP;
         if (results && processed) results.push(...processed);
       } else {
-        logger.error('Failed to parse paginated %o', next);
+        logger.error(parsedNext, 'Failed to parse paginated function');
       }
     }
     return resultsP;
@@ -629,7 +631,7 @@ class Meta implements ChannelInterface {
     if (!debugTokenParsed.success) {
       return new AError('Failed to parse token response');
     }
-    return new Date(debugTokenParsed.data.data.data_access_expires_at * 1000);
+    return new Date(debugTokenParsed.data.data.data_access_expires_at * 700);
   }
 
   private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([

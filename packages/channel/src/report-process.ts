@@ -97,7 +97,12 @@ export const checkReports = async (): Promise<void> => {
           logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
           switch (status) {
             case JobStatusEnum.SUCCESS:
-              await Promise.all([channel.processReport(activeReport), deleteMessage(msg, channelType, activeReport)]);
+              {
+                const report = await channel.processReport(activeReport);
+                if (!isAError(report)) {
+                  await deleteMessage(msg, channelType, activeReport);
+                }
+              }
               continue;
             case JobStatusEnum.FAILED:
             case JobStatusEnum.CANCELED:
