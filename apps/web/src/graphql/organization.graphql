@@ -70,9 +70,8 @@ query availableOrganizationAdAccounts($channel: IntegrationType!) {
   availableOrganizationAdAccounts(channel: $channel) {
     id
     adCount
-    insights {
-      id
-    }
+    name
+    isConnectedToCurrentOrg
   }
 }
 

@@ -1100,7 +1100,8 @@ export type AvailableOrganizationAdAccountsQuery = {
     __typename?: 'AdAccount';
     id: string;
     adCount: number;
-    insights: Array<{ __typename?: 'Insight'; id: string }>;
+    name: string;
+    isConnectedToCurrentOrg: boolean;
   }>;
 };
 
@@ -1592,9 +1593,8 @@ export const AvailableOrganizationAdAccountsDocument = gql`
     availableOrganizationAdAccounts(channel: $channel) {
       id
       adCount
-      insights {
-        id
-      }
+      name
+      isConnectedToCurrentOrg
     }
   }
 `;

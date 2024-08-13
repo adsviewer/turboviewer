@@ -13,8 +13,7 @@ import { dateFormatOptions } from '@/util/format-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { isOrgAdmin } from '@/util/access-utils';
 import { deAuthIntegration } from '../actions';
-import UpdateAdAccountsButton from './update-ad-accounts-button';
-import ViewAdAccountsButton from './view-ad-accounts-button';
+import AdAccountsButton from './ad-accounts-button';
 
 interface IntegrationProps {
   title: string;
@@ -138,8 +137,9 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
       <Group justify="space-between" mt="md" mb="xs">
         <Flex align="center" gap="xs">
           <Text fw={500}>{props.title}</Text>
-          <UpdateAdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
-          <ViewAdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
+          {props.isConnected ? (
+            <AdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
+          ) : null}
         </Flex>
         {props.isConnected ? (
           <Badge color="green">{t('connected')}</Badge>

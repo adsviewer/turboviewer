@@ -16,6 +16,8 @@ import {
   type UpdateOrganizationMutationVariables,
   type DeleteOrganizationMutation,
   type DeleteOrganizationMutationVariables,
+  type IntegrationType,
+  type OrganizationAdAccountsQuery,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -146,6 +148,18 @@ export async function getOrganizationAdAccounts(
   channel: IntegrationType,
 ): Promise<UrqlResult<OrganizationAdAccountsQuery>> {
   return await handleUrqlRequest(urqlClientSdk().organizationAdAccounts({ channel }));
+}
+
+export async function getAvailableOrganizationAdAccounts(
+  channel: IntegrationType,
+): Promise<UrqlResult<AvailableOrganizationAdAccountsQuery>> {
+  return await handleUrqlRequest(urqlClientSdk().availableOrganizationAdAccounts({ channel }));
+}
+
+export async function updateOrganizationAdAccounts(
+  values: UpdateOrganizationAdAccountsMutationVariables,
+): Promise<UrqlResult<UpdateOrganizationAdAccountsMutation, string>> {
+  return await handleUrqlRequest(urqlClientSdk().updateOrganizationAdAccounts(values));
 }
 
 type InviteUsersMutationError = Extract<
