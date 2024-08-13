@@ -9,7 +9,6 @@ import {
 } from '@aws-sdk/client-sqs';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { isAError } from '@repo/utils';
-import { Environment, MODE } from '@repo/mode';
 import {
   channelReportQueueUrl,
   JobStatusEnum,
@@ -97,7 +96,12 @@ export const checkReports = async (): Promise<void> => {
           logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
           switch (status) {
             case JobStatusEnum.SUCCESS:
-              await Promise.all([channel.processReport(activeReport), deleteMessage(msg, channelType, activeReport)]);
+              {
+                const report = await channel.processReport(activeReport);
+                if (!isAError(report)) {
+                  await deleteMessage(msg, channelType, activeReport);
+                }
+              }
               continue;
             case JobStatusEnum.FAILED:
             case JobStatusEnum.CANCELED:
@@ -118,6 +122,6 @@ const periodicCheckReports = (): void => {
   setTimeout(async () => {
     await checkReports();
     periodicCheckReports();
-  }, 5000);
+  }, 40_000);
 };
-if (MODE === Environment.Local) periodicCheckReports();
+periodicCheckReports();

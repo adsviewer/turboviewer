@@ -48,9 +48,7 @@ data "aws_iam_policy_document" "channel_report_policy_document" {
       condition {
         test     = "ArnEquals"
         variable = "aws:SourceArn"
-        values = [
-          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.channel_report_lambda_name}"
-        ]
+        values   = [var.app_runner_arn]
       }
     }
   }

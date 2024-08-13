@@ -1,6 +1,6 @@
 const xMonths = 3;
 
-export type IntervalType = 'day' | 'week' | 'month';
+export type IntervalType = 'day' | 'week' | 'month' | 'quarter';
 
 export const extractDate = (date: Date): { year: number; month: string; day: string } => {
   const year = date.getFullYear();
@@ -14,12 +14,14 @@ export const formatYYYMMDDDate = (date: Date): string => {
   return `${String(year)}-${month}-${day}`;
 };
 
+/**
+ * Get the last x months from today or year to date whichever is earlier
+ */
 export const getLastXMonths = (): { until: Date; since: Date } => {
   const today = new Date();
-  const lastXMonths = new Date(today);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  lastXMonths.setMonth(today.getMonth() - xMonths);
+  const lastXMonths = getBeforeXMonths();
   return {
     since: lastXMonths,
     until: tomorrow,
@@ -55,18 +57,21 @@ export const getBeforeXMonths = (): Date => {
   const xMonthsAgo = new Date(today);
   xMonthsAgo.setMonth(today.getMonth() - xMonths);
   xMonthsAgo.setHours(0, 0, 0, 0);
+  if (xMonthsAgo.getFullYear() === today.getFullYear()) {
+    xMonthsAgo.setMonth(0);
+    xMonthsAgo.setDate(1);
+  }
   return xMonthsAgo;
 };
 
-export const addInterval = (
-  date: Date,
-  interval: 'week' | 'month' | 'day' | 'seconds',
-  numOfIntervals: number,
-): Date => {
+export const addInterval = (date: Date, interval: IntervalType | 'seconds', numOfIntervals: number): Date => {
   const result = new Date(date);
   switch (interval) {
     case 'week':
       result.setDate(result.getDate() + numOfIntervals * 7);
+      break;
+    case 'quarter':
+      result.setMonth(result.getMonth() + numOfIntervals * 3);
       break;
     case 'month':
       result.setMonth(result.getMonth() + numOfIntervals);
@@ -83,7 +88,7 @@ export const addInterval = (
 
 export const isDateWithinInterval = (
   dateFrom: Date,
-  interval: 'week' | 'month' | 'day',
+  interval: IntervalType,
   dateTo: Date,
   numOfIntervals: number,
 ): boolean => {

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/turborviewer.iml" filepath="$PROJECT_DIR$/.idea/turborviewer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/turboviewer.iml" filepath="$PROJECT_DIR$/.idea/turboviewer.iml" />
     </modules>
   </component>
 </project>

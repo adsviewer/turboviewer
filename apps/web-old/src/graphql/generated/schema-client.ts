@@ -406,6 +406,7 @@ export enum InsightsInterval {
   day = 'day',
   week = 'week',
   month = 'month',
+  quarter = 'quarter',
 }
 
 export enum InsightsOrderBy {
