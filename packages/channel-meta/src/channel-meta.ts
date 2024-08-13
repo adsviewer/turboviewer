@@ -453,32 +453,32 @@ class Meta implements ChannelInterface {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const adReportRunSchema = z.object({ id: z.string() });
     const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
-    const resp = await Meta.sdk(
-      async () =>
-        account.getInsightsAsync(
-          [
-            AdsInsights.Fields.account_id,
-            AdsInsights.Fields.ad_id,
-            AdsInsights.Fields.ad_name,
-            AdsInsights.Fields.date_start,
-            AdsInsights.Fields.spend,
-            AdsInsights.Fields.impressions,
+    const resp = await Meta.sdk(async () => {
+      const mtimeRange = await metaTimeRange(initial, adAccount.id);
+      logger.info(`Running report for account ${adAccount.id} with time range ${JSON.stringify(mtimeRange)}`);
+      return account.getInsightsAsync(
+        [
+          AdsInsights.Fields.account_id,
+          AdsInsights.Fields.ad_id,
+          AdsInsights.Fields.ad_name,
+          AdsInsights.Fields.date_start,
+          AdsInsights.Fields.spend,
+          AdsInsights.Fields.impressions,
+        ],
+        {
+          limit: 700,
+          time_increment: 1,
+          filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
+          breakdowns: [
+            AdsInsights.Breakdowns.device_platform,
+            AdsInsights.Breakdowns.publisher_platform,
+            AdsInsights.Breakdowns.platform_position,
           ],
-          {
-            limit: 700,
-            time_increment: 1,
-            filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
-            breakdowns: [
-              AdsInsights.Breakdowns.device_platform,
-              AdsInsights.Breakdowns.publisher_platform,
-              AdsInsights.Breakdowns.platform_position,
-            ],
-            level: AdsInsights.Level.ad,
-            time_range: await metaTimeRange(initial, adAccount.id),
-          },
-        ),
-      integration,
-    );
+          level: AdsInsights.Level.ad,
+          time_range: mtimeRange,
+        },
+      );
+    }, integration);
     if (isAError(resp)) return resp;
     const parsed = adReportRunSchema.safeParse(resp);
     if (!parsed.success) {
