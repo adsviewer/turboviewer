@@ -123,6 +123,6 @@ module "environment_potentially_local" {
   source   = "../../modules/environment_potentially_local"
 
   channel_ingress_lambda_name = "not_applicable"
-  channel_report_lambda_name  = "not_applicable"
+  app_runner_arn              = "not_applicable"
   environment                 = "${var.environment}-${each.key}"
 }

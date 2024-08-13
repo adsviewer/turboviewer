@@ -9,7 +9,6 @@ import {
 } from '@aws-sdk/client-sqs';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { isAError } from '@repo/utils';
-import { Environment, MODE } from '@repo/mode';
 import {
   channelReportQueueUrl,
   JobStatusEnum,
@@ -123,6 +122,6 @@ const periodicCheckReports = (): void => {
   setTimeout(async () => {
     await checkReports();
     periodicCheckReports();
-  }, 5000);
+  }, 40_000);
 };
-if (MODE === Environment.Local) periodicCheckReports();
+periodicCheckReports();
