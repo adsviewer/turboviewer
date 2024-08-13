@@ -11,7 +11,7 @@ import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
+import { AllRoles, OrganizationRoleEnum } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import getOrganization, { inviteUsers } from '../actions';
 
@@ -19,6 +19,11 @@ const emailSchema = z.string().email();
 
 export interface PropsType {
   isPending: boolean;
+}
+
+interface RolesDataType {
+  value: OrganizationRoleEnum;
+  label: string;
 }
 
 export default function InviteUsersButton(props: PropsType): React.ReactNode {
@@ -31,17 +36,50 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInputValue, setEmailInputValue] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<OrganizationRoleEnum>(OrganizationRoleEnum.ORG_MEMBER);
+  const [rolesData, setRolesData] = useState<RolesDataType[]>([]);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const rolesData = [
-    {
-      value: OrganizationRoleEnum.ORG_MEMBER,
-      label: tGeneric('roleMember'),
-    },
-    {
-      value: OrganizationRoleEnum.ORG_OPERATOR,
-      label: tGeneric('roleOperator'),
-    },
-  ];
+  const roleToRoleTitleMap = {
+    ORG_ADMIN: tGeneric('roleAdmin'),
+    ORG_OPERATOR: tGeneric('roleOperator'),
+    ORG_MEMBER: tGeneric('roleMember'),
+  };
+
+  const openModal = (): void => {
+    setRolesDataOptions();
+    open();
+  };
+
+  const setRolesDataOptions = (): void => {
+    if (userDetails.allRoles.includes(AllRoles.ORG_OPERATOR)) {
+      setRolesData([
+        {
+          value: OrganizationRoleEnum.ORG_OPERATOR,
+          label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_OPERATOR],
+        },
+        {
+          value: OrganizationRoleEnum.ORG_MEMBER,
+          label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_MEMBER],
+        },
+      ]);
+    }
+    // Admins can change anyone to anything
+    else {
+      setRolesData([
+        {
+          value: OrganizationRoleEnum.ORG_ADMIN,
+          label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_ADMIN],
+        },
+        {
+          value: OrganizationRoleEnum.ORG_OPERATOR,
+          label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_OPERATOR],
+        },
+        {
+          value: OrganizationRoleEnum.ORG_MEMBER,
+          label: roleToRoleTitleMap[OrganizationRoleEnum.ORG_MEMBER],
+        },
+      ]);
+    }
+  };
 
   const closeModal = (): void => {
     setEmails([]);
@@ -147,7 +185,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
         leftSection={<IconUserPlus size={18} />}
         color={theme.colors.blue[7]}
         variant="outline"
-        onClick={open}
+        onClick={openModal}
         disabled={(!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)) || props.isPending}
       >
         {t('inviteUsers')}
