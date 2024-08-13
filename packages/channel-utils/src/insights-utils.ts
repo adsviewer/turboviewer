@@ -95,7 +95,7 @@ export const saveInsights = async (
 };
 
 export const deleteOldInsights = async (adAccountId: string, initial: boolean): Promise<void> => {
-  const gte = (async () => {
+  const gteP = (async () => {
     if (initial) {
       return getBeforeXMonths();
     }
@@ -106,10 +106,12 @@ export const deleteOldInsights = async (adAccountId: string, initial: boolean): 
     });
     return latestInsight ? getYesterday(latestInsight.date) : getYesterday();
   })();
+  const gte = await gteP;
+  logger.info(`Deleting insights for ${adAccountId}, after ${String(gte)}`);
   await prisma.insight.deleteMany({
     where: {
       adAccountId,
-      date: { gte: await gte },
+      date: { gte },
     },
   });
 };
