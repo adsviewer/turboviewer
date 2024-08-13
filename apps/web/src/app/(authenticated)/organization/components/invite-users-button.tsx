@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Button, Modal, useMantineTheme, PillsInput, Pill } from '@mantine/core';
+import { Flex, Button, Modal, useMantineTheme, PillsInput, Pill, Select } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { IconUserPlus } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
@@ -30,12 +30,23 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const setOrganization = useSetAtom(organizationAtom);
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInputValue, setEmailInputValue] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<OrganizationRoleEnum>(OrganizationRoleEnum.ORG_MEMBER);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const DEFAULT_ROLE = OrganizationRoleEnum.ORG_MEMBER;
+  const rolesData = [
+    {
+      value: OrganizationRoleEnum.ORG_MEMBER,
+      label: tGeneric('roleMember'),
+    },
+    {
+      value: OrganizationRoleEnum.ORG_OPERATOR,
+      label: tGeneric('roleOperator'),
+    },
+  ];
 
   const closeModal = (): void => {
     setEmails([]);
     setEmailInputValue('');
+    setSelectedRole(OrganizationRoleEnum.ORG_MEMBER);
     setIsPending(false);
     close();
   };
@@ -90,7 +101,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const performUserInvites = (): void => {
     setIsPending(true);
 
-    void inviteUsers({ emails, role: DEFAULT_ROLE })
+    void inviteUsers({ emails, role: selectedRole })
       .then((res) => {
         logger.info(res);
         if (!res.success) {
@@ -122,6 +133,12 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
+  };
+
+  const onRoleChanged = (role: string | null): void => {
+    if (role) {
+      setSelectedRole(role as OrganizationRoleEnum);
+    }
   };
 
   return (
@@ -162,6 +179,13 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
               <PillsInput.Field placeholder={t('enterEmails')} value={emailInputValue} />
             </Pill.Group>
           </PillsInput>
+          <Select
+            label={tGeneric('role')}
+            comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+            data={rolesData}
+            value={selectedRole}
+            onChange={onRoleChanged}
+          />
           <Button color="blue" disabled={!emails.length || isPending} onClick={performUserInvites}>
             {t('invite')}
           </Button>

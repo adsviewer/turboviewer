@@ -7,7 +7,12 @@
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!",
     "copied": "Kopiëren succesvol",
     "remove": "Verwijderen",
-    "refresh": "Vernieuwen"
+    "refresh": "Vernieuwen",
+    "role": "Rol",
+    "roleOrgAdmin": "Organisatiebeheerder",
+    "roleAdmin": "Beheerder",
+    "roleOperator": "Bediende",
+    "roleMember": "Lid"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
