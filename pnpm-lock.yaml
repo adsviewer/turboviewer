@@ -87,46 +87,6 @@ importers:
         specifier: 5.5.4
         version: 5.5.4
 
-  apps/channel-report:
-    dependencies:
-      '@repo/channel':
-        specifier: workspace:*
-        version: link:../../packages/channel
-      '@repo/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@repo/mode':
-        specifier: workspace:*
-        version: link:../../packages/mode
-      '@sentry/aws-serverless':
-        specifier: ^8.22.0
-        version: 8.23.0(@opentelemetry/api@1.9.0)
-      '@sentry/profiling-node':
-        specifier: ^8.22.0
-        version: 8.23.0
-    devDependencies:
-      '@aws-sdk/client-sqs':
-        specifier: ^3.623.0
-        version: 3.623.0
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/config-eslint
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/config-typescript
-      '@sentry/cli':
-        specifier: ^2.33.1
-        version: 2.33.1
-      '@types/aws-lambda':
-        specifier: ^8.10.142
-        version: 8.10.142
-      '@types/node':
-        specifier: 22.1.0
-        version: 22.1.0
-      typescript:
-        specifier: 5.5.4
-        version: 5.5.4
-
   apps/landing-page:
     dependencies:
       '@repo/ui':
