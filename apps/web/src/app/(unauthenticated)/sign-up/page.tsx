@@ -59,7 +59,7 @@ export default function SignUp(): React.JSX.Element {
     setTimeout(() => {
       setIsMounted(true);
     }, 0);
-  }, []);
+  }, [searchParams]);
 
   const handleSubmit = (values: SignUpSchemaType): void => {
     setIsPending(true);
