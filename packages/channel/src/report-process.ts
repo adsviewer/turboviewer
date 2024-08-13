@@ -120,6 +120,7 @@ export const checkReports = async (): Promise<void> => {
 const periodicCheckReports = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- it's fine
   setTimeout(async () => {
+    logger.info('Checking reports');
     await checkReports();
     periodicCheckReports();
   }, 40_000);
