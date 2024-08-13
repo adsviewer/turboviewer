@@ -3,6 +3,6 @@
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 
-export const getLoginProviders = async (): Promise<LoginProvidersQuery> => {
-  return await urqlClientSdk().loginProviders();
+export const getLoginProviders = async (inviteHash?: string | null): Promise<LoginProvidersQuery> => {
+  return await urqlClientSdk().loginProviders({ inviteHash });
 };

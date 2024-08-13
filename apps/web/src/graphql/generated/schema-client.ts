@@ -998,7 +998,9 @@ export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: ne
 
 export type ResendEmailConfirmationMutation = { __typename: 'Mutation'; resendEmailConfirmation: boolean };
 
-export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
+export type LoginProvidersQueryVariables = Exact<{
+  inviteHash?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 export type LoginProvidersQuery = {
   __typename: 'Query';
@@ -1438,8 +1440,8 @@ export function useResendEmailConfirmationMutation() {
   );
 }
 export const LoginProvidersDocument = gql`
-  query loginProviders {
-    loginProviders {
+  query loginProviders($inviteHash: String) {
+    loginProviders(inviteHash: $inviteHash) {
       url
       type
     }

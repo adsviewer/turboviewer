@@ -49,7 +49,8 @@ export default function SignUp(): React.JSX.Element {
   });
 
   useEffect(() => {
-    void getLoginProviders().then((res) => {
+    const inviteHash = searchParams.get(inviteHashLabel);
+    void getLoginProviders(inviteHash).then((res) => {
       setLoginProviders(res.loginProviders);
     });
 
