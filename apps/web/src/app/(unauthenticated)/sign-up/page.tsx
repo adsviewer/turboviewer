@@ -138,7 +138,7 @@ export default function SignUp(): React.JSX.Element {
                   {...form.getInputProps('email')}
                   required
                   mt="md"
-                  disabled={searchParams.has(emailKey)}
+                  readOnly={searchParams.has(emailKey)}
                 />
                 <PasswordInput
                   label={t('password')}
