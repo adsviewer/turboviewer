@@ -20,6 +20,7 @@ export const pageSizeKey = 'pageSize';
 export const orderDirectionKey = 'order';
 export const orderByKey = 'orderBy';
 export const fetchPreviewsKey = 'fetchPreviews';
+export const emailKey = 'email';
 
 export const positions = [
   'an_classic',

@@ -5,7 +5,14 @@
     "warning": "Waarschuwing!",
     "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!",
-    "copied": "Kopiëren succesvol"
+    "copied": "Kopiëren succesvol",
+    "remove": "Verwijderen",
+    "refresh": "Vernieuwen",
+    "role": "Rol",
+    "roleOrgAdmin": "Organisatiebeheerder",
+    "roleAdmin": "Beheerder",
+    "roleOperator": "Bediende",
+    "roleMember": "Lid"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -107,12 +114,18 @@
     "roleOrganizationAdmin": "Organisatiebeheerder",
     "roleOrganizationUser": "Lid",
     "deleteOrganization": "Organisatie verwijderen",
+    "inviteUsers": "Nodig gebruikers uit",
+    "invite": "Uitnodiging",
+    "enterEmails": "E-mailadres(sen)",
     "delete": "Verwijderen",
     "deleteTip": "Om te bevestigen typt u \"DELETE\" in het onderstaande vak.",
     "deleteWarning": "WAARSCHUWING: Adsviewer zal alle gegevens met betrekking tot deze organisatie wissen!",
     "createOrganization": "Creëer organisatie",
     "selectOrganization": "Selecteer organisatie",
-    "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!"
+    "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!",
+    "organizationMembers": "Leden",
+    "inviteSuccess": "Ik denk dat het goed is!",
+    "invited": "Uitgenodigd"
   },
   "profile": {
     "title": "Profiel",
@@ -125,6 +138,7 @@
     "repeatPassword": "Herhaal wachtwoord",
     "roleOrgAdmin": "Organisatiebeheerder",
     "roleAdmin": "Beheerder",
+    "roleOperator": "Bediende",
     "roleUser": "Lid",
     "submit": "Indienen"
   }

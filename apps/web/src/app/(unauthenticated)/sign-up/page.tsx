@@ -20,9 +20,10 @@ import {
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { inviteHashLabel } from '@repo/utils';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
-import { addOrReplaceURLParams, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, emailKey, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from '../sign-in/actions';
 
@@ -40,14 +41,16 @@ export default function SignUp(): React.JSX.Element {
     initialValues: {
       firstName: '',
       lastName: '',
-      email: '',
+      email: searchParams.get(emailKey) ?? '',
       password: '',
+      inviteHash: searchParams.get(inviteHashLabel) ?? '',
     },
     validate: zodResolver(SignUpSchema),
   });
 
   useEffect(() => {
-    void getLoginProviders().then((res) => {
+    const inviteHash = searchParams.get(inviteHashLabel);
+    void getLoginProviders(inviteHash).then((res) => {
       setLoginProviders(res.loginProviders);
     });
 
@@ -56,7 +59,7 @@ export default function SignUp(): React.JSX.Element {
     setTimeout(() => {
       setIsMounted(true);
     }, 0);
-  }, []);
+  }, [searchParams]);
 
   const handleSubmit = (values: SignUpSchemaType): void => {
     setIsPending(true);
@@ -69,7 +72,7 @@ export default function SignUp(): React.JSX.Element {
       })
       .then((data: GenericRequestResponseBody) => {
         if (data.success) {
-          router.push('/confirm-email');
+          router.push('/');
           return null;
         }
 
@@ -135,6 +138,7 @@ export default function SignUp(): React.JSX.Element {
                   {...form.getInputProps('email')}
                   required
                   mt="md"
+                  readOnly={searchParams.has(emailKey)}
                 />
                 <PasswordInput
                   label={t('password')}

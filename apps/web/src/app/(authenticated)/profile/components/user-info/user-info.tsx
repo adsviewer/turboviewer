@@ -11,9 +11,10 @@ interface PropsType {
 export function UserInfo({ userDetails }: PropsType): React.ReactNode {
   const t = useTranslations('profile');
   const roleToRoleTitleMap: Record<string, string> = {
-    USER: t('roleUser'),
     ADMIN: t('roleAdmin'),
     ORG_ADMIN: t('roleOrgAdmin'),
+    ORG_OPERATOR: t('roleOperator'),
+    ORG_MEMBER: t('roleUser'),
   };
 
   const renderUserRoles = (roles: string[]): string => roles.map((role) => roleToRoleTitleMap[role]).join(' / ');

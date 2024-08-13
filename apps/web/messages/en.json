@@ -5,7 +5,14 @@
     "warning": "Warning!",
     "accessOrgAdmin": "Only organization admins may perform this action!",
     "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!",
-    "copied": "Copied to clipboard"
+    "copied": "Copied to clipboard",
+    "remove": "Remove",
+    "refresh": "Refresh",
+    "role": "Role",
+    "roleOrgAdmin": "Organization Administrator",
+    "roleAdmin": "Administrator",
+    "roleOperator": "Operator",
+    "roleMember": "Member"
   },
 "errors": {
   "errorPageTitle": "Something bad just happened...",
@@ -107,12 +114,18 @@
     "roleOrganizationAdmin": "Organization Administrator",
     "roleOrganizationUser": "Member",
     "deleteOrganization": "Delete organization",
+    "inviteUsers": "Invite users",
+    "invite": "Invite",
+    "enterEmails": "Enter email(s)",
     "delete": "Delete",
     "deleteTip": "To confirm, type \"DELETE\" in the box below.",
     "deleteWarning": "WARNING: Adsviewer will erase all data related to this organization!",
     "createOrganization": "Create organization",
     "selectOrganization": "Select organization",
-    "updateOrganizationSuccess": "The organization was updated successfully!"
+    "updateOrganizationSuccess": "The organization was updated successfully!",
+    "organizationMembers": "Members",
+    "inviteSuccess": "Invitation(s) sent successfully!",
+    "invited": "Invited"
   },
   "profile": {
     "title": "Profile",
@@ -125,6 +138,7 @@
     "repeatPassword": "Repeat Password",
     "roleOrgAdmin": "Organization Administrator",
     "roleAdmin": "Administrator",
+    "roleOperator": "Operator",
     "roleUser": "Member",
     "submit": "Submit"
   }
