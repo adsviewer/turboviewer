@@ -1,6 +1,6 @@
 const xMonths = 3;
 
-export type IntervalType = 'day' | 'week' | 'month';
+export type IntervalType = 'day' | 'week' | 'month' | 'quarter';
 
 export const extractDate = (date: Date): { year: number; month: string; day: string } => {
   const year = date.getFullYear();

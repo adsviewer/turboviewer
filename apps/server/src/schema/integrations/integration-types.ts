@@ -281,7 +281,7 @@ const OrderByDto = builder.enumType('OrderBy', {
   values: ['asc', 'desc'] as const,
 });
 
-const insightsIntervals: IntervalType[] = ['day', 'week', 'month'] as const;
+const insightsIntervals: IntervalType[] = ['day', 'week', 'month', 'quarter'] as const;
 const InsightsIntervalDto = builder.enumType('InsightsInterval', {
   values: insightsIntervals,
 });

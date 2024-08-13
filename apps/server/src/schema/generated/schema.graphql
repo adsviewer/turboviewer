@@ -377,6 +377,7 @@ enum InsightsInterval {
   day
   week
   month
+  quarter
 }
 
 enum InsightsOrderBy {
