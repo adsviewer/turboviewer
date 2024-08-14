@@ -8,7 +8,7 @@ import {
   SQSClient,
 } from '@aws-sdk/client-sqs';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
-import { isAError } from '@repo/utils';
+import { isAError, FireAndForget } from '@repo/utils';
 import {
   channelReportQueueUrl,
   JobStatusEnum,
@@ -16,8 +16,12 @@ import {
   type RunAdInsightReportReq,
 } from '@repo/channel-utils';
 import _ from 'lodash';
+import { Environment, MODE } from '@repo/mode';
+import type { Request, Response } from 'express';
 import { env } from './config';
 import { getChannel } from './channel-helper';
+
+const fireAndForget = new FireAndForget();
 
 const client = new SQSClient({ region: env.AWS_REGION });
 
@@ -125,6 +129,13 @@ export const checkReports = async (): Promise<void> => {
   );
 };
 
+export const channelDataReportWebhook = (_req: Request, res: Response): void => {
+  fireAndForget.add(() => checkReports());
+  res.send({
+    statusCode: 200,
+  });
+};
+
 const periodicCheckReports = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- it's fine
   setTimeout(async () => {
@@ -134,4 +145,4 @@ const periodicCheckReports = (): void => {
     periodicCheckReports();
   }, 1_000);
 };
-periodicCheckReports();
+if (MODE === Environment.Local) periodicCheckReports();
