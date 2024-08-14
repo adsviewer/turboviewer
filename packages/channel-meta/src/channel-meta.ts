@@ -114,7 +114,7 @@ class Meta implements ChannelInterface {
     if (parsed.data.expires_in) {
       return {
         accessToken: parsed.data.access_token,
-        accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 700),
+        accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
       };
     }
     const accessTokenExpiresAt = await Meta.getExpireAt(parsed.data.access_token);
