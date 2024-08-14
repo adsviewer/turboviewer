@@ -64,6 +64,8 @@ const apiVersion = 'v20.0';
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
+const limit = 700;
+
 class Meta implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const scopes = ['ads_read'];
@@ -279,7 +281,7 @@ class Meta implements ChannelInterface {
         `ads_volume{${AdAccountAdVolume.Fields.ads_running_or_in_review_count}}`,
       ],
       {
-        limit: 500,
+        limit,
       },
     );
     const accountSchema = z.object({
@@ -336,7 +338,7 @@ class Meta implements ChannelInterface {
       const getAdsFn = account.getAds(
         [Ad.Fields.id, Ad.Fields.account_id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`],
         {
-          limit: 500,
+          limit,
         },
       );
       const accountCreatives = await Meta.handlePagination(integration, getAdsFn, adsSchema, toCreative);
@@ -431,7 +433,7 @@ class Meta implements ChannelInterface {
         AdsInsights.Breakdowns.platform_position,
       ],
       {
-        limit: 700,
+        limit,
       },
     );
     const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]): Promise<undefined> => {
@@ -466,7 +468,7 @@ class Meta implements ChannelInterface {
           AdsInsights.Fields.impressions,
         ],
         {
-          limit: 700,
+          limit,
           time_increment: 1,
           filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
           breakdowns: [

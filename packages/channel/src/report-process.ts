@@ -21,7 +21,7 @@ import type { Request, Response } from 'express';
 import { env } from './config';
 import { getChannel } from './channel-helper';
 
-const fireAndForget = new FireAndForget();
+const fireAndForget = new FireAndForget({ concurrency: 100 });
 
 const client = new SQSClient({ region: env.AWS_REGION });
 
@@ -109,10 +109,12 @@ export const checkReports = async (): Promise<void> => {
                   { ...activeReport } satisfies ProcessReportReq,
                   60 * 60 * 6,
                 );
-                const report = await channel.processReport(activeReport);
-                if (!isAError(report)) {
-                  await deleteMessage(msg, channelType, activeReport);
-                }
+                fireAndForget.add(async () => {
+                  const report = await channel.processReport(activeReport);
+                  if (!isAError(report)) {
+                    await deleteMessage(msg, channelType, activeReport);
+                  }
+                });
               }
               continue;
             case JobStatusEnum.FAILED:
