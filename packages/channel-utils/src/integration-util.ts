@@ -8,7 +8,7 @@ import { decryptAesGcm } from './aes-util';
 export const authEndpoint = '/channel/auth';
 
 export const revokeIntegration = async (externalId: string, type: IntegrationTypeEnum): Promise<void> => {
-  const { adAccounts } = await prisma.integration.update({
+  /*const { adAccounts } = */ await prisma.integration.update({
     select: { adAccounts: true },
     where: {
       externalId_type: {
@@ -20,13 +20,14 @@ export const revokeIntegration = async (externalId: string, type: IntegrationTyp
       status: IntegrationStatus.REVOKED,
     },
   });
-  await prisma.adAccount.deleteMany({
-    where: {
-      id: {
-        in: adAccounts.map((adAccount) => adAccount.id),
-      },
-    },
-  });
+  // TODO: will be fixed as part of https://github.com/adsviewer/turboviewer/issues/351
+  // await prisma.adAccount.deleteMany({
+  //   where: {
+  //     id: {
+  //       in: adAccounts.map((adAccount) => adAccount.id),
+  //     },
+  //   },
+  // });
 };
 
 export const getConnectedIntegrationByOrg = async (

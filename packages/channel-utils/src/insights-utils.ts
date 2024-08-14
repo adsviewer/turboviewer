@@ -1,9 +1,7 @@
-import type { AdAccount, Integration } from '@repo/database';
-import { prisma } from '@repo/database';
+import { type AdAccount, type Integration, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { getBeforeXMonths, getYesterday } from '@repo/utils';
 import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
-import { type ReportAdAccount, type ReportIntegration } from './send-messages';
 
 export const saveAccounts = async (
   activeAccounts: ChannelAdAccount[],
@@ -32,7 +30,7 @@ export const saveAccounts = async (
   );
 
 export const saveAds = async (
-  integration: ReportIntegration,
+  integration: Integration,
   ads: ChannelAd[],
   adAccountId: string,
   adExternalIdMap: Map<string, string>,
@@ -74,7 +72,7 @@ export const saveAds = async (
 export const saveInsights = async (
   insights: ChannelInsight[],
   adExternalIdMap: Map<string, string>,
-  dbAccount: ReportAdAccount,
+  dbAccount: AdAccount,
 ): Promise<void> => {
   logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
   await prisma.insight.createMany({
@@ -115,3 +113,8 @@ export const deleteOldInsights = async (adAccountId: string, initial: boolean): 
     },
   });
 };
+
+export const adAccountWithIntegration = Prisma.validator<Prisma.AdAccountDefaultArgs>()({
+  include: { integration: true },
+});
+export type AdAccountWithIntegration = Prisma.AdAccountGetPayload<typeof adAccountWithIntegration>;

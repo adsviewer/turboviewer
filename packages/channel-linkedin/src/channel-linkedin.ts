@@ -14,6 +14,7 @@ import { logger } from '@repo/logger';
 import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
+  type AdAccountWithIntegration,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -25,9 +26,7 @@ import {
   getConnectedIntegrationByOrg,
   getIFrame,
   JobStatusEnum,
-  type ProcessReportReq,
   revokeIntegrationById,
-  type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -365,15 +364,15 @@ class LinkedIn implements ChannelInterface {
     ['DESKTOP_WEB', DeviceEnum.Desktop],
   ]);
 
-  getReportStatus(_input: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+  getReportStatus(_adAccount: AdAccountWithIntegration, _taskId: string): Promise<JobStatusEnum> {
     return Promise.resolve(JobStatusEnum.FAILED);
   }
 
-  processReport(_input: ProcessReportReq): Promise<AError | undefined> {
+  processReport(_adAccount: AdAccountWithIntegration, _taskId: string, _initial: boolean): Promise<AError | undefined> {
     return Promise.resolve(new AError('Not implemented'));
   }
 
-  runAdInsightReport(_input: RunAdInsightReportReq): Promise<string | AError> {
+  runAdInsightReport(_adAccount: AdAccountWithIntegration, _initial: boolean): Promise<string | AError> {
     return Promise.resolve(new AError('Not implemented'));
   }
 }
