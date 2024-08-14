@@ -1,8 +1,8 @@
 import { SendMessageBatchCommand, SQSClient } from '@aws-sdk/client-sqs';
-import { type AdAccount, type Integration, type IntegrationTypeEnum } from '@repo/database';
-import { type Optional } from '@repo/utils';
+import { type AdAccount, type IntegrationTypeEnum } from '@repo/database';
 import { MODE } from '@repo/mode';
 import _ from 'lodash';
+import { z } from 'zod';
 import { env } from './config';
 
 const sqsClient = new SQSClient({ region: env.AWS_REGION });
@@ -13,14 +13,15 @@ const queueUrl = (channel: IntegrationTypeEnum, queueName: string, isFifo: boole
 export const channelReportQueueUrl = (channel: IntegrationTypeEnum): string =>
   queueUrl(channel, 'report-requests', false);
 
-export interface RunAdInsightReportReq {
-  initial: boolean;
-  integration: ReportIntegration;
-  adAccount: ReportAdAccount;
-}
+export const runAdInsightReportReq = z.object({
+  initial: z.boolean(),
+  adAccountId: z.string(),
+});
+type RunAdInsightReportReq = z.infer<typeof runAdInsightReportReq>;
+
 export interface ProcessReportReq extends RunAdInsightReportReq {
   taskId: string;
-  hasStarted: boolean;
+  status: JobStatusEnum;
 }
 
 export enum JobStatusEnum {
@@ -31,20 +32,11 @@ export enum JobStatusEnum {
   CANCELED = 'CANCELED',
 }
 
-export type ReportAdAccount = Optional<AdAccount, 'updatedAt'>;
-export type ReportIntegration = Optional<Integration, 'lastSyncedAt' | 'updatedAt'>;
-
 export const sendReportRequestsMessage = async (
-  adAccounts: ReportAdAccount[],
-  integration: ReportIntegration,
+  adAccounts: AdAccount[],
   channel: IntegrationTypeEnum,
   initial: boolean,
 ): Promise<void> => {
-  delete integration.lastSyncedAt;
-  delete integration.updatedAt;
-  adAccounts.forEach((account) => {
-    delete account.updatedAt;
-  });
   const chunkedAccounts = _.chunk(adAccounts, 10);
   await Promise.all(
     chunkedAccounts.map((accounts) =>
@@ -55,8 +47,7 @@ export const sendReportRequestsMessage = async (
             Id: account.id,
             MessageBody: JSON.stringify({
               initial,
-              integration,
-              adAccount: account,
+              adAccountId: account.id,
             } satisfies RunAdInsightReportReq),
           })),
         }),

@@ -1,10 +1,11 @@
 import { Redis } from 'ioredis';
+import { stringifySorted } from '@repo/utils';
 import { env } from './config';
 
 export const ioredis = new Redis(env.REDIS_URL);
 
 export const redisSet = async (key: string, value: string | number | object, ttlSec?: number): Promise<void> => {
-  const serializedValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const serializedValue = typeof value === 'object' ? stringifySorted(value) : value;
   if (!ttlSec) {
     await ioredis.set(key, serializedValue);
     return;
@@ -32,7 +33,7 @@ export const getAllSet = async <T extends object | string | boolean>(key: string
 };
 
 export const redisAddToSet = async (key: string, value: string | number | object, ttlSec?: number): Promise<void> => {
-  const serializedValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const serializedValue = typeof value === 'object' ? stringifySorted(value) : value;
   const multiPipeline = ioredis.multi();
   void multiPipeline.sadd(key, serializedValue);
   if (ttlSec) {
@@ -42,7 +43,7 @@ export const redisAddToSet = async (key: string, value: string | number | object
 };
 
 export const redisRemoveFromSet = async (key: string, value: string | number | object): Promise<void> => {
-  const serializedValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  const serializedValue = typeof value === 'object' ? stringifySorted(value) : value;
   await ioredis.srem(key, serializedValue);
 };
 

@@ -27,6 +27,7 @@ import {
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import _ from 'lodash';
 import {
+  type AdAccountWithIntegration,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -43,12 +44,8 @@ import {
   isMetaAdPosition,
   JobStatusEnum,
   MetaError,
-  type ProcessReportReq,
-  type ReportAdAccount,
-  type ReportIntegration,
   revokeIntegration,
   revokeIntegrationById,
-  type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -221,7 +218,7 @@ class Meta implements ChannelInterface {
     if (isAError(dbAccounts)) return dbAccounts;
     logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(dbAccounts)} active accounts`);
 
-    await sendReportRequestsMessage(dbAccounts, integration, IntegrationTypeEnum.META, initial);
+    await sendReportRequestsMessage(dbAccounts, IntegrationTypeEnum.META, initial);
   }
 
   async getAdPreview(
@@ -347,7 +344,7 @@ class Meta implements ChannelInterface {
     return creatives;
   }
 
-  async getReportStatus({ taskId, integration, adAccount }: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+  async getReportStatus({ id, integration }: AdAccountWithIntegration, taskId: string): Promise<JobStatusEnum> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const reportId = taskId;
     const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
@@ -369,7 +366,7 @@ class Meta implements ChannelInterface {
     });
     const parsed = reportSchema.safeParse(resp);
     if (!parsed.success) {
-      logger.error(resp, `Failed to parse meta ad report for ${reportId} and ${adAccount.id}`);
+      logger.error(resp, `Failed to parse meta ad report for ${reportId} and ${id}`);
       return JobStatusEnum.FAILED;
     }
     const metaJobStatusMap = new Map<z.infer<typeof metaJobStatusEnum>, JobStatusEnum>([
@@ -383,8 +380,12 @@ class Meta implements ChannelInterface {
     return metaJobStatusMap.get(parsed.data.async_status) ?? JobStatusEnum.FAILED;
   }
 
-  async processReport({ integration, adAccount, taskId, initial }: ProcessReportReq): Promise<AError | undefined> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
+  async processReport(
+    adAccount: AdAccountWithIntegration,
+    taskId: string,
+    initial: boolean,
+  ): Promise<AError | undefined> {
+    adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
     const reportId = taskId;
     const adExternalIdMap = new Map<string, string>();
     const insightSchema = z.object({
@@ -437,12 +438,12 @@ class Meta implements ChannelInterface {
       },
     );
     const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]): Promise<undefined> => {
-      await this.saveAdsAndInsights(i, adExternalIdMap, integration, adAccount);
+      await this.saveAdsAndInsights(i, adExternalIdMap, adAccount);
       return undefined;
     };
     await deleteOldInsights(adAccount.id, initial);
     const accountInsightsAndAds = await Meta.handlePaginationFn(
-      integration,
+      adAccount.integration,
       getInsightsFn,
       insightSchema,
       toInsightAndAd,
@@ -451,8 +452,8 @@ class Meta implements ChannelInterface {
     if (isAError(accountInsightsAndAds)) return accountInsightsAndAds;
   }
 
-  async runAdInsightReport({ adAccount, integration, initial }: RunAdInsightReportReq): Promise<string | AError> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
+  async runAdInsightReport(adAccount: AdAccountWithIntegration, initial: boolean): Promise<string | AError> {
+    adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
     const adReportRunSchema = z.object({ id: z.string() });
     const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
     const resp = await Meta.sdk(async () => {
@@ -480,7 +481,7 @@ class Meta implements ChannelInterface {
           time_range: mtimeRange,
         },
       );
-    }, integration);
+    }, adAccount.integration);
     if (isAError(resp)) return resp;
     const parsed = adReportRunSchema.safeParse(resp);
     if (!parsed.success) {
@@ -493,8 +494,7 @@ class Meta implements ChannelInterface {
   private async saveAdsAndInsights(
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd }[],
     adExternalIdMap: Map<string, string>,
-    integration: ReportIntegration,
-    dbAccount: ReportAdAccount,
+    dbAccount: AdAccountWithIntegration,
   ): Promise<void> {
     const [insights, ads] = accountInsightsAndAds.reduce(
       (acc, item) => {
@@ -506,7 +506,7 @@ class Meta implements ChannelInterface {
     );
     const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
     const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
-    await saveAds(integration, newAds, dbAccount.id, adExternalIdMap);
+    await saveAds(dbAccount.integration, newAds, dbAccount.id, adExternalIdMap);
 
     await saveInsights(insights, adExternalIdMap, dbAccount);
   }
@@ -540,7 +540,7 @@ class Meta implements ChannelInterface {
   }
 
   private static async handlePaginationFn<T, U extends ZodTypeAny, V>(
-    integration: ReportIntegration,
+    integration: Integration,
     fn: Promise<Cursor> | Cursor,
     schema: U,
     parseCallback: (result: z.infer<U>) => T,
@@ -570,7 +570,7 @@ class Meta implements ChannelInterface {
     return resultsP;
   }
 
-  private static async sdk<T>(fn: () => Promise<T> | T | AError, integration: ReportIntegration): Promise<T | AError> {
+  private static async sdk<T>(fn: () => Promise<T> | T | AError, integration: Integration): Promise<T | AError> {
     try {
       return await fn();
     } catch (error) {

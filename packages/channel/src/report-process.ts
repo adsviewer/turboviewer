@@ -1,4 +1,4 @@
-import { IntegrationTypeEnum } from '@repo/database';
+import { IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import {
   DeleteMessageCommand,
@@ -8,12 +8,14 @@ import {
   SQSClient,
 } from '@aws-sdk/client-sqs';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
-import { isAError, FireAndForget } from '@repo/utils';
+import { FireAndForget, isAError } from '@repo/utils';
 import {
+  adAccountWithIntegration,
   channelReportQueueUrl,
+  decryptTokens,
   JobStatusEnum,
   type ProcessReportReq,
-  type RunAdInsightReportReq,
+  runAdInsightReportReq,
 } from '@repo/channel-utils';
 import _ from 'lodash';
 import { Environment, MODE } from '@repo/mode';
@@ -45,7 +47,12 @@ const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
   [IntegrationTypeEnum.META, 10],
 ]);
 
-async function deleteMessage(msg: Message, channel: IntegrationTypeEnum, redisValue: ProcessReportReq): Promise<void> {
+async function deleteMessage(
+  msg: Message,
+  channel: IntegrationTypeEnum,
+  redisValue: ProcessReportReq,
+  status: JobStatusEnum,
+): Promise<void> {
   if (msg.ReceiptHandle) {
     await client.send(
       new DeleteMessageCommand({
@@ -56,6 +63,8 @@ async function deleteMessage(msg: Message, channel: IntegrationTypeEnum, redisVa
     logger.info('Message deleted');
   }
   await redisRemoveFromSet(activeReportRedisKey(channel), redisValue);
+  redisValue.status = status;
+  await redisAddToSet(activeReportRedisKey(channel), { ...redisValue } satisfies ProcessReportReq, 60 * 5);
 }
 
 export const checkReports = async (): Promise<void> => {
@@ -76,43 +85,54 @@ export const checkReports = async (): Promise<void> => {
           logger.warn('Empty message');
           continue;
         }
-        const parsed = JSON.parse(body) as RunAdInsightReportReq;
-        const activeReport = activeReports.find((report) => _.isMatch(report, parsed));
+        const parsed = runAdInsightReportReq.safeParse(JSON.parse(body));
+        if (!parsed.success) {
+          logger.error(parsed.error);
+          continue;
+        }
+        const { adAccountId, initial } = parsed.data;
+
+        const adAccount = await prisma.adAccount.findUniqueOrThrow({
+          where: { id: adAccountId },
+          ...adAccountWithIntegration,
+        });
+        const integration = decryptTokens(adAccount.integration);
+        if (!integration || isAError(integration)) continue;
+        adAccount.integration = integration;
+
+        const activeReport = activeReports.find((report) => _.isMatch(report, parsed.data));
 
         if (!activeReport) {
-          logger.info(`No active report for ${parsed.adAccount.id}`);
-          const taskId = await channel.runAdInsightReport(parsed);
+          logger.info(`No active report for ${adAccountId}`);
+          const taskId = await channel.runAdInsightReport(adAccount, initial);
           if (isAError(taskId)) {
             logger.error(taskId);
             continue;
           }
           await redisAddToSet(
             activeReportRedisKey(channelType),
-            {
-              ...parsed,
-              taskId,
-              hasStarted: false,
-            } satisfies ProcessReportReq,
+            { ...parsed.data, taskId, status: JobStatusEnum.QUEUING } satisfies ProcessReportReq,
             60 * 60 * 6,
           );
         } else {
-          logger.info(`Active report for ${activeReport.adAccount.id}`);
-          const status = await channel.getReportStatus(activeReport);
+          logger.info(`Active report for ${activeReport.adAccountId}`);
+          const status = await channel.getReportStatus(adAccount, activeReport.taskId);
           logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
           switch (status) {
             case JobStatusEnum.SUCCESS:
-              if (!activeReport.hasStarted) {
+              if (activeReport.status === JobStatusEnum.QUEUING) {
                 await redisRemoveFromSet(activeReportRedisKey(channelType), activeReport);
-                activeReport.hasStarted = true;
+                activeReport.status = JobStatusEnum.PROCESSING;
                 await redisAddToSet(
                   activeReportRedisKey(channelType),
                   { ...activeReport } satisfies ProcessReportReq,
                   60 * 60 * 6,
                 );
+                // TODO: this should be invoking an aws batch
                 fireAndForget.add(async () => {
-                  const report = await channel.processReport(activeReport);
+                  const report = await channel.processReport(adAccount, activeReport.taskId, activeReport.initial);
                   if (!isAError(report)) {
-                    await deleteMessage(msg, channelType, activeReport);
+                    await deleteMessage(msg, channelType, activeReport, JobStatusEnum.SUCCESS);
                   }
                 });
               }
@@ -120,7 +140,7 @@ export const checkReports = async (): Promise<void> => {
             case JobStatusEnum.FAILED:
             case JobStatusEnum.CANCELED:
               logger.error(`Task ${activeReport.taskId} was canceled/failed`);
-              await deleteMessage(msg, channelType, activeReport);
+              await deleteMessage(msg, channelType, activeReport, JobStatusEnum.FAILED);
               continue;
             default:
               break;

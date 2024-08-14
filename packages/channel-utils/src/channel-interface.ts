@@ -9,7 +9,8 @@ import {
 } from '@repo/database';
 import { type MetaError } from './errors';
 import { type ChannelIFrame } from './iframe-helper';
-import { type JobStatusEnum, type ProcessReportReq, type RunAdInsightReportReq } from './send-messages';
+import { type JobStatusEnum } from './send-messages';
+import { type AdAccountWithIntegration } from './insights-utils';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -67,10 +68,10 @@ export interface ChannelInterface {
   ) => Promise<ChannelIFrame | AError>;
   getChannelData: (integration: Integration, initial: boolean) => Promise<AError | undefined>;
   getDefaultPublisher: () => PublisherEnum;
-  getReportStatus: (input: Omit<ProcessReportReq, 'initial'>) => Promise<JobStatusEnum>;
+  getReportStatus: (adAccount: AdAccountWithIntegration, taskId: string) => Promise<JobStatusEnum>;
   getUserId: (accessToken: string) => Promise<string | AError>;
-  processReport: (input: ProcessReportReq) => Promise<AError | undefined>;
-  runAdInsightReport: (input: RunAdInsightReportReq) => Promise<string | AError>;
+  processReport: (adAccount: AdAccountWithIntegration, taskId: string, initial: boolean) => Promise<AError | undefined>;
+  runAdInsightReport: (adAccount: AdAccountWithIntegration, initial: boolean) => Promise<string | AError>;
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
 }

@@ -1,4 +1,4 @@
-export const stringifySorted = (obj: Record<string, unknown>): string => {
+export const stringifySorted = (obj: object): string => {
   const sortedObj = sortObjectKeysAndValues(obj);
   return JSON.stringify(sortedObj);
 };

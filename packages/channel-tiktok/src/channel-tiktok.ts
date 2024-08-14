@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
+  type AdAccountWithIntegration,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -24,10 +25,6 @@ import {
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   JobStatusEnum,
-  type ProcessReportReq,
-  type ReportAdAccount,
-  type ReportIntegration,
-  type RunAdInsightReportReq,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -175,7 +172,7 @@ export class Tiktok implements ChannelInterface {
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     const dbAccounts = await this.saveAdAccounts(integration);
     if (isAError(dbAccounts)) return dbAccounts;
-    await sendReportRequestsMessage(dbAccounts, integration, IntegrationTypeEnum.TIKTOK, initial);
+    await sendReportRequestsMessage(dbAccounts, IntegrationTypeEnum.TIKTOK, initial);
     return undefined;
   }
 
@@ -210,13 +207,16 @@ export class Tiktok implements ChannelInterface {
     };
   }
 
-  async runAdInsightReport({ initial, adAccount, integration }: RunAdInsightReportReq): Promise<string | AError> {
-    const tikTokTimeRange = await Tiktok.timeRange(initial, adAccount.id);
+  async runAdInsightReport(
+    { integration, externalId, id }: AdAccountWithIntegration,
+    initial: boolean,
+  ): Promise<string | AError> {
+    const tikTokTimeRange = await Tiktok.timeRange(initial, id);
     const response = await Tiktok.tikTokFetch(integration.accessToken, `${baseUrl}/report/task/create`, {
       method: 'POST',
       body: JSON.stringify({
         ...tikTokTimeRange,
-        advertiser_id: adAccount.externalId,
+        advertiser_id: externalId,
         data_level: 'AUCTION_AD',
         dimensions: ['ad_id', 'placement', 'stat_time_day'],
         report_type: 'AUDIENCE',
@@ -234,9 +234,12 @@ export class Tiktok implements ChannelInterface {
     return parsed.data.task_id;
   }
 
-  async getReportStatus({ taskId, adAccount, integration }: Omit<ProcessReportReq, 'initial'>): Promise<JobStatusEnum> {
+  async getReportStatus(
+    { id, externalId, integration }: AdAccountWithIntegration,
+    taskId: string,
+  ): Promise<JobStatusEnum> {
     const params = new URLSearchParams({
-      advertiser_id: adAccount.externalId,
+      advertiser_id: externalId,
       task_id: taskId,
     });
     const response = await Tiktok.tikTokFetch(
@@ -245,27 +248,31 @@ export class Tiktok implements ChannelInterface {
     );
     const data = await Tiktok.baseValidation(response);
     if (isAError(data)) {
-      logger.error(data, `Failed to get status for task ${taskId} and integration ${adAccount.id}`);
+      logger.error(data, `Failed to get status for task ${taskId} and integration ${id}`);
       return JobStatusEnum.FAILED;
     }
     const schema = z.object({ status: z.nativeEnum(JobStatusEnum) });
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
-      logger.error(parsed.error, `Failed to get status for task ${taskId} and integration ${adAccount.id}`);
+      logger.error(parsed.error, `Failed to get status for task ${taskId} and integration ${id}`);
       return JobStatusEnum.FAILED;
     }
     return parsed.data.status;
   }
 
-  async processReport({ taskId, integration, adAccount, initial }: ProcessReportReq): Promise<AError | undefined> {
+  async processReport(
+    adAccount: AdAccountWithIntegration,
+    taskId: string,
+    initial: boolean,
+  ): Promise<AError | undefined> {
     const adsMap = new Map<string, ChannelAd>();
     const adExternalIdMap = new Map<string, string>();
     const params = new URLSearchParams({
-      advertiser_id: integration.externalId,
+      advertiser_id: adAccount.integration.externalId,
       task_id: taskId,
     });
     const response = await Tiktok.tikTokFetch(
-      integration.accessToken,
+      adAccount.integration.accessToken,
       `${baseUrl}/report/task/download?${params.toString()}`,
     );
 
@@ -276,7 +283,15 @@ export class Tiktok implements ChannelInterface {
     ]);
 
     const fn = (data: unknown[]): Promise<AError | undefined> =>
-      Tiktok.processReportChunk(taskId, integration, adAccount, data, placementPublisherMap, adsMap, adExternalIdMap);
+      Tiktok.processReportChunk(
+        taskId,
+        adAccount.integration,
+        adAccount,
+        data,
+        placementPublisherMap,
+        adsMap,
+        adExternalIdMap,
+      );
     if (isAError(response)) return response;
     await deleteOldInsights(adAccount.id, initial);
     const processed = await Tiktok.csvParseAndProcess(response, fn);
@@ -455,8 +470,8 @@ export class Tiktok implements ChannelInterface {
 
   private static processReportChunk = async (
     taskId: string,
-    integration: ReportIntegration,
-    adAccount: ReportAdAccount,
+    integration: Integration,
+    adAccount: AdAccount,
     data: unknown[],
     placementPublisherMap: Map<PlacementsEnum, PublisherEnum>,
     adsMap: Map<string, ChannelAd>,
