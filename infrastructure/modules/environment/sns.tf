@@ -111,11 +111,11 @@ resource "aws_sns_topic" "channel_report_report_topic" {
   policy = data.aws_iam_policy_document.channel_data_report_policy_document.json
 }
 
-# resource "aws_sns_topic_subscription" "subscription" {
-#   topic_arn = aws_sns_topic.channel_report_report_topic.arn
-#   protocol  = "https"
-#   endpoint  = "${local.server_api_endpoint}/channel/report"
-# }
+resource "aws_sns_topic_subscription" "channel_report_subscription" {
+  topic_arn = aws_sns_topic.channel_report_report_topic.arn
+  protocol  = "https"
+  endpoint  = "${local.server_api_endpoint}/channel/report"
+}
 
 resource "aws_cloudwatch_event_rule" "channel_data_report" {
   schedule_expression = "rate(2 minutes)"
