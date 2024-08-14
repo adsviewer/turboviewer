@@ -61,7 +61,7 @@ const apiVersion = 'v20.0';
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
-const limit = 700;
+const limit = 600;
 
 class Meta implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {

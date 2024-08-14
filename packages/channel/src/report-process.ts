@@ -47,12 +47,11 @@ const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
   [IntegrationTypeEnum.META, 10],
 ]);
 
-async function deleteMessage(
+const deleteMessage = async (
   msg: Message,
   channel: IntegrationTypeEnum,
   redisValue: ProcessReportReq,
-  status: JobStatusEnum,
-): Promise<void> {
+): Promise<void> => {
   if (msg.ReceiptHandle) {
     await client.send(
       new DeleteMessageCommand({
@@ -63,9 +62,9 @@ async function deleteMessage(
     logger.info('Message deleted');
   }
   await redisRemoveFromSet(activeReportRedisKey(channel), redisValue);
-  redisValue.status = status;
+  redisValue.status = JobStatusEnum.SUCCESS;
   await redisAddToSet(activeReportRedisKey(channel), { ...redisValue } satisfies ProcessReportReq, 60 * 5);
-}
+};
 
 export const checkReports = async (): Promise<void> => {
   await Promise.all(
@@ -132,7 +131,9 @@ export const checkReports = async (): Promise<void> => {
                 fireAndForget.add(async () => {
                   const report = await channel.processReport(adAccount, activeReport.taskId, activeReport.initial);
                   if (!isAError(report)) {
-                    await deleteMessage(msg, channelType, activeReport, JobStatusEnum.SUCCESS);
+                    await deleteMessage(msg, channelType, activeReport);
+                  } else {
+                    await redisRemoveFromSet(activeReportRedisKey(channelType), activeReport);
                   }
                 });
               }
@@ -140,7 +141,7 @@ export const checkReports = async (): Promise<void> => {
             case JobStatusEnum.FAILED:
             case JobStatusEnum.CANCELED:
               logger.error(`Task ${activeReport.taskId} was canceled/failed`);
-              await deleteMessage(msg, channelType, activeReport, JobStatusEnum.FAILED);
+              await redisRemoveFromSet(activeReportRedisKey(channelType), activeReport);
               continue;
             default:
               break;

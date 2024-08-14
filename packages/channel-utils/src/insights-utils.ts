@@ -1,6 +1,6 @@
 import { type AdAccount, type Integration, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { getBeforeXMonths, getYesterday } from '@repo/utils';
+import { AError, getBeforeXMonths, getYesterday, isAError } from '@repo/utils';
 import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
 
 export const saveAccounts = async (
@@ -75,21 +75,30 @@ export const saveInsights = async (
   dbAccount: AdAccount,
 ): Promise<void> => {
   logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
-  await prisma.insight.createMany({
-    data: insights.map((insight) => ({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the external id exists
-      adId: adExternalIdMap.get(insight.externalAdId)!,
-      adAccountId: dbAccount.id,
-      currency: dbAccount.currency,
-      date: insight.date,
-      device: insight.device,
-      impressions: insight.impressions,
-      position: insight.position,
-      publisher: insight.publisher,
-      spend: insight.spend,
-    })),
-  });
-  logger.info('Saved %d insights for %s', insights.length, dbAccount.id);
+  const createInsights = await prisma.insight
+    .createMany({
+      data: insights.map((insight) => ({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the external id exists
+        adId: adExternalIdMap.get(insight.externalAdId)!,
+        adAccountId: dbAccount.id,
+        currency: dbAccount.currency,
+        date: insight.date,
+        device: insight.device,
+        impressions: insight.impressions,
+        position: insight.position,
+        publisher: insight.publisher,
+        spend: insight.spend,
+      })),
+    })
+    .catch((e: unknown) => {
+      logger.error(
+        e,
+        'Error saving insights with dates: %o',
+        insights.map((i) => i.date),
+      );
+      return new AError(`Error saving insights for ${dbAccount.id}`);
+    });
+  if (!isAError(createInsights)) logger.info('Saved %d insights for %s', insights.length, dbAccount.id);
 };
 
 export const deleteOldInsights = async (adAccountId: string, initial: boolean): Promise<void> => {
