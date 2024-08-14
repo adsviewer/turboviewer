@@ -8,7 +8,7 @@ import {
   PublisherEnum,
 } from '@repo/database';
 import { MetaError } from '@repo/channel-utils';
-import { getEndOfDay, type IntervalType } from '@repo/utils';
+import { getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
@@ -238,7 +238,7 @@ export const AdDto = builder.prismaObject('Ad', {
       totalCount: true,
       query: (args, _ctx) => ({
         where: {
-          date: { gte: args.dateFrom ?? undefined, lte: getEndOfDay(args.dateTo) },
+          date: { gte: args.dateFrom ?? undefined, lt: getTomorrowStartOfDay(args.dateTo) },
           device: { in: args.devices ?? undefined },
           publisher: { in: args.publishers ?? undefined },
           position: { in: args.positions ?? undefined },
