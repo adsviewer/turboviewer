@@ -2,6 +2,7 @@ import { AllRoles, OrganizationRoleEnum } from '@/graphql/generated/schema-serve
 
 type RoleType = AllRoles | OrganizationRoleEnum;
 
+// ADMIN is the admin of adsviewer, not the Organization Admin!
 export const isAdmin = (roles: AllRoles[]): boolean => {
   return roles.includes(AllRoles.ADMIN);
 };

@@ -26,7 +26,7 @@ import {
   type AvailableOrganizationAdAccountsQuery,
 } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
-import { isAdmin } from '@/util/access-utils';
+import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
 import {
@@ -65,8 +65,9 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
     setInitialAdAccounts([]);
     setIsPending(true);
 
+    logger.info(userDetails.allRoles);
     // Fetch data from the appropriate endpoint based on whether the user is an admin or not
-    if (!isAdmin(userDetails.allRoles)) {
+    if (!isOrgAdmin(userDetails.allRoles)) {
       void getOrganizationAdAccounts(props.channel)
         .then((res) => {
           if (!res.success) {
@@ -208,7 +209,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
             ? adAccountsToShow.map((adAccount) => {
                 return (
                   <Flex align="center" key={adAccount.id} gap="sm" m="xs">
-                    {isAdmin(userDetails.allRoles) ? (
+                    {isOrgAdmin(userDetails.allRoles) ? (
                       <Checkbox
                         label={adAccount.name}
                         checked={'isConnectedToCurrentOrg' in adAccount ? adAccount.isConnectedToCurrentOrg : false}
@@ -216,7 +217,9 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
                           toggleCheckbox(e, adAccount.id);
                         }}
                       />
-                    ) : null}
+                    ) : (
+                      <Text>{adAccount.name}</Text>
+                    )}
                     <Text size="sm" c="dimmed" fs="italic">
                       ({format.number(adAccount.adCount)} {t('ads')})
                     </Text>
@@ -233,7 +236,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
           {isPending ? <LoaderCentered /> : null}
         </ScrollArea.Autosize>
 
-        {isAdmin(userDetails.allRoles) ? (
+        {isOrgAdmin(userDetails.allRoles) ? (
           <Button
             variant="filled"
             fullWidth
