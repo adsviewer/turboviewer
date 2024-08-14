@@ -631,7 +631,7 @@ class Meta implements ChannelInterface {
     if (!debugTokenParsed.success) {
       return new AError('Failed to parse token response');
     }
-    return new Date(debugTokenParsed.data.data.data_access_expires_at * 700);
+    return new Date(debugTokenParsed.data.data.data_access_expires_at * 1000);
   }
 
   private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([
