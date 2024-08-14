@@ -76,7 +76,7 @@ export const checkReports = async (): Promise<void> => {
         const activeReport = activeReports.find((report) => _.isMatch(report, parsed));
 
         if (!activeReport) {
-          logger.info('No active report');
+          logger.info(`No active report for ${parsed.adAccount.id}`);
           const taskId = await channel.runAdInsightReport(parsed);
           if (isAError(taskId)) {
             logger.error(taskId);
@@ -87,16 +87,24 @@ export const checkReports = async (): Promise<void> => {
             {
               ...parsed,
               taskId,
+              hasStarted: false,
             } satisfies ProcessReportReq,
-            60 * 60 * 24,
+            60 * 60 * 6,
           );
         } else {
-          logger.info('Active report');
+          logger.info(`Active report for ${activeReport.adAccount.id}`);
           const status = await channel.getReportStatus(activeReport);
           logger.info(`Task ${activeReport.taskId} status: ${String(status)}`);
           switch (status) {
             case JobStatusEnum.SUCCESS:
-              {
+              if (!activeReport.hasStarted) {
+                await redisRemoveFromSet(activeReportRedisKey(channelType), activeReport);
+                activeReport.hasStarted = true;
+                await redisAddToSet(
+                  activeReportRedisKey(channelType),
+                  { ...activeReport } satisfies ProcessReportReq,
+                  60 * 60 * 6,
+                );
                 const report = await channel.processReport(activeReport);
                 if (!isAError(report)) {
                   await deleteMessage(msg, channelType, activeReport);
@@ -124,6 +132,6 @@ const periodicCheckReports = (): void => {
       logger.error(e);
     });
     periodicCheckReports();
-  }, 40_000);
+  }, 1_000);
 };
 periodicCheckReports();
