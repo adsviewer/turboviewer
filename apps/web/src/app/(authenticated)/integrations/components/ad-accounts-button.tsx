@@ -69,15 +69,13 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
     if (!isAdmin(userDetails.allRoles)) {
       void getOrganizationAdAccounts(props.channel)
         .then((res) => {
-          if (res.error) {
+          if (!res.success) {
             logger.error(res.error);
             return;
           }
 
-          if (res.data) {
-            setAdAccounts(res.data.organizationAdAccounts);
-            setAdAccountsToShow(res.data.organizationAdAccounts);
-          }
+          setAdAccounts(res.data.organizationAdAccounts);
+          setAdAccountsToShow(res.data.organizationAdAccounts);
         })
         .catch((err: unknown) => {
           logger.error(err);
@@ -88,16 +86,14 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
     } else {
       void getAvailableOrganizationAdAccounts(props.channel)
         .then((res) => {
-          if (res.error) {
+          if (!res.success) {
             logger.error(res.error);
             return;
           }
 
-          if (res.data) {
-            setAdAccounts(res.data.availableOrganizationAdAccounts);
-            setAdAccountsToShow(res.data.availableOrganizationAdAccounts);
-            setInitialAdAccounts(res.data.availableOrganizationAdAccounts);
-          }
+          setAdAccounts(res.data.availableOrganizationAdAccounts);
+          setAdAccountsToShow(res.data.availableOrganizationAdAccounts);
+          setInitialAdAccounts(res.data.availableOrganizationAdAccounts);
         })
         .catch((err: unknown) => {
           logger.error(err);
