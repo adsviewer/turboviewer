@@ -20,6 +20,7 @@ export interface RunAdInsightReportReq {
 }
 export interface ProcessReportReq extends RunAdInsightReportReq {
   taskId: string;
+  hasStarted: boolean;
 }
 
 export enum JobStatusEnum {
