@@ -6,8 +6,6 @@ import {
   type RemoveUserFromOrganizationMutationVariables,
   type CreateOrganizationMutation,
   type CreateOrganizationMutationVariables,
-  type DeleteOrganizationMutation,
-  type DeleteOrganizationMutationVariables,
   type InviteUsersMutation,
   type InviteUsersMutationVariables,
   type SwitchOrganizationMutation,
@@ -18,12 +16,19 @@ import {
   type DeleteOrganizationMutationVariables,
   type IntegrationType,
   type OrganizationAdAccountsQuery,
+  type UpdateOrganizationAdAccountsMutationVariables,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { refreshJWTToken } from '@/app/(authenticated)/actions';
-import { type GetOrganizationQuery } from '@/graphql/generated/schema-client';
+import {
+  type AvailableOrganizationAdAccountsQuery,
+  type UpdateOrganizationAdAccountsMutation,
+  type UpdateOrganizationUserMutation,
+  type UpdateOrganizationUserMutationVariables,
+  type GetOrganizationQuery,
+} from '@/graphql/generated/schema-client';
 
 export default async function getOrganization(): Promise<UrqlResult<GetOrganizationQuery>> {
   return await handleUrqlRequest(urqlClientSdk().getOrganization());

@@ -1090,14 +1090,29 @@ export type DeleteOrganizationMutation = {
   deleteOrganization: { __typename: 'Organization'; id: string };
 };
 
+export type InviteUsersMutationVariables = Exact<{
+  emails: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  role: OrganizationRoleEnum;
+}>;
+
+export type InviteUsersMutation = {
+  __typename: 'Mutation';
+  inviteUsers:
+    | {
+        __typename: 'InviteUsersErrors';
+        error: Array<{ __typename: 'InviteUsersError'; email: string; message: string }>;
+      }
+    | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
+};
+
 export type AvailableOrganizationAdAccountsQueryVariables = Exact<{
   channel: IntegrationType;
 }>;
 
 export type AvailableOrganizationAdAccountsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   availableOrganizationAdAccounts: Array<{
-    __typename?: 'AdAccount';
+    __typename: 'AdAccount';
     id: string;
     adCount: number;
     name: string;
@@ -1105,13 +1120,19 @@ export type AvailableOrganizationAdAccountsQuery = {
   }>;
 };
 
+export type RemoveUserFromOrganizationMutationVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+export type RemoveUserFromOrganizationMutation = { __typename: 'Mutation'; removeUserFromOrganization: boolean };
+
 export type OrganizationAdAccountsQueryVariables = Exact<{
   channel: IntegrationType;
 }>;
 
 export type OrganizationAdAccountsQuery = {
-  __typename?: 'Query';
-  organizationAdAccounts: Array<{ __typename?: 'AdAccount'; id: string; adCount: number; name: string }>;
+  __typename: 'Query';
+  organizationAdAccounts: Array<{ __typename: 'AdAccount'; id: string; adCount: number; name: string }>;
 };
 
 export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
@@ -1119,8 +1140,8 @@ export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
 }>;
 
 export type UpdateOrganizationAdAccountsMutation = {
-  __typename?: 'Mutation';
-  updateOrganizationAdAccounts: { __typename?: 'Organization'; id: string };
+  __typename: 'Mutation';
+  updateOrganizationAdAccounts: { __typename: 'Organization'; id: string };
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1588,6 +1609,25 @@ export const DeleteOrganizationDocument = gql`
 export function useDeleteOrganizationMutation() {
   return Urql.useMutation<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(DeleteOrganizationDocument);
 }
+export const InviteUsersDocument = gql`
+  mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
+    inviteUsers(emails: $emails, role: $role) {
+      ... on MutationInviteUsersSuccess {
+        data
+      }
+      ... on InviteUsersErrors {
+        error {
+          email
+          message
+        }
+      }
+    }
+  }
+`;
+
+export function useInviteUsersMutation() {
+  return Urql.useMutation<InviteUsersMutation, InviteUsersMutationVariables>(InviteUsersDocument);
+}
 export const AvailableOrganizationAdAccountsDocument = gql`
   query availableOrganizationAdAccounts($channel: IntegrationType!) {
     availableOrganizationAdAccounts(channel: $channel) {
@@ -1606,6 +1646,17 @@ export function useAvailableOrganizationAdAccountsQuery(
     query: AvailableOrganizationAdAccountsDocument,
     ...options,
   });
+}
+export const RemoveUserFromOrganizationDocument = gql`
+  mutation removeUserFromOrganization($userId: String!) {
+    removeUserFromOrganization(userId: $userId)
+  }
+`;
+
+export function useRemoveUserFromOrganizationMutation() {
+  return Urql.useMutation<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
+    RemoveUserFromOrganizationDocument,
+  );
 }
 export const OrganizationAdAccountsDocument = gql`
   query organizationAdAccounts($channel: IntegrationType!) {
