@@ -25,8 +25,9 @@ export enum IntegrationStatusEnum {
 }
 
 export const ShouldConnectIntegrationStatuses = [
-  IntegrationStatusEnum.NotConnected,
+  IntegrationStatusEnum.Connected,
   IntegrationStatusEnum.Expired,
+  IntegrationStatusEnum.NotConnected,
   IntegrationStatusEnum.Revoked,
 ];
 
