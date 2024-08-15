@@ -47,15 +47,20 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_security_group" "batch_security_group" {
+  name   = "${var.environment}-aws-batch-compute-environment-security-group"
+  vpc_id = var.vpc_id
+}
+
 resource "aws_batch_compute_environment" "channel_report_process" {
   compute_environment_name = local.channel_process_report
 
   compute_resources {
     max_vcpus = 16
 
-    #     security_group_ids = [
-    #       aws_security_group.sample.id
-    #     ]
+    security_group_ids = [
+      aws_security_group.batch_security_group.id
+    ]
 
     subnets = var.service_subnet_ids
 
