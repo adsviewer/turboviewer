@@ -932,7 +932,7 @@ export type IntegrationsQuery = {
     __typename: 'Integration';
     type: IntegrationType;
     lastSyncedAt?: Date | null;
-    accessTokenExpiresAt?: Date | null;
+    status: IntegrationStatus;
     adAccounts: Array<{ __typename: 'AdAccount'; adCount: number }>;
   }>;
 };
@@ -1139,7 +1139,12 @@ export type UpdateUserMutation = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
-      integrations: Array<{ __typename: 'Integration'; type: IntegrationType; accessTokenExpiresAt?: Date | null }>;
+      integrations: Array<{
+        __typename: 'Integration';
+        status: IntegrationStatus;
+        type: IntegrationType;
+        accessTokenExpiresAt?: Date | null;
+      }>;
     } | null;
   };
 };
@@ -1167,7 +1172,12 @@ export type MeQuery = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
-      integrations: Array<{ __typename: 'Integration'; type: IntegrationType; accessTokenExpiresAt?: Date | null }>;
+      integrations: Array<{
+        __typename: 'Integration';
+        status: IntegrationStatus;
+        type: IntegrationType;
+        accessTokenExpiresAt?: Date | null;
+      }>;
     } | null;
   };
 };
@@ -1191,7 +1201,12 @@ export type UserFieldsFragment = {
     name: string;
     isRoot: boolean;
     parentId?: string | null;
-    integrations: Array<{ __typename: 'Integration'; type: IntegrationType; accessTokenExpiresAt?: Date | null }>;
+    integrations: Array<{
+      __typename: 'Integration';
+      status: IntegrationStatus;
+      type: IntegrationType;
+      accessTokenExpiresAt?: Date | null;
+    }>;
   } | null;
 };
 
@@ -1216,6 +1231,7 @@ export const UserFieldsFragmentDoc = gql`
       isRoot
       parentId
       integrations {
+        status
         type
         accessTokenExpiresAt
       }
@@ -1340,7 +1356,7 @@ export const IntegrationsDocument = gql`
     integrations {
       type
       lastSyncedAt
-      accessTokenExpiresAt
+      status
       adAccounts {
         adCount
       }

@@ -26,7 +26,7 @@ interface IntegrationProps {
 interface IntegrationDataType {
   adCount: number;
   lastSyncedAt: Date | null | undefined;
-  accessTokenExpiresAt: Date;
+  status: IntegrationStatus;
 }
 
 type IntegrationsDataType = {
@@ -37,32 +37,32 @@ const initialIntegrationsData: IntegrationsDataType = {
   [IntegrationType.META]: {
     adCount: 0,
     lastSyncedAt: null,
-    accessTokenExpiresAt: new Date(),
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.LINKEDIN]: {
     adCount: 0,
     lastSyncedAt: null,
-    accessTokenExpiresAt: new Date(),
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.TIKTOK]: {
     adCount: 0,
     lastSyncedAt: null,
-    accessTokenExpiresAt: new Date(),
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.GOOGLE]: {
     adCount: 0,
     lastSyncedAt: null,
-    accessTokenExpiresAt: new Date(),
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.REDDIT]: {
     adCount: 0,
     lastSyncedAt: null,
-    accessTokenExpiresAt: new Date(),
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.SNAPCHAT]: {
     adCount: 0,
     lastSyncedAt: null,
-    accessTokenExpiresAt: new Date(),
+    status: IntegrationStatus.ComingSoon,
   },
 };
 
@@ -139,7 +139,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
                   image={<Image src={imageSrc} alt={title} width={100} priority />}
                   adCount={integrationsData[integration.type].adCount}
                   lastSyncedAt={integrationsData[integration.type].lastSyncedAt}
-                  accessTokenExpiresAt={integrationsData[integration.type].accessTokenExpiresAt}
+                  status={integrationsData[integration.type].status}
                 />
               );
             })}

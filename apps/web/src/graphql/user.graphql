@@ -34,6 +34,7 @@ fragment UserFields on User {
     isRoot
     parentId
     integrations {
+      status
       type
       accessTokenExpiresAt
     }

@@ -8,7 +8,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle, IconExclamationCircle } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAtomValue } from 'jotai';
-import { type IntegrationType } from '@/graphql/generated/schema-server';
+import { IntegrationStatus, type IntegrationType } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { isOrgAdmin } from '@/util/access-utils';
@@ -24,7 +24,7 @@ interface IntegrationProps {
   image?: ReactNode;
   adCount: number;
   lastSyncedAt: Date | null | undefined;
-  accessTokenExpiresAt: Date;
+  status: IntegrationStatus;
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
@@ -94,7 +94,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
                 mt="lg"
                 component="a"
                 disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
-                leftSection={<IconExclamationCircle size={20} />}
+                leftSection={props.status === IntegrationStatus.Expiring ? <IconExclamationCircle size={20} /> : null}
                 onClick={() => {
                   handleConnect();
                 }}

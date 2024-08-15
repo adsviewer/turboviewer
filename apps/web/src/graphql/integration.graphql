@@ -10,7 +10,7 @@ query integrations {
   integrations {
     type
     lastSyncedAt
-    accessTokenExpiresAt
+    status
     adAccounts {
       adCount
     }

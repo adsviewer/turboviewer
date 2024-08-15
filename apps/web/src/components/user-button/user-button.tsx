@@ -10,8 +10,7 @@ import { useTranslations } from 'next-intl';
 import { getUserDetails } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { type Integration } from '@/graphql/generated/schema-server';
-import { isTokenCloseToExpiration } from '@/util/integration-utils';
+import { IntegrationStatus, type Integration } from '@/graphql/generated/schema-server';
 import classes from './user-button.module.scss';
 
 export default function UserButton(): ReactNode {
@@ -25,7 +24,7 @@ export default function UserButton(): ReactNode {
     (integrationsData: Integration[] | null): void => {
       if (integrationsData) {
         for (const integration of integrationsData) {
-          if (isTokenCloseToExpiration(integration.accessTokenExpiresAt)) {
+          if (integration.status === IntegrationStatus.Expiring) {
             notifications.show({
               title: tGeneric('warning'),
               message: `(${integration.type}) ${tIntegrations('tokenWarning')}`,
