@@ -96,6 +96,7 @@ module "environment" {
   git_repository              = local.git_repository
   github_role_name            = module.workspace.github_role_name
   organization                = local.organization
+  public_subnet_ids           = module.workspace.public_subnet_ids
   redis_url                   = var.redis_url
   service_subnet_ids          = module.workspace.private_subnet_ids
   slack_webhook_url           = var.slack_webhook_url
