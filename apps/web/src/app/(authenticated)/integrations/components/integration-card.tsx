@@ -5,7 +5,7 @@ import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { IconAlertTriangle, IconExclamationCircle } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAtomValue } from 'jotai';
 import { type IntegrationType } from '@/graphql/generated/schema-server';
@@ -94,6 +94,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
                 mt="lg"
                 component="a"
                 disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+                leftSection={<IconExclamationCircle size={20} />}
                 onClick={() => {
                   handleConnect();
                 }}
