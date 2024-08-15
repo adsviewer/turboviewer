@@ -1,6 +1,8 @@
 locals {
-  endpoint_regions     = [data.aws_region.current.name]
-  availability_zones   = ["${data.aws_region.current.name}a", "${data.aws_region.current.name}b", "${data.aws_region.current.name}c"]
+  endpoint_regions = [data.aws_region.current.name]
+  availability_zones = [
+    "${data.aws_region.current.name}a", "${data.aws_region.current.name}b", "${data.aws_region.current.name}c"
+  ]
   cidr_block           = "10.1.0.0/16"
   public_cidr_blocks   = ["10.1.0.0/20", "10.1.16.0/20", "10.1.32.0/20"]
   private_cidr_blocks  = ["10.1.128.0/20", "10.1.144.0/20", "10.1.160.0/20"]
@@ -192,4 +194,29 @@ resource "aws_security_group_rule" "interface_https_quic" {
   cidr_blocks       = [aws_vpc.vpc.cidr_block]
   ipv6_cidr_blocks  = [aws_vpc.vpc.ipv6_cidr_block]
   security_group_id = aws_security_group.endpoint_interface.id
+}
+
+resource "aws_eip" "nat" {
+  count  = var.multi_nat ? length(local.public_cidr_blocks) : 1
+  domain = "vpc"
+  tags   = { Name = "${var.environment}-eip-nat-${element(local.availability_zones, count.index)}" }
+}
+
+# Nat gateways are pretty expensive, for all our throwaway environments let's use our own that
+resource "aws_nat_gateway" "nat" {
+  count         = length(aws_eip.nat)
+  allocation_id = element(aws_eip.nat.*.id, count.index)
+  subnet_id     = element(aws_subnet.public.*.id, count.index)
+  tags          = { Name = "${var.environment}-nat-${element(local.availability_zones, count.index)}" }
+}
+
+resource "aws_route" "private_nat_gateway" {
+  count                  = length(aws_route_table.private_routes)
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = element(aws_nat_gateway.nat.*.id, min(length(aws_nat_gateway.nat), count.index))
+  route_table_id         = element(aws_route_table.private_routes.*.id, count.index)
+
+  timeouts {
+    create = "20m"
+  }
 }
