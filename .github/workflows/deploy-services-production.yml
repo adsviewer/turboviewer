@@ -1,20 +1,22 @@
-name: Deploy server prod
+name: Deploy services prod
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
       - apps/server/**
+      - apps/channel-report/**
       - packages/**
       - infrastructure/**
       - .github/workflows/**
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-server
-  cancel-in-progress: true
-
 jobs:
-  deploy_server:
+  build_deploy:
+    strategy:
+      fail-fast: false
+      matrix:
+        service_name: [ server, channel-report ]
     permissions:
       id-token: write
       contents: read
@@ -31,4 +33,4 @@ jobs:
       github_role: prod-github
       github-organization: adsviewer
       organization: adsviewer
-      service_name: server
+      service_name: ${{ matrix.service_name }}

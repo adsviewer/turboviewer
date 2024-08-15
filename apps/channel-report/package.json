@@ -2,11 +2,13 @@
   "name": "channel-report",
   "version": "1.0.0",
   "private": true,
-  "description": "Check status of async reports, start new if within concurrency limits and process the finished",
+  "description": "Process channel report",
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "dev": "cross-env NODE_ENV=development && tsx watch src/index.ts",
     "build": "tsc && pnpm run sentry:sourcemaps",
+    "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist node_modules .turbo",
@@ -28,7 +30,10 @@
     "@repo/channel": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
-    "@sentry/aws-serverless": "^8.22.0",
-    "@sentry/profiling-node": "^8.22.0"
+    "@sentry/node": "^8.22.0",
+    "@sentry/profiling-node": "^8.22.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "extensionless": "^1.9.9"
   }
 }
