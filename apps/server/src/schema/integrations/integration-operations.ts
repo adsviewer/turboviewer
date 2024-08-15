@@ -1,6 +1,6 @@
 import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { AError, FireAndForget } from '@repo/utils';
+import { AError, FireAndForget, getDateDiffIn } from '@repo/utils';
 import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
@@ -98,6 +98,8 @@ builder.subscriptionFields((t) => ({
 }));
 
 const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[]): IntegrationStatusEnum => {
+  const EXPIRING_THRESHOLD_DAYS = 10;
+
   const SUPPORTED_INTEGRATIONS: IntegrationTypeEnum[] = [
     IntegrationTypeEnum.META,
     IntegrationTypeEnum.TIKTOK,
@@ -115,5 +117,12 @@ const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[
     (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())
   )
     return IntegrationStatusEnum.Expired;
+  if (
+    (integration.refreshTokenExpiresAt &&
+      getDateDiffIn('day', integration.refreshTokenExpiresAt, new Date()) < EXPIRING_THRESHOLD_DAYS) ??
+    (!integration.refreshTokenExpiresAt &&
+      getDateDiffIn('day', integration.accessTokenExpiresAt, new Date()) < EXPIRING_THRESHOLD_DAYS)
+  )
+    return IntegrationStatusEnum.Expiring;
   return IntegrationStatusEnum.Connected;
 };

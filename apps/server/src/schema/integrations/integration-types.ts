@@ -21,6 +21,7 @@ export enum IntegrationStatusEnum {
   Connected = 'Connected',
   Errored = 'Errored',
   Expired = 'Expired',
+  Expiring = 'Expiring',
   NotConnected = 'NotConnected',
   Revoked = 'Revoked',
 }
@@ -29,6 +30,7 @@ export const ShouldConnectIntegrationStatuses = [
   IntegrationStatusEnum.Connected,
   IntegrationStatusEnum.Errored,
   IntegrationStatusEnum.Expired,
+  IntegrationStatusEnum.Expiring,
   IntegrationStatusEnum.NotConnected,
   IntegrationStatusEnum.Revoked,
 ];
