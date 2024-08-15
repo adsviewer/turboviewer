@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        lambda_name: [ channel-ingress ]
+        lambda_name: [ channel-report, channel-ingress ]
     permissions:
       id-token: write
       contents: read
