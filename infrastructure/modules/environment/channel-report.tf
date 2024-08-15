@@ -1,5 +1,5 @@
 locals {
-  channel_report_name-no-env = "channel-process-report"
+  channel_report_name-no-env = "channel-report"
   channel_process_report     = "${var.environment}-${local.channel_report_name-no-env}"
 }
 
