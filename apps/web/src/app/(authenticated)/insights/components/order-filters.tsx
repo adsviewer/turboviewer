@@ -65,6 +65,8 @@ export default function OrderFilters(): React.ReactNode {
       return InsightsInterval.month;
     } else if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.week)) {
       return InsightsInterval.week;
+    } else if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.quarter)) {
+      return InsightsInterval.quarter;
     }
     return InsightsInterval.day;
   };
@@ -172,8 +174,9 @@ export default function OrderFilters(): React.ReactNode {
             placeholder="Pick value"
             data={[
               { value: InsightsInterval.day, label: t('daily') },
-              // { value: InsightsInterval.week, label: t('weekly') }, // commented this out since the issue doesn't include week
+              { value: InsightsInterval.week, label: t('weekly') },
               { value: InsightsInterval.month, label: t('monthly') },
+              { value: InsightsInterval.quarter, label: t('quarterly') },
             ]}
             value={getIntervalValue()}
             onChange={handleIntervalChange}
