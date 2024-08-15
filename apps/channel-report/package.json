@@ -1,0 +1,39 @@
+{
+  "name": "channel-report",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Process channel report",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development && tsx watch src/index.ts",
+    "build": "tsc && pnpm run sentry:sourcemaps",
+    "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "clean": "rm -rf dist node_modules .turbo",
+    "update": "pnpm update --latest && pnpm install",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project channel-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project channel-report ./dist"
+  },
+  "author": "",
+  "license": "UNLICENCED",
+  "devDependencies": {
+    "@aws-sdk/client-sqs": "^3.623.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@sentry/cli": "^2.33.1",
+    "@types/aws-lambda": "^8.10.142",
+    "@types/node": "22.1.0",
+    "typescript": "5.5.4"
+  },
+  "dependencies": {
+    "@repo/channel": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "@repo/mode": "workspace:*",
+    "@sentry/node": "^8.22.0",
+    "@sentry/profiling-node": "^8.22.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "extensionless": "^1.9.9"
+  }
+}

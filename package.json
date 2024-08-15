@@ -24,9 +24,9 @@
     "prisma": "^5.17.0",
     "terraform": "^1.23.0",
     "tsx": "^4.16.5",
-    "turbo": "^2.0.12"
+    "turbo": "^2.0.13"
   },
-  "packageManager": "pnpm@9.7.0",
+  "packageManager": "pnpm@9.7.1",
   "engines": {
     "node": ">=20"
   },
