@@ -12,7 +12,11 @@ on:
       - main
     paths:
       - apps/web/**
-      - packages/**
+      - packages/logger/**
+      - packages/mappings/**
+      - packages/mode/**
+      - packages/ui/**
+      - packages/utils/**
       - .github/workflows/**
 
 jobs:
