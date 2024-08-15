@@ -39,7 +39,7 @@ resource "aws_batch_compute_environment" "channel_report_process" {
       aws_security_group.batch_security_group.id
     ]
 
-    subnets = var.public_subnet_ids
+    subnets = var.service_subnet_ids
 
     type = "FARGATE_SPOT"
   }
