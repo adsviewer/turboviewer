@@ -65,7 +65,6 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
     setInitialAdAccounts([]);
     setIsPending(true);
 
-    logger.info(userDetails.allRoles);
     // Fetch data from the appropriate endpoint based on whether the user is an admin or not
     if (!isOrgAdmin(userDetails.allRoles)) {
       void getOrganizationAdAccounts(props.channel)
@@ -209,7 +208,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
             ? adAccountsToShow.map((adAccount) => {
                 return (
                   <Flex align="center" key={adAccount.id} gap="sm" m="xs">
-                    {isOrgAdmin(userDetails.allRoles) ? (
+                    {isOrgAdmin(userDetails.allRoles) && !userDetails.currentOrganization?.isRoot ? (
                       <Checkbox
                         label={adAccount.name}
                         checked={'isConnectedToCurrentOrg' in adAccount ? adAccount.isConnectedToCurrentOrg : false}
@@ -236,7 +235,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
           {isPending ? <LoaderCentered /> : null}
         </ScrollArea.Autosize>
 
-        {isOrgAdmin(userDetails.allRoles) ? (
+        {isOrgAdmin(userDetails.allRoles) && !userDetails.currentOrganization?.isRoot ? (
           <Button
             variant="filled"
             fullWidth
