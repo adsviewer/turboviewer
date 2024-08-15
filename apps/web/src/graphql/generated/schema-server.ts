@@ -457,6 +457,8 @@ export type Integration = {
   /** Caller is permitted to view this field if they are in an offspring organization */
   refreshTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   /** Caller is permitted to view this field if they are in an offspring organization */
+  status: IntegrationStatus;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   type: IntegrationType;
   /** Caller is permitted to view this field if they are in an offspring organization */
   updatedAt: Scalars['Date']['output'];
@@ -474,6 +476,7 @@ export enum IntegrationStatus {
   Connected = 'Connected',
   Errored = 'Errored',
   Expired = 'Expired',
+  Expiring = 'Expiring',
   NotConnected = 'NotConnected',
   Revoked = 'Revoked',
 }

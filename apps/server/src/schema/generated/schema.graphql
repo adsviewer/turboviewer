@@ -448,6 +448,11 @@ type Integration {
   """
   Caller is permitted to view this field if they are in an offspring organization
   """
+  status: IntegrationStatus!
+
+  """
+  Caller is permitted to view this field if they are in an offspring organization
+  """
   type: IntegrationType!
 
   """
@@ -467,6 +472,7 @@ enum IntegrationStatus {
   Connected
   Errored
   Expired
+  Expiring
   NotConnected
   Revoked
 }
