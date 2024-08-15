@@ -52,36 +52,36 @@ resource "aws_security_group" "batch_security_group" {
   vpc_id = var.vpc_id
 }
 
-resource "aws_batch_compute_environment" "channel_report_process" {
-  compute_environment_name = local.channel_process_report
+# resource "aws_batch_compute_environment" "channel_report_process" {
+#   compute_environment_name = local.channel_process_report
+#
+#   compute_resources {
+#     max_vcpus = 16
+#
+#     security_group_ids = [
+#       aws_security_group.batch_security_group.id
+#     ]
+#
+#     subnets = var.service_subnet_ids
+#
+#     type = "FARGATE_SPOT"
+#   }
+#
+#   #   service_role = aws_iam_role.ecs_task_execution_role.arn
+#   type = "MANAGED"
+#   #   depends_on = [aws_iam_role_policy_attachment.aws_batch_service_role]
+# }
 
-  compute_resources {
-    max_vcpus = 16
-
-    security_group_ids = [
-      aws_security_group.batch_security_group.id
-    ]
-
-    subnets = var.service_subnet_ids
-
-    type = "FARGATE_SPOT"
-  }
-
-  #   service_role = aws_iam_role.ecs_task_execution_role.arn
-  type = "MANAGED"
-  #   depends_on = [aws_iam_role_policy_attachment.aws_batch_service_role]
-}
-
-resource "aws_batch_job_queue" "channel_report_process" {
-  name     = local.channel_process_report
-  state    = "ENABLED"
-  priority = 1
-
-  compute_environment_order {
-    order               = 1
-    compute_environment = aws_batch_compute_environment.channel_report_process.arn
-  }
-}
+# resource "aws_batch_job_queue" "channel_report_process" {
+#   name     = local.channel_process_report
+#   state    = "ENABLED"
+#   priority = 1
+#
+#   compute_environment_order {
+#     order               = 1
+#     compute_environment = aws_batch_compute_environment.channel_report_process.arn
+#   }
+# }
 
 resource "aws_ecr_repository" "channel_report_process_ecr_repo" {
   name                 = local.channel_process_report
