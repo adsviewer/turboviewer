@@ -69,3 +69,54 @@ resource "aws_ecr_repository" "channel_report_process_ecr_repo" {
     scan_on_push = true
   }
 }
+
+resource "aws_iam_role" "channel_report_task_execution_role" {
+  name               = local.channel_process_report
+  assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "ecs_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "channel_report_execution_role_policy" {
+  role       = aws_iam_role.channel_report_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_batch_job_definition" "channel_report_process" {
+  name = local.channel_process_report
+  type = "container"
+
+  platform_capabilities = [
+    "FARGATE",
+  ]
+
+  container_properties = jsonencode({
+    image = "${aws_ecr_repository.channel_report_process_ecr_repo.repository_url}:amd-latest"
+
+    fargatePlatformConfiguration = {
+      platformVersion = "LATEST"
+    }
+
+    resourceRequirements = [
+      {
+        type  = "VCPU"
+        value = "0.25"
+      },
+      {
+        type  = "MEMORY"
+        value = "512"
+      }
+    ]
+
+    executionRoleArn = aws_iam_role.channel_report_task_execution_role.arn
+  })
+}
