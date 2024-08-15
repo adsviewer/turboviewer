@@ -3,49 +3,49 @@ locals {
   channel_process_report     = "${var.environment}-${local.channel_report_name-no-env}"
 }
 
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "${var.environment}-batch-exec-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
-}
-
-data "aws_iam_policy_document" "assume_role_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "batch_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["batch.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "aws_batch_service_role" {
-  name               = "${var.environment}-batch-service-role"
-  assume_role_policy = data.aws_iam_policy_document.batch_assume_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "aws_batch_service_role" {
-  role       = aws_iam_role.aws_batch_service_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
+# resource "aws_iam_role" "ecs_task_execution_role" {
+#   name               = "${var.environment}-batch-exec-role"
+#   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
+# }
+#
+# data "aws_iam_policy_document" "assume_role_policy" {
+#   statement {
+#     actions = ["sts:AssumeRole"]
+#
+#     principals {
+#       type = "Service"
+#       identifiers = ["ecs-tasks.amazonaws.com"]
+#     }
+#   }
+# }
+#
+# data "aws_iam_policy_document" "batch_assume_role" {
+#   statement {
+#     effect = "Allow"
+#
+#     principals {
+#       type = "Service"
+#       identifiers = ["batch.amazonaws.com"]
+#     }
+#
+#     actions = ["sts:AssumeRole"]
+#   }
+# }
+#
+# resource "aws_iam_role" "aws_batch_service_role" {
+#   name               = "${var.environment}-batch-service-role"
+#   assume_role_policy = data.aws_iam_policy_document.batch_assume_role.json
+# }
+#
+# resource "aws_iam_role_policy_attachment" "aws_batch_service_role" {
+#   role       = aws_iam_role.aws_batch_service_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
+# }
+#
+# resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+#   role       = aws_iam_role.ecs_task_execution_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+# }
 
 resource "aws_security_group" "batch_security_group" {
   name   = "${var.environment}-aws-batch-compute-environment-security-group"
@@ -67,9 +67,9 @@ resource "aws_batch_compute_environment" "channel_report_process" {
     type = "FARGATE_SPOT"
   }
 
-  service_role = aws_iam_role.ecs_task_execution_role.arn
-  type         = "MANAGED"
-  depends_on   = [aws_iam_role_policy_attachment.aws_batch_service_role]
+  #   service_role = aws_iam_role.ecs_task_execution_role.arn
+  type = "MANAGED"
+  #   depends_on = [aws_iam_role_policy_attachment.aws_batch_service_role]
 }
 
 resource "aws_batch_job_queue" "channel_report_process" {
