@@ -8,6 +8,15 @@ const sortObjectKeysAndValues = (obj: unknown): unknown => {
     return obj; // Return the value if obj is not an object
   }
 
+  if (
+    'getMonth' in obj &&
+    typeof obj.getMonth === 'function' &&
+    'toISOString' in obj &&
+    typeof obj.toISOString === 'function'
+  ) {
+    return obj.toISOString(); // Return the ISO string if obj is a Date
+  }
+
   if (Array.isArray(obj)) {
     // eslint-disable-next-line @typescript-eslint/require-array-sort-compare -- we don't care about the order of elements, only that it's consistent
     return obj.map(sortObjectKeysAndValues).sort(); // Recursively sort array elements and then sort the array
