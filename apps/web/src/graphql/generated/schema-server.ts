@@ -928,6 +928,7 @@ export type IntegrationsQuery = {
     __typename: 'Integration';
     type: IntegrationType;
     lastSyncedAt?: Date | null;
+    accessTokenExpiresAt?: Date | null;
     adAccounts: Array<{ __typename: 'AdAccount'; adCount: number }>;
   }>;
 };
@@ -1134,6 +1135,7 @@ export type UpdateUserMutation = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
+      integrations: Array<{ __typename: 'Integration'; type: IntegrationType; accessTokenExpiresAt?: Date | null }>;
     } | null;
   };
 };
@@ -1161,6 +1163,7 @@ export type MeQuery = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
+      integrations: Array<{ __typename: 'Integration'; type: IntegrationType; accessTokenExpiresAt?: Date | null }>;
     } | null;
   };
 };
@@ -1184,6 +1187,7 @@ export type UserFieldsFragment = {
     name: string;
     isRoot: boolean;
     parentId?: string | null;
+    integrations: Array<{ __typename: 'Integration'; type: IntegrationType; accessTokenExpiresAt?: Date | null }>;
   } | null;
 };
 
@@ -1207,6 +1211,10 @@ export const UserFieldsFragmentDoc = gql`
       name
       isRoot
       parentId
+      integrations {
+        type
+        accessTokenExpiresAt
+      }
     }
   }
 `;
@@ -1304,6 +1312,7 @@ export const IntegrationsDocument = gql`
     integrations {
       type
       lastSyncedAt
+      accessTokenExpiresAt
       adAccounts {
         adCount
       }

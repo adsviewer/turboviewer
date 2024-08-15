@@ -24,6 +24,7 @@ interface IntegrationProps {
   image?: ReactNode;
   adCount: number;
   lastSyncedAt: Date | null | undefined;
+  accessTokenExpiresAt: Date;
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
@@ -82,19 +83,39 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
         );
       }
       return (
-        <Tooltip
-          label={tGeneric('accessOrgAdminRoot')}
-          disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
-        >
-          <Button
-            mt="lg"
-            color={theme.colors.red[7]}
-            onClick={open}
-            disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+        <Flex direction="column" gap="xs" mt="xs">
+          <Tooltip
+            label={tGeneric('accessOrgAdminRoot')}
+            disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
           >
-            {t('revoke')}
-          </Button>
-        </Tooltip>
+            <Link href={props.authUrl ?? ''} passHref>
+              <Button
+                w="100%"
+                mt="lg"
+                component="a"
+                disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+                onClick={() => {
+                  handleConnect();
+                }}
+              >
+                {t('reconnect')}
+              </Button>
+            </Link>
+          </Tooltip>
+          <Tooltip
+            label={tGeneric('accessOrgAdminRoot')}
+            disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
+          >
+            <Button
+              color={theme.colors.red[7]}
+              onClick={open}
+              disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+              fullWidth
+            >
+              {t('revoke')}
+            </Button>
+          </Tooltip>
+        </Flex>
       );
     }
     return (
