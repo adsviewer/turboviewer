@@ -46,10 +46,10 @@ import {
   MetaError,
   revokeIntegration,
   revokeIntegrationById,
+  adReportsStatusesToRedis,
   saveAccounts,
   saveAds,
   saveInsights,
-  sendReportRequestsMessage,
   timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
@@ -218,7 +218,7 @@ class Meta implements ChannelInterface {
     if (isAError(dbAccounts)) return dbAccounts;
     logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(dbAccounts)} active accounts`);
 
-    await sendReportRequestsMessage(dbAccounts, IntegrationTypeEnum.META, initial);
+    await adReportsStatusesToRedis(this.getType(), dbAccounts, initial);
   }
 
   async getAdPreview(
@@ -452,8 +452,12 @@ class Meta implements ChannelInterface {
     if (isAError(accountInsightsAndAds)) return accountInsightsAndAds;
   }
 
-  async runAdInsightReport(adAccount: AdAccountWithIntegration, initial: boolean): Promise<string | AError> {
-    adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
+  async runAdInsightReport(
+    adAccount: DbAdAccount,
+    integration: Integration,
+    initial: boolean,
+  ): Promise<string | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
     const adReportRunSchema = z.object({ id: z.string() });
     const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
     const resp = await Meta.sdk(async () => {
@@ -481,8 +485,11 @@ class Meta implements ChannelInterface {
           time_range: mtimeRange,
         },
       );
-    }, adAccount.integration);
-    if (isAError(resp)) return resp;
+    }, integration);
+    if (isAError(resp)) {
+      logger.error(resp, 'Failed to run ad report');
+      return resp;
+    }
     const parsed = adReportRunSchema.safeParse(resp);
     if (!parsed.success) {
       logger.error('Failed to parse ad report run %o', resp);
@@ -648,6 +655,10 @@ class Meta implements ChannelInterface {
     ['messenger', PublisherEnum.Messenger],
     ['audience_network', PublisherEnum.AudienceNetwork],
   ]);
+
+  getType(): IntegrationTypeEnum {
+    return IntegrationTypeEnum.META;
+  }
 }
 
 const metaTimeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {

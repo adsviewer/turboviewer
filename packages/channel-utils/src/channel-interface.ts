@@ -5,11 +5,12 @@ import {
   type CurrencyEnum,
   type DeviceEnum,
   type Integration,
+  type IntegrationTypeEnum,
   type PublisherEnum,
 } from '@repo/database';
 import { type MetaError } from './errors';
 import { type ChannelIFrame } from './iframe-helper';
-import { type JobStatusEnum } from './send-messages';
+import { type JobStatusEnum } from './report-async-start';
 import { type AdAccountWithIntegration } from './insights-utils';
 
 export interface GenerateAuthUrlResp {
@@ -71,7 +72,8 @@ export interface ChannelInterface {
   getReportStatus: (adAccount: AdAccountWithIntegration, taskId: string) => Promise<JobStatusEnum>;
   getUserId: (accessToken: string) => Promise<string | AError>;
   processReport: (adAccount: AdAccountWithIntegration, taskId: string, initial: boolean) => Promise<AError | undefined>;
-  runAdInsightReport: (adAccount: AdAccountWithIntegration, initial: boolean) => Promise<string | AError>;
+  runAdInsightReport: (adAccount: AdAccount, integration: Integration, initial: boolean) => Promise<string | AError>;
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
+  getType: () => IntegrationTypeEnum;
 }

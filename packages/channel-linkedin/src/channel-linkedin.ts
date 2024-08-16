@@ -372,8 +372,12 @@ class LinkedIn implements ChannelInterface {
     return Promise.resolve(new AError('Not implemented'));
   }
 
-  runAdInsightReport(_adAccount: AdAccountWithIntegration, _initial: boolean): Promise<string | AError> {
+  runAdInsightReport(_adAccount: AdAccount, _integration: Integration, _initial: boolean): Promise<string | AError> {
     return Promise.resolve(new AError('Not implemented'));
+  }
+
+  getType(): IntegrationTypeEnum {
+    return IntegrationTypeEnum.LINKEDIN;
   }
 }
 

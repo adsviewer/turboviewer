@@ -115,3 +115,10 @@ export const getAdAccountWithIntegration = async (adAccountId: string): Promise<
   adAccount.integration = integration;
   return adAccount;
 };
+
+export const getDecryptedIntegration = async (integrationId: string): Promise<Integration | AError> => {
+  const integration = await prisma.integration.findUniqueOrThrow({ where: { id: integrationId } });
+  const decryptedIntegration = decryptTokens(integration);
+  if (!decryptedIntegration) return new AError('Failed to decrypt integration');
+  return decryptedIntegration;
+};

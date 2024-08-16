@@ -959,6 +959,9 @@ importers:
       '@repo/mode':
         specifier: workspace:*
         version: link:../mode
+      '@repo/redis':
+        specifier: workspace:*
+        version: link:../redis
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
