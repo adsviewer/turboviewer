@@ -29,13 +29,31 @@ resource "aws_iam_role_policy_attachment" "parameter_access_role_attachment" {
   policy_arn = aws_iam_policy.server_parameters_access_policy.arn
 }
 
+resource "aws_security_group" "batch_security_group" {
+  name        = "${var.environment}-batch-security-group"
+  description = "egress for channel report"
+  vpc_id      = var.vpc_id
+  tags        = { Name = "${var.environment}-batch-security-group" }
+}
+
+resource "aws_vpc_security_group_egress_rule" "egress_ports" {
+  for_each = toset(["5432", "6379"])
+
+  security_group_id = aws_security_group.batch_security_group.id
+
+  from_port   = each.key
+  ip_protocol = "tcp"
+  cidr_ipv4   = "0.0.0.0/0"
+  to_port     = each.key
+}
+
 resource "aws_batch_compute_environment" "channel_report_process" {
   compute_environment_name = local.channel_process_report
 
   compute_resources {
     max_vcpus = 16
 
-    security_group_ids = [var.endpoint_interface_security_group_id]
+    security_group_ids = [var.endpoint_interface_security_group_id, aws_security_group.batch_security_group.id]
 
     subnets = var.service_subnet_ids
 
