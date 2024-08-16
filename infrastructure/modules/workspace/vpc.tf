@@ -151,7 +151,7 @@ resource "aws_vpc_security_group_egress_rule" "egress_all_https" {
 }
 
 resource "aws_vpc_endpoint" "interface_endpoints" {
-  for_each            = toset(["ecr.api", "ecr.dkr", "logs"])
+  for_each            = toset(["ecr.api", "ecr.dkr", "logs", "ssm"])
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.endpoint_interface.id]
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
