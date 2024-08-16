@@ -71,7 +71,7 @@ resource "aws_ecr_repository" "channel_report_process_ecr_repo" {
 }
 
 resource "aws_iam_role" "channel_report_task_execution_role" {
-  name               = local.channel_process_report
+  name               = "${local.channel_process_report}-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
 }
 
