@@ -24,6 +24,11 @@ resource "aws_iam_role_policy_attachment" "batch_service_role_policy_attachment"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
 }
 
+resource "aws_iam_role_policy_attachment" "parameter_access_role_attachment" {
+  role       = aws_iam_role.batch_service_role.name
+  policy_arn = aws_iam_policy.server_parameters_access_policy.arn
+}
+
 resource "aws_batch_compute_environment" "channel_report_process" {
   compute_environment_name = local.channel_process_report
 
@@ -93,23 +98,46 @@ resource "aws_batch_job_definition" "channel_report_process" {
   ]
 
   container_properties = jsonencode({
-    image = "${aws_ecr_repository.channel_report_process_ecr_repo.repository_url}:amd-latest"
+
+    environment = [
+      {
+        name  = "AWS_ACCOUNT_ID"
+        value = data.aws_caller_identity.current.account_id
+      },
+      {
+        name  = "AWS_REGION"
+        value = data.aws_region.current.name
+      },
+      {
+        name  = "MODE"
+        value = var.environment
+      }
+    ]
+
+    executionRoleArn = aws_iam_role.channel_report_task_execution_role.arn
 
     fargatePlatformConfiguration = {
       platformVersion = "LATEST"
     }
 
+    image = "${aws_ecr_repository.channel_report_process_ecr_repo.repository_url}:amd-latest"
+
     resourceRequirements = [
       {
         type  = "VCPU"
-        value = "0.25"
+        value = "4"
       },
       {
         type  = "MEMORY"
-        value = "512"
+        value = "8192"
       }
     ]
 
-    executionRoleArn = aws_iam_role.channel_report_task_execution_role.arn
+    secrets : [
+      for k, v in local.server_secrets : {
+        name      = k
+        valueFrom = v
+      }
+    ]
   })
 }

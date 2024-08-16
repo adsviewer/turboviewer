@@ -28,12 +28,15 @@
   },
   "dependencies": {
     "@repo/channel": "workspace:*",
+    "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@sentry/node": "^8.22.0",
     "@sentry/profiling-node": "^8.22.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
-    "extensionless": "^1.9.9"
+    "extensionless": "^1.9.9",
+    "zod": "^3.23.8"
   }
 }

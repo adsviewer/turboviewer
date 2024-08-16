@@ -21,6 +21,7 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@aws-sdk/client-batch": "^3.632.0",
     "@aws-sdk/client-sqs": "^3.623.0",
     "@repo/channel-linkedin": "workspace:*",
     "@repo/channel-meta": "workspace:*",

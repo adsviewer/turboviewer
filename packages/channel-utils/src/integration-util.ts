@@ -4,6 +4,7 @@ import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
 import { env } from './config';
 import { decryptAesGcm } from './aes-util';
+import { type AdAccountWithIntegration, adAccountWithIntegration } from './insights-utils';
 
 export const authEndpoint = '/channel/auth';
 
@@ -101,4 +102,16 @@ export const revokeIntegrationById = async (integrationId: string, notify: boole
     where: { id: integrationId },
     data: { status: IntegrationStatus.REVOKED },
   });
+};
+
+export const getAdAccountWithIntegration = async (adAccountId: string): Promise<AdAccountWithIntegration | AError> => {
+  const adAccount = await prisma.adAccount.findUniqueOrThrow({
+    where: { id: adAccountId },
+    ...adAccountWithIntegration,
+  });
+  const integration = decryptTokens(adAccount.integration);
+  if (isAError(integration)) return integration;
+  if (!integration) return new AError('Failed to decrypt integration');
+  adAccount.integration = integration;
+  return adAccount;
 };
