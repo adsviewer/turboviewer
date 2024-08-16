@@ -71,7 +71,7 @@ resource "aws_sns_topic_subscription" "subscription" {
 }
 
 resource "aws_cloudwatch_event_rule" "channel_data_refresh" {
-  schedule_expression = "rate(8 hours)"
+  schedule_expression = "rate(8 days)"
   name                = "channel-data-refresh"
   description         = "Fires to trigger a refresh of channel data."
 }
