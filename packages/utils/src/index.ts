@@ -7,4 +7,4 @@ export * from './password-helper';
 export * from './shared-names';
 export * from './typesctipt-utils';
 
-export { awsSchema, commonSchema, TOKEN_KEY, REFRESH_TOKEN_KEY } from './config';
+export { awsSchema, channelSchema, commonSchema, TOKEN_KEY, REFRESH_TOKEN_KEY } from './config';

@@ -2,6 +2,10 @@ output "database_subnet_ids" {
   value = aws_subnet.database.*.id
 }
 
+output "endpoint_interface_security_group_id" {
+  value = aws_security_group.endpoint_interface.id
+}
+
 output "github_role_name" {
   value = aws_iam_role.github_role.name
 }

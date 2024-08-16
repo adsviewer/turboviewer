@@ -1,6 +1,8 @@
 locals {
-  endpoint_regions     = [data.aws_region.current.name]
-  availability_zones   = ["${data.aws_region.current.name}a", "${data.aws_region.current.name}b", "${data.aws_region.current.name}c"]
+  endpoint_regions = [data.aws_region.current.name]
+  availability_zones = [
+    "${data.aws_region.current.name}a", "${data.aws_region.current.name}b", "${data.aws_region.current.name}c"
+  ]
   cidr_block           = "10.1.0.0/16"
   public_cidr_blocks   = ["10.1.0.0/20", "10.1.16.0/20", "10.1.32.0/20"]
   private_cidr_blocks  = ["10.1.128.0/20", "10.1.144.0/20", "10.1.160.0/20"]
@@ -125,71 +127,43 @@ locals {
 
 resource "aws_security_group" "endpoint_interface" {
   name        = "${var.environment}-endpoint-interface"
-  description = "ingress and egress for http(s) to the vpc for interface endpoints"
+  description = "ingress and egress for https to the vpc for interface endpoints"
   vpc_id      = aws_vpc.vpc.id
   tags        = { Name = "${var.environment}-endpoint-interface" }
 }
 
-resource "aws_security_group_rule" "interface_ingress_all" {
-  type              = "ingress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = [aws_vpc.vpc.cidr_block]
-  ipv6_cidr_blocks  = [aws_vpc.vpc.ipv6_cidr_block]
+resource "aws_vpc_security_group_ingress_rule" "ingress_https_in_vpc" {
   security_group_id = aws_security_group.endpoint_interface.id
+
+  from_port                    = 443
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.endpoint_interface.id
+  to_port                      = 443
 }
 
-resource "aws_security_group_rule" "interface_egress_all" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks  = ["::/0"]
+resource "aws_vpc_security_group_egress_rule" "egress_all_https" {
   security_group_id = aws_security_group.endpoint_interface.id
+
+  from_port   = 443
+  ip_protocol = "tcp"
+  cidr_ipv4   = "0.0.0.0/0"
+  to_port     = 443
 }
 
-resource "aws_security_group_rule" "interface_http_tcp" {
-  for_each          = toset(["ingress", "egress"])
-  type              = each.key
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = [aws_vpc.vpc.cidr_block]
-  ipv6_cidr_blocks  = [aws_vpc.vpc.ipv6_cidr_block]
-  security_group_id = aws_security_group.endpoint_interface.id
+resource "aws_vpc_endpoint" "interface_endpoints" {
+  for_each            = toset(["ecr.api", "ecr.dkr", "logs"])
+  private_dns_enabled = true
+  security_group_ids  = [aws_security_group.endpoint_interface.id]
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  subnet_ids          = aws_subnet.private[*].id
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = aws_vpc.vpc.id
 }
 
-resource "aws_security_group_rule" "interface_http_quic" {
-  for_each          = toset(["ingress", "egress"])
-  type              = each.key
-  from_port         = 80
-  to_port           = 80
-  protocol          = "udp"
-  cidr_blocks       = [aws_vpc.vpc.cidr_block]
-  ipv6_cidr_blocks  = [aws_vpc.vpc.ipv6_cidr_block]
-  security_group_id = aws_security_group.endpoint_interface.id
-}
-
-resource "aws_security_group_rule" "interface_https_tcp" {
-  for_each          = toset(["ingress", "egress"])
-  type              = each.key
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = [aws_vpc.vpc.cidr_block]
-  ipv6_cidr_blocks  = [aws_vpc.vpc.ipv6_cidr_block]
-  security_group_id = aws_security_group.endpoint_interface.id
-}
-
-resource "aws_security_group_rule" "interface_https_quic" {
-  for_each          = toset(["ingress", "egress"])
-  type              = each.key
-  from_port         = 443
-  to_port           = 443
-  protocol          = "udp"
-  cidr_blocks       = [aws_vpc.vpc.cidr_block]
-  ipv6_cidr_blocks  = [aws_vpc.vpc.ipv6_cidr_block]
-  security_group_id = aws_security_group.endpoint_interface.id
+resource "aws_vpc_endpoint" "gateway_endpoints" {
+  for_each          = toset(["s3"])
+  route_table_ids   = aws_route_table.private_routes.*.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  vpc_endpoint_type = "Gateway"
+  vpc_id            = aws_vpc.vpc.id
 }

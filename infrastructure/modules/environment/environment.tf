@@ -1,5 +1,6 @@
 locals {
   error_namespace = "${var.environment}-error-namespace"
+  server_name     = "server"
 }
 
 data "aws_region" "current" {}
@@ -69,6 +70,21 @@ locals {
   server_domain_prefix = "api"
   server_api_endpoint  = "https://${local.server_domain_prefix}.${local.domain}/${local.api_path}"
 }
+
+data "aws_iam_policy_document" "server_parameters_access_policy_document" {
+  statement {
+    actions = ["ssm:DescribeParameters", "ssm:GetParameters"]
+    resources = concat([
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/${local.server_name}/*"
+    ])
+  }
+}
+
+resource "aws_iam_policy" "server_parameters_access_policy" {
+  name   = "${var.environment}-${local.server_name}-parameters-access-policy"
+  policy = data.aws_iam_policy_document.server_parameters_access_policy_document.json
+}
+
 module "server" {
   source          = "../service"
   certificate_arn = aws_acm_certificate.wildcard.arn
@@ -77,17 +93,20 @@ module "server" {
   domain_zone_id  = aws_route53_zone.zone.id
   environment     = var.environment
   environment_variables = {
-    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
-    AWS_REGION     = data.aws_region.current.name
-    API_ENDPOINT   = local.server_api_endpoint
-    MODE           = var.environment
-    PORT           = 4000,
-    PUBLIC_URL     = local.full_domain
+    AWS_ACCOUNT_ID                        = data.aws_caller_identity.current.account_id
+    AWS_REGION                            = data.aws_region.current.name
+    API_ENDPOINT                          = local.server_api_endpoint
+    CHANNEL_PROCESS_REPORT_JOB_DEFINITION = aws_batch_job_definition.channel_report_process.arn
+    CHANNEL_PROCESS_REPORT_JOB_QUEUE      = aws_batch_job_queue.channel_report_process.arn
+    MODE                                  = var.environment
+    PORT                                  = 4000,
+    PUBLIC_URL                            = local.full_domain
   }
-  github_role_name   = var.github_role_name
-  mapped_secrets     = local.server_secrets
-  service_name       = "server"
-  service_subnet_ids = var.service_subnet_ids
+  github_role_name                     = var.github_role_name
+  mapped_secrets                       = local.server_secrets
+  service_parameters_access_policy_arn = aws_iam_policy.server_parameters_access_policy.arn
+  service_name                         = local.server_name
+  service_subnet_ids                   = var.service_subnet_ids
   instance_role_policies = {
     "ses"    = module.ses.send_email_policy_arn
     "sns"    = aws_iam_policy.sns_policy.arn

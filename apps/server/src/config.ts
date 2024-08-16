@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { awsSchema, commonSchema, createEnv } from '@repo/utils';
+import { awsSchema, channelSchema, commonSchema, createEnv } from '@repo/utils';
 
 const defaultPort = '4000';
 const schema = z
@@ -17,6 +17,7 @@ const schema = z
       .default(defaultPort),
     PUBLIC_URL: z.string().url().default('http://localhost:3000'),
   })
+  .merge(channelSchema)
   .merge(commonSchema)
   .merge(awsSchema);
 

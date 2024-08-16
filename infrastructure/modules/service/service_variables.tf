@@ -15,6 +15,10 @@ variable "service_name" {
   type = string
 }
 
+variable "service_parameters_access_policy_arn" {
+  type = string
+}
+
 variable "certificate_arn" {
   type = string
 }

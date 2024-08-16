@@ -14,6 +14,10 @@ variable "emailable_api_key" {
   type = string
 }
 
+variable "endpoint_interface_security_group_id" {
+  type = string
+}
+
 variable "environment" {
   type = string
 }
@@ -49,6 +53,10 @@ variable "linkedin_application_secret" {
 
 variable "organization" {
   type = string
+}
+
+variable "public_subnet_ids" {
+  type = list(string)
 }
 
 variable "redis_url" {

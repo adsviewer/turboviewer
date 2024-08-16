@@ -82,29 +82,31 @@ module "environment" {
     aws.us_east_1 = aws.us_east_1
   }
 
-  amplify_token               = var.amplify_token
-  base_tags                   = var.default_tags
-  domain                      = local.domain
-  environment                 = var.environment
-  emailable_api_key           = var.emailable_api_key
-  fb_application_id           = var.fb_application_id
-  fb_application_secret       = var.fb_application_secret
-  google_application_id       = var.google_application_id
-  google_application_secret   = var.google_application_secret
-  linkedin_application_id     = var.linkedin_application_id
-  linkedin_application_secret = var.linkedin_application_secret
-  git_repository              = local.git_repository
-  github_role_name            = module.workspace.github_role_name
-  organization                = local.organization
-  redis_url                   = var.redis_url
-  service_subnet_ids          = module.workspace.private_subnet_ids
-  slack_webhook_url           = var.slack_webhook_url
-  slack_workspace_id          = var.slack_workspace_id
-  tiktok_application_id       = var.tiktok_application_id
-  tiktok_application_secret   = var.tiktok_application_secret
-  vercel_api_token            = var.vercel_api_token
-  vercel_team                 = var.vercel_team
-  vpc_id                      = module.workspace.vpc_id
+  amplify_token                        = var.amplify_token
+  base_tags                            = var.default_tags
+  domain                               = local.domain
+  environment                          = var.environment
+  emailable_api_key                    = var.emailable_api_key
+  endpoint_interface_security_group_id = module.workspace.endpoint_interface_security_group_id
+  fb_application_id                    = var.fb_application_id
+  fb_application_secret                = var.fb_application_secret
+  google_application_id                = var.google_application_id
+  google_application_secret            = var.google_application_secret
+  linkedin_application_id              = var.linkedin_application_id
+  linkedin_application_secret          = var.linkedin_application_secret
+  git_repository                       = local.git_repository
+  github_role_name                     = module.workspace.github_role_name
+  organization                         = local.organization
+  public_subnet_ids                    = module.workspace.public_subnet_ids
+  redis_url                            = var.redis_url
+  service_subnet_ids                   = module.workspace.private_subnet_ids
+  slack_webhook_url                    = var.slack_webhook_url
+  slack_workspace_id                   = var.slack_workspace_id
+  tiktok_application_id                = var.tiktok_application_id
+  tiktok_application_secret            = var.tiktok_application_secret
+  vercel_api_token                     = var.vercel_api_token
+  vercel_team                          = var.vercel_team
+  vpc_id                               = module.workspace.vpc_id
 }
 
 provider "vercel" {

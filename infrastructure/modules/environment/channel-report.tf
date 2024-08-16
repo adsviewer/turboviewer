@@ -3,8 +3,8 @@ locals {
   channel_process_report     = "${var.environment}-${local.channel_report_name-no-env}"
 }
 
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "${var.environment}-batch-exec-role"
+resource "aws_iam_role" "batch_service_role" {
+  name               = "${var.environment}-batch-service-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
@@ -14,42 +14,19 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
     principals {
       type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "batch_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
       identifiers = ["batch.amazonaws.com"]
     }
-
-    actions = ["sts:AssumeRole"]
   }
 }
 
-resource "aws_iam_role" "aws_batch_service_role" {
-  name               = "${var.environment}-batch-service-role"
-  assume_role_policy = data.aws_iam_policy_document.batch_assume_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "aws_batch_service_role" {
-  role       = aws_iam_role.aws_batch_service_role.name
+resource "aws_iam_role_policy_attachment" "batch_service_role_policy_attachment" {
+  role       = aws_iam_role.batch_service_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_security_group" "batch_security_group" {
-  name   = "${var.environment}-aws-batch-compute-environment-security-group"
-  vpc_id = var.vpc_id
+resource "aws_iam_role_policy_attachment" "parameter_access_role_attachment" {
+  role       = aws_iam_role.batch_service_role.name
+  policy_arn = aws_iam_policy.server_parameters_access_policy.arn
 }
 
 resource "aws_batch_compute_environment" "channel_report_process" {
@@ -58,18 +35,16 @@ resource "aws_batch_compute_environment" "channel_report_process" {
   compute_resources {
     max_vcpus = 16
 
-    security_group_ids = [
-      aws_security_group.batch_security_group.id
-    ]
+    security_group_ids = [var.endpoint_interface_security_group_id]
 
     subnets = var.service_subnet_ids
 
     type = "FARGATE_SPOT"
   }
 
-  service_role = aws_iam_role.ecs_task_execution_role.arn
+  service_role = aws_iam_role.batch_service_role.arn
   type         = "MANAGED"
-  depends_on   = [aws_iam_role_policy_attachment.aws_batch_service_role]
+  depends_on   = [aws_iam_role_policy_attachment.batch_service_role_policy_attachment]
 }
 
 resource "aws_batch_job_queue" "channel_report_process" {
@@ -91,4 +66,78 @@ resource "aws_ecr_repository" "channel_report_process_ecr_repo" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "aws_iam_role" "channel_report_task_execution_role" {
+  name               = "${local.channel_process_report}-execution-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "ecs_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "channel_report_execution_role_policy" {
+  role       = aws_iam_role.channel_report_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_batch_job_definition" "channel_report_process" {
+  name = local.channel_process_report
+  type = "container"
+
+  platform_capabilities = [
+    "FARGATE",
+  ]
+
+  container_properties = jsonencode({
+
+    environment = [
+      {
+        name  = "AWS_ACCOUNT_ID"
+        value = data.aws_caller_identity.current.account_id
+      },
+      {
+        name  = "AWS_REGION"
+        value = data.aws_region.current.name
+      },
+      {
+        name  = "MODE"
+        value = var.environment
+      }
+    ]
+
+    executionRoleArn = aws_iam_role.channel_report_task_execution_role.arn
+
+    fargatePlatformConfiguration = {
+      platformVersion = "LATEST"
+    }
+
+    image = "${aws_ecr_repository.channel_report_process_ecr_repo.repository_url}:amd-latest"
+
+    resourceRequirements = [
+      {
+        type  = "VCPU"
+        value = "4"
+      },
+      {
+        type  = "MEMORY"
+        value = "8192"
+      }
+    ]
+
+    secrets : [
+      for k, v in local.server_secrets : {
+        name      = k
+        valueFrom = v
+      }
+    ]
+  })
 }

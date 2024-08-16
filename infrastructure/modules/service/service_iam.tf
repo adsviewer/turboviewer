@@ -61,23 +61,9 @@ resource "aws_iam_role" "instance_role" {
   assume_role_policy = data.aws_iam_policy_document.service_assume_role_policy.json
 }
 
-data "aws_iam_policy_document" "parameters_access_policy_document" {
-  statement {
-    actions = ["ssm:DescribeParameters", "ssm:GetParameters"]
-    resources = concat([
-      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/${var.service_name}/*"
-    ])
-  }
-}
-
-resource "aws_iam_policy" "parameters_access_policy" {
-  name   = "${local.name}-parameters-access-policy"
-  policy = data.aws_iam_policy_document.parameters_access_policy_document.json
-}
-
 resource "aws_iam_role_policy_attachment" "parameter_access_role_attachment" {
   role       = aws_iam_role.instance_role.name
-  policy_arn = aws_iam_policy.parameters_access_policy.arn
+  policy_arn = var.service_parameters_access_policy_arn
 }
 
 data "aws_iam_policy_document" "github_operating" {
@@ -95,7 +81,7 @@ resource "aws_iam_policy" "ecr_policy" {
 
 resource "aws_iam_role_policy_attachment" "parameter_access_github_attachment" {
   role       = var.github_role_name
-  policy_arn = aws_iam_policy.parameters_access_policy.arn
+  policy_arn = var.service_parameters_access_policy_arn
 }
 
 resource "aws_iam_role_policy_attachment" "github_operating" {

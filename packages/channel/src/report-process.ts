@@ -1,4 +1,4 @@
-import { IntegrationTypeEnum, prisma } from '@repo/database';
+import { IntegrationTypeEnum } from '@repo/database';
 import { logger } from '@repo/logger';
 import {
   DeleteMessageCommand,
@@ -10,9 +10,10 @@ import {
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { FireAndForget, isAError } from '@repo/utils';
 import {
-  adAccountWithIntegration,
+  type AdAccountWithIntegration,
+  type ChannelInterface,
   channelReportQueueUrl,
-  decryptTokens,
+  getAdAccountWithIntegration,
   JobStatusEnum,
   type ProcessReportReq,
   runAdInsightReportReq,
@@ -20,12 +21,14 @@ import {
 import _ from 'lodash';
 import { Environment, MODE } from '@repo/mode';
 import type { Request, Response } from 'express';
+import { BatchClient, SubmitJobCommand } from '@aws-sdk/client-batch';
 import { env } from './config';
 import { getChannel } from './channel-helper';
 
 const fireAndForget = new FireAndForget({ concurrency: 100 });
 
 const client = new SQSClient({ region: env.AWS_REGION });
+const batchClient = new BatchClient({ region: env.AWS_REGION });
 
 const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
@@ -91,13 +94,8 @@ export const checkReports = async (): Promise<void> => {
         }
         const { adAccountId, initial } = parsed.data;
 
-        const adAccount = await prisma.adAccount.findUniqueOrThrow({
-          where: { id: adAccountId },
-          ...adAccountWithIntegration,
-        });
-        const integration = decryptTokens(adAccount.integration);
-        if (!integration || isAError(integration)) continue;
-        adAccount.integration = integration;
+        const adAccount = await getAdAccountWithIntegration(adAccountId);
+        if (isAError(adAccount)) continue;
 
         const activeReport = activeReports.find((report) => _.isMatch(report, parsed.data));
 
@@ -127,15 +125,8 @@ export const checkReports = async (): Promise<void> => {
                   { ...activeReport } satisfies ProcessReportReq,
                   60 * 60 * 6,
                 );
-                // TODO: this should be invoking an aws batch
-                fireAndForget.add(async () => {
-                  const report = await channel.processReport(adAccount, activeReport.taskId, activeReport.initial);
-                  if (!isAError(report)) {
-                    await deleteMessage(msg, channelType, activeReport);
-                  } else {
-                    await redisRemoveFromSet(activeReportRedisKey(channelType), activeReport);
-                  }
-                });
+                await processReport(adAccount, activeReport, channelType, channel);
+                await deleteMessage(msg, channelType, activeReport);
               }
               continue;
             case JobStatusEnum.FAILED:
@@ -157,6 +148,38 @@ export const channelDataReportWebhook = (_req: Request, res: Response): void => 
   res.send({
     statusCode: 200,
   });
+};
+
+export const AD_ACCOUNT_ID = 'AD_ACCOUNT_ID';
+export const TASK_ID = 'TASK_ID';
+export const CHANNEL_TYPE = 'CHANNEL_TYPE';
+export const INITIAL = 'INITIAL';
+
+const processReport = async (
+  adAccount: AdAccountWithIntegration,
+  activeReport: ProcessReportReq,
+  channelType: IntegrationTypeEnum,
+  channel: ChannelInterface,
+): Promise<void> => {
+  if (MODE !== Environment.Local) {
+    await batchClient.send(
+      new SubmitJobCommand({
+        jobDefinition: process.env.CHANNEL_PROCESS_REPORT_JOB_DEFINITION,
+        jobQueue: process.env.CHANNEL_PROCESS_REPORT_JOB_QUEUE,
+        containerOverrides: {
+          environment: [
+            { name: AD_ACCOUNT_ID, value: adAccount.id },
+            { name: TASK_ID, value: activeReport.taskId },
+            { name: CHANNEL_TYPE, value: channelType },
+            { name: INITIAL, value: String(activeReport.initial) },
+          ],
+        },
+        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${String(activeReport.initial)}`,
+      }),
+    );
+  } else {
+    await channel.processReport(adAccount, activeReport.taskId, activeReport.initial);
+  }
 };
 
 const periodicCheckReports = (): void => {
