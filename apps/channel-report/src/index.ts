@@ -19,6 +19,7 @@ export const processReport = async (): Promise<void> => {
   logger.info(
     `Report processed for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, initial ${String(env.INITIAL)}`,
   );
+  process.exit(0);
 };
 
 await processReport();
