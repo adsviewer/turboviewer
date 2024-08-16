@@ -12,7 +12,7 @@ resource "aws_apprunner_service" "server" {
     protocol = "HTTP"
   }
   instance_configuration {
-    cpu               = 4
+    cpu               = 1024
     memory            = 4096
     instance_role_arn = aws_iam_role.instance_role.arn
   }
