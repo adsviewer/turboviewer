@@ -118,7 +118,7 @@ resource "aws_sns_topic_subscription" "channel_report_subscription" {
 }
 
 resource "aws_cloudwatch_event_rule" "channel_data_report" {
-  schedule_expression = "rate(2 minutes)"
+  schedule_expression = "rate(1 minute)"
   name                = "channel-data-report"
   description         = "Fires to trigger a channel report check."
 }

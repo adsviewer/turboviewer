@@ -15,9 +15,9 @@ export const processReport = async (): Promise<void> => {
     logger.error(adAccount);
     return;
   }
-  await channel.processReport(adAccount, env.TASK_ID, env.INITIAL);
+  const report = await channel.processReport(adAccount, env.TASK_ID, env.INITIAL);
   logger.info(
-    `Report processed for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, initial ${String(env.INITIAL)}`,
+    `Report processed ${isAError(report) ? 'un' : ''}successfully for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, initial ${String(env.INITIAL)}`,
   );
   process.exit(0);
 };

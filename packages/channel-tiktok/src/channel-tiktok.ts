@@ -25,10 +25,10 @@ import {
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   JobStatusEnum,
+  adReportsStatusesToRedis,
   saveAccounts,
   saveAds,
   saveInsights,
-  sendReportRequestsMessage,
   timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
@@ -172,8 +172,7 @@ export class Tiktok implements ChannelInterface {
   async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
     const dbAccounts = await this.saveAdAccounts(integration);
     if (isAError(dbAccounts)) return dbAccounts;
-    await sendReportRequestsMessage(dbAccounts, IntegrationTypeEnum.TIKTOK, initial);
-    return undefined;
+    await adReportsStatusesToRedis(this.getType(), dbAccounts, initial);
   }
 
   async getAdPreview(
@@ -208,7 +207,8 @@ export class Tiktok implements ChannelInterface {
   }
 
   async runAdInsightReport(
-    { integration, externalId, id }: AdAccountWithIntegration,
+    { externalId, id }: AdAccount,
+    integration: Integration,
     initial: boolean,
   ): Promise<string | AError> {
     const tikTokTimeRange = await Tiktok.timeRange(initial, id);
@@ -508,6 +508,10 @@ export class Tiktok implements ChannelInterface {
     await saveAds(integration, newAds, adAccount.id, adExternalIdMap);
     await saveInsights(insights, adExternalIdMap, adAccount);
   };
+
+  getType(): IntegrationTypeEnum {
+    return IntegrationTypeEnum.TIKTOK;
+  }
 }
 
 export const tiktok = new Tiktok();
