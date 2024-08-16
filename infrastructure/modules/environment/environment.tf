@@ -27,6 +27,17 @@ module "ses" {
   zone_id     = aws_route53_zone.zone.zone_id
 }
 
+data "aws_iam_policy_document" "batch_policy_document" {
+  statement {
+    actions   = ["batch:SubmitJob"]
+    resources = [aws_batch_job_queue.channel_report_process.arn, aws_batch_job_definition.channel_report_process.arn]
+  }
+}
+resource "aws_iam_policy" "batch_policy" {
+  name   = "${var.environment}-batch-policy"
+  policy = data.aws_iam_policy_document.batch_policy_document.json
+}
+
 data "aws_iam_policy_document" "sns_policy_document" {
   statement {
     actions = ["sns:Subscribe", "sns:Unsubscribe"]
@@ -108,6 +119,7 @@ module "server" {
   service_name                         = local.server_name
   service_subnet_ids                   = var.service_subnet_ids
   instance_role_policies = {
+    "batch"  = aws_iam_policy.batch_policy.arn
     "ses"    = module.ses.send_email_policy_arn
     "sns"    = aws_iam_policy.sns_policy.arn
     "sqs"    = aws_iam_policy.sqs_policy.arn

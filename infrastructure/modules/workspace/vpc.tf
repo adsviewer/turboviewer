@@ -151,7 +151,7 @@ resource "aws_vpc_security_group_egress_rule" "egress_all_https" {
 }
 
 resource "aws_vpc_endpoint" "interface_endpoints" {
-  for_each            = toset(["ecr.api", "ecr.dkr", "logs"])
+  for_each            = toset(["ecr.api", "ecr.dkr", "logs", "ssm"])
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.endpoint_interface.id]
   service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
@@ -166,4 +166,29 @@ resource "aws_vpc_endpoint" "gateway_endpoints" {
   service_name      = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
   vpc_endpoint_type = "Gateway"
   vpc_id            = aws_vpc.vpc.id
+}
+
+resource "aws_eip" "nat" {
+  count  = var.multi_nat ? length(local.public_cidr_blocks) : 1
+  domain = "vpc"
+  tags   = { Name = "${var.environment}-eip-nat-${element(local.availability_zones, count.index)}" }
+}
+
+# Nat gateways are pretty expensive, for all our throwaway environments let's use our own that
+resource "aws_nat_gateway" "nat" {
+  count         = length(aws_eip.nat)
+  allocation_id = element(aws_eip.nat.*.id, count.index)
+  subnet_id     = element(aws_subnet.public.*.id, count.index)
+  tags          = { Name = "${var.environment}-nat-${element(local.availability_zones, count.index)}" }
+}
+
+resource "aws_route" "private_nat_gateway" {
+  count                  = length(aws_route_table.private_routes)
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = element(aws_nat_gateway.nat.*.id, min(length(aws_nat_gateway.nat), count.index))
+  route_table_id         = element(aws_route_table.private_routes.*.id, count.index)
+
+  timeouts {
+    create = "20m"
+  }
 }

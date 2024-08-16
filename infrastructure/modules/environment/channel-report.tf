@@ -89,6 +89,13 @@ resource "aws_iam_role_policy_attachment" "channel_report_execution_role_policy"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+
+resource "aws_iam_role_policy_attachment" "channel_report_ssm_role_policy_attachment" {
+  role       = aws_iam_role.channel_report_task_execution_role.name
+  policy_arn = aws_iam_policy.server_parameters_access_policy.arn
+}
+
+
 resource "aws_batch_job_definition" "channel_report_process" {
   name = local.channel_process_report
   type = "container"
