@@ -14,6 +14,10 @@ variable "emailable_api_key" {
   type = string
 }
 
+variable "endpoint_interface_security_group_id" {
+  type = string
+}
+
 variable "environment" {
   type = string
 }

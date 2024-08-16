@@ -36,7 +36,8 @@ resource "aws_batch_compute_environment" "channel_report_process" {
     max_vcpus = 16
 
     security_group_ids = [
-      aws_security_group.batch_security_group.id
+      aws_security_group.batch_security_group.id,
+      var.endpoint_interface_security_group_id
     ]
 
     subnets = var.service_subnet_ids
