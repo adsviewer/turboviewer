@@ -1,4 +1,4 @@
-import { type AdAccount, IntegrationTypeEnum, prisma } from '@repo/database';
+import { IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { FireAndForget, isAError } from '@repo/utils';
@@ -50,10 +50,7 @@ export const checkReports = async (): Promise<void> => {
       if (availableReportsToStart <= 0) return;
 
       const reportsToStart = queuedReports.slice(0, availableReportsToStart);
-      const adAccountsToStart = await prisma.adAccount.findMany({
-        where: { id: { in: reportsToStart.map((report) => report.adAccountId) } },
-      });
-      await runAsyncReports(channelType, adAccountsToStart, channel, false);
+      await runAsyncReports(channelType, reportsToStart, channel);
     }),
   );
 };
@@ -106,22 +103,27 @@ const updateReports = (
 
 const runAsyncReports = async (
   channelType: IntegrationTypeEnum,
-  adAccounts: AdAccount[],
+  reports: ProcessReportReq[],
   channel: ChannelInterface,
-  initial: boolean,
 ): Promise<void> => {
+  const adAccounts = await prisma.adAccount.findMany({
+    where: { id: { in: reports.map((report) => report.adAccountId) } },
+  });
+  const adAccountIdInitialMap = new Map(reports.map((report) => [report.adAccountId, report.initial]));
   // eslint-disable-next-line @typescript-eslint/no-floating-promises -- we want to run all the reports in parallel
   await Promise.all(
     adAccounts.map(async (account) => {
       const integration = await getDecryptedIntegration(account.integrationId);
       if (isAError(integration)) throw new Error(integration.message);
+      const initial = adAccountIdInitialMap.get(account.id) ?? false;
       return {
         taskId: await channel.runAdInsightReport(account, integration, initial),
+        initial,
         adAccountId: account.id,
       };
     }),
   ).then((taskIds) =>
-    taskIds.map(({ taskId, adAccountId }) => {
+    taskIds.map(({ taskId, adAccountId, initial }) => {
       if (isAError(taskId)) return;
       return adReportStatusToRedis(channelType, adAccountId, initial, JobStatusEnum.PROCESSING, taskId);
     }),
