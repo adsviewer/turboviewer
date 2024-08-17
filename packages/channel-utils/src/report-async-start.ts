@@ -39,7 +39,7 @@ export const adReportStatusToRedis = async (
   taskId?: string,
 ): Promise<void> => {
   if (status !== JobStatusEnum.QUEUING) {
-    logger.info(`Should remove adAccountId: ${adAccountId}, status: ${status}`);
+    logger.info(`Should remove adAccountId: ${adAccountId}, status: ${status}, initial: ${String(initial)}`);
     const removed = await redisRemoveFromSet(activeReportRedisKey(channelType), {
       initial,
       adAccountId,
