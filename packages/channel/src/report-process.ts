@@ -26,8 +26,8 @@ const batchClient = new BatchClient({ region: env.AWS_REGION });
 const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
-  [IntegrationTypeEnum.TIKTOK, 10],
-  [IntegrationTypeEnum.META, 10],
+  [IntegrationTypeEnum.TIKTOK, 5],
+  [IntegrationTypeEnum.META, 5],
 ]);
 
 export const AD_ACCOUNT_ID = 'AD_ACCOUNT_ID';
@@ -80,8 +80,11 @@ const updateReports = (
     switch (status) {
       case JobStatusEnum.SUCCESS:
         if (report.status === JobStatusEnum.PROCESSING) {
-          await redisRemoveFromSet(activeReportRedisKey(channelType), report);
+          logger.info(`Should remove report: ${JSON.stringify(report)}`);
+          const removed = await redisRemoveFromSet(activeReportRedisKey(channelType), report);
+          logger.info(`Removed ${String(removed)} items.`);
           report.status = JobStatusEnum.SUCCESS;
+          logger.info(`Adding report: ${JSON.stringify({ ...report })}`);
           await redisAddToSet(
             activeReportRedisKey(channelType),
             { ...report } satisfies ProcessReportReq,

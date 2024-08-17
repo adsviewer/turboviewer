@@ -1,5 +1,6 @@
 import { type AdAccount, type IntegrationTypeEnum } from '@repo/database';
 import { redisAddToSet, redisRemoveFromSet } from '@repo/redis';
+import { logger } from '@repo/logger';
 
 export interface ProcessReportReq {
   initial: boolean;
@@ -38,12 +39,15 @@ export const adReportStatusToRedis = async (
   taskId?: string,
 ): Promise<void> => {
   if (status !== JobStatusEnum.QUEUING) {
-    await redisRemoveFromSet(activeReportRedisKey(channelType), {
+    logger.info(`Should remove adAccountId: ${adAccountId}, status: ${status}`);
+    const removed = await redisRemoveFromSet(activeReportRedisKey(channelType), {
       initial,
       adAccountId,
       status: JobStatusEnum.QUEUING,
     } satisfies ProcessReportReq);
+    logger.info(`Removed ${String(removed)} items.`);
   }
+  logger.info(`Adding adAccountId: ${adAccountId}, status: ${status}, taskId: ${String(taskId)}`);
   await redisAddToSet(
     activeReportRedisKey(channelType),
     { initial, adAccountId, taskId, status } satisfies ProcessReportReq,

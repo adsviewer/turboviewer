@@ -42,9 +42,9 @@ export const redisAddToSet = async (key: string, value: string | number | object
   await multiPipeline.exec();
 };
 
-export const redisRemoveFromSet = async (key: string, value: string | number | object): Promise<void> => {
+export const redisRemoveFromSet = async (key: string, value: string | number | object): Promise<number> => {
   const serializedValue = typeof value === 'object' ? stringifySorted(value) : value;
-  await ioredis.srem(key, serializedValue);
+  return await ioredis.srem(key, serializedValue);
 };
 
 export const redisGetKeys = (key: string): Promise<string[]> => ioredis.keys(`${key}*`);
