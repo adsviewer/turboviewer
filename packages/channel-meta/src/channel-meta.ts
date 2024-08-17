@@ -366,7 +366,7 @@ class Meta implements ChannelInterface {
     });
     const parsed = reportSchema.safeParse(resp);
     if (!parsed.success) {
-      logger.error(resp, `Failed to parse meta ad report for ${reportId} and ${id}`);
+      logger.error(parsed.error, `Failed to parse meta ad report for ${reportId} and ${id}`);
       return JobStatusEnum.FAILED;
     }
     const metaJobStatusMap = new Map<z.infer<typeof metaJobStatusEnum>, JobStatusEnum>([
