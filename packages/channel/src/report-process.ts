@@ -26,7 +26,7 @@ const batchClient = new BatchClient({ region: env.AWS_REGION });
 const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
-  [IntegrationTypeEnum.TIKTOK, 5],
+  [IntegrationTypeEnum.TIKTOK, 2],
   [IntegrationTypeEnum.META, 5],
 ]);
 
@@ -92,7 +92,7 @@ const updateReports = (
         break;
       case JobStatusEnum.FAILED:
       case JobStatusEnum.CANCELED:
-        logger.error(`Task ${report.taskId} was canceled/failed`);
+        logger.error(`Report ${JSON.stringify(report)} was canceled/failed`);
         await redisRemoveFromSet(activeReportRedisKey(channelType), report);
         break;
       default:

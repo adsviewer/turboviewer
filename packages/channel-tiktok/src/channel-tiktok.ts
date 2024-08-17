@@ -248,13 +248,13 @@ export class Tiktok implements ChannelInterface {
     );
     const data = await Tiktok.baseValidation(response);
     if (isAError(data)) {
-      logger.error(data, `Failed to get status for task ${taskId} and integration ${id}`);
+      logger.error(data, `Failed to get status for task ${taskId} and adAccount ${id}`);
       return JobStatusEnum.FAILED;
     }
     const schema = z.object({ status: z.nativeEnum(JobStatusEnum) });
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
-      logger.error(parsed.error, `Failed to get status for task ${taskId} and integration ${id}`);
+      logger.error(parsed.error, `Failed to get status for task ${taskId} and adAccount ${id}`);
       return JobStatusEnum.FAILED;
     }
     return parsed.data.status;
@@ -358,7 +358,7 @@ export class Tiktok implements ChannelInterface {
       return response;
     }
     if (!response.ok) {
-      logger.error(await response.text(), 'Failed to execute tik-tok request');
+      logger.error(await response.text(), 'tik-tok request was not ok');
       return new AError('Unknown error');
     }
     return response;
