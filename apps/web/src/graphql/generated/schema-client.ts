@@ -384,7 +384,7 @@ export enum InsightsColumnsOrderBy {
 
 export type InsightsDatapoints = {
   __typename: 'InsightsDatapoints';
-  cpm: Scalars['Int']['output'];
+  cpm?: Maybe<Scalars['Int']['output']>;
   date: Scalars['Date']['output'];
   impressions: Scalars['Int']['output'];
   /** In Cents */
@@ -894,7 +894,7 @@ export type InsightsQuery = {
         date: Date;
         spend: number;
         impressions: number;
-        cpm: number;
+        cpm?: number | null;
       }>;
       iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number } | null;
     }>;
