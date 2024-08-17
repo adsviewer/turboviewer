@@ -150,11 +150,11 @@ resource "aws_batch_job_definition" "channel_report_process" {
     resourceRequirements = [
       {
         type  = "VCPU"
-        value = "4"
+        value = "0.25"
       },
       {
         type  = "MEMORY"
-        value = "8192"
+        value = "512"
       }
     ]
 
