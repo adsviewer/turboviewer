@@ -50,7 +50,7 @@ export const getConnectedIntegrationByOrg = async (
 
   if (isAError(integration)) {
     if (encryptedIntegration.id) {
-      await revokeIntegrationById(encryptedIntegration.id, false);
+      await markErrorIntegrationById(encryptedIntegration.id, false);
     }
     return integration;
   }
@@ -94,13 +94,13 @@ export const decryptTokens = (integration: Integration | null): null | AError | 
   return integration;
 };
 
-export const revokeIntegrationById = async (integrationId: string, notify: boolean): Promise<Integration> => {
+export const markErrorIntegrationById = async (integrationId: string, notify: boolean): Promise<Integration> => {
   if (notify) {
     // TODO: notify the organization that the integration has been revoked
   }
   return await prisma.integration.update({
     where: { id: integrationId },
-    data: { status: IntegrationStatus.REVOKED },
+    data: { status: IntegrationStatus.ERRORED },
   });
 };
 

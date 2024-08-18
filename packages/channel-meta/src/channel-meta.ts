@@ -45,7 +45,7 @@ import {
   JobStatusEnum,
   MetaError,
   revokeIntegration,
-  revokeIntegrationById,
+  markErrorIntegrationById,
   adReportsStatusesToRedis,
   saveAccounts,
   saveAds,
@@ -678,7 +678,7 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
     error.message === metaErrorValidatingAccessTokenChangedSession ||
     error.message.startsWith(metaErrorNotAuthenticated)
   ) {
-    await revokeIntegrationById(integrationId, notify);
+    await markErrorIntegrationById(integrationId, notify);
     return true;
   }
   return false;

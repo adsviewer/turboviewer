@@ -464,9 +464,10 @@ type IntegrationListItem {
 
 enum IntegrationStatus {
   ComingSoon
-  NotConnected
-  Expired
   Connected
+  Errored
+  Expired
+  NotConnected
   Revoked
 }
 

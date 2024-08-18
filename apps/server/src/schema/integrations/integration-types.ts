@@ -18,14 +18,16 @@ import { getRootOrganizationId } from '../../contexts/organization';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
-  NotConnected = 'NotConnected',
-  Expired = 'Expired',
   Connected = 'Connected',
+  Errored = 'Errored',
+  Expired = 'Expired',
+  NotConnected = 'NotConnected',
   Revoked = 'Revoked',
 }
 
 export const ShouldConnectIntegrationStatuses = [
   IntegrationStatusEnum.Connected,
+  IntegrationStatusEnum.Errored,
   IntegrationStatusEnum.Expired,
   IntegrationStatusEnum.NotConnected,
   IntegrationStatusEnum.Revoked,

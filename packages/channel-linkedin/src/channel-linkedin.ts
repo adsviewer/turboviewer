@@ -26,7 +26,7 @@ import {
   getConnectedIntegrationByOrg,
   getIFrame,
   JobStatusEnum,
-  revokeIntegrationById,
+  markErrorIntegrationById,
   saveAccounts,
   saveAds,
   saveInsights,
@@ -388,7 +388,7 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
     'The provided authorization grant or refresh token is invalid, expired or revoked.',
   ];
   if (revocableMessages.includes(error.message)) {
-    await revokeIntegrationById(integrationId, notify);
+    await markErrorIntegrationById(integrationId, notify);
     return true;
   }
   return false;
