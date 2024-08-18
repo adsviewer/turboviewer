@@ -9,7 +9,7 @@ import { insightsAtom } from '@/app/atoms/insights-atoms';
 import InsightCard from './insight-card';
 
 interface PropsType {
-  isDataLoaded: boolean;
+  isPending: boolean;
 }
 
 export default function InsightsGrid(props: PropsType): ReactNode {
@@ -19,10 +19,14 @@ export default function InsightsGrid(props: PropsType): ReactNode {
   return (
     <>
       {/* Loading */}
-      {!props.isDataLoaded ? <LoaderCentered type="dots" /> : null}
+      {!props.isPending ? <LoaderCentered type="dots" /> : null}
 
       {/* Empty insights data */}
-      {props.isDataLoaded && !insights.length ? <Text>{t('noResultsFound')}</Text> : null}
+      {props.isPending && !insights.length ? (
+        <Text c="dimmed" ta="center">
+          {t('noResultsFound')}
+        </Text>
+      ) : null}
 
       {/* Render insights */}
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} style={{ display: 'relative' }}>

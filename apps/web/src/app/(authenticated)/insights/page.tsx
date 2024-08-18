@@ -23,19 +23,22 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
   const page = parseInt(searchParams.page ?? '1', 10);
   const setInsights = useSetAtom(insightsAtom);
   const setHasNextInsightsPage = useSetAtom(hasNextInsightsPageAtom);
-  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [isPending, setIsPending] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsDataLoaded(false);
+    setIsPending(false);
     setInsights([]);
     void getInsights(searchParams, orderBy, order, pageSize, page)
       .then((res) => {
         setInsights(res.insights.edges);
         setHasNextInsightsPage(res.insights.hasNext);
-        setIsDataLoaded(true);
+        setIsPending(true);
       })
       .catch((error: unknown) => {
         logger.error(error);
+      })
+      .finally(() => {
+        setIsPending(true);
       });
   }, [order, orderBy, page, pageSize, searchParams, setHasNextInsightsPage, setInsights]);
 
@@ -44,7 +47,7 @@ export default function Insights({ searchParams }: InsightsProps): ReactNode {
       <OrderFilters />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <Flex direction="column">
-          <InsightsGrid isDataLoaded={isDataLoaded} />
+          <InsightsGrid isPending={isPending} />
           <PageControls />
         </Flex>
       </Suspense>
