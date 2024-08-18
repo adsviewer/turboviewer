@@ -66,6 +66,7 @@
     "connect": "Verbinden",
     "revoke": "Intrekken",
     "reconnect": "Opnieuw verbinden",
+    "extend": "Verlengen",
     "comingSoon": "Binnenkort beschikbaar",
     "connected": "Verbonden",
     "notConnected": "Niet verbonden",
@@ -73,7 +74,8 @@
     "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak.",
     "syncedOn": "Gesynchroniseerd op",
     "ads": "advertenties",
-    "tokenWarning": "Integratie verloopt bijna! Ga naar de Integratiepagina om opnieuw verbinding te maken!"
+    "tokenWarning": "Integratie verloopt bijna! Ga naar de Integratiepagina om opnieuw verbinding te maken!",
+    "tokenWarningExtend": "Het is een goed idee om dit te doen!"
   },
   "settings": {
     "title": "Instellingen",

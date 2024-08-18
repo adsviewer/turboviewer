@@ -94,12 +94,11 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
                 mt="lg"
                 component="a"
                 disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
-                leftSection={props.status === IntegrationStatus.Expiring ? <IconExclamationCircle size={20} /> : null}
                 onClick={() => {
                   handleConnect();
                 }}
               >
-                {t('reconnect')}
+                {props.status === IntegrationStatus.Expiring ? t('extend') : t('reconnect')}
               </Button>
             </Link>
           </Tooltip>
@@ -135,7 +134,14 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
       </Card.Section>
 
       <Group justify="space-between" mt="md" mb="xs">
-        <Text fw={500}>{props.title}</Text>
+        <Flex align="center" gap={6}>
+          {props.status === IntegrationStatus.Expiring ? (
+            <Tooltip label={t('tokenWarningExtend')}>
+              <IconExclamationCircle color="orange" size={20} />
+            </Tooltip>
+          ) : null}
+          <Text fw={500}>{props.title}</Text>
+        </Flex>
         {props.isConnected ? (
           <Badge color="green">{t('connected')}</Badge>
         ) : (

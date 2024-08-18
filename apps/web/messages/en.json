@@ -14,11 +14,11 @@
     "roleOperator": "Operator",
     "roleMember": "Member"
   },
-"errors": {
-  "errorPageTitle": "Something bad just happened...",
-  "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
-  "refreshHint": "Refresh page"
-},
+  "errors": {
+    "errorPageTitle": "Something bad just happened...",
+    "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
+    "refreshHint": "Refresh page"
+  },
   "navbar": {
     "insights": "Insights",
     "integrations": "Integrations",
@@ -66,6 +66,7 @@
     "connect": "Connect",
     "revoke": "Revoke",
     "reconnect": "Reconnect",
+    "extend": "Extend",
     "comingSoon": "Coming soon",
     "connected": "Connected",
     "notConnected": "Not Connected",
@@ -73,7 +74,8 @@
     "revokeTip": "To confirm, type \"REVOKE\" in the box below.",
     "syncedOn": "Synced on",
     "ads": "ads",
-    "tokenWarning": "Integration token is close to expiration! Visit the Integrations page to reconnect!"
+    "tokenWarning": "Integration token is close to expiration! Visit the Integrations page to extend!",
+    "tokenWarningExtend": "Integration token is close to expiration and must be extended!"
   },
   "settings": {
     "title": "Settings",
