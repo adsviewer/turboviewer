@@ -53,6 +53,7 @@ import {
   timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
+import { retry } from '@lifeomic/attempt';
 import { env } from './config';
 
 const fireAndForget = new FireAndForget();
@@ -579,7 +580,7 @@ class Meta implements ChannelInterface {
 
   private static async sdk<T>(fn: () => Promise<T> | T | AError, integration: Integration): Promise<T | AError> {
     try {
-      return await fn();
+      return await retry(async () => await fn());
     } catch (error) {
       const msg = 'Failed to complete fb sdk call';
       logger.error(error, msg);

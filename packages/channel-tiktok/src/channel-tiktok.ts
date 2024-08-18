@@ -51,6 +51,7 @@ enum PlacementsEnum {
   TikTok = 'TikTok',
   GlobalAppBundle = 'Global App Bundle',
   Pangle = 'Pangle',
+  Others = 'Others',
 }
 
 const insightsSchema = z.array(
@@ -280,6 +281,7 @@ export class Tiktok implements ChannelInterface {
       [PlacementsEnum.TikTok, PublisherEnum.TikTok],
       [PlacementsEnum.GlobalAppBundle, PublisherEnum.GlobalAppBundle],
       [PlacementsEnum.Pangle, PublisherEnum.Pangle],
+      [PlacementsEnum.Others, PublisherEnum.Unknown],
     ]);
 
     const fn = (data: unknown[]): Promise<AError | undefined> =>

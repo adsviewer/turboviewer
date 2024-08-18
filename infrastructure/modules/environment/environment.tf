@@ -29,8 +29,11 @@ module "ses" {
 
 data "aws_iam_policy_document" "batch_policy_document" {
   statement {
-    actions   = ["batch:SubmitJob"]
-    resources = [aws_batch_job_queue.channel_report_process.arn, aws_batch_job_definition.channel_report_process.arn]
+    actions = ["batch:SubmitJob"]
+    resources = [
+      aws_batch_job_queue.channel_report_process.arn,
+      "arn:aws:batch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:job-definition/${local.channel_process_report}:*",
+    ]
   }
 }
 resource "aws_iam_policy" "batch_policy" {
