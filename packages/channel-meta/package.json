@@ -21,6 +21,7 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@lifeomic/attempt": "^3.1.0",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
