@@ -49,6 +49,7 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _root, args, ctx, _info) => {
       const { parentId } = await prisma.organization.findUniqueOrThrow({ where: { id: ctx.organizationId } });
+      await checkIsAdminInParent(parentId, ctx.currentUserId);
       return await prisma.adAccount.findMany({
         ...query,
         where: { type: args.channel, organizations: { some: { id: parentId ?? ctx.organizationId } } },
@@ -265,7 +266,12 @@ builder.mutationFields((t) => ({
     args: {
       adAccountIds: t.arg.stringList({ required: true }),
     },
-    resolve: (query, _root, args, ctx, _info) => {
+    resolve: async (query, _root, args, ctx, _info) => {
+      const { parentId } = await prisma.organization.findUniqueOrThrow({ where: { id: ctx.organizationId } });
+      if (!parentId) {
+        throw new GraphQLError('Cannot update ad accounts for the root organization');
+      }
+      await checkIsAdminInParent(parentId, ctx.currentUserId);
       deleteInsightsCache(ctx.organizationId);
       return prisma.organization.update({
         ...query,
@@ -275,3 +281,18 @@ builder.mutationFields((t) => ({
     },
   }),
 }));
+
+const checkIsAdminInParent = async (parentId: string | null, userId: string) => {
+  if (parentId) {
+    const activeAdminUserOrg = await prisma.userOrganization.findUnique({
+      where: {
+        userId_organizationId: { userId, organizationId: parentId },
+        role: OrganizationRoleEnum.ORG_ADMIN,
+        status: UserOrganizationStatus.ACTIVE,
+      },
+    });
+    if (!activeAdminUserOrg) {
+      throw new GraphQLError('Only administrators of the parent organization are allowed to view/update adAccounts');
+    }
+  }
+};
