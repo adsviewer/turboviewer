@@ -140,6 +140,7 @@ enum IntegrationTypeEnum {
 enum IntegrationStatus {
   CONNECTED
   REVOKED
+  ERRORED
 }
 
 model Integration {

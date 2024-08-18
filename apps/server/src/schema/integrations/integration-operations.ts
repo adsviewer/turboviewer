@@ -108,6 +108,7 @@ const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[
   const integration = integrations.find((i) => i.type === type);
   if (!integration) return IntegrationStatusEnum.NotConnected;
   if (integration.status === IntegrationStatus.REVOKED) return IntegrationStatusEnum.Revoked;
+  if (integration.status === IntegrationStatus.ERRORED) return IntegrationStatusEnum.Errored;
   if (!integration.accessTokenExpiresAt) return IntegrationStatusEnum.Connected;
   if (
     (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??

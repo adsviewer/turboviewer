@@ -471,9 +471,10 @@ export type IntegrationListItem = {
 
 export enum IntegrationStatus {
   ComingSoon = 'ComingSoon',
-  NotConnected = 'NotConnected',
-  Expired = 'Expired',
   Connected = 'Connected',
+  Errored = 'Errored',
+  Expired = 'Expired',
+  NotConnected = 'NotConnected',
   Revoked = 'Revoked',
 }
 
