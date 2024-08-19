@@ -94,3 +94,17 @@ export const isDateWithinInterval = (
   const targetDate = addInterval(dateFrom, interval, numOfIntervals);
   return targetDate < dateTo;
 };
+
+export const getDateDiffIn = (interval: IntervalType, dateFrom: Date, dateTo: Date): number => {
+  const diff = dateFrom.getTime() - dateTo.getTime();
+  switch (interval) {
+    case 'day':
+      return diff / (1000 * 60 * 60 * 24);
+    case 'week':
+      return diff / (1000 * 60 * 60 * 24 * 7);
+    case 'month':
+      return diff / (1000 * 60 * 60 * 24 * 30);
+    case 'quarter':
+      return diff / (1000 * 60 * 60 * 24 * 30 * 3);
+  }
+};

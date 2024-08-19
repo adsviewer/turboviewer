@@ -15,6 +15,7 @@ export const initialUserDetails: MeQuery['me'] = {
     name: '',
     isRoot: false,
     parentId: null,
+    integrations: [],
   },
   organizations: [],
 };

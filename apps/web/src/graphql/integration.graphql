@@ -10,6 +10,7 @@ query integrations {
   integrations {
     type
     lastSyncedAt
+    status
     adAccounts {
       adCount
     }

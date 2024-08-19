@@ -26,6 +26,7 @@ interface IntegrationProps {
 interface IntegrationDataType {
   adCount: number;
   lastSyncedAt: Date | null | undefined;
+  status: IntegrationStatus;
 }
 
 type IntegrationsDataType = {
@@ -36,26 +37,32 @@ const initialIntegrationsData: IntegrationsDataType = {
   [IntegrationType.META]: {
     adCount: 0,
     lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.LINKEDIN]: {
     adCount: 0,
     lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.TIKTOK]: {
     adCount: 0,
     lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.GOOGLE]: {
     adCount: 0,
     lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.REDDIT]: {
     adCount: 0,
     lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
   },
   [IntegrationType.SNAPCHAT]: {
     adCount: 0,
     lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
   },
 };
 
@@ -73,6 +80,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
           (acc, adAccount) => acc + adAccount.adCount,
           0,
         );
+        newIntegrationsData[integration.type].status = integration.status;
       }
       setIntegrationsData(newIntegrationsData);
     }
@@ -90,7 +98,8 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
 
   const isIntegrationAvailable = (status: IntegrationStatus): boolean => status !== IntegrationStatus.ComingSoon;
 
-  const isIntegrationConnected = (status: IntegrationStatus): boolean => status === IntegrationStatus.Connected;
+  const isIntegrationConnected = (status: IntegrationStatus): boolean =>
+    status === IntegrationStatus.Connected || status === IntegrationStatus.Expiring;
 
   const map = new Map<IntegrationType, { title: string; description?: string; imageSrc: string }>([
     [
@@ -132,6 +141,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
                   image={<Image src={imageSrc} alt={title} width={100} priority />}
                   adCount={integrationsData[integration.type].adCount}
                   lastSyncedAt={integrationsData[integration.type].lastSyncedAt}
+                  status={integrationsData[integration.type].status}
                 />
               );
             })}

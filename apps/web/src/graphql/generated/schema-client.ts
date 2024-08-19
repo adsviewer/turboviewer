@@ -458,6 +458,8 @@ export type Integration = {
   /** Caller is permitted to view this field if they are in an offspring organization */
   refreshTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   /** Caller is permitted to view this field if they are in an offspring organization */
+  status: IntegrationStatus;
+  /** Caller is permitted to view this field if they are in an offspring organization */
   type: IntegrationType;
   /** Caller is permitted to view this field if they are in an offspring organization */
   updatedAt: Scalars['Date']['output'];
@@ -475,6 +477,7 @@ export enum IntegrationStatus {
   Connected = 'Connected',
   Errored = 'Errored',
   Expired = 'Expired',
+  Expiring = 'Expiring',
   NotConnected = 'NotConnected',
   Revoked = 'Revoked',
 }
@@ -929,6 +932,7 @@ export type IntegrationsQuery = {
     __typename: 'Integration';
     type: IntegrationType;
     lastSyncedAt?: Date | null;
+    status: IntegrationStatus;
     adAccounts: Array<{ __typename: 'AdAccount'; adCount: number }>;
   }>;
 };
@@ -1135,6 +1139,12 @@ export type UpdateUserMutation = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
+      integrations: Array<{
+        __typename: 'Integration';
+        status: IntegrationStatus;
+        type: IntegrationType;
+        accessTokenExpiresAt?: Date | null;
+      }>;
     } | null;
   };
 };
@@ -1162,6 +1172,12 @@ export type MeQuery = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
+      integrations: Array<{
+        __typename: 'Integration';
+        status: IntegrationStatus;
+        type: IntegrationType;
+        accessTokenExpiresAt?: Date | null;
+      }>;
     } | null;
   };
 };
@@ -1185,6 +1201,12 @@ export type UserFieldsFragment = {
     name: string;
     isRoot: boolean;
     parentId?: string | null;
+    integrations: Array<{
+      __typename: 'Integration';
+      status: IntegrationStatus;
+      type: IntegrationType;
+      accessTokenExpiresAt?: Date | null;
+    }>;
   } | null;
 };
 
@@ -1208,6 +1230,11 @@ export const UserFieldsFragmentDoc = gql`
       name
       isRoot
       parentId
+      integrations {
+        status
+        type
+        accessTokenExpiresAt
+      }
     }
   }
 `;
@@ -1329,6 +1356,7 @@ export const IntegrationsDocument = gql`
     integrations {
       type
       lastSyncedAt
+      status
       adAccounts {
         adCount
       }

@@ -5,10 +5,10 @@ import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { IconAlertTriangle, IconExclamationCircle } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAtomValue } from 'jotai';
-import { type IntegrationType } from '@/graphql/generated/schema-server';
+import { IntegrationStatus, type IntegrationType } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { isOrgAdmin } from '@/util/access-utils';
@@ -24,6 +24,7 @@ interface IntegrationProps {
   image?: ReactNode;
   adCount: number;
   lastSyncedAt: Date | null | undefined;
+  status: IntegrationStatus;
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
@@ -82,19 +83,39 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
         );
       }
       return (
-        <Tooltip
-          label={tGeneric('accessOrgAdminRoot')}
-          disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
-        >
-          <Button
-            mt="lg"
-            color={theme.colors.red[7]}
-            onClick={open}
-            disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+        <Flex direction="column" gap="xs" mt="xs">
+          <Tooltip
+            label={tGeneric('accessOrgAdminRoot')}
+            disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
           >
-            {t('revoke')}
-          </Button>
-        </Tooltip>
+            <Link href={props.authUrl ?? ''} passHref>
+              <Button
+                w="100%"
+                mt="lg"
+                component="a"
+                disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+                onClick={() => {
+                  handleConnect();
+                }}
+              >
+                {props.status === IntegrationStatus.Expiring ? t('extend') : t('reconnect')}
+              </Button>
+            </Link>
+          </Tooltip>
+          <Tooltip
+            label={tGeneric('accessOrgAdminRoot')}
+            disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
+          >
+            <Button
+              color={theme.colors.red[7]}
+              onClick={open}
+              disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
+              fullWidth
+            >
+              {t('revoke')}
+            </Button>
+          </Tooltip>
+        </Flex>
       );
     }
     return (
@@ -113,7 +134,14 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
       </Card.Section>
 
       <Group justify="space-between" mt="md" mb="xs">
-        <Text fw={500}>{props.title}</Text>
+        <Flex align="center" gap={6}>
+          {props.status === IntegrationStatus.Expiring ? (
+            <Tooltip label={t('tokenWarningExtend')}>
+              <IconExclamationCircle color="orange" size={20} />
+            </Tooltip>
+          ) : null}
+          <Text fw={500}>{props.title}</Text>
+        </Flex>
         {props.isConnected ? (
           <Badge color="green">{t('connected')}</Badge>
         ) : (

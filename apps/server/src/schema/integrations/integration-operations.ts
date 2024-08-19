@@ -1,4 +1,4 @@
-import { type Integration, IntegrationStatus, IntegrationTypeEnum, prisma } from '@repo/database';
+import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, FireAndForget } from '@repo/utils';
 import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
@@ -9,6 +9,7 @@ import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import { getRootOrganizationId } from '../../contexts/organization';
 import {
   ChannelInitialProgressPayloadDto,
+  getIntegrationStatus,
   IntegrationDto,
   IntegrationListItemDto,
   IntegrationStatusEnum,
@@ -106,14 +107,5 @@ const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[
   if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
   const integration = integrations.find((i) => i.type === type);
-  if (!integration) return IntegrationStatusEnum.NotConnected;
-  if (integration.status === IntegrationStatus.REVOKED) return IntegrationStatusEnum.Revoked;
-  if (integration.status === IntegrationStatus.ERRORED) return IntegrationStatusEnum.Errored;
-  if (!integration.accessTokenExpiresAt) return IntegrationStatusEnum.Connected;
-  if (
-    (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??
-    (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())
-  )
-    return IntegrationStatusEnum.Expired;
-  return IntegrationStatusEnum.Connected;
+  return getIntegrationStatus(integration);
 };

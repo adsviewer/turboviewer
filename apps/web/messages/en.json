@@ -14,11 +14,11 @@
     "roleOperator": "Operator",
     "roleMember": "Member"
   },
-"errors": {
-  "errorPageTitle": "Something bad just happened...",
-  "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
-  "refreshHint": "Refresh page"
-},
+  "errors": {
+    "errorPageTitle": "Something bad just happened...",
+    "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
+    "refreshHint": "Refresh page"
+  },
   "navbar": {
     "insights": "Insights",
     "integrations": "Integrations",
@@ -65,13 +65,17 @@
     "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!",
     "connect": "Connect",
     "revoke": "Revoke",
+    "reconnect": "Reconnect",
+    "extend": "Extend",
     "comingSoon": "Coming soon",
     "connected": "Connected",
     "notConnected": "Not Connected",
     "revokeWarning": "You are about to perform a revoke action! Adsviewer will erase all your data related to this integration.",
     "revokeTip": "To confirm, type \"REVOKE\" in the box below.",
     "syncedOn": "Synced on",
-    "ads": "ads"
+    "ads": "ads",
+    "tokenWarning": "Integration token is close to expiration! Visit the Integrations page to extend!",
+    "tokenWarningExtend": "Integration token is close to expiration and must be extended!"
   },
   "settings": {
     "title": "Settings",

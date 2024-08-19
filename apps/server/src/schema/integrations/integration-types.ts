@@ -3,12 +3,13 @@ import {
   DeviceEnum,
   type Insight,
   type Integration,
+  IntegrationStatus,
   IntegrationTypeEnum,
   prisma,
   PublisherEnum,
 } from '@repo/database';
 import { MetaError } from '@repo/channel-utils';
-import { getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
+import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
@@ -21,6 +22,7 @@ export enum IntegrationStatusEnum {
   Connected = 'Connected',
   Errored = 'Errored',
   Expired = 'Expired',
+  Expiring = 'Expiring',
   NotConnected = 'NotConnected',
   Revoked = 'Revoked',
 }
@@ -29,6 +31,7 @@ export const ShouldConnectIntegrationStatuses = [
   IntegrationStatusEnum.Connected,
   IntegrationStatusEnum.Errored,
   IntegrationStatusEnum.Expired,
+  IntegrationStatusEnum.Expiring,
   IntegrationStatusEnum.NotConnected,
   IntegrationStatusEnum.Revoked,
 ];
@@ -74,6 +77,14 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
+    status: t.field({
+      type: IntegrationStatusDto,
+      nullable: false,
+      ...offspringOrgFieldProps,
+      resolve: (root) => {
+        return getIntegrationStatus(root);
+      },
+    }),
 
     organization: t.relation('organization', { nullable: false }),
     adAccounts: t.relation('adAccounts', {
@@ -361,3 +372,24 @@ export const InsightsDatapointsInput = builder.inputType('InsightsDatapointsInpu
 
 export type FilterInsightsInputType = typeof FilterInsightsInput.$inferInput;
 export type InsightsDatapointsInputType = typeof InsightsDatapointsInput.$inferInput;
+
+export const getIntegrationStatus = (integration: Integration | undefined): IntegrationStatusEnum => {
+  const EXPIRING_THRESHOLD_DAYS = 10;
+  if (!integration) return IntegrationStatusEnum.NotConnected;
+  if (integration.status === IntegrationStatus.REVOKED) return IntegrationStatusEnum.Revoked;
+  if (integration.status === IntegrationStatus.ERRORED) return IntegrationStatusEnum.Errored;
+  if (!integration.accessTokenExpiresAt) return IntegrationStatusEnum.Connected;
+  if (
+    (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??
+    (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())
+  )
+    return IntegrationStatusEnum.Expired;
+  if (
+    (integration.refreshTokenExpiresAt &&
+      getDateDiffIn('day', integration.refreshTokenExpiresAt, new Date()) < EXPIRING_THRESHOLD_DAYS) ??
+    (!integration.refreshTokenExpiresAt &&
+      getDateDiffIn('day', integration.accessTokenExpiresAt, new Date()) < EXPIRING_THRESHOLD_DAYS)
+  )
+    return IntegrationStatusEnum.Expiring;
+  return IntegrationStatusEnum.Connected;
+};
