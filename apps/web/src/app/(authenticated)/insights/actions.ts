@@ -45,6 +45,6 @@ export default async function getInsights(
     pageSize,
     positions: searchParams.position,
     publishers: searchParams.publisher,
-    interval: InsightsInterval.week,
+    interval: searchParams.interval ?? InsightsInterval.week,
   });
 }
