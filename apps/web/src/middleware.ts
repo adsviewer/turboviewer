@@ -112,7 +112,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Insights only) If page is loaded without any query params, set the following initial group filters
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
-    const newURL = `/insights?${groupedByKey}=${InsightsColumnsGroupBy.adId}&${groupedByKey}=${InsightsColumnsGroupBy.device}&${groupedByKey}=${InsightsColumnsGroupBy.publisher}&${groupedByKey}=${InsightsColumnsGroupBy.position}&${fetchPreviewsKey}=true&${intervalKey}=${InsightsInterval.month}`;
+    const newURL = `/insights?${groupedByKey}=${InsightsColumnsGroupBy.adId}&${groupedByKey}=${InsightsColumnsGroupBy.device}&${groupedByKey}=${InsightsColumnsGroupBy.publisher}&${groupedByKey}=${InsightsColumnsGroupBy.position}&${fetchPreviewsKey}=true&${intervalKey}=${InsightsInterval.week}`;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
