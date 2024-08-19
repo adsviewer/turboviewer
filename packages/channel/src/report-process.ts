@@ -90,13 +90,10 @@ const updateReports = (
           await processReport(adAccount, report, channelType, channel);
         }
         break;
-      case JobStatusEnum.CANCELED:
-        logger.error(`Report ${JSON.stringify(report)} was canceled`);
-        await redisRemoveFromSet(activeReportRedisKey(channelType), report);
-        break;
       case JobStatusEnum.FAILED:
-        logger.warn(`Report ${JSON.stringify(report)} was failed, retrying...`);
-        await runAsyncReports(channelType, [report], channel);
+      case JobStatusEnum.CANCELED:
+        logger.error(`Report ${JSON.stringify(report)} was canceled/failed`);
+        await redisRemoveFromSet(activeReportRedisKey(channelType), report);
         break;
       default:
         break;
