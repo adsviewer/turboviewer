@@ -135,7 +135,12 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
       </Card.Section>
 
       <Group justify="space-between" mt="md" mb="xs">
-        <Flex align="center" gap="xs">
+        <Flex align="center" gap={6}>
+          {props.status === IntegrationStatus.Expiring ? (
+            <Tooltip label={t('tokenWarningExtend')}>
+              <IconExclamationCircle color="orange" size={20} />
+            </Tooltip>
+          ) : null}
           <Text fw={500}>{props.title}</Text>
           {props.isConnected ? (
             <AdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
