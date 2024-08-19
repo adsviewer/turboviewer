@@ -5,8 +5,8 @@ import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
 import { type AJwtPayload } from '@repo/shared-types';
 import { env } from './env.mjs';
-import { fetchPreviewsKey, groupedByKey } from './util/url-query-utils';
-import { InsightsColumnsGroupBy, UserStatus } from './graphql/generated/schema-server';
+import { fetchPreviewsKey, groupedByKey, intervalKey } from './util/url-query-utils';
+import { InsightsColumnsGroupBy, InsightsInterval, UserStatus } from './graphql/generated/schema-server';
 
 const defaultMissingOrgURL = '/organization-warning';
 const publicPaths = [
@@ -112,7 +112,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Insights only) If page is loaded without any query params, set the following initial group filters
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
-    const newURL = `/insights?${groupedByKey}=${InsightsColumnsGroupBy.adId}&${groupedByKey}=${InsightsColumnsGroupBy.device}&${groupedByKey}=${InsightsColumnsGroupBy.publisher}&${groupedByKey}=${InsightsColumnsGroupBy.position}&${fetchPreviewsKey}=true`;
+    const newURL = `/insights?${groupedByKey}=${InsightsColumnsGroupBy.adId}&${groupedByKey}=${InsightsColumnsGroupBy.device}&${groupedByKey}=${InsightsColumnsGroupBy.publisher}&${groupedByKey}=${InsightsColumnsGroupBy.position}&${fetchPreviewsKey}=true&${intervalKey}=${InsightsInterval.week}`;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
