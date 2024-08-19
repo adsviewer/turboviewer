@@ -97,7 +97,8 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
 
   const isIntegrationAvailable = (status: IntegrationStatus): boolean => status !== IntegrationStatus.ComingSoon;
 
-  const isIntegrationConnected = (status: IntegrationStatus): boolean => status === IntegrationStatus.Connected;
+  const isIntegrationConnected = (status: IntegrationStatus): boolean =>
+    status === IntegrationStatus.Connected || status === IntegrationStatus.Expiring;
 
   const map = new Map<IntegrationType, { title: string; description?: string; imageSrc: string }>([
     [
