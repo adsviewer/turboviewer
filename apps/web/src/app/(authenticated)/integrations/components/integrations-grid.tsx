@@ -80,6 +80,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
           (acc, adAccount) => acc + adAccount.adCount,
           0,
         );
+        newIntegrationsData[integration.type].status = integration.status;
       }
       setIntegrationsData(newIntegrationsData);
     }

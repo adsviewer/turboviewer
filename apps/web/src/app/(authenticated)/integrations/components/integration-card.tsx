@@ -89,6 +89,9 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
           >
             <Link href={props.authUrl ?? ''} passHref>
+              {props.integrationType.toString()}
+              {props.status}
+              {props.isAvailable.toString()}
               <Button
                 w="100%"
                 mt="lg"
