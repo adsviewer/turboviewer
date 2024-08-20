@@ -202,7 +202,9 @@ export function UsersTable(): React.ReactNode {
           ) : null}
 
           {userData.status === UserOrganizationStatus.INVITED ? (
-            <Text fs="italic">{tOrganization('invited')}</Text>
+            <Text fs="italic" c="dimmed">
+              {tOrganization('invited')}
+            </Text>
           ) : null}
         </Flex>
       </Table.Td>
