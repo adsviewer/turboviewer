@@ -18,7 +18,6 @@ import {
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
-import { logger } from '@repo/logger';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -88,7 +87,6 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
-    logger.info(value);
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
     startTransition(() => {
       router.replace(newURL);
