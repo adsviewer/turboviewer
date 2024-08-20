@@ -18,6 +18,7 @@ import {
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
+import { logger } from '@repo/logger';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -47,17 +48,23 @@ export default function OrderFilters(): React.ReactNode {
     return OrderDirection.desc;
   };
 
+  const getAdPreviewValue = (): boolean => {
+    return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
+  };
+
   const getOrderByValue = (): string => {
     if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions_rel)) {
       return InsightsColumnsOrderBy.impressions_rel;
+    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions_abs)) {
+      return InsightsColumnsOrderBy.impressions_abs;
+    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.spend_abs)) {
+      return InsightsColumnsOrderBy.spend_abs;
     } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_rel)) {
       return InsightsColumnsOrderBy.cpm_rel;
+    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_abs)) {
+      return InsightsColumnsOrderBy.cpm_abs;
     }
     return InsightsColumnsOrderBy.spend_rel; // default
-  };
-
-  const getAdPreviewValue = (): boolean => {
-    return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
   };
 
   const getIntervalValue = (): string => {
@@ -81,6 +88,7 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
+    logger.info(value);
     const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
     startTransition(() => {
       router.replace(newURL);
