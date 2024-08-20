@@ -133,6 +133,7 @@ export default function OrderFilters(): React.ReactNode {
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             maw={90}
+            scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
             disabled={isPending}
           />
         </Flex>
@@ -154,6 +155,7 @@ export default function OrderFilters(): React.ReactNode {
             onChange={handleOrderByChange}
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
             maw={150}
             disabled={isPending}
           />
@@ -167,6 +169,7 @@ export default function OrderFilters(): React.ReactNode {
             onChange={handleOrderDirectionChange}
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
             maw={150}
             disabled={isPending}
           />
@@ -182,6 +185,7 @@ export default function OrderFilters(): React.ReactNode {
             onChange={handleIntervalChange}
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+            scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
             maw={150}
             disabled={isPending}
           />
