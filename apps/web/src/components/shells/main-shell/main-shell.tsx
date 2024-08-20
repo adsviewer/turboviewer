@@ -65,7 +65,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             <LogoFull />
           </Flex>
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
-            {userDetails.organizations.length ? <OrganizationSelect /> : null}
+            <OrganizationSelect />
             <CreateOrganizationButton />
             <SettingsButton />
           </Flex>

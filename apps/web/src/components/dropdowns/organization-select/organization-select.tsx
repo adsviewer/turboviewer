@@ -48,6 +48,7 @@ export default function OrganizationSelect(): React.ReactNode {
       value={userDetails.currentOrganization?.id ?? null}
       onChange={handleOrganizationSelect}
       withCheckIcon
+      disabled={!userDetails.organizations.length}
       comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
     />
   );
