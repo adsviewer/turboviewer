@@ -31,7 +31,6 @@ const commonOrgAuthScopes = async (user: User, ctx: GraphQLContext): Promise<boo
     where: {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked in baseScopes
       userId_organizationId: { userId: user.id, organizationId: ctx.organizationId! },
-      status: UserOrganizationStatus.ACTIVE,
     },
   });
   return Boolean(commonOrg);
