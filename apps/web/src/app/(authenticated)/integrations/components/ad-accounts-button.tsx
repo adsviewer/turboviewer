@@ -165,7 +165,8 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
           const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
           router.replace(newURL);
         }
-        logger.info(res);
+
+        window.location.reload();
       })
       .catch((err: unknown) => {
         logger.error(err);
