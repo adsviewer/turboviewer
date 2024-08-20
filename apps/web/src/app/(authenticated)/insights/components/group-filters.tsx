@@ -216,6 +216,7 @@ export default function GroupFilters(): ReactNode {
             handleMultiFilterRemove(positionKey, value);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           my={4}
         />
         <Text size="sm" mt="xs">
@@ -234,6 +235,7 @@ export default function GroupFilters(): ReactNode {
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
+          scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
         />
         <Text size="sm" mt="xs">
           {t('publishers')}
@@ -250,6 +252,7 @@ export default function GroupFilters(): ReactNode {
             handleMultiFilterRemove(publisherKey, value);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           my={4}
         />
         <Text size="sm" mt="lg">
