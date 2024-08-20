@@ -6,6 +6,8 @@
     "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!",
     "copied": "Kopiëren succesvol",
+    "search": "Zoekopdracht",
+    "submit": "Verzenden",
     "remove": "Verwijderen",
     "refresh": "Vernieuwen",
     "role": "Rol",
@@ -67,6 +69,8 @@
   },
   "integrations": {
     "title": "Integraties",
+    "adAccounts": "Advertentieaccounts",
+    "noAdAccountsFound": "Geen accounts gevonden",
     "description": "Versterk je werk door de tools die je dagelijks gebruikt te verbinden om je advertenties op één plek te beheren!",
     "connect": "Verbinden",
     "revoke": "Intrekken",

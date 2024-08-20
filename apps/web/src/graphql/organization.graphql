@@ -65,7 +65,30 @@ mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
     }
   }
 }
+  
+query availableOrganizationAdAccounts($channel: IntegrationType!) {
+  availableOrganizationAdAccounts(channel: $channel) {
+    id
+    adCount
+    name
+    isConnectedToCurrentOrg
+  }
+}
 
 mutation removeUserFromOrganization($userId: String!) {
   removeUserFromOrganization(userId: $userId)
+}
+
+query organizationAdAccounts($channel: IntegrationType!) {
+  organizationAdAccounts(channel: $channel) {
+    id
+    adCount
+    name
+  }
+}
+
+mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
+  updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
+    id
+  }
 }

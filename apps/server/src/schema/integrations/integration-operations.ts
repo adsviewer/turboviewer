@@ -41,9 +41,10 @@ builder.queryFields((t) => ({
     type: [IntegrationListItemDto],
     nullable: false,
     resolve: async (_root, _args, ctx, _info) => {
+      const rootOrgId = await getRootOrganizationId(ctx.organizationId);
       const integrations = await prisma.integration.findMany({
         where: {
-          organizationId: ctx.organizationId,
+          organizationId: rootOrgId,
         },
       });
 

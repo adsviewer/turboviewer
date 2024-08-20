@@ -6,6 +6,8 @@
     "accessOrgAdmin": "Only organization admins may perform this action!",
     "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!",
     "copied": "Copied to clipboard",
+    "search": "Search",
+    "submit": "Submit",
     "remove": "Remove",
     "refresh": "Refresh",
     "role": "Role",
@@ -67,6 +69,8 @@
   },
   "integrations": {
     "title": "Integrations",
+    "adAccounts": "Ad Accounts",
+    "noAdAccountsFound": "No ad accounts found",
     "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!",
     "connect": "Connect",
     "revoke": "Revoke",

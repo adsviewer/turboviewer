@@ -96,7 +96,6 @@ export function UsersTable(): React.ReactNode {
     setIsPending(true);
     void getOrganization()
       .then((orgRes) => {
-        logger.info(orgRes);
         if (orgRes.data) {
           // We need to re-fetch the logged in user's details since the user's role might've changed
           void getUserDetails()

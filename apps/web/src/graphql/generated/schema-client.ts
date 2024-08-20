@@ -1105,11 +1105,44 @@ export type InviteUsersMutation = {
     | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
 };
 
+export type AvailableOrganizationAdAccountsQueryVariables = Exact<{
+  channel: IntegrationType;
+}>;
+
+export type AvailableOrganizationAdAccountsQuery = {
+  __typename: 'Query';
+  availableOrganizationAdAccounts: Array<{
+    __typename: 'AdAccount';
+    id: string;
+    adCount: number;
+    name: string;
+    isConnectedToCurrentOrg: boolean;
+  }>;
+};
+
 export type RemoveUserFromOrganizationMutationVariables = Exact<{
   userId: Scalars['String']['input'];
 }>;
 
 export type RemoveUserFromOrganizationMutation = { __typename: 'Mutation'; removeUserFromOrganization: boolean };
+
+export type OrganizationAdAccountsQueryVariables = Exact<{
+  channel: IntegrationType;
+}>;
+
+export type OrganizationAdAccountsQuery = {
+  __typename: 'Query';
+  organizationAdAccounts: Array<{ __typename: 'AdAccount'; id: string; adCount: number; name: string }>;
+};
+
+export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
+  adAccountIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+export type UpdateOrganizationAdAccountsMutation = {
+  __typename: 'Mutation';
+  updateOrganizationAdAccounts: { __typename: 'Organization'; id: string };
+};
 
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
@@ -1595,6 +1628,25 @@ export const InviteUsersDocument = gql`
 export function useInviteUsersMutation() {
   return Urql.useMutation<InviteUsersMutation, InviteUsersMutationVariables>(InviteUsersDocument);
 }
+export const AvailableOrganizationAdAccountsDocument = gql`
+  query availableOrganizationAdAccounts($channel: IntegrationType!) {
+    availableOrganizationAdAccounts(channel: $channel) {
+      id
+      adCount
+      name
+      isConnectedToCurrentOrg
+    }
+  }
+`;
+
+export function useAvailableOrganizationAdAccountsQuery(
+  options: Omit<Urql.UseQueryArgs<AvailableOrganizationAdAccountsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<AvailableOrganizationAdAccountsQuery, AvailableOrganizationAdAccountsQueryVariables>({
+    query: AvailableOrganizationAdAccountsDocument,
+    ...options,
+  });
+}
 export const RemoveUserFromOrganizationDocument = gql`
   mutation removeUserFromOrganization($userId: String!) {
     removeUserFromOrganization(userId: $userId)
@@ -1604,6 +1656,37 @@ export const RemoveUserFromOrganizationDocument = gql`
 export function useRemoveUserFromOrganizationMutation() {
   return Urql.useMutation<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
     RemoveUserFromOrganizationDocument,
+  );
+}
+export const OrganizationAdAccountsDocument = gql`
+  query organizationAdAccounts($channel: IntegrationType!) {
+    organizationAdAccounts(channel: $channel) {
+      id
+      adCount
+      name
+    }
+  }
+`;
+
+export function useOrganizationAdAccountsQuery(
+  options: Omit<Urql.UseQueryArgs<OrganizationAdAccountsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<OrganizationAdAccountsQuery, OrganizationAdAccountsQueryVariables>({
+    query: OrganizationAdAccountsDocument,
+    ...options,
+  });
+}
+export const UpdateOrganizationAdAccountsDocument = gql`
+  mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
+    updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
+      id
+    }
+  }
+`;
+
+export function useUpdateOrganizationAdAccountsMutation() {
+  return Urql.useMutation<UpdateOrganizationAdAccountsMutation, UpdateOrganizationAdAccountsMutationVariables>(
+    UpdateOrganizationAdAccountsDocument,
   );
 }
 export const UpdateUserDocument = gql`
