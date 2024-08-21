@@ -140,6 +140,8 @@ const processReport = async (
   channel: ChannelInterface,
 ): Promise<void> => {
   if (!('taskId' in activeReport) || !activeReport.taskId) throw new Error('TaskId is missing');
+  const since = new Date(activeReport.since).toISOString();
+  const until = new Date(activeReport.until).toISOString();
   if (MODE !== Environment.Local) {
     await batchClient.send(
       new SubmitJobCommand({
@@ -150,11 +152,11 @@ const processReport = async (
             { name: AD_ACCOUNT_ID, value: adAccount.id },
             { name: TASK_ID, value: activeReport.taskId },
             { name: CHANNEL_TYPE, value: channelType },
-            { name: SINCE, value: String(activeReport.since) },
-            { name: UNTIL, value: String(activeReport.until) },
+            { name: SINCE, value: since },
+            { name: UNTIL, value: until },
           ],
         },
-        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${String(activeReport.since)}-${String(activeReport.until)}`,
+        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${since}-${until}`,
       }),
     );
   } else {
