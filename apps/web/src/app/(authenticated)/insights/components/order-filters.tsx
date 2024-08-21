@@ -54,8 +54,8 @@ export default function OrderFilters(): React.ReactNode {
   const getOrderByValue = (): string => {
     if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions_rel)) {
       return InsightsColumnsOrderBy.impressions_rel;
-    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions_abs)) {
-      return InsightsColumnsOrderBy.impressions_abs;
+    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.spend_rel)) {
+      return InsightsColumnsOrderBy.spend_rel;
     } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.spend_abs)) {
       return InsightsColumnsOrderBy.spend_abs;
     } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_rel)) {
@@ -63,7 +63,7 @@ export default function OrderFilters(): React.ReactNode {
     } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_abs)) {
       return InsightsColumnsOrderBy.cpm_abs;
     }
-    return InsightsColumnsOrderBy.spend_rel; // default
+    return InsightsColumnsOrderBy.impressions_abs; // default
   };
 
   const getIntervalValue = (): string => {
