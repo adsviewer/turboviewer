@@ -33,7 +33,8 @@ const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
 export const AD_ACCOUNT_ID = 'AD_ACCOUNT_ID';
 export const TASK_ID = 'TASK_ID';
 export const CHANNEL_TYPE = 'CHANNEL_TYPE';
-export const INITIAL = 'INITIAL';
+export const SINCE = 'SINCE';
+export const UNTIL = 'UNTIL';
 
 export const checkReports = async (): Promise<void> => {
   await Promise.all(
@@ -109,23 +110,25 @@ const runAsyncReports = async (
   const adAccounts = await prisma.adAccount.findMany({
     where: { id: { in: reports.map((report) => report.adAccountId) } },
   });
-  const adAccountIdInitialMap = new Map(reports.map((report) => [report.adAccountId, report.initial]));
+  const adAccountIdAdAccountMap = new Map(adAccounts.map((account) => [account.id, account]));
   // eslint-disable-next-line @typescript-eslint/no-floating-promises -- we want to run all the reports in parallel
   await Promise.all(
-    adAccounts.map(async (account) => {
+    reports.map(async (report) => {
+      const account = adAccountIdAdAccountMap.get(report.adAccountId);
+      if (!account) throw new Error('AdAccount is missing');
       const integration = await getDecryptedIntegration(account.integrationId);
       if (isAError(integration)) throw new Error(integration.message);
-      const initial = adAccountIdInitialMap.get(account.id) ?? false;
       return {
-        taskId: await channel.runAdInsightReport(account, integration, initial),
-        initial,
+        taskId: await channel.runAdInsightReport(account, integration, new Date(report.since), new Date(report.until)),
+        since: report.since,
+        until: report.until,
         adAccountId: account.id,
       };
     }),
   ).then((taskIds) =>
-    taskIds.map(({ taskId, adAccountId, initial }) => {
+    taskIds.map(({ taskId, adAccountId, since, until }) => {
       if (isAError(taskId)) return;
-      return adReportStatusToRedis(channelType, adAccountId, initial, JobStatusEnum.PROCESSING, taskId);
+      return adReportStatusToRedis(channelType, adAccountId, since, until, JobStatusEnum.PROCESSING, taskId);
     }),
   );
 };
@@ -147,14 +150,20 @@ const processReport = async (
             { name: AD_ACCOUNT_ID, value: adAccount.id },
             { name: TASK_ID, value: activeReport.taskId },
             { name: CHANNEL_TYPE, value: channelType },
-            { name: INITIAL, value: String(activeReport.initial) },
+            { name: SINCE, value: String(activeReport.since) },
+            { name: UNTIL, value: String(activeReport.until) },
           ],
         },
-        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${String(activeReport.initial)}`,
+        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${String(activeReport.since)}-${String(activeReport.until)}`,
       }),
     );
   } else {
-    await channel.processReport(adAccount, activeReport.taskId, activeReport.initial);
+    await channel.processReport(
+      adAccount,
+      activeReport.taskId,
+      new Date(activeReport.since),
+      new Date(activeReport.until),
+    );
   }
 };
 

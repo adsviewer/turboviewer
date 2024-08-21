@@ -15,5 +15,9 @@ export const awsSchema = z.object({
   AWS_USERNAME: z.string().optional(),
 });
 
+export const apiEndpointSchema = z.object({
+  API_ENDPOINT: z.string().url().default('http://localhost:3000'),
+});
+
 export const TOKEN_KEY = 'av_token';
 export const REFRESH_TOKEN_KEY = 'av_refresh_token';

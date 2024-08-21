@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createEnv } from '@repo/utils';
+import { apiEndpointSchema, createEnv } from '@repo/utils';
 import { channelsSchema } from '@repo/channel-utils';
 
 const schema = z
@@ -7,6 +7,7 @@ const schema = z
     FB_APPLICATION_ID: z.string().min(15).max(17),
     FB_APPLICATION_SECRET: z.string().length(32),
   })
+  .merge(apiEndpointSchema)
   .merge(channelsSchema);
 
 export const env = createEnv(schema);

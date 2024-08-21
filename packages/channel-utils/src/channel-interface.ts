@@ -71,8 +71,18 @@ export interface ChannelInterface {
   getDefaultPublisher: () => PublisherEnum;
   getReportStatus: (adAccount: AdAccountWithIntegration, taskId: string) => Promise<JobStatusEnum>;
   getUserId: (accessToken: string) => Promise<string | AError>;
-  processReport: (adAccount: AdAccountWithIntegration, taskId: string, initial: boolean) => Promise<AError | undefined>;
-  runAdInsightReport: (adAccount: AdAccount, integration: Integration, initial: boolean) => Promise<string | AError>;
+  processReport: (
+    adAccount: AdAccountWithIntegration,
+    taskId: string,
+    since: Date,
+    until: Date,
+  ) => Promise<AError | undefined>;
+  runAdInsightReport: (
+    adAccount: AdAccount,
+    integration: Integration,
+    since: Date,
+    until: Date,
+  ) => Promise<string | AError>;
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   getType: () => IntegrationTypeEnum;

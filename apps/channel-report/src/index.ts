@@ -6,7 +6,7 @@ import { env } from './config';
 
 export const processReport = async (): Promise<void> => {
   logger.info(
-    `Processing report for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, initial ${String(env.INITIAL)}`,
+    `Processing report for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, since ${env.SINCE.toISOString()}, until ${env.UNTIL.toISOString()}`,
   );
 
   const channel = getChannel(env.CHANNEL_TYPE);
@@ -15,9 +15,9 @@ export const processReport = async (): Promise<void> => {
     logger.error(adAccount);
     return;
   }
-  const report = await channel.processReport(adAccount, env.TASK_ID, env.INITIAL);
+  const report = await channel.processReport(adAccount, env.TASK_ID, env.SINCE, env.UNTIL);
   logger.info(
-    `Report processed ${isAError(report) ? 'un' : ''}successfully for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, initial ${String(env.INITIAL)}`,
+    `Report processed ${isAError(report) ? 'un' : ''}successfully for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, since ${env.SINCE.toISOString()}, until ${env.UNTIL.toISOString()}`,
   );
   process.exit(0);
 };

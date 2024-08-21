@@ -15,6 +15,7 @@ import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountWithIntegration,
+  adReportsStatusesToRedis,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -25,11 +26,9 @@ import {
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   JobStatusEnum,
-  adReportsStatusesToRedis,
   saveAccounts,
   saveAds,
   saveInsights,
-  timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
 import csvParser from 'csv-parser';
@@ -208,11 +207,12 @@ export class Tiktok implements ChannelInterface {
   }
 
   async runAdInsightReport(
-    { externalId, id }: AdAccount,
+    { externalId }: AdAccount,
     integration: Integration,
-    initial: boolean,
+    since: Date,
+    until: Date,
   ): Promise<string | AError> {
-    const tikTokTimeRange = await Tiktok.timeRange(initial, id);
+    const tikTokTimeRange = Tiktok.timeRange(since, until);
     const response = await Tiktok.tikTokFetch(integration.accessToken, `${baseUrl}/report/task/create`, {
       method: 'POST',
       body: JSON.stringify({
@@ -264,7 +264,8 @@ export class Tiktok implements ChannelInterface {
   async processReport(
     adAccount: AdAccountWithIntegration,
     taskId: string,
-    initial: boolean,
+    since: Date,
+    until: Date,
   ): Promise<AError | undefined> {
     const adsMap = new Map<string, ChannelAd>();
     const adExternalIdMap = new Map<string, string>();
@@ -295,7 +296,7 @@ export class Tiktok implements ChannelInterface {
         adExternalIdMap,
       );
     if (isAError(response)) return response;
-    await deleteOldInsights(adAccount.id, initial);
+    await deleteOldInsights(adAccount.id, since, until);
     const processed = await Tiktok.csvParseAndProcess(response, fn);
     if (processed) return processed[0];
     return undefined;
@@ -459,14 +460,10 @@ export class Tiktok implements ChannelInterface {
     return await Promise.all(tasks).then((results) => results.flatMap((result) => (result ? [result] : [])));
   };
 
-  private static timeRange = async (
-    initial: boolean,
-    adAccountId: string,
-  ): Promise<{ start_date: string; end_date: string }> => {
-    const range = await timeRange(initial, adAccountId);
+  private static timeRange = (since: Date, until: Date): { start_date: string; end_date: string } => {
     return {
-      start_date: formatYYYMMDDDate(range.since),
-      end_date: formatYYYMMDDDate(range.until),
+      start_date: formatYYYMMDDDate(since),
+      end_date: formatYYYMMDDDate(until),
     };
   };
 

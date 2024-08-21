@@ -1,9 +1,11 @@
 import { type AdAccount, type IntegrationTypeEnum } from '@repo/database';
 import { redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { logger } from '@repo/logger';
+import { timeRanges } from './date-utils';
 
 export interface ProcessReportReq {
-  initial: boolean;
+  since: Date | string;
+  until: Date | string;
   adAccountId: string;
   taskId?: string;
   status: JobStatusEnum;
@@ -27,21 +29,32 @@ export const adReportsStatusesToRedis = async (
   initial: boolean,
 ): Promise<void> => {
   await Promise.all(
-    adAccounts.map(async (account) => adReportStatusToRedis(channelType, account.id, initial, JobStatusEnum.QUEUING)),
+    adAccounts.map(async (account) => {
+      const ranges = await timeRanges(initial, account.id);
+      await Promise.all(
+        ranges.map((range) =>
+          adReportStatusToRedis(channelType, account.id, range.since, range.until, JobStatusEnum.QUEUING),
+        ),
+      );
+    }),
   );
 };
 
 export const adReportStatusToRedis = async (
   channelType: IntegrationTypeEnum,
   adAccountId: string,
-  initial: boolean,
+  since: Date | string,
+  until: Date | string,
   status: JobStatusEnum,
   taskId?: string,
 ): Promise<void> => {
   if (status !== JobStatusEnum.QUEUING) {
-    logger.info(`Should remove adAccountId: ${adAccountId}, status: ${status}, initial: ${String(initial)}`);
+    logger.info(
+      `Should remove adAccountId: ${adAccountId}, status: ${status}, since: ${String(since)}, until: ${String(until)}`,
+    );
     const removed = await redisRemoveFromSet(activeReportRedisKey(channelType), {
-      initial,
+      since,
+      until,
       adAccountId,
       status: JobStatusEnum.QUEUING,
     } satisfies ProcessReportReq);
@@ -50,7 +63,7 @@ export const adReportStatusToRedis = async (
   logger.info(`Adding adAccountId: ${adAccountId}, status: ${status}, taskId: ${String(taskId)}`);
   await redisAddToSet(
     activeReportRedisKey(channelType),
-    { initial, adAccountId, taskId, status } satisfies ProcessReportReq,
+    { since, until, adAccountId, taskId, status } satisfies ProcessReportReq,
     maxTimeToProcessSec,
   );
 };

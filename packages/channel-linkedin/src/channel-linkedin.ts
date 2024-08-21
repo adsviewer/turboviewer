@@ -30,7 +30,7 @@ import {
   saveAccounts,
   saveAds,
   saveInsights,
-  timeRange,
+  timeRanges,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { env } from './config';
@@ -121,14 +121,17 @@ class LinkedIn implements ChannelInterface {
     if (isAError(dbAccounts)) return dbAccounts;
 
     for (const dbAccount of dbAccounts) {
-      const analytics = await this.getAdAnalytics(integration, initial, dbAccount);
-      if (isAError(analytics)) return analytics;
+      const ranges = await timeRanges(initial, dbAccount.id);
+      for (const range of ranges) {
+        const analytics = await this.getAdAnalytics(integration, range, dbAccount);
+        if (isAError(analytics)) return analytics;
 
-      const adExternalIdMap = await this.saveCreativesAsAds(integration, analytics.creativeIds, dbAccount);
-      if (isAError(adExternalIdMap)) return adExternalIdMap;
+        const adExternalIdMap = await this.saveCreativesAsAds(integration, analytics.creativeIds, dbAccount);
+        if (isAError(adExternalIdMap)) return adExternalIdMap;
 
-      await deleteOldInsights(dbAccount.id, initial);
-      await saveInsights(analytics.insights, adExternalIdMap, dbAccount);
+        await deleteOldInsights(dbAccount.id, range.since, range.until);
+        await saveInsights(analytics.insights, adExternalIdMap, dbAccount);
+      }
     }
     return Promise.resolve(undefined);
   }
@@ -195,7 +198,7 @@ class LinkedIn implements ChannelInterface {
 
   private async getAdAnalytics(
     integration: Integration,
-    initial: boolean,
+    range: { since: Date; until: Date },
     dbAccount: AdAccount,
   ): Promise<AError | { creativeIds: Set<string>; insights: ChannelInsight[] }> {
     const params = {
@@ -203,7 +206,7 @@ class LinkedIn implements ChannelInterface {
       pivots: 'List(CREATIVE,IMPRESSION_DEVICE_TYPE)',
       timeGranularity: 'DAILY',
       accounts: `List(${encodeURIComponent(`urn:li:sponsoredAccount:${dbAccount.externalId}`)})`,
-      dateRange: await linkedInTimeRange(initial, dbAccount.id),
+      dateRange: linkedInTimeRange(range),
       fields: 'clicks,impressions,pivotValues,costInLocalCurrency,dateRange',
     };
     const adAnalytics = await LinkedIn.handlePagination(
@@ -368,11 +371,21 @@ class LinkedIn implements ChannelInterface {
     return Promise.resolve(JobStatusEnum.FAILED);
   }
 
-  processReport(_adAccount: AdAccountWithIntegration, _taskId: string, _initial: boolean): Promise<AError | undefined> {
+  processReport(
+    _adAccount: AdAccountWithIntegration,
+    _taskId: string,
+    _since: Date,
+    _until: Date,
+  ): Promise<AError | undefined> {
     return Promise.resolve(new AError('Not implemented'));
   }
 
-  runAdInsightReport(_adAccount: AdAccount, _integration: Integration, _initial: boolean): Promise<string | AError> {
+  runAdInsightReport(
+    _adAccount: AdAccount,
+    _integration: Integration,
+    _since: Date,
+    _until: Date,
+  ): Promise<string | AError> {
     return Promise.resolve(new AError('Not implemented'));
   }
 
@@ -394,10 +407,10 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
   return false;
 };
 
-const linkedInTimeRange = async (initial: boolean, adAccountId: string): Promise<string> => {
-  const range = await timeRange(initial, adAccountId);
-  const { year, month, day } = extractDate(range.since);
-  return `(start:(year:${String(year)},month:${month},day:${day}))`;
+const linkedInTimeRange = ({ since, until }: { since: Date; until: Date }): string => {
+  const { year: yearSince, month: monthSince, day: daySince } = extractDate(since);
+  const { year: yearUntil, month: monthUntil, day: dayUntil } = extractDate(until);
+  return `(start:(year:${String(yearSince)},month:${monthSince},day:${daySince}),end:(year:${String(yearUntil)},month:${String(monthUntil)},day:${String(dayUntil)}))`;
 };
 
 const queryParams = (params: Record<string, string>): string => {
