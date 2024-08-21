@@ -1,7 +1,7 @@
 import { IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
-import { FireAndForget, isAError } from '@repo/utils';
+import { FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
 import {
   activeReportRedisKey,
   type AdAccountWithIntegration,
@@ -140,8 +140,8 @@ const processReport = async (
   channel: ChannelInterface,
 ): Promise<void> => {
   if (!('taskId' in activeReport) || !activeReport.taskId) throw new Error('TaskId is missing');
-  const since = new Date(activeReport.since).toISOString();
-  const until = new Date(activeReport.until).toISOString();
+  const since = new Date(activeReport.since);
+  const until = new Date(activeReport.until);
   if (MODE !== Environment.Local) {
     await batchClient.send(
       new SubmitJobCommand({
@@ -152,11 +152,11 @@ const processReport = async (
             { name: AD_ACCOUNT_ID, value: adAccount.id },
             { name: TASK_ID, value: activeReport.taskId },
             { name: CHANNEL_TYPE, value: channelType },
-            { name: SINCE, value: since },
-            { name: UNTIL, value: until },
+            { name: SINCE, value: since.toISOString() },
+            { name: UNTIL, value: until.toISOString() },
           ],
         },
-        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${since}-${until}`,
+        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${formatYYYMMDDDate(since)}-${formatYYYMMDDDate(until)}`,
       }),
     );
   } else {
