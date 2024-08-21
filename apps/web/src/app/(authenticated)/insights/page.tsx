@@ -17,7 +17,7 @@ interface InsightsProps {
 }
 
 export default function Insights({ searchParams }: InsightsProps): ReactNode {
-  const orderBy = searchParams.orderBy ?? InsightsColumnsOrderBy.spend_rel;
+  const orderBy = searchParams.orderBy ?? InsightsColumnsOrderBy.impressions_abs;
   const order = searchParams.order ?? OrderBy.desc;
   const pageSize = parseInt(searchParams.pageSize ?? '12', 10);
   const page = parseInt(searchParams.page ?? '1', 10);
