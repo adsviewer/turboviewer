@@ -1,6 +1,6 @@
 import { type AdAccount, type Integration, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { AError, getBeforeXMonths, getYesterday, isAError } from '@repo/utils';
+import { AError, isAError } from '@repo/utils';
 import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
 
 export const saveAccounts = async (
@@ -101,24 +101,12 @@ export const saveInsights = async (
   if (!isAError(createInsights)) logger.info('Saved %d insights for %s', insights.length, dbAccount.id);
 };
 
-export const deleteOldInsights = async (adAccountId: string, initial: boolean): Promise<void> => {
-  const gteP = (async () => {
-    if (initial) {
-      return getBeforeXMonths();
-    }
-    const latestInsight = await prisma.insight.findFirst({
-      select: { date: true },
-      where: { adAccountId },
-      orderBy: { date: 'desc' },
-    });
-    return latestInsight ? getYesterday(latestInsight.date) : getYesterday();
-  })();
-  const gte = await gteP;
-  logger.info(`Deleting insights for ${adAccountId}, after ${String(gte)}`);
+export const deleteOldInsights = async (adAccountId: string, since: Date, until: Date): Promise<void> => {
+  logger.info(`Deleting insights for ${adAccountId}, since ${since.toISOString()} until ${until.toISOString()}`);
   await prisma.insight.deleteMany({
     where: {
       adAccountId,
-      date: { gte },
+      date: { gte: since, lte: until },
     },
   });
 };

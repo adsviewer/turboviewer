@@ -28,6 +28,7 @@ import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import _ from 'lodash';
 import {
   type AdAccountWithIntegration,
+  adReportsStatusesToRedis,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -43,14 +44,12 @@ import {
   getIFrameAdFormat,
   isMetaAdPosition,
   JobStatusEnum,
+  markErrorIntegrationById,
   MetaError,
   revokeIntegration,
-  markErrorIntegrationById,
-  adReportsStatusesToRedis,
   saveAccounts,
   saveAds,
   saveInsights,
-  timeRange,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { retry } from '@lifeomic/attempt';
@@ -384,7 +383,8 @@ class Meta implements ChannelInterface {
   async processReport(
     adAccount: AdAccountWithIntegration,
     taskId: string,
-    initial: boolean,
+    since: Date,
+    until: Date,
   ): Promise<AError | undefined> {
     adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
     const reportId = taskId;
@@ -442,7 +442,7 @@ class Meta implements ChannelInterface {
       await this.saveAdsAndInsights(i, adExternalIdMap, adAccount);
       return undefined;
     };
-    await deleteOldInsights(adAccount.id, initial);
+    await deleteOldInsights(adAccount.id, since, until);
     const accountInsightsAndAds = await Meta.handlePaginationFn(
       adAccount.integration,
       getInsightsFn,
@@ -456,13 +456,14 @@ class Meta implements ChannelInterface {
   async runAdInsightReport(
     adAccount: DbAdAccount,
     integration: Integration,
-    initial: boolean,
+    since: Date,
+    until: Date,
   ): Promise<string | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const adReportRunSchema = z.object({ id: z.string() });
     const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
     const resp = await Meta.sdk(async () => {
-      const mtimeRange = await metaTimeRange(initial, adAccount.id);
+      const mtimeRange = { since: formatYYYMMDDDate(since), until: formatYYYMMDDDate(until) };
       logger.info(`Running report for account ${adAccount.id} with time range ${JSON.stringify(mtimeRange)}`);
       return account.getInsightsAsync(
         [
@@ -661,14 +662,6 @@ class Meta implements ChannelInterface {
     return IntegrationTypeEnum.META;
   }
 }
-
-const metaTimeRange = async (initial: boolean, adAccountId: string): Promise<{ until: string; since: string }> => {
-  const range = await timeRange(initial, adAccountId);
-  return {
-    until: formatYYYMMDDDate(range.until),
-    since: formatYYYMMDDDate(range.since),
-  };
-};
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
   const metaErrorValidatingAccessTokenChangedSession =
