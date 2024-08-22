@@ -26,7 +26,7 @@ const batchClient = new BatchClient({ region: env.AWS_REGION });
 const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
-  [IntegrationTypeEnum.TIKTOK, 3],
+  [IntegrationTypeEnum.TIKTOK, 2],
   [IntegrationTypeEnum.META, 10],
 ]);
 
