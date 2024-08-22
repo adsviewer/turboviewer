@@ -51,12 +51,14 @@ resource "aws_lambda_function" "channel_report_check_lambda" {
       }, {
       for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.value
       }, {
-      AWS_ACCOUNT_ID  = data.aws_caller_identity.current.account_id
-      CHANNEL_SECRET  = aws_ssm_parameter.channel_secret.value
-      DATABASE_URL    = aws_ssm_parameter.database_url.value
-      DATABASE_RO_URL = aws_ssm_parameter.database_ro_url.value
-      IS_LAMBDA       = true
-      MODE            = var.environment
+      AWS_ACCOUNT_ID                        = data.aws_caller_identity.current.account_id
+      CHANNEL_PROCESS_REPORT_JOB_DEFINITION = aws_batch_job_definition.channel_report_process.arn
+      CHANNEL_PROCESS_REPORT_JOB_QUEUE      = aws_batch_job_queue.channel_report_process.arn
+      CHANNEL_SECRET                        = aws_ssm_parameter.channel_secret.value
+      DATABASE_URL                          = aws_ssm_parameter.database_url.value
+      DATABASE_RO_URL                       = aws_ssm_parameter.database_ro_url.value
+      IS_LAMBDA                             = true
+      MODE                                  = var.environment
     })
   }
   function_name = local.channel_report_check_name

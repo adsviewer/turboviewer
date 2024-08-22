@@ -93,14 +93,12 @@ module "server" {
   domain_zone_id  = aws_route53_zone.zone.id
   environment     = var.environment
   environment_variables = {
-    AWS_ACCOUNT_ID                        = data.aws_caller_identity.current.account_id
-    AWS_REGION                            = data.aws_region.current.name
-    API_ENDPOINT                          = local.server_api_endpoint
-    CHANNEL_PROCESS_REPORT_JOB_DEFINITION = aws_batch_job_definition.channel_report_process.arn
-    CHANNEL_PROCESS_REPORT_JOB_QUEUE      = aws_batch_job_queue.channel_report_process.arn
-    MODE                                  = var.environment
-    PORT                                  = 4000,
-    PUBLIC_URL                            = local.full_domain
+    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+    AWS_REGION     = data.aws_region.current.name
+    API_ENDPOINT   = local.server_api_endpoint
+    MODE           = var.environment
+    PORT           = 4000,
+    PUBLIC_URL     = local.full_domain
   }
   github_role_name                     = var.github_role_name
   mapped_secrets                       = local.server_secrets
