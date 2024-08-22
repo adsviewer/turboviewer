@@ -24,6 +24,24 @@ resource "aws_iam_role_policy_attachment" "channel_report_check_basic_policy_att
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+data "aws_iam_policy_document" "channel_report_check_policy_document" {
+  statement {
+    actions = ["batch:SubmitJob"]
+    resources = [
+      aws_batch_job_queue.channel_report_process.arn,
+      "arn:aws:batch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:job-definition/${local.channel_process_report}:*",
+    ]
+  }
+}
+resource "aws_iam_policy" "channel_report_check_policy" {
+  name   = local.channel_report_check_name
+  policy = data.aws_iam_policy_document.channel_report_check_policy_document.json
+}
+resource "aws_iam_role_policy_attachment" "channel_report_check_policy_attachment" {
+  role       = aws_iam_role.channel_report_check_role.id
+  policy_arn = aws_iam_policy.channel_report_check_policy.arn
+}
+
 resource "aws_lambda_function" "channel_report_check_lambda" {
   architectures = ["arm64"]
   description   = "Ingests channel data"
@@ -33,12 +51,14 @@ resource "aws_lambda_function" "channel_report_check_lambda" {
       }, {
       for k, v in aws_ssm_parameter.server_secrets : upper(k) => v.value
       }, {
-      AWS_ACCOUNT_ID  = data.aws_caller_identity.current.account_id
-      CHANNEL_SECRET  = aws_ssm_parameter.channel_secret.value
-      DATABASE_URL    = aws_ssm_parameter.database_url.value
-      DATABASE_RO_URL = aws_ssm_parameter.database_ro_url.value
-      IS_LAMBDA       = true
-      MODE            = var.environment
+      AWS_ACCOUNT_ID                        = data.aws_caller_identity.current.account_id
+      CHANNEL_PROCESS_REPORT_JOB_DEFINITION = aws_batch_job_definition.channel_report_process.arn
+      CHANNEL_PROCESS_REPORT_JOB_QUEUE      = aws_batch_job_queue.channel_report_process.arn
+      CHANNEL_SECRET                        = aws_ssm_parameter.channel_secret.value
+      DATABASE_URL                          = aws_ssm_parameter.database_url.value
+      DATABASE_RO_URL                       = aws_ssm_parameter.database_ro_url.value
+      IS_LAMBDA                             = true
+      MODE                                  = var.environment
     })
   }
   function_name = local.channel_report_check_name
@@ -118,6 +138,7 @@ resource "aws_cloudwatch_log_metric_filter" "channel_report_check_lambda_log_err
     value     = "1"
     unit      = "Count"
   }
+  depends_on = [aws_lambda_function.channel_report_check_lambda]
 }
 resource "aws_cloudwatch_metric_alarm" "channel_report_check_lambda_error_alarm" {
   alarm_name          = local.channel_report_check_alarm_name
@@ -128,6 +149,6 @@ resource "aws_cloudwatch_metric_alarm" "channel_report_check_lambda_error_alarm"
   period              = 60
   statistic           = "SampleCount"
   threshold           = 1
-  alarm_description   = "Alarm when the channel ingress lambda has errors"
+  alarm_description   = "Alarm when the channel report check lambda has errors"
   alarm_actions       = [aws_sns_topic.channel_report_check_error_topic.arn]
 }
