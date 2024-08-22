@@ -45,7 +45,7 @@ data "aws_iam_policy_document" "sns_policy_document" {
   statement {
     actions = ["sns:Subscribe", "sns:Unsubscribe"]
     resources = [
-      aws_sns_topic.channel_data_refresh_topic.arn, aws_sns_topic.channel_report_report_topic.arn,
+      aws_sns_topic.channel_data_refresh_topic.arn
     ]
   }
 }

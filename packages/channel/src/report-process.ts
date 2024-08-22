@@ -1,7 +1,7 @@
 import { IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
-import { FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
+import { formatYYYMMDDDate, isAError } from '@repo/utils';
 import {
   activeReportRedisKey,
   type AdAccountWithIntegration,
@@ -14,12 +14,9 @@ import {
   successExpirationSec,
 } from '@repo/channel-utils';
 import { Environment, MODE } from '@repo/mode';
-import type { Request, Response } from 'express';
 import { BatchClient, SubmitJobCommand } from '@aws-sdk/client-batch';
 import { env } from './config';
 import { getChannel } from './channel-helper';
-
-const fireAndForget = new FireAndForget({ concurrency: 100 });
 
 const batchClient = new BatchClient({ region: env.AWS_REGION });
 
@@ -27,7 +24,7 @@ const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
   [IntegrationTypeEnum.TIKTOK, 2],
-  [IntegrationTypeEnum.META, 10],
+  [IntegrationTypeEnum.META, 5],
 ]);
 
 export const AD_ACCOUNT_ID = 'AD_ACCOUNT_ID';
@@ -54,13 +51,6 @@ export const checkReports = async (): Promise<void> => {
       await runAsyncReports(channelType, reportsToStart, channel);
     }),
   );
-};
-
-export const channelDataReportWebhook = (_req: Request, res: Response): void => {
-  fireAndForget.add(() => checkReports());
-  res.send({
-    statusCode: 200,
-  });
 };
 
 const updateReports = (
