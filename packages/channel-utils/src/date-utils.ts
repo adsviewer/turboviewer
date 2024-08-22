@@ -16,7 +16,7 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
   return splitTimeRange(range.since, range.until);
 };
 
-const maxTimePeriodDays = 10; // 10 days
+const maxTimePeriodDays = 90; // 90 days
 const maxTimePeriod = 1000 * 60 * 60 * 24 * maxTimePeriodDays;
 export const splitTimeRange = (since: Date, until: Date = new Date()): { since: Date; until: Date }[] => {
   if (since.getTime() > new Date().getTime()) return [];

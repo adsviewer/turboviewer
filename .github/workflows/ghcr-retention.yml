@@ -18,7 +18,7 @@ jobs:
       - name: Delete containers older than a week
         uses: snok/container-retention-policy@v2
         with:
-          image-names: server, channel-ingress
+          image-names: server, channel-ingress, channel-report-check, channel-report
           cut-off: A week ago UTC
           timestamp-to-use: updated_at
           account-type: org

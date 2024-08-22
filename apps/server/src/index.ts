@@ -6,7 +6,7 @@ import { logger } from '@repo/logger';
 import bodyParser from 'body-parser';
 import { IntegrationTypeEnum } from '@repo/database';
 import { FireAndForget } from '@repo/utils';
-import { authCallback, channelDataReportWebhook, getChannel, invokeChannelIngress } from '@repo/channel';
+import { authCallback, getChannel, invokeChannelIngress } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
 import * as Sentry from '@sentry/node';
 import { Environment, MODE } from '@repo/mode';
@@ -60,7 +60,6 @@ const index = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.get(`/api${authConfirmInvitedUserEndpoint}`, authConfirmInvitedUserRateLimiter, authConfirmInvitedUserCallback);
   app.post('/api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
-  app.post('/api/channel/report', snsMiddleware, channelDataReportWebhook);
   app.post(
     '/api/fb/sign-out',
     bodyParser.urlencoded({ extended: true }),
