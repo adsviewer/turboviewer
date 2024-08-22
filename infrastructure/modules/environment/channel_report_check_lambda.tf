@@ -118,6 +118,7 @@ resource "aws_cloudwatch_log_metric_filter" "channel_report_check_lambda_log_err
     value     = "1"
     unit      = "Count"
   }
+  depends_on = [aws_lambda_function.channel_report_check_lambda]
 }
 resource "aws_cloudwatch_metric_alarm" "channel_report_check_lambda_error_alarm" {
   alarm_name          = local.channel_report_check_alarm_name
