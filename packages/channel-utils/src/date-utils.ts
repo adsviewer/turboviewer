@@ -19,9 +19,13 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
 const maxTimePeriodDays = 10; // 10 days
 const maxTimePeriod = 1000 * 60 * 60 * 24 * maxTimePeriodDays;
 export const splitTimeRange = (since: Date, until: Date = new Date()): { since: Date; until: Date }[] => {
+  if (since.getTime() > new Date().getTime()) return [];
+
   const periods: { since: Date; until: Date }[] = [];
+
   const diff = until.getTime() - since.getTime();
   if (diff < maxTimePeriod) return [{ since, until }];
+
   const newDateUntil = addInterval(since, 'day', maxTimePeriodDays - 1);
   periods.push({ since, until: newDateUntil });
   const newDateSince = getTomorrowStartOfDay(newDateUntil);
