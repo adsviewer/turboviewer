@@ -1,0 +1,39 @@
+query settingsChannels {
+  settingsChannels {
+    type
+    status
+    authUrl
+  }
+}
+
+query integrations {
+  integrations {
+    type
+    lastSyncedAt
+    status
+    adAccounts {
+      adCount
+    }
+  }
+}
+
+mutation deAuthIntegration($type: IntegrationType!) {
+  deAuthIntegration(type: $type) {
+    ... on BaseError {
+      message
+    }
+    ... on MetaError {
+      message
+    }
+    ... on MutationDeAuthIntegrationSuccess {
+      data
+    }
+  }
+}
+
+subscription channelInitialSetupProgress {
+  channelInitialSetupProgress {
+    progress
+    channel
+  }
+}
