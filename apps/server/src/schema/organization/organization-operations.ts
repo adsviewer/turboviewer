@@ -168,7 +168,7 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  removeUserFromOrganization: t.withAuth({ isOrgAdmin: true, isOrgOperator: true }).field({
+  removeUserFromOrganization: t.withAuth({ isInOrg: true }).field({
     type: 'Boolean',
     nullable: false,
     args: {
@@ -183,6 +183,9 @@ builder.mutationFields((t) => ({
       }
       if (ctx.isOrgOperator && userOrganization.role === OrganizationRoleEnum.ORG_ADMIN) {
         throw new GraphQLError('Only organization administrators can remove organization administrators');
+      }
+      if (ctx.isOrgMember && ctx.currentUserId !== args.userId) {
+        throw new GraphQLError('Not authorized to remove other users from the organization');
       }
       if (ctx.currentUserId === args.userId && ctx.isOrgAdmin) {
         const otherAdmins = await prisma.userOrganization.count({

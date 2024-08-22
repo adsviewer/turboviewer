@@ -24,6 +24,7 @@ export interface InOrganizationContext extends GraphQLContext {
   isAdmin: NonNullable<GraphQLContext['isAdmin']>;
   isOrgAdmin: NonNullable<GraphQLContext['isOrgAdmin']>;
   isOrgOperator: NonNullable<GraphQLContext['isOrgOperator']>;
+  isOrgMember: NonNullable<GraphQLContext['isOrgMember']>;
 }
 
 export interface RefreshContext extends GraphQLContext {
@@ -50,6 +51,7 @@ export const builder = new SchemaBuilder<{
     isAdmin: boolean;
     isOrgAdmin: boolean;
     isOrgOperator: boolean;
+    isOrgMember: boolean;
     isRootOrg: boolean;
     isInOrg: boolean;
     refresh: boolean;
@@ -60,6 +62,7 @@ export const builder = new SchemaBuilder<{
     isAdmin: AuthenticatedContext;
     isOrgAdmin: InOrganizationContext;
     isOrgOperator: InOrganizationContext;
+    isOrgMember: InOrganizationContext;
     isInOrg: InOrganizationContext;
     refresh: RefreshContext;
     emailUnconfirmed: InOrganizationContext;
@@ -76,6 +79,7 @@ export const builder = new SchemaBuilder<{
       isAdmin: Boolean(context.isAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
       isOrgAdmin: Boolean(context.isOrgAdmin) && !context.isRefreshToken && !context.emailUnconfirmed,
       isOrgOperator: Boolean(context.isOrgOperator) && !context.isRefreshToken && !context.emailUnconfirmed,
+      isOrgMember: Boolean(context.isOrgMember) && !context.isRefreshToken && !context.emailUnconfirmed,
       isRootOrg: async () =>
         Boolean(
           context.organizationId && context.organizationId === (await getRootOrganizationId(context.organizationId)),

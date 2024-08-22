@@ -15,6 +15,7 @@ export interface GraphQLContext {
   isOrgAdmin: boolean | undefined;
   isOrgOperator: boolean | undefined;
   isInOrg: boolean | undefined;
+  isOrgMember: boolean | undefined;
   isRefreshToken: boolean | undefined;
   request: {
     operatingSystem: string;
@@ -41,6 +42,7 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
     isAdmin: token?.roles?.includes(RoleEnum.ADMIN),
     isOrgAdmin: token?.roles?.includes(OrganizationRoleEnum.ORG_ADMIN),
     isOrgOperator: token?.roles?.includes(OrganizationRoleEnum.ORG_OPERATOR),
+    isOrgMember: token?.roles?.includes(OrganizationRoleEnum.ORG_MEMBER),
     isInOrg: token?.roles?.some((r) =>
       [OrganizationRoleEnum.ORG_ADMIN, OrganizationRoleEnum.ORG_MEMBER, OrganizationRoleEnum.ORG_OPERATOR].includes(
         r as OrganizationRoleEnum,
