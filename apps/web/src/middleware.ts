@@ -84,6 +84,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       return NextResponse.redirect(redirectUrl);
     }
     const redirectUrl = new URL('/sign-in', request.url);
+    redirectUrl.search = request.nextUrl.search;
     return NextResponse.redirect(redirectUrl);
   }
 

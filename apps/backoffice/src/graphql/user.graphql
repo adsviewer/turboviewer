@@ -2,14 +2,14 @@ query refreshToken {
   refreshToken
 }
 
-mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
-  updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
+query me {
+  me {
     ...UserFields
   }
 }
 
-query me {
-  me {
+mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
+  updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
     ...UserFields
   }
 }
@@ -21,22 +21,4 @@ fragment UserFields on User {
   email
   photoUrl
   allRoles
-  organizations {
-    organization {
-      id
-      name
-    }
-  }
-  currentOrganizationId
-  currentOrganization {
-    id
-    name
-    isRoot
-    parentId
-    integrations {
-      status
-      type
-      accessTokenExpiresAt
-    }
-  }
 }

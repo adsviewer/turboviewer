@@ -34,6 +34,17 @@ const config: CodegenConfig = {
       },
       documents: ['../web/src/graphql/*.graphql'],
     },
+    '../backoffice/src/graphql/generated/schema-server.ts': {
+      plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
+      config: {
+        nonOptionalTypename: true,
+        withHooks: true,
+        namingConvention: {
+          enumValues: 'keep',
+        },
+      },
+      documents: ['../backoffice/src/graphql/*.graphql'],
+    },
     '../web-old/src/graphql/generated/schema-server.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
       config: {

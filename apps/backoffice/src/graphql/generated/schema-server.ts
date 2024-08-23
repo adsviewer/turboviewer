@@ -531,6 +531,7 @@ export type Mutation = {
   /** Deletes the invitation link for the given role */
   deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
+  emulateAdmin: Tokens;
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
@@ -570,6 +571,10 @@ export type MutationDeleteInvitationLinkArgs = {
 
 export type MutationDeleteOrganizationArgs = {
   organizationId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationEmulateAdminArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 export type MutationForgetPasswordArgs = {
@@ -728,6 +733,7 @@ export type Query = {
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
+  organizations: Array<Organization>;
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   settingsChannels: Array<IntegrationListItem>;
@@ -849,298 +855,39 @@ export type ZodFieldError = {
   path: Array<Scalars['String']['output']>;
 };
 
-export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
+export type GetOrganizationsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type AdAccountsQuery = {
+export type GetOrganizationsQuery = {
   __typename: 'Query';
-  integrations: Array<{
-    __typename: 'Integration';
-    lastSyncedAt?: Date | null;
-    adAccounts: Array<{ __typename: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number }>;
-  }>;
+  organizations: Array<{ __typename: 'Organization'; id: string; name: string }>;
 };
 
-export type InsightsQueryVariables = Exact<{
-  adAccountIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-  adIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-  dateFrom?: InputMaybe<Scalars['Date']['input']>;
-  dateTo?: InputMaybe<Scalars['Date']['input']>;
-  devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
-  interval: InsightsInterval;
-  publishers?: InputMaybe<Array<PublisherEnum> | PublisherEnum>;
-  positions?: InputMaybe<Array<InsightsPosition> | InsightsPosition>;
-  order?: InputMaybe<OrderBy>;
-  orderBy: InsightsColumnsOrderBy;
-  groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
-  pageSize: Scalars['Int']['input'];
-  page: Scalars['Int']['input'];
+export type EmulateAdminMutationVariables = Exact<{
+  organizationId: Scalars['String']['input'];
 }>;
 
-export type InsightsQuery = {
-  __typename: 'Query';
-  insights: {
-    __typename: 'GroupedInsight';
-    hasNext: boolean;
-    edges: Array<{
-      __typename: 'GroupedInsights';
-      id: string;
-      adAccountId?: string | null;
-      adAccountName?: string | null;
-      adId?: string | null;
-      adName?: string | null;
-      currency: CurrencyEnum;
-      device?: DeviceEnum | null;
-      publisher?: PublisherEnum | null;
-      position?: string | null;
-      datapoints: Array<{
-        __typename: 'InsightsDatapoints';
-        date: Date;
-        spend: number;
-        impressions: number;
-        cpm?: number | null;
-      }>;
-      iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number } | null;
-    }>;
-  };
-};
-
-export type LastThreeMonthsAdsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type LastThreeMonthsAdsQuery = {
-  __typename: 'Query';
-  lastThreeMonthsAds: Array<{ __typename: 'Ad'; id: string; name?: string | null }>;
-};
-
-export type SettingsChannelsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type SettingsChannelsQuery = {
-  __typename: 'Query';
-  settingsChannels: Array<{
-    __typename: 'IntegrationListItem';
-    type: IntegrationType;
-    status: IntegrationStatus;
-    authUrl?: string | null;
-  }>;
-};
-
-export type IntegrationsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type IntegrationsQuery = {
-  __typename: 'Query';
-  integrations: Array<{
-    __typename: 'Integration';
-    type: IntegrationType;
-    lastSyncedAt?: Date | null;
-    status: IntegrationStatus;
-    adAccounts: Array<{ __typename: 'AdAccount'; adCount: number }>;
-  }>;
-};
-
-export type DeAuthIntegrationMutationVariables = Exact<{
-  type: IntegrationType;
-}>;
-
-export type DeAuthIntegrationMutation = {
+export type EmulateAdminMutation = {
   __typename: 'Mutation';
-  deAuthIntegration:
-    | { __typename: 'BaseError'; message: string }
-    | { __typename: 'MetaError'; message: string }
-    | { __typename: 'MutationDeAuthIntegrationSuccess'; data: string };
-};
-
-export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: string]: never }>;
-
-export type ChannelInitialSetupProgressSubscription = {
-  __typename: 'Subscription';
-  channelInitialSetupProgress: {
-    __typename: 'ChannelInitialProgressPayload';
-    progress: number;
-    channel: IntegrationType;
-  };
-};
-
-export type LoginMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-}>;
-
-export type LoginMutation = {
-  __typename: 'Mutation';
-  login: { __typename: 'Tokens'; token: string; refreshToken: string };
-};
-
-export type SignupMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-  firstName: Scalars['String']['input'];
-  lastName: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  inviteHash?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-export type SignupMutation = {
-  __typename: 'Mutation';
-  signup: { __typename: 'Tokens'; token: string; refreshToken: string };
-};
-
-export type ForgetPasswordMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-}>;
-
-export type ForgetPasswordMutation = { __typename: 'Mutation'; forgetPassword: boolean };
-
-export type ResetPasswordMutationVariables = Exact<{
-  token: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-}>;
-
-export type ResetPasswordMutation = {
-  __typename: 'Mutation';
-  resetPassword: { __typename: 'Tokens'; token: string; refreshToken: string };
+  emulateAdmin: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type RefreshTokenQueryVariables = Exact<{ [key: string]: never }>;
 
 export type RefreshTokenQuery = { __typename: 'Query'; refreshToken: string };
 
-export type ResendEmailConfirmationMutationVariables = Exact<{ [key: string]: never }>;
+export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ResendEmailConfirmationMutation = { __typename: 'Mutation'; resendEmailConfirmation: boolean };
-
-export type LoginProvidersQueryVariables = Exact<{
-  inviteHash?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-export type LoginProvidersQuery = {
+export type MeQuery = {
   __typename: 'Query';
-  loginProviders: Array<{ __typename: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
-};
-
-export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
-
-export type GetOrganizationQuery = {
-  __typename: 'Query';
-  organization: {
-    __typename: 'Organization';
+  me: {
+    __typename: 'User';
     id: string;
-    userOrganizations: Array<{
-      __typename: 'UserOrganization';
-      userId: string;
-      role: OrganizationRoleEnum;
-      status: UserOrganizationStatus;
-      user: {
-        __typename: 'User';
-        id: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        photoUrl?: string | null;
-      };
-    }>;
+    firstName: string;
+    lastName: string;
+    email: string;
+    photoUrl?: string | null;
+    allRoles: Array<AllRoles>;
   };
-};
-
-export type UpdateOrganizationUserMutationVariables = Exact<{
-  userId: Scalars['String']['input'];
-  role?: InputMaybe<OrganizationRoleEnum>;
-}>;
-
-export type UpdateOrganizationUserMutation = {
-  __typename: 'Mutation';
-  updateOrganizationUser: {
-    __typename: 'UserOrganization';
-    role: OrganizationRoleEnum;
-    organization: { __typename: 'Organization'; id: string };
-  };
-};
-
-export type CreateOrganizationMutationVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-export type CreateOrganizationMutation = {
-  __typename: 'Mutation';
-  createOrganization: { __typename: 'Organization'; id: string; name: string };
-};
-
-export type UpdateOrganizationMutationVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-export type UpdateOrganizationMutation = {
-  __typename: 'Mutation';
-  updateOrganization: { __typename: 'Organization'; id: string; name: string };
-};
-
-export type SwitchOrganizationMutationVariables = Exact<{
-  organizationId: Scalars['String']['input'];
-}>;
-
-export type SwitchOrganizationMutation = {
-  __typename: 'Mutation';
-  switchOrganization: { __typename: 'Tokens'; token: string; refreshToken: string };
-};
-
-export type DeleteOrganizationMutationVariables = Exact<{
-  organizationId: Scalars['String']['input'];
-}>;
-
-export type DeleteOrganizationMutation = {
-  __typename: 'Mutation';
-  deleteOrganization: { __typename: 'Organization'; id: string };
-};
-
-export type InviteUsersMutationVariables = Exact<{
-  emails: Array<Scalars['String']['input']> | Scalars['String']['input'];
-  role: OrganizationRoleEnum;
-}>;
-
-export type InviteUsersMutation = {
-  __typename: 'Mutation';
-  inviteUsers:
-    | {
-        __typename: 'InviteUsersErrors';
-        error: Array<{ __typename: 'InviteUsersError'; email: string; message: string }>;
-      }
-    | { __typename: 'MutationInviteUsersSuccess'; data: boolean };
-};
-
-export type AvailableOrganizationAdAccountsQueryVariables = Exact<{
-  channel: IntegrationType;
-}>;
-
-export type AvailableOrganizationAdAccountsQuery = {
-  __typename: 'Query';
-  availableOrganizationAdAccounts: Array<{
-    __typename: 'AdAccount';
-    id: string;
-    adCount: number;
-    name: string;
-    isConnectedToCurrentOrg: boolean;
-  }>;
-};
-
-export type RemoveUserFromOrganizationMutationVariables = Exact<{
-  userId: Scalars['String']['input'];
-}>;
-
-export type RemoveUserFromOrganizationMutation = { __typename: 'Mutation'; removeUserFromOrganization: boolean };
-
-export type OrganizationAdAccountsQueryVariables = Exact<{
-  channel: IntegrationType;
-}>;
-
-export type OrganizationAdAccountsQuery = {
-  __typename: 'Query';
-  organizationAdAccounts: Array<{ __typename: 'AdAccount'; id: string; adCount: number; name: string }>;
-};
-
-export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
-  adAccountIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
-}>;
-
-export type UpdateOrganizationAdAccountsMutation = {
-  __typename: 'Mutation';
-  updateOrganizationAdAccounts: { __typename: 'Organization'; id: string };
 };
 
 export type UpdateUserMutationVariables = Exact<{
@@ -1160,57 +907,6 @@ export type UpdateUserMutation = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
-    currentOrganizationId?: string | null;
-    organizations: Array<{
-      __typename: 'UserOrganization';
-      organization: { __typename: 'Organization'; id: string; name: string };
-    }>;
-    currentOrganization?: {
-      __typename: 'Organization';
-      id: string;
-      name: string;
-      isRoot: boolean;
-      parentId?: string | null;
-      integrations: Array<{
-        __typename: 'Integration';
-        status: IntegrationStatus;
-        type: IntegrationType;
-        accessTokenExpiresAt?: Date | null;
-      }>;
-    } | null;
-  };
-};
-
-export type MeQueryVariables = Exact<{ [key: string]: never }>;
-
-export type MeQuery = {
-  __typename: 'Query';
-  me: {
-    __typename: 'User';
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    photoUrl?: string | null;
-    allRoles: Array<AllRoles>;
-    currentOrganizationId?: string | null;
-    organizations: Array<{
-      __typename: 'UserOrganization';
-      organization: { __typename: 'Organization'; id: string; name: string };
-    }>;
-    currentOrganization?: {
-      __typename: 'Organization';
-      id: string;
-      name: string;
-      isRoot: boolean;
-      parentId?: string | null;
-      integrations: Array<{
-        __typename: 'Integration';
-        status: IntegrationStatus;
-        type: IntegrationType;
-        accessTokenExpiresAt?: Date | null;
-      }>;
-    } | null;
   };
 };
 
@@ -1222,24 +918,6 @@ export type UserFieldsFragment = {
   email: string;
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
-  currentOrganizationId?: string | null;
-  organizations: Array<{
-    __typename: 'UserOrganization';
-    organization: { __typename: 'Organization'; id: string; name: string };
-  }>;
-  currentOrganization?: {
-    __typename: 'Organization';
-    id: string;
-    name: string;
-    isRoot: boolean;
-    parentId?: string | null;
-    integrations: Array<{
-      __typename: 'Integration';
-      status: IntegrationStatus;
-      type: IntegrationType;
-      accessTokenExpiresAt?: Date | null;
-    }>;
-  } | null;
 };
 
 export const UserFieldsFragmentDoc = gql`
@@ -1250,176 +928,19 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
+  }
+`;
+export const GetOrganizationsDocument = gql`
+  query getOrganizations {
     organizations {
-      organization {
-        id
-        name
-      }
-    }
-    currentOrganizationId
-    currentOrganization {
-      id
-      name
-      isRoot
-      parentId
-      integrations {
-        status
-        type
-        accessTokenExpiresAt
-      }
-    }
-  }
-`;
-export const AdAccountsDocument = gql`
-  query adAccounts {
-    integrations {
-      lastSyncedAt
-      adAccounts {
-        id
-        name
-        currency
-        adCount
-      }
-    }
-  }
-`;
-export const InsightsDocument = gql`
-  query insights(
-    $adAccountIds: [String!]
-    $adIds: [String!]
-    $dateFrom: Date
-    $dateTo: Date
-    $devices: [DeviceEnum!]
-    $interval: InsightsInterval!
-    $publishers: [PublisherEnum!]
-    $positions: [InsightsPosition!]
-    $order: OrderBy
-    $orderBy: InsightsColumnsOrderBy!
-    $groupBy: [InsightsColumnsGroupBy!]
-    $pageSize: Int!
-    $page: Int!
-  ) {
-    insights(
-      filter: {
-        adAccountIds: $adAccountIds
-        adIds: $adIds
-        dateFrom: $dateFrom
-        dateTo: $dateTo
-        devices: $devices
-        interval: $interval
-        publishers: $publishers
-        positions: $positions
-        order: $order
-        orderBy: $orderBy
-        groupBy: $groupBy
-        pageSize: $pageSize
-        page: $page
-      }
-    ) {
-      hasNext
-      edges {
-        id
-        adAccountId
-        adAccountName
-        adId
-        adName
-        currency
-        datapoints {
-          date
-          spend
-          impressions
-          cpm
-        }
-        iFrame {
-          src
-          width
-          height
-        }
-        device
-        publisher
-        position
-      }
-    }
-  }
-`;
-export const LastThreeMonthsAdsDocument = gql`
-  query lastThreeMonthsAds {
-    lastThreeMonthsAds {
       id
       name
     }
   }
 `;
-export const SettingsChannelsDocument = gql`
-  query settingsChannels {
-    settingsChannels {
-      type
-      status
-      authUrl
-    }
-  }
-`;
-export const IntegrationsDocument = gql`
-  query integrations {
-    integrations {
-      type
-      lastSyncedAt
-      status
-      adAccounts {
-        adCount
-      }
-    }
-  }
-`;
-export const DeAuthIntegrationDocument = gql`
-  mutation deAuthIntegration($type: IntegrationType!) {
-    deAuthIntegration(type: $type) {
-      ... on BaseError {
-        message
-      }
-      ... on MetaError {
-        message
-      }
-      ... on MutationDeAuthIntegrationSuccess {
-        data
-      }
-    }
-  }
-`;
-export const ChannelInitialSetupProgressDocument = gql`
-  subscription channelInitialSetupProgress {
-    channelInitialSetupProgress {
-      progress
-      channel
-    }
-  }
-`;
-export const LoginDocument = gql`
-  mutation login($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
-      token
-      refreshToken
-    }
-  }
-`;
-export const SignupDocument = gql`
-  mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!, $inviteHash: String) {
-    signup(
-      args: { email: $email, firstName: $firstName, lastName: $lastName, password: $password, inviteHash: $inviteHash }
-    ) {
-      token
-      refreshToken
-    }
-  }
-`;
-export const ForgetPasswordDocument = gql`
-  mutation forgetPassword($email: String!) {
-    forgetPassword(email: $email)
-  }
-`;
-export const ResetPasswordDocument = gql`
-  mutation resetPassword($token: String!, $password: String!) {
-    resetPassword(token: $token, password: $password) {
+export const EmulateAdminDocument = gql`
+  mutation emulateAdmin($organizationId: String!) {
+    emulateAdmin(organizationId: $organizationId) {
       token
       refreshToken
     }
@@ -1430,124 +951,13 @@ export const RefreshTokenDocument = gql`
     refreshToken
   }
 `;
-export const ResendEmailConfirmationDocument = gql`
-  mutation resendEmailConfirmation {
-    resendEmailConfirmation
-  }
-`;
-export const LoginProvidersDocument = gql`
-  query loginProviders($inviteHash: String) {
-    loginProviders(inviteHash: $inviteHash) {
-      url
-      type
+export const MeDocument = gql`
+  query me {
+    me {
+      ...UserFields
     }
   }
-`;
-export const GetOrganizationDocument = gql`
-  query getOrganization {
-    organization {
-      id
-      userOrganizations {
-        userId
-        role
-        status
-        user {
-          id
-          email
-          firstName
-          lastName
-          photoUrl
-        }
-      }
-    }
-  }
-`;
-export const UpdateOrganizationUserDocument = gql`
-  mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
-    updateOrganizationUser(userId: $userId, role: $role) {
-      role
-      organization {
-        id
-      }
-    }
-  }
-`;
-export const CreateOrganizationDocument = gql`
-  mutation createOrganization($name: String!) {
-    createOrganization(name: $name) {
-      id
-      name
-    }
-  }
-`;
-export const UpdateOrganizationDocument = gql`
-  mutation updateOrganization($name: String!) {
-    updateOrganization(name: $name) {
-      id
-      name
-    }
-  }
-`;
-export const SwitchOrganizationDocument = gql`
-  mutation switchOrganization($organizationId: String!) {
-    switchOrganization(organizationId: $organizationId) {
-      token
-      refreshToken
-    }
-  }
-`;
-export const DeleteOrganizationDocument = gql`
-  mutation deleteOrganization($organizationId: String!) {
-    deleteOrganization(organizationId: $organizationId) {
-      id
-    }
-  }
-`;
-export const InviteUsersDocument = gql`
-  mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
-    inviteUsers(emails: $emails, role: $role) {
-      ... on MutationInviteUsersSuccess {
-        data
-      }
-      ... on InviteUsersErrors {
-        error {
-          email
-          message
-        }
-      }
-    }
-  }
-`;
-export const AvailableOrganizationAdAccountsDocument = gql`
-  query availableOrganizationAdAccounts($channel: IntegrationType!) {
-    availableOrganizationAdAccounts(channel: $channel) {
-      id
-      adCount
-      name
-      isConnectedToCurrentOrg
-    }
-  }
-`;
-export const RemoveUserFromOrganizationDocument = gql`
-  mutation removeUserFromOrganization($userId: String!) {
-    removeUserFromOrganization(userId: $userId)
-  }
-`;
-export const OrganizationAdAccountsDocument = gql`
-  query organizationAdAccounts($channel: IntegrationType!) {
-    organizationAdAccounts(channel: $channel) {
-      id
-      adCount
-      name
-    }
-  }
-`;
-export const UpdateOrganizationAdAccountsDocument = gql`
-  mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
-    updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
-      id
-    }
-  }
+  ${UserFieldsFragmentDoc}
 `;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
@@ -1557,96 +967,22 @@ export const UpdateUserDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
-export const MeDocument = gql`
-  query me {
-    me {
-      ...UserFields
-    }
-  }
-  ${UserFieldsFragmentDoc}
-`;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
-    adAccounts(variables?: AdAccountsQueryVariables, options?: C): Promise<AdAccountsQuery> {
-      return requester<AdAccountsQuery, AdAccountsQueryVariables>(
-        AdAccountsDocument,
+    getOrganizations(variables?: GetOrganizationsQueryVariables, options?: C): Promise<GetOrganizationsQuery> {
+      return requester<GetOrganizationsQuery, GetOrganizationsQueryVariables>(
+        GetOrganizationsDocument,
         variables,
         options,
-      ) as Promise<AdAccountsQuery>;
+      ) as Promise<GetOrganizationsQuery>;
     },
-    insights(variables: InsightsQueryVariables, options?: C): Promise<InsightsQuery> {
-      return requester<InsightsQuery, InsightsQueryVariables>(
-        InsightsDocument,
+    emulateAdmin(variables: EmulateAdminMutationVariables, options?: C): Promise<EmulateAdminMutation> {
+      return requester<EmulateAdminMutation, EmulateAdminMutationVariables>(
+        EmulateAdminDocument,
         variables,
         options,
-      ) as Promise<InsightsQuery>;
-    },
-    lastThreeMonthsAds(variables?: LastThreeMonthsAdsQueryVariables, options?: C): Promise<LastThreeMonthsAdsQuery> {
-      return requester<LastThreeMonthsAdsQuery, LastThreeMonthsAdsQueryVariables>(
-        LastThreeMonthsAdsDocument,
-        variables,
-        options,
-      ) as Promise<LastThreeMonthsAdsQuery>;
-    },
-    settingsChannels(variables?: SettingsChannelsQueryVariables, options?: C): Promise<SettingsChannelsQuery> {
-      return requester<SettingsChannelsQuery, SettingsChannelsQueryVariables>(
-        SettingsChannelsDocument,
-        variables,
-        options,
-      ) as Promise<SettingsChannelsQuery>;
-    },
-    integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
-      return requester<IntegrationsQuery, IntegrationsQueryVariables>(
-        IntegrationsDocument,
-        variables,
-        options,
-      ) as Promise<IntegrationsQuery>;
-    },
-    deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
-      return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(
-        DeAuthIntegrationDocument,
-        variables,
-        options,
-      ) as Promise<DeAuthIntegrationMutation>;
-    },
-    channelInitialSetupProgress(
-      variables?: ChannelInitialSetupProgressSubscriptionVariables,
-      options?: C,
-    ): AsyncIterable<ChannelInitialSetupProgressSubscription> {
-      return requester<ChannelInitialSetupProgressSubscription, ChannelInitialSetupProgressSubscriptionVariables>(
-        ChannelInitialSetupProgressDocument,
-        variables,
-        options,
-      ) as AsyncIterable<ChannelInitialSetupProgressSubscription>;
-    },
-    login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
-      return requester<LoginMutation, LoginMutationVariables>(
-        LoginDocument,
-        variables,
-        options,
-      ) as Promise<LoginMutation>;
-    },
-    signup(variables: SignupMutationVariables, options?: C): Promise<SignupMutation> {
-      return requester<SignupMutation, SignupMutationVariables>(
-        SignupDocument,
-        variables,
-        options,
-      ) as Promise<SignupMutation>;
-    },
-    forgetPassword(variables: ForgetPasswordMutationVariables, options?: C): Promise<ForgetPasswordMutation> {
-      return requester<ForgetPasswordMutation, ForgetPasswordMutationVariables>(
-        ForgetPasswordDocument,
-        variables,
-        options,
-      ) as Promise<ForgetPasswordMutation>;
-    },
-    resetPassword(variables: ResetPasswordMutationVariables, options?: C): Promise<ResetPasswordMutation> {
-      return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(
-        ResetPasswordDocument,
-        variables,
-        options,
-      ) as Promise<ResetPasswordMutation>;
+      ) as Promise<EmulateAdminMutation>;
     },
     refreshToken(variables?: RefreshTokenQueryVariables, options?: C): Promise<RefreshTokenQuery> {
       return requester<RefreshTokenQuery, RefreshTokenQueryVariables>(
@@ -1655,126 +991,8 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<RefreshTokenQuery>;
     },
-    resendEmailConfirmation(
-      variables?: ResendEmailConfirmationMutationVariables,
-      options?: C,
-    ): Promise<ResendEmailConfirmationMutation> {
-      return requester<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
-        ResendEmailConfirmationDocument,
-        variables,
-        options,
-      ) as Promise<ResendEmailConfirmationMutation>;
-    },
-    loginProviders(variables?: LoginProvidersQueryVariables, options?: C): Promise<LoginProvidersQuery> {
-      return requester<LoginProvidersQuery, LoginProvidersQueryVariables>(
-        LoginProvidersDocument,
-        variables,
-        options,
-      ) as Promise<LoginProvidersQuery>;
-    },
-    getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
-      return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(
-        GetOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<GetOrganizationQuery>;
-    },
-    updateOrganizationUser(
-      variables: UpdateOrganizationUserMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationUserMutation> {
-      return requester<UpdateOrganizationUserMutation, UpdateOrganizationUserMutationVariables>(
-        UpdateOrganizationUserDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationUserMutation>;
-    },
-    createOrganization(
-      variables: CreateOrganizationMutationVariables,
-      options?: C,
-    ): Promise<CreateOrganizationMutation> {
-      return requester<CreateOrganizationMutation, CreateOrganizationMutationVariables>(
-        CreateOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<CreateOrganizationMutation>;
-    },
-    updateOrganization(
-      variables: UpdateOrganizationMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationMutation> {
-      return requester<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(
-        UpdateOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationMutation>;
-    },
-    switchOrganization(
-      variables: SwitchOrganizationMutationVariables,
-      options?: C,
-    ): Promise<SwitchOrganizationMutation> {
-      return requester<SwitchOrganizationMutation, SwitchOrganizationMutationVariables>(
-        SwitchOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<SwitchOrganizationMutation>;
-    },
-    deleteOrganization(
-      variables: DeleteOrganizationMutationVariables,
-      options?: C,
-    ): Promise<DeleteOrganizationMutation> {
-      return requester<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(
-        DeleteOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<DeleteOrganizationMutation>;
-    },
-    inviteUsers(variables: InviteUsersMutationVariables, options?: C): Promise<InviteUsersMutation> {
-      return requester<InviteUsersMutation, InviteUsersMutationVariables>(
-        InviteUsersDocument,
-        variables,
-        options,
-      ) as Promise<InviteUsersMutation>;
-    },
-    availableOrganizationAdAccounts(
-      variables: AvailableOrganizationAdAccountsQueryVariables,
-      options?: C,
-    ): Promise<AvailableOrganizationAdAccountsQuery> {
-      return requester<AvailableOrganizationAdAccountsQuery, AvailableOrganizationAdAccountsQueryVariables>(
-        AvailableOrganizationAdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<AvailableOrganizationAdAccountsQuery>;
-    },
-    removeUserFromOrganization(
-      variables: RemoveUserFromOrganizationMutationVariables,
-      options?: C,
-    ): Promise<RemoveUserFromOrganizationMutation> {
-      return requester<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
-        RemoveUserFromOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<RemoveUserFromOrganizationMutation>;
-    },
-    organizationAdAccounts(
-      variables: OrganizationAdAccountsQueryVariables,
-      options?: C,
-    ): Promise<OrganizationAdAccountsQuery> {
-      return requester<OrganizationAdAccountsQuery, OrganizationAdAccountsQueryVariables>(
-        OrganizationAdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<OrganizationAdAccountsQuery>;
-    },
-    updateOrganizationAdAccounts(
-      variables: UpdateOrganizationAdAccountsMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationAdAccountsMutation> {
-      return requester<UpdateOrganizationAdAccountsMutation, UpdateOrganizationAdAccountsMutationVariables>(
-        UpdateOrganizationAdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationAdAccountsMutation>;
+    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
+      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(
@@ -1782,9 +1000,6 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpdateUserMutation>;
-    },
-    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
-      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
     },
   };
 }

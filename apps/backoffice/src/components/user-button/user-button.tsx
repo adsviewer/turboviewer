@@ -41,7 +41,6 @@ export default function UserButton(): ReactNode {
   useEffect(() => {
     void getUserDetails()
       .then((res) => {
-        checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
         setUserDetails(res);
         setIsDataLoaded(true);
       })

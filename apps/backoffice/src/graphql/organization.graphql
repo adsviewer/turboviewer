@@ -1,94 +1,13 @@
-query getOrganization {
-  organization {
-    id
-    userOrganizations {
-      userId
-      role
-      status
-      user {
-        id
-        email
-        firstName
-        lastName
-        photoUrl
-      }
-    }
-  }
-}
-
-mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
-  updateOrganizationUser(userId: $userId, role: $role) {
-    role
-    organization {
-      id
-    }
-  }
-}
-
-mutation createOrganization($name: String!) {
-  createOrganization(name: $name) {
+query getOrganizations {
+  organizations {
     id
     name
   }
 }
 
-mutation updateOrganization($name: String!) {
-  updateOrganization(name: $name) {
-    id
-    name
-  }
-}
-
-mutation switchOrganization($organizationId: String!) {
-  switchOrganization(organizationId: $organizationId) {
+mutation emulateAdmin($organizationId: String!) {
+  emulateAdmin(organizationId: $organizationId) {
     token
     refreshToken
-  }
-}
-
-mutation deleteOrganization($organizationId: String!) {
-  deleteOrganization(organizationId: $organizationId) {
-    id
-  }
-}
-
-mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
-  inviteUsers(emails: $emails, role: $role) {
-    ... on MutationInviteUsersSuccess {
-      data
-    }
-    ... on InviteUsersErrors {
-      error {
-        email
-        message
-      }
-    }
-  }
-}
-
-query availableOrganizationAdAccounts($channel: IntegrationType!) {
-  availableOrganizationAdAccounts(channel: $channel) {
-    id
-    adCount
-    name
-    isConnectedToCurrentOrg
-  }
-}
-
-mutation removeUserFromOrganization($userId: String!) {
-  removeUserFromOrganization(userId: $userId)
-}
-
-query organizationAdAccounts($channel: IntegrationType!) {
-  organizationAdAccounts(channel: $channel) {
-    id
-    adCount
-    name
-  }
-}
-
-mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
-  updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
-    id
   }
 }

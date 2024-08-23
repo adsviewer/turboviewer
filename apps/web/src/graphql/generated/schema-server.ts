@@ -531,6 +531,7 @@ export type Mutation = {
   /** Deletes the invitation link for the given role */
   deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
+  emulateAdmin: Tokens;
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
@@ -570,6 +571,10 @@ export type MutationDeleteInvitationLinkArgs = {
 
 export type MutationDeleteOrganizationArgs = {
   organizationId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationEmulateAdminArgs = {
+  organizationId: Scalars['String']['input'];
 };
 
 export type MutationForgetPasswordArgs = {
@@ -728,6 +733,7 @@ export type Query = {
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
+  organizations: Array<Organization>;
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
   settingsChannels: Array<IntegrationListItem>;

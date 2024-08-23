@@ -322,4 +322,20 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
+  emulateAdmin: t.withAuth({ isAdmin: true }).field({
+    type: TokensDto,
+    nullable: false,
+    args: {
+      organizationId: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const admin = await prisma.user.findFirstOrThrow({
+        ...userWithRoles,
+        where: {
+          organizations: { some: { organizationId: args.organizationId, role: OrganizationRoleEnum.ORG_ADMIN } },
+        },
+      });
+      return createJwts(admin);
+    },
+  }),
 }));
