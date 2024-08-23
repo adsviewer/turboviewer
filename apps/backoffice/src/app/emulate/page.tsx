@@ -4,7 +4,7 @@ import React, { useEffect, useState, useTransition } from 'react';
 import { ActionIcon, Flex, Select } from '@mantine/core';
 import { IconUserBolt } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { emulateAdminUser, getOrganizations } from '@/app/(authenticated)/emulate/actions';
+import { emulateAdminUser, getOrganizations } from '@/app/emulate/actions';
 
 interface SelectDataType {
   value: string;
