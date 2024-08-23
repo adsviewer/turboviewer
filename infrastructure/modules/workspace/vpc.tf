@@ -118,6 +118,13 @@ resource "aws_route_table_association" "database" {
 
 # Aws Vpc Endpoints
 
+locals {
+  route_table_ids = concat(
+    [aws_route_table.public_routes.id, aws_route_table.database_routes.id],
+    aws_route_table.private_routes.*.id,
+  )
+}
+
 resource "aws_security_group" "endpoint_interface" {
   name        = "${var.environment}-endpoint-interface"
   description = "ingress and egress for https to the vpc for interface endpoints"
@@ -141,6 +148,24 @@ resource "aws_vpc_security_group_egress_rule" "egress_all_https" {
   ip_protocol = "tcp"
   cidr_ipv4   = "0.0.0.0/0"
   to_port     = 443
+}
+
+resource "aws_vpc_endpoint" "interface_endpoints" {
+  for_each            = toset(["ecr.api", "ecr.dkr", "logs", "ssm"])
+  private_dns_enabled = true
+  security_group_ids  = [aws_security_group.endpoint_interface.id]
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  subnet_ids          = aws_subnet.private[*].id
+  vpc_endpoint_type   = "Interface"
+  vpc_id              = aws_vpc.vpc.id
+}
+
+resource "aws_vpc_endpoint" "gateway_endpoints" {
+  for_each          = toset(["s3"])
+  route_table_ids   = aws_route_table.private_routes.*.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.${each.key}"
+  vpc_endpoint_type = "Gateway"
+  vpc_id            = aws_vpc.vpc.id
 }
 
 resource "aws_eip" "nat" {
