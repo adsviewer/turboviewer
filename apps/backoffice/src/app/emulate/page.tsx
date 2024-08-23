@@ -30,7 +30,7 @@ export default function EmulateOrganizations(): React.ReactNode {
 
   const [selectedOrganization, setSelectedOrganization] = useState<string | null>(null);
 
-  const onClick = (): void => {
+  const onEmulateClick = (): void => {
     if (selectedOrganization) {
       startTransition(() => {
         void emulateAdminUser(selectedOrganization);
@@ -53,7 +53,13 @@ export default function EmulateOrganizations(): React.ReactNode {
         scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
         disabled={isPending}
       />
-      <ActionIcon onClick={onClick} disabled={!selectedOrganization} variant="default" size={35} aria-label="Settings">
+      <ActionIcon
+        onClick={onEmulateClick}
+        disabled={!selectedOrganization || isPending}
+        variant="default"
+        size={35}
+        aria-label="Settings"
+      >
         <IconUserBolt />
       </ActionIcon>
     </Flex>
