@@ -117,14 +117,6 @@ resource "aws_route_table_association" "database" {
 }
 
 # Aws Vpc Endpoints
-
-locals {
-  route_table_ids = concat(
-    [aws_route_table.public_routes.id, aws_route_table.database_routes.id],
-    aws_route_table.private_routes.*.id,
-  )
-}
-
 resource "aws_security_group" "endpoint_interface" {
   name        = "${var.environment}-endpoint-interface"
   description = "ingress and egress for https to the vpc for interface endpoints"
