@@ -9,15 +9,6 @@ export const initialUserDetails: MeQuery['me'] = {
   email: '',
   photoUrl: '',
   allRoles: [],
-  currentOrganization: {
-    __typename: 'Organization',
-    id: '',
-    name: '',
-    isRoot: false,
-    parentId: null,
-    integrations: [],
-  },
-  organizations: [],
 };
 
 export const userDetailsAtom = atom<MeQuery['me']>(initialUserDetails);
