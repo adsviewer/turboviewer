@@ -26,7 +26,7 @@ A bunch of cool staff for viewing, optimizing and growing your digital ad portfo
 5. Create a .env file in the `apps/web` and `apps/backoffice` directory with the following content:
 
    ```env
-   NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
+   NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
    ```
 
 6. Run `pnpm i`
