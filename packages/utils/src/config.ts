@@ -16,7 +16,7 @@ export const awsSchema = z.object({
 });
 
 export const apiEndpointSchema = z.object({
-  API_ENDPOINT: z.string().url().default('http://localhost:3000'),
+  API_ENDPOINT: z.string().url().default('http://localhost:4000/api'),
 });
 
 export const TOKEN_KEY = 'av_token';
