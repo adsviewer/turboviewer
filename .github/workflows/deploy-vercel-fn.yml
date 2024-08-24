@@ -1,4 +1,4 @@
-name: Vercel Deployments
+name: Vercel Deployments Function
 
 on:
   workflow_call:
