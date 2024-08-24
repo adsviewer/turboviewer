@@ -49,3 +49,12 @@ resource "aws_route53_record" "landing_page_domain_record" {
   ttl     = "300"
   records = ["cname.vercel-dns.com."]
 }
+
+resource "aws_route53_record" "admin_page_domain_record" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "admin"
+  type    = "CNAME"
+  ttl     = "300"
+  records = ["cname.vercel-dns.com."]
+}

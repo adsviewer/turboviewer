@@ -1,0 +1,13 @@
+query getOrganizations {
+  organizations {
+    id
+    name
+  }
+}
+
+mutation emulateAdmin($organizationId: String!) {
+  emulateAdmin(organizationId: $organizationId) {
+    token
+    refreshToken
+  }
+}

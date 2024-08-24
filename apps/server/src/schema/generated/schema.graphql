@@ -535,6 +535,7 @@ type Mutation {
   """
   deleteInvitationLink(role: OrganizationRoleEnum!): Boolean!
   deleteOrganization(organizationId: String): Organization!
+  emulateAdmin(organizationId: String!): Tokens!
   forgetPassword(email: String!): Boolean!
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): MutationInviteUsersResult!
   login(email: String!, password: String!, token: String): Tokens!
@@ -657,6 +658,7 @@ type Query {
   Return the adAccounts for a channel that are associated with the organization.
   """
   organizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
+  organizations: [Organization!]!
 
   """
   Uses the refresh token to generate a new token

@@ -1,0 +1,54 @@
+{
+  "generic": {
+    "error": "Error",
+    "success": "Success!",
+    "warning": "Warning!",
+    "accessOrgAdmin": "Only organization admins may perform this action!",
+    "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!",
+    "copied": "Copied to clipboard",
+    "search": "Search",
+    "submit": "Submit",
+    "remove": "Remove",
+    "refresh": "Refresh",
+    "role": "Role",
+    "roleOrgAdmin": "Organization Administrator",
+    "roleAdmin": "Administrator",
+    "roleOperator": "Operator",
+    "roleMember": "Member"
+  },
+  "errors": {
+    "errorPageTitle": "Something bad just happened...",
+    "errorPageDescription": "Our servers could not handle your request. Don't worry, our development team was already notified. Try refreshing the page.",
+    "refreshHint": "Refresh page"
+  },
+  "navbar": {
+    "emulate": "Emulate organizations",
+    "settings": "Settings",
+    "organization": "Organization",
+    "signOut": "Sign Out",
+    "noOrganizationData": "No organization data"
+  },
+  "emulate": {
+    "emulateDropdownPlaceholder": "Select organization"
+  },
+  "settings": {
+    "title": "Settings",
+    "changeLanguage": "Change language",
+    "changeColorScheme": "Color theme"
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Manage your profile details to ensure all your personal information is up-to-date and accurately reflects your current status.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "password": "Password",
+    "oldPassword": "Old Password",
+    "newPassword": "New Password",
+    "repeatPassword": "Repeat Password",
+    "roleOrgAdmin": "Organization Administrator",
+    "roleAdmin": "Administrator",
+    "roleOperator": "Operator",
+    "roleUser": "Member",
+    "submit": "Submit"
+  }
+}

@@ -1,0 +1,50 @@
+@function rem($px) {
+  @return #{calc($px / 16)}rem;
+}
+.root {
+  padding-top: rem(80px);
+  padding-bottom: rem(80px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.inner {
+  position: relative;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  opacity: 0.75;
+  color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
+
+.content {
+  padding-top: rem(220px);
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 48em) {
+    padding-top: rem(120px);
+  }
+}
+
+.title {
+  font-family: Greycliff CF,
+  var(--mantine-font-family), serif;
+  text-align: center;
+  font-weight: 900;
+  font-size: rem(38px);
+
+  @media (max-width: 48em) {
+    font-size: rem(32px);
+  }
+}
+
+.description {
+  max-width: rem(540px);
+  margin: var(--mantine-spacing-xl) auto calc(var(--mantine-spacing-xl) * 1.5);
+}

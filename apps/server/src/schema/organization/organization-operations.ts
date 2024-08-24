@@ -24,6 +24,16 @@ builder.queryFields((t) => ({
     },
   }),
 
+  organizations: t.withAuth({ isAdmin: true }).prismaField({
+    type: [OrganizationDto],
+    nullable: false,
+    resolve: (query, _root, _args, _ctx, _info) => {
+      return prisma.organization.findMany({
+        ...query,
+      });
+    },
+  }),
+
   organizationAdAccounts: t.withAuth({ isInOrg: true }).prismaField({
     description: 'Return the adAccounts for a channel that are associated with the organization.',
     type: [AdAccountDto],
