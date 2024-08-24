@@ -1,6 +1,7 @@
-name: Vercel Deployments
+name: Vercel Web Deployment
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -21,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         app_project_id: [ WEB_VERCEL_PROJECT_ID, LANDING_PAGE_VERCEL_PROJECT_ID, BACKOFFICE_VERCEL_PROJECT_ID ]
-    uses: ./.github/workflows/deploy-vercel-fn.yml
+    uses: ./.github/workflows/deploy-at-vercel-fn.yml
     secrets:
       sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
       turbo_token: ${{ secrets.TURBO_TOKEN }}
