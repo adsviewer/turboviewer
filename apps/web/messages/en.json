@@ -84,7 +84,8 @@
     "syncedOn": "Synced on",
     "ads": "ads",
     "tokenWarning": "Integration token is close to expiration! Visit the Integrations page to extend!",
-    "tokenWarningExtend": "Integration token is close to expiration and must be extended!"
+    "tokenWarningExtend": "Integration token is close to expiration and must be extended!",
+    "erroredIntegrationWarning": "There is an error with this integration!"
   },
   "settings": {
     "title": "Settings",

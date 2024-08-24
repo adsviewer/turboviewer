@@ -84,7 +84,8 @@
     "syncedOn": "Gesynchroniseerd op",
     "ads": "advertenties",
     "tokenWarning": "Integratie verloopt bijna! Ga naar de Integratiepagina om opnieuw verbinding te maken!",
-    "tokenWarningExtend": "Het is een goed idee om dit te doen!"
+    "tokenWarningExtend": "Het is een goed idee om dit te doen!",
+    "erroredIntegrationWarning": "Er is een fout met deze integratie!"
   },
   "settings": {
     "title": "Instellingen",
