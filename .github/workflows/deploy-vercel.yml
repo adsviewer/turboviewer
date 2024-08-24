@@ -1,0 +1,31 @@
+name: Vercel Deployments
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/web/**
+      - apps/landing-page/**
+      - apps/backoffice/**
+      - packages/logger/**
+      - packages/mappings/**
+      - packages/mode/**
+      - packages/ui/**
+      - packages/utils/**
+      - .github/workflows/**
+
+jobs:
+  deploy:
+    strategy:
+      fail-fast: false
+      matrix:
+        app_project_id: [ WEB_VERCEL_PROJECT_ID, LANDING_PAGE_VERCEL_PROJECT_ID, BACKOFFICE_VERCEL_PROJECT_ID ]
+    uses: ./.github/workflows/deploy-vercel-fn.yml
+    secrets:
+      sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      turbo_token: ${{ secrets.TURBO_TOKEN }}
+      vercel_project_id: ${{ secrets[matrix.app_project_id] }}
+      vercel_token: ${{ secrets.VERCEL_TOKEN }}
+    with:
+      vercel_org_id: ${{ vars.TURBO_TEAM }}
