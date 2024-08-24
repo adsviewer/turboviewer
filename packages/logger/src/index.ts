@@ -5,12 +5,12 @@ export interface SlackTransportOptions {
   webhookUrl: string;
 }
 
-const options: Partial<SlackTransportOptions> = { webhookUrl: process.env.SLACK_WEBHOOK_URL };
+const _options: Partial<SlackTransportOptions> = { webhookUrl: process.env.SLACK_WEBHOOK_URL };
 const optionsOrStream: LoggerOptions = {
   base: undefined,
   transport: {
     targets: [
-      ...(options.webhookUrl ? [{ level: 'error', target: './slack.mjs', options }] : []),
+      // ...(options.webhookUrl ? [{ level: 'error', target: './slack.mjs', options }] : []),
       { target: process.env.MODE ? 'pino/file' : 'pino-pretty', options: { destination: 1 } },
     ],
   },
