@@ -5,8 +5,6 @@ import './globals.scss';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Suspense } from 'react';
 import { MainAppShell } from '@/components/shells/main-shell/main-shell';
@@ -14,8 +12,8 @@ import SetUserSentry from '@/app/set-user-sentry';
 import LoaderCentered from '@/components/misc/loader-centered';
 
 export const metadata: Metadata = {
-  title: 'AdsViewer',
-  description: 'Get granular insights into your ads performance',
+  title: 'Backoffice AdsViewer',
+  description: 'Backoffice for AdsViewer',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }): Promise<React.ReactNode> {
@@ -32,8 +30,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <SetUserSentry />
               <Suspense fallback={<LoaderCentered />}>{children}</Suspense>
             </MainAppShell>
-            <Analytics />
-            <SpeedInsights />
           </MantineProvider>
         </NextIntlClientProvider>
       </body>

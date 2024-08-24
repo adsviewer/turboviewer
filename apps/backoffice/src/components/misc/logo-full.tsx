@@ -35,7 +35,7 @@ export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement
       xmlns="http://www.w3.org/2000/svg"
       {...props}
       onClick={() => {
-        router.push('/insights');
+        router.push('/');
       }}
     >
       <line x1="9.19527" y1="2.28171" x2="1.28172" y2="24.024" strokeWidth="2" strokeLinecap="round" />
