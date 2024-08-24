@@ -1,7 +1,6 @@
-name: Vercel Web Deployment
+name: Vercel Deployments
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
