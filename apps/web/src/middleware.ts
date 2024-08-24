@@ -22,29 +22,8 @@ const publicPaths = [
   '/api/auth/reset-password',
 ];
 
-// Stop Middleware running on static files and public folder
-// export const config = {
-//   matcher: [
-//     /*
-//      * Match all request paths except for the ones starting with:
-//      * - _next (static files & image optimization files)
-//      * - favicon.ico (favicon file)
-//      */
-//     '/((?!_next|favicon.ico).*)',
-//   ],
-// };
-
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {

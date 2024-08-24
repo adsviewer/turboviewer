@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 import { type z } from 'zod';
-import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { SignInSchema } from '@/util/schemas/login-schemas';
 import { handleUrqlRequest } from '@/util/handle-urql-request';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
@@ -30,7 +30,11 @@ export async function POST(request: Request): Promise<NextResponse<{ success: tr
   }
   cookies().set(TOKEN_KEY, result.data.login.token);
   cookies().set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    success: true,
+    token: result.data.login.token,
+    refreshToken: result.data.login.refreshToken,
+  });
 }
 
 // Check for auth tokens in url on page visit
