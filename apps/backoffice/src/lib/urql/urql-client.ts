@@ -11,7 +11,7 @@ import { makeAuthExchange } from '@/lib/urql/urql-auth';
 const makeClient = (refresh?: boolean): Client => {
   const token = refresh ? cookies().get(REFRESH_TOKEN_KEY)?.value : cookies().get(TOKEN_KEY)?.value;
   return createClient({
-    url: env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
+    url: env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
     exchanges: [cacheExchange, makeAuthExchange(token), fetchExchange],
     // We may need to add this back in if we run into issues with caching
     // fetchOptions: { cache: 'no-store' },
