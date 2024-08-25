@@ -20,7 +20,7 @@ import { getChannel } from './channel-helper';
 
 const batchClient = new BatchClient({ region: env.AWS_REGION });
 
-const reportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
+export const asyncReportChannels = [IntegrationTypeEnum.TIKTOK, IntegrationTypeEnum.META];
 
 const channelConcurrencyReportMap = new Map<IntegrationTypeEnum, number>([
   [IntegrationTypeEnum.TIKTOK, 2],
@@ -35,7 +35,7 @@ export const UNTIL = 'UNTIL';
 
 export const checkReports = async (): Promise<void> => {
   await Promise.all(
-    reportChannels.map(async (channelType) => {
+    asyncReportChannels.map(async (channelType) => {
       const channel = getChannel(channelType);
 
       const reports = await getAllSet<ProcessReportReq>(activeReportRedisKey(channelType));
@@ -156,6 +156,7 @@ const processReport = async (
       new Date(activeReport.since),
       new Date(activeReport.until),
     );
+    await prisma.integration.update({ where: { id: adAccount.integrationId }, data: { lastSyncedAt: new Date() } });
   }
 };
 

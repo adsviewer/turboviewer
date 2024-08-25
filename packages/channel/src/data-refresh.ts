@@ -8,6 +8,7 @@ import { Environment, MODE } from '@repo/mode';
 import _ from 'lodash';
 import { deleteInsightsCache } from './insights-cache';
 import { getChannel } from './channel-helper';
+import { asyncReportChannels } from './report-process';
 
 const refreshDataOf = async (integration: Integration, initial: boolean): Promise<void> => {
   await saveChannelData(integration, initial).catch((e: unknown) => {
@@ -32,7 +33,10 @@ const saveChannelData = async (integration: Integration, initial: boolean): Prom
   const channel = getChannel(integration.type);
   const data = await channel.getChannelData(integration, initial);
   if (isAError(data)) return data;
-  await prisma.integration.update({ where: { id: integration.id }, data: { lastSyncedAt: new Date() } });
+  // @ts-expect-error -- this is fine
+  if (!asyncReportChannels.includes(integration.type)) {
+    await prisma.integration.update({ where: { id: integration.id }, data: { lastSyncedAt: new Date() } });
+  }
 };
 
 export const refreshData = async ({
@@ -76,8 +80,20 @@ export const invokeChannelIngress = async (
   }
 
   const connectedIntegrations = await getAllConnectedIntegrations();
-  const slicedIntegrations = _.chunk(connectedIntegrations, 10);
+  const [asyncReportIntegrations, nonAsyncReportIntegrations] = _.partition(connectedIntegrations, (integration) =>
+    // @ts-expect-error -- we are partitioning the integrations based on the type
+    asyncReportChannels.includes(integration.type),
+  );
   const results: (AError | z.infer<typeof channelIngressOutput>)[] = [];
+
+  results.push(
+    await invokeChannelIngressLambda({
+      initial: payload.initial,
+      integrationIds: asyncReportIntegrations.map((integration) => integration.id),
+    } satisfies z.infer<typeof channelIngressInput>),
+  );
+
+  const slicedIntegrations = _.chunk(nonAsyncReportIntegrations, 10);
   for (const integrations of slicedIntegrations) {
     const invocations = await Promise.all(
       integrations.map((integration) =>
@@ -89,5 +105,6 @@ export const invokeChannelIngress = async (
     );
     results.push(...invocations);
   }
+
   return results;
 };
