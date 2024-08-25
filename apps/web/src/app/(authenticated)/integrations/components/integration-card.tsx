@@ -22,6 +22,7 @@ interface IntegrationProps {
   integrationType: IntegrationType;
   isConnected: boolean;
   isAvailable: boolean;
+  isErrored: boolean;
   image?: ReactNode;
   adCount: number;
   lastSyncedAt: Date | null | undefined;
@@ -57,6 +58,15 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
   const closeRevokeModal = (): void => {
     close();
     setRevokeFieldValue('');
+  };
+
+  const renderBadge = (): ReactNode => {
+    if (props.isConnected && !props.isErrored) {
+      return <Badge color="green">{t('connected')}</Badge>;
+    } else if (props.isErrored) {
+      return <Badge color="red">{t('error')}</Badge>;
+    }
+    return <Badge color="gray">{t('notConnected')}</Badge>;
   };
 
   const renderIntegrationButton = (): ReactNode => {
@@ -146,11 +156,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             <AdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
           ) : null}
         </Flex>
-        {props.isConnected ? (
-          <Badge color="green">{t('connected')}</Badge>
-        ) : (
-          <Badge color="gray">{t('notConnected')}</Badge>
-        )}
+        {renderBadge()}
       </Group>
 
       <Text size="sm" c="dimmed" mb="auto">

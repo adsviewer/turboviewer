@@ -96,10 +96,14 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     }, 0);
   }, [searchParams, updateIntegrationsData]);
 
+  const isIntegrationErrored = (status: IntegrationStatus): boolean => status === IntegrationStatus.Errored;
+
   const isIntegrationAvailable = (status: IntegrationStatus): boolean => status !== IntegrationStatus.ComingSoon;
 
   const isIntegrationConnected = (status: IntegrationStatus): boolean =>
-    status === IntegrationStatus.Connected || status === IntegrationStatus.Expiring;
+    status === IntegrationStatus.Connected ||
+    status === IntegrationStatus.Expiring ||
+    status === IntegrationStatus.Errored;
 
   const map = new Map<IntegrationType, { title: string; description?: string; imageSrc: string }>([
     [
@@ -138,6 +142,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
                   integrationType={integration.type}
                   isConnected={isIntegrationConnected(integration.status)}
                   isAvailable={isIntegrationAvailable(integration.status)}
+                  isErrored={isIntegrationErrored(integration.status)}
                   image={<Image src={imageSrc} alt={title} width={100} priority />}
                   adCount={integrationsData[integration.type].adCount}
                   lastSyncedAt={integrationsData[integration.type].lastSyncedAt}

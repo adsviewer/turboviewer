@@ -79,12 +79,14 @@
     "comingSoon": "Binnenkort beschikbaar",
     "connected": "Verbonden",
     "notConnected": "Niet verbonden",
+    "error": "Fout",
     "revokeWarning": "U staat op het punt om een herroepingsactie uit te voeren! Adsviewer zal alle gegevens met betrekking tot deze integratie wissen.",
     "revokeTip": "Om te bevestigen, typ \"REVOKE\" in het onderstaande vak.",
     "syncedOn": "Gesynchroniseerd op",
     "ads": "advertenties",
     "tokenWarning": "Integratie verloopt bijna! Ga naar de Integratiepagina om opnieuw verbinding te maken!",
-    "tokenWarningExtend": "Het is een goed idee om dit te doen!"
+    "tokenWarningExtend": "Het is een goed idee om dit te doen!",
+    "erroredIntegrationWarning": "Er is een fout met deze integratie!"
   },
   "settings": {
     "title": "Instellingen",

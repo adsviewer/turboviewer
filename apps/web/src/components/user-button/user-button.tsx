@@ -31,6 +31,13 @@ export default function UserButton(): ReactNode {
               color: 'orange',
               autoClose: false,
             });
+          } else if (integration.status === IntegrationStatus.Errored) {
+            notifications.show({
+              title: tGeneric('error'),
+              message: `(${integration.type}) ${tIntegrations('erroredIntegrationWarning')}`,
+              color: 'red',
+              autoClose: false,
+            });
           }
         }
       }

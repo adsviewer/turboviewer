@@ -79,12 +79,14 @@
     "comingSoon": "Coming soon",
     "connected": "Connected",
     "notConnected": "Not Connected",
+    "error": "Error",
     "revokeWarning": "You are about to perform a revoke action! Adsviewer will erase all your data related to this integration.",
     "revokeTip": "To confirm, type \"REVOKE\" in the box below.",
     "syncedOn": "Synced on",
     "ads": "ads",
     "tokenWarning": "Integration token is close to expiration! Visit the Integrations page to extend!",
-    "tokenWarningExtend": "Integration token is close to expiration and must be extended!"
+    "tokenWarningExtend": "Integration token is close to expiration and must be extended!",
+    "erroredIntegrationWarning": "There is an error with this integration!"
   },
   "settings": {
     "title": "Settings",
