@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // If user is not admin redirect to web app
   if (!token || !tokenData?.roles?.includes(AllRoles.ADMIN) || tokenData.userStatus === UserStatus.EMAIL_UNCONFIRMED) {
     const redirectUrl = new URL(env.NEXT_WEBAPP_ENDPOINT, request.url);
-    redirectUrl.searchParams.set('redirect', env.BACKOFFICE_ENDPOINT);
+    redirectUrl.searchParams.set('redirect', env.BACKOFFICE_URL);
     logger.info(redirectUrl.toString());
     return NextResponse.redirect(redirectUrl);
   }

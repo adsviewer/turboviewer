@@ -11,7 +11,7 @@ export const env = createEnv({
    */
   server: {
     AUTH_SECRET: z.string().min(1).default('something'),
-    BACKOFFICE_ENDPOINT: z.string().min(1).default('http://localhost:3002'),
+    BACKOFFICE_URL: z.string().min(1).default('http://localhost:3002'),
   },
 
   /**
@@ -32,7 +32,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
-    BACKOFFICE_ENDPOINT: process.env.BACKOFFICE_ENDPOINT,
+    BACKOFFICE_URL: process.env.BACKOFFICE_URL,
     NEXT_WEBAPP_ENDPOINT: process.env.NEXT_WEBAPP_ENDPOINT,
     NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
   },

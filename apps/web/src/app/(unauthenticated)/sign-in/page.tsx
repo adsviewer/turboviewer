@@ -4,23 +4,25 @@ import Link from 'next/link';
 import { useForm, zodResolver } from '@mantine/form';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
-  TextInput,
-  PasswordInput,
   Anchor,
-  Paper,
-  Title,
-  Text,
-  Container,
   Button,
+  Container,
   Flex,
+  Paper,
+  PasswordInput,
+  Text,
+  TextInput,
+  Title,
   Transition,
 } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
+import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
+import { env } from '@/env.mjs';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from './actions';
 
@@ -66,11 +68,19 @@ export default function SignIn(): React.JSX.Element {
         .then((response) => {
           return response.json();
         })
-        .then((data: GenericRequestResponseBody) => {
+        .then((data: GenericRequestResponseBody & { token: string; refreshToken: string }) => {
           if (data.success) {
             startTransition(() => {
               const redirect = searchParams.get('redirect');
-              router.push(redirect ?? '/insights');
+              logger.info(redirect, 'Redirect');
+
+              if (redirect === env.NEXT_PUBLIC_BACKOFFICE_URL) {
+                router.push(
+                  `${env.NEXT_PUBLIC_BACKOFFICE_URL}/api/save-tokens?${TOKEN_KEY}=${data.token}&${REFRESH_TOKEN_KEY}=${data.refreshToken}`,
+                );
+              } else {
+                router.push(redirect ?? '/insights');
+              }
             });
             return null;
           }
