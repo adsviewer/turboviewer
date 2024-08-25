@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   // Refresh user's JWT if invalid (except if signing out)
-  if (request.nextUrl.pathname !== '/sign-out' && token) {
+  if (request.nextUrl.pathname !== '/api/auth/sign-out' && token) {
     try {
       await jwtVerify(token, new TextEncoder().encode(env.AUTH_SECRET));
     } catch (err) {
@@ -101,7 +101,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (
     tokenData &&
     !tokenData.organizationId &&
-    request.nextUrl.pathname !== '/sign-out' &&
+    request.nextUrl.pathname !== '/api/auth/sign-out' &&
     request.nextUrl.pathname !== defaultMissingOrgURL
   ) {
     const redirectUrl = new URL(defaultMissingOrgURL, request.url);
@@ -117,7 +117,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 const signOut = (request: NextRequest): NextResponse => {
-  const signOutUrl = new URL('/sign-out', request.url);
+  const signOutUrl = new URL('/api/auth/sign-out', request.url);
   signOutUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
   return NextResponse.redirect(signOutUrl);
 };

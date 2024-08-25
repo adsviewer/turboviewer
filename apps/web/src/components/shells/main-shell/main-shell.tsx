@@ -105,7 +105,11 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             <Divider />
             <UserButton />
             <Divider />
-            <NavLink label={t('signOut')} href="/sign-out" leftSection={<IconLogout size="1rem" stroke={1.5} />} />
+            <NavLink
+              label={t('signOut')}
+              href="/api/auth/sign-out"
+              leftSection={<IconLogout size="1rem" stroke={1.5} />}
+            />
           </Flex>
         </Flex>
       </AppShellNavbar>
