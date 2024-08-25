@@ -257,7 +257,7 @@ model Insight {
   adAccount AdAccount? @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
 
   @@unique([adId, date, device, publisher, position])
-  @@index([adAccountId])
+  @@index([adAccountId, date])
   @@index([currency])
   @@index([date])
   @@index([impressions])

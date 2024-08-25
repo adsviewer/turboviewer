@@ -28,16 +28,14 @@ export const adReportsStatusesToRedis = async (
   adAccounts: AdAccount[],
   initial: boolean,
 ): Promise<void> => {
-  await Promise.all(
-    adAccounts.map(async (account) => {
-      const ranges = await timeRanges(initial, account.id);
-      await Promise.all(
-        ranges.map((range) =>
-          adReportStatusToRedis(channelType, account.id, range.since, range.until, JobStatusEnum.QUEUING),
-        ),
-      );
-    }),
-  );
+  for (const account of adAccounts) {
+    const ranges = await timeRanges(initial, account.id);
+    await Promise.all(
+      ranges.map((range) =>
+        adReportStatusToRedis(channelType, account.id, range.since, range.until, JobStatusEnum.QUEUING),
+      ),
+    );
+  }
 };
 
 export const adReportStatusToRedis = async (
