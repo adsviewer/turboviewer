@@ -40,9 +40,9 @@ interface RankType {
 
 interface Datapoint {
   date: string;
-  impressions: number;
-  spend: number;
-  cpm: number;
+  impressions: bigint;
+  spend: bigint;
+  cpm: bigint;
 }
 
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
@@ -97,8 +97,8 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         formattedDatapoints.push({
           date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
           impressions: datapoint.impressions,
-          spend: datapoint.spend / 100,
-          cpm: datapoint.cpm ?? 0,
+          spend: BigInt(Math.floor(Number(datapoint.spend) / 100)),
+          cpm: datapoint.cpm ?? 0n,
         });
       }
       setDatapoints(formattedDatapoints);
@@ -258,14 +258,14 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
               gap="xs"
               onClick={() => {
                 if (props.datapoints) {
-                  void copyText(String(props.datapoints[props.datapoints.length - 1].spend / 100));
+                  void copyText(String(Number(props.datapoints[props.datapoints.length - 1].spend) / 100));
                 }
               }}
               style={{ cursor: 'pointer' }}
             >
               <IconCoins />
               <Text size="sm" c="dimmed">
-                {format.number(props.datapoints[props.datapoints.length - 1].spend / 100, {
+                {format.number(Number(props.datapoints[props.datapoints.length - 1].spend) / 100, {
                   style: 'currency',
                   currency: props.currency,
                 })}

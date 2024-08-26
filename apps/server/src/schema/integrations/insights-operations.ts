@@ -90,7 +90,7 @@ builder.queryFields((t) => ({
         device?: DeviceEnum;
         publisher?: PublisherEnum;
         currency: CurrencyEnum;
-        datapoints: { spend: number; impressions: number; date: Date; cpm: number }[];
+        datapoints: { spend: bigint; impressions: bigint; date: Date; cpm: bigint }[];
       }[] = [];
       const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
         return groupBy.map((group) => insight[group]).join('-');
@@ -101,7 +101,12 @@ builder.queryFields((t) => ({
           ret.push({
             ...valueWithoutDatapoints,
             id: groupBy.map((group) => value[0][group]).join('-'),
-            datapoints: value.map((v) => ({ spend: v.spend, impressions: v.impressions, date: v.date, cpm: v.cpm })),
+            datapoints: value.map((v) => ({
+              spend: BigInt(v.spend),
+              impressions: BigInt(v.impressions),
+              date: v.date,
+              cpm: BigInt(Math.round(v.cpm)),
+            })),
           });
         }
       }
@@ -294,9 +299,9 @@ const GroupedInsightDto = builder.simpleObject(
 
 const InsightsDatapointsDto = builder.simpleObject('InsightsDatapoints', {
   fields: (t) => ({
-    spend: t.field({ type: 'Int', nullable: false, description: 'In Cents' }),
-    impressions: t.field({ type: 'Int', nullable: false }),
-    cpm: t.field({ type: 'Int', nullable: true }),
+    spend: t.field({ type: 'BigInt', nullable: false, description: 'In Cents' }),
+    impressions: t.field({ type: 'BigInt', nullable: false }),
+    cpm: t.field({ type: 'BigInt', nullable: true }),
     date: t.field({ type: 'Date', nullable: false }),
   }),
 });

@@ -72,6 +72,11 @@ type BaseError implements Error {
   message: String!
 }
 
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
 type ChannelInitialProgressPayload {
   channel: IntegrationType!
   progress: Float!
@@ -352,14 +357,14 @@ enum InsightsColumnsOrderBy {
 }
 
 type InsightsDatapoints {
-  cpm: Int
+  cpm: BigInt
   date: Date!
-  impressions: Int!
+  impressions: BigInt!
 
   """
   In Cents
   """
-  spend: Int!
+  spend: BigInt!
 }
 
 input InsightsDatapointsInput {

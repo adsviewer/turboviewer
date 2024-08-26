@@ -1,6 +1,7 @@
 export const stringifySorted = (obj: object): string => {
   const sortedObj = sortObjectKeysAndValues(obj);
-  return JSON.stringify(sortedObj);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- intentional
+  return JSON.stringify(sortedObj, (_key, value) => (typeof value === 'bigint' ? value.toString() : value));
 };
 
 const sortObjectKeysAndValues = (obj: unknown): unknown => {

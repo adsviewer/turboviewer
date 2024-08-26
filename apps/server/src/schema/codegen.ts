@@ -3,6 +3,23 @@ import { printSchema } from 'graphql';
 import type { CodegenConfig } from '@graphql-codegen/cli';
 import { schema } from '.';
 
+const serverConfig = {
+  nonOptionalTypename: true,
+  withHooks: true,
+  namingConvention: {
+    enumValues: 'keep',
+  },
+};
+
+const clientConfig = {
+  ...serverConfig,
+  urqlImportFrom: '@urql/next',
+};
+
+const commonPlugins = ['typescript', 'typescript-operations'];
+const serverPlugins = [...commonPlugins, 'typescript-generic-sdk'];
+const clientPlugins = [...commonPlugins, 'typescript-urql'];
+
 const config: CodegenConfig = {
   watch: false,
   schema: printSchema(schema),
@@ -12,64 +29,35 @@ const config: CodegenConfig = {
       plugins: ['schema-ast'],
     },
     '../web/src/graphql/generated/schema-server.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
-      config: {
-        nonOptionalTypename: true,
-        withHooks: true,
-        namingConvention: {
-          enumValues: 'keep',
-        },
-      },
+      plugins: serverPlugins,
+      config: serverConfig,
       documents: ['../web/src/graphql/*.graphql'],
     },
     '../web/src/graphql/generated/schema-client.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
-      config: {
-        nonOptionalTypename: true,
-        withHooks: true,
-        urqlImportFrom: '@urql/next',
-        namingConvention: {
-          enumValues: 'keep',
-        },
-      },
+      plugins: clientPlugins,
+      config: clientConfig,
       documents: ['../web/src/graphql/*.graphql'],
     },
     '../backoffice/src/graphql/generated/schema-server.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
-      config: {
-        nonOptionalTypename: true,
-        withHooks: true,
-        namingConvention: {
-          enumValues: 'keep',
-        },
-      },
+      plugins: serverPlugins,
+      config: serverConfig,
       documents: ['../backoffice/src/graphql/*.graphql'],
     },
     '../web-old/src/graphql/generated/schema-server.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typescript-generic-sdk'],
-      config: {
-        withHooks: true,
-        namingConvention: {
-          enumValues: 'keep',
-        },
-      },
+      plugins: serverPlugins,
+      config: serverConfig,
       documents: ['../web-old/src/graphql/*.graphql'],
     },
     '../web-old/src/graphql/generated/schema-client.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typescript-urql'],
-      config: {
-        withHooks: true,
-        urqlImportFrom: '@urql/next',
-        namingConvention: {
-          enumValues: 'keep',
-        },
-      },
+      plugins: clientPlugins,
+      config: clientConfig,
       documents: ['../web-old/src/graphql/*.graphql'],
     },
   },
   config: {
     scalars: {
       Date: 'Date',
+      BigInt: 'bigint',
       UUID: 'string',
     },
   },

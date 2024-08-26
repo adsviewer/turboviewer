@@ -31,7 +31,7 @@ export default function Insight({
             <div key={id}>
               <div className="flex flex-row">
                 <Spend spend={spend} currency={currency} />
-                <Cpm spend={cpm ?? 0} currency={currency} />
+                <Cpm spend={cpm ?? 0n} currency={currency} />
                 <Eye />
                 <div>{format.number(impressions, { style: 'decimal' })}</div>
                 <CalendarDays />

@@ -146,7 +146,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, limit, offset, args.dateTo)}
-  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, CAST(SUM(i.spend) AS INTEGER) AS spend, CAST(SUM(i.impressions) AS INTEGER) AS impressions, CAST(SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS INTEGER) AS cpm 
+  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
     AND i.date < DATE_TRUNC('${args.interval}', ${date})
@@ -157,10 +157,10 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
 };
 
 export const insightsDatapoints = (args: InsightsDatapointsInputType, organizationId: string) =>
-  `SELECT DATE_TRUNC('${args.interval}', i.date)                             AS date,
-          CAST(SUM(i.spend) AS INTEGER)                                      AS spend,
-          CAST(SUM(i.impressions) AS INTEGER)                                AS impressions,
-          CAST(SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS INTEGER)   AS cpm
+  `SELECT DATE_TRUNC('${args.interval}', i.date)                     AS date,
+          SUM(i.spend)                                               AS spend,
+          SUM(i.impressions)                                         AS impressions,
+          SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
    FROM insights i
             JOIN ads a on i.ad_id = a.id
             JOIN ad_accounts aa on a.ad_account_id = aa.id

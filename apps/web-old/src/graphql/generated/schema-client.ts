@@ -15,6 +15,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  /** The `BigInt` scalar type represents non-fractional signed whole numeric values. */
+  BigInt: { input: bigint; output: bigint };
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   Date: { input: Date; output: Date };
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -22,7 +24,7 @@ export type Scalars = {
 };
 
 export type Ad = {
-  __typename?: 'Ad';
+  __typename: 'Ad';
   adAccount: AdAccount;
   adAccountId: Scalars['String']['output'];
   externalId: Scalars['String']['output'];
@@ -46,7 +48,7 @@ export type AdInsightsArgs = {
 };
 
 export type AdAccount = {
-  __typename?: 'AdAccount';
+  __typename: 'AdAccount';
   adCount: Scalars['Int']['output'];
   advertisements: AdAccountAdvertisementsConnection;
   createdAt: Scalars['Date']['output'];
@@ -72,26 +74,26 @@ export type AdAccountAdvertisementsArgs = {
 };
 
 export type AdAccountAdvertisementsConnection = {
-  __typename?: 'AdAccountAdvertisementsConnection';
+  __typename: 'AdAccountAdvertisementsConnection';
   edges: Array<Maybe<AdAccountAdvertisementsConnectionEdge>>;
   pageInfo: PageInfo;
 };
 
 export type AdAccountAdvertisementsConnectionEdge = {
-  __typename?: 'AdAccountAdvertisementsConnectionEdge';
+  __typename: 'AdAccountAdvertisementsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Ad;
 };
 
 export type AdInsightsConnection = {
-  __typename?: 'AdInsightsConnection';
+  __typename: 'AdInsightsConnection';
   edges: Array<Maybe<AdInsightsConnectionEdge>>;
   pageInfo: PageInfo;
   totalCount: Scalars['Int']['output'];
 };
 
 export type AdInsightsConnectionEdge = {
-  __typename?: 'AdInsightsConnectionEdge';
+  __typename: 'AdInsightsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Insight;
 };
@@ -104,12 +106,12 @@ export enum AllRoles {
 }
 
 export type BaseError = Error & {
-  __typename?: 'BaseError';
+  __typename: 'BaseError';
   message: Scalars['String']['output'];
 };
 
 export type ChannelInitialProgressPayload = {
-  __typename?: 'ChannelInitialProgressPayload';
+  __typename: 'ChannelInitialProgressPayload';
   channel: IntegrationType;
   progress: Scalars['Float']['output'];
 };
@@ -315,13 +317,13 @@ export type FilterInsightsInput = {
 };
 
 export type GenerateGoogleAuthUrlResponse = {
-  __typename?: 'GenerateGoogleAuthUrlResponse';
+  __typename: 'GenerateGoogleAuthUrlResponse';
   type: LoginProviderEnum;
   url: Scalars['String']['output'];
 };
 
 export type GroupedInsight = Pagination & {
-  __typename?: 'GroupedInsight';
+  __typename: 'GroupedInsight';
   edges: Array<GroupedInsights>;
   hasNext: Scalars['Boolean']['output'];
   page: Scalars['Int']['output'];
@@ -330,7 +332,7 @@ export type GroupedInsight = Pagination & {
 };
 
 export type GroupedInsights = {
-  __typename?: 'GroupedInsights';
+  __typename: 'GroupedInsights';
   adAccountId?: Maybe<Scalars['String']['output']>;
   adAccountName?: Maybe<Scalars['String']['output']>;
   adId?: Maybe<Scalars['String']['output']>;
@@ -345,14 +347,14 @@ export type GroupedInsights = {
 };
 
 export type IFrame = {
-  __typename?: 'IFrame';
+  __typename: 'IFrame';
   height: Scalars['Int']['output'];
   src: Scalars['String']['output'];
   width: Scalars['Int']['output'];
 };
 
 export type Insight = {
-  __typename?: 'Insight';
+  __typename: 'Insight';
   ad: Ad;
   adId: Scalars['String']['output'];
   date: Scalars['Date']['output'];
@@ -383,12 +385,12 @@ export enum InsightsColumnsOrderBy {
 }
 
 export type InsightsDatapoints = {
-  __typename?: 'InsightsDatapoints';
-  cpm?: Maybe<Scalars['Int']['output']>;
+  __typename: 'InsightsDatapoints';
+  cpm?: Maybe<Scalars['BigInt']['output']>;
   date: Scalars['Date']['output'];
-  impressions: Scalars['Int']['output'];
+  impressions: Scalars['BigInt']['output'];
   /** In Cents */
-  spend: Scalars['Int']['output'];
+  spend: Scalars['BigInt']['output'];
 };
 
 export type InsightsDatapointsInput = {
@@ -441,7 +443,7 @@ export enum InsightsPosition {
 }
 
 export type Integration = {
-  __typename?: 'Integration';
+  __typename: 'Integration';
   /** Caller is permitted to view this field if they are in an offspring organization */
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   /** Caller is permitted to view this field if they are in an offspring organization */
@@ -466,7 +468,7 @@ export type Integration = {
 };
 
 export type IntegrationListItem = {
-  __typename?: 'IntegrationListItem';
+  __typename: 'IntegrationListItem';
   authUrl?: Maybe<Scalars['String']['output']>;
   status: IntegrationStatus;
   type: IntegrationType;
@@ -492,19 +494,19 @@ export enum IntegrationType {
 }
 
 export type InviteLinks = {
-  __typename?: 'InviteLinks';
+  __typename: 'InviteLinks';
   role: OrganizationRoleEnum;
   url: Scalars['String']['output'];
 };
 
 export type InviteUsersError = {
-  __typename?: 'InviteUsersError';
+  __typename: 'InviteUsersError';
   email: Scalars['String']['output'];
   message: Scalars['String']['output'];
 };
 
 export type InviteUsersErrors = Error & {
-  __typename?: 'InviteUsersErrors';
+  __typename: 'InviteUsersErrors';
   error: Array<InviteUsersError>;
   message: Scalars['String']['output'];
 };
@@ -514,7 +516,7 @@ export enum LoginProviderEnum {
 }
 
 export type MetaError = Error & {
-  __typename?: 'MetaError';
+  __typename: 'MetaError';
   code: Scalars['Int']['output'];
   errorSubCode: Scalars['Int']['output'];
   fbTraceId: Scalars['String']['output'];
@@ -522,7 +524,7 @@ export type MetaError = Error & {
 };
 
 export type Mutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   /** Use this mutation after the user has clicked on the non-personalized invite link and they have an account already */
   acceptLinkInvitationExistingUser: Tokens;
   /** Creates a link for the signed in org for a specific role */
@@ -645,14 +647,14 @@ export type MutationUpdateUserArgs = {
 export type MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDeAuthIntegrationSuccess;
 
 export type MutationDeAuthIntegrationSuccess = {
-  __typename?: 'MutationDeAuthIntegrationSuccess';
+  __typename: 'MutationDeAuthIntegrationSuccess';
   data: Scalars['String']['output'];
 };
 
 export type MutationInviteUsersResult = InviteUsersErrors | MutationInviteUsersSuccess;
 
 export type MutationInviteUsersSuccess = {
-  __typename?: 'MutationInviteUsersSuccess';
+  __typename: 'MutationInviteUsersSuccess';
   data: Scalars['Boolean']['output'];
 };
 
@@ -662,7 +664,7 @@ export enum OrderBy {
 }
 
 export type Organization = {
-  __typename?: 'Organization';
+  __typename: 'Organization';
   adAccounts: Array<AdAccount>;
   createdAt: Scalars['Date']['output'];
   domain?: Maybe<Scalars['String']['output']>;
@@ -685,7 +687,7 @@ export enum OrganizationRoleEnum {
 }
 
 export type PageInfo = {
-  __typename?: 'PageInfo';
+  __typename: 'PageInfo';
   endCursor?: Maybe<Scalars['String']['output']>;
   hasNextPage: Scalars['Boolean']['output'];
   hasPreviousPage: Scalars['Boolean']['output'];
@@ -700,7 +702,7 @@ export type Pagination = {
 };
 
 export type PrismaClientKnownRequestError = Error & {
-  __typename?: 'PrismaClientKnownRequestError';
+  __typename: 'PrismaClientKnownRequestError';
   code: Scalars['String']['output'];
   message: Scalars['String']['output'];
 };
@@ -718,7 +720,7 @@ export enum PublisherEnum {
 }
 
 export type Query = {
-  __typename?: 'Query';
+  __typename: 'Query';
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
@@ -784,26 +786,26 @@ export type SignUpInput = {
 };
 
 export type Subscription = {
-  __typename?: 'Subscription';
+  __typename: 'Subscription';
   channelInitialSetupProgress: ChannelInitialProgressPayload;
 };
 
 export type TokenDto = {
-  __typename?: 'TokenDto';
+  __typename: 'TokenDto';
   refreshToken: Scalars['String']['output'];
   token: Scalars['String']['output'];
   user: User;
 };
 
 export type Tokens = {
-  __typename?: 'Tokens';
+  __typename: 'Tokens';
   refreshToken: Scalars['String']['output'];
   token: Scalars['String']['output'];
 };
 
 /** Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization */
 export type User = {
-  __typename?: 'User';
+  __typename: 'User';
   allRoles: Array<AllRoles>;
   createdAt: Scalars['Date']['output'];
   currentOrganization?: Maybe<Organization>;
@@ -825,7 +827,7 @@ export type User = {
 };
 
 export type UserOrganization = {
-  __typename?: 'UserOrganization';
+  __typename: 'UserOrganization';
   organization: Organization;
   organizationId: Scalars['String']['output'];
   role: OrganizationRoleEnum;
@@ -845,13 +847,13 @@ export enum UserStatus {
 }
 
 export type ZodError = Error & {
-  __typename?: 'ZodError';
+  __typename: 'ZodError';
   fieldErrors: Array<ZodFieldError>;
   message: Scalars['String']['output'];
 };
 
 export type ZodFieldError = {
-  __typename?: 'ZodFieldError';
+  __typename: 'ZodFieldError';
   message: Scalars['String']['output'];
   path: Array<Scalars['String']['output']>;
 };
@@ -859,10 +861,10 @@ export type ZodFieldError = {
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AdAccountsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   integrations: Array<{
-    __typename?: 'Integration';
-    adAccounts: Array<{ __typename?: 'AdAccount'; id: string; name: string; currency: CurrencyEnum }>;
+    __typename: 'Integration';
+    adAccounts: Array<{ __typename: 'AdAccount'; id: string; name: string; currency: CurrencyEnum }>;
   }>;
 };
 
@@ -883,12 +885,12 @@ export type InsightsQueryVariables = Exact<{
 }>;
 
 export type InsightsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   insights: {
-    __typename?: 'GroupedInsight';
+    __typename: 'GroupedInsight';
     hasNext: boolean;
     edges: Array<{
-      __typename?: 'GroupedInsights';
+      __typename: 'GroupedInsights';
       id: string;
       adAccountId?: string | null;
       adAccountName?: string | null;
@@ -899,13 +901,13 @@ export type InsightsQuery = {
       publisher?: PublisherEnum | null;
       position?: string | null;
       datapoints: Array<{
-        __typename?: 'InsightsDatapoints';
+        __typename: 'InsightsDatapoints';
         date: Date;
-        spend: number;
-        impressions: number;
-        cpm?: number | null;
+        spend: bigint;
+        impressions: bigint;
+        cpm?: bigint | null;
       }>;
-      iFrame?: { __typename?: 'IFrame'; src: string; height: number; width: number } | null;
+      iFrame?: { __typename: 'IFrame'; src: string; height: number; width: number } | null;
     }>;
   };
 };
@@ -913,16 +915,16 @@ export type InsightsQuery = {
 export type LastThreeMonthsAdsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LastThreeMonthsAdsQuery = {
-  __typename?: 'Query';
-  lastThreeMonthsAds: Array<{ __typename?: 'Ad'; id: string; name?: string | null }>;
+  __typename: 'Query';
+  lastThreeMonthsAds: Array<{ __typename: 'Ad'; id: string; name?: string | null }>;
 };
 
 export type SettingsChannelsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type SettingsChannelsQuery = {
-  __typename?: 'Query';
+  __typename: 'Query';
   settingsChannels: Array<{
-    __typename?: 'IntegrationListItem';
+    __typename: 'IntegrationListItem';
     type: IntegrationType;
     status: IntegrationStatus;
     authUrl?: string | null;
@@ -934,19 +936,19 @@ export type DeAuthIntegrationMutationVariables = Exact<{
 }>;
 
 export type DeAuthIntegrationMutation = {
-  __typename?: 'Mutation';
+  __typename: 'Mutation';
   deAuthIntegration:
-    | { __typename?: 'BaseError'; message: string }
-    | { __typename?: 'MetaError'; message: string }
-    | { __typename?: 'MutationDeAuthIntegrationSuccess'; data: string };
+    | { __typename: 'BaseError'; message: string }
+    | { __typename: 'MetaError'; message: string }
+    | { __typename: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
 
 export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: string]: never }>;
 
 export type ChannelInitialSetupProgressSubscription = {
-  __typename?: 'Subscription';
+  __typename: 'Subscription';
   channelInitialSetupProgress: {
-    __typename?: 'ChannelInitialProgressPayload';
+    __typename: 'ChannelInitialProgressPayload';
     progress: number;
     channel: IntegrationType;
   };
@@ -958,8 +960,8 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 export type LoginMutation = {
-  __typename?: 'Mutation';
-  login: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  login: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type SignupMutationVariables = Exact<{
@@ -970,15 +972,15 @@ export type SignupMutationVariables = Exact<{
 }>;
 
 export type SignupMutation = {
-  __typename?: 'Mutation';
-  signup: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  signup: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type ForgetPasswordMutationVariables = Exact<{
   email: Scalars['String']['input'];
 }>;
 
-export type ForgetPasswordMutation = { __typename?: 'Mutation'; forgetPassword: boolean };
+export type ForgetPasswordMutation = { __typename: 'Mutation'; forgetPassword: boolean };
 
 export type ResetPasswordMutationVariables = Exact<{
   token: Scalars['String']['input'];
@@ -986,30 +988,30 @@ export type ResetPasswordMutationVariables = Exact<{
 }>;
 
 export type ResetPasswordMutation = {
-  __typename?: 'Mutation';
-  resetPassword: { __typename?: 'Tokens'; token: string; refreshToken: string };
+  __typename: 'Mutation';
+  resetPassword: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
 export type RefreshTokenQueryVariables = Exact<{ [key: string]: never }>;
 
-export type RefreshTokenQuery = { __typename?: 'Query'; refreshToken: string };
+export type RefreshTokenQuery = { __typename: 'Query'; refreshToken: string };
 
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
-  __typename?: 'Query';
-  me: { __typename?: 'User'; firstName: string; lastName: string; email: string; photoUrl?: string | null };
+  __typename: 'Query';
+  me: { __typename: 'User'; firstName: string; lastName: string; email: string; photoUrl?: string | null };
 };
 
 export type LoginProvidersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LoginProvidersQuery = {
-  __typename?: 'Query';
-  loginProviders: Array<{ __typename?: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
+  __typename: 'Query';
+  loginProviders: Array<{ __typename: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
 export type UserFieldsFragment = {
-  __typename?: 'User';
+  __typename: 'User';
   id: string;
   firstName: string;
   lastName: string;
