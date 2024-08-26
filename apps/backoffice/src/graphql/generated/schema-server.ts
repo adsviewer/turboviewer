@@ -347,8 +347,14 @@ export type IFrame = {
   __typename: 'IFrame';
   height: Scalars['Int']['output'];
   src: Scalars['String']['output'];
+  type: IFrameType;
   width: Scalars['Int']['output'];
 };
+
+export enum IFrameType {
+  IFRAME = 'IFRAME',
+  EMBEDDED = 'EMBEDDED',
+}
 
 export type Insight = {
   __typename: 'Insight';

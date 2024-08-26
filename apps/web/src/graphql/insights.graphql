@@ -60,6 +60,7 @@ query insights(
         src
         width
         height
+        type
       }
       device
       publisher

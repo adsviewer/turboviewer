@@ -1,21 +1,25 @@
 'use client';
 
-import { Card, Text, Badge, Group, Box, Flex, Title, Tooltip } from '@mantine/core';
+import { Badge, Box, Card, Flex, Group, Text, Title, Tooltip } from '@mantine/core';
 import { AreaChart } from '@mantine/charts';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import * as React from 'react';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
 import { YAxis } from 'recharts';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
-import { IconEye, IconCoins, IconChartLine } from '@tabler/icons-react';
+import { IconChartLine, IconCoins, IconEye } from '@tabler/icons-react';
+import { Embed } from '@repo/ui/embed';
+import { IFrame as IFrameT } from '@repo/ui/iframe';
 import {
-  type PublisherEnum,
   type CurrencyEnum,
   type DeviceEnum,
   type IFrame,
+  IFrameType,
   type InsightsDatapoints,
+  type PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
@@ -112,6 +116,24 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     }
   }, [props.datapoints, setupDatapoints, setupRank]);
 
+  const getIFrameHtml = (): ReactNode => {
+    if (!props.iframe) return <Flex justify="center" />;
+    const iFrameProps: React.EmbedHTMLAttributes<HTMLEmbedElement> & React.IframeHTMLAttributes<HTMLIFrameElement> = {
+      src: props.iframe.src,
+      width: String(props.iframe.width),
+      height: String(props.iframe.height),
+    };
+    switch (props.iframe.type) {
+      case IFrameType.EMBEDDED:
+        return <Embed style={{ border: 'none' }} {...iFrameProps} />;
+      case IFrameType.IFRAME:
+        return <IFrameT scrolling="no" loading="lazy" style={{ border: 'none' }} {...iFrameProps} />;
+      default:
+        logger.error('Unknown iframe type');
+        return <Flex justify="center" />;
+    }
+  };
+
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Flex gap="sm" align="center">
@@ -169,17 +191,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         </Box>
       ) : (
         // IFrame ad preview
-        <Flex justify="center">
-          <iframe
-            scrolling="no"
-            src={props.iframe?.src}
-            width={props.iframe?.width}
-            height={props.iframe?.height}
-            title={props.iframe?.src}
-            loading="lazy"
-            style={{ border: 'none' }}
-          />
-        </Flex>
+        getIFrameHtml()
       )}
 
       {/* Title */}

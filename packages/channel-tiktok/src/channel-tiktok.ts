@@ -201,8 +201,8 @@ export class Tiktok implements ChannelInterface {
     }
     return {
       src: parsed.data.preview_link,
-      width: 261,
-      height: 561,
+      width: 288,
+      height: 588,
     };
   }
 
