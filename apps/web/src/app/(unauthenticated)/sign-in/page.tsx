@@ -77,8 +77,7 @@ export default function SignIn(): React.JSX.Element {
               const redirectUrl = searchParams.get('redirect');
               logger.info(`Redirect after sign-in: ${String(redirectUrl)}`);
 
-              const backofficeUrl = new URL(env.NEXT_PUBLIC_BACKOFFICE_URL);
-              logger.info(`Backoffice URL: ${String(backofficeUrl)}`);
+              logger.info(`Backoffice URL: ${env.NEXT_PUBLIC_BACKOFFICE_URL}`);
               if (redirectUrl === env.NEXT_PUBLIC_BACKOFFICE_URL) {
                 const redirectTo = `${env.NEXT_PUBLIC_BACKOFFICE_URL}/api/save-tokens?${TOKEN_KEY}=${data.token}&${REFRESH_TOKEN_KEY}=${data.refreshToken}`;
                 logger.info(`Redirecting to: ${redirectTo}`);
