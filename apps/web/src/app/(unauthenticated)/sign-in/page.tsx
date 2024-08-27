@@ -60,6 +60,7 @@ export default function SignIn(): React.JSX.Element {
   }, []);
 
   const handleSubmit = (values: SignInSchemaType): void => {
+    logger.info(`Sign-in...`);
     startTransition(() => {
       fetch('/api/auth/sign-in', {
         method: 'POST',
