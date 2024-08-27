@@ -66,9 +66,11 @@ export default function SignIn(): React.JSX.Element {
         body: JSON.stringify(values),
       })
         .then((response) => {
+          logger.info(`Sign-in response: ${String(response.status)}. Is Ok: ${String(response.ok)}`);
           return response.json();
         })
         .then((data: GenericRequestResponseBody & { token: string; refreshToken: string }) => {
+          logger.info(`Sign-in data: ${JSON.stringify(data)}`);
           if (data.success) {
             startTransition(() => {
               const redirectUrl = searchParams.get('redirect');
