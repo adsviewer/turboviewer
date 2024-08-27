@@ -60,27 +60,20 @@ export default function SignIn(): React.JSX.Element {
   }, []);
 
   const handleSubmit = (values: SignInSchemaType): void => {
-    logger.info(`Sign-in...`);
     startTransition(() => {
       fetch('/api/auth/sign-in', {
         method: 'POST',
         body: JSON.stringify(values),
       })
         .then((response) => {
-          logger.info(`Sign-in response: ${String(response.status)}. Is Ok: ${String(response.ok)}`);
           return response.json();
         })
         .then((data: GenericRequestResponseBody & { token: string; refreshToken: string }) => {
-          logger.info(`Sign-in data: ${JSON.stringify(data)}`);
           if (data.success) {
             startTransition(() => {
               const redirectUrl = searchParams.get('redirect');
-              logger.info(`Redirect after sign-in: ${String(redirectUrl)}`);
-
-              logger.info(`Backoffice URL: ${env.NEXT_PUBLIC_BACKOFFICE_URL}`);
               if (redirectUrl === env.NEXT_PUBLIC_BACKOFFICE_URL) {
                 const redirectTo = `${env.NEXT_PUBLIC_BACKOFFICE_URL}/api/save-tokens?${TOKEN_KEY}=${data.token}&${REFRESH_TOKEN_KEY}=${data.refreshToken}`;
-                logger.info(`Redirecting to: ${redirectTo}`);
                 return redirect(redirectTo);
               }
               router.push(redirectUrl ?? '/insights');
