@@ -26,7 +26,7 @@ export const env = createEnv({
     NEXT_PUBLIC_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
     NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:3000/graphql'),
     NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
-    NEXT_PUBLIC_BACKOFFICE_URL: z.string().min(1).default('http://localhost:3002'),
+    NEXT_PUBLIC_BACKOFFICE_URL: z.string().min(1).default('http://localhost:3001'),
   },
 
   /**
