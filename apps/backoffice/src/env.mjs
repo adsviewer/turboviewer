@@ -11,7 +11,7 @@ export const env = createEnv({
    */
   server: {
     AUTH_SECRET: z.string().min(1).default('something'),
-    BACKOFFICE_URL: z.string().min(1).default('http://localhost:3002'),
+    BACKOFFICE_URL: z.string().min(1).default('http://localhost:3001'),
   },
 
   /**

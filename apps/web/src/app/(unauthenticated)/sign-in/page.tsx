@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useForm, zodResolver } from '@mantine/form';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { redirect, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   Anchor,
   Button,
@@ -71,15 +71,15 @@ export default function SignIn(): React.JSX.Element {
         .then((data: GenericRequestResponseBody & { token: string; refreshToken: string }) => {
           if (data.success) {
             startTransition(() => {
-              const redirect = searchParams.get('redirect');
-              logger.info(redirect, 'Redirect');
+              const redirectUrl = searchParams.get('redirect');
+              logger.info(redirectUrl, 'Redirect');
 
-              if (redirect === env.NEXT_PUBLIC_BACKOFFICE_URL) {
-                router.push(
+              if (redirectUrl === env.NEXT_PUBLIC_BACKOFFICE_URL) {
+                redirect(
                   `${env.NEXT_PUBLIC_BACKOFFICE_URL}/api/save-tokens?${TOKEN_KEY}=${data.token}&${REFRESH_TOKEN_KEY}=${data.refreshToken}`,
                 );
               } else {
-                router.push(redirect ?? '/insights');
+                router.push(redirectUrl ?? '/insights');
               }
             });
             return null;

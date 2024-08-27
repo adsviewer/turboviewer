@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
+import { logger } from '@repo/logger';
 import { env } from '@/env.mjs';
 
 export const GET = (request: NextRequest): void => {
@@ -10,5 +11,6 @@ export const GET = (request: NextRequest): void => {
   const cookieStore = cookies();
   if (token) cookieStore.set(TOKEN_KEY, token);
   if (refreshToken) cookieStore.set(REFRESH_TOKEN_KEY, refreshToken);
+  logger.info('Tokens saved');
   redirect(env.BACKOFFICE_URL);
 };
