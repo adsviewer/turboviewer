@@ -320,7 +320,13 @@ type GroupedInsights {
 type IFrame {
   height: Int!
   src: String!
+  type: IFrameType!
   width: Int!
+}
+
+enum IFrameType {
+  IFRAME
+  EMBEDDED
 }
 
 type Insight {

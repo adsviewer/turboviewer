@@ -16,7 +16,13 @@ const iFrameSchema = z.object({
   scrolling: z.nativeEnum(IFrameScrolling).optional(),
 });
 
+export enum IFrameTypeEnum {
+  IFRAME = 'iFrame',
+  EMBEDDED = 'embedded',
+}
+
 export type ChannelIFrame = z.infer<typeof iFrameSchema>;
+export type IFrameWithType = ChannelIFrame & { type: IFrameTypeEnum };
 
 export const getIFrame = (iFrame: string): AError | ChannelIFrame => {
   const htmlRoot = htmlParse(iFrame);

@@ -349,8 +349,14 @@ export type IFrame = {
   __typename: 'IFrame';
   height: Scalars['Int']['output'];
   src: Scalars['String']['output'];
+  type: IFrameType;
   width: Scalars['Int']['output'];
 };
+
+export enum IFrameType {
+  IFRAME = 'IFRAME',
+  EMBEDDED = 'EMBEDDED',
+}
 
 export type Insight = {
   __typename: 'Insight';
@@ -907,7 +913,7 @@ export type InsightsQuery = {
         impressions: bigint;
         cpm?: bigint | null;
       }>;
-      iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number } | null;
+      iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number; type: IFrameType } | null;
     }>;
   };
 };
@@ -1342,6 +1348,7 @@ export const InsightsDocument = gql`
           src
           width
           height
+          type
         }
         device
         publisher

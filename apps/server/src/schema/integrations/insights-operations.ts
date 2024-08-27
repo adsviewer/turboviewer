@@ -2,9 +2,10 @@ import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type 
 import { Kind } from 'graphql/language';
 import { FireAndForget, isAError } from '@repo/utils';
 import {
-  type ChannelIFrame,
   getInsightsCache,
   iFramePerInsight,
+  IFrameTypeEnum,
+  type IFrameWithType,
   invokeChannelIngress,
   setInsightsCache,
 } from '@repo/channel';
@@ -219,11 +220,16 @@ const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
 });
 type GroupedInsightsType = typeof GroupedInsightsDto.$inferType;
 
-const IFrameDTO = builder.objectRef<ChannelIFrame>('IFrame').implement({
+const IFrameTypeEnumDTO = builder.enumType(IFrameTypeEnum, {
+  name: 'IFrameType',
+});
+
+const IFrameDTO = builder.objectRef<IFrameWithType>('IFrame').implement({
   fields: (t) => ({
     src: t.exposeString('src', { nullable: false }),
     width: t.exposeInt('width', { nullable: false }),
     height: t.exposeInt('height', { nullable: false }),
+    type: t.expose('type', { type: IFrameTypeEnumDTO, nullable: false }),
   }),
 });
 

@@ -10,6 +10,7 @@
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
     "./checkbox": "./src/checkbox.tsx",
+    "./embed": "./src/embed.tsx",
     "./fallback": "./src/fallback.tsx",
     "./iframe": "./src/iframe.tsx",
     "./input": "./src/input.tsx",
