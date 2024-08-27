@@ -33,6 +33,7 @@ const getFn =
     if (!decryptedIntegration) return new AError('Integration not found');
     if (isAError(decryptedIntegration)) return decryptedIntegration;
     const iFrame = await channel.getAdPreview(decryptedIntegration, adId, publisher, device, position);
+    if (isAError(iFrame)) return iFrame;
     return {
       ...iFrame,
       type: embeddedFrameIntegrations.includes(ad.adAccount.integration.type)
