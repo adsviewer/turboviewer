@@ -15,36 +15,32 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_KEY)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value;
   let tokenData: AJwtPayload | undefined;
-  if (token) {
+  logger.info(`Pathname: ${request.nextUrl.pathname}`);
+  if (request.nextUrl.pathname !== 'api/sign-out' && token) {
     try {
       await jwtVerify(token, new TextEncoder().encode(env.AUTH_SECRET));
       tokenData = decodeJwt(token) as AJwtPayload;
-    } catch (error: unknown) {
-      logger.error(error);
+    } catch (err: unknown) {
+      return tryRefreshToken(err, refreshToken, request);
     }
   }
 
   // If user is not admin redirect to web app and sign the user out
   if (!token || !tokenData?.roles?.includes(AllRoles.ADMIN) || tokenData.userStatus === UserStatus.EMAIL_UNCONFIRMED) {
+    logger.info('User is not admin or email is unconfirmed');
     const redirectUrl = new URL(`${env.NEXT_WEBAPP_ENDPOINT}/api/auth/sign-out`, request.url);
     redirectUrl.searchParams.set('redirect', env.BACKOFFICE_URL);
+    logger.info(`Redirecting to ${redirectUrl.toString()}`);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Refresh user's JWT if invalid (except if signing out)
-  if (request.nextUrl.pathname !== '/sign-out' && token) {
-    try {
-      await jwtVerify(token, new TextEncoder().encode(env.AUTH_SECRET));
-    } catch (err) {
-      return tryRefreshToken(err, refreshToken, request);
-    }
-  }
   return NextResponse.next();
 }
 
 const signOut = (request: NextRequest): NextResponse => {
   const signOutUrl = new URL('api/sign-out', request.url);
   signOutUrl.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  logger.info(`Signing out, redirecting to ${signOutUrl.toString()}`);
   return NextResponse.redirect(signOutUrl);
 };
 
@@ -75,10 +71,12 @@ const tryRefreshToken = async (
       .then((json) => schema.safeParse(json));
 
     if (newRefreshToken.success) {
+      logger.info('Token refreshed');
       const response = NextResponse.redirect(request.url);
       response.cookies.set(TOKEN_KEY, newRefreshToken.data.data.refreshToken);
       return response;
     }
+    logger.info('Token refresh failed');
     return signOut(request);
   }
   logger.error(err);
