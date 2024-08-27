@@ -13,7 +13,9 @@ export default function Cards({ integrations }: CardsProps): JSX.Element {
       {integrations.map((integration) => (
         <Suspense
           key={integration.type}
-          fallback={<Card status={IntegrationStatus.ComingSoon} type={integration.type} />}
+          fallback={
+            <Card __typename="IntegrationListItem" status={IntegrationStatus.ComingSoon} type={integration.type} />
+          }
         >
           <Card {...integration} />
         </Suspense>

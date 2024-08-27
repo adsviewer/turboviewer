@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql';
-import { DateTimeResolver, JSONResolver } from 'graphql-scalars';
+import { BigIntResolver, DateTimeResolver, JSONResolver } from 'graphql-scalars';
 import SchemaBuilder from '@pothos/core';
 import ErrorsPlugin from '@pothos/plugin-errors';
 import PrismaPlugin from '@pothos/plugin-prisma';
@@ -43,6 +43,10 @@ export const builder = new SchemaBuilder<{
     JSON: {
       Input: JsonValue;
       Output: JsonValue;
+    };
+    BigInt: {
+      Input: bigint;
+      Output: bigint;
     };
   };
   PrismaTypes: PrismaTypes;
@@ -111,3 +115,4 @@ export const builder = new SchemaBuilder<{
 
 builder.addScalarType('Date', DateTimeResolver, {});
 builder.addScalarType('JSON', JSONResolver, {});
+builder.addScalarType('BigInt', BigIntResolver, {});
