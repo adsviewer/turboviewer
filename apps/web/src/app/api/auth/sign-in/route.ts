@@ -28,8 +28,9 @@ export async function POST(request: Request): Promise<NextResponse<{ success: tr
   if (!result.success) {
     return NextResponse.json({ success: false, error: { message: result.error } });
   }
-  cookies().set(TOKEN_KEY, result.data.login.token);
-  cookies().set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
+  const cookieStore = cookies();
+  cookieStore.set(TOKEN_KEY, result.data.login.token);
+  cookieStore.set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
   return NextResponse.json({
     success: true,
     token: result.data.login.token,
@@ -47,7 +48,8 @@ export function GET(request: NextRequest): NextResponse {
       error: { message: 'No JWT data found in the URL. Not attempting authorization.' },
     });
   }
-  cookies().set(TOKEN_KEY, token);
-  cookies().set(REFRESH_TOKEN_KEY, refreshToken);
+  const cookieStore = cookies();
+  cookieStore.set(TOKEN_KEY, token);
+  cookieStore.set(REFRESH_TOKEN_KEY, refreshToken);
   return NextResponse.redirect(env.NEXT_PUBLIC_ENDPOINT);
 }
