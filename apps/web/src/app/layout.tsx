@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getMessages } from 'next-intl/server';
 import { headers } from 'next/headers';
 import NotificationsHandler from '@/components/misc/notifications-handler';
 
@@ -20,11 +20,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const headersList = headers();
   const acceptLanguageHeaderValue = headersList.get('accept-language');
   const preferredLocale = acceptLanguageHeaderValue ? acceptLanguageHeaderValue.split(',')[0] : 'en';
-  const locale = await getLocale();
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={preferredLocale}>
       <body>
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages} locale={preferredLocale}>
