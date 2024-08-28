@@ -281,8 +281,8 @@ export const InsightDto = builder.prismaObject('Insight', {
     adId: t.exposeString('adId', { nullable: false }),
 
     date: t.expose('date', { type: 'Date', nullable: false }),
-    impressions: t.exposeInt('impressions', { nullable: false }),
-    spend: t.exposeInt('spend', { nullable: false }),
+    impressions: t.expose('impressions', { type: 'BigInt', nullable: false }),
+    spend: t.expose('spend', { type: 'BigInt', nullable: false }),
     device: t.expose('device', { type: DeviceEnumDto, nullable: false }),
     publisher: t.expose('publisher', { type: PublisherEnum, nullable: false }),
     position: t.exposeString('position', { nullable: false }),

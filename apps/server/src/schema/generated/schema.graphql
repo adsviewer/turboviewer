@@ -335,14 +335,14 @@ type Insight {
   date: Date!
   device: DeviceEnum!
   id: ID!
-  impressions: Int!
+  impressions: BigInt!
   position: String!
   publisher: PublisherEnum!
 
   """
   Amount of money spent on the ad in cents
   """
-  spend: Int!
+  spend: BigInt!
 }
 
 enum InsightsColumnsGroupBy {
