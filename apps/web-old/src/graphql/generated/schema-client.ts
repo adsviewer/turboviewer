@@ -636,6 +636,7 @@ export type MutationUpdateOrganizationArgs = {
 
 export type MutationUpdateOrganizationAdAccountsArgs = {
   adAccountIds: Array<Scalars['String']['input']>;
+  integrationType: IntegrationType;
 };
 
 export type MutationUpdateOrganizationUserArgs = {
