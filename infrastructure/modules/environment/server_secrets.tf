@@ -1,6 +1,7 @@
 locals {
   server_secrets_map = {
     "emailable_api_key" : var.emailable_api_key
+    "exchange_rates_api_key" : var.exchange_rates_api_key
     "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret,
     "linkedin_application_id" : var.linkedin_application_id,
     "linkedin_application_secret" : var.linkedin_application_secret,

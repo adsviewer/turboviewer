@@ -22,6 +22,10 @@ variable "environment" {
   type = string
 }
 
+variable "exchange_rates_api_key" {
+  type = string
+}
+
 variable "fb_application_id" {
   type = string
 }

@@ -1,5 +1,6 @@
 export * from './aes-util';
 export * from './channel-interface';
+export * from './currency-to-eur-cacheable';
 export { channelsSchema } from './config';
 export * from './date-utils';
 export * from './errors';

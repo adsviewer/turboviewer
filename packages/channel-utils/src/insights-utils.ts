@@ -2,6 +2,7 @@ import { type AdAccount, type Integration, Prisma, prisma } from '@repo/database
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
 import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
+import { currencyToEuro } from './currency-to-eur-cacheable';
 
 export const saveAccounts = async (
   activeAccounts: ChannelAdAccount[],
@@ -75,6 +76,10 @@ export const saveInsights = async (
   dbAccount: AdAccount,
 ): Promise<void> => {
   logger.info('Saving %d insights for %s', insights.length, dbAccount.id);
+  const toEuro = await currencyToEuro
+    .getValue(dbAccount.currency, dbAccount.currency)
+    .then((rate) => (isAError(rate) ? null : 1 / rate));
+
   const createInsights = await prisma.insight
     .createMany({
       data: insights.map((insight) => ({
@@ -88,6 +93,7 @@ export const saveInsights = async (
         position: insight.position,
         publisher: insight.publisher,
         spend: insight.spend,
+        spendEur: toEuro ? Math.floor(insight.spend * toEuro) : null,
       })),
     })
     .catch((e: unknown) => {

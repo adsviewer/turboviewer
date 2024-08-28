@@ -550,6 +550,7 @@ type Mutation {
   forgetPassword(email: String!): Boolean!
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): MutationInviteUsersResult!
   login(email: String!, password: String!, token: String): Tokens!
+  populateSpendEur(integrationIds: [String!]): Boolean!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
   removeUserFromOrganization(userId: String!): Boolean!
   resendEmailConfirmation: Boolean!

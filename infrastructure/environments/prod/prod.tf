@@ -87,6 +87,7 @@ module "environment" {
   domain                               = local.domain
   environment                          = var.environment
   emailable_api_key                    = var.emailable_api_key
+  exchange_rates_api_key               = var.exchange_rates_api_key
   endpoint_interface_security_group_id = module.workspace.endpoint_interface_security_group_id
   fb_application_id                    = var.fb_application_id
   fb_application_secret                = var.fb_application_secret
