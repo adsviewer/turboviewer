@@ -15,7 +15,7 @@ import { Embed } from '@repo/ui/embed';
 import { IFrame as IFrameT } from '@repo/ui/iframe';
 import {
   type CurrencyEnum,
-  type DeviceEnum,
+  DeviceEnum,
   type IFrame,
   IFrameType,
   type InsightsDatapoints,
@@ -228,6 +228,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           }}
           style={{ cursor: 'pointer' }}
         >
+          {props.device ? `(${DeviceEnum[props.device]}) ` : null}
           {sentenceCase(props.description ?? '')}
         </Text>
         {props.publisher ? (
