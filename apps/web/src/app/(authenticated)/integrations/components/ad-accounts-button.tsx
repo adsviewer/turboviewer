@@ -158,7 +158,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
     const adAccountIds = selectedAdAccounts.map((adAccount) => adAccount.id);
 
     setIsPending(true);
-    void updateOrganizationAdAccounts({ adAccountIds })
+    void updateOrganizationAdAccounts({ adAccountIds, channel: props.channel })
       .then((res) => {
         if (!res.success) {
           logger.error(res.error);

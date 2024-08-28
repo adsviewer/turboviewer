@@ -562,7 +562,7 @@ type Mutation {
   signup(args: SignUpInput!): Tokens!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
-  updateOrganizationAdAccounts(adAccountIds: [String!]!): Organization!
+  updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
 }

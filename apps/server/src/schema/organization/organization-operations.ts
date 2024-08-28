@@ -277,6 +277,7 @@ builder.mutationFields((t) => ({
     type: OrganizationDto,
     nullable: false,
     args: {
+      integrationType: t.arg({ type: IntegrationTypeDto, required: true }),
       adAccountIds: t.arg.stringList({ required: true }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
@@ -286,10 +287,15 @@ builder.mutationFields((t) => ({
       }
       await checkIsAdminInParent(parentId, ctx.currentUserId);
       deleteInsightsCache(ctx.organizationId);
+      const adAccounts = await prisma.adAccount.findMany({
+        where: { type: { not: args.integrationType }, organizations: { some: { id: ctx.organizationId } } },
+      });
+      const adAccountIds = adAccounts.map((adAccount) => adAccount.id);
+      const newAdAccountsIds = [...adAccountIds, ...args.adAccountIds];
       return prisma.organization.update({
         ...query,
         where: { id: ctx.organizationId },
-        data: { adAccounts: { set: args.adAccountIds.map((id) => ({ id })) } },
+        data: { adAccounts: { set: newAdAccountsIds.map((id) => ({ id })) } },
       });
     },
   }),

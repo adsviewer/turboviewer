@@ -65,7 +65,7 @@ mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
     }
   }
 }
-  
+
 query availableOrganizationAdAccounts($channel: IntegrationType!) {
   availableOrganizationAdAccounts(channel: $channel) {
     id
@@ -87,8 +87,8 @@ query organizationAdAccounts($channel: IntegrationType!) {
   }
 }
 
-mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
-  updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
+mutation updateOrganizationAdAccounts($adAccountIds: [String!]!, $channel: IntegrationType!) {
+  updateOrganizationAdAccounts(adAccountIds: $adAccountIds, integrationType: $channel) {
     id
   }
 }

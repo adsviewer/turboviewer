@@ -635,6 +635,7 @@ export type MutationUpdateOrganizationArgs = {
 
 export type MutationUpdateOrganizationAdAccountsArgs = {
   adAccountIds: Array<Scalars['String']['input']>;
+  integrationType: IntegrationType;
 };
 
 export type MutationUpdateOrganizationUserArgs = {
@@ -1150,6 +1151,7 @@ export type OrganizationAdAccountsQuery = {
 
 export type UpdateOrganizationAdAccountsMutationVariables = Exact<{
   adAccountIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  channel: IntegrationType;
 }>;
 
 export type UpdateOrganizationAdAccountsMutation = {
@@ -1558,8 +1560,8 @@ export const OrganizationAdAccountsDocument = gql`
   }
 `;
 export const UpdateOrganizationAdAccountsDocument = gql`
-  mutation updateOrganizationAdAccounts($adAccountIds: [String!]!) {
-    updateOrganizationAdAccounts(adAccountIds: $adAccountIds) {
+  mutation updateOrganizationAdAccounts($adAccountIds: [String!]!, $channel: IntegrationType!) {
+    updateOrganizationAdAccounts(adAccountIds: $adAccountIds, integrationType: $channel) {
       id
     }
   }
