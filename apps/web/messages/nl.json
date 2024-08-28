@@ -71,6 +71,8 @@
     "title": "Integraties",
     "adAccounts": "Advertentieaccounts",
     "noAdAccountsFound": "Geen accounts gevonden",
+    "selectAdAccounts": "Selecteer Account(s)",
+    "viewAdAccounts": "Bekijk Account(s)",
     "description": "Versterk je werk door de tools die je dagelijks gebruikt te verbinden om je advertenties op één plek te beheren!",
     "connect": "Verbinden",
     "revoke": "Intrekken",

@@ -1,19 +1,8 @@
 'use client';
 
-import {
-  ActionIcon,
-  Modal,
-  Tooltip,
-  Text,
-  Flex,
-  ScrollArea,
-  CloseButton,
-  TextInput,
-  Checkbox,
-  Button,
-} from '@mantine/core';
+import { Modal, Text, Flex, ScrollArea, CloseButton, TextInput, Checkbox, Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconAd, IconSearch } from '@tabler/icons-react';
+import { IconSearch } from '@tabler/icons-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { type ChangeEvent, useState, type ReactNode } from 'react';
 import { logger } from '@repo/logger';
@@ -179,11 +168,11 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
   return (
     <>
       {/* View button */}
-      <Tooltip label={t('adAccounts')}>
-        <ActionIcon variant="default" onClick={openModal}>
-          <IconAd size={22} />
-        </ActionIcon>
-      </Tooltip>
+      <Button onClick={openModal} w="100%" variant="light">
+        {isOrgAdmin(userDetails.allRoles) && !userDetails.currentOrganization?.isRoot
+          ? t('selectAdAccounts')
+          : t('viewAdAccounts')}
+      </Button>
 
       {/* Modal Contents */}
       <Modal

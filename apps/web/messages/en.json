@@ -71,6 +71,8 @@
     "title": "Integrations",
     "adAccounts": "Ad Accounts",
     "noAdAccountsFound": "No ad accounts found",
+    "selectAdAccounts": "Select Account(s)",
+    "viewAdAccounts": "View Account(s)",
     "description": "Supercharge your work by connecting the tools you use every day to manage your advertisements in one place!",
     "connect": "Connect",
     "revoke": "Revoke",
