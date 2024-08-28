@@ -15,7 +15,8 @@
     "roleOrgAdmin": "Organisatiebeheerder",
     "roleAdmin": "Beheerder",
     "roleOperator": "Bediende",
-    "roleMember": "Lid"
+    "roleMember": "Lid",
+    "pickDateRange": "Kies een datumbereik"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -35,6 +36,7 @@
     "insight": "In zicht",
     "pageSize": "Paginagrootte",
     "orderBy": "Sorteren op",
+    "timeConstraints": "Tijdsbeperkingen",
     "spent": "Uitgegeven",
     "impressions": "Vertoningen",
     "relative": "Relatief",

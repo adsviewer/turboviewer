@@ -15,7 +15,8 @@
     "roleOrgAdmin": "Organization Administrator",
     "roleAdmin": "Administrator",
     "roleOperator": "Operator",
-    "roleMember": "Member"
+    "roleMember": "Member",
+    "pickDateRange": "Pick a date range"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",
@@ -35,6 +36,7 @@
     "insight": "Insight",
     "pageSize": "Page size",
     "orderBy": "Order by",
+    "timeConstraints": "Time Constraints",
     "spent": "Spent",
     "impressions": "Impressions",
     "relative": "Relative",

@@ -25,6 +25,8 @@ export interface SearchParams {
   position?: InsightsPosition;
   interval?: InsightsInterval;
   fetchPreviews?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
 }
 
 export default async function getInsights(
