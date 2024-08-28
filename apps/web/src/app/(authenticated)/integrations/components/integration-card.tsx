@@ -95,6 +95,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
       }
       return (
         <Flex direction="column" gap="xs" mt="xs">
+          <AdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
           <Tooltip
             label={tGeneric('accessOrgAdminRoot')}
             disabled={isOrgAdmin(userDetails.allRoles) && userDetails.currentOrganization?.isRoot}
@@ -102,7 +103,6 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             <Link href={props.authUrl ?? ''} passHref>
               <Button
                 w="100%"
-                mt="lg"
                 component="a"
                 disabled={!isOrgAdmin(userDetails.allRoles) || !userDetails.currentOrganization?.isRoot}
                 onClick={() => {
@@ -152,9 +152,6 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
             </Tooltip>
           ) : null}
           <Text fw={500}>{props.title}</Text>
-          {props.isConnected ? (
-            <AdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
-          ) : null}
         </Flex>
         {renderBadge()}
       </Group>
