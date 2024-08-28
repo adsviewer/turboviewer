@@ -186,6 +186,7 @@ export default function GroupFilters(): ReactNode {
 
             <MultiSelect
               disabled={isPending}
+              searchable
               placeholder={`${t('selectAccounts')}...`}
               data={populateAccountsAvailableValues()}
               value={getAccountCurrentValues()}
@@ -206,6 +207,7 @@ export default function GroupFilters(): ReactNode {
         </Text>
         <MultiSelect
           disabled={isPending}
+          searchable
           placeholder={`${t('selectPositions')}...`}
           data={populatePositionAvailableValues()}
           value={getPositionCurrentValues()}
