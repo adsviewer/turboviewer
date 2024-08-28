@@ -214,11 +214,11 @@ builder.mutationFields((t) => ({
         const toEur = await currencyToEuro.getValue(adAccount.currency, adAccount.currency);
         if (isAError(toEur)) continue;
 
-        await prisma.$executeRaw`UPDATE insights
-                                 SET spend_eur           = spend * ${toEur},
+        await prisma.$queryRawUnsafe(`UPDATE insights
+                                 SET spend_eur           = spend * ${String(toEur)},
                                      currency_convertion = true
-                                 WHERE ad_account_id = ${adAccount.id}
-                                   AND currency_convertion = false`;
+                                 WHERE ad_account_id = '${adAccount.id}'
+                                   AND currency_convertion = false`);
       }
       return true;
     },
