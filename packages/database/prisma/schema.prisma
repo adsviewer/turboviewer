@@ -249,9 +249,13 @@ model Insight {
   impressions Int
   /// Amount of money spent on the ad in cents
   spend       Int
+  /// Amount of money spent on the ad in Euro cents * 100
+  spendEur    Int?          @map("spend_eur")
   device      DeviceEnum
   publisher   PublisherEnum
   position    String
+
+  currencyConvertion Boolean @default(false) @map("currency_convertion")
 
   ad        Ad         @relation(fields: [adId], references: [id])
   adAccount AdAccount? @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
@@ -261,7 +265,7 @@ model Insight {
   @@index([currency])
   @@index([date])
   @@index([impressions])
-  @@index([spend])
+  @@index([spendEur])
   @@index([device])
   @@index([publisher])
   @@index([position])

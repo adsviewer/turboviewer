@@ -544,6 +544,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
+  populateSpendEur: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
@@ -599,6 +600,10 @@ export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationPopulateSpendEurArgs = {
+  integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type MutationRefreshDataArgs = {

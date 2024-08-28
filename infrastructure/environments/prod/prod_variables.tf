@@ -26,6 +26,10 @@ variable "environment" {
   default = "prod"
 }
 
+variable "exchange_rates_api_key" {
+  type = string
+}
+
 variable "fb_application_id" {
   type = string
 }

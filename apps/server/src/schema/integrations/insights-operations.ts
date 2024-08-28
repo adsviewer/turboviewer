@@ -2,6 +2,7 @@ import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type 
 import { Kind } from 'graphql/language';
 import { FireAndForget, isAError } from '@repo/utils';
 import {
+  currencyToEuro,
   getInsightsCache,
   iFramePerInsight,
   IFrameTypeEnum,
@@ -198,6 +199,26 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, args, _ctx, _info) => {
       await invokeChannelIngress({ initial: args.initial, integrationIds: args.integrationIds ?? undefined });
+      return true;
+    },
+  }),
+  populateSpendEur: t.withAuth({ isAdmin: true }).field({
+    type: 'Boolean',
+    nullable: false,
+    args: {
+      integrationIds: t.arg.stringList({ required: false }),
+    },
+    resolve: async (_root, _args, _ctx, _info) => {
+      const adAccounts = await prisma.adAccount.findMany();
+      for (const adAccount of adAccounts) {
+        const toEur = await currencyToEuro.getValue(adAccount.currency, adAccount.currency);
+        if (isAError(toEur)) continue;
+
+        await prisma.insight.updateMany({
+          where: { adAccountId: adAccount.id, currencyConvertion: false },
+          data: { spendEur: { multiply: toEur }, currencyConvertion: true },
+        });
+      }
       return true;
     },
   }),

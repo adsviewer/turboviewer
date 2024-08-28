@@ -154,10 +154,10 @@ void describe('insights query builder tests', () => {
     );
   });
   void it('orderColumnTrendAbsolute', () => {
-    const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'spend', 10, 20);
+    const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'spend_eur', 10, 20);
     assertSql(
       insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) AS trend
+      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS trend
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -170,7 +170,7 @@ void describe('insights query builder tests', () => {
     const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'cpm', 10, 20);
     assert.strictEqual(
       insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend
+      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -184,7 +184,7 @@ void describe('insights query builder tests', () => {
     const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'cpm', 10, 20, new Date('2024-05-28'));
     assert.strictEqual(
       insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend
+      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
@@ -195,10 +195,10 @@ void describe('insights query builder tests', () => {
     );
   });
   void it('last interval and not order by it', () => {
-    const insights = lastInterval('ad_id, publisher', 'week', 'spend');
+    const insights = lastInterval('ad_id, publisher', 'week', 'spend_eur');
     assert.strictEqual(
       insights,
-      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend) AS spend
+      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -209,7 +209,7 @@ void describe('insights query builder tests', () => {
     const insights = lastInterval('ad_id, publisher', 'week', 'cpm');
     assert.strictEqual(
       insights,
-      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
+      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -217,10 +217,10 @@ void describe('insights query builder tests', () => {
     );
   });
   void it('last interval date to filter', () => {
-    const insights = lastInterval('ad_id, publisher', 'week', 'spend', new Date('2024-05-28'));
+    const insights = lastInterval('ad_id, publisher', 'week', 'spend_eur', new Date('2024-05-28'));
     assert.strictEqual(
       insights,
-      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend) AS spend
+      `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
@@ -228,10 +228,10 @@ void describe('insights query builder tests', () => {
     );
   });
   void it('intervalBeforeLast', () => {
-    const insights = intervalBeforeLast('ad_id, publisher', 'week', 'spend');
+    const insights = intervalBeforeLast('ad_id, publisher', 'week', 'spend_eur');
     assert.strictEqual(
       insights,
-      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend) AS spend
+      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
@@ -243,7 +243,7 @@ void describe('insights query builder tests', () => {
     const insights = intervalBeforeLast('ad_id, publisher', 'week', 'cpm');
     assert.strictEqual(
       insights,
-      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
+      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
@@ -252,10 +252,10 @@ void describe('insights query builder tests', () => {
     );
   });
   void it('intervalBeforeLast dateTo', () => {
-    const insights = intervalBeforeLast('ad_id, publisher', 'week', 'spend', new Date('2024-05-28'));
+    const insights = intervalBeforeLast('ad_id, publisher', 'week', 'spend_eur', new Date('2024-05-28'));
     assert.strictEqual(
       insights,
-      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend) AS spend
+      `interval_before_last AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
@@ -264,12 +264,12 @@ void describe('insights query builder tests', () => {
     );
   });
   void it('order column trend', () => {
-    const insights = orderColumnTrend(['ad_id', 'publisher'], 'spend', 'desc', 10, 20);
+    const insights = orderColumnTrend(['ad_id', 'publisher'], 'spend_eur', 'desc', 10, 20);
     assert.strictEqual(
       insights,
-      `order_column_trend AS (SELECT li.ad_id, li.publisher, li.spend / ibl.spend::decimal trend
+      `order_column_trend AS (SELECT li.ad_id, li.publisher, li.spend_eur / ibl.spend_eur::decimal trend
                                       FROM last_interval li JOIN interval_before_last ibl ON li.ad_id = ibl.ad_id AND li.publisher = ibl.publisher
-                                      WHERE ibl.spend
+                                      WHERE ibl.spend_eur
                                           > 0
                                       ORDER BY trend
                                       LIMIT 10 OFFSET 20)`,
@@ -297,20 +297,20 @@ void describe('insights query builder tests', () => {
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               ), 
-  last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend
+  last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
                                       GROUP BY ad_id, publisher, currency),
-  interval_before_last AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend
+  interval_before_last AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                              GROUP BY ad_id, publisher, currency
                                              ),
-  order_column_trend AS (SELECT li.ad_id, li.publisher, li.currency, li.spend / ibl.spend::decimal trend
+  order_column_trend AS (SELECT li.ad_id, li.publisher, li.currency, li.spend_eur / ibl.spend_eur::decimal trend
                                       FROM last_interval li JOIN interval_before_last ibl ON li.ad_id = ibl.ad_id AND li.publisher = ibl.publisher AND li.currency = ibl.currency
-                                      WHERE ibl.spend
+                                      WHERE ibl.spend_eur
                                           > 0
                                       ORDER BY trend
                                       LIMIT 11 OFFSET 0)
@@ -344,7 +344,7 @@ void describe('insights query builder tests', () => {
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               ), 
-  order_column_trend AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS trend
+  order_column_trend AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', CURRENT_DATE)
@@ -384,20 +384,20 @@ void describe('insights query builder tests', () => {
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                               ), 
-  last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend
+  last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
                                       GROUP BY ad_id, publisher, currency),
-  interval_before_last AS (SELECT ad_id, publisher, currency, SUM(i.spend) AS spend
+  interval_before_last AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
                                              GROUP BY ad_id, publisher, currency
                                              ),
-  order_column_trend AS (SELECT li.ad_id, li.publisher, li.currency, li.spend / ibl.spend::decimal trend
+  order_column_trend AS (SELECT li.ad_id, li.publisher, li.currency, li.spend_eur / ibl.spend_eur::decimal trend
                                       FROM last_interval li JOIN interval_before_last ibl ON li.ad_id = ibl.ad_id AND li.publisher = ibl.publisher AND li.currency = ibl.currency
-                                      WHERE ibl.spend
+                                      WHERE ibl.spend_eur
                                           > 0
                                       ORDER BY trend
                                       LIMIT 11 OFFSET 0)

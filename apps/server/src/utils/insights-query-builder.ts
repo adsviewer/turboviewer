@@ -55,7 +55,7 @@ export const lastInterval = (
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
   const sqlOrderColumn =
     orderColumn === 'cpm'
-      ? 'SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
+      ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
       : `SUM(i.${orderColumn}) AS ${orderColumn}`;
   const relative = orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : '';
   return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
@@ -74,7 +74,7 @@ export const intervalBeforeLast = (
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
   const sqlOrderColumn =
     orderColumn === 'cpm'
-      ? 'SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
+      ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
       : `SUM(i.${orderColumn}) AS ${orderColumn}`;
   return `interval_before_last AS (SELECT ${group}, ${sqlOrderColumn}
                                              FROM organization_insights i
@@ -91,7 +91,7 @@ const joinFn = (columns: string[], table: string, left: string) => {
 
 export const orderColumnTrend = (
   group: string[],
-  orderColumn: string,
+  orderColumn: OrderByColumn,
   trend: 'asc' | 'desc' | null | undefined,
   limit: number,
   offset: number,
@@ -120,7 +120,7 @@ export const orderColumnTrendAbsolute = (
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
   const sqlOrderColumn =
     orderColumn === 'cpm'
-      ? 'SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend'
+      ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend'
       : `SUM(i.${orderColumn}) AS trend`;
   return `order_column_trend AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
@@ -183,14 +183,14 @@ const abbreviateSnakeCase = (snakeCaseString: string) =>
     .map((word) => word[0])
     .join('');
 
-type OrderByColumn = 'cpm' | 'spend' | 'impressions';
+type OrderByColumn = 'cpm' | 'spend_eur' | 'impressions';
 const getOrderByColumn = (orderBy: FilterInsightsInputType['orderBy']): OrderByColumn => {
   switch (orderBy) {
     case 'spend_abs': {
-      return 'spend';
+      return 'spend_eur';
     }
     case 'spend_rel': {
-      return 'spend';
+      return 'spend_eur';
     }
     case 'impressions_abs': {
       return 'impressions';

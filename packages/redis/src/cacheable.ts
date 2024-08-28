@@ -9,7 +9,7 @@ export interface CacheableDataWrapper<T> {
 }
 
 export class Cacheable<
-  T extends string | string[] | object | object[],
+  T extends number | string | string[] | object | object[],
   U extends string | object,
   V extends string | object,
 > {
