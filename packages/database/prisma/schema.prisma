@@ -246,11 +246,11 @@ model Insight {
 
   adId        String        @map("ad_id")
   date        DateTime
-  impressions Int
+  impressions BigInt
   /// Amount of money spent on the ad in cents
-  spend       Int
-  /// Amount of money spent on the ad in Euro cents * 100
-  spendEur    Int?          @map("spend_eur")
+  spend       BigInt
+  /// Amount of money spent on the ad in Euro cents
+  spendEur    BigInt?       @map("spend_eur")
   device      DeviceEnum
   publisher   PublisherEnum
   position    String

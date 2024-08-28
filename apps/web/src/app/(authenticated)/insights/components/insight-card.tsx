@@ -44,9 +44,9 @@ interface RankType {
 
 interface Datapoint {
   date: string;
-  impressions: number;
+  impressions: bigint;
   spend: number;
-  cpm: number;
+  cpm: bigint;
 }
 
 export default function InsightsGrid(props: InsightCardProps): ReactNode {
@@ -100,9 +100,9 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       for (const datapoint of props.datapoints) {
         formattedDatapoints.push({
           date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
-          impressions: Number(datapoint.impressions),
+          impressions: datapoint.impressions,
           spend: Math.floor(Number(datapoint.spend) / 100),
-          cpm: Number(datapoint.cpm ?? 0n),
+          cpm: datapoint.cpm ?? 0n,
         });
       }
       setDatapoints(formattedDatapoints);

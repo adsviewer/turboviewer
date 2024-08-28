@@ -366,11 +366,11 @@ export type Insight = {
   date: Scalars['Date']['output'];
   device: DeviceEnum;
   id: Scalars['ID']['output'];
-  impressions: Scalars['Int']['output'];
+  impressions: Scalars['BigInt']['output'];
   position: Scalars['String']['output'];
   publisher: PublisherEnum;
   /** Amount of money spent on the ad in cents */
-  spend: Scalars['Int']['output'];
+  spend: Scalars['BigInt']['output'];
 };
 
 export enum InsightsColumnsGroupBy {
