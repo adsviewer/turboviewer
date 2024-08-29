@@ -82,19 +82,22 @@ export const saveInsights = async (
 
   const createInsights = await prisma.insight
     .createMany({
-      data: insights.map((insight) => ({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the external id exists
-        adId: adExternalIdMap.get(insight.externalAdId)!,
-        adAccountId: dbAccount.id,
-        currency: dbAccount.currency,
-        date: insight.date,
-        device: insight.device,
-        impressions: insight.impressions,
-        position: insight.position,
-        publisher: insight.publisher,
-        spend: insight.spend,
-        spendEur: toEuro ? Math.floor(insight.spend * toEuro) : null,
-      })),
+      data: insights.map((insight) => {
+        const spend = Math.floor(insight.spend);
+        return {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the external id exists
+          adId: adExternalIdMap.get(insight.externalAdId)!,
+          adAccountId: dbAccount.id,
+          currency: dbAccount.currency,
+          date: insight.date,
+          device: insight.device,
+          impressions: insight.impressions,
+          position: insight.position,
+          publisher: insight.publisher,
+          spend,
+          spendEur: toEuro ? Math.floor(spend * toEuro) : null,
+        };
+      }),
     })
     .catch((e: unknown) => {
       logger.error(

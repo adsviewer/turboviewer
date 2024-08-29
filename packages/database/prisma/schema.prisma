@@ -255,8 +255,6 @@ model Insight {
   publisher   PublisherEnum
   position    String
 
-  currencyConvertion Boolean @default(false) @map("currency_convertion")
-
   ad        Ad         @relation(fields: [adId], references: [id])
   adAccount AdAccount? @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
 
