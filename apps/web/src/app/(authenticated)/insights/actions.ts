@@ -25,8 +25,8 @@ export interface SearchParams {
   position?: InsightsPosition;
   interval?: InsightsInterval;
   fetchPreviews?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: number;
+  dateTo?: number;
 }
 
 export default async function getInsights(
@@ -39,6 +39,8 @@ export default async function getInsights(
   return await urqlClientSdk().insights({
     adAccountIds: searchParams.account,
     adIds: searchParams.adId,
+    dateFrom: searchParams.dateFrom ? new Date(Number(searchParams.dateFrom)) : undefined,
+    dateTo: searchParams.dateTo ? new Date(Number(searchParams.dateTo)) : undefined,
     devices: searchParams.device,
     groupBy: searchParams.groupedBy,
     order,

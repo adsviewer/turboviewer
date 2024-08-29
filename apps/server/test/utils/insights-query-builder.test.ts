@@ -7,6 +7,7 @@ import type {
   InsightsDatapointsInputType,
 } from '../../src/schema/integrations/integration-types';
 import {
+  calculateDataPointsPerInterval,
   getInsightsDateFrom,
   getOrganizationalInsights,
   groupedInsights,
@@ -31,6 +32,67 @@ const assertSql = (actual: string, expected: string) => {
 };
 
 void describe('insights query builder tests', () => {
+  void it('calculateDataPointsPerInterval no date week', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(undefined, undefined, 'week', 'en-GB');
+    assert.equal(dataPointsPerInterval, 3);
+  });
+  void it('calculateDataPointsPerInterval no date day', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(undefined, undefined, 'day', 'en-GB');
+    assert.equal(dataPointsPerInterval, 28);
+  });
+  void it('calculateDataPointsPerInterval no date month', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(undefined, undefined, 'month', 'en-GB');
+    assert.equal(dataPointsPerInterval, 3);
+  });
+  void it('calculateDataPointsPerInterval no date quarter', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(undefined, undefined, 'quarter', 'en-GB');
+    assert.equal(dataPointsPerInterval, 3);
+  });
+  void it('calculateDataPointsPerInterval 3 weeks exact', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(
+      new Date('2024-08-05'),
+      new Date('2024-08-26'),
+      'week',
+      'en-GB',
+    );
+    assert.equal(dataPointsPerInterval, 3);
+  });
+  void it('calculateDataPointsPerInterval 3 weeks exact en-US', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(
+      new Date('2024-08-04'),
+      new Date('2024-08-25'),
+      'week',
+      'en-US',
+    );
+    assert.equal(dataPointsPerInterval, 3);
+  });
+  void it('calculateDataPointsPerInterval 1 day before 3 weeks', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(
+      new Date('2024-08-05'),
+      new Date('2024-08-25'),
+      'week',
+      'en-GB',
+    );
+    assert.equal(dataPointsPerInterval, 3);
+  });
+  void it('calculateDataPointsPerInterval 3+ weeks more before', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(
+      new Date('2024-08-03'),
+      new Date('2024-08-26'),
+      'week',
+      'en-GB',
+    );
+    assert.equal(dataPointsPerInterval, 4);
+  });
+  void it('calculateDataPointsPerInterval 3+ weeks more before and after', () => {
+    const dataPointsPerInterval = calculateDataPointsPerInterval(
+      new Date('2024-08-03'),
+      new Date('2024-08-27'),
+      'week',
+      'en-GB',
+    );
+    assert.equal(dataPointsPerInterval, 5);
+  });
   void it('getInsightsDateFrom no range', () => {
     const dateFrom = getInsightsDateFrom(undefined, undefined, 3, 'day');
     assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', CURRENT_DATE - INTERVAL '3 day')`);
@@ -63,7 +125,10 @@ void describe('insights query builder tests', () => {
     const dateTo = new Date('2024-05-28');
     const dateFrom = addInterval(dateTo, 'week', -2);
     const res = getInsightsDateFrom(dateFrom, dateTo, 3, 'week');
-    assert.strictEqual(res, `AND i.date >= DATE_TRUNC('week', TIMESTAMP '${dateFrom.toISOString()}')`);
+    assert.strictEqual(
+      res,
+      `AND i.date >= DATE_TRUNC('week', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '3 week')`,
+    );
   });
 
   void it('get insights no filters', () => {
@@ -71,13 +136,12 @@ void describe('insights query builder tests', () => {
       orderBy: 'spend_rel',
       page: 1,
       pageSize: 10,
-      dataPointsPerInterval: 3,
       groupBy: ['adId', 'publisher'],
       interval: 'week',
       order: 'desc',
     };
 
-    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args);
+    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
       `organization_insights AS (SELECT i.*
@@ -96,13 +160,12 @@ void describe('insights query builder tests', () => {
       orderBy: 'spend_rel',
       page: 1,
       pageSize: 10,
-      dataPointsPerInterval: 3,
       groupBy: ['adId', 'publisher'],
       interval: 'week',
       order: 'desc',
     };
 
-    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args);
+    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
       `organization_insights AS (SELECT i.*
@@ -126,7 +189,6 @@ void describe('insights query builder tests', () => {
       orderBy: 'spend_rel',
       page: 1,
       pageSize: 10,
-      dataPointsPerInterval: 3,
       groupBy: ['adId', 'publisher'],
       interval: 'week',
       order: 'desc',
@@ -134,7 +196,7 @@ void describe('insights query builder tests', () => {
       publishers: [PublisherEnum.Facebook],
     };
 
-    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args);
+    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
       `organization_insights AS (SELECT i.*
@@ -288,13 +350,12 @@ void describe('insights query builder tests', () => {
       orderBy: 'spend_rel',
       page: 1,
       pageSize: 10,
-      dataPointsPerInterval: 3,
       groupBy: ['adId', 'publisher'],
       interval: 'week',
       order: 'asc',
     };
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = groupedInsights(args, organizationId);
+    const insights = groupedInsights(args, organizationId, 'en-GB');
     assertSql(
       insights,
       `WITH organization_insights AS (SELECT i.*
@@ -335,13 +396,12 @@ void describe('insights query builder tests', () => {
       orderBy: 'spend_abs',
       page: 1,
       pageSize: 10,
-      dataPointsPerInterval: 3,
       groupBy: ['adId', 'publisher'],
       interval: 'week',
       order: 'desc',
     };
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = groupedInsights(args, organizationId);
+    const insights = groupedInsights(args, organizationId, 'en-GB');
     assertSql(
       insights,
       `WITH organization_insights AS (SELECT i.*
@@ -372,7 +432,6 @@ void describe('insights query builder tests', () => {
       orderBy: 'spend_rel',
       page: 1,
       pageSize: 10,
-      dataPointsPerInterval: 3,
       dateFrom: new Date('2024-04-01'),
       dateTo: new Date('2024-05-28'),
       groupBy: ['adId', 'publisher'],
@@ -380,7 +439,7 @@ void describe('insights query builder tests', () => {
       order: 'desc',
     };
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = groupedInsights(args, organizationId);
+    const insights = groupedInsights(args, organizationId, 'en-GB');
     assertSql(
       insights,
       `WITH organization_insights AS (SELECT i.*
@@ -389,7 +448,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
+                                                AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                               ), 
   last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
@@ -411,7 +470,7 @@ void describe('insights query builder tests', () => {
                                       LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
-  WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
+  WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
     AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,

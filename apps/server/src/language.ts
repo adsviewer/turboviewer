@@ -16,3 +16,13 @@ export const acceptedLanguage = (request: Request): Language => {
 
   return Language.EN;
 };
+
+export const acceptedLocale = (request: Request): string => {
+  const header = request.headers.get('accept-language');
+  if (header === null) {
+    return Language.EN;
+  }
+
+  const languages = header.split(',');
+  return languages[0];
+};
