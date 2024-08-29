@@ -55,7 +55,7 @@ function Integration(): ReactNode {
             className="animate_top w-1/6"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-07.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-meta.svg" alt="Brand" />
             </div>
           </motion.div>
 
@@ -97,7 +97,7 @@ function Integration(): ReactNode {
             className="animate_top w-1/6"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-08.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-tiktok.svg" alt="Brand" />
             </div>
           </motion.div>
 
@@ -145,7 +145,7 @@ function Integration(): ReactNode {
                 width={50}
                 height={50}
                 style={{ width: '50', height: 'auto' }}
-                src="./images/brand/brand-09.svg"
+                src="./images/brand/brand-snapchat.svg"
                 alt="Brand"
               />
             </div>
@@ -210,7 +210,7 @@ function Integration(): ReactNode {
             className="animate_top w-1/6"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-10.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-linkedIn.svg" alt="Brand" />
             </div>
           </motion.div>
 
@@ -258,7 +258,7 @@ function Integration(): ReactNode {
                 width={0}
                 height={0}
                 style={{ width: '50', height: 'auto' }}
-                src="./images/brand/brand-11.svg"
+                src="./images/brand/brand-tiktok.svg"
                 alt="Brand"
               />
             </div>
@@ -304,7 +304,7 @@ function Integration(): ReactNode {
             className="animate_top w-1/6"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-12.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-google-ads.svg" alt="Brand" />
             </div>
           </motion.div>
         </div>
