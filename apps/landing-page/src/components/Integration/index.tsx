@@ -8,7 +8,7 @@ import SectionHeader from '../Common/section-header';
 function Integration(): ReactNode {
   const t = useTranslations('integrations');
   return (
-    <section>
+    <section id="integration">
       <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
         {/* <!-- Section Title Start --> */}
         <SectionHeader
@@ -17,7 +17,6 @@ function Integration(): ReactNode {
             subtitle: t('subtitle'),
             description: t('description'),
           }}
-          
         />
 
         {/* <!-- Section Title End --> */}

@@ -76,7 +76,7 @@ function Footer(): ReactNode {
                 viewport={{ once: true }}
                 className="animate_top"
               >
-                <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">Quick Links</h4>
+                <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">{t('quickLinks')}</h4>
 
                 <ul>
                   <li>
@@ -86,7 +86,7 @@ function Footer(): ReactNode {
                   </li>
                   <li>
                     <a href="/#features" className="mb-3 inline-block hover:text-primary">
-                      {t('product')}
+                      {t('features')}
                     </a>
                   </li>
                   {/* <li>
@@ -95,7 +95,7 @@ function Footer(): ReactNode {
                     </a>
                   </li> */}
                   <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
+                    <a href="/#pricing" className="mb-3 inline-block hover:text-primary">
                       {t('pricing')}
                     </a>
                   </li>
@@ -120,7 +120,7 @@ function Footer(): ReactNode {
                 viewport={{ once: true }}
                 className="animate_top"
               >
-                <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">Support</h4>
+                <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">{t('support')}</h4>
 
                 <ul>
                   {/* <li>
@@ -139,7 +139,7 @@ function Footer(): ReactNode {
                     </a>
                   </li> */}
                   <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
+                    <a href="/#support" className="mb-3 inline-block hover:text-primary">
                       {t('contactUs')}
                     </a>
                   </li>
@@ -238,7 +238,7 @@ function Footer(): ReactNode {
                 </a>
               </li>
               <li>
-                <a href="/" className="hover:text-primary">
+                <a href="/#support" className="hover:text-primary">
                   {t('support')}
                 </a>
               </li>

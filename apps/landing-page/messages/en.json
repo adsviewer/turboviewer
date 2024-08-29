@@ -230,8 +230,9 @@
   },
   "footer": {
     "title": "adsViewer.io - tooling for viewing digital ads.",
+    "quickLinks": "Quick Links",
     "home": "Home",
-    "product": "Features",
+    "features": "Features",
     "careers": "Careers",
     "pricing": "Pricing",
     "company": "Company",

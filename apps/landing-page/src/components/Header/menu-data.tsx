@@ -17,13 +17,13 @@ const menuData: Menu[] = [
     id: 2.1,
     title: 'Integrations',
     newTab: false,
-    path: '/integration',
+    path: '/#integration',
   },
   {
     id: 2.3,
     title: 'Pricing',
     newTab: false,
-    path: '/pricing',
+    path: '/#pricing',
   },
   // {
   //   id: 3,
@@ -54,12 +54,12 @@ const menuData: Menu[] = [
   //       newTab: false,
   //       path: '/docs',
   //     },
-       {
-         id: 35.1,
-         title: 'Support',
-         newTab: false,
-         path: '/support',
-       },
+  {
+    id: 35.1,
+    title: 'Support',
+    newTab: false,
+    path: '/#support',
+  },
   //     {
   //       id: 36,
   //       title: '404',
