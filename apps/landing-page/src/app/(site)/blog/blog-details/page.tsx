@@ -71,7 +71,7 @@ function SingleBlogPage(): ReactNode {
               <div className="mb-10 w-full overflow-hidden ">
                 <div className="relative aspect-[97/60] w-full sm:aspect-[97/44]">
                   <Image
-                    src="/images/blog/blog-01.png"
+                    src="/images/blog/blog-01.avif"
                     alt="Kobe Steel plant that supplied"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -114,8 +114,8 @@ function SingleBlogPage(): ReactNode {
                 </p>
 
                 <div className="flex flex-wrap gap-5">
-                  <Image src="/images/blog/blog-01.png" width={350} height={200} alt="image" />
-                  <Image src="/images/blog/blog-02.png" width={350} height={200} alt="image" />
+                  <Image src="/images/blog/blog-01.avif" width={350} height={200} alt="image" />
+                  <Image src="/images/blog/blog-02.avif" width={350} height={200} alt="image" />
                 </div>
 
                 <h3 className="pt-8">Nunc elementum elit viverra, tempus quam non</h3>

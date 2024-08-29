@@ -56,7 +56,7 @@ function Hero(): ReactNode {
           <div className="animate_right hidden md:w-1/2 lg:block">
             <div className="relative 2xl:-mr-7.5">
               <Image
-                src="/images/shape/shape-01.png"
+                src="/images/shape/shape-01.avif"
                 alt="shape"
                 width={46}
                 height={246}
@@ -77,8 +77,8 @@ function Hero(): ReactNode {
                 className="absolute -right-6.5 bottom-0 z-1"
               />
               <div className=" relative aspect-[700/444] w-full">
-                <Image className="shadow-solid-l dark:hidden" src="/images/hero/hero-light.png" alt="Hero" fill />
-                <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.png" alt="Hero" fill />
+                <Image className="shadow-solid-l dark:hidden" src="/images/hero/hero-light.avif" alt="Hero" fill />
+                <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.avif" alt="Hero" fill />
               </div>
             </div>
           </div>

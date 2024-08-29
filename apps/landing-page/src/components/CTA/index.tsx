@@ -57,7 +57,7 @@ function CTA(): ReactNode {
                 <Image
                   width={299}
                   height={299}
-                  src="/images/shape/shape-06.png"
+                  src="/images/shape/shape-06.avif"
                   alt="Saly"
                   className="hidden xl:block"
                 />

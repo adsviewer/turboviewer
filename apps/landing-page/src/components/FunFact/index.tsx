@@ -14,14 +14,14 @@ function FunFact(): ReactNode {
           <Image
             width={335}
             height={384}
-            src="/images/shape/shape-04.png"
+            src="/images/shape/shape-04.avif"
             alt="Man"
             className="absolute -left-15 -top-25 -z-1 lg:left-0"
           />
           <Image
             width={132}
             height={132}
-            src="/images/shape/shape-05.png"
+            src="/images/shape/shape-05.avif"
             alt="Doodle"
             className="absolute bottom-0 right-0 -z-1"
           />

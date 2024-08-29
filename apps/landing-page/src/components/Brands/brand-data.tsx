@@ -5,8 +5,8 @@ const brandData: Brand[] = [
     id: 0.3,
     name: 'Client',
     href: 'https://www.versuni.com/',
-    image: '/images/brand/brand-versuni-light.png',
-    imageLight: '/images/brand/brand-versuni-dark.png',
+    image: '/images/brand/brand-versuni-light.avif',
+    imageLight: '/images/brand/brand-versuni-dark.avif',
   },
   {
     id: 0.4,
@@ -19,8 +19,8 @@ const brandData: Brand[] = [
     id: 0.5,
     name: 'Client',
     href: 'https://www.faire.com/',
-    image: '/images/brand/brand-faire-light.png',
-    imageLight: '/images/brand/brand-faire-dark.png',
+    image: '/images/brand/brand-faire-light.avif',
+    imageLight: '/images/brand/brand-faire-dark.avif',
   },
   {
     id: 0.6,

@@ -32,14 +32,14 @@ function About(): ReactNode {
               className="animate_left relative mx-auto hidden aspect-[588/526.5] md:block md:w-1/2"
             >
               <Image
-                src="/images/about/about-light-01.png"
+                src="/images/about/about-light-01.avif"
                 alt="About"
                 className="dark:hidden"
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               <Image
-                src="/images/about/about-dark-01.png"
+                src="/images/about/about-dark-01.avif"
                 alt="About"
                 className="hidden dark:block"
                 fill
