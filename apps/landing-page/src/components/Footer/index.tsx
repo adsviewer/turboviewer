@@ -89,11 +89,6 @@ function Footer(): ReactNode {
                       {t('features')}
                     </a>
                   </li>
-                  {/* <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
-                      {t('careers')}
-                    </a>
-                  </li> */}
                   <li>
                     <a href="/#pricing" className="mb-3 inline-block hover:text-primary">
                       {t('pricing')}
@@ -123,21 +118,6 @@ function Footer(): ReactNode {
                 <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">{t('support')}</h4>
 
                 <ul>
-                  {/* <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
-                      {t('company')}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
-                      {t('pressMedia')}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
-                      {t('ourBlog')}
-                    </a>
-                  </li> */}
                   <li>
                     <a href="/#support" className="mb-3 inline-block hover:text-primary">
                       {t('contactUs')}
