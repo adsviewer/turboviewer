@@ -15,66 +15,66 @@ const menuData: Menu[] = [
   },
   {
     id: 2.1,
-    title: 'Blog',
+    title: 'Integrations',
     newTab: false,
-    path: '/blog',
+    path: '/integration',
   },
   {
     id: 2.3,
-    title: 'Docs',
+    title: 'Pricing',
     newTab: false,
-    path: '/docs',
+    path: '/pricing',
   },
-  {
-    id: 3,
-    title: 'Pages',
-    newTab: false,
-    submenu: [
-      {
-        id: 31,
-        title: 'Blog Grid',
-        newTab: false,
-        path: '/blog',
-      },
-      {
-        id: 33,
-        title: 'Sign In',
-        newTab: false,
-        path: '/auth/signin',
-      },
-      {
-        id: 34,
-        title: 'Sign Up',
-        newTab: false,
-        path: '/auth/signup',
-      },
-      {
-        id: 35,
-        title: 'Docs',
-        newTab: false,
-        path: '/docs',
-      },
-      {
-        id: 35.1,
-        title: 'Support',
-        newTab: false,
-        path: '/support',
-      },
-      {
-        id: 36,
-        title: '404',
-        newTab: false,
-        path: '/error',
-      },
-    ],
-  },
+  // {
+  //   id: 3,
+  //   title: 'Pages',
+  //   newTab: false,
+  //   submenu: [
+  //     {
+  //       id: 31,
+  //       title: 'Blog Grid',
+  //       newTab: false,
+  //       path: '/blog',
+  //     },
+  //     {
+  //       id: 33,
+  //       title: 'Sign In',
+  //       newTab: false,
+  //       path: '/auth/signin',
+  //     },
+  //     {
+  //       id: 34,
+  //       title: 'Sign Up',
+  //       newTab: false,
+  //       path: '/auth/signup',
+  //     },
+  //     {
+  //       id: 35,
+  //       title: 'Docs',
+  //       newTab: false,
+  //       path: '/docs',
+  //     },
+       {
+         id: 35.1,
+         title: 'Support',
+         newTab: false,
+         path: '/support',
+       },
+  //     {
+  //       id: 36,
+  //       title: '404',
+  //       newTab: false,
+  //       path: '/error',
+  //     },
+  //   ],
+  // },
 
-  {
-    id: 4,
-    title: 'Support',
-    newTab: false,
-    path: '/support',
-  },
+  // {
+  //   id: 4,
+  //   title: 'Support',
+  //   newTab: false,
+  //   path: '/support',
+  // },
 ];
 
 export default menuData;

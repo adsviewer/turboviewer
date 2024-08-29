@@ -52,7 +52,7 @@ function Header(): ReactNode {
               alt="logo"
               width={0}
               height={0}
-              style={{ width: '119.03px', height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               className="w-full dark:hidden"
             />
           </a>
@@ -159,18 +159,18 @@ function Header(): ReactNode {
           <div className="mt-7 flex items-center gap-6 xl:mt-0">
             <ThemeToggler />
 
-            <Link
+            {/* <Link
               href="https://github.com/NextJSTemplates/solid-nextjs"
               className="text-regular font-medium text-waterloo hover:text-primary"
             >
               {t('githubRepo')} 🌟
-            </Link>
+            </Link> */}
 
             <Link
-              href="https://nextjstemplates.com/templates/solid"
+              href="https://app.adsviewer.io/sign-up"
               className="flex items-center justify-center rounded-full bg-primary px-7.5 py-2.5 text-regular text-white duration-300 ease-in-out hover:bg-primaryho"
             >
-              {t('getPro')} 🔥
+              {t('getPro')}
             </Link>
           </div>
         </div>

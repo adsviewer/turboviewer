@@ -23,7 +23,8 @@ function Hero(): ReactNode {
                 {t('title2ndLine')}
               </span>
             </h1>
-            <p>{t('body')}</p>
+            <h4 className="mb-4.5 text-lg font-medium text-black dark:text-white">💡 {t('body')}</h4>
+            <p>{t('body2ndLine')}</p>
 
             <div className="mt-10">
               <form onSubmit={handleSubmit}>
@@ -76,8 +77,8 @@ function Hero(): ReactNode {
                 className="absolute -right-6.5 bottom-0 z-1"
               />
               <div className=" relative aspect-[700/444] w-full">
-                <Image className="shadow-solid-l dark:hidden" src="/images/hero/hero-light.svg" alt="Hero" fill />
-                <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.svg" alt="Hero" fill />
+                <Image className="shadow-solid-l dark:hidden" src="/images/hero/hero-light.png" alt="Hero" fill />
+                <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.png" alt="Hero" fill />
               </div>
             </div>
           </div>

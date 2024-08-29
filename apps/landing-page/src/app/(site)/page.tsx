@@ -15,8 +15,8 @@ import Blog from '@/components/Blog';
 import Testimonial from '@/components/Testimonial';
 
 export const metadata: Metadata = {
-  title: 'Next.js Starter Template for SaaS Startups - Solid SaaS Boilerplate',
-  description: 'This is Home for Solid Pro',
+  title: 'adsViewer.io - your central hub for viewing your ads online',
+  description: 'This website contains information about adsviewer, a platform used by small and large companies to view their digital advertisements and associated data in an automated way.',
   // other metadata
 };
 
@@ -26,16 +26,16 @@ export default function Home(): ReactNode {
       <Hero />
       <Brands />
       <Feature />
-      <About />
+      {/* <About /> */}
       <FeaturesTab />
-      <FunFact />
+      {/* <FunFact /> */}
       <Integration />
-      <Cta />
-      <Faq />
-      <Testimonial />
+      {/* <Cta /> */}
+      {/* <Faq /> */}
+      {/* <Testimonial /> */}
       <Pricing />
       <Contact />
-      <Blog />
+      {/* <Blog /> */}
     </main>
   );
 }

@@ -53,7 +53,7 @@ function Footer(): ReactNode {
 
               <p className="mb-1.5 text-sectiontitle uppercase tracking-[5px]">contact</p>
               <a href="/" className="text-itemtitle font-medium text-black dark:text-white">
-                hello@solid.com
+                info@adsviewer.io
               </a>
             </motion.div>
 
@@ -85,15 +85,15 @@ function Footer(): ReactNode {
                     </a>
                   </li>
                   <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
+                    <a href="/#features" className="mb-3 inline-block hover:text-primary">
                       {t('product')}
                     </a>
                   </li>
-                  <li>
+                  {/* <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
                       {t('careers')}
                     </a>
-                  </li>
+                  </li> */}
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
                       {t('pricing')}
@@ -123,7 +123,7 @@ function Footer(): ReactNode {
                 <h4 className="mb-9 text-itemtitle2 font-medium text-black dark:text-white">Support</h4>
 
                 <ul>
-                  <li>
+                  {/* <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
                       {t('company')}
                     </a>
@@ -137,7 +137,7 @@ function Footer(): ReactNode {
                     <a href="/" className="mb-3 inline-block hover:text-primary">
                       {t('ourBlog')}
                     </a>
-                  </li>
+                  </li> */}
                   <li>
                     <a href="/" className="mb-3 inline-block hover:text-primary">
                       {t('contactUs')}

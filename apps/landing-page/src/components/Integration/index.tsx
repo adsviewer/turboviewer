@@ -17,6 +17,7 @@ function Integration(): ReactNode {
             subtitle: t('subtitle'),
             description: t('description'),
           }}
+          
         />
 
         {/* <!-- Section Title End --> */}
@@ -142,8 +143,8 @@ function Integration(): ReactNode {
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image
-                width={0}
-                height={0}
+                width={50}
+                height={50}
                 style={{ width: '50', height: 'auto' }}
                 src="./images/brand/brand-09.svg"
                 alt="Brand"

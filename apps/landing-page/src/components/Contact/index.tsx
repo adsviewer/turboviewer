@@ -172,13 +172,13 @@ function Contact(): ReactNode {
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
                 <p>
-                  <a href="/">yourmail@domainname.com</a>
+                  <a href="/">info@adsviewer.io</a>
                 </p>
               </div>
               <div>
                 <h4 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">Phone Number</h4>
                 <p>
-                  <a href="/">+009 42334 6343 843</a>
+                  <a href="/">+31 652 43 37 49</a>
                 </p>
               </div>
             </motion.div>
