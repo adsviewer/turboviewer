@@ -105,7 +105,7 @@ export const orderColumnTrend = (
                                       FROM last_interval ${li} ${join}
                                       WHERE ${ibl}.${orderColumn}
                                           > 0
-                                      ORDER BY trend${trend === 'asc' ? ' DESC' : ''}
+                                      ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
 
@@ -113,6 +113,7 @@ export const orderColumnTrendAbsolute = (
   group: string,
   interval: FilterInsightsInputType['interval'],
   orderColumn: OrderByColumn,
+  trend: 'asc' | 'desc' | null | undefined,
   limit: number,
   offset: number,
   dateTo?: Date | null,
@@ -128,7 +129,7 @@ export const orderColumnTrendAbsolute = (
                                         AND date < DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}
                                       ${orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : ''}
-                                      ORDER BY trend DESC
+                                      ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
 
@@ -145,13 +146,13 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   const sql = `WITH ${getOrganizationalInsights(organizationId, args)}, 
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
-  ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, limit, offset, args.dateTo)}
+  ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
     AND i.date < DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
-  ORDER BY oct.trend, interval_start;`;
+  ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
 
   return sql.replace(/\n\s*\n/g, '\n');
 };
