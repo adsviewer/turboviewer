@@ -134,7 +134,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
     );
     setAdAccounts(adAccountsData);
 
-    const adAccountsToShowData = _.map(adAccounts, (adAccount) =>
+    const adAccountsToShowData = _.map(adAccountsToShow, (adAccount) =>
       adAccount.id === adAccountId ? { ...adAccount, isConnectedToCurrentOrg: e.target.checked } : adAccount,
     );
     setAdAccountsToShow(adAccountsToShowData);
