@@ -172,7 +172,7 @@ function Contact(): ReactNode {
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
                 <p>
-                  <a href="/">info@adsviewer.io</a>
+                  <a href="/">hello@adsviewer.io</a>
                 </p>
               </div>
               <div>

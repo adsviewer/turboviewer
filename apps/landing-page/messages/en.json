@@ -87,7 +87,7 @@
     },
     "tabThree": {
       "title": "Your creative renders in different ways",
-      "desc1": "Stories, Reels, Feed, Overlays are just a fragment of ways your ad serves.",
+      "desc1": "Stories, Reels, Feed and Overlays are just a fragment of ways your ad serves.",
       "desc2": "View every and all variations side by side, and filter for specific ways a User experienced your ad."
     }
   },
@@ -188,7 +188,7 @@
     "tier4-ai": "Yes",
     "tier4-sso": "Yes",
     "getThePlan": "Get the Plan",
-    "contactUspricing": "Contact Us",
+    "contactUsPricing": "Contact Us",
     "popular": "popular"
   },
   "contact": {
@@ -239,7 +239,6 @@
     "pressMedia": "Press media",
     "ourBlog": "Our Blog",
     "contactUs": "Contact Us",
-    "english": "English",
     "privacyPolicy": "Privacy Policy",
     "support": "Support",
     "subscribeBody": "Subscribe to receive future updates",
