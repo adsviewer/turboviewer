@@ -15,7 +15,7 @@ import { Embed } from '@repo/ui/embed';
 import { IFrame as IFrameT } from '@repo/ui/iframe';
 import {
   type CurrencyEnum,
-  DeviceEnum,
+  type DeviceEnum,
   type IFrame,
   IFrameType,
   type InsightsDatapoints,
@@ -23,7 +23,7 @@ import {
 } from '@/graphql/generated/schema-server';
 import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
-import { publisherToIconMap } from '@/util/publisher-utils';
+import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
 import { fetchPreviewsKey } from '@/util/url-query-utils';
 
 interface InsightCardProps {
@@ -228,19 +228,30 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
           }}
           style={{ cursor: 'pointer' }}
         >
-          {props.device ? `(${DeviceEnum[props.device]}) ` : null}
           {sentenceCase(props.description ?? '')}
         </Text>
-        {props.publisher ? (
-          <Tooltip label={String(props.publisher)}>
-            <div style={{ opacity: 0.3 }}>
-              {(() => {
-                const PublisherIcon = publisherToIconMap.get(props.publisher);
-                return PublisherIcon ? <PublisherIcon /> : null;
-              })()}
-            </div>
-          </Tooltip>
-        ) : null}
+        <Flex>
+          {props.device ? (
+            <Tooltip label={String(props.device)}>
+              <div style={{ opacity: 0.3 }}>
+                {(() => {
+                  const DeviceIcon = deviceToIconMap.get(props.device);
+                  return DeviceIcon ? <DeviceIcon /> : null;
+                })()}
+              </div>
+            </Tooltip>
+          ) : null}
+          {props.publisher ? (
+            <Tooltip label={String(props.publisher)}>
+              <div style={{ opacity: 0.3 }}>
+                {(() => {
+                  const PublisherIcon = publisherToIconMap.get(props.publisher);
+                  return PublisherIcon ? <PublisherIcon /> : null;
+                })()}
+              </div>
+            </Tooltip>
+          ) : null}
+        </Flex>
       </Flex>
 
       {/* Stats */}
