@@ -43,16 +43,6 @@ const config: CodegenConfig = {
       config: serverConfig,
       documents: ['../backoffice/src/graphql/*.graphql'],
     },
-    '../web-old/src/graphql/generated/schema-server.ts': {
-      plugins: serverPlugins,
-      config: serverConfig,
-      documents: ['../web-old/src/graphql/*.graphql'],
-    },
-    '../web-old/src/graphql/generated/schema-client.ts': {
-      plugins: clientPlugins,
-      config: clientConfig,
-      documents: ['../web-old/src/graphql/*.graphql'],
-    },
   },
   config: {
     scalars: {
