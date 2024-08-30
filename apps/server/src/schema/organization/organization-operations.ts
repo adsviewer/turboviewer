@@ -62,7 +62,11 @@ builder.queryFields((t) => ({
       await checkIsAdminInParent(parentId, ctx.currentUserId);
       return await prisma.adAccount.findMany({
         ...query,
-        where: { type: args.channel, organizations: { some: { id: parentId ?? ctx.organizationId } } },
+        where: {
+          type: args.channel,
+          organizations: { some: { id: parentId ?? ctx.organizationId } },
+          advertisements: { some: {} },
+        },
       });
     },
   }),
