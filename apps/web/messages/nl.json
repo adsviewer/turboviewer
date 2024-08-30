@@ -5,6 +5,7 @@
     "warning": "Waarschuwing!",
     "accessOrgAdmin": "Alleen organisatiebeheerders kunnen deze actie uitvoeren!",
     "accessOrgAdminRoot": "Alleen een organisatiebeheerder van de bovenliggende organisatie mag deze actie uitvoeren!",
+    "accessRootOrg": "Deze actie kan alleen worden uitgevoerd vanuit de root-organisatie!",
     "copied": "Kopiëren succesvol",
     "search": "Zoekopdracht",
     "submit": "Verzenden",
