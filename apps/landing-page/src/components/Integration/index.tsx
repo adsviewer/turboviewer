@@ -186,7 +186,7 @@ function Integration(): ReactNode {
             viewport={{ once: true }}
             className="animate_top w-1/7 flex justify-center items-center"
           >
-            <div className="h-[11px] w-[11px] rounded-full bg-primary" />
+            <div className="h-[7px] w-[7px] opacity-35 rounded-full bg-primary" />
           </motion.div>
         </div>
 
