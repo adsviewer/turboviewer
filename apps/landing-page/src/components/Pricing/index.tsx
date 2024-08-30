@@ -2,10 +2,12 @@
 import Image from 'next/image';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import SectionHeader from '../Common/section-header';
 
 function Pricing(): ReactNode {
   const t = useTranslations('pricing');
+
   return (
     <section id="pricing" className="overflow-hidden pb-20 pt-15 lg:pb-25 xl:pb-30">
       <div className="mx-auto max-w-c-1315 px-4 md:px-8 xl:px-0">
@@ -207,7 +209,9 @@ function Pricing(): ReactNode {
               aria-label={`${t('contactUsPricing')} button`}
               className="group/btn inline-flex items-center gap-2.5 font-medium text-primary transition-all duration-300 dark:text-white dark:hover:text-primary mt-auto"
             >
-              <span className="duration-300 group-hover/btn:pr-2">{t('contactUsPricing')}</span>
+              <Link className="duration-300 group-hover/btn:pr-2" href="#support">
+                {t('contactUsPricing')}
+              </Link>
               <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M10.4767 6.16701L6.00668 1.69701L7.18501 0.518677L13.6667 7.00034L7.18501 13.482L6.00668 12.3037L10.4767 7.83368H0.333344V6.16701H10.4767Z"
