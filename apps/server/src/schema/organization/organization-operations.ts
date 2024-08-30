@@ -95,6 +95,12 @@ builder.mutationFields((t) => ({
       name: t.arg.string({ required: true }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
+      if (ctx.organizationId) {
+        const currentOrganization = await prisma.organization.findUniqueOrThrow({ where: { id: ctx.organizationId } });
+        if (currentOrganization.parentId) {
+          throw new GraphQLError('Cannot create an organization under a sub-organization');
+        }
+      }
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: ctx.currentUserId },
       });
