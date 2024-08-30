@@ -3,7 +3,7 @@
 import { Flex, Text, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { type ChangeEvent, useTransition } from 'react';
+import { type ChangeEvent, useTransition, useState } from 'react';
 import { useSetAtom } from 'jotai/index';
 import { DatePickerInput, type DateValue, type DatesRangeValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
@@ -32,6 +32,15 @@ export default function OrderFilters(): React.ReactNode {
   const [isPending, startTransition] = useTransition();
   const setInsights = useSetAtom(insightsAtom);
   const setHasNextInsightsPageAtom = useSetAtom(hasNextInsightsPageAtom);
+
+  // Date range values loading
+  const paramsDateFrom = searchParams.get(dateFromKey)
+    ? (new Date(Number(searchParams.get(dateFromKey))) as DateValue)
+    : null;
+  const paramsDateTo = searchParams.get(dateToKey)
+    ? (new Date(Number(searchParams.get(dateToKey))) as DateValue)
+    : null;
+  const [dateRangeValue, setDateRangeValue] = useState<[DateValue, DateValue]>([paramsDateFrom, paramsDateTo]);
 
   const resetInsights = (): void => {
     setInsights([]);
@@ -82,13 +91,6 @@ export default function OrderFilters(): React.ReactNode {
     return InsightsInterval.day;
   };
 
-  const getDateRangeValue = (): DatesRangeValue | undefined => {
-    const dateFrom = searchParams.get(dateFromKey);
-    const dateTo = searchParams.get(dateToKey);
-    if (dateFrom && dateTo) return [new Date(Number(dateFrom)) as DateValue, new Date(Number(dateTo)) as DateValue];
-    return [null, null];
-  };
-
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
@@ -123,17 +125,21 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleDateRangeChange = (dates: DatesRangeValue): void => {
     const newParams = new URLSearchParams(searchParams.toString());
-    const dateFrom = dates[0]?.getTime();
-    const dateTo = dates[1]?.getTime();
+    const dateFrom = dates[0];
+    const dateTo = dates[1];
+    setDateRangeValue([dateFrom, dateTo]);
+    // Perform new fetching only if both dates are given
     if (dateFrom && dateTo) {
       resetInsights();
-      newParams.set(dateFromKey, String(dateFrom));
-      newParams.set(dateToKey, String(dateTo));
+      newParams.set(dateFromKey, String(dateFrom.getTime()));
+      newParams.set(dateToKey, String(dateTo.getTime()));
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
       });
-    } else if (!dateFrom && !dateTo) {
+    }
+    // Clear logic
+    else if (!dateFrom && !dateTo) {
       resetInsights();
       newParams.delete(dateFromKey);
       newParams.delete(dateToKey);
@@ -241,7 +247,7 @@ export default function OrderFilters(): React.ReactNode {
                 leftSection={<IconCalendarMonth />}
                 clearable
                 onChange={handleDateRangeChange}
-                value={getDateRangeValue()}
+                value={dateRangeValue}
               />
             </Flex>
           </Flex>
