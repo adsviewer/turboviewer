@@ -35,7 +35,255 @@ function Integration(): ReactNode {
           />
           <Image fill src="/images/shape/shape-dotted-dark.svg" alt="Dotted" className="hidden dark:block" />
         </div>
-        <div className="flex flex-wrap justify-around gap-y-10">
+
+        {/* Brands container row 1 */}
+        <div className="flex flex-wrap justify-evenly items-center mb-12 gap-y-10">
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-facebook.svg" alt="Brand" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="h-[6px] w-[6px] rounded-full bg-[#EF5C00]" />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-instagram.svg" alt="Brand" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-tiktok.svg" alt="Brand" />
+            </div>
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="h-[11px] w-[11px] rounded-full bg-[#FFDB26]" />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-snapchat.svg" alt="Brand" />
+            </div>
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="h-[11px] w-[11px] rounded-full bg-primary" />
+          </motion.div>
+        </div>
+
+        {/* Brands container row 2 */}
+        <div className="flex flex-wrap justify-evenly items-center">
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-youtube.svg" alt="Brand" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="h-[9px] w-[9px] opacity-50 rounded-full bg-primary" />
+          </motion.div>
+
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-linkedIn.svg" alt="Brand" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-google-ads.svg" alt="Brand" />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* <div className="flex flex-wrap justify-around gap-y-10">
           <motion.div
             variants={{
               hidden: {
@@ -307,7 +555,7 @@ function Integration(): ReactNode {
               <Image width={50} height={50} src="./images/brand/brand-google-ads.svg" alt="Brand" />
             </div>
           </motion.div>
-        </div>
+        </div> */}
       </div>
     </section>
   );
