@@ -52,7 +52,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image width={50} height={50} src="./images/brand/brand-meta.svg" alt="Brand" />
@@ -75,7 +75,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           />
 
           <motion.div
@@ -94,7 +94,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image width={50} height={50} src="./images/brand/brand-tiktok.svg" alt="Brand" />
@@ -117,7 +117,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="h-[11px] w-[11px] rounded-full bg-[#FFDB26]" />
           </motion.div>
@@ -138,7 +138,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image
@@ -167,7 +167,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           />
 
           <motion.div
@@ -186,7 +186,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="h-[15px] w-[15px] rounded-full bg-[#62E888]" />
           </motion.div>
@@ -207,7 +207,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image width={50} height={50} src="./images/brand/brand-linkedIn.svg" alt="Brand" />
@@ -230,7 +230,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="h-[23px] w-[23px] rounded-full bg-[#EF5C00]" />
           </motion.div>
@@ -251,7 +251,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image
@@ -280,7 +280,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="h-[15px] w-[15px] rounded-full bg-[#016BFF]" />
           </motion.div>
@@ -301,7 +301,7 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/6 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image width={50} height={50} src="./images/brand/brand-google-ads.svg" alt="Brand" />
