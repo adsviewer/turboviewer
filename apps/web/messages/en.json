@@ -5,6 +5,7 @@
     "warning": "Warning!",
     "accessOrgAdmin": "Only organization admins may perform this action!",
     "accessOrgAdminRoot": "Only an organization admin from the parent organization may perform this action!",
+    "accessRootOrg": "This action can be performed only from the root organization!",
     "copied": "Copied to clipboard",
     "search": "Search",
     "submit": "Submit",
