@@ -24,22 +24,7 @@ function Pricing(): ReactNode {
         <div className="absolute -bottom-15 -z-1 h-full w-full">
           <Image fill src="./images/shape/shape-dotted-light.svg" alt="Dotted" className="dark:hidden" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-7.5 xl:gap-12.5">
-          {/* Pricing Intro */}
-          <div className="animate_top group relative rounded-lg border border-stroke bg-white p-7.5 shadow-solid-10 dark:border-strokedark dark:bg-blacksection dark:shadow-none h-full flex flex-col">
-            <h3 className="mb-7.5 text-3xl font-bold text-black dark:text-white xl:text-sectiontitle2">Tier:</h3>
-            <h4 className="mb-2.5 text-para2 font-medium text-black dark:text-white">Price</h4>
-            <div className="mt-36 border-t border-stroke pb-12.5 pt-9 dark:border-strokedark">
-              <ul>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">User(s)</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">Integrations</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">Data Recency</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">AI Analysis</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">SSO</li>
-              </ul>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7.5 xl:gap-12.5">
           {/* Pricing Item */}
           <div className="animate_top group relative rounded-lg border border-stroke bg-white p-7.5 shadow-solid-10 dark:border-strokedark dark:bg-blacksection dark:shadow-none h-full flex flex-col">
             <h3 className="mb-7.5 text-3xl font-bold text-black dark:text-white xl:text-sectiontitle2">
@@ -49,11 +34,26 @@ function Pricing(): ReactNode {
             <p className="flex-grow">{t('tier1-packdescription')}</p>
             <div className="mt-9 border-t border-stroke pb-12.5 pt-9 dark:border-strokedark">
               <ul>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier1-users')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier1-integrations')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier1-data')}</li>
-                <li className="mb-4 text-black opacity-40 last:mb-0 dark:text-manatee">{t('tier1-ai')}</li>
-                <li className="mb-4 text-black opacity-40 last:mb-0 dark:text-manatee">{t('tier1-sso')}</li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Total Users</p>
+                  <p>{t('tier1-users')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Integrations</p>
+                  <p>{t('tier1-integrations')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Data Recency</p>
+                  <p>{t('tier1-data')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">AI Analysis</p>
+                  <p>-</p>
+                </li>
+                <li className="mb-4 text-black  last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">SSO</p>
+                  <p>-</p>
+                </li>
               </ul>
             </div>
 
@@ -83,11 +83,26 @@ function Pricing(): ReactNode {
             <p className="flex-grow">{t('tier2-packdescription')}</p>
             <div className="mt-9 border-t border-stroke pb-12.5 pt-9 dark:border-strokedark">
               <ul>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier2-users')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier2-integrations')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier2-data')}</li>
-                <li className="mb-4 text-black  last:mb-0 dark:text-manatee">{t('tier2-ai')}</li>
-                <li className="mb-4 text-black opacity-40 last:mb-0 dark:text-manatee">{t('tier2-sso')}</li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Total Users</p>
+                  <p>{t('tier2-users')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Integrations</p>
+                  <p>{t('tier2-integrations')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Data Recency</p>
+                  <p>{t('tier2-data')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">AI Analysis</p>
+                  <p>{t('tier2-ai')}</p>
+                </li>
+                <li className="mb-4 text-black  last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">SSO</p>
+                  <p>-</p>
+                </li>
               </ul>
             </div>
 
@@ -117,11 +132,26 @@ function Pricing(): ReactNode {
             <p className="flex-grow">{t('tier3-packdescription')}</p>
             <div className="mt-9 border-t border-stroke pb-12.5 pt-9 dark:border-strokedark">
               <ul>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier3-users')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier3-integrations')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier3-data')}</li>
-                <li className="mb-4 text-black  last:mb-0 dark:text-manatee">{t('tier3-ai')}</li>
-                <li className="mb-4 text-black opacity-40 last:mb-0 dark:text-manatee">{t('tier3-sso')}</li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Total Users</p>
+                  <p>{t('tier3-users')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Integrations</p>
+                  <p>{t('tier3-integrations')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Data Recency</p>
+                  <p>{t('tier3-data')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">AI Analysis</p>
+                  <p>{t('tier3-ai')}</p>
+                </li>
+                <li className="mb-4 text-black  last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">SSO</p>
+                  <p>-</p>
+                </li>
               </ul>
             </div>
 
@@ -149,11 +179,26 @@ function Pricing(): ReactNode {
             <p className="flex-grow">{t('tier4-packdescription')}</p>
             <div className="mt-9 border-t border-stroke pb-12.5 pt-9 dark:border-strokedark">
               <ul>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier4-users')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier4-integrations')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier4-data')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier4-ai')}</li>
-                <li className="mb-4 text-black last:mb-0 dark:text-manatee">{t('tier4-sso')}</li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Total Users</p>
+                  <p>{t('tier4-users')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Integrations</p>
+                  <p>{t('tier4-integrations')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">Data Recency</p>
+                  <p>{t('tier4-data')}</p>
+                </li>
+                <li className="mb-4 text-black last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">AI Analysis</p>
+                  <p>{t('tier4-ai')}</p>
+                </li>
+                <li className="mb-4 text-black  last:mb-0 dark:text-manatee">
+                  <p className="text-xs text-gray-500">SSO</p>
+                  <p>{t('tier4-sso')}</p>
+                </li>
               </ul>
             </div>
 
