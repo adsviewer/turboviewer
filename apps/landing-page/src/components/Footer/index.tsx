@@ -209,7 +209,7 @@ function Footer(): ReactNode {
             <ul className="flex items-center gap-8">
               <li>
                 <a href="/" className="hover:text-primary">
-                  {t('privacyPolicy')}
+                  Terms & Conditions
                 </a>
               </li>
               <li>
