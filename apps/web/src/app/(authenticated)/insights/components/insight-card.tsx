@@ -191,7 +191,9 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         </Box>
       ) : (
         // IFrame ad preview
-        <Flex justify="center">{getIFrameHtml()}</Flex>
+        <Flex justify="center" align="center" mb="auto" h="100%">
+          {getIFrameHtml()}
+        </Flex>
       )}
 
       {/* Title */}
