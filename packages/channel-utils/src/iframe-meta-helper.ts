@@ -135,7 +135,7 @@ export const formatDimensionsMap = new Map<FormatType, { height: number; width: 
   // [FormatType.FacebookReelsSticker, { height: 0, width: 0 }],
   [FormatType.FacebookStoryMobile, { height: 566, width: 320 }],
   // [FormatType.FacebookStoryStickerMobile, { height: 0, width: 0 }],
-  // [FormatType.InstagramExploreContextual, { height: 0, width: 0 }],
+  [FormatType.InstagramExploreContextual, { height: 560, width: 320 }],
   [FormatType.InstagramExploreGridHome, { height: 566, width: 320 }],
   [FormatType.InstagramExploreImmersive, { height: 564, width: 318 }],
   [FormatType.InstagramFeedWeb, { height: 810, width: 500 }],
