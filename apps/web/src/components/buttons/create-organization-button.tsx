@@ -45,9 +45,15 @@ export default function CreateOrganizationButton(): ReactNode {
   return (
     <Group justify="center">
       {/* Icon Button */}
-      <Tooltip label={userDetails.currentOrganization?.isRoot ? t('createOrganization') : tGeneric('accessRootOrg')}>
+      <Tooltip
+        label={
+          !userDetails.currentOrganization?.isRoot && userDetails.currentOrganization !== null
+            ? tGeneric('accessRootOrg')
+            : t('createOrganization')
+        }
+      >
         <ActionIcon
-          disabled={!userDetails.currentOrganization?.isRoot}
+          disabled={!userDetails.currentOrganization?.isRoot && userDetails.currentOrganization !== null}
           onClick={open}
           variant="default"
           size={35}
