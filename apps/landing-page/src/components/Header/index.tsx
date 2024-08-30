@@ -43,7 +43,7 @@ function Header(): ReactNode {
               alt="logo"
               width={0}
               height={0}
-              style={{ width: '119.03px', height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               className="hidden w-full dark:block"
             />
             <Image
