@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 function Footer(): ReactNode {
   const t = useTranslations('footer');
@@ -208,9 +209,9 @@ function Footer(): ReactNode {
           >
             <ul className="flex items-center gap-8">
               <li>
-                <a href="/" className="hover:text-primary">
+                <Link href="/terms-and-conditions" className="hover:text-primary">
                   Terms & Conditions
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="/#support" className="hover:text-primary">
