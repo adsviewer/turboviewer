@@ -83,8 +83,16 @@ function Hero(): ReactNode {
                   alt="Hero"
                   fill
                   sizes="50vw"
+                  priority
                 />
-                <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.avif" alt="Hero" fill />
+                <Image
+                  className="hidden shadow-solid-l dark:block"
+                  src="/images/hero/hero-dark.avif"
+                  alt="Hero"
+                  fill
+                  sizes="50vw"
+                  priority
+                />
               </div>
             </div>
           </div>
