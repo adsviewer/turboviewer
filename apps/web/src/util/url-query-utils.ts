@@ -76,11 +76,11 @@ export const addOrReplaceURLParams = (
   const multiKeyParams = [groupedByKey, publisherKey, deviceKey, positionKey, accountKey];
   const newParams = new URLSearchParams(searchParams.toString());
 
+  // First, make sure to remove the 'page' param so that the new results start from the 1st page
+  newParams.delete(pageKey);
+
   // Specific case for handling keys that can co-exist with different values
   if (multiKeyParams.includes(key)) {
-    // First, make sure to remove the 'page' param so that the new results start from the 1st page
-    newParams.delete(pageKey);
-
     // If it doesn't exist, just add it
     if (!newParams.has(key, newValue) && newValue) {
       newParams.append(key, newValue);
