@@ -141,7 +141,9 @@ function Header(): ReactNode {
                       <ul className={`dropdown ${dropdownToggler ? 'flex' : ''}`}>
                         {menuItem.submenu.map((item) => (
                           <li key={item.id} className="hover:text-primary">
-                            <Link href={item.path ?? '#'}>{t(item.title)}</Link>
+                            <Link href={item.path ?? '#'} scroll>
+                              {t(item.title)}
+                            </Link>
                           </li>
                         ))}
                       </ul>

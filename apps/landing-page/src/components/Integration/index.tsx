@@ -8,7 +8,7 @@ import SectionHeader from '../Common/section-header';
 function Integration(): ReactNode {
   const t = useTranslations('integrations');
   return (
-    <section id="integration">
+    <section id="integration" className="pt-20 lg:pt-25 xl:pt-30">
       <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
         {/* <!-- Section Title Start --> */}
         <SectionHeader
