@@ -11,14 +11,14 @@ const serverConfig = {
   },
 };
 
-const clientConfig = {
+const _clientConfig = {
   ...serverConfig,
   urqlImportFrom: '@urql/next',
 };
 
 const commonPlugins = ['typescript', 'typescript-operations'];
 const serverPlugins = [...commonPlugins, 'typescript-generic-sdk'];
-const clientPlugins = [...commonPlugins, 'typescript-urql'];
+const _clientPlugins = [...commonPlugins, 'typescript-urql'];
 
 const config: CodegenConfig = {
   watch: false,
@@ -33,11 +33,11 @@ const config: CodegenConfig = {
       config: serverConfig,
       documents: ['../web/src/graphql/*.graphql'],
     },
-    '../web/src/graphql/generated/schema-client.ts': {
-      plugins: clientPlugins,
-      config: clientConfig,
-      documents: ['../web/src/graphql/*.graphql'],
-    },
+    // '../web/src/graphql/generated/schema-client.ts': {
+    //   plugins: _clientPlugins,
+    //   config: _clientConfig,
+    //   documents: ['../web/src/graphql/*.graphql'],
+    // },
     '../backoffice/src/graphql/generated/schema-server.ts': {
       plugins: serverPlugins,
       config: serverConfig,

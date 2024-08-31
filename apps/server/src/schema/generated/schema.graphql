@@ -517,6 +517,23 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+type LandingPageSupportMessage {
+  email: String!
+  fullName: String!
+  id: ID!
+  message: String!
+  phone: String
+  subject: String!
+}
+
+input LandingPageSupportMessageInput {
+  email: String!
+  fullName: String!
+  message: String!
+  phone: String
+  subject: String!
+}
+
 enum LoginProviderEnum {
   GOOGLE
 }
@@ -554,12 +571,14 @@ type Mutation {
   removeUserFromOrganization(userId: String!): Boolean!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
+  sendLandingPageSupportMessage(args: LandingPageSupportMessageInput!): LandingPageSupportMessage!
 
   """
   Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet
   """
   signUpInvitedUser(firstName: String!, inviteHash: String!, lastName: String!, password: String!): Tokens!
   signup(args: SignUpInput!): Tokens!
+  subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
@@ -577,6 +596,11 @@ union MutationInviteUsersResult = InviteUsersErrors | MutationInviteUsersSuccess
 
 type MutationInviteUsersSuccess {
   data: Boolean!
+}
+
+type NewsletterSubscription {
+  email: String!
+  id: ID!
 }
 
 enum OrderBy {

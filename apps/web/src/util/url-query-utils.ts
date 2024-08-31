@@ -1,6 +1,6 @@
 import { type ReadonlyURLSearchParams } from 'next/navigation';
 import { sentenceCase } from 'change-case';
-import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-client';
+import { InsightsColumnsGroupBy } from '@/graphql/generated/schema-server';
 
 export interface GenericRequestResponseBody {
   success: boolean;

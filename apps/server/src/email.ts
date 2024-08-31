@@ -3,6 +3,7 @@ import { logger } from '@repo/logger';
 import { type Optional } from '@repo/utils';
 import { Environment, MODE } from '@repo/mode';
 import { env } from './config';
+import { type LandingPageSupportMessageInputType } from './schema/landing-page/landing-page-types';
 
 // Import the SignupEmailData interface from the appropriate module
 
@@ -116,6 +117,39 @@ export const sendOrganizationInviteConfirmEmail = async (data: InviteEmailData) 
                 '',
                 `The invitation will expire in ${String(data.expirationInDays)} days.`,
               ].join('<br />')}</p>`,
+            },
+          },
+        },
+      }),
+    )
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
+  logger.info(JSON.stringify(command));
+};
+
+export const sendNewLandingPageSupportMessageEmail = async (data: LandingPageSupportMessageInputType) => {
+  logger.info(`New landing page support message from ${data.email}`);
+  const command = await client
+    .send(
+      new SendEmailCommand({
+        Destination: {
+          ToAddresses: [`hello@${baseDomain()}`],
+        },
+        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
+        Message: {
+          Subject: {
+            Data: `${data.fullName} has sent a new message from the landing page`,
+          },
+          Body: {
+            Html: {
+              Data: `
+<p>full name: ${data.fullName}</p>
+<p>email: ${data.email}</p>
+<p>phone (optional): ${String(data.phone)}</p>
+<p>subject: ${data.subject}</p>
+<p>message: ${data.message}</p>
+`,
             },
           },
         },

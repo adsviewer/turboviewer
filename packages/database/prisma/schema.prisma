@@ -205,6 +205,28 @@ model Ad {
   @@map("ads")
 }
 
+model LandingPageSupportMessage {
+  id        String   @id @default(cuid())
+  email     String
+  fullName  String   @map("full_name")
+  phone     String?
+  subject   String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("landing_page_support_messages")
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("newsletter_subscriptions")
+}
+
 enum DeviceEnum {
   MobileWeb
   MobileApp
