@@ -1,11 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument -- keep things simple */
+/* eslint-disable @typescript-eslint/no-unsafe-call -- keep things simple */
+/* eslint-disable prefer-template -- keep things simple */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- keep things simple */
 'use client';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React, { type ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { logger } from '@repo/logger';
+import { toast as toaster } from 'react-hot-toast';
+import { env } from '@/env.mjs';
 
 function Contact(): ReactNode {
   const t = useTranslations('contact');
+
   /**
    * Source: https://www.joshwcomeau.com/react/the-perils-of-rehydration/
    * Reason: To fix rehydration error
@@ -18,6 +26,42 @@ function Contact(): ReactNode {
     return null;
   }
 
+  // @ts-expect-error -- keep things simple
+  const submitForm = (e): void => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    const graphqlBody = JSON.stringify({
+      query:
+        'mutation sendLandingPageSupportMessage {\n  sendLandingPageSupportMessage(args: {\n    email:"' +
+        String(data.get('email')) +
+        '",\n  fullName: "' +
+        String(data.get('fullName')) +
+        '", phone:"' +
+        String(data.get('phone')) +
+        '", message:"' +
+        String(data.get('message')) +
+        '", subject:"' +
+        String(data.get('subject')) +
+        '"\n    \n  }){\n    id\n  }\n}',
+      variables: {},
+    });
+
+    void fetch(env.NEXT_PUBLIC_GRAPHQL_ENDPOINT, {
+      method: 'POST',
+      body: graphqlBody,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        toaster.success('Your message was sent successfully!');
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+        toaster.error('There was a problem sending your message!');
+      });
+  };
+
   return (
     <>
       {/* <!-- ===== Contact Start ===== --> */}
@@ -25,8 +69,14 @@ function Contact(): ReactNode {
         <div className="relative mx-auto max-w-c-1390 px-7.5 pt-10 lg:px-15 lg:pt-15 xl:px-20 xl:pt-20">
           <div className="absolute left-0 top-0 -z-1 h-2/3 w-full rounded-lg bg-gradient-to-t from-transparent to-[#dee7ff47] dark:bg-gradient-to-t dark:to-[#252A42]" />
           <div className="absolute bottom-[-255px] left-0 -z-1 h-full w-full">
-            <Image src="./images/shape/shape-dotted-light.svg" alt="Dotted" className="dark:hidden" fill />
-            <Image src="./images/shape/shape-dotted-dark.svg" alt="Dotted" className="hidden dark:block" fill />
+            <Image src="./images/shape/shape-dotted-light.svg" alt="Dotted" className="dark:hidden" fill priority />
+            <Image
+              src="./images/shape/shape-dotted-dark.svg"
+              alt="Dotted"
+              className="hidden dark:block"
+              fill
+              priority
+            />
           </div>
 
           <div className="flex flex-col-reverse flex-wrap gap-8 md:flex-row md:flex-nowrap md:justify-between xl:gap-20">
@@ -52,26 +102,37 @@ function Contact(): ReactNode {
                 {t('title')}
               </h2>
 
-              <form action="https://formbold.com/s/unique_form_id" method="POST">
+              <form
+                id="contact-form"
+                method="POST"
+                onSubmit={(e) => {
+                  submitForm(e);
+                }}
+              >
                 <div className="mb-7.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
                   <input
                     id="name-send-msg"
+                    name="fullName"
                     type="text"
-                    placeholder={t('fullName')}
+                    placeholder={`${t('fullName')} *`}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                    required
                   />
 
                   <input
                     id="email-send-msg"
+                    name="email"
                     type="email"
-                    placeholder={t('email')}
+                    placeholder={`${t('email')} *`}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                    required
                   />
                 </div>
 
                 <div className="mb-12.5 flex flex-col gap-7.5 lg:flex-row lg:justify-between lg:gap-14">
                   <input
                     id="subject-send-msg"
+                    name="subject"
                     type="text"
                     placeholder={t('subject')}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
@@ -79,6 +140,7 @@ function Contact(): ReactNode {
 
                   <input
                     id="phone-send-msg"
+                    name="phone"
                     type="text"
                     placeholder={t('phoneNumber')}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
@@ -88,15 +150,17 @@ function Contact(): ReactNode {
                 <div className="mb-11.5 flex">
                   <textarea
                     id="message-send-msg"
-                    placeholder={t('message')}
+                    name="message"
+                    placeholder={`${t('message')} *`}
                     rows={4}
                     className="w-full border-b border-stroke bg-transparent focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white"
+                    required
                   />
                 </div>
 
                 <div className="flex flex-wrap gap-4 xl:justify-between ">
                   <div className="mb-4 flex md:mb-0">
-                    <input id="default-checkbox" type="checkbox" className="peer sr-only" />
+                    <input id="default-checkbox" type="checkbox" className="peer sr-only" required />
                     <span className="border-gray-300 bg-gray-100 text-blue-600 dark:border-gray-600 dark:bg-gray-700 group mt-2 flex h-5 min-w-[20px] items-center justify-center rounded peer-checked:bg-primary">
                       <svg
                         className="opacity-0 peer-checked:group-[]:opacity-100"
@@ -115,7 +179,7 @@ function Contact(): ReactNode {
                       </svg>
                     </span>
                     <label htmlFor="default-checkbox" className="flex max-w-[425px] cursor-pointer select-none pl-5">
-                      {t('termsAndConditions')}
+                      {`${t('termsAndConditions')} *`}
                     </label>
                   </div>
 
@@ -172,13 +236,13 @@ function Contact(): ReactNode {
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
                 <p>
-                  <a href="/">yourmail@domainname.com</a>
+                  <a href="/">hello@adsviewer.io</a>
                 </p>
               </div>
               <div>
                 <h4 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">Phone Number</h4>
                 <p>
-                  <a href="/">+009 42334 6343 843</a>
+                  <a href="/">+31 652 43 37 49</a>
                 </p>
               </div>
             </motion.div>

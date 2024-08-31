@@ -5,8 +5,11 @@ import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect, useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
 import { useTranslations } from 'next-intl';
-import ThemeToggler from './theme-toggler';
+import dynamic from 'next/dynamic';
 import menuData from './menu-data';
+
+// Lazy load theme toggler
+const ThemeToggler = dynamic(() => import('./theme-toggler'), { ssr: false });
 
 function Header(): ReactNode {
   const [navigationOpen, setNavigationOpen] = useState(false);
@@ -43,7 +46,7 @@ function Header(): ReactNode {
               alt="logo"
               width={0}
               height={0}
-              style={{ width: '119.03px', height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               className="hidden w-full dark:block"
             />
             <Image
@@ -52,7 +55,7 @@ function Header(): ReactNode {
               alt="logo"
               width={0}
               height={0}
-              style={{ width: '119.03px', height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               className="w-full dark:hidden"
             />
           </a>
@@ -138,7 +141,9 @@ function Header(): ReactNode {
                       <ul className={`dropdown ${dropdownToggler ? 'flex' : ''}`}>
                         {menuItem.submenu.map((item) => (
                           <li key={item.id} className="hover:text-primary">
-                            <Link href={item.path ?? '#'}>{t(item.title)}</Link>
+                            <Link href={item.path ?? '#'} scroll>
+                              {t(item.title)}
+                            </Link>
                           </li>
                         ))}
                       </ul>
@@ -147,6 +152,7 @@ function Header(): ReactNode {
                     <Link
                       href={String(menuItem.path)}
                       className={pathUrl === menuItem.path ? 'text-primary hover:text-primary' : 'hover:text-primary'}
+                      scroll
                     >
                       {t(menuItem.title)}
                     </Link>
@@ -158,19 +164,11 @@ function Header(): ReactNode {
 
           <div className="mt-7 flex items-center gap-6 xl:mt-0">
             <ThemeToggler />
-
             <Link
-              href="https://github.com/NextJSTemplates/solid-nextjs"
-              className="text-regular font-medium text-waterloo hover:text-primary"
-            >
-              {t('githubRepo')} 🌟
-            </Link>
-
-            <Link
-              href="https://nextjstemplates.com/templates/solid"
+              href="https://app.adsviewer.io/sign-up"
               className="flex items-center justify-center rounded-full bg-primary px-7.5 py-2.5 text-regular text-white duration-300 ease-in-out hover:bg-primaryho"
             >
-              {t('getPro')} 🔥
+              {t('getPro')}
             </Link>
           </div>
         </div>

@@ -1,5 +1,5 @@
-import image1 from '@public/images/user/user-01.png';
-import image2 from '@public/images/user/user-02.png';
+import image1 from '@public/images/user/user-01.avif';
+import image2 from '@public/images/user/user-02.avif';
 import { type Testimonial } from '@/types/testimonial';
 
 export const testimonialData: Testimonial[] = [

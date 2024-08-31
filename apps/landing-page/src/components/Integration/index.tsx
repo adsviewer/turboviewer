@@ -8,7 +8,7 @@ import SectionHeader from '../Common/section-header';
 function Integration(): ReactNode {
   const t = useTranslations('integrations');
   return (
-    <section>
+    <section id="integration" className="pt-20 lg:pt-25 xl:pt-30">
       <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
         {/* <!-- Section Title Start --> */}
         <SectionHeader
@@ -32,10 +32,13 @@ function Integration(): ReactNode {
             alt="Dotted"
             className="dark:hidden"
             style={{ position: 'static' }}
+            priority
           />
-          <Image fill src="/images/shape/shape-dotted-dark.svg" alt="Dotted" className="hidden dark:block" />
+          <Image fill src="/images/shape/shape-dotted-dark.svg" alt="Dotted" className="hidden dark:block" priority />
         </div>
-        <div className="flex flex-wrap justify-around gap-y-10">
+
+        {/* Brands container row 1 */}
+        <div className="flex flex-wrap justify-evenly items-center mb-12 gap-y-10">
           <motion.div
             variants={{
               hidden: {
@@ -52,10 +55,10 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-07.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-facebook.svg" alt="Brand" />
             </div>
           </motion.div>
 
@@ -75,9 +78,10 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
-          />
-
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="h-[6px] w-[6px] rounded-full bg-[#EF5C00]" />
+          </motion.div>
           <motion.div
             variants={{
               hidden: {
@@ -94,10 +98,10 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-08.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-instagram.svg" alt="Brand" />
             </div>
           </motion.div>
 
@@ -117,11 +121,32 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-tiktok.svg" alt="Brand" />
+            </div>
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="h-[11px] w-[11px] rounded-full bg-[#FFDB26]" />
           </motion.div>
-
           <motion.div
             variants={{
               hidden: {
@@ -138,15 +163,61 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
+              <Image width={50} height={50} src="./images/brand/brand-snapchat.svg" alt="Brand" />
+            </div>
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
+          >
+            <div className="h-[7px] w-[7px] opacity-35 rounded-full bg-primary" />
+          </motion.div>
+        </div>
+
+        {/* Brands container row 2 */}
+        <div className="flex flex-wrap justify-evenly items-center">
+          <motion.div
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: -20,
+              },
+
+              visible: {
+                opacity: 1,
+                y: 0,
+              },
+            }}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 1, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
               <Image
-                width={0}
-                height={0}
-                style={{ width: '50', height: 'auto' }}
-                src="./images/brand/brand-09.svg"
+                width={50}
+                height={50}
+                src="./images/brand/brand-youtube.svg"
                 alt="Brand"
+                style={{ width: '50px', height: 'auto' }}
               />
             </div>
           </motion.div>
@@ -167,28 +238,9 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
-          />
-
-          <motion.div
-            variants={{
-              hidden: {
-                opacity: 0,
-                y: -20,
-              },
-
-              visible: {
-                opacity: 1,
-                y: 0,
-              },
-            }}
-            initial="hidden"
-            whileInView="visible"
-            transition={{ duration: 1, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
           >
-            <div className="h-[15px] w-[15px] rounded-full bg-[#62E888]" />
+            <div className="h-[9px] w-[9px] opacity-50 rounded-full bg-primary" />
           </motion.div>
 
           <motion.div
@@ -207,10 +259,10 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-10.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-linkedIn.svg" alt="Brand" />
             </div>
           </motion.div>
 
@@ -230,81 +282,10 @@ function Integration(): ReactNode {
             whileInView="visible"
             transition={{ duration: 1, delay: 0.1 }}
             viewport={{ once: true }}
-            className="animate_top w-1/6"
-          >
-            <div className="h-[23px] w-[23px] rounded-full bg-[#EF5C00]" />
-          </motion.div>
-
-          <motion.div
-            variants={{
-              hidden: {
-                opacity: 0,
-                y: -20,
-              },
-
-              visible: {
-                opacity: 1,
-                y: 0,
-              },
-            }}
-            initial="hidden"
-            whileInView="visible"
-            transition={{ duration: 1, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="animate_top w-1/6"
+            className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image
-                width={0}
-                height={0}
-                style={{ width: '50', height: 'auto' }}
-                src="./images/brand/brand-11.svg"
-                alt="Brand"
-              />
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={{
-              hidden: {
-                opacity: 0,
-                y: -20,
-              },
-
-              visible: {
-                opacity: 1,
-                y: 0,
-              },
-            }}
-            initial="hidden"
-            whileInView="visible"
-            transition={{ duration: 1, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="animate_top w-1/6"
-          >
-            <div className="h-[15px] w-[15px] rounded-full bg-[#016BFF]" />
-          </motion.div>
-
-          <motion.div
-            variants={{
-              hidden: {
-                opacity: 0,
-                y: -20,
-              },
-
-              visible: {
-                opacity: 1,
-                y: 0,
-              },
-            }}
-            initial="hidden"
-            whileInView="visible"
-            transition={{ duration: 1, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="animate_top w-1/6"
-          >
-            <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-12.svg" alt="Brand" />
+              <Image width={50} height={50} src="./images/brand/brand-google-ads.svg" alt="Brand" />
             </div>
           </motion.div>
         </div>

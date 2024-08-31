@@ -23,7 +23,8 @@ function Hero(): ReactNode {
                 {t('title2ndLine')}
               </span>
             </h1>
-            <p>{t('body')}</p>
+            <p className="mb-4.5 text-lg font-medium text-black dark:text-white">💡 {t('body')}</p>
+            <p>{t('body2ndLine')}</p>
 
             <div className="mt-10">
               <form onSubmit={handleSubmit}>
@@ -55,7 +56,7 @@ function Hero(): ReactNode {
           <div className="animate_right hidden md:w-1/2 lg:block">
             <div className="relative 2xl:-mr-7.5">
               <Image
-                src="/images/shape/shape-01.png"
+                src="/images/shape/shape-01.avif"
                 alt="shape"
                 width={46}
                 height={246}
@@ -76,8 +77,22 @@ function Hero(): ReactNode {
                 className="absolute -right-6.5 bottom-0 z-1"
               />
               <div className=" relative aspect-[700/444] w-full">
-                <Image className="shadow-solid-l dark:hidden" src="/images/hero/hero-light.svg" alt="Hero" fill />
-                <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.svg" alt="Hero" fill />
+                <Image
+                  className="shadow-solid-l dark:hidden"
+                  src="/images/hero/hero-light.avif"
+                  alt="Hero"
+                  fill
+                  sizes="50vw"
+                  priority
+                />
+                <Image
+                  className="hidden shadow-solid-l dark:block"
+                  src="/images/hero/hero-dark.avif"
+                  alt="Hero"
+                  fill
+                  sizes="50vw"
+                  priority
+                />
               </div>
             </div>
           </div>

@@ -11,44 +11,48 @@
     "Support": "Support",
     "404": "404",
     "githubRepo": "GitHub Repo",
-    "getPro": "Get Pro"
+    "getPro": "Sign Up",
+    "Integrations": "Integrations",
+    "Pricing": "Pricing"
+
   },
   "hero": {
-    "superTitle": "Solid - A Complete SaaS Web Template",
-    "title1stLine": "Free Next.js Template for",
-    "title2ndLine": "SaaS",
-    "body": "Solid Pro - Packed with all the key integrations you need for swift SaaS startup launch, including - Auth,\n              Database, Sanity Blog, Essential Components, Pages and More. Built-winth - Next.js 13, React 18 and\n              TypeScript.",
+    "superTitle": "AdsViewer - View, test and optimize your ads in real-time.",
+    "title1stLine": "More than 70% of",
+    "title2ndLine": "ad performance is driven by the creative",
+    "body": "Stop over-focusing on the numbers alone, start focusing on the creative.",
+    "body2ndLine": "adsViewer.io aggregates and visualises your digital ads across major ad platforms to unlock greater insight and creativity. We offer a hub of solutions to view your ads, products & creative elements as they were displayed to your customers on web, mobile & app.",
     "getStarted": "Get Started",
     "enterEmail": "Enter your email address",
     "tryForFree": "Try for free no credit card required."
   },
   "features": {
-    "title": "Solid Features",
-    "subtitle": "Core Features of Solid",
-    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In\n            convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam\n            ante in maximus.",
+    "title": "AdsViewer Features",
+    "subtitle": "Core Features of AdsViewer",
+    "description": "Platforms like Meta, Google & TikTok make it incredibly difficult to extract information about your ads. Sure there's companies which provide metrics - but what about the creative?",
     "saas": {
-      "title": "Crafted for SaaS",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+      "title": "Crafted for Growth teams",
+      "description": "Supercharge your advertising insights and increase your bottom line. Our platform can be used by SMB, Enterprise and Agencies!"
     },
     "highQuality": {
-      "title": "High-quality Design",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+      "title": "Popular Ad Platforms Included",
+      "description": "We offer previews and insights across Facebook & Instagram (Meta), TikTok, LinkedIn, Google, Snapchat, Reddit & More."
     },
     "next13": {
-      "title": "Next.js 13 + TypeScript",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+      "title": "AI takes center-stage",
+      "description": "We use Image Recognition to enhance your ad data and provide actionable insights to improve your ads."
     },
     "sanity": {
-      "title": "Sanity Blog and Docs",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+      "title": "A/B Testing",
+      "description": "Testing is at the core of the product, compare ads across placements / platforms and use statistics to drive insights."
     },
     "dbAuthStripe": {
-      "title": "DB, Auth and Stripe",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+      "title": "Stripe for Billing",
+      "description": "Easily manage your own billing, or your clients billing straight through our platform."
     },
     "freeUpdates": {
-      "title": "Regular Free Updates",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor."
+      "title": "Automate Ad Creation",
+      "description": "Tap into ad platform APIs to automatically generate new ads across platforms at scale."
     }
   },
   "about": {
@@ -69,22 +73,22 @@
   },
   "featuresTab": {
     "cleanUI": "Clean User Interface",
-    "essentialPages": "Essential Business Pages",
-    "fullyFunctionalIntegrations": "Fully Functional Integrations",
+    "essentialPages": "View ads across platforms",
+    "fullyFunctionalIntegrations": "Deepest level of granularity",
     "tabOne": {
-      "title": "Clean User Interface",
-      "desc1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices. Fusce consectetur le.",
-      "desc2": "    Nam id eleifend dui, id iaculis purus. Etiam lobortis neque nec finibus sagittis. Nulla ligula nunc egestas ut."
+      "title": "Remove the clutter.",
+      "desc1": "Focus on what matters: your creative elements, the ads preview, and the metrics that you care about.",
+      "desc2": "Customize date ranges and get the insights you want, all whilst maintaining a view of your ads."
     },
     "tabTwo": {
-      "title": "Ready to Use Pages You Need for a SaaS Business.",
-      "desc1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices. Fusce consectetur le.",
-      "desc2": "    Nam id eleifend dui, id iaculis purus. Etiam lobortis neque nec finibus sagittis. Nulla ligula nunc egestas ut."
+      "title": "Meta, TikTok, LinkedIn & More",
+      "desc1": "These ad platforms operate as walled gardens, making it extremely difficult to get creative insights.",
+      "desc2": "Forget worrying about data in spreadsheets for creative analysis, no walled gardens, just results."
     },
     "tabThree": {
-      "title": "Functional Blog, DB, Auth and Many More",
-      "desc1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ultricies lacus non fermentum ultrices. Fusce consectetur le.",
-      "desc2": "    Nam id eleifend dui, id iaculis purus. Etiam lobortis neque nec finibus sagittis. Nulla ligula nunc egestas ut."
+      "title": "Your creative renders in different ways",
+      "desc1": "Stories, Reels, Feed and Overlays are just a fragment of ways your ad serves.",
+      "desc2": "View every and all variations side by side, and filter for specific ways a User experienced your ad."
     }
   },
   "funFact": {
@@ -96,8 +100,8 @@
   },
   "integrations": {
     "title": "Integrations",
-    "subtitle": "Remotely Maintain Your Data, From Anywhere, Anytime.",
-    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus."
+    "subtitle": "We've got you covered.",
+    "description": "We integrate with the main ad platforms, and if you have a specific need - we can build it."
   },
   "cta": {
     "title": "Join With Us Today & Increase Your Productivity",
@@ -148,21 +152,44 @@
   },
   "pricing": {
     "title": "Pricing Plans",
-    "subtitle": "Simple Pricing",
-    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In convallis tortor eros. Donec vitae tortor lacus. Phasellus aliquam ante in maximus.",
+    "subtitle": "Pricing that just works.",
+    "description": "Our distinct tiers offer friendly pricing for whichever usecase you might have.",
     "month": "month",
-    "smallPack": "Small Pack",
-    "smallPackDescription": "Lorem ipsum dolor sit amet, consec adipisicing elit.",
-    "storage": "300 GB Storage",
-    "photosVideos": "Unlimited Photos and Videos",
-    "exclusiveSupport": "Exclusive Support",
-    "brandingStrategy": "Custom Branding Strategy",
+    "user": "user",
+    "tier1-packname": "Launch",
+    "tier1-packdescription": "A starter kit with one login and last 7 days of Meta data.",
+    "tier1-users": "1 User Login",
+    "tier1-integrations": "1 platform only",
+    "tier1-data": "Last 7 Days",
+    "tier1-ai": "No",
+    "tier1-sso": "No",
+    "tier2-packname": "Build",
+    "tier2-price": "59",
+    "tier2-packdescription": "If you're serious about making improvements.",
+    "tier2-users": "1-4 User Login(s)",
+    "tier2-integrations": "All platforms",
+    "tier2-data": "Last 90 Days",
+    "tier2-ai": "Extra Cost",
+    "tier2-sso": "No",
+    "tier3-packname": "Grow",
+    "tier3-price": "15",
+    "tier3-packdescription": "A pack for teams with serious growth aspirations.",
+    "tier3-users": "5-10 User Logins",
+    "tier3-integrations": "All platforms",
+    "tier3-data": "Last 365 Days",
+    "tier3-ai": "Yes",
+    "tier3-sso": "No",
+    "tier4-packname": "Scale",
+    "tier4-price": "Contact Us",
+    "tier4-packdescription": "Our most advanced Enterprise level offering.",
+    "tier4-users": "100+ User Logins",
+    "tier4-integrations": "All platforms",
+    "tier4-data": "Custom",
+    "tier4-ai": "Yes",
+    "tier4-sso": "Yes",
     "getThePlan": "Get the Plan",
-    "popular": "popular",
-    "mediumPack": "Medium Pack",
-    "mediumPackDescription": "Lorem ipsum dolor sit amet, consec adipisicing elit.",
-    "largePack": "Large Pack",
-    "largePackDescription": "Lorem ipsum dolor sit amet, consec adipisicing elit."
+    "contactUsPricing": "Contact Us",
+    "popular": "popular"
   },
   "contact": {
     "title": "Send a message",
@@ -171,11 +198,11 @@
     "subject": "Subject",
     "phoneNumber": "Phone number",
     "message": "Message",
-    "termsAndConditions": "By clicking Checkbox, you agree to use our “Form” terms And consent cookie usage in browser.",
+    "termsAndConditions": "By ticking this checkbox, you agree to terms & conditions and consent to our cookie usage in your browser.",
     "sendMsg": "Send Message",
     "findUs": "Find us",
     "ourLocation": "Our Location",
-    "address": "290 Maryam Springs 260, Courbevoie, Paris, France"
+    "address": "Bloemistenlaan 44, Leiden, The Netherlands"
   },
   "blog": {
     "title": "News & Blogs",
@@ -202,16 +229,16 @@
     }
   },
   "footer": {
-    "title": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "title": "adsViewer.io - tooling for viewing digital ads.",
+    "quickLinks": "Quick Links",
     "home": "Home",
-    "product": "Product",
+    "features": "Features",
     "careers": "Careers",
     "pricing": "Pricing",
     "company": "Company",
     "pressMedia": "Press media",
     "ourBlog": "Our Blog",
     "contactUs": "Contact Us",
-    "english": "English",
     "privacyPolicy": "Privacy Policy",
     "support": "Support",
     "subscribeBody": "Subscribe to receive future updates",

@@ -14,7 +14,9 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@repo/logger": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.11.0",
     "framer-motion": "^11.3.21",
     "next": "^14.2.5",
     "next-intl": "^3.17.2",
@@ -23,7 +25,8 @@
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "sharp": "^0.33.4",
-    "swiper": "^11.1.9"
+    "swiper": "^11.1.9",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
