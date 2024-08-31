@@ -150,6 +150,7 @@ function Header(): ReactNode {
                     <Link
                       href={String(menuItem.path)}
                       className={pathUrl === menuItem.path ? 'text-primary hover:text-primary' : 'hover:text-primary'}
+                      scroll
                     >
                       {t(menuItem.title)}
                     </Link>
