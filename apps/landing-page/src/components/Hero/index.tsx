@@ -77,7 +77,13 @@ function Hero(): ReactNode {
                 className="absolute -right-6.5 bottom-0 z-1"
               />
               <div className=" relative aspect-[700/444] w-full">
-                <Image className="shadow-solid-l dark:hidden" src="/images/hero/hero-light.avif" alt="Hero" fill />
+                <Image
+                  className="shadow-solid-l dark:hidden"
+                  src="/images/hero/hero-light.avif"
+                  alt="Hero"
+                  fill
+                  sizes="50vw"
+                />
                 <Image className="hidden shadow-solid-l dark:block" src="/images/hero/hero-dark.avif" alt="Hero" fill />
               </div>
             </div>

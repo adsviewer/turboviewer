@@ -211,7 +211,13 @@ function Integration(): ReactNode {
             className="animate_top w-1/7 flex justify-center items-center"
           >
             <div className="inline-block rounded-[10px] bg-white p-4.5 shadow-solid-7 dark:bg-btndark">
-              <Image width={50} height={50} src="./images/brand/brand-youtube.svg" alt="Brand" />
+              <Image
+                width={50}
+                height={50}
+                src="./images/brand/brand-youtube.svg"
+                alt="Brand"
+                style={{ width: '50px', height: 'auto' }}
+              />
             </div>
           </motion.div>
 

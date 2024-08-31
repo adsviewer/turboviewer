@@ -33,7 +33,7 @@ function SingleBrand({ brand }: { brand: Brand }): ReactNode {
         height={5}
         src={image}
         alt={name}
-        // fill
+        style={{ width: '110px', height: 'auto' }} // exists to remove warnings
       />
       <Image
         className="hidden opacity-50 transition-all duration-300 hover:opacity-100 dark:block"
@@ -41,7 +41,7 @@ function SingleBrand({ brand }: { brand: Brand }): ReactNode {
         height={5}
         src={imageLight}
         alt={name}
-        // fill
+        style={{ width: '110px', height: 'auto' }} // exists to remove warnings
       />
     </motion.a>
   );
