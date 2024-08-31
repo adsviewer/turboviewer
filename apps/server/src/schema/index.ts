@@ -2,6 +2,7 @@ import { builder } from './builder';
 import './errors';
 import './integrations/integration-operations';
 import './integrations/insights-operations';
+import './landing-page/landing-page-operations';
 import './organization/org-types';
 import './organization/organization-operations';
 import './user/social-login-operations';

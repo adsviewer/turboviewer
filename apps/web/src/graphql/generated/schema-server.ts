@@ -516,6 +516,24 @@ export type InviteUsersErrors = Error & {
   message: Scalars['String']['output'];
 };
 
+export type LandingPageSupportMessage = {
+  __typename: 'LandingPageSupportMessage';
+  email: Scalars['String']['output'];
+  fullName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  message: Scalars['String']['output'];
+  phone?: Maybe<Scalars['String']['output']>;
+  subject: Scalars['String']['output'];
+};
+
+export type LandingPageSupportMessageInput = {
+  email: Scalars['String']['input'];
+  fullName: Scalars['String']['input'];
+  message: Scalars['String']['input'];
+  phone?: InputMaybe<Scalars['String']['input']>;
+  subject: Scalars['String']['input'];
+};
+
 export enum LoginProviderEnum {
   GOOGLE = 'GOOGLE',
 }
@@ -547,9 +565,11 @@ export type Mutation = {
   removeUserFromOrganization: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
+  sendLandingPageSupportMessage: LandingPageSupportMessage;
   /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
   signUpInvitedUser: Tokens;
   signup: Tokens;
+  subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
@@ -614,6 +634,10 @@ export type MutationResetPasswordArgs = {
   token: Scalars['String']['input'];
 };
 
+export type MutationSendLandingPageSupportMessageArgs = {
+  args: LandingPageSupportMessageInput;
+};
+
 export type MutationSignUpInvitedUserArgs = {
   firstName: Scalars['String']['input'];
   inviteHash: Scalars['String']['input'];
@@ -623,6 +647,10 @@ export type MutationSignUpInvitedUserArgs = {
 
 export type MutationSignupArgs = {
   args: SignUpInput;
+};
+
+export type MutationSubscribeNewsletterArgs = {
+  email: Scalars['String']['input'];
 };
 
 export type MutationSwitchOrganizationArgs = {
@@ -662,6 +690,12 @@ export type MutationInviteUsersResult = InviteUsersErrors | MutationInviteUsersS
 export type MutationInviteUsersSuccess = {
   __typename: 'MutationInviteUsersSuccess';
   data: Scalars['Boolean']['output'];
+};
+
+export type NewsletterSubscription = {
+  __typename: 'NewsletterSubscription';
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
 };
 
 export enum OrderBy {
