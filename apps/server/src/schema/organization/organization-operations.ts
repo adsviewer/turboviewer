@@ -8,7 +8,8 @@ import { TokensDto } from '../user/user-types';
 import { deleteRedisInvite } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
 import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-types';
-import { OrganizationDto, OrganizationRoleEnumDto, UserOrganizationDto } from './org-types';
+import { sendOrganizationAddedEmail } from '../../email';
+import { OrganizationDto, OrganizationRoleEnumDto, UserOrganizationDto, UserRolesInput } from './org-types';
 
 const fireAndForget = new FireAndForget();
 
@@ -93,6 +94,12 @@ builder.mutationFields((t) => ({
     grantScopes: ['readOrganization'],
     args: {
       name: t.arg.string({ required: true }),
+      users: t.arg({
+        type: [UserRolesInput],
+        required: false,
+        description:
+          'Users should already be active in the parent organization (if there is a parent). This list should not include the caller, the caller will automatically be added as administrator.',
+      }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
       if (ctx.organizationId) {
@@ -101,6 +108,33 @@ builder.mutationFields((t) => ({
           throw new GraphQLError('Cannot create an organization under a sub-organization');
         }
       }
+      const users = await (async () => {
+        if (!args.users || !ctx.organizationId) return [];
+        return await Promise.all(
+          args.users
+            .filter((userRole) => userRole.userId !== ctx.currentUserId)
+            .map(async (userRole) => {
+              const user = await prisma.userOrganization.findUnique({
+                where: {
+                  userId_organizationId: {
+                    userId: userRole.userId,
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- already checked above
+                    organizationId: ctx.organizationId!,
+                  },
+                  status: UserOrganizationStatus.ACTIVE,
+                },
+              });
+              if (!user) {
+                throw new GraphQLError(`At least one user is not an active member of this organization`);
+              }
+              return {
+                userId: userRole.userId,
+                role: userRole.role,
+                status: UserOrganizationStatus.ACTIVE,
+              };
+            }),
+        );
+      })();
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: ctx.currentUserId },
       });
@@ -117,21 +151,35 @@ builder.mutationFields((t) => ({
         return domainInner;
       })();
 
-      return prisma.organization.create({
+      const newOrganization = prisma.organization.create({
         ...query,
         data: {
           name: args.name,
           domain,
           parentId: ctx.organizationId,
           users: {
-            create: {
-              userId: ctx.currentUserId,
-              status: UserOrganizationStatus.ACTIVE,
-              role: OrganizationRoleEnum.ORG_ADMIN,
+            createMany: {
+              skipDuplicates: true,
+              data: [
+                ...users,
+                {
+                  userId: ctx.currentUserId,
+                  status: UserOrganizationStatus.ACTIVE,
+                  role: OrganizationRoleEnum.ORG_ADMIN,
+                },
+              ],
             },
           },
         },
       });
+      fireAndForget.add(() =>
+        prisma.user
+          .findMany({ where: { id: { in: users.map((u) => u.userId) } } })
+          .then((mailUsers) =>
+            mailUsers.map((u) => sendOrganizationAddedEmail(u.email, args.name, u.firstName, u.lastName)),
+          ),
+      );
+      return newOrganization;
     },
   }),
 

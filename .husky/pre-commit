@@ -6,3 +6,4 @@ git add apps/web/src/graphql/generated/*
 git add apps/backoffice/src/graphql/generated/*
 pnpm lint-staged
 pnpm lint:fix
+pnpm lint-staged
