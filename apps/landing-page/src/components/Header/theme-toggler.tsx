@@ -1,9 +1,12 @@
+'use client';
+
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import { type ReactNode } from 'react';
 
 function ThemeToggler(): ReactNode {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  setTheme(localStorage.getItem('theme') ?? 'system');
 
   const switchTheme = (): void => {
     if (localStorage.getItem('theme') === 'light') {
@@ -29,21 +32,21 @@ function ThemeToggler(): ReactNode {
         alt="logo"
         width={21}
         height={21}
-        className={localStorage.getItem('theme') === 'dark' ? 'block' : 'hidden'}
+        className={theme === 'dark' ? 'block' : 'hidden'}
       />
       <Image
         src="/images/icon/icon-sun.svg"
         alt="logo"
         width={22}
         height={22}
-        className={localStorage.getItem('theme') === 'light' ? 'block' : 'hidden'}
+        className={theme === 'light' ? 'block' : 'hidden'}
       />
       <Image
         src="/images/icon/icon-auto.svg"
         alt="logo"
         width={21}
         height={22}
-        className={localStorage.getItem('theme') === 'system' ? 'block' : 'hidden'}
+        className={theme === 'system' ? 'block' : 'hidden'}
       />
     </button>
   );
