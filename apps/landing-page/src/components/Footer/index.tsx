@@ -1,12 +1,44 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- keep things simple */
+/* eslint-disable @typescript-eslint/no-unsafe-call -- keep things simple */
+
 'use client';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast as toaster } from 'react-hot-toast';
+import { logger } from '@repo/logger';
 import Link from 'next/link';
+import { env } from '@/env.mjs';
 
 function Footer(): ReactNode {
   const t = useTranslations('footer');
+
+  // @ts-expect-error -- keep things simple
+  const submitForm = (e): void => {
+    e.preventDefault();
+    const email = document.getElementById('email-newsletter') as HTMLInputElement;
+    const graphqlBody = JSON.stringify({
+      query: `mutation {subscribeNewsletter(email:"${email.value}"){id}}`,
+      variables: {},
+    });
+
+    void fetch(env.NEXT_PUBLIC_GRAPHQL_ENDPOINT, {
+      method: 'POST',
+      body: graphqlBody,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(() => {
+        toaster.success('You succesfully subscribed to our newsletter!');
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+        toaster.error('There was a problem subscribing to the newsletter!');
+      });
+  };
+
   return (
     <footer className="border-t border-stroke bg-white dark:border-strokedark dark:bg-blacksection">
       <div className="mx-auto max-w-c-1390 px-4 md:px-8 2xl:px-0">
@@ -152,12 +184,20 @@ function Footer(): ReactNode {
                   <div className="relative">
                     <input
                       id="email-newsletter"
+                      name="email"
                       type="text"
                       placeholder="Email address"
                       className="w-full rounded-full border border-stroke px-6 py-3 shadow-solid-11 focus:border-primary focus:outline-none dark:border-strokedark dark:bg-black dark:shadow-none dark:focus:border-primary"
                     />
 
-                    <button type="submit" aria-label="signup to newsletter" className="absolute right-0 p-4">
+                    <button
+                      type="submit"
+                      aria-label="signup to newsletter"
+                      className="absolute right-0 p-4"
+                      onClick={(e) => {
+                        submitForm(e);
+                      }}
+                    >
                       <svg
                         className="fill-[#757693] hover:fill-primary dark:fill-white"
                         width="20"
