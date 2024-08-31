@@ -6,16 +6,11 @@ import { type ReactNode } from 'react';
 
 function ThemeToggler(): ReactNode {
   const { theme, setTheme } = useTheme();
-  setTheme(localStorage.getItem('theme') ?? 'system');
 
   const switchTheme = (): void => {
-    if (localStorage.getItem('theme') === 'light') {
-      setTheme('dark');
-    } else if (localStorage.getItem('theme') === 'dark') {
-      setTheme('system');
-    } else {
-      setTheme('light');
-    }
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('system');
+    else setTheme('light');
   };
 
   return (

@@ -5,8 +5,11 @@ import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect, useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
 import { useTranslations } from 'next-intl';
-import ThemeToggler from './theme-toggler';
+import dynamic from 'next/dynamic';
 import menuData from './menu-data';
+
+// Lazy load theme toggler
+const ThemeToggler = dynamic(() => import('./theme-toggler'), { ssr: false });
 
 function Header(): ReactNode {
   const [navigationOpen, setNavigationOpen] = useState(false);
