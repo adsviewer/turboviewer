@@ -57,15 +57,17 @@ function Contact(): ReactNode {
                   <input
                     id="name-send-msg"
                     type="text"
-                    placeholder={t('fullName')}
+                    placeholder={`${t('fullName')} *`}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                    required
                   />
 
                   <input
                     id="email-send-msg"
                     type="email"
-                    placeholder={t('email')}
+                    placeholder={`${t('email')} *`}
                     className="w-full border-b border-stroke bg-transparent pb-3.5 focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white lg:w-1/2"
+                    required
                   />
                 </div>
 
@@ -88,15 +90,16 @@ function Contact(): ReactNode {
                 <div className="mb-11.5 flex">
                   <textarea
                     id="message-send-msg"
-                    placeholder={t('message')}
+                    placeholder={`${t('message')} *`}
                     rows={4}
                     className="w-full border-b border-stroke bg-transparent focus:border-waterloo focus:placeholder:text-black focus-visible:outline-none dark:border-strokedark dark:focus:border-manatee dark:focus:placeholder:text-white"
+                    required
                   />
                 </div>
 
                 <div className="flex flex-wrap gap-4 xl:justify-between ">
                   <div className="mb-4 flex md:mb-0">
-                    <input id="default-checkbox" type="checkbox" className="peer sr-only" />
+                    <input id="default-checkbox" type="checkbox" className="peer sr-only" required />
                     <span className="border-gray-300 bg-gray-100 text-blue-600 dark:border-gray-600 dark:bg-gray-700 group mt-2 flex h-5 min-w-[20px] items-center justify-center rounded peer-checked:bg-primary">
                       <svg
                         className="opacity-0 peer-checked:group-[]:opacity-100"
@@ -115,7 +118,7 @@ function Contact(): ReactNode {
                       </svg>
                     </span>
                     <label htmlFor="default-checkbox" className="flex max-w-[425px] cursor-pointer select-none pl-5">
-                      {t('termsAndConditions')}
+                      {`${t('termsAndConditions')} *`}
                     </label>
                   </div>
 
