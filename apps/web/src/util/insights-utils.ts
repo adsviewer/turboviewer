@@ -7,6 +7,7 @@ import {
   IconBrandTiktok,
   IconDeviceDesktop,
   IconDeviceMobile,
+  IconDeviceMobileCode,
   IconDevices,
   IconHelpOctagon,
 } from '@tabler/icons-react';
@@ -27,6 +28,6 @@ export const publisherToIconMap = new Map<PublisherEnum, React.FC>([
 export const deviceToIconMap = new Map<DeviceEnum, React.FC>([
   [DeviceEnum.Desktop, IconDeviceDesktop],
   [DeviceEnum.MobileApp, IconDeviceMobile],
-  [DeviceEnum.MobileWeb, IconDeviceMobile],
+  [DeviceEnum.MobileWeb, IconDeviceMobileCode],
   [DeviceEnum.Unknown, IconDevices],
 ]);
