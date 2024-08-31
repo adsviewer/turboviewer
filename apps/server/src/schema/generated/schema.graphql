@@ -272,7 +272,6 @@ interface Error {
 input FilterInsightsInput {
   adAccountIds: [String!]
   adIds: [String!]
-  dataPointsPerInterval: Int! = 3
   dateFrom: Date
   dateTo: Date
   devices: [DeviceEnum!]

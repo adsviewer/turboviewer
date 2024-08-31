@@ -96,7 +96,7 @@ export const isDateWithinInterval = (
 };
 
 export const getDateDiffIn = (interval: IntervalType, dateFrom: Date, dateTo: Date): number => {
-  const diff = dateFrom.getTime() - dateTo.getTime();
+  const diff = dateTo.getTime() - dateFrom.getTime();
   switch (interval) {
     case 'day':
       return diff / (1000 * 60 * 60 * 24);
@@ -107,4 +107,30 @@ export const getDateDiffIn = (interval: IntervalType, dateFrom: Date, dateTo: Da
     case 'quarter':
       return diff / (1000 * 60 * 60 * 24 * 30 * 3);
   }
+};
+
+const getFirstDayOfWeek = (dt: Date, locale: string): Date => {
+  // @ts-expect-error - weekInfo is not in the types eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- weekInfo is not in the types
+  const firstDayOfWeek = new Intl.Locale(locale).weekInfo.firstDay as number;
+  const day = dt.getDay();
+  const number = firstDayOfWeek % 7;
+  const diff = dt.getDate() - day + (day === number - 1 ? -6 : number);
+  const retDate = new Date(dt);
+  retDate.setUTCDate(diff);
+  return retDate;
+};
+
+const getFirstDayNextWeek = (dt: Date, locale: string): Date => {
+  const firstDayOfWeek = getFirstDayOfWeek(dt, locale);
+  if (firstDayOfWeek.getTime() === dt.getTime()) return firstDayOfWeek;
+  const addWeek = addInterval(dt, 'week', 1);
+  return getFirstDayOfWeek(addWeek, locale);
+};
+
+export const getCalendarDateDiffIn = (interval: IntervalType, dateFrom: Date, dateTo: Date, locale: string): number => {
+  if (interval !== 'week') return Math.ceil(getDateDiffIn(interval, dateFrom, getTomorrowStartOfDay(dateTo)));
+  const firstDayOfWeek = getFirstDayOfWeek(dateFrom, locale);
+  const firstDayNextWeek = getFirstDayNextWeek(dateTo, locale);
+  return Math.ceil(getDateDiffIn(interval, firstDayOfWeek, firstDayNextWeek));
 };

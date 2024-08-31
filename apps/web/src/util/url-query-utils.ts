@@ -20,6 +20,8 @@ export const pageSizeKey = 'pageSize';
 export const orderDirectionKey = 'order';
 export const orderByKey = 'orderBy';
 export const intervalKey = 'interval';
+export const dateFromKey = 'dateFrom';
+export const dateToKey = 'dateTo';
 export const fetchPreviewsKey = 'fetchPreviews';
 export const emailKey = 'email';
 

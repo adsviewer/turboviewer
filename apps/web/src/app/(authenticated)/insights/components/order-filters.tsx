@@ -3,8 +3,10 @@
 import { Flex, Text, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { type ChangeEvent, useTransition } from 'react';
+import { type ChangeEvent, useTransition, useState } from 'react';
 import { useSetAtom } from 'jotai/index';
+import { DatePickerInput, type DateValue, type DatesRangeValue } from '@mantine/dates';
+import { IconCalendarMonth } from '@tabler/icons-react';
 import {
   OrderDirection,
   addOrReplaceURLParams,
@@ -15,18 +17,30 @@ import {
   fetchPreviewsKey,
   groupedByKey,
   intervalKey,
+  dateFromKey,
+  dateToKey,
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
+  const tGeneric = useTranslations('generic');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const setInsights = useSetAtom(insightsAtom);
   const setHasNextInsightsPageAtom = useSetAtom(hasNextInsightsPageAtom);
+
+  // Date range values loading
+  const paramsDateFrom = searchParams.get(dateFromKey)
+    ? (new Date(Number(searchParams.get(dateFromKey))) as DateValue)
+    : null;
+  const paramsDateTo = searchParams.get(dateToKey)
+    ? (new Date(Number(searchParams.get(dateToKey))) as DateValue)
+    : null;
+  const [dateRangeValue, setDateRangeValue] = useState<[DateValue, DateValue]>([paramsDateFrom, paramsDateTo]);
 
   const resetInsights = (): void => {
     setInsights([]);
@@ -109,6 +123,33 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
+  const handleDateRangeChange = (dates: DatesRangeValue): void => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    const dateFrom = dates[0];
+    const dateTo = dates[1];
+    setDateRangeValue([dateFrom, dateTo]);
+    // Perform new fetching only if both dates are given
+    if (dateFrom && dateTo) {
+      resetInsights();
+      newParams.set(dateFromKey, String(dateFrom.getTime()));
+      newParams.set(dateToKey, String(dateTo.getTime()));
+      const newURL = `${pathname}?${newParams.toString()}`;
+      startTransition(() => {
+        router.replace(newURL);
+      });
+    }
+    // Clear logic
+    else if (!dateFrom && !dateTo) {
+      resetInsights();
+      newParams.delete(dateFromKey);
+      newParams.delete(dateToKey);
+      const newURL = `${pathname}?${newParams.toString()}`;
+      startTransition(() => {
+        router.replace(newURL);
+      });
+    }
+  };
+
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
     resetInsights();
     let newURL: string;
@@ -125,7 +166,7 @@ export default function OrderFilters(): React.ReactNode {
   return (
     <Flex w="100%" wrap="wrap" direction="column">
       {/* Filters */}
-      <Flex wrap="wrap" mb="md">
+      <Flex wrap="wrap" mb="md" gap="xs">
         {/* Page size filter */}
         <Flex align="center" mr="sm">
           <Text size="md" mr="sm">
@@ -145,7 +186,7 @@ export default function OrderFilters(): React.ReactNode {
         </Flex>
 
         {/* Order filter */}
-        <Flex align="center" gap="md">
+        <Flex align="center" gap="md" wrap="wrap">
           <Text size="md">{t('orderBy')}:</Text>
           <Select
             placeholder="Pick value"
@@ -179,22 +220,37 @@ export default function OrderFilters(): React.ReactNode {
             maw={150}
             disabled={isPending}
           />
-          <Select
-            placeholder="Pick value"
-            data={[
-              { value: InsightsInterval.day, label: t('daily') },
-              { value: InsightsInterval.week, label: t('weekly') },
-              { value: InsightsInterval.month, label: t('monthly') },
-              { value: InsightsInterval.quarter, label: t('quarterly') },
-            ]}
-            value={getIntervalValue()}
-            onChange={handleIntervalChange}
-            allowDeselect={false}
-            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-            scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
-            maw={150}
-            disabled={isPending}
-          />
+
+          <Flex align="center" gap="md" wrap="wrap">
+            <Text size="md">{t('timeConstraints')}:</Text>
+            <Flex gap="sm">
+              <Select
+                placeholder="Pick value"
+                data={[
+                  { value: InsightsInterval.day, label: t('daily') },
+                  { value: InsightsInterval.week, label: t('weekly') },
+                  { value: InsightsInterval.month, label: t('monthly') },
+                  { value: InsightsInterval.quarter, label: t('quarterly') },
+                ]}
+                value={getIntervalValue()}
+                onChange={handleIntervalChange}
+                allowDeselect={false}
+                comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+                scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+                maw={150}
+                disabled={isPending}
+              />
+              <DatePickerInput
+                type="range"
+                maxDate={new Date()}
+                placeholder={tGeneric('pickDateRange')}
+                leftSection={<IconCalendarMonth />}
+                clearable
+                onChange={handleDateRangeChange}
+                value={dateRangeValue}
+              />
+            </Flex>
+          </Flex>
         </Flex>
       </Flex>
 

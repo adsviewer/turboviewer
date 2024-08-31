@@ -4,13 +4,14 @@ import { isAError } from '@repo/utils';
 import { GraphQLError } from 'graphql/index';
 import { setContext, setUser } from '@sentry/node';
 import { decodeJwt } from './auth';
-import { acceptedLanguage, type Language } from './language';
+import { acceptedLanguage, acceptedLocale, type Language } from './language';
 import RoleEnum = $Enums.RoleEnum;
 
 export interface GraphQLContext {
   currentUserId: undefined | string;
   organizationId: undefined | string | null;
   acceptedLanguage: Language;
+  acceptedLocale: string;
   isAdmin: boolean | undefined;
   isOrgAdmin: boolean | undefined;
   isOrgOperator: boolean | undefined;
@@ -49,6 +50,7 @@ export const createContext = (initialContext: YogaInitialContext): GraphQLContex
       ),
     ),
     acceptedLanguage: acceptedLanguage(initialContext.request),
+    acceptedLocale: acceptedLocale(initialContext.request),
     request: {
       operatingSystem,
       browserName,

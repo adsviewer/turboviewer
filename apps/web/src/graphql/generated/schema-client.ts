@@ -1,5 +1,5 @@
-import { DocumentNode } from 'graphql';
 import gql from 'graphql-tag';
+import * as Urql from '@urql/next';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -7,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string };
@@ -515,24 +516,6 @@ export type InviteUsersErrors = Error & {
   message: Scalars['String']['output'];
 };
 
-export type LandingPageSupportMessage = {
-  __typename: 'LandingPageSupportMessage';
-  email: Scalars['String']['output'];
-  fullName: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  message: Scalars['String']['output'];
-  phone?: Maybe<Scalars['String']['output']>;
-  subject: Scalars['String']['output'];
-};
-
-export type LandingPageSupportMessageInput = {
-  email: Scalars['String']['input'];
-  fullName: Scalars['String']['input'];
-  message: Scalars['String']['input'];
-  phone?: InputMaybe<Scalars['String']['input']>;
-  subject: Scalars['String']['input'];
-};
-
 export enum LoginProviderEnum {
   GOOGLE = 'GOOGLE',
 }
@@ -564,11 +547,9 @@ export type Mutation = {
   removeUserFromOrganization: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
-  sendLandingPageSupportMessage: LandingPageSupportMessage;
   /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
   signUpInvitedUser: Tokens;
   signup: Tokens;
-  subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
@@ -633,10 +614,6 @@ export type MutationResetPasswordArgs = {
   token: Scalars['String']['input'];
 };
 
-export type MutationSendLandingPageSupportMessageArgs = {
-  args: LandingPageSupportMessageInput;
-};
-
 export type MutationSignUpInvitedUserArgs = {
   firstName: Scalars['String']['input'];
   inviteHash: Scalars['String']['input'];
@@ -646,10 +623,6 @@ export type MutationSignUpInvitedUserArgs = {
 
 export type MutationSignupArgs = {
   args: SignUpInput;
-};
-
-export type MutationSubscribeNewsletterArgs = {
-  email: Scalars['String']['input'];
 };
 
 export type MutationSwitchOrganizationArgs = {
@@ -689,12 +662,6 @@ export type MutationInviteUsersResult = InviteUsersErrors | MutationInviteUsersS
 export type MutationInviteUsersSuccess = {
   __typename: 'MutationInviteUsersSuccess';
   data: Scalars['Boolean']['output'];
-};
-
-export type NewsletterSubscription = {
-  __typename: 'NewsletterSubscription';
-  email: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
 };
 
 export enum OrderBy {
@@ -1332,6 +1299,10 @@ export const AdAccountsDocument = gql`
     }
   }
 `;
+
+export function useAdAccountsQuery(options?: Omit<Urql.UseQueryArgs<AdAccountsQueryVariables>, 'query'>) {
+  return Urql.useQuery<AdAccountsQuery, AdAccountsQueryVariables>({ query: AdAccountsDocument, ...options });
+}
 export const InsightsDocument = gql`
   query insights(
     $adAccountIds: [String!]
@@ -1392,6 +1363,10 @@ export const InsightsDocument = gql`
     }
   }
 `;
+
+export function useInsightsQuery(options: Omit<Urql.UseQueryArgs<InsightsQueryVariables>, 'query'>) {
+  return Urql.useQuery<InsightsQuery, InsightsQueryVariables>({ query: InsightsDocument, ...options });
+}
 export const LastThreeMonthsAdsDocument = gql`
   query lastThreeMonthsAds {
     lastThreeMonthsAds {
@@ -1400,6 +1375,15 @@ export const LastThreeMonthsAdsDocument = gql`
     }
   }
 `;
+
+export function useLastThreeMonthsAdsQuery(
+  options?: Omit<Urql.UseQueryArgs<LastThreeMonthsAdsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<LastThreeMonthsAdsQuery, LastThreeMonthsAdsQueryVariables>({
+    query: LastThreeMonthsAdsDocument,
+    ...options,
+  });
+}
 export const SettingsChannelsDocument = gql`
   query settingsChannels {
     settingsChannels {
@@ -1409,6 +1393,13 @@ export const SettingsChannelsDocument = gql`
     }
   }
 `;
+
+export function useSettingsChannelsQuery(options?: Omit<Urql.UseQueryArgs<SettingsChannelsQueryVariables>, 'query'>) {
+  return Urql.useQuery<SettingsChannelsQuery, SettingsChannelsQueryVariables>({
+    query: SettingsChannelsDocument,
+    ...options,
+  });
+}
 export const IntegrationsDocument = gql`
   query integrations {
     integrations {
@@ -1421,6 +1412,10 @@ export const IntegrationsDocument = gql`
     }
   }
 `;
+
+export function useIntegrationsQuery(options?: Omit<Urql.UseQueryArgs<IntegrationsQueryVariables>, 'query'>) {
+  return Urql.useQuery<IntegrationsQuery, IntegrationsQueryVariables>({ query: IntegrationsDocument, ...options });
+}
 export const DeAuthIntegrationDocument = gql`
   mutation deAuthIntegration($type: IntegrationType!) {
     deAuthIntegration(type: $type) {
@@ -1436,6 +1431,10 @@ export const DeAuthIntegrationDocument = gql`
     }
   }
 `;
+
+export function useDeAuthIntegrationMutation() {
+  return Urql.useMutation<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(DeAuthIntegrationDocument);
+}
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {
     channelInitialSetupProgress {
@@ -1444,6 +1443,17 @@ export const ChannelInitialSetupProgressDocument = gql`
     }
   }
 `;
+
+export function useChannelInitialSetupProgressSubscription<TData = ChannelInitialSetupProgressSubscription>(
+  options?: Omit<Urql.UseSubscriptionArgs<ChannelInitialSetupProgressSubscriptionVariables>, 'query'>,
+  handler?: Urql.SubscriptionHandler<ChannelInitialSetupProgressSubscription, TData>,
+) {
+  return Urql.useSubscription<
+    ChannelInitialSetupProgressSubscription,
+    TData,
+    ChannelInitialSetupProgressSubscriptionVariables
+  >({ query: ChannelInitialSetupProgressDocument, ...options }, handler);
+}
 export const LoginDocument = gql`
   mutation login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
@@ -1452,6 +1462,10 @@ export const LoginDocument = gql`
     }
   }
 `;
+
+export function useLoginMutation() {
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+}
 export const SignupDocument = gql`
   mutation signup($email: String!, $firstName: String!, $lastName: String!, $password: String!, $inviteHash: String) {
     signup(
@@ -1462,11 +1476,19 @@ export const SignupDocument = gql`
     }
   }
 `;
+
+export function useSignupMutation() {
+  return Urql.useMutation<SignupMutation, SignupMutationVariables>(SignupDocument);
+}
 export const ForgetPasswordDocument = gql`
   mutation forgetPassword($email: String!) {
     forgetPassword(email: $email)
   }
 `;
+
+export function useForgetPasswordMutation() {
+  return Urql.useMutation<ForgetPasswordMutation, ForgetPasswordMutationVariables>(ForgetPasswordDocument);
+}
 export const ResetPasswordDocument = gql`
   mutation resetPassword($token: String!, $password: String!) {
     resetPassword(token: $token, password: $password) {
@@ -1475,16 +1497,30 @@ export const ResetPasswordDocument = gql`
     }
   }
 `;
+
+export function useResetPasswordMutation() {
+  return Urql.useMutation<ResetPasswordMutation, ResetPasswordMutationVariables>(ResetPasswordDocument);
+}
 export const RefreshTokenDocument = gql`
   query refreshToken {
     refreshToken
   }
 `;
+
+export function useRefreshTokenQuery(options?: Omit<Urql.UseQueryArgs<RefreshTokenQueryVariables>, 'query'>) {
+  return Urql.useQuery<RefreshTokenQuery, RefreshTokenQueryVariables>({ query: RefreshTokenDocument, ...options });
+}
 export const ResendEmailConfirmationDocument = gql`
   mutation resendEmailConfirmation {
     resendEmailConfirmation
   }
 `;
+
+export function useResendEmailConfirmationMutation() {
+  return Urql.useMutation<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
+    ResendEmailConfirmationDocument,
+  );
+}
 export const LoginProvidersDocument = gql`
   query loginProviders($inviteHash: String) {
     loginProviders(inviteHash: $inviteHash) {
@@ -1493,6 +1529,13 @@ export const LoginProvidersDocument = gql`
     }
   }
 `;
+
+export function useLoginProvidersQuery(options?: Omit<Urql.UseQueryArgs<LoginProvidersQueryVariables>, 'query'>) {
+  return Urql.useQuery<LoginProvidersQuery, LoginProvidersQueryVariables>({
+    query: LoginProvidersDocument,
+    ...options,
+  });
+}
 export const GetOrganizationDocument = gql`
   query getOrganization {
     organization {
@@ -1512,6 +1555,13 @@ export const GetOrganizationDocument = gql`
     }
   }
 `;
+
+export function useGetOrganizationQuery(options?: Omit<Urql.UseQueryArgs<GetOrganizationQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetOrganizationQuery, GetOrganizationQueryVariables>({
+    query: GetOrganizationDocument,
+    ...options,
+  });
+}
 export const UpdateOrganizationUserDocument = gql`
   mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
     updateOrganizationUser(userId: $userId, role: $role) {
@@ -1522,6 +1572,12 @@ export const UpdateOrganizationUserDocument = gql`
     }
   }
 `;
+
+export function useUpdateOrganizationUserMutation() {
+  return Urql.useMutation<UpdateOrganizationUserMutation, UpdateOrganizationUserMutationVariables>(
+    UpdateOrganizationUserDocument,
+  );
+}
 export const CreateOrganizationDocument = gql`
   mutation createOrganization($name: String!) {
     createOrganization(name: $name) {
@@ -1530,6 +1586,10 @@ export const CreateOrganizationDocument = gql`
     }
   }
 `;
+
+export function useCreateOrganizationMutation() {
+  return Urql.useMutation<CreateOrganizationMutation, CreateOrganizationMutationVariables>(CreateOrganizationDocument);
+}
 export const UpdateOrganizationDocument = gql`
   mutation updateOrganization($name: String!) {
     updateOrganization(name: $name) {
@@ -1538,6 +1598,10 @@ export const UpdateOrganizationDocument = gql`
     }
   }
 `;
+
+export function useUpdateOrganizationMutation() {
+  return Urql.useMutation<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(UpdateOrganizationDocument);
+}
 export const SwitchOrganizationDocument = gql`
   mutation switchOrganization($organizationId: String!) {
     switchOrganization(organizationId: $organizationId) {
@@ -1546,6 +1610,10 @@ export const SwitchOrganizationDocument = gql`
     }
   }
 `;
+
+export function useSwitchOrganizationMutation() {
+  return Urql.useMutation<SwitchOrganizationMutation, SwitchOrganizationMutationVariables>(SwitchOrganizationDocument);
+}
 export const DeleteOrganizationDocument = gql`
   mutation deleteOrganization($organizationId: String!) {
     deleteOrganization(organizationId: $organizationId) {
@@ -1553,6 +1621,10 @@ export const DeleteOrganizationDocument = gql`
     }
   }
 `;
+
+export function useDeleteOrganizationMutation() {
+  return Urql.useMutation<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(DeleteOrganizationDocument);
+}
 export const InviteUsersDocument = gql`
   mutation inviteUsers($emails: [String!]!, $role: OrganizationRoleEnum!) {
     inviteUsers(emails: $emails, role: $role) {
@@ -1568,6 +1640,10 @@ export const InviteUsersDocument = gql`
     }
   }
 `;
+
+export function useInviteUsersMutation() {
+  return Urql.useMutation<InviteUsersMutation, InviteUsersMutationVariables>(InviteUsersDocument);
+}
 export const AvailableOrganizationAdAccountsDocument = gql`
   query availableOrganizationAdAccounts($channel: IntegrationType!) {
     availableOrganizationAdAccounts(channel: $channel) {
@@ -1578,11 +1654,26 @@ export const AvailableOrganizationAdAccountsDocument = gql`
     }
   }
 `;
+
+export function useAvailableOrganizationAdAccountsQuery(
+  options: Omit<Urql.UseQueryArgs<AvailableOrganizationAdAccountsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<AvailableOrganizationAdAccountsQuery, AvailableOrganizationAdAccountsQueryVariables>({
+    query: AvailableOrganizationAdAccountsDocument,
+    ...options,
+  });
+}
 export const RemoveUserFromOrganizationDocument = gql`
   mutation removeUserFromOrganization($userId: String!) {
     removeUserFromOrganization(userId: $userId)
   }
 `;
+
+export function useRemoveUserFromOrganizationMutation() {
+  return Urql.useMutation<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
+    RemoveUserFromOrganizationDocument,
+  );
+}
 export const OrganizationAdAccountsDocument = gql`
   query organizationAdAccounts($channel: IntegrationType!) {
     organizationAdAccounts(channel: $channel) {
@@ -1592,6 +1683,15 @@ export const OrganizationAdAccountsDocument = gql`
     }
   }
 `;
+
+export function useOrganizationAdAccountsQuery(
+  options: Omit<Urql.UseQueryArgs<OrganizationAdAccountsQueryVariables>, 'query'>,
+) {
+  return Urql.useQuery<OrganizationAdAccountsQuery, OrganizationAdAccountsQueryVariables>({
+    query: OrganizationAdAccountsDocument,
+    ...options,
+  });
+}
 export const UpdateOrganizationAdAccountsDocument = gql`
   mutation updateOrganizationAdAccounts($adAccountIds: [String!]!, $channel: IntegrationType!) {
     updateOrganizationAdAccounts(adAccountIds: $adAccountIds, integrationType: $channel) {
@@ -1599,6 +1699,12 @@ export const UpdateOrganizationAdAccountsDocument = gql`
     }
   }
 `;
+
+export function useUpdateOrganizationAdAccountsMutation() {
+  return Urql.useMutation<UpdateOrganizationAdAccountsMutation, UpdateOrganizationAdAccountsMutationVariables>(
+    UpdateOrganizationAdAccountsDocument,
+  );
+}
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -1607,6 +1713,10 @@ export const UpdateUserDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
+
+export function useUpdateUserMutation() {
+  return Urql.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument);
+}
 export const MeDocument = gql`
   query me {
     me {
@@ -1615,227 +1725,7 @@ export const MeDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
-export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
-export function getSdk<C>(requester: Requester<C>) {
-  return {
-    adAccounts(variables?: AdAccountsQueryVariables, options?: C): Promise<AdAccountsQuery> {
-      return requester<AdAccountsQuery, AdAccountsQueryVariables>(
-        AdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<AdAccountsQuery>;
-    },
-    insights(variables: InsightsQueryVariables, options?: C): Promise<InsightsQuery> {
-      return requester<InsightsQuery, InsightsQueryVariables>(
-        InsightsDocument,
-        variables,
-        options,
-      ) as Promise<InsightsQuery>;
-    },
-    lastThreeMonthsAds(variables?: LastThreeMonthsAdsQueryVariables, options?: C): Promise<LastThreeMonthsAdsQuery> {
-      return requester<LastThreeMonthsAdsQuery, LastThreeMonthsAdsQueryVariables>(
-        LastThreeMonthsAdsDocument,
-        variables,
-        options,
-      ) as Promise<LastThreeMonthsAdsQuery>;
-    },
-    settingsChannels(variables?: SettingsChannelsQueryVariables, options?: C): Promise<SettingsChannelsQuery> {
-      return requester<SettingsChannelsQuery, SettingsChannelsQueryVariables>(
-        SettingsChannelsDocument,
-        variables,
-        options,
-      ) as Promise<SettingsChannelsQuery>;
-    },
-    integrations(variables?: IntegrationsQueryVariables, options?: C): Promise<IntegrationsQuery> {
-      return requester<IntegrationsQuery, IntegrationsQueryVariables>(
-        IntegrationsDocument,
-        variables,
-        options,
-      ) as Promise<IntegrationsQuery>;
-    },
-    deAuthIntegration(variables: DeAuthIntegrationMutationVariables, options?: C): Promise<DeAuthIntegrationMutation> {
-      return requester<DeAuthIntegrationMutation, DeAuthIntegrationMutationVariables>(
-        DeAuthIntegrationDocument,
-        variables,
-        options,
-      ) as Promise<DeAuthIntegrationMutation>;
-    },
-    channelInitialSetupProgress(
-      variables?: ChannelInitialSetupProgressSubscriptionVariables,
-      options?: C,
-    ): AsyncIterable<ChannelInitialSetupProgressSubscription> {
-      return requester<ChannelInitialSetupProgressSubscription, ChannelInitialSetupProgressSubscriptionVariables>(
-        ChannelInitialSetupProgressDocument,
-        variables,
-        options,
-      ) as AsyncIterable<ChannelInitialSetupProgressSubscription>;
-    },
-    login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
-      return requester<LoginMutation, LoginMutationVariables>(
-        LoginDocument,
-        variables,
-        options,
-      ) as Promise<LoginMutation>;
-    },
-    signup(variables: SignupMutationVariables, options?: C): Promise<SignupMutation> {
-      return requester<SignupMutation, SignupMutationVariables>(
-        SignupDocument,
-        variables,
-        options,
-      ) as Promise<SignupMutation>;
-    },
-    forgetPassword(variables: ForgetPasswordMutationVariables, options?: C): Promise<ForgetPasswordMutation> {
-      return requester<ForgetPasswordMutation, ForgetPasswordMutationVariables>(
-        ForgetPasswordDocument,
-        variables,
-        options,
-      ) as Promise<ForgetPasswordMutation>;
-    },
-    resetPassword(variables: ResetPasswordMutationVariables, options?: C): Promise<ResetPasswordMutation> {
-      return requester<ResetPasswordMutation, ResetPasswordMutationVariables>(
-        ResetPasswordDocument,
-        variables,
-        options,
-      ) as Promise<ResetPasswordMutation>;
-    },
-    refreshToken(variables?: RefreshTokenQueryVariables, options?: C): Promise<RefreshTokenQuery> {
-      return requester<RefreshTokenQuery, RefreshTokenQueryVariables>(
-        RefreshTokenDocument,
-        variables,
-        options,
-      ) as Promise<RefreshTokenQuery>;
-    },
-    resendEmailConfirmation(
-      variables?: ResendEmailConfirmationMutationVariables,
-      options?: C,
-    ): Promise<ResendEmailConfirmationMutation> {
-      return requester<ResendEmailConfirmationMutation, ResendEmailConfirmationMutationVariables>(
-        ResendEmailConfirmationDocument,
-        variables,
-        options,
-      ) as Promise<ResendEmailConfirmationMutation>;
-    },
-    loginProviders(variables?: LoginProvidersQueryVariables, options?: C): Promise<LoginProvidersQuery> {
-      return requester<LoginProvidersQuery, LoginProvidersQueryVariables>(
-        LoginProvidersDocument,
-        variables,
-        options,
-      ) as Promise<LoginProvidersQuery>;
-    },
-    getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
-      return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(
-        GetOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<GetOrganizationQuery>;
-    },
-    updateOrganizationUser(
-      variables: UpdateOrganizationUserMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationUserMutation> {
-      return requester<UpdateOrganizationUserMutation, UpdateOrganizationUserMutationVariables>(
-        UpdateOrganizationUserDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationUserMutation>;
-    },
-    createOrganization(
-      variables: CreateOrganizationMutationVariables,
-      options?: C,
-    ): Promise<CreateOrganizationMutation> {
-      return requester<CreateOrganizationMutation, CreateOrganizationMutationVariables>(
-        CreateOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<CreateOrganizationMutation>;
-    },
-    updateOrganization(
-      variables: UpdateOrganizationMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationMutation> {
-      return requester<UpdateOrganizationMutation, UpdateOrganizationMutationVariables>(
-        UpdateOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationMutation>;
-    },
-    switchOrganization(
-      variables: SwitchOrganizationMutationVariables,
-      options?: C,
-    ): Promise<SwitchOrganizationMutation> {
-      return requester<SwitchOrganizationMutation, SwitchOrganizationMutationVariables>(
-        SwitchOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<SwitchOrganizationMutation>;
-    },
-    deleteOrganization(
-      variables: DeleteOrganizationMutationVariables,
-      options?: C,
-    ): Promise<DeleteOrganizationMutation> {
-      return requester<DeleteOrganizationMutation, DeleteOrganizationMutationVariables>(
-        DeleteOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<DeleteOrganizationMutation>;
-    },
-    inviteUsers(variables: InviteUsersMutationVariables, options?: C): Promise<InviteUsersMutation> {
-      return requester<InviteUsersMutation, InviteUsersMutationVariables>(
-        InviteUsersDocument,
-        variables,
-        options,
-      ) as Promise<InviteUsersMutation>;
-    },
-    availableOrganizationAdAccounts(
-      variables: AvailableOrganizationAdAccountsQueryVariables,
-      options?: C,
-    ): Promise<AvailableOrganizationAdAccountsQuery> {
-      return requester<AvailableOrganizationAdAccountsQuery, AvailableOrganizationAdAccountsQueryVariables>(
-        AvailableOrganizationAdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<AvailableOrganizationAdAccountsQuery>;
-    },
-    removeUserFromOrganization(
-      variables: RemoveUserFromOrganizationMutationVariables,
-      options?: C,
-    ): Promise<RemoveUserFromOrganizationMutation> {
-      return requester<RemoveUserFromOrganizationMutation, RemoveUserFromOrganizationMutationVariables>(
-        RemoveUserFromOrganizationDocument,
-        variables,
-        options,
-      ) as Promise<RemoveUserFromOrganizationMutation>;
-    },
-    organizationAdAccounts(
-      variables: OrganizationAdAccountsQueryVariables,
-      options?: C,
-    ): Promise<OrganizationAdAccountsQuery> {
-      return requester<OrganizationAdAccountsQuery, OrganizationAdAccountsQueryVariables>(
-        OrganizationAdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<OrganizationAdAccountsQuery>;
-    },
-    updateOrganizationAdAccounts(
-      variables: UpdateOrganizationAdAccountsMutationVariables,
-      options?: C,
-    ): Promise<UpdateOrganizationAdAccountsMutation> {
-      return requester<UpdateOrganizationAdAccountsMutation, UpdateOrganizationAdAccountsMutationVariables>(
-        UpdateOrganizationAdAccountsDocument,
-        variables,
-        options,
-      ) as Promise<UpdateOrganizationAdAccountsMutation>;
-    },
-    updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
-      return requester<UpdateUserMutation, UpdateUserMutationVariables>(
-        UpdateUserDocument,
-        variables,
-        options,
-      ) as Promise<UpdateUserMutation>;
-    },
-    me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
-      return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
-    },
-  };
+
+export function useMeQuery(options?: Omit<Urql.UseQueryArgs<MeQueryVariables>, 'query'>) {
+  return Urql.useQuery<MeQuery, MeQueryVariables>({ query: MeDocument, ...options });
 }
-export type Sdk = ReturnType<typeof getSdk>;

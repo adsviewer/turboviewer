@@ -332,7 +332,6 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
     adIds: t.stringList({ required: false }),
     dateFrom: t.field({ type: 'Date', required: false }),
     dateTo: t.field({ type: 'Date', required: false }),
-    dataPointsPerInterval: t.int({ required: true, defaultValue: 3 }),
     devices: t.field({ type: [DeviceEnumDto], required: false }),
     groupBy: t.field({ type: [InsightsColumnsGroupByDto], required: false }),
     interval: t.field({ type: InsightsIntervalDto, required: true }),
@@ -355,6 +354,22 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
     positions: t.field({ type: [InsightsPositionDto], required: false }),
     publishers: t.field({ type: [PublisherEnumDto], required: false }),
   }),
+  validate: [
+    [
+      (args) => !(args.dateFrom && args.dateTo && args.dateFrom.getTime() > args.dateTo.getTime()),
+      { message: 'Date from should be less or equal to date to' },
+    ],
+    [
+      (args) =>
+        !(
+          args.dateFrom &&
+          args.dateTo &&
+          args.interval === 'day' &&
+          args.dateFrom.getTime() - args.dateTo.getTime() < 1000 * 60 * 60 * 24 * 90
+        ),
+      { message: 'Day intervals can not be more than 90 days' },
+    ],
+  ],
 });
 
 export const InsightsDatapointsInput = builder.inputType('InsightsDatapointsInput', {
@@ -386,9 +401,9 @@ export const getIntegrationStatus = (integration: Integration | undefined): Inte
     return IntegrationStatusEnum.Expired;
   if (
     (integration.refreshTokenExpiresAt &&
-      getDateDiffIn('day', integration.refreshTokenExpiresAt, new Date()) < EXPIRING_THRESHOLD_DAYS) ??
+      getDateDiffIn('day', new Date(), integration.refreshTokenExpiresAt) < EXPIRING_THRESHOLD_DAYS) ??
     (!integration.refreshTokenExpiresAt &&
-      getDateDiffIn('day', integration.accessTokenExpiresAt, new Date()) < EXPIRING_THRESHOLD_DAYS)
+      getDateDiffIn('day', new Date(), integration.accessTokenExpiresAt) < EXPIRING_THRESHOLD_DAYS)
   )
     return IntegrationStatusEnum.Expiring;
   return IntegrationStatusEnum.Connected;

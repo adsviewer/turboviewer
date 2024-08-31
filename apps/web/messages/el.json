@@ -15,7 +15,8 @@
     "roleOrgAdmin": "Διαχειριστής Οργάνωσης",
     "roleAdmin": "Διαχειριστής",
     "roleOperator": "Χειριστής",
-    "roleMember": "Μέλος"
+    "roleMember": "Μέλος",
+    "pickDateRange": "Επιλέξτε ένα εύρος ημερομηνιών"
   },
   "errors": {
     "errorPageTitle": "Μόλις συνέβη κάτι κακό...",
@@ -35,6 +36,7 @@
     "insight": "Διορατικότητα",
     "pageSize": "Μέγεθος σελίδας",
     "orderBy": "Ταξινόμηση",
+    "timeConstraints": "Χρονικοί Περιορισμοί",
     "spent": "Δαπάνες",
     "impressions": "Εμφανίσεις",
     "relative": "Σχετικό",

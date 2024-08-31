@@ -1,9 +1,33 @@
 import * as changeCase from 'change-case';
-import { type IntervalType, isDateWithinInterval } from '@repo/utils';
+import { getCalendarDateDiffIn, type IntervalType, isDateWithinInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
   type InsightsDatapointsInputType,
 } from '../schema/integrations/integration-types';
+
+export const calculateDataPointsPerInterval = (
+  dateFrom: Date | null | undefined,
+  dateTo: Date | null | undefined,
+  interval: IntervalType,
+  locale: string,
+): number => {
+  if (!dateFrom) {
+    switch (interval) {
+      case 'week':
+        return 3;
+      case 'month':
+        return 3;
+      case 'quarter':
+        return 3;
+      case 'day':
+        return 28;
+      default:
+        return 3;
+    }
+  }
+  const newDateTo = dateTo ?? new Date();
+  return Math.ceil(getCalendarDateDiffIn(interval, dateFrom, newDateTo, locale));
+};
 
 export const getInsightsDateFrom = (
   dateFrom: Date | undefined | null,
@@ -22,15 +46,14 @@ export const getInsightsDateFrom = (
     return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom.toISOString()}')`;
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
-  if (isDateWithinInterval(dateFrom!, interval, dateTo!, dataPointsPerInterval)) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
-    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
-  return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom!.toISOString()}')`;
+  return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
 };
 
-export const getOrganizationalInsights = (organizationId: string, filter: FilterInsightsInputType): string =>
+export const getOrganizationalInsights = (
+  organizationId: string,
+  filter: FilterInsightsInputType,
+  dataPointsPerInterval: number,
+): string =>
   `organization_insights AS (SELECT i.*
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
@@ -39,7 +62,7 @@ export const getOrganizationalInsights = (organizationId: string, filter: Filter
                                               WHERE ao."B" = '${organizationId}'
                                                 ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
-                                                ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, filter.dataPointsPerInterval, filter.interval)}
+                                                ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, dataPointsPerInterval, filter.interval)}
                                                 ${filter.dateTo ? `AND i.date < TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
                                                 ${filter.devices ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.positions ? `AND i.position IN (${filter.positions.map((i) => `'${i}'`).join(', ')})` : ''}
@@ -133,7 +156,8 @@ export const orderColumnTrendAbsolute = (
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
 
-export const groupedInsights = (args: FilterInsightsInputType, organizationId: string) => {
+export const groupedInsights = (args: FilterInsightsInputType, organizationId: string, locale: string) => {
+  const dataPointsPerInterval = calculateDataPointsPerInterval(args.dateFrom, args.dateTo, args.interval, locale);
   const groupBy = [...(args.groupBy ?? []), 'currency'];
   const orderBy = getOrderByColumn(args.orderBy);
   const isRelative = args.orderBy === 'spend_rel' || args.orderBy === 'impressions_rel' || args.orderBy === 'cpm_rel';
@@ -143,13 +167,13 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   const offset = (args.page - 1) * args.pageSize;
   const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
 
-  const sql = `WITH ${getOrganizationalInsights(organizationId, args)}, 
+  const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)}, 
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
-  WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(args.dataPointsPerInterval)} ${args.interval}')
+  WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(dataPointsPerInterval)} ${args.interval}')
     AND i.date < DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
   ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;

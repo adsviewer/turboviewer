@@ -67,7 +67,7 @@ builder.queryFields((t) => ({
       const groupBy: InsightScalarFieldEnum[] = [...(args.filter.groupBy ?? []), 'currency'];
 
       const insightsRaw: Record<string, never>[] = await prisma.$queryRawUnsafe(
-        groupedInsights(args.filter, ctx.organizationId),
+        groupedInsights(args.filter, ctx.organizationId, ctx.acceptedLocale),
       );
       const insightsTransformed = insightsRaw.map((obj) => {
         const newObj: Record<string, never> = {};
