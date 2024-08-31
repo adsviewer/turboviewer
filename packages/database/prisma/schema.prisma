@@ -207,7 +207,7 @@ model Ad {
 
 model LandingPageSupportMessage {
   id        String   @id @default(cuid())
-  email     String
+  email     String   @db.Citext
   fullName  String   @map("full_name")
   phone     String?
   subject   String
@@ -220,7 +220,7 @@ model LandingPageSupportMessage {
 
 model NewsletterSubscription {
   id        String   @id @default(cuid())
-  email     String   @unique
+  email     String   @unique @db.Citext
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access -- keep things simple */
-/* eslint-disable @typescript-eslint/no-unsafe-call -- keep things simple */
-
 'use client';
+
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type ReactNode } from 'react';
@@ -14,8 +12,7 @@ import { env } from '@/env.mjs';
 function Footer(): ReactNode {
   const t = useTranslations('footer');
 
-  // @ts-expect-error -- keep things simple
-  const submitForm = (e): void => {
+  const submitForm = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     const email = document.getElementById('email-newsletter') as HTMLInputElement;
     const graphqlBody = JSON.stringify({

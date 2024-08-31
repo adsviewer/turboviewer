@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument -- keep things simple */
-/* eslint-disable @typescript-eslint/no-unsafe-call -- keep things simple */
-/* eslint-disable prefer-template -- keep things simple */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access -- keep things simple */
 'use client';
+
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import React, { type ReactNode, useEffect, useState } from 'react';
@@ -26,23 +23,17 @@ function Contact(): ReactNode {
     return null;
   }
 
-  // @ts-expect-error -- keep things simple
-  const submitForm = (e): void => {
+  const submitForm = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    const data = new FormData(e.target);
+    const data = new FormData(e.currentTarget);
     const graphqlBody = JSON.stringify({
-      query:
-        'mutation sendLandingPageSupportMessage {\n  sendLandingPageSupportMessage(args: {\n    email:"' +
-        String(data.get('email')) +
-        '",\n  fullName: "' +
-        String(data.get('fullName')) +
-        '", phone:"' +
-        String(data.get('phone')) +
-        '", message:"' +
-        String(data.get('message')) +
-        '", subject:"' +
-        String(data.get('subject')) +
-        '"\n    \n  }){\n    id\n  }\n}',
+      query: `mutation {sendLandingPageSupportMessage(args: {
+      email:"${String(data.get('email'))}", 
+      fullName: "${String(data.get('fullName'))}", 
+      phone:"${String(data.get('phone'))}", 
+      message:"${String(data.get('message'))}", 
+      subject:"${String(data.get('subject'))}"
+      }){id}}`,
       variables: {},
     });
 
