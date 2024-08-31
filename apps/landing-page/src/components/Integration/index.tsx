@@ -32,8 +32,9 @@ function Integration(): ReactNode {
             alt="Dotted"
             className="dark:hidden"
             style={{ position: 'static' }}
+            priority
           />
-          <Image fill src="/images/shape/shape-dotted-dark.svg" alt="Dotted" className="hidden dark:block" />
+          <Image fill src="/images/shape/shape-dotted-dark.svg" alt="Dotted" className="hidden dark:block" priority />
         </div>
 
         {/* Brands container row 1 */}

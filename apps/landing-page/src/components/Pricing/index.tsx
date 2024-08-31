@@ -24,7 +24,7 @@ function Pricing(): ReactNode {
 
       <div className="relative mx-auto mt-15 max-w-[1207px] px-4 md:px-8 xl:mt-20 xl:px-0">
         <div className="absolute -bottom-15 -z-1 h-full w-full">
-          <Image fill src="./images/shape/shape-dotted-light.svg" alt="Dotted" className="dark:hidden" />
+          <Image fill src="./images/shape/shape-dotted-light.svg" alt="Dotted" className="dark:hidden" priority />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7.5 xl:gap-12.5">
           {/* Pricing Item */}
