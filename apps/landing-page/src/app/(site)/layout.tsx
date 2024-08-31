@@ -22,7 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`dark:bg-black ${inter.className}`}>
-        <ThemeProvider enableSystem={false} attribute="class" defaultTheme="light">
+        <ThemeProvider enableSystem attribute="class">
           <NextIntlClientProvider messages={messages}>
             <Lines />
             <Header />

@@ -407,6 +407,9 @@ importers:
 
   apps/landing-page:
     dependencies:
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui

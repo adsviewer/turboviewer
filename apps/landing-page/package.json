@@ -14,6 +14,7 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@repo/logger": "workspace:*",
     "@repo/ui": "workspace:*",
     "framer-motion": "^11.3.21",
     "next": "^14.2.5",
