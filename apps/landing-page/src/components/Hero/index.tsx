@@ -23,7 +23,7 @@ function Hero(): ReactNode {
                 {t('title2ndLine')}
               </span>
             </h1>
-            <h5 className="mb-4.5 text-lg font-medium text-black dark:text-white">💡 {t('body')}</h5>
+            <p className="mb-4.5 text-lg font-medium text-black dark:text-white">💡 {t('body')}</p>
             <p>{t('body2ndLine')}</p>
 
             <div className="mt-10">
