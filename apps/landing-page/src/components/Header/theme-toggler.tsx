@@ -25,23 +25,23 @@ function ThemeToggler(): ReactNode {
       <Image
         src="/images/icon/icon-moon.svg"
         alt="logo"
-        width={21}
-        height={21}
-        className={theme === 'dark' ? 'block' : 'hidden'}
+        width={22}
+        height={22}
+        className={theme === 'light' ? 'block' : 'hidden'}
       />
       <Image
         src="/images/icon/icon-sun.svg"
         alt="logo"
         width={22}
         height={22}
-        className={theme === 'light' ? 'block' : 'hidden'}
+        className={theme === 'system' ? 'block' : 'hidden'}
       />
       <Image
         src="/images/icon/icon-auto.svg"
         alt="logo"
-        width={21}
+        width={22}
         height={22}
-        className={theme === 'system' ? 'block' : 'hidden'}
+        className={theme === 'dark' ? 'block' : 'hidden'}
       />
     </button>
   );
