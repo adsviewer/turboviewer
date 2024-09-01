@@ -9,7 +9,7 @@
     "test": "turbo test",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
-    "update": "pnpm update --latest && pnpm i && turbo update --concurrency=1 && pnpm install",
+    "update": "pnpm update --latest && pnpm i",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prettier": "prettier --check \"**/*.{ts,tsx,md}\"",
     "lint-staged": "lint-staged --no-hide-partially-staged",
