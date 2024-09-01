@@ -18,9 +18,9 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@sentry/cli": "^2.33.1",
-    "@types/aws-lambda": "^8.10.142",
-    "@types/node": "22.1.0",
+    "@sentry/cli": "^2.34.1",
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "22.5.1",
     "typescript": "5.5.4"
   },
   "dependencies": {
@@ -29,8 +29,8 @@
     "@repo/lambda-utils": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
-    "@sentry/aws-serverless": "^8.22.0",
-    "@sentry/profiling-node": "^8.22.0",
+    "@sentry/aws-serverless": "^8.27.0",
+    "@sentry/profiling-node": "^8.27.0",
     "zod": "^3.23.8"
   }
 }
