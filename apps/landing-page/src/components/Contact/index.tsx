@@ -112,6 +112,7 @@ function Contact(): ReactNode {
 
                   <input
                     id="email-send-msg"
+                    autoComplete="email"
                     name="email"
                     type="email"
                     placeholder={`${t('email')} *`}
@@ -131,6 +132,7 @@ function Contact(): ReactNode {
 
                   <input
                     id="phone-send-msg"
+                    autoComplete="tel"
                     name="phone"
                     type="text"
                     placeholder={t('phoneNumber')}

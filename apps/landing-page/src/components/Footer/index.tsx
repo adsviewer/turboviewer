@@ -180,6 +180,7 @@ function Footer(): ReactNode {
                 <form action="/">
                   <div className="relative">
                     <input
+                      autoComplete="email"
                       id="email-newsletter"
                       name="email"
                       type="text"
