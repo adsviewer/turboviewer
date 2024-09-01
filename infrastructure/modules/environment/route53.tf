@@ -132,6 +132,6 @@ resource "aws_route53_record" "dmarc" {
   type    = "TXT"
   ttl     = "300"
   records = [
-    "v=DMARC1;p=quarantine;rua=mailto:tech@adsviewer.io;pct=100"
+    "v=DMARC1;p=quarantine;rua=mailto:no-email@adsviewer.io;pct=100"
   ]
 }
