@@ -6,6 +6,7 @@ A bunch of cool staff for viewing, optimizing and growing your digital ad portfo
 
 ### Prerequisites
 
+- MacOS or Linux (Windows and/or WSL are **not** supported)
 - [postgres](https://www.postgresql.org/download/)
 - [pnpm](https://pnpm.io/installation)
 - [redis-cli](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
