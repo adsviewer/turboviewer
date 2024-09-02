@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { env } from '@/env.mjs';
 import SectionHeader from '../Common/section-header';
 
 function Pricing(): ReactNode {
@@ -64,7 +65,8 @@ function Pricing(): ReactNode {
               aria-label={`${t('contactUsPricing')} button`}
               className="group/btn inline-flex items-center gap-2.5 font-medium text-primary transition-all duration-300 dark:text-white dark:hover:text-primary mt-auto"
             >
-              <Link className="duration-300 group-hover/btn:pr-2" href="https://app.adsviewer.io/sign-up">
+              {/* eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- use env */}
+              <Link className="duration-300 group-hover/btn:pr-2" href={`${env.NEXT_PUBLIC_WEBAPP_ENDPOINT}/sign-up`}>
                 Get Started
               </Link>
               <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
@@ -115,7 +117,8 @@ function Pricing(): ReactNode {
               aria-label={`${t('contactUsPricing')} button`}
               className="group/btn inline-flex items-center gap-2.5 font-medium text-primary transition-all duration-300 dark:text-white dark:hover:text-primary mt-auto"
             >
-              <Link className="duration-300 group-hover/btn:pr-2" href="https://app.adsviewer.io/sign-up">
+              {/* eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- use env */}
+              <Link className="duration-300 group-hover/btn:pr-2" href={`${env.NEXT_PUBLIC_WEBAPP_ENDPOINT}/sign-up`}>
                 Get Started
               </Link>
               <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
@@ -166,7 +169,8 @@ function Pricing(): ReactNode {
               aria-label={`${t('contactUsPricing')} button`}
               className="group/btn inline-flex items-center gap-2.5 font-medium text-primary transition-all duration-300 dark:text-white dark:hover:text-primary mt-auto"
             >
-              <Link className="duration-300 group-hover/btn:pr-2" href="https://app.adsviewer.io/sign-up">
+              {/* eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- use env */}
+              <Link className="duration-300 group-hover/btn:pr-2" href={`${env.NEXT_PUBLIC_WEBAPP_ENDPOINT}/sign-up`}>
                 Get Started
               </Link>
               <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
