@@ -224,7 +224,7 @@ function Contact(): ReactNode {
 
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('ourLocation')}</h3>
-                <p>{t('address')}</p>
+                The Netherlands
               </div>
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
@@ -232,12 +232,12 @@ function Contact(): ReactNode {
                   <a href="/">hello@adsviewer.io</a>
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <h4 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">Phone Number</h4>
                 <p>
                   <a href="/">+31 652 43 37 49</a>
                 </p>
-              </div>
+              </div> */}
             </motion.div>
           </div>
         </div>
