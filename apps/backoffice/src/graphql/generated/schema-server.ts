@@ -586,7 +586,6 @@ export type MutationCreateInvitationLinkArgs = {
 
 export type MutationCreateOrganizationArgs = {
   name: Scalars['String']['input'];
-  users?: InputMaybe<Array<UserRolesInput>>;
 };
 
 export type MutationDeAuthIntegrationArgs = {
@@ -880,11 +879,6 @@ export enum UserOrganizationStatus {
   ACTIVE = 'ACTIVE',
   INVITED = 'INVITED',
 }
-
-export type UserRolesInput = {
-  role: OrganizationRoleEnum;
-  userId: Scalars['String']['input'];
-};
 
 export enum UserStatus {
   EMAIL_UNCONFIRMED = 'EMAIL_UNCONFIRMED',

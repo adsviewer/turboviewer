@@ -554,14 +554,7 @@ type Mutation {
   Creates a link for the signed in org for a specific role
   """
   createInvitationLink(role: OrganizationRoleEnum!): String!
-  createOrganization(
-    name: String!
-
-    """
-    Users should already be active in the parent organization (if there is a parent). This list should not include the caller, the caller will automatically be added as administrator.
-    """
-    users: [UserRolesInput!]
-  ): Organization!
+  createOrganization(name: String!): Organization!
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
 
   """
@@ -782,11 +775,6 @@ type UserOrganization {
 enum UserOrganizationStatus {
   ACTIVE
   INVITED
-}
-
-input UserRolesInput {
-  role: OrganizationRoleEnum!
-  userId: String!
 }
 
 enum UserStatus {
