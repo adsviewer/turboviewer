@@ -6,6 +6,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { cx } from '@repo/ui/tailwind-utils';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
+import { env } from '@/env.mjs';
 import menuData from './menu-data';
 
 // Lazy load theme toggler
@@ -165,7 +166,7 @@ function Header(): ReactNode {
           <div className="mt-7 flex items-center gap-6 xl:mt-0">
             <ThemeToggler />
             <Link
-              href="https://app.adsviewer.io/sign-up"
+              href={`${env.NEXT_PUBLIC_WEBAPP_ENDPOINT}/sign-up`}
               className="flex items-center justify-center rounded-full bg-primary px-7.5 py-2.5 text-regular text-white duration-300 ease-in-out hover:bg-primaryho"
             >
               {t('getPro')}
