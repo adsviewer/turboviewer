@@ -1117,6 +1117,7 @@ export type UpdateOrganizationUserMutation = {
 
 export type CreateOrganizationMutationVariables = Exact<{
   name: Scalars['String']['input'];
+  users?: InputMaybe<Array<UserRolesInput> | UserRolesInput>;
 }>;
 
 export type CreateOrganizationMutation = {
@@ -1537,8 +1538,8 @@ export const UpdateOrganizationUserDocument = gql`
   }
 `;
 export const CreateOrganizationDocument = gql`
-  mutation createOrganization($name: String!) {
-    createOrganization(name: $name) {
+  mutation createOrganization($name: String!, $users: [UserRolesInput!]) {
+    createOrganization(name: $name, users: $users) {
       id
       name
     }
