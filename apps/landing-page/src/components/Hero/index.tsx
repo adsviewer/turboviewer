@@ -2,13 +2,17 @@
 import Image from 'next/image';
 import { type FormEvent, type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { env } from '@/env.mjs';
 
 function Hero(): ReactNode {
   const [email, setEmail] = useState('');
   const t = useTranslations('hero');
+  const router = useRouter();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
+    router.push(`${env.NEXT_PUBLIC_WEBAPP_ENDPOINT}/sign-up?email=${email}`);
   };
 
   return (
