@@ -222,10 +222,10 @@ function Contact(): ReactNode {
                 {t('findUs')}
               </h2>
 
-              {/* <div className="5 mb-7">
+              <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('ourLocation')}</h3>
-                <p>{t('address')}</p>
-              </div> */}
+                The Netherlands
+              </div>
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
                 <p>
