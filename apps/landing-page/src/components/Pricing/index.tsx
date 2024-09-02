@@ -115,8 +115,8 @@ function Pricing(): ReactNode {
               aria-label={`${t('contactUsPricing')} button`}
               className="group/btn inline-flex items-center gap-2.5 font-medium text-primary transition-all duration-300 dark:text-white dark:hover:text-primary mt-auto"
             >
-              <Link className="duration-300 group-hover/btn:pr-2" href="/#support">
-                {t('contactUsPricing')}
+              <Link className="duration-300 group-hover/btn:pr-2" href="https://app.adsviewer.io/sign-up">
+                Get Started
               </Link>
               <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -166,8 +166,8 @@ function Pricing(): ReactNode {
               aria-label={`${t('contactUsPricing')} button`}
               className="group/btn inline-flex items-center gap-2.5 font-medium text-primary transition-all duration-300 dark:text-white dark:hover:text-primary mt-auto"
             >
-              <Link className="duration-300 group-hover/btn:pr-2" href="/#support">
-                {t('contactUsPricing')}
+              <Link className="duration-300 group-hover/btn:pr-2" href="https://app.adsviewer.io/sign-up">
+                Get Started
               </Link>
               <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
                 <path
