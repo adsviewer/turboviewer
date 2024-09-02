@@ -43,7 +43,7 @@ resource "aws_route53_record" "website_a" {
   name    = ""
   type    = "A"
   ttl     = "300"
-  records = ["168.119.246.178"]
+  records = ["76.76.21.21"]
 }
 
 resource "aws_route53_record" "website_www" {
