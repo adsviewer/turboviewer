@@ -86,10 +86,3 @@ export const inviteLinkDto = builder.simpleObject('InviteLinks', {
     role: t.field({ type: OrganizationRoleEnumDto, nullable: false }),
   }),
 });
-
-export const UserRolesInput = builder.inputType('UserRolesInput', {
-  fields: (t) => ({
-    userId: t.string({ required: true }),
-    role: t.field({ type: OrganizationRoleEnumDto, required: true }),
-  }),
-});

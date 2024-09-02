@@ -25,8 +25,8 @@ mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
   }
 }
 
-mutation createOrganization($name: String!, $users: [UserRolesInput!]) {
-  createOrganization(name: $name, users: $users) {
+mutation createOrganization($name: String!) {
+  createOrganization(name: $name) {
     id
     name
   }

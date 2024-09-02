@@ -128,41 +128,6 @@ export const sendOrganizationInviteConfirmEmail = async (data: InviteEmailData) 
   logger.info(JSON.stringify(command));
 };
 
-export const sendOrganizationAddedEmail = async (
-  email: string,
-  organizationName: string,
-  firstName?: string,
-  lastName?: string,
-) => {
-  logger.info(`Inform user ${email} that has been added to ${organizationName}`);
-  const command = await client
-    .send(
-      new SendEmailCommand({
-        Destination: {
-          ToAddresses: [email],
-        },
-        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
-        Message: {
-          Subject: {
-            Data: 'You have been added to an AdsViewer organization!',
-          },
-          Body: {
-            Html: {
-              Data: `<p>${[
-                `Hi${firstName ? ` ${firstName}` : ''}${lastName ? ` ${lastName}` : ''},`,
-                `You have been added to ${organizationName} organization.`,
-              ].join('<br />')}</p>`,
-            },
-          },
-        },
-      }),
-    )
-    .catch((err: unknown) => {
-      logger.error(err);
-    });
-  logger.info(JSON.stringify(command));
-};
-
 export const sendNewLandingPageSupportMessageEmail = async (data: LandingPageSupportMessageInputType) => {
   logger.info(`New landing page support message from ${data.email}`);
   const command = await client
