@@ -31,7 +31,7 @@ A bunch of cool staff for viewing, optimizing and growing your digital ad portfo
    ```
 
 6. Run `pnpm i`
-7. `pnpm run dev`
+7. `pnpm dev`
 8. Open [http://localhost:3000](http://localhost:3000)
 
 ### Configuring aws-cli
@@ -52,4 +52,4 @@ the `~/.aws/credentials` file.
 
 The credentials that you generated above will expire every 12 hours. In order to refresh them you need to repeat the
 process. On the flip side, very few features require aws services to be run locally (sending emails on forget password
-flow, or ads ingress are some examples).
+flow is an example).
