@@ -12,6 +12,7 @@ import { useAtomValue } from 'jotai';
 import { type CreateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
 import { createAndSwitchOrganization } from '@/app/(authenticated)/organization/actions';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import AddUsersModal from './add-users-modal';
 
 export default function CreateOrganizationButton(): ReactNode {
   const t = useTranslations('organization');
@@ -23,6 +24,7 @@ export default function CreateOrganizationButton(): ReactNode {
     mode: 'controlled',
     initialValues: {
       name: '',
+      users: [],
     },
   });
 
@@ -63,7 +65,7 @@ export default function CreateOrganizationButton(): ReactNode {
         </ActionIcon>
       </Tooltip>
 
-      {/* Modal */}
+      {/* Create Org Modal */}
       <Modal opened={opened} onClose={closeModal} title={t('createOrganization')} size="md" centered>
         <form
           onSubmit={form.onSubmit((values) => {
@@ -81,8 +83,10 @@ export default function CreateOrganizationButton(): ReactNode {
               disabled={isPending}
             />
           </Flex>
+          <AddUsersModal />
+
           <Flex>
-            <Button type="submit" my="md" disabled={isPending || !form.isDirty()}>
+            <Button type="submit" disabled={isPending || !form.isDirty()}>
               {t('submit')}
             </Button>
           </Flex>

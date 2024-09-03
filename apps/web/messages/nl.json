@@ -11,12 +11,14 @@
     "submit": "Verzenden",
     "remove": "Verwijderen",
     "refresh": "Vernieuwen",
+    "user": "Gebruiker",
     "role": "Rol",
     "roleOrgAdmin": "Organisatiebeheerder",
     "roleAdmin": "Beheerder",
     "roleOperator": "Bediende",
     "roleMember": "Lid",
-    "pickDateRange": "Kies een datumbereik"
+    "pickDateRange": "Kies een datumbereik",
+    "add": "Toevoegen"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -136,6 +138,8 @@
     "deleteOrganization": "Organisatie verwijderen",
     "inviteUsers": "Nodig gebruikers uit",
     "invite": "Uitnodiging",
+    "addUsers": "Gebruikers toevoegen",
+    "addUsersHint": "Voeg gebruikers uit de huidige organisatie toe aan uw nieuwe organisatie en wijs ze nieuwe rollen toe!",
     "enterEmails": "E-mailadres(sen)",
     "delete": "Verwijderen",
     "deleteTip": "Om te bevestigen typt u \"DELETE\" in het onderstaande vak.",
