@@ -20,6 +20,13 @@ generator pothos {
   provider = "prisma-pothos-types"
 }
 
+enum Tier {
+  Launch
+  Build
+  Grow
+  Scale
+}
+
 model Organization {
   id           String   @id @default(cuid())
   name         String
@@ -28,6 +35,7 @@ model Organization {
   randomString String   @default(cuid())
   domain       String?  @unique
   parentId     String?  @map("parent_id")
+  tier         Tier     @default(Launch)
 
   integrations    Integration[]
   users           UserOrganization[]

@@ -616,6 +616,7 @@ type Organization {
   isRoot: Boolean!
   name: String!
   parentId: String
+  tier: tier!
   updatedAt: Date!
   userOrganizations: [UserOrganization!]!
 }
@@ -790,4 +791,11 @@ type ZodError implements Error {
 type ZodFieldError {
   message: String!
   path: [String!]!
+}
+
+enum tier {
+  Launch
+  Build
+  Grow
+  Scale
 }

@@ -21,6 +21,11 @@ export const OrganizationDto = builder.prismaObject('Organization', {
     userOrganizations: t.relation('users', { nullable: false }),
     integrations: t.relation('integrations', { nullable: false }),
     adAccounts: t.relation('adAccounts', { nullable: false }),
+    tier: t.field({
+      type: tierEnum,
+      nullable: false,
+      resolve: (organization) => organization.tier,
+    }),
     isRoot: t.boolean({
       nullable: false,
       resolve: (root, _args, _ctx) => root.parentId === null,
@@ -85,4 +90,13 @@ export const inviteLinkDto = builder.simpleObject('InviteLinks', {
     url: t.string({ nullable: false }),
     role: t.field({ type: OrganizationRoleEnumDto, nullable: false }),
   }),
+});
+
+export const tierEnum = builder.enumType('tier', {
+  values: {
+    Launch: { value: 'Launch' },
+    Build: { value: 'Build' },
+    Grow: { value: 'Grow' },
+    Scale: { value: 'Scale' },
+  },
 });

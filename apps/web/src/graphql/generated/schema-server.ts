@@ -712,6 +712,7 @@ export type Organization = {
   isRoot: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   parentId?: Maybe<Scalars['String']['output']>;
+  tier: Tier;
   updatedAt: Scalars['Date']['output'];
   userOrganizations: Array<UserOrganization>;
 };
@@ -896,6 +897,13 @@ export type ZodFieldError = {
   message: Scalars['String']['output'];
   path: Array<Scalars['String']['output']>;
 };
+
+export enum Tier {
+  Launch = 'Launch',
+  Build = 'Build',
+  Grow = 'Grow',
+  Scale = 'Scale',
+}
 
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
