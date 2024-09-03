@@ -830,6 +830,13 @@ export type Subscription = {
   channelInitialSetupProgress: ChannelInitialProgressPayload;
 };
 
+export enum Tier {
+  Launch = 'Launch',
+  Build = 'Build',
+  Grow = 'Grow',
+  Scale = 'Scale',
+}
+
 export type TokenDto = {
   __typename: 'TokenDto';
   refreshToken: Scalars['String']['output'];
@@ -897,13 +904,6 @@ export type ZodFieldError = {
   message: Scalars['String']['output'];
   path: Array<Scalars['String']['output']>;
 };
-
-export enum Tier {
-  Launch = 'Launch',
-  Build = 'Build',
-  Grow = 'Grow',
-  Scale = 'Scale',
-}
 
 export type GetOrganizationsQueryVariables = Exact<{ [key: string]: never }>;
 

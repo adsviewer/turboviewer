@@ -616,7 +616,7 @@ type Organization {
   isRoot: Boolean!
   name: String!
   parentId: String
-  tier: tier!
+  tier: Tier!
   updatedAt: Date!
   userOrganizations: [UserOrganization!]!
 }
@@ -714,6 +714,13 @@ type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
 }
 
+enum Tier {
+  Launch
+  Build
+  Grow
+  Scale
+}
+
 type TokenDto {
   refreshToken: String!
   token: String!
@@ -791,11 +798,4 @@ type ZodError implements Error {
 type ZodFieldError {
   message: String!
   path: [String!]!
-}
-
-enum tier {
-  Launch
-  Build
-  Grow
-  Scale
 }
