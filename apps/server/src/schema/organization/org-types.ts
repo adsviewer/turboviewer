@@ -81,7 +81,7 @@ export const InviteUsersErrorsDto = builder.objectType(InviteUsersErrors, {
   }),
 });
 
-export const inviteLinkDto = builder.simpleObject('InviteLinks', {
+export const InviteLinkDto = builder.simpleObject('InviteLinks', {
   fields: (t) => ({
     url: t.string({ nullable: false }),
     role: t.field({ type: OrganizationRoleEnumDto, nullable: false }),

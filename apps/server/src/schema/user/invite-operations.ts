@@ -21,7 +21,7 @@ import {
   setConfirmInvitedUserRedis,
 } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
-import { inviteLinkDto, InviteUsersErrors, OrganizationRoleEnumDto } from '../organization/org-types';
+import { InviteLinkDto, InviteUsersErrors, OrganizationRoleEnumDto } from '../organization/org-types';
 import { env } from '../../config';
 import { sendOrganizationInviteConfirmEmail } from '../../email';
 import { validateEmail } from '../../emailable-helper';
@@ -48,7 +48,7 @@ builder.queryFields((t) => ({
   }),
 
   inviteLinks: t.withAuth({ isInOrg: true, isOrgOperator: true }).field({
-    type: [inviteLinkDto],
+    type: [InviteLinkDto],
     nullable: false,
     description: 'Returns the invitation links for the signed in org',
     resolve: async (_root, _args, ctx, _info) => {
