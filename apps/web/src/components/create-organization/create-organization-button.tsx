@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from '@mantine/form';
 import { logger } from '@repo/logger';
 import { useAtomValue } from 'jotai';
-import { type CreateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
+import { type UserRolesInput, type CreateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
 import { createAndSwitchOrganization } from '@/app/(authenticated)/organization/actions';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import AddUsersModal from './add-users-modal';
@@ -20,7 +20,7 @@ export default function CreateOrganizationButton(): ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const form = useForm({
+  const form = useForm<CreateOrganizationMutationVariables>({
     mode: 'controlled',
     initialValues: {
       name: '',
@@ -28,15 +28,34 @@ export default function CreateOrganizationButton(): ReactNode {
     },
   });
 
+  const updateSelectedUsers = (newUsers: UserRolesInput[]): void => {
+    let newUsersFiltered: UserRolesInput[] = [];
+    for (const user of newUsers) {
+      if (user.userId)
+        newUsersFiltered = [
+          ...newUsersFiltered,
+          {
+            userId: user.userId,
+            role: user.role,
+          },
+        ];
+    }
+    form.setValues({ users: newUsersFiltered });
+  };
+
   const handleSubmit = (values: CreateOrganizationMutationVariables): void => {
     setIsPending(true);
 
-    void createAndSwitchOrganization(values).then((success) => {
-      if (!success) {
-        logger.error(success);
-      }
-      window.location.reload();
-    });
+    void createAndSwitchOrganization(values)
+      .then((success) => {
+        if (!success) {
+          logger.error(success);
+        }
+        window.location.reload();
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      });
   };
 
   const closeModal = (): void => {
@@ -83,10 +102,10 @@ export default function CreateOrganizationButton(): ReactNode {
               disabled={isPending}
             />
           </Flex>
-          <AddUsersModal />
+          <AddUsersModal setNewUsers={updateSelectedUsers} />
 
           <Flex>
-            <Button type="submit" disabled={isPending || !form.isDirty()}>
+            <Button type="submit" disabled={isPending || !form.isDirty() || !form.values.name}>
               {t('submit')}
             </Button>
           </Flex>

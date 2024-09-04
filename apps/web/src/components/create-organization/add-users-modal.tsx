@@ -5,9 +5,13 @@ import { IconUserPlus } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState, type ReactNode } from 'react';
-import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
+import { OrganizationRoleEnum, type UserRolesInput } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import getOrganization from '@/app/(authenticated)/organization/actions';
+
+interface PropsType {
+  setNewUsers: (users: UserRolesInput[]) => void;
+}
 
 interface SelectedUsersType {
   role: OrganizationRoleEnum;
@@ -27,7 +31,7 @@ const INITIAL_USER_VALUE = {
   key: 0,
 };
 
-export default function AddUsersModal(): ReactNode {
+export default function AddUsersModal(props: PropsType): ReactNode {
   const t = useTranslations('organization');
   const tGeneric = useTranslations('generic');
   const tProfile = useTranslations('profile');
@@ -77,27 +81,11 @@ export default function AddUsersModal(): ReactNode {
 
   const closeModal = (): void => {
     close();
-    // form.reset();
-  };
-
-  const resetUsers = (): void => {
-    setUsers([]);
-    if (organization) {
-      setAvailableUsers(
-        organization.organization.userOrganizations.map((userData) => {
-          return {
-            label: `${userData.user.firstName} ${userData.user.lastName}`,
-            value: userData.userId,
-            disabled: false,
-          };
-        }),
-      );
-    }
   };
 
   const handleSubmit = (): void => {
+    props.setNewUsers(users as UserRolesInput[]);
     closeModal();
-    resetUsers();
   };
 
   const addUser = (): void => {
@@ -182,6 +170,7 @@ export default function AddUsersModal(): ReactNode {
                       <Flex gap="md" mt={10} align="center" key={userData.key}>
                         <Select
                           data={availableUsers}
+                          value={userData.userId ? userData.userId : null}
                           description={tGeneric('user')}
                           placeholder={tGeneric('user')}
                           allowDeselect={false}
@@ -214,7 +203,7 @@ export default function AddUsersModal(): ReactNode {
           </Flex>
           <Flex direction="column" gap="xs" mt="xl">
             <Button
-              type="submit"
+              type="button"
               onClick={() => {
                 handleSubmit();
               }}
