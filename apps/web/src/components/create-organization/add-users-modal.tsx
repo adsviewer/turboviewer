@@ -18,6 +18,7 @@ interface SelectedUsersType {
 interface DropdownValueType {
   label: string;
   value: string;
+  disabled: boolean;
 }
 
 const INITIAL_USER_VALUE = {
@@ -62,6 +63,7 @@ export default function AddUsersModal(): ReactNode {
                 return {
                   label: `${userData.user.firstName} ${userData.user.lastName}`,
                   value: userData.userId,
+                  disabled: false,
                 };
               }),
             );
@@ -79,8 +81,6 @@ export default function AddUsersModal(): ReactNode {
   };
 
   const handleSubmit = (): void => {
-    logger.info(users);
-    logger.info(availableUsers);
     // closeModal();
   };
 
@@ -103,44 +103,34 @@ export default function AddUsersModal(): ReactNode {
   };
 
   const changeUser = (newUserId: string, userChangeIndex: number): void => {
-    const prevUser = users[userChangeIndex];
-
-    // Remove the new user from available users & add the previous
-    let newAvailableUsers = availableUsers.filter((user) => user.value !== newUserId);
-    if (prevUser.userId && organization) {
-      for (const userData of organization.organization.userOrganizations) {
-        if (userData.userId === prevUser.userId) {
-          newAvailableUsers = [
-            ...newAvailableUsers,
-            {
-              label: `${userData.user.firstName} ${userData.user.lastName}`,
-              value: userData.userId,
-            },
-          ];
-          break;
-        }
-      }
-    }
-    setAvailableUsers(newAvailableUsers);
-    setUsers(users.map((user, index) => (userChangeIndex === index ? { ...user, userId: newUserId } : user)));
+    setUsers(() => {
+      const newUsers = users.map((user, index) => (userChangeIndex === index ? { ...user, userId: newUserId } : user));
+      updateAvailableUsers(newUsers);
+      return newUsers;
+    });
   };
 
-  const deleteUser = (deletedUserKey: number, deletedUserId: string | null): void => {
-    setUsers(users.filter((user) => user.key !== deletedUserKey));
-    if (deletedUserId && organization) {
+  const updateAvailableUsers = (updatedUsers: SelectedUsersType[]): void => {
+    let updatedAvailableUsers: DropdownValueType[] = [];
+    if (organization) {
       for (const userData of organization.organization.userOrganizations) {
-        if (userData.userId === deletedUserId) {
-          setAvailableUsers([
-            ...availableUsers,
-            {
-              label: `${userData.user.firstName} ${userData.user.lastName}`,
-              value: userData.userId,
-            },
-          ]);
-          break;
-        }
+        const userToAdd = {
+          label: `${userData.user.firstName} ${userData.user.lastName}`,
+          value: userData.userId,
+          disabled: updatedUsers.some((currUser) => currUser.userId === userData.userId),
+        };
+        updatedAvailableUsers = [...updatedAvailableUsers, userToAdd];
       }
+      setAvailableUsers(updatedAvailableUsers);
     }
+  };
+
+  const deleteUser = (deletedUserKey: number): void => {
+    setUsers(() => {
+      const updatedUsers = users.filter((user) => user.key !== deletedUserKey);
+      updateAvailableUsers(updatedUsers);
+      return updatedUsers;
+    });
   };
 
   return (
@@ -176,7 +166,6 @@ export default function AddUsersModal(): ReactNode {
                       <Flex gap="md" mt={10} align="center" key={userData.key}>
                         <Select
                           data={availableUsers}
-                          label={userData.userId}
                           description={tGeneric('user')}
                           placeholder={tGeneric('user')}
                           allowDeselect={false}
@@ -198,7 +187,7 @@ export default function AddUsersModal(): ReactNode {
                         <CloseButton
                           mt={18}
                           onClick={() => {
-                            deleteUser(userData.key, userData.userId);
+                            deleteUser(userData.key);
                           }}
                         />
                       </Flex>
