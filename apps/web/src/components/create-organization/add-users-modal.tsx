@@ -1,17 +1,23 @@
-import { Button, type ComboboxData, Flex, Modal, Select, Text, CloseButton, ScrollArea } from '@mantine/core';
+import { Button, Flex, Modal, Select, Text, CloseButton, ScrollArea } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { logger } from '@repo/logger';
 import { IconUserPlus } from '@tabler/icons-react';
-import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState, type ReactNode } from 'react';
 import { OrganizationRoleEnum } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
+import getOrganization from '@/app/(authenticated)/organization/actions';
 
 interface SelectedUsersType {
   role: OrganizationRoleEnum;
   userId: string | null;
   key: number;
+}
+
+interface DropdownValueType {
+  label: string;
+  value: string;
 }
 
 const INITIAL_USER_VALUE = {
@@ -25,9 +31,9 @@ export default function AddUsersModal(): ReactNode {
   const tGeneric = useTranslations('generic');
   const tProfile = useTranslations('profile');
   const [opened, { open, close }] = useDisclosure(false);
-  const organization = useAtomValue(organizationAtom);
+  const [organization, setOrganization] = useAtom(organizationAtom);
   // const usersData: UserRolesInput[] = [];
-  const [availableUsers, setAvailableUsers] = useState<ComboboxData>([]);
+  const [availableUsers, setAvailableUsers] = useState<DropdownValueType[]>([]);
   const [users, setUsers] = useState<SelectedUsersType[]>([]);
   let keys: number[] = [];
   const rolesData = [
@@ -46,17 +52,26 @@ export default function AddUsersModal(): ReactNode {
   ];
 
   useEffect(() => {
-    if (organization?.organization.userOrganizations.length) {
-      setAvailableUsers(
-        organization.organization.userOrganizations.map((userData) => {
-          return {
-            label: `${userData.user.firstName} ${userData.user.lastName}`,
-            value: userData.userId,
-          };
-        }),
-      );
-    }
-  }, [organization?.organization.userOrganizations]);
+    void getOrganization()
+      .then((orgRes) => {
+        if (orgRes.data) {
+          setOrganization(orgRes.data);
+          if (orgRes.data.organization.userOrganizations.length) {
+            setAvailableUsers(
+              orgRes.data.organization.userOrganizations.map((userData) => {
+                return {
+                  label: `${userData.user.firstName} ${userData.user.lastName}`,
+                  value: userData.userId,
+                };
+              }),
+            );
+          }
+        }
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      });
+  }, [setOrganization]);
 
   const closeModal = (): void => {
     close();
@@ -65,7 +80,19 @@ export default function AddUsersModal(): ReactNode {
 
   const handleSubmit = (): void => {
     logger.info(users);
+    logger.info(availableUsers);
     // closeModal();
+  };
+
+  const addUser = (): void => {
+    const newUser = { ...INITIAL_USER_VALUE };
+    let newKey = Math.random();
+    while (keys.includes(newKey)) {
+      newKey = Math.random();
+    }
+    keys = [...keys, newKey];
+    newUser.key = newKey;
+    setUsers([...users, newUser]);
   };
 
   const changeRole = (newRole: string, roleChangeIndex: number): void => {
@@ -75,13 +102,45 @@ export default function AddUsersModal(): ReactNode {
     setUsers(updatedUsers);
   };
 
-  const changeUser = (newUser: string, roleChangeIndex: number): void => {
-    const updatedUsers = users.map((user, index) => (roleChangeIndex === index ? { ...user, userId: newUser } : user));
-    setUsers(updatedUsers);
+  const changeUser = (newUserId: string, userChangeIndex: number): void => {
+    const prevUser = users[userChangeIndex];
+
+    // Remove the new user from available users & add the previous
+    let newAvailableUsers = availableUsers.filter((user) => user.value !== newUserId);
+    if (prevUser.userId && organization) {
+      for (const userData of organization.organization.userOrganizations) {
+        if (userData.userId === prevUser.userId) {
+          newAvailableUsers = [
+            ...newAvailableUsers,
+            {
+              label: `${userData.user.firstName} ${userData.user.lastName}`,
+              value: userData.userId,
+            },
+          ];
+          break;
+        }
+      }
+    }
+    setAvailableUsers(newAvailableUsers);
+    setUsers(users.map((user, index) => (userChangeIndex === index ? { ...user, userId: newUserId } : user)));
   };
 
-  const deleteUser = (deletedUserKey: number): void => {
+  const deleteUser = (deletedUserKey: number, deletedUserId: string | null): void => {
     setUsers(users.filter((user) => user.key !== deletedUserKey));
+    if (deletedUserId && organization) {
+      for (const userData of organization.organization.userOrganizations) {
+        if (userData.userId === deletedUserId) {
+          setAvailableUsers([
+            ...availableUsers,
+            {
+              label: `${userData.user.firstName} ${userData.user.lastName}`,
+              value: userData.userId,
+            },
+          ]);
+          break;
+        }
+      }
+    }
   };
 
   return (
@@ -103,14 +162,7 @@ export default function AddUsersModal(): ReactNode {
           mb="md"
           leftSection={<IconUserPlus size={16} />}
           onClick={() => {
-            const newUser = { ...INITIAL_USER_VALUE };
-            let newKey = Math.random();
-            while (keys.includes(newKey)) {
-              newKey = Math.random();
-            }
-            keys = [...keys, newKey];
-            newUser.key = newKey;
-            setUsers([...users, newUser]);
+            addUser();
           }}
         >
           {tGeneric('add')}
@@ -124,6 +176,7 @@ export default function AddUsersModal(): ReactNode {
                       <Flex gap="md" mt={10} align="center" key={userData.key}>
                         <Select
                           data={availableUsers}
+                          label={userData.userId}
                           description={tGeneric('user')}
                           placeholder={tGeneric('user')}
                           allowDeselect={false}
@@ -145,7 +198,7 @@ export default function AddUsersModal(): ReactNode {
                         <CloseButton
                           mt={18}
                           onClick={() => {
-                            deleteUser(userData.key);
+                            deleteUser(userData.key, userData.userId);
                           }}
                         />
                       </Flex>
@@ -157,12 +210,11 @@ export default function AddUsersModal(): ReactNode {
           <Flex direction="column" gap="xs" mt="xl">
             <Button
               type="submit"
-              leftSection={<IconUserPlus size={16} />}
               onClick={() => {
                 handleSubmit();
               }}
             >
-              {t('addUsers')}
+              OK
             </Button>
           </Flex>
         </Flex>
