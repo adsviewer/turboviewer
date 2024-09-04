@@ -80,8 +80,24 @@ export default function AddUsersModal(): ReactNode {
     // form.reset();
   };
 
+  const resetUsers = (): void => {
+    setUsers([]);
+    if (organization) {
+      setAvailableUsers(
+        organization.organization.userOrganizations.map((userData) => {
+          return {
+            label: `${userData.user.firstName} ${userData.user.lastName}`,
+            value: userData.userId,
+            disabled: false,
+          };
+        }),
+      );
+    }
+  };
+
   const handleSubmit = (): void => {
-    // closeModal();
+    closeModal();
+    resetUsers();
   };
 
   const addUser = (): void => {
