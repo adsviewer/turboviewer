@@ -182,7 +182,7 @@ function Pricing(): ReactNode {
           {/* Pricing Item */}
           <div className="animate_top group relative rounded-lg border border-stroke bg-white p-7.5 shadow-solid-10 dark:border-strokedark dark:bg-blacksection dark:shadow-none h-full flex flex-col">
             <h3 className="mb-7.5 text-3xl font-bold text-black dark:text-white xl:text-sectiontitle2">
-              {t('tier4-packname')}
+              {t('tier4-packname')} 🚀
             </h3>
             <h4 className="mb-2.5 text-para2 font-medium text-black dark:text-white">{t('tier4-price')}</h4>
             <p className="flex-grow">{t('tier4-packdescription')}</p>
