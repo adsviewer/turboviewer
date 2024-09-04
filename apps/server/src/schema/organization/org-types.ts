@@ -1,4 +1,4 @@
-import { OrganizationRoleEnum, UserOrganizationStatus } from '@repo/database';
+import { OrganizationRoleEnum, Tier, UserOrganizationStatus } from '@repo/database';
 import { AError } from '@repo/utils';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
@@ -21,6 +21,7 @@ export const OrganizationDto = builder.prismaObject('Organization', {
     userOrganizations: t.relation('users', { nullable: false }),
     integrations: t.relation('integrations', { nullable: false }),
     adAccounts: t.relation('adAccounts', { nullable: false }),
+    tier: t.expose('tier', { type: TierEnum, nullable: false }),
     isRoot: t.boolean({
       nullable: false,
       resolve: (root, _args, _ctx) => root.parentId === null,
@@ -80,9 +81,11 @@ export const InviteUsersErrorsDto = builder.objectType(InviteUsersErrors, {
   }),
 });
 
-export const inviteLinkDto = builder.simpleObject('InviteLinks', {
+export const InviteLinkDto = builder.simpleObject('InviteLinks', {
   fields: (t) => ({
     url: t.string({ nullable: false }),
     role: t.field({ type: OrganizationRoleEnumDto, nullable: false }),
   }),
 });
+
+export const TierEnum = builder.enumType(Tier, { name: 'Tier' });

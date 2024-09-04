@@ -616,6 +616,7 @@ type Organization {
   isRoot: Boolean!
   name: String!
   parentId: String
+  tier: Tier!
   updatedAt: Date!
   userOrganizations: [UserOrganization!]!
 }
@@ -711,6 +712,13 @@ input SignUpInput {
 
 type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
+}
+
+enum Tier {
+  Launch
+  Build
+  Grow
+  Scale
 }
 
 type TokenDto {
