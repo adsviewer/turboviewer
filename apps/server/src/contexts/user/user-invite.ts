@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { type EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
-import { AError, inviteHashLabel, isAError } from '@repo/utils';
+import { AError, canAddUser, inviteHashLabel, isAError, maxUsersPerTier, type Tier } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
 import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
@@ -94,6 +94,24 @@ export const createInvitedUser = async (
   role: OrganizationRoleEnum,
   organizationId: string,
 ) => {
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    include: { users: true },
+  });
+
+  if (!organization) {
+    throw new Error('Organization not found');
+  }
+
+  const currentTier = organization.tier as Tier;
+  const currentUserCount = organization.users.length;
+
+  if (!canAddUser(currentTier, currentUserCount)) {
+    throw new Error(
+      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].toString()}.`,
+    );
+  }
+
   return await prisma.user.create({
     data: {
       email,

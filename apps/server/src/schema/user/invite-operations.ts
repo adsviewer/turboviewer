@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql/index';
-import { FireAndForget, inviteHashLabel, isAError } from '@repo/utils';
+import { canAddUser, FireAndForget, inviteHashLabel, isAError, maxUsersPerTier, type Tier } from '@repo/utils';
 import { OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
@@ -142,7 +142,7 @@ builder.mutationFields((t) => ({
 
       const frontEndInvitedUserUrl = new URL(`${env.PUBLIC_URL}/sign-up`);
 
-      const [usersMap, organization] = await Promise.all([
+      const [usersMap] = await Promise.all([
         prisma.user
           .findMany({
             where: {
@@ -158,6 +158,25 @@ builder.mutationFields((t) => ({
         args.emails.map(async (email) => {
           const inviteHash = generateConfirmInvitedUserToken();
           const dbUser = usersMap.get(email);
+
+          const organization = await prisma.organization.findUnique({
+            where: { id: ctx.organizationId },
+            include: { users: true },
+          });
+
+          if (!organization) {
+            throw new Error('Organization not found');
+          }
+
+          const currentTier = organization.tier as Tier;
+          const currentUserCount = organization.users.length;
+
+          if (!canAddUser(currentTier, currentUserCount)) {
+            throw new Error(
+              `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].toString()}.`,
+            );
+          }
+
           if (dbUser) {
             // Don't re-invite users that are already active in the organization and in the same or higher role
             const userOrganization = dbUser.organizations.find((o) => o.organizationId === ctx.organizationId);
