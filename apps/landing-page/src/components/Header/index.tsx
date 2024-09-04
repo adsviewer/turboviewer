@@ -171,6 +171,12 @@ function Header(): ReactNode {
             >
               {t('getPro')}
             </Link>
+            <Link
+              href={`${env.NEXT_PUBLIC_WEBAPP_ENDPOINT}/sign-in`}
+              className="flex items-center justify-center rounded-full bg-gray-700 px-7.5 py-2.5 text-regular text-white duration-300 ease-in-out hover:bg-gray-500"
+            >
+              {t('Sign In')}
+            </Link>
           </div>
         </div>
       </div>
