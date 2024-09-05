@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { type EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
-import { AError, canAddUser, inviteHashLabel, isAError, maxUsersPerTier, type Tier } from '@repo/utils';
+import { AError, inviteHashLabel, isAError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
+import { canAddUser, maxUsersPerTier } from '@repo/mappings';
 import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
 import { env } from '../../config';
 import { type UserWithRoles } from './user-roles';
@@ -94,21 +95,20 @@ export const createInvitedUser = async (
   role: OrganizationRoleEnum,
   organizationId: string,
 ) => {
-  const organization = await prisma.organization.findUnique({
+  const organization = await prisma.organization.findUniqueOrThrow({
     where: { id: organizationId },
-    include: { users: true },
   });
 
-  if (!organization) {
-    throw new Error('Organization not found');
-  }
+  const userOrganizationCount = await prisma.userOrganization.count({
+    where: { organizationId },
+  });
 
-  const currentTier = organization.tier as Tier;
-  const currentUserCount = organization.users.length;
+  const currentTier = organization.tier;
+  const currentUserCount = userOrganizationCount;
 
   if (!canAddUser(currentTier, currentUserCount)) {
-    throw new Error(
-      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].toString()}.`,
+    return new AError(
+      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
     );
   }
 

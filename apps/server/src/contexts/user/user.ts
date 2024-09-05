@@ -1,7 +1,8 @@
 import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { EmailType, OrganizationRoleEnum, prisma, type User, UserOrganizationStatus, UserStatus } from '@repo/database';
-import { AError, canAddUser, isAError, maxUsersPerTier, type Tier } from '@repo/utils';
+import { canAddUser, maxUsersPerTier } from '@repo/mappings';
+import { AError, isAError } from '@repo/utils';
 import * as changeCase from 'change-case';
 import { logger } from '@repo/logger';
 import { createId } from '@paralleldrive/cuid2';
@@ -86,21 +87,20 @@ export const activateInvitedUser = async (args: LoginDataProvider | LoginDataPas
 export const createUser = async (args: SignupDataProvider | SignupDataPassword) => {
   const { organizationId, lastName, firstName, email, emailType, role } = args;
 
-  const organization = await prisma.organization.findUnique({
+  const organization = await prisma.organization.findUniqueOrThrow({
     where: { id: organizationId },
-    include: { users: true },
   });
 
-  if (!organization) {
-    throw new Error('Organization not found');
-  }
+  const userOrganizationCount = await prisma.userOrganization.count({
+    where: { organizationId },
+  });
 
-  const currentTier = organization.tier as Tier;
-  const currentUserCount = organization.users.length;
+  const currentTier = organization.tier;
+  const currentUserCount = userOrganizationCount;
 
   if (!canAddUser(currentTier, currentUserCount)) {
-    throw new Error(
-      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].toString()}.`,
+    return new AError(
+      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
     );
   }
 
