@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql/index';
-import { AError, FireAndForget, inviteHashLabel, isAError } from '@repo/utils';
-import { OrganizationRoleEnum, prisma, type User, UserOrganizationStatus, UserStatus } from '@repo/database';
+import { FireAndForget, inviteHashLabel, isAError } from '@repo/utils';
+import { OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
 import { canAddUser, maxUsersPerTier } from '@repo/mappings';
@@ -143,7 +143,7 @@ builder.mutationFields((t) => ({
 
       const frontEndInvitedUserUrl = new URL(`${env.PUBLIC_URL}/sign-up`);
 
-      const [usersMap] = await Promise.all([
+      const [usersMap, organization] = await Promise.all([
         prisma.user
           .findMany({
             where: {
@@ -160,21 +160,17 @@ builder.mutationFields((t) => ({
           const inviteHash = generateConfirmInvitedUserToken();
           const dbUser = usersMap.get(email);
 
-          const organization = await prisma.organization.findUniqueOrThrow({
-            where: { id: ctx.organizationId },
-          });
-
           const userOrganizationCount = await prisma.userOrganization.count({
             where: { organizationId: ctx.organizationId },
           });
 
           const currentTier = organization.tier;
-          const currentUserCount = userOrganizationCount;
 
-          if (!canAddUser(currentTier, currentUserCount)) {
-            return new AError(
-              `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
-            );
+          if (!canAddUser(currentTier, userOrganizationCount)) {
+            return {
+              message: `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
+              email,
+            };
           }
 
           if (dbUser) {
@@ -233,32 +229,28 @@ builder.mutationFields((t) => ({
             frontEndInvitedUserUrl.search = searchParams.toString();
             logger.info(`Confirm invited non-existing user ${email}: ${frontEndInvitedUserUrl.toString()}`);
 
-            const newUser: AError | User = await createInvitedUser(email, emailType, args.role, ctx.organizationId);
-            if (!(newUser instanceof AError)) {
-              await Promise.all([
-                sendOrganizationInviteConfirmEmail({
-                  firstName: newUser.firstName,
-                  lastName: newUser.lastName,
-                  email,
-                  organizationName: organization.name,
-                  expirationInDays: invitationExpirationInDays,
-                  actionUrl: frontEndInvitedUserUrl.toString(),
-                }),
-                setConfirmInvitedUserRedis(inviteHash, newUser.id, ctx.organizationId),
-              ]);
-            } else {
-              return new AError('Error creating invited user');
+            const newUser = await createInvitedUser(email, emailType, args.role, ctx.organizationId);
+
+            if (isAError(newUser)) {
+              return { message: newUser.message, email };
             }
+
+            await Promise.all([
+              sendOrganizationInviteConfirmEmail({
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email,
+                organizationName: organization.name,
+                expirationInDays: invitationExpirationInDays,
+                actionUrl: frontEndInvitedUserUrl.toString(),
+              }),
+              setConfirmInvitedUserRedis(inviteHash, newUser.id, ctx.organizationId),
+            ]);
           }
         }),
       );
 
-      function isEmailMessageObject(
-        error: AError | { email: string; message: string },
-      ): error is { email: string; message: string } {
-        return !(error instanceof AError);
-      }
-      const flattenErrors = errors.flatMap((e) => e ?? []).filter(isEmailMessageObject);
+      const flattenErrors = errors.flatMap((e) => e ?? []);
 
       if (!flattenErrors.length) return true;
 

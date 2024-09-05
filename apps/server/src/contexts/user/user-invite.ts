@@ -104,9 +104,8 @@ export const createInvitedUser = async (
   });
 
   const currentTier = organization.tier;
-  const currentUserCount = userOrganizationCount;
 
-  if (!canAddUser(currentTier, currentUserCount)) {
+  if (!canAddUser(currentTier, userOrganizationCount)) {
     return new AError(
       `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
     );

@@ -7,6 +7,6 @@ export const maxUsersPerTier: Record<Tier, { maxUsers: number }> = {
   Scale: { maxUsers: 100 },
 };
 
-export function canAddUser(tier: Tier, currentUserCount: number): boolean {
-  return currentUserCount <= maxUsersPerTier[tier].maxUsers;
+export function canAddUser(tier: Tier, userOrganizationCount: number): boolean {
+  return userOrganizationCount <= maxUsersPerTier[tier].maxUsers;
 }
