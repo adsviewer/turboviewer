@@ -158,6 +158,9 @@ builder.mutationFields((t) => ({
         organizationId: redisVal?.organizationId ?? newOrgId,
         role: redisVal?.role ?? OrganizationRoleEnum.ORG_ADMIN,
       });
+
+      if (isAError(user)) throw new GraphQLError(user.message);
+
       await confirmEmail(user);
 
       // TODO: enable me

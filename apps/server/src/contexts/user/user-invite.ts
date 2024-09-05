@@ -4,6 +4,7 @@ import { type EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus, U
 import { AError, inviteHashLabel, isAError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
+import { canAddUser, maxUsersPerTier } from '@repo/mappings';
 import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
 import { env } from '../../config';
 import { type UserWithRoles } from './user-roles';
@@ -94,6 +95,22 @@ export const createInvitedUser = async (
   role: OrganizationRoleEnum,
   organizationId: string,
 ) => {
+  const organization = await prisma.organization.findUniqueOrThrow({
+    where: { id: organizationId },
+  });
+
+  const userOrganizationCount = await prisma.userOrganization.count({
+    where: { organizationId },
+  });
+
+  const currentTier = organization.tier;
+
+  if (!canAddUser(currentTier, userOrganizationCount)) {
+    return new AError(
+      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
+    );
+  }
+
   return await prisma.user.create({
     data: {
       email,

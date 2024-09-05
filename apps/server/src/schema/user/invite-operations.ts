@@ -3,6 +3,7 @@ import { FireAndForget, inviteHashLabel, isAError } from '@repo/utils';
 import { OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
+import { canAddUser, maxUsersPerTier } from '@repo/mappings';
 import { builder } from '../builder';
 import { createPassword } from '../../contexts/user/user';
 import { createJwts } from '../../auth';
@@ -158,6 +159,20 @@ builder.mutationFields((t) => ({
         args.emails.map(async (email) => {
           const inviteHash = generateConfirmInvitedUserToken();
           const dbUser = usersMap.get(email);
+
+          const userOrganizationCount = await prisma.userOrganization.count({
+            where: { organizationId: ctx.organizationId },
+          });
+
+          const currentTier = organization.tier;
+
+          if (!canAddUser(currentTier, userOrganizationCount)) {
+            return {
+              message: `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
+              email,
+            };
+          }
+
           if (dbUser) {
             // Don't re-invite users that are already active in the organization and in the same or higher role
             const userOrganization = dbUser.organizations.find((o) => o.organizationId === ctx.organizationId);
@@ -215,6 +230,11 @@ builder.mutationFields((t) => ({
             logger.info(`Confirm invited non-existing user ${email}: ${frontEndInvitedUserUrl.toString()}`);
 
             const newUser = await createInvitedUser(email, emailType, args.role, ctx.organizationId);
+
+            if (isAError(newUser)) {
+              return { message: newUser.message, email };
+            }
+
             await Promise.all([
               sendOrganizationInviteConfirmEmail({
                 firstName: newUser.firstName,
@@ -229,8 +249,11 @@ builder.mutationFields((t) => ({
           }
         }),
       );
+
       const flattenErrors = errors.flatMap((e) => e ?? []);
+
       if (!flattenErrors.length) return true;
+
       throw new InviteUsersErrors(flattenErrors);
     },
   }),
