@@ -96,30 +96,22 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
   }
 }
 
-export async function deleteOrganizationAndRefreshJWT(values: DeleteOrganizationMutationVariables): Promise<{
-  success: boolean;
-  error?: unknown;
-}> {
+export async function deleteOrganizationAndRefreshJWT(
+  values: DeleteOrganizationMutationVariables,
+): Promise<UrqlResult> {
   try {
     const res = await deleteOrganization(values);
 
     if (!res.success) {
-      logger.error(res.error);
-      return {
-        success: false,
-        error: res.error,
-      };
+      return res;
     }
 
     const refreshRes = await refreshJWTToken();
 
     await changeJWT(refreshRes.refreshToken);
 
-    return {
-      success: true,
-    };
+    return res;
   } catch (error) {
-    logger.error(error);
     return {
       success: false,
       error,

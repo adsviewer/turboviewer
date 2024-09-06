@@ -35,11 +35,11 @@ export default function CreateOrganizationButton(): ReactNode {
 
   const updateSelectedUsers = (newUsers: UserRolesInput[]): void => {
     const newUsersFiltered: UserRolesInput[] = newUsers
-  .filter(user => user.userId)
-  .map(user => ({
-    userId: user.userId,
-    role: user.role,
-  }));
+      .filter((user) => user.userId)
+      .map((user) => ({
+        userId: user.userId,
+        role: user.role,
+      }));
     form.setValues({ users: newUsersFiltered });
   };
 
