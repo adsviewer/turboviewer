@@ -10,6 +10,8 @@ A bunch of cool staff for viewing, optimizing and growing your digital ad portfo
 - [postgres](https://www.postgresql.org/download/)
 - [pnpm](https://pnpm.io/installation)
 - [redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
+- [enable meta integration](https://github.com/adsviewer/turboviewer/wiki/Enable-meta-integration). Soft requirement,
+  you will not be able to use meta integration locally without this.
 
 ### Setup
 
