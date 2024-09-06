@@ -2,12 +2,13 @@ import { Button, Flex, Modal, Select, Text, CloseButton, ScrollArea } from '@man
 import { useDisclosure } from '@mantine/hooks';
 import { logger } from '@repo/logger';
 import { IconUserPlus } from '@tabler/icons-react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
-import React, { useEffect, useState, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { OrganizationRoleEnum, type UserRolesInput } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import getOrganization from '@/app/(authenticated)/organization/actions';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 
 interface PropsType {
   setNewUsers: (users: UserRolesInput[]) => void;
@@ -25,7 +26,7 @@ interface DropdownValueType {
   disabled: boolean;
 }
 
-const INITIAL_USER_VALUE = {
+const INITIAL_USER_VALUE: SelectedUsersType = {
   role: OrganizationRoleEnum.ORG_MEMBER,
   userId: null,
   key: 0,
@@ -37,10 +38,11 @@ export default function AddUsersModal(props: PropsType): ReactNode {
   const tProfile = useTranslations('profile');
   const [opened, { open, close }] = useDisclosure(false);
   const [organization, setOrganization] = useAtom(organizationAtom);
+  const userDetails = useAtomValue(userDetailsAtom);
   // const usersData: UserRolesInput[] = [];
   const [availableUsers, setAvailableUsers] = useState<DropdownValueType[]>([]);
   const [users, setUsers] = useState<SelectedUsersType[]>([]);
-  let keys: number[] = [];
+  const [keys, setKeys] = useState<number[]>([]);
   const rolesData = [
     {
       label: tProfile('roleAdmin'),
@@ -55,6 +57,51 @@ export default function AddUsersModal(props: PropsType): ReactNode {
       value: OrganizationRoleEnum.ORG_MEMBER,
     },
   ];
+
+  const updateAvailableUsers = useCallback(
+    (updatedUsers: SelectedUsersType[]): void => {
+      let updatedAvailableUsers: DropdownValueType[] = [];
+      if (organization) {
+        for (const userData of organization.organization.userOrganizations) {
+          const userToAdd = {
+            label: `${userData.user.firstName} ${userData.user.lastName}`,
+            value: userData.userId,
+            disabled: updatedUsers.some((currUser) => currUser.userId === userData.userId),
+          };
+          updatedAvailableUsers = [...updatedAvailableUsers, userToAdd];
+        }
+        setAvailableUsers(updatedAvailableUsers);
+      }
+    },
+    [organization],
+  );
+
+  const addUser = useCallback(
+    (userId?: string, role?: OrganizationRoleEnum): void => {
+      const newUser = { ...INITIAL_USER_VALUE };
+      let newKey = Math.random();
+      while (keys.includes(newKey)) {
+        newKey = Math.random();
+      }
+      setKeys([...keys, newKey]);
+      newUser.key = newKey;
+      newUser.userId = userId ? userId : null;
+      newUser.role = role ? role : OrganizationRoleEnum.ORG_MEMBER;
+      setUsers(() => {
+        const newUsers = [...users, newUser];
+        updateAvailableUsers(newUsers);
+        return [...users, newUser];
+      });
+    },
+    [keys, updateAvailableUsers, users],
+  );
+
+  const changeRole = (newRole: string, roleChangeIndex: number): void => {
+    const updatedUsers = users.map((user, index) =>
+      roleChangeIndex === index ? { ...user, role: newRole as OrganizationRoleEnum } : user,
+    );
+    setUsers(updatedUsers);
+  };
 
   useEffect(() => {
     void getOrganization()
@@ -71,13 +118,16 @@ export default function AddUsersModal(props: PropsType): ReactNode {
                 };
               }),
             );
+
+            // Initial users should contain the current user
+            addUser(userDetails.id, OrganizationRoleEnum.ORG_ADMIN);
           }
         }
       })
       .catch((err: unknown) => {
         logger.error(err);
       });
-  }, [setOrganization]);
+  }, [setOrganization, userDetails.id]);
 
   const closeModal = (): void => {
     close();
@@ -88,45 +138,12 @@ export default function AddUsersModal(props: PropsType): ReactNode {
     closeModal();
   };
 
-  const addUser = (): void => {
-    const newUser = { ...INITIAL_USER_VALUE };
-    let newKey = Math.random();
-    while (keys.includes(newKey)) {
-      newKey = Math.random();
-    }
-    keys = [...keys, newKey];
-    newUser.key = newKey;
-    setUsers([...users, newUser]);
-  };
-
-  const changeRole = (newRole: string, roleChangeIndex: number): void => {
-    const updatedUsers = users.map((user, index) =>
-      roleChangeIndex === index ? { ...user, role: newRole as OrganizationRoleEnum } : user,
-    );
-    setUsers(updatedUsers);
-  };
-
   const changeUser = (newUserId: string, userChangeIndex: number): void => {
     setUsers(() => {
       const newUsers = users.map((user, index) => (userChangeIndex === index ? { ...user, userId: newUserId } : user));
       updateAvailableUsers(newUsers);
       return newUsers;
     });
-  };
-
-  const updateAvailableUsers = (updatedUsers: SelectedUsersType[]): void => {
-    let updatedAvailableUsers: DropdownValueType[] = [];
-    if (organization) {
-      for (const userData of organization.organization.userOrganizations) {
-        const userToAdd = {
-          label: `${userData.user.firstName} ${userData.user.lastName}`,
-          value: userData.userId,
-          disabled: updatedUsers.some((currUser) => currUser.userId === userData.userId),
-        };
-        updatedAvailableUsers = [...updatedAvailableUsers, userToAdd];
-      }
-      setAvailableUsers(updatedAvailableUsers);
-    }
   };
 
   const deleteUser = (deletedUserKey: number): void => {
@@ -171,6 +188,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
                         <Select
                           data={availableUsers}
                           value={userData.userId ? userData.userId : null}
+                          disabled={index === 0}
                           description={tGeneric('user')}
                           placeholder={tGeneric('user')}
                           allowDeselect={false}
@@ -182,6 +200,8 @@ export default function AddUsersModal(props: PropsType): ReactNode {
                         <Select
                           data={rolesData}
                           defaultValue={OrganizationRoleEnum.ORG_MEMBER}
+                          value={userData.role}
+                          disabled={index === 0}
                           description={tGeneric('role')}
                           allowDeselect={false}
                           onChange={(e) => {
@@ -194,6 +214,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
                           onClick={() => {
                             deleteUser(userData.key);
                           }}
+                          disabled={index === 0}
                         />
                       </Flex>
                     );
