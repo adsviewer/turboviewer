@@ -140,6 +140,7 @@
     "invite": "Uitnodiging",
     "addUsers": "Gebruikers toevoegen",
     "addUsersHint": "Voeg gebruikers uit de huidige organisatie toe aan uw nieuwe organisatie en wijs ze nieuwe rollen toe!",
+    "addUsersNoUsersHint": "De organisatie heeft geen andere leden!",
     "enterEmails": "E-mailadres(sen)",
     "delete": "Verwijderen",
     "deleteTip": "Om te bevestigen typt u \"DELETE\" in het onderstaande vak.",

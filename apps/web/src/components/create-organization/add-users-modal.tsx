@@ -1,4 +1,4 @@
-import { Button, Flex, Modal, Select, Text, CloseButton, ScrollArea } from '@mantine/core';
+import { Button, Flex, Modal, Select, Text, CloseButton, ScrollArea, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { logger } from '@repo/logger';
 import { IconUserPlus } from '@tabler/icons-react';
@@ -157,9 +157,17 @@ export default function AddUsersModal(props: PropsType): ReactNode {
   return (
     <>
       <Flex align="center" my="sm">
-        <Button variant="light" fullWidth leftSection={<IconUserPlus size={16} />} onClick={open}>
-          {t('addUsers')}
-        </Button>
+        <Tooltip label={t('addUsersNoUsersHint')} disabled={organization?.organization.userOrganizations.length !== 1}>
+          <Button
+            variant="light"
+            fullWidth
+            leftSection={<IconUserPlus size={16} />}
+            onClick={open}
+            disabled={organization?.organization.userOrganizations.length === 1}
+          >
+            {t('addUsers')}
+          </Button>
+        </Tooltip>
       </Flex>
 
       {/* Modal */}

@@ -140,6 +140,7 @@
     "invite": "Invite",
     "addUsers": "Add users",
     "addUsersHint": "Add users from the current organization to your new organization and assign them new roles!",
+    "addUsersNoUsersHint": "The organization doesn't have any other members!",
     "enterEmails": "Enter email(s)",
     "delete": "Delete",
     "deleteTip": "To confirm, type \"DELETE\" in the box below.",
