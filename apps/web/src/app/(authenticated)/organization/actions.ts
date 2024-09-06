@@ -70,7 +70,6 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
     const res = await createOrganization(values);
 
     if (!res.success) {
-      logger.error(res.error);
       return {
         success: false,
         message: res.error,
@@ -80,7 +79,6 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
     const switchRes = await switchOrganization({ organizationId: res.data.createOrganization.id });
 
     if (!switchRes.success) {
-      logger.error(switchRes.error);
       return {
         success: false,
         message: switchRes.error,
@@ -92,7 +90,6 @@ export async function createAndSwitchOrganization(values: CreateOrganizationMuta
       success: true,
     };
   } catch (error) {
-    logger.error(error);
     return {
       success: false,
     };
