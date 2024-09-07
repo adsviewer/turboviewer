@@ -45,17 +45,27 @@
         ".next/**",
         "!.next/cache/**"
       ],
-      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.*"
+      ]
     },
     "lint": {},
     "lint:fix": {},
     "update": {
       "cache": false
     },
-    "test": {},
+    "test": {
+      "cache": false
+    },
     "type-check": {},
     "dev": {
-      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.*"
+      ],
       "persistent": true
     },
     "clean": {
