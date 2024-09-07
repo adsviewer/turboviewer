@@ -62,36 +62,32 @@ async function deleteOrganization(
   return await handleUrqlRequest(urqlClientSdk().deleteOrganization(values));
 }
 
-export async function createAndSwitchOrganization(values: CreateOrganizationMutationVariables): Promise<{
-  success: boolean;
-  message?: string;
-}> {
+export async function createAndSwitchOrganization(values: CreateOrganizationMutationVariables): Promise<UrqlResult> {
   try {
     const res = await createOrganization(values);
 
     if (!res.success) {
       return {
         success: false,
-        message: res.error,
+        error: res.error,
       };
     }
 
     const switchRes = await switchOrganization({ organizationId: res.data.createOrganization.id });
 
     if (!switchRes.success) {
-      return {
-        success: false,
-        message: switchRes.error,
-      };
+      return switchRes;
     }
 
     await changeJWT(switchRes.data.switchOrganization.token, switchRes.data.switchOrganization.refreshToken);
     return {
       success: true,
+      data: null,
     };
   } catch (error) {
     return {
       success: false,
+      error,
     };
   }
 }

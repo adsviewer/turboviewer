@@ -39,7 +39,6 @@ export default function AddUsersModal(props: PropsType): ReactNode {
   const [opened, { open, close }] = useDisclosure(false);
   const [organization, setOrganization] = useAtom(organizationAtom);
   const userDetails = useAtomValue(userDetailsAtom);
-  // const usersData: UserRolesInput[] = [];
   const [availableUsers, setAvailableUsers] = useState<DropdownValueType[]>([]);
   const [users, setUsers] = useState<SelectedUsersType[]>([]);
   const [keys, setKeys] = useState<number[]>([]);

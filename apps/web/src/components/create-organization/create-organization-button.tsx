@@ -49,8 +49,8 @@ export default function CreateOrganizationButton(): ReactNode {
     void createAndSwitchOrganization(values)
       .then((res) => {
         if (!res.success) {
-          logger.error(res.message);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.message));
+          logger.error(res.error);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
           router.replace(newURL);
           return;
         }
