@@ -145,7 +145,8 @@
     "updateOrganizationSuccess": "De organisatie is succesvol bijgewerkt!",
     "organizationMembers": "Leden",
     "inviteSuccess": "Ik denk dat het goed is!",
-    "invited": "Uitgenodigd"
+    "invited": "Uitgenodigd",
+    "inviteUsersLimitHint": "U hebt het maximale aantal gebruikers voor uw huidige abonnement bereikt!"
   },
   "profile": {
     "title": "Profiel",

@@ -1078,6 +1078,7 @@ export type GetOrganizationQuery = {
   organization: {
     __typename: 'Organization';
     id: string;
+    tier: Tier;
     userOrganizations: Array<{
       __typename: 'UserOrganization';
       userId: string;
@@ -1505,6 +1506,7 @@ export const GetOrganizationDocument = gql`
   query getOrganization {
     organization {
       id
+      tier
       userOrganizations {
         userId
         role

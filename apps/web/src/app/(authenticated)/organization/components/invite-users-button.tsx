@@ -1,17 +1,18 @@
 'use client';
 
-import { Flex, Button, Modal, useMantineTheme, PillsInput, Pill, Select } from '@mantine/core';
+import { Flex, Button, Modal, useMantineTheme, PillsInput, Pill, Select, Tooltip } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { IconUserPlus } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useState } from 'react';
 import { z } from 'zod';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
+import { canAddUser } from '@repo/mappings';
 import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { AllRoles, OrganizationRoleEnum } from '@/graphql/generated/schema-server';
+import { AllRoles, OrganizationRoleEnum, Tier } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import getOrganization, { inviteUsers } from '../actions';
 
@@ -32,7 +33,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const userDetails = useAtomValue(userDetailsAtom);
-  const setOrganization = useSetAtom(organizationAtom);
+  const [organization, setOrganization] = useAtom(organizationAtom);
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInputValue, setEmailInputValue] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<OrganizationRoleEnum>(OrganizationRoleEnum.ORG_MEMBER);
@@ -45,6 +46,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
   };
 
   const openModal = (): void => {
+    logger.info(organization);
     setRolesDataOptions();
     open();
   };
@@ -181,15 +183,30 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
 
   return (
     <Flex>
-      <Button
-        leftSection={<IconUserPlus size={18} />}
-        color={theme.colors.blue[7]}
-        variant="outline"
-        onClick={openModal}
-        disabled={(!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)) || props.isPending}
+      <Tooltip
+        label={t('inviteUsersLimitHint')}
+        disabled={canAddUser(
+          organization?.organization.tier ?? Tier.Launch,
+          organization?.organization.userOrganizations.length ?? 1,
+        )}
       >
-        {t('inviteUsers')}
-      </Button>
+        <Button
+          leftSection={<IconUserPlus size={18} />}
+          color={theme.colors.blue[7]}
+          variant="outline"
+          onClick={openModal}
+          disabled={
+            (!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)) ||
+            props.isPending ||
+            !canAddUser(
+              organization?.organization.tier ?? Tier.Launch,
+              organization?.organization.userOrganizations.length ?? 1,
+            )
+          }
+        >
+          {t('inviteUsers')}
+        </Button>
+      </Tooltip>
 
       {/* Invite Modal */}
       <Modal opened={opened} onClose={closeModal} title={t('inviteUsers')} centered>

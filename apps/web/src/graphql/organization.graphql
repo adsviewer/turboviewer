@@ -1,6 +1,7 @@
 query getOrganization {
   organization {
     id
+    tier
     userOrganizations {
       userId
       role
