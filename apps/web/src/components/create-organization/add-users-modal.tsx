@@ -127,6 +127,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
       .catch((err: unknown) => {
         logger.error(err);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- works as intended - if the dependency is added it keeps calling it self infinitely, not sure if possible to fix this.
   }, [setOrganization, userDetails.id]);
 
   const closeModal = (): void => {
