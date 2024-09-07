@@ -1,10 +1,11 @@
+import 'dotenv/config';
 import { describe, it } from 'node:test';
 import * as assert from 'node:assert';
 import { DeviceEnum, PublisherEnum } from '@repo/database';
 import { addInterval } from '@repo/utils';
-import type {
-  FilterInsightsInputType,
-  InsightsDatapointsInputType,
+import {
+  type FilterInsightsInputType,
+  type InsightsDatapointsInputType,
 } from '../../src/schema/integrations/integration-types';
 import {
   calculateDataPointsPerInterval,
@@ -16,7 +17,13 @@ import {
   lastInterval,
   orderColumnTrend,
   orderColumnTrendAbsolute,
+  searchAdsToSQL,
 } from '../../src/utils/insights-query-builder';
+import {
+  type InsightsSearchExpression,
+  InsightsSearchField,
+  InsightsSearchOperator,
+} from '../../src/contexts/insights';
 
 const getNoEmptyLines = (str: string) =>
   str
@@ -163,6 +170,7 @@ void describe('insights query builder tests', () => {
       groupBy: ['adId', 'publisher'],
       interval: 'week',
       order: 'desc',
+      search: { term: { field: InsightsSearchField.AdName, operator: InsightsSearchOperator.Equals, value: 'chair' } },
     };
 
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
@@ -174,6 +182,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                                AND a.name = 'chair'
                                                 AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               )`,
@@ -194,6 +203,7 @@ void describe('insights query builder tests', () => {
       order: 'desc',
       positions: ['feed'],
       publishers: [PublisherEnum.Facebook],
+      search: {},
     };
 
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
@@ -509,5 +519,147 @@ void describe('insights query builder tests', () => {
                       HAVING SUM(i.impressions) > 0
                       ORDER BY date;`;
     assertSql(insights, expected);
+  });
+});
+
+void describe('searchAdsToSQL tests', () => {
+  void it('should generate SQL for no expression', () => {
+    const sql = searchAdsToSQL({});
+    assert.strictEqual(sql, '');
+  });
+
+  void it('should generate SQL for a single term', () => {
+    const expression: InsightsSearchExpression = {
+      term: {
+        field: InsightsSearchField.AdName,
+        operator: InsightsSearchOperator.Contains,
+        value: 'test',
+      },
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND a.name ILIKE '%test%'");
+  });
+
+  void it('should generate SQL for AND expression', () => {
+    const expression: InsightsSearchExpression = {
+      and: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.Contains,
+            value: 'test',
+          },
+        },
+        {
+          term: {
+            field: InsightsSearchField.AccountName,
+            operator: InsightsSearchOperator.Equals,
+            value: 'account',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name ILIKE '%test%' AND aa.name = 'account')");
+  });
+
+  void it('should generate SQL for OR expression', () => {
+    const expression: InsightsSearchExpression = {
+      or: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.Contains,
+            value: 'test',
+          },
+        },
+        {
+          term: {
+            field: InsightsSearchField.AccountName,
+            operator: InsightsSearchOperator.Equals,
+            value: 'account',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name ILIKE '%test%' OR aa.name = 'account')");
+  });
+
+  void it('should generate SQL for nested expressions', () => {
+    const expression: InsightsSearchExpression = {
+      and: [
+        {
+          or: [
+            {
+              term: {
+                field: InsightsSearchField.AdName,
+                operator: InsightsSearchOperator.Contains,
+                value: 'test',
+              },
+            },
+            {
+              term: {
+                field: InsightsSearchField.AccountName,
+                operator: InsightsSearchOperator.Equals,
+                value: 'account',
+              },
+            },
+          ],
+        },
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.StartsWith,
+            value: 'start',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND ((a.name ILIKE '%test%' OR aa.name = 'account') AND a.name ILIKE 'start%')");
+  });
+
+  void it('should generate SQL for nested expressions with nested null expression', () => {
+    const expression: InsightsSearchExpression = {
+      and: [
+        {
+          or: [
+            {
+              term: {
+                field: InsightsSearchField.AdName,
+                operator: InsightsSearchOperator.Contains,
+                value: 'test',
+              },
+            },
+          ],
+        },
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.StartsWith,
+            value: 'start',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND ((a.name ILIKE '%test%') AND a.name ILIKE 'start%')");
+  });
+
+  void it('should generate SQL for nested expressions with nested null expression 2', () => {
+    const expression: InsightsSearchExpression = {
+      and: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.StartsWith,
+            value: 'start',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name ILIKE 'start%')");
   });
 });

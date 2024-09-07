@@ -287,6 +287,7 @@ input FilterInsightsInput {
   pageSize: Int! = 12
   positions: [InsightsPosition!]
   publishers: [PublisherEnum!]
+  search: InsightsSearchExpression
 }
 
 type GenerateGoogleAuthUrlResponse {
@@ -419,6 +420,29 @@ enum InsightsPosition {
   search
   video_feeds
   unknown
+}
+
+input InsightsSearchExpression {
+  and: [InsightsSearchExpression!]
+  or: [InsightsSearchExpression!]
+  term: InsightsSearchTerm
+}
+
+enum InsightsSearchField {
+  AdName
+  AccountName
+}
+
+enum InsightsSearchOperator {
+  Contains
+  StartsWith
+  Equals
+}
+
+input InsightsSearchTerm {
+  field: InsightsSearchField!
+  operator: InsightsSearchOperator!
+  value: String!
 }
 
 type Integration {

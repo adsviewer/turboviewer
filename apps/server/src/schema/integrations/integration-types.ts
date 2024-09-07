@@ -16,6 +16,12 @@ import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
 import type { GraphQLContext } from '../../context';
 import { getRootOrganizationId } from '../../contexts/organization';
+import {
+  type InsightsSearchExpression,
+  InsightsSearchField,
+  InsightsSearchOperator,
+  type InsightsSearchTerm,
+} from '../../contexts/insights';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
@@ -326,6 +332,28 @@ export const InsightsPositionDto = builder.enumType('InsightsPosition', {
   ] as const,
 });
 
+export const InsightsSearchFieldDto = builder.enumType(InsightsSearchField, { name: 'InsightsSearchField' });
+
+export const InsightsSearchOperatorDto = builder.enumType(InsightsSearchOperator, { name: 'InsightsSearchOperator' });
+
+export const InsightsSearchTermDto = builder.inputRef<InsightsSearchTerm>('InsightsSearchTerm').implement({
+  fields: (t) => ({
+    field: t.field({ type: InsightsSearchFieldDto, required: true }),
+    operator: t.field({ type: InsightsSearchOperatorDto, required: true }),
+    value: t.string({ required: true }),
+  }),
+});
+
+export const InsightsSearchExpressionDto = builder
+  .inputRef<InsightsSearchExpression>('InsightsSearchExpression')
+  .implement({
+    fields: (t) => ({
+      and: t.field({ type: [InsightsSearchExpressionDto], required: false }),
+      or: t.field({ type: [InsightsSearchExpressionDto], required: false }),
+      term: t.field({ type: InsightsSearchTermDto, required: false }),
+    }),
+  });
+
 export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
   fields: (t) => ({
     adAccountIds: t.stringList({ required: false }),
@@ -353,6 +381,7 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
     }),
     positions: t.field({ type: [InsightsPositionDto], required: false }),
     publishers: t.field({ type: [PublisherEnumDto], required: false }),
+    search: t.field({ type: InsightsSearchExpressionDto, required: false }),
   }),
   validate: [
     [

@@ -4,6 +4,7 @@ import {
   type FilterInsightsInputType,
   type InsightsDatapointsInputType,
 } from '../schema/integrations/integration-types';
+import { type InsightsSearchExpression, InsightsSearchOperator, type InsightsSearchTerm } from '../contexts/insights';
 
 export const calculateDataPointsPerInterval = (
   dateFrom: Date | null | undefined,
@@ -49,6 +50,50 @@ export const getInsightsDateFrom = (
   return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
 };
 
+export const searchAdsToSQL = (expression: InsightsSearchExpression): string => {
+  function evaluateTerm(term: InsightsSearchTerm): string {
+    const field = term.field;
+    const value = term.value;
+    switch (term.operator) {
+      case InsightsSearchOperator.Contains:
+        return `${field} ILIKE '%${value}%'`;
+      case InsightsSearchOperator.StartsWith:
+        return `${field} ILIKE '${value}%'`;
+      case InsightsSearchOperator.Equals:
+        return `${field} = '${value}'`;
+      default:
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- intentional
+        throw new Error(`Unknown operator: ${term.operator}`);
+    }
+  }
+
+  const evaluateExpression = (expr: InsightsSearchExpression): string | null => {
+    if (expr.term) {
+      return evaluateTerm(expr.term);
+    }
+    if (expr.and) {
+      return `(${expr.and
+        .flatMap((subExpr) => {
+          const evaluatedExpr = evaluateExpression(subExpr);
+          return evaluatedExpr ? [evaluatedExpr] : [];
+        })
+        .join(' AND ')})`;
+    }
+    if (expr.or) {
+      return `(${expr.or
+        .flatMap((subExpr) => {
+          const evaluatedExpr = evaluateExpression(subExpr);
+          return evaluatedExpr ? [evaluatedExpr] : [];
+        })
+        .join(' OR ')})`;
+    }
+    return null; // Default condition when no expression is provided
+  };
+
+  const evaluatedExpr = evaluateExpression(expression);
+  return evaluatedExpr ? `AND ${evaluatedExpr}` : '';
+};
+
 export const getOrganizationalInsights = (
   organizationId: string,
   filter: FilterInsightsInputType,
@@ -60,6 +105,7 @@ export const getOrganizationalInsights = (
                                                        JOIN ad_accounts aa on a.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = '${organizationId}'
+                                                ${filter.search ? searchAdsToSQL(filter.search) : ''}
                                                 ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, dataPointsPerInterval, filter.interval)}
