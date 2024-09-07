@@ -46,15 +46,6 @@ resource "aws_route53_record" "website_a" {
   records = ["76.76.21.21"]
 }
 
-resource "aws_route53_record" "website_www" {
-  count   = var.environment == "prod" ? 1 : 0
-  zone_id = aws_route53_zone.zone.zone_id
-  name    = "www"
-  type    = "CNAME"
-  ttl     = "300"
-  records = ["adsviewer.io."]
-}
-
 resource "aws_route53_record" "fivetran" {
   count   = var.environment == "prod" ? 1 : 0
   zone_id = aws_route53_zone.zone.zone_id
