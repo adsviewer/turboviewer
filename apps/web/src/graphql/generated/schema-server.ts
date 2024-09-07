@@ -312,6 +312,7 @@ export type FilterInsightsInput = {
   pageSize?: Scalars['Int']['input'];
   positions?: InputMaybe<Array<InsightsPosition>>;
   publishers?: InputMaybe<Array<PublisherEnum>>;
+  search?: InputMaybe<InsightsSearchExpression>;
 };
 
 export type GenerateGoogleAuthUrlResponse = {
@@ -445,6 +446,29 @@ export enum InsightsPosition {
   video_feeds = 'video_feeds',
   unknown = 'unknown',
 }
+
+export type InsightsSearchExpression = {
+  and?: InputMaybe<Array<InsightsSearchExpression>>;
+  or?: InputMaybe<Array<InsightsSearchExpression>>;
+  term?: InputMaybe<InsightsSearchTerm>;
+};
+
+export enum InsightsSearchField {
+  AdName = 'AdName',
+  AccountName = 'AccountName',
+}
+
+export enum InsightsSearchOperator {
+  Contains = 'Contains',
+  StartsWith = 'StartsWith',
+  Equals = 'Equals',
+}
+
+export type InsightsSearchTerm = {
+  field: InsightsSearchField;
+  operator: InsightsSearchOperator;
+  value: Scalars['String']['input'];
+};
 
 export type Integration = {
   __typename: 'Integration';
@@ -930,6 +954,7 @@ export type InsightsQueryVariables = Exact<{
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
   pageSize: Scalars['Int']['input'];
   page: Scalars['Int']['input'];
+  search?: InputMaybe<InsightsSearchExpression>;
 }>;
 
 export type InsightsQuery = {
@@ -1355,6 +1380,7 @@ export const InsightsDocument = gql`
     $groupBy: [InsightsColumnsGroupBy!]
     $pageSize: Int!
     $page: Int!
+    $search: InsightsSearchExpression
   ) {
     insights(
       filter: {
@@ -1371,6 +1397,7 @@ export const InsightsDocument = gql`
         groupBy: $groupBy
         pageSize: $pageSize
         page: $page
+        search: $search
       }
     ) {
       hasNext

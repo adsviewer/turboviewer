@@ -195,6 +195,7 @@ model AdAccount {
   organizations  Organization[]
 
   @@unique([externalId, type])
+  @@index([name])
   @@map("ad_accounts")
 }
 
@@ -210,6 +211,7 @@ model Ad {
   creative   Creative? @relation(fields: [creativeId], references: [id])
 
   @@unique([adAccountId, externalId])
+  @@index([name])
   @@map("ads")
 }
 

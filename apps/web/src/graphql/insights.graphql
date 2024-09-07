@@ -24,6 +24,7 @@ query insights(
   $groupBy: [InsightsColumnsGroupBy!]
   $pageSize: Int!
   $page: Int!
+  $search: InsightsSearchExpression
 ) {
   insights(
     filter: {
@@ -40,6 +41,7 @@ query insights(
       groupBy: $groupBy
       pageSize: $pageSize
       page: $page
+      search: $search
     }
   ) {
     hasNext
