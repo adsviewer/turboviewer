@@ -89,3 +89,10 @@ export const InviteLinkDto = builder.simpleObject('InviteLinks', {
 });
 
 export const TierEnum = builder.enumType(Tier, { name: 'Tier' });
+
+export const UserRolesInput = builder.inputType('UserRolesInput', {
+  fields: (t) => ({
+    userId: t.string({ required: true }),
+    role: t.field({ type: OrganizationRoleEnumDto, required: true }),
+  }),
+});

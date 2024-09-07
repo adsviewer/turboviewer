@@ -610,6 +610,7 @@ export type MutationCreateInvitationLinkArgs = {
 
 export type MutationCreateOrganizationArgs = {
   name: Scalars['String']['input'];
+  users?: InputMaybe<Array<UserRolesInput>>;
 };
 
 export type MutationDeAuthIntegrationArgs = {
@@ -912,6 +913,11 @@ export enum UserOrganizationStatus {
   INVITED = 'INVITED',
 }
 
+export type UserRolesInput = {
+  role: OrganizationRoleEnum;
+  userId: Scalars['String']['input'];
+};
+
 export enum UserStatus {
   EMAIL_UNCONFIRMED = 'EMAIL_UNCONFIRMED',
   EMAIL_CONFIRMED = 'EMAIL_CONFIRMED',
@@ -1136,6 +1142,7 @@ export type UpdateOrganizationUserMutation = {
 
 export type CreateOrganizationMutationVariables = Exact<{
   name: Scalars['String']['input'];
+  users?: InputMaybe<Array<UserRolesInput> | UserRolesInput>;
 }>;
 
 export type CreateOrganizationMutation = {
@@ -1558,8 +1565,8 @@ export const UpdateOrganizationUserDocument = gql`
   }
 `;
 export const CreateOrganizationDocument = gql`
-  mutation createOrganization($name: String!) {
-    createOrganization(name: $name) {
+  mutation createOrganization($name: String!, $users: [UserRolesInput!]) {
+    createOrganization(name: $name, users: $users) {
       id
       name
     }

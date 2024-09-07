@@ -22,7 +22,7 @@ import GroupFilters from '@/app/(authenticated)/insights/components/group-filter
 import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
 import OrganizationSelect from '@/components/dropdowns/organization-select/organization-select';
-import CreateOrganizationButton from '@/components/buttons/create-organization-button';
+import CreateOrganizationButton from '@/components/create-organization/create-organization-button';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {

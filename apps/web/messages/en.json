@@ -11,12 +11,14 @@
     "submit": "Submit",
     "remove": "Remove",
     "refresh": "Refresh",
+    "user": "User",
     "role": "Role",
     "roleOrgAdmin": "Organization Administrator",
     "roleAdmin": "Administrator",
     "roleOperator": "Operator",
     "roleMember": "Member",
-    "pickDateRange": "Pick a date range"
+    "pickDateRange": "Pick a date range",
+    "add": "Add"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",
@@ -136,6 +138,9 @@
     "deleteOrganization": "Delete organization",
     "inviteUsers": "Invite users",
     "invite": "Invite",
+    "addUsers": "Add users",
+    "addUsersHint": "Add users from the current organization to your new organization and assign them new roles!",
+    "addUsersNoUsersHint": "The organization doesn't have any other members!",
     "enterEmails": "Enter email(s)",
     "delete": "Delete",
     "deleteTip": "To confirm, type \"DELETE\" in the box below.",
