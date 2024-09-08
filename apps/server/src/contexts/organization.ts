@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database';
+import { prisma, Tier } from '@repo/database';
 
 export const getRootOrganizationId = async (organizationId: string): Promise<string> => {
   const organization = await prisma.organization.findUniqueOrThrow({ where: { id: organizationId } });
@@ -6,4 +6,15 @@ export const getRootOrganizationId = async (organizationId: string): Promise<str
     return await getRootOrganizationId(organization.parentId);
   }
   return organization.id;
+};
+
+export const getTier = async (organizationId?: string | null): Promise<Tier> => {
+  if (!organizationId) {
+    return Tier.Launch;
+  }
+
+  const rootOrganizationId = await getRootOrganizationId(organizationId);
+  const organization = await prisma.organization.findUniqueOrThrow({ where: { id: rootOrganizationId } });
+
+  return organization.tier;
 };

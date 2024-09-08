@@ -8,5 +8,5 @@ export const maxUsersPerTier: Record<Tier, { maxUsers: number }> = {
 };
 
 export function canAddUser(tier: Tier, userOrganizationCount: number): boolean {
-  return userOrganizationCount <= maxUsersPerTier[tier].maxUsers;
+  return userOrganizationCount < maxUsersPerTier[tier].maxUsers;
 }

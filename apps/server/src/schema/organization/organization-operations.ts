@@ -9,6 +9,7 @@ import { deleteRedisInvite } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
 import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-types';
 import { sendOrganizationAddedEmail } from '../../email';
+import { getTier } from '../../contexts/organization';
 import { OrganizationDto, OrganizationRoleEnumDto, UserOrganizationDto, UserRolesInput } from './org-types';
 
 const fireAndForget = new FireAndForget();
@@ -157,6 +158,7 @@ builder.mutationFields((t) => ({
           name: args.name,
           domain,
           parentId: ctx.organizationId,
+          tier: await getTier(ctx.organizationId),
           users: {
             createMany: {
               skipDuplicates: true,

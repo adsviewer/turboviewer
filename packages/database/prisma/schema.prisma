@@ -35,7 +35,7 @@ model Organization {
   randomString String   @default(cuid())
   domain       String?  @unique
   parentId     String?  @map("parent_id")
-  tier         Tier     @default(Launch)
+  tier         Tier
 
   integrations    Integration[]
   users           UserOrganization[]
