@@ -1,6 +1,14 @@
 import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
-import { EmailType, OrganizationRoleEnum, prisma, type User, UserOrganizationStatus, UserStatus } from '@repo/database';
+import {
+  EmailType,
+  OrganizationRoleEnum,
+  prisma,
+  Tier,
+  type User,
+  UserOrganizationStatus,
+  UserStatus,
+} from '@repo/database';
 import { canAddUser, maxUsersPerTier } from '@repo/mappings';
 import { AError, isAError } from '@repo/utils';
 import * as changeCase from 'change-case';
@@ -188,6 +196,39 @@ const completeConfirmUserEmailCallback = async (token: string): Promise<TokensTy
   return await createJwts(user);
 };
 
+export const createOrg = async (
+  emailValidation:
+    | { emailType: 'PERSONAL' }
+    | {
+        domain: string;
+        emailType: EmailType;
+      },
+  orgId: string,
+  nonWorkName: string,
+  role?: OrganizationRoleEnum,
+) => {
+  if (emailValidation.emailType === EmailType.PERSONAL) {
+    await prisma.organization.create({
+      data: { id: orgId, name: nonWorkName, tier: Tier.Launch },
+    });
+    return { orgId, emailType: EmailType.PERSONAL, role };
+  }
+  const organization = await prisma.organization.findUnique({
+    where: { domain: emailValidation.domain },
+  });
+  if (organization) {
+    await prisma.organization.create({
+      data: { id: orgId, name: nonWorkName, tier: Tier.Launch },
+    });
+  } else {
+    const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
+    await prisma.organization.create({
+      data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain, tier: Tier.Launch },
+    });
+  }
+  return { orgId, emailType: EmailType.WORK, role };
+};
+
 const validateEmailProcess = async (
   firstName: string,
   email: string,
@@ -210,26 +251,7 @@ const validateEmailProcess = async (
   if (isAError(emailValidation)) {
     return emailValidation;
   }
-  if (emailValidation.emailType === EmailType.PERSONAL) {
-    await prisma.organization.create({
-      data: { id: orgId, name: nonWorkName },
-    });
-    return { orgId, emailType: EmailType.PERSONAL, role };
-  }
-  const organization = await prisma.organization.findUnique({
-    where: { domain: emailValidation.domain },
-  });
-  if (organization) {
-    await prisma.organization.create({
-      data: { id: orgId, name: nonWorkName },
-    });
-  } else {
-    const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
-    await prisma.organization.create({
-      data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain },
-    });
-  }
-  return { orgId, emailType: EmailType.WORK, role };
+  return await createOrg(emailValidation, orgId, nonWorkName, role);
 };
 
 export const confirmEmail = async (user: User): Promise<undefined | AError> => {

@@ -1,15 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';
-import { EmailType, OrganizationRoleEnum, prisma } from '@repo/database';
+import { OrganizationRoleEnum, prisma } from '@repo/database';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { createId } from '@paralleldrive/cuid2';
-import * as changeCase from 'change-case';
 import { createJwts } from '../../auth';
 import {
   activateInvitedUser,
   confirmEmail,
+  createOrg,
   createPassword,
   createUser,
   passwordsMatch,
@@ -77,37 +77,6 @@ const updateUserSchema = z.object({
   newPassword: PasswordSchema.optional(),
 });
 
-const createOrg = async (
-  emailValidation:
-    | { emailType: 'PERSONAL' }
-    | {
-        domain: string;
-        emailType: EmailType;
-      },
-  orgId: string,
-  nonWorkName: string,
-) => {
-  if (emailValidation.emailType === EmailType.PERSONAL) {
-    await prisma.organization.create({
-      data: { id: orgId, name: nonWorkName },
-    });
-  } else {
-    const organization = await prisma.organization.findUnique({
-      where: { domain: emailValidation.domain },
-    });
-    if (organization) {
-      await prisma.organization.create({
-        data: { id: orgId, name: nonWorkName },
-      });
-    } else {
-      const domainName = emailValidation.domain.replace(/\.[^/.]+$/, '');
-      await prisma.organization.create({
-        data: { id: orgId, name: changeCase.capitalCase(domainName), domain: emailValidation.domain },
-      });
-    }
-  }
-};
-
 builder.mutationFields((t) => ({
   signup: t.field({
     nullable: false,
@@ -116,7 +85,7 @@ builder.mutationFields((t) => ({
       args: t.arg({ type: SignUpInputDto, required: true }),
     },
     validate: (args) => Boolean(signUpInputSchema.parse(args)),
-    resolve: async (root, args, _ctx, _info) => {
+    resolve: async (_root, args, _ctx, _info) => {
       const [existingUser, redisVal] = await Promise.all([
         prisma.user.findUnique({
           where: { email: args.args.email },
@@ -147,7 +116,7 @@ builder.mutationFields((t) => ({
 
       const newOrgId = createId();
 
-      if (!redisVal) await createOrg(emailValidation, newOrgId, nonWorkName);
+      if (!redisVal) await createOrg(emailValidation, newOrgId, nonWorkName, OrganizationRoleEnum.ORG_ADMIN);
 
       const user = await createUser({
         email: args.args.email,
