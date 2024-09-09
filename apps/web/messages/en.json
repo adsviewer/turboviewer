@@ -146,7 +146,7 @@
     "organizationMembers": "Members",
     "inviteSuccess": "Invitation(s) sent successfully!",
     "invited": "Invited",
-    "inviteUsersLimitHint": "You have reached the maximum amount of users for your current plan!"
+    "inviteUsersLimitHint": "You have reached the maximum amount of users for your current plan."
   },
   "profile": {
     "title": "Profile",
