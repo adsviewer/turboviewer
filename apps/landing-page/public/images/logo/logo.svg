@@ -3,17 +3,19 @@
         "https://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 <svg xmlns="http://www.w3.org/2000/svg"
      width="486.000000pt" height="486.000000pt" viewBox="0 0 486.000000 486.000000"
-     preserveAspectRatio="xMidYMid meet" baseProfile="full">
-    <style>
-        g {
-        fill: #000000;
-        }
-        @media (prefers-color-scheme: dark) {
+     preserveAspectRatio="xMidYMid meet" baseProfile="tiny-ps">
+    <defs>
+        <style>
             g {
-            fill: #ffffff;
+            fill: #000000;
             }
-        }
-    </style>
+            @media (prefers-color-scheme: dark) {
+                g {
+                fill: #ffffff;
+                }
+            }
+        </style>
+    </defs>
     <g transform="translate(0.000000,486.000000) scale(0.100000,-0.100000)"
        stroke="none">
         <path d="M3069 3601 c-20 -21 -29 -39 -29 -63 0 -19 173 -509 400 -1133 319
