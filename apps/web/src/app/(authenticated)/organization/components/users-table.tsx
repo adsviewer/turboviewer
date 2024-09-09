@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { maxUsersPerTier } from '@repo/mappings';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import { AllRoles, OrganizationRoleEnum, UserOrganizationStatus } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
@@ -252,6 +253,13 @@ export function UsersTable(): React.ReactNode {
             <IconRefresh size={20} />
           </ActionIcon>
         </Tooltip>
+
+        {organization?.organization.userOrganizations.length ? (
+          <Text c="dimmed" ml="auto" size="sm">
+            {organization.organization.userOrganizations.length} /{' '}
+            {String(maxUsersPerTier[organization.organization.tier].maxUsers)} {tOrganization('organizationMembers')}
+          </Text>
+        ) : null}
       </Flex>
 
       <Box pos="relative" mih={120}>

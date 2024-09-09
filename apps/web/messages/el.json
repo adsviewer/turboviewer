@@ -150,7 +150,8 @@
     "updateOrganizationSuccess": "Ο οργανισμός ενημερώθηκε με επιτυχία!",
     "organizationMembers": "Μέλη",
     "inviteSuccess": "Οι προσκλήσεις στάλθηκαν με επιτυχία!",
-    "invited": "Καλέστηκε"
+    "invited": "Καλέστηκε",
+    "inviteUsersLimitHint": "Έχετε φτάσει τον μέγιστο αριθμό χρηστών για το τρέχον σχέδιό σας."
   },
   "profile": {
     "title": "Προφίλ",
