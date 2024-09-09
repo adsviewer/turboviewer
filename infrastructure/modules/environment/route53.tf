@@ -126,3 +126,14 @@ resource "aws_route53_record" "dmarc" {
     "v=DMARC1;p=quarantine;rua=mailto:no-email@adsviewer.io;pct=100"
   ]
 }
+
+resource "aws_route53_record" "bimi" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "default._bimi"
+  type    = "TXT"
+  ttl     = "300"
+  records = [
+    "v=BIMI1;l=https://app.adsviewer.io/logo.svg"
+  ]
+}
