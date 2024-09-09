@@ -23,7 +23,7 @@ const publicPaths = [
 ];
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|logo.svg).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
 };
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
