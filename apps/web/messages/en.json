@@ -8,6 +8,7 @@
     "accessRootOrg": "This action can be performed only from the root organization!",
     "copied": "Copied to clipboard",
     "search": "Search",
+    "advancedSearch": "Advanced Search",
     "submit": "Submit",
     "remove": "Remove",
     "refresh": "Refresh",
