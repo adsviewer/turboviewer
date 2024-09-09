@@ -4,18 +4,7 @@
 <svg xmlns="http://www.w3.org/2000/svg"
      width="486.000000pt" height="486.000000pt" viewBox="0 0 486.000000 486.000000"
      preserveAspectRatio="xMidYMid meet" baseProfile="tiny-ps">
-    <defs>
-        <style>
-            g {
-            fill: #000000;
-            }
-            @media (prefers-color-scheme: dark) {
-                g {
-                fill: #ffffff;
-                }
-            }
-        </style>
-    </defs>
+    <rect width="100%" height="100%" fill="white"/>
     <g transform="translate(0.000000,486.000000) scale(0.100000,-0.100000)"
        stroke="none">
         <path d="M3069 3601 c-20 -21 -29 -39 -29 -63 0 -19 173 -509 400 -1133 319

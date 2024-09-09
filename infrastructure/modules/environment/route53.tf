@@ -134,6 +134,6 @@ resource "aws_route53_record" "bimi" {
   type    = "TXT"
   ttl     = "300"
   records = [
-    "v=BIMI1;l=https://adsviewer.io/images/logo/logo.svg"
+    "v=BIMI1;l=https://adsviewer.io/images/logo/bimi-logo.svg"
   ]
 }
