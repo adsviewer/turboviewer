@@ -1,12 +1,11 @@
 'use client';
 
 import { Badge, Box, Card, Flex, Group, Text, Title, Tooltip } from '@mantine/core';
-import { AreaChart } from '@mantine/charts';
+import { LineChart } from '@mantine/charts';
 import * as React from 'react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
-import { YAxis } from 'recharts';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
@@ -145,7 +144,29 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       {!searchParams.has(fetchPreviewsKey) ? (
         // Chart Analytics
         <Box>
-          <AreaChart
+          <LineChart
+            h={300}
+            tooltipProps={{ wrapperStyle: { zIndex: 10 } }}
+            curveType="natural"
+            strokeWidth={1.5}
+            tooltipAnimationDuration={200}
+            withLegend
+            withRightYAxis
+            valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
+            dataKey="date"
+            data={datapoints}
+            series={[
+              {
+                yAxisId: 'left',
+                name: 'spend',
+                color: 'teal.6',
+                label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
+              },
+              { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: t('impressions') },
+              { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
+            ]}
+          />
+          {/* <AreaChart
             mt="md"
             px="sm"
             h={300}
@@ -187,7 +208,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
                 stroke: 'var(--chart-grid-color)',
               }}
             />
-          </AreaChart>
+          </AreaChart> */}
         </Box>
       ) : (
         // IFrame ad preview
