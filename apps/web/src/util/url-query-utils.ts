@@ -29,6 +29,7 @@ export const dateFromKey = 'dateFrom';
 export const dateToKey = 'dateTo';
 export const fetchPreviewsKey = 'fetchPreviews';
 export const emailKey = 'email';
+export const searchKey = 'search';
 export const chartMetricKey = 'chartMetric';
 
 export const positions = [

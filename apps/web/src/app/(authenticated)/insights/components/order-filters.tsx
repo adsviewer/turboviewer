@@ -185,7 +185,7 @@ export default function OrderFilters(): React.ReactNode {
     <Flex w="100%" wrap="wrap" direction="column">
       <Flex wrap="wrap" mb="md" gap="xs">
         {/* Search */}
-        <Search />
+        <Search isPending={isPending} startTransition={startTransition} />
       </Flex>
       {/* Filters */}
       <Flex wrap="wrap" mb="md" gap="xs">
