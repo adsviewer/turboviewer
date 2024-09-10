@@ -1,11 +1,20 @@
-import { ActionIcon, Flex, Modal, TextInput, Tooltip } from '@mantine/core';
+import { ActionIcon, CloseButton, Flex, Modal, TextInput, Tooltip } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch, IconAdjustmentsAlt } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
 
 export default function Search(): React.ReactNode {
   const tGeneric = useTranslations('generic');
   const [opened, { open, close }] = useDisclosure(false);
+  const searchBoxRef = useRef<HTMLInputElement>(null);
+  const [searchBoxValue, setSearchBoxValue] = useState<string>('');
+
+  const handleSearchBoxValueChanged = (): void => {
+    if (searchBoxRef.current) {
+      setSearchBoxValue(searchBoxRef.current.value);
+    }
+  };
 
   const openAdvancedSearchModal = (): void => {
     open();
@@ -14,7 +23,14 @@ export default function Search(): React.ReactNode {
   return (
     <Flex align="center" gap="md" wrap="wrap">
       {/* Search */}
-      <TextInput leftSectionPointerEvents="none" leftSection={<IconSearch />} placeholder={tGeneric('search')} />
+      <TextInput
+        ref={searchBoxRef}
+        onChange={handleSearchBoxValueChanged}
+        leftSectionPointerEvents="none"
+        leftSection={<IconSearch />}
+        rightSection={<CloseButton disabled={!searchBoxValue} />}
+        placeholder={tGeneric('search')}
+      />
 
       {/* Advanced Search Button */}
       <Tooltip label={tGeneric('advancedSearch')}>

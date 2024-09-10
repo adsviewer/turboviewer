@@ -10,6 +10,7 @@ import {
   type InsightsQuery,
   type OrderBy,
   type PublisherEnum,
+  type InsightsSearchExpression,
 } from '@/graphql/generated/schema-server';
 
 export interface SearchParams {
@@ -27,6 +28,7 @@ export interface SearchParams {
   fetchPreviews?: string;
   dateFrom?: number;
   dateTo?: number;
+  search?: InsightsSearchExpression;
 }
 
 export default async function getInsights(
@@ -35,6 +37,7 @@ export default async function getInsights(
   order: OrderBy,
   pageSize: number,
   page: number,
+  search: InsightsSearchExpression,
 ): Promise<InsightsQuery> {
   return await urqlClientSdk().insights({
     adAccountIds: searchParams.account,
@@ -50,5 +53,6 @@ export default async function getInsights(
     positions: searchParams.position,
     publishers: searchParams.publisher,
     interval: searchParams.interval ?? InsightsInterval.week,
+    search,
   });
 }
