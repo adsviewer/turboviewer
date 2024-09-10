@@ -30,6 +30,7 @@
     "@repo/database": "workspace:*",
     "@repo/lambda-utils": "workspace:*",
     "@repo/logger": "workspace:*",
+    "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
