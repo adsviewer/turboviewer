@@ -3,7 +3,7 @@
 import { Badge, Box, Card, Flex, Group, Text, Title, Tooltip } from '@mantine/core';
 import { AreaChart } from '@mantine/charts';
 import * as React from 'react';
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useState, useRef } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
 import { YAxis } from 'recharts';
@@ -54,6 +54,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
   const searchParams = useSearchParams();
+  const iframeRef = useRef(null);
   const [rank, setRank] = useState<RankType>({
     label: 'GOOD',
     color: 'green',
@@ -116,6 +117,11 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     }
   }, [props.datapoints, setupDatapoints, setupRank]);
 
+  const onIframeLoad = (): void => {
+    const iframeElement = iframeRef.current;
+    logger.info(iframeElement);
+  };
+
   const getIFrameHtml = (): ReactNode => {
     if (!props.iframe) return <Flex justify="center" />;
     const iFrameProps: React.EmbedHTMLAttributes<HTMLEmbedElement> & React.IframeHTMLAttributes<HTMLIFrameElement> = {
@@ -125,9 +131,18 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     };
     switch (props.iframe.type) {
       case IFrameType.EMBEDDED:
-        return <Embed style={{ border: 'none' }} {...iFrameProps} />;
+        return <Embed style={{ border: 'none' }} {...iFrameProps} ref={iframeRef} />;
       case IFrameType.IFRAME:
-        return <IFrameT scrolling="no" loading="lazy" style={{ border: 'none' }} {...iFrameProps} />;
+        return (
+          <IFrameT
+            scrolling="no"
+            loading="lazy"
+            style={{ border: 'none' }}
+            {...iFrameProps}
+            ref={iframeRef}
+            onLoad={onIframeLoad}
+          />
+        );
       default:
         logger.error('Unknown iframe type');
         return <Flex justify="center" />;
