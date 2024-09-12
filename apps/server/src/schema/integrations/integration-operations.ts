@@ -1,7 +1,8 @@
 import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, FireAndForget } from '@repo/utils';
-import { getChannel, getIntegrationAuthUrl, getRootOrganizationId, getTier } from '@repo/channel';
+import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
+import { getRootOrganizationId, getTier } from '@repo/organization';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
 import { maxUsersPerTier } from '@repo/mappings';
@@ -48,16 +49,12 @@ builder.queryFields((t) => ({
         },
       });
       const tierStatus = await getTier(ctx.organizationId);
-      let maxIntegrations = 0;
-      maxIntegrations = maxUsersPerTier[tierStatus].maxIntegrations ?? Infinity;
+      const maxIntegrations = maxUsersPerTier[tierStatus].maxIntegrations ?? Infinity;
 
-      let currentIntegrations = 0;
-      Object.values(IntegrationTypeEnum).forEach((ch) => {
+      const currentIntegrations = Object.values(IntegrationTypeEnum).reduce((acc, ch) => {
         const status = integrationStatus(ch, integrations);
-        if (status === IntegrationStatusEnum.Connected) {
-          currentIntegrations++;
-        }
-      });
+        return status === IntegrationStatusEnum.Connected ? acc + 1 : acc;
+      }, 0);
 
       const tierAllowIntegration = currentIntegrations < maxIntegrations;
 

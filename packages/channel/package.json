@@ -32,6 +32,7 @@
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
+    "@repo/organization": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
     "lodash": "^4.17.21",

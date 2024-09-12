@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma, Tier } from '@repo/database';
+import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
+import { getTier } from '@repo/organization';
 import { logger } from '@repo/logger';
 import { redisGet, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError } from '@repo/utils';
@@ -90,47 +91,43 @@ const completeIntegration = async (
   }
 
   const tierStatus = await getTier(organizationId);
-  let maxIntegrations = 0;
-  maxIntegrations = maxUsersPerTier[tierStatus].maxIntegrations ?? Infinity;
+  const maxIntegrations = maxUsersPerTier[tierStatus].maxIntegrations ?? Infinity;
 
-  let currentIntegrations = 1;
   const integrations = await prisma.integration.findMany({
     where: {
       organizationId,
     },
   });
 
-  integrations.map((el) => (el.status === 'CONNECTED' ? currentIntegrations++ : null));
+  const currentIntegrations = integrations.reduce((acc, el) => (el.status === 'CONNECTED' ? acc + 1 : acc), 1);
 
   if (currentIntegrations > maxIntegrations) {
     return new AError('Max integration limit reached for the current tier');
   }
-
-  if (currentIntegrations <= maxIntegrations) {
-    const decryptedIntegration = await saveTokens(tokens, organizationId, integrationType).catch((e: unknown) => {
-      if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
-        const metaSchema = z.object({ modelName: z.string(), target: z.array(z.string()) });
-        const parsed = metaSchema.safeParse(e.meta);
-        if (
-          parsed.success &&
-          parsed.data.modelName === 'Integration' &&
-          parsed.data.target.includes('external_id') &&
-          parsed.data.target.includes('type')
-        )
-          return new AError(
-            'There is already an integration for this organization. Please disconnect the existing one first.',
-          );
-        return new AError('Failed to save tokens to database');
-      }
-      logger.error(e, 'Failed to save tokens to database');
+  const decryptedIntegration = await saveTokens(tokens, organizationId, integrationType).catch((e: unknown) => {
+    if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
+      const metaSchema = z.object({ modelName: z.string(), target: z.array(z.string()) });
+      const parsed = metaSchema.safeParse(e.meta);
+      if (
+        parsed.success &&
+        parsed.data.modelName === 'Integration' &&
+        parsed.data.target.includes('external_id') &&
+        parsed.data.target.includes('type')
+      )
+        return new AError(
+          'There is already an integration for this organization. Please disconnect the existing one first.',
+        );
       return new AError('Failed to save tokens to database');
-    });
-    if (isAError(decryptedIntegration)) return decryptedIntegration;
+    }
+    logger.error(e, 'Failed to save tokens to database');
+    return new AError('Failed to save tokens to database');
+  });
+  if (isAError(decryptedIntegration)) return decryptedIntegration;
 
-    fireAndForget.add(
-      async () => await invokeChannelIngress({ initial: false, integrationIds: [decryptedIntegration.id] }),
-    );
-  }
+  fireAndForget.add(
+    async () => await invokeChannelIngress({ initial: false, integrationIds: [decryptedIntegration.id] }),
+  );
+
   return integrationType;
 };
 
@@ -195,23 +192,4 @@ const saveTokens = async (
   const adAccounts = await getChannel(type).saveAdAccounts(decryptedIntegration);
   if (isAError(adAccounts)) return adAccounts;
   return decryptedIntegration;
-};
-
-export const getRootOrganizationId = async (organizationId: string): Promise<string> => {
-  const organization = await prisma.organization.findUniqueOrThrow({ where: { id: organizationId } });
-  if (organization.parentId) {
-    return await getRootOrganizationId(organization.parentId);
-  }
-  return organization.id;
-};
-
-export const getTier = async (organizationId?: string | null): Promise<Tier> => {
-  if (!organizationId) {
-    return Tier.Launch;
-  }
-
-  const rootOrganizationId = await getRootOrganizationId(organizationId);
-  const organization = await prisma.organization.findUniqueOrThrow({ where: { id: rootOrganizationId } });
-
-  return organization.tier;
 };

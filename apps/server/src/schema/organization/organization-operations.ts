@@ -1,8 +1,8 @@
 import { EmailType, OrganizationRoleEnum, prisma, Tier, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { GraphQLError } from 'graphql';
 import { AError, FireAndForget, isAError } from '@repo/utils';
-import { deleteInsightsCache, getTier } from '@repo/channel';
-import { maxUsersPerTier } from '@repo/mappings';
+import { deleteInsightsCache } from '@repo/channel';
+import { getTier, switchTierHelper } from '@repo/organization';
 import { builder } from '../builder';
 import { createJwts } from '../../auth';
 import { TokensDto } from '../user/user-types';
@@ -360,7 +360,7 @@ builder.mutationFields((t) => ({
     },
   }),
 
-  switchTiers: t.withAuth({ authenticated: true }).prismaField({
+  switchTiers: t.withAuth({ isAdmin: true }).prismaField({
     type: OrganizationDto,
     nullable: false,
     args: {
@@ -368,97 +368,9 @@ builder.mutationFields((t) => ({
       tier: t.arg({ type: Tier, required: true }),
     },
     resolve: async (query, _root, args, _ctx, _info) => {
-      const { organizationId, tier } = args;
+      const { organizationId, tier: newTier } = args;
 
-      const organization = await prisma.organization.findUniqueOrThrow({
-        where: { id: organizationId },
-        include: {
-          users: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-
-      const currentTier = organization.tier;
-      const maxUsersInNewTier = maxUsersPerTier[tier].maxUsers;
-
-      if (currentTier !== tier) {
-        if (tier === 'Launch') {
-          if (organization.users.length > maxUsersInNewTier) {
-            const usersToRemove = organization.users.slice(maxUsersInNewTier);
-
-            await prisma.userOrganization.deleteMany({
-              where: {
-                userId: { in: usersToRemove.map((userOrg) => userOrg.userId) },
-                organizationId,
-              },
-            });
-          }
-        }
-        if (tier === 'Build') {
-          const adminUsers = organization.users
-            .filter((userOrg) => userOrg.role === 'ORG_ADMIN')
-            .sort((a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime());
-
-          const regularUsers = organization.users
-            .filter((userOrg) => userOrg.role !== 'ORG_ADMIN')
-            .sort((a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime());
-
-          const usersToKeep = [
-            ...adminUsers.slice(0, maxUsersInNewTier),
-            ...regularUsers.slice(0, maxUsersInNewTier - adminUsers.length),
-          ].slice(0, maxUsersInNewTier);
-
-          const usersToRemove = organization.users.filter(
-            (userOrg) => !usersToKeep.some((keep) => keep.userId === userOrg.userId),
-          );
-
-          await prisma.userOrganization.deleteMany({
-            where: {
-              userId: { in: usersToRemove.map((userOrg) => userOrg.userId) },
-              organizationId,
-            },
-          });
-        }
-
-        if (tier === 'Grow') {
-          const adminUsers = organization.users
-            .filter((userOrg) => userOrg.role === 'ORG_ADMIN')
-            .sort((a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime());
-
-          // if (adminUsers.length < 5) {
-          //   throw new GraphQLError('Cannot downgrade to Grow tier: minimum of 5 admins required.');
-          // }
-
-          const regularUsers = organization.users
-            .filter((userOrg) => userOrg.role !== 'ORG_ADMIN')
-            .sort((a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime());
-
-          const usersToKeep = [
-            ...adminUsers.slice(0, Math.max(5, maxUsersInNewTier)),
-            ...regularUsers.slice(0, maxUsersInNewTier - adminUsers.length),
-          ].slice(0, maxUsersInNewTier);
-
-          const usersToRemove = organization.users.filter(
-            (userOrg) => !usersToKeep.some((keep) => keep.userId === userOrg.userId),
-          );
-
-          await prisma.userOrganization.deleteMany({
-            where: {
-              userId: { in: usersToRemove.map((userOrg) => userOrg.userId) },
-              organizationId,
-            },
-          });
-        }
-      }
-
-      const updatedOrganization = await prisma.organization.update({
-        ...query,
-        where: { id: organizationId },
-        data: { tier },
-      });
+      const updatedOrganization = switchTierHelper(organizationId, newTier, query);
 
       return updatedOrganization;
     },

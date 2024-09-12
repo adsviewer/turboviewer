@@ -10,7 +10,7 @@ import SimpleObjectsPlugin from '@pothos/plugin-simple-objects';
 import ZodPlugin from '@pothos/plugin-zod';
 import { prisma, Prisma } from '@repo/database';
 import { Environment, MODE } from '@repo/mode';
-import { getRootOrganizationId } from '@repo/channel';
+import { getRootOrganizationId } from '@repo/organization';
 import { type GraphQLContext } from '../context';
 import JsonValue = Prisma.JsonValue;
 
