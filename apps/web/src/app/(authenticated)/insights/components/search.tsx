@@ -74,7 +74,7 @@ export default function Search(props: PropsType): React.ReactNode {
           const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
           router.replace(newURL);
         });
-      }, 2000);
+      }, 1000);
 
       setSearchBoxValue(newSearchValue);
     }
@@ -106,6 +106,7 @@ export default function Search(props: PropsType): React.ReactNode {
         leftSection={<IconSearch />}
         rightSection={<CloseButton disabled={!searchBoxValue || props.isPending} onClick={clearSearchBoxValue} />}
         placeholder={tGeneric('search')}
+        autoComplete="false"
       />
 
       {/* Advanced Search Button */}
