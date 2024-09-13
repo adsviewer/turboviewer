@@ -292,7 +292,7 @@ class LinkedIn implements ChannelInterface {
     const responseP = fetch(`${baseUrl}/rest${queryParams}`, {
       headers,
     });
-    const response = await LinkedIn.parseLinkedInResponse(responseP, schema);
+    const response = await LinkedIn.parseLinkedInResponse(integration.id, responseP, schema);
     if (isAError(response)) return response;
     res.push(...response.elements);
     let next = response.next;
@@ -300,7 +300,7 @@ class LinkedIn implements ChannelInterface {
       const nextResponse = fetch(`${baseUrl}${next.href}`, {
         headers,
       });
-      const nextResponseParsed = await LinkedIn.parseLinkedInResponse(nextResponse, schema);
+      const nextResponseParsed = await LinkedIn.parseLinkedInResponse(integration.id, nextResponse, schema);
       if (isAError(nextResponseParsed)) return nextResponseParsed;
       res.push(...nextResponseParsed.elements);
       next = nextResponseParsed.next;
@@ -309,10 +309,14 @@ class LinkedIn implements ChannelInterface {
   }
 
   private static async parseLinkedInResponse<T extends ZodTypeAny>(
+    integrationId: string,
     responseP: Promise<Response>,
     schema: T,
   ): Promise<AError | { next: { rel: string; href: string } | undefined; elements: T[] }> {
-    const response = await responseP.catch((error: unknown) => {
+    const response = await responseP.catch(async (error: unknown) => {
+      if (error instanceof Error) {
+        await disConnectIntegrationOnError(integrationId, error, true);
+      }
       logger.error(error, 'Failed to fetch data in parseLinkedInResponse');
       return new AError('Failed to fetch data');
     });
@@ -398,6 +402,7 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
   const revocableMessages = [
     'Empty oauth2 access token',
     'The token used in the request has been revoked by the user',
+    'The token used in the request has expired',
     'The provided authorization grant or refresh token is invalid, expired or revoked.',
   ];
   if (revocableMessages.includes(error.message)) {
