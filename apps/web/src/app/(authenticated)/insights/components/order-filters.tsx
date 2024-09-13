@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Text, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
+import { Flex, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ChangeEvent, useTransition, useState } from 'react';
@@ -19,6 +19,8 @@ import {
   intervalKey,
   dateFromKey,
   dateToKey,
+  chartMetricKey,
+  ChartMetricsEnum,
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
@@ -89,6 +91,21 @@ export default function OrderFilters(): React.ReactNode {
       return InsightsInterval.quarter;
     }
     return InsightsInterval.day;
+  };
+
+  const getChartMetricValue = (): string => {
+    if (isParamInSearchParams(searchParams, chartMetricKey, ChartMetricsEnum.SPENT)) {
+      return ChartMetricsEnum.SPENT;
+    }
+    return ChartMetricsEnum.IMPRESSIONS;
+  };
+
+  const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
+    resetInsights();
+    const newURL = addOrReplaceURLParams(pathname, searchParams, chartMetricKey, option.value);
+    startTransition(() => {
+      router.replace(newURL);
+    });
   };
 
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
@@ -168,11 +185,9 @@ export default function OrderFilters(): React.ReactNode {
       {/* Filters */}
       <Flex wrap="wrap" mb="md" gap="xs">
         {/* Page size filter */}
-        <Flex align="center" mr="sm">
-          <Text size="md" mr="sm">
-            {t('pageSize')}:
-          </Text>
+        <Flex align="flex-end" mr="sm">
           <Select
+            description={t('pageSize')}
             placeholder="Pick value"
             data={['6', '12', '18', '50', '100']}
             value={getPageSizeValue()}
@@ -186,9 +201,9 @@ export default function OrderFilters(): React.ReactNode {
         </Flex>
 
         {/* Order filter */}
-        <Flex align="center" gap="md" wrap="wrap">
-          <Text size="md">{t('orderBy')}:</Text>
+        <Flex align="flex-end" gap="md" wrap="wrap">
           <Select
+            description={t('orderBy')}
             placeholder="Pick value"
             data={[
               { value: InsightsColumnsOrderBy.spend_rel, label: `${t('spent')} (${t('relative')})` },
@@ -221,10 +236,10 @@ export default function OrderFilters(): React.ReactNode {
             disabled={isPending}
           />
 
-          <Flex align="center" gap="md" wrap="wrap">
-            <Text size="md">{t('timeConstraints')}:</Text>
+          <Flex align="flex-end" gap="md" wrap="wrap">
             <Flex gap="sm">
               <Select
+                description={t('timeConstraints')}
                 placeholder="Pick value"
                 data={[
                   { value: InsightsInterval.day, label: t('daily') },
@@ -241,6 +256,7 @@ export default function OrderFilters(): React.ReactNode {
                 disabled={isPending}
               />
               <DatePickerInput
+                mt="auto"
                 type="range"
                 maxDate={new Date()}
                 placeholder={tGeneric('pickDateRange')}
@@ -255,7 +271,7 @@ export default function OrderFilters(): React.ReactNode {
       </Flex>
 
       {/* Misc. controls */}
-      <Flex align="center" gap="md" mb="md">
+      <Flex align="center" gap="md" mb="md" wrap="wrap">
         {/* Toggle ad previews */}
         <Tooltip
           withArrow
@@ -271,6 +287,27 @@ export default function OrderFilters(): React.ReactNode {
             disabled={isPending || !isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
           />
         </Tooltip>
+        {/* Change chart left metric */}
+        {!getAdPreviewValue() ? (
+          <Flex align="flex-end" gap="md" wrap="wrap" ml="auto">
+            <Select
+              description={t('chartMetric')}
+              placeholder="Pick value"
+              data={[
+                { value: ChartMetricsEnum.IMPRESSIONS, label: t('impressions') },
+                { value: ChartMetricsEnum.SPENT, label: t('spent') },
+              ]}
+              defaultValue={ChartMetricsEnum.IMPRESSIONS}
+              value={getChartMetricValue()}
+              onChange={handleChartMetricChange}
+              allowDeselect={false}
+              comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+              scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+              maw={150}
+              disabled={isPending}
+            />
+          </Flex>
+        ) : null}
       </Flex>
     </Flex>
   );

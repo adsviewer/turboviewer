@@ -53,6 +53,7 @@
     "noResultsFound": "Geen resultaten gevonden",
     "showAdPreviews": "Advertenties weergeven",
     "adPreviewsTooltip": "Voorbeelden kunnen alleen worden bekeken via filteren op advertentie-ID",
+    "chartMetric": "Grafiekmetriek",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",

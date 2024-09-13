@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge, Box, Card, Flex, Group, Text, Title, Tooltip } from '@mantine/core';
-import { LineChart } from '@mantine/charts';
+import { AreaChart, type AreaChartSeries } from '@mantine/charts';
 import * as React from 'react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -23,7 +23,7 @@ import {
 import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
-import { fetchPreviewsKey } from '@/util/url-query-utils';
+import { chartMetricKey, ChartMetricsEnum, fetchPreviewsKey } from '@/util/url-query-utils';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -133,6 +133,25 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
     }
   };
 
+  const getChartSeries = (): AreaChartSeries[] => {
+    if (searchParams.get(chartMetricKey) === ChartMetricsEnum.SPENT) {
+      return [
+        {
+          yAxisId: 'left',
+          name: 'spend',
+          color: 'teal.6',
+          label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
+        },
+        { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
+      ];
+    }
+
+    return [
+      { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: t('impressions') },
+      { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
+    ];
+  };
+
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Flex gap="sm" align="center">
@@ -144,7 +163,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       {!searchParams.has(fetchPreviewsKey) ? (
         // Chart Analytics
         <Box>
-          <LineChart
+          <AreaChart
             h={300}
             tooltipProps={{ wrapperStyle: { zIndex: 10 } }}
             curveType="natural"
@@ -155,60 +174,8 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
             valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
             dataKey="date"
             data={datapoints}
-            series={[
-              {
-                yAxisId: 'left',
-                name: 'spend',
-                color: 'teal.6',
-                label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
-              },
-              { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: t('impressions') },
-              { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
-            ]}
+            series={getChartSeries()}
           />
-          {/* <AreaChart
-            mt="md"
-            px="sm"
-            h={300}
-            data={datapoints}
-            dataKey="date"
-            series={[
-              {
-                yAxisId: 'right',
-                name: 'spend',
-                color: 'teal.6',
-                label: `${t('spent')} (${getCurrencySymbol(props.currency)})`,
-              },
-              { yAxisId: 'right', name: 'impressions', color: 'blue.6', label: t('impressions') },
-              { yAxisId: 'left', name: 'cpm', color: 'orange', label: 'CPM' },
-            ]}
-            valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
-            tooltipProps={{ wrapperStyle: { zIndex: 3 } }}
-            yAxisProps={{ yAxisId: 'left' }}
-            areaProps={(series) => series}
-            splitColors={['green', 'white']}
-            withLegend
-            curveType="natural"
-            strokeWidth={1.5}
-            tooltipAnimationDuration={200}
-          >
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              axisLine={false}
-              type="number"
-              tick={{
-                transform: 'translate(10, 0)',
-                fontSize: 12,
-                fill: 'currentColor',
-              }}
-              allowDecimals
-              tickLine={{
-                color: 'var(--chart-grid-color)',
-                stroke: 'var(--chart-grid-color)',
-              }}
-            />
-          </AreaChart> */}
         </Box>
       ) : (
         // IFrame ad preview

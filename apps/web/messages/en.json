@@ -53,6 +53,7 @@
     "noResultsFound": "No results found",
     "showAdPreviews": "Show ad previews",
     "adPreviewsTooltip": "Previews can be viewed only via filtering by Ad ID",
+    "chartMetric": "Chart Metric",
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",
