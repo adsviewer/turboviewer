@@ -32,7 +32,7 @@ export interface SearchParams {
 }
 
 export default async function getInsights(searchParams: SearchParams): Promise<InsightsQuery> {
-  const parsedSearch: InsightsSearchExpression = searchParams.search
+  const parsedSearchData: InsightsSearchExpression = searchParams.search
     ? (JSON.parse(Buffer.from(searchParams.search, 'base64').toString('utf-8')) as InsightsSearchExpression)
     : {};
 
@@ -50,6 +50,6 @@ export default async function getInsights(searchParams: SearchParams): Promise<I
     positions: searchParams.position,
     publishers: searchParams.publisher,
     interval: searchParams.interval ?? InsightsInterval.week,
-    search: parsedSearch,
+    search: parsedSearchData,
   });
 }

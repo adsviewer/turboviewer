@@ -14,7 +14,6 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { logger } from '@repo/logger';
 import { IconSearch, IconAdjustmentsAlt, IconPlus } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useTranslations } from 'next-intl';
@@ -115,7 +114,7 @@ export default function Search(props: PropsType): React.ReactNode {
   ];
 
   useEffect(() => {
-    const parsedSearch = searchParams.get(searchKey)
+    const parsedSearchData = searchParams.get(searchKey)
       ? (JSON.parse(
           Buffer.from(String(searchParams.get(searchKey)), 'base64').toString('utf-8'),
         ) as InsightsSearchExpression)
@@ -123,14 +122,14 @@ export default function Search(props: PropsType): React.ReactNode {
 
     if (searchParams.get(searchKey)) {
       // Load simple search data
-      if (parsedSearch.term?.value) {
-        setSearchBoxValue(parsedSearch.term.value);
+      if (parsedSearchData.term?.value) {
+        setSearchBoxValue(parsedSearchData.term.value);
       }
       // Load advanced search data
       else {
         let updatedSearchTerms: SearchTermType[] = [];
-        if (parsedSearch.and?.length) {
-          for (const currTerm of parsedSearch.and) {
+        if (parsedSearchData.and?.length) {
+          for (const currTerm of parsedSearchData.and) {
             if (currTerm.term) {
               const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
               newTerm.key = uniqid();
@@ -142,8 +141,8 @@ export default function Search(props: PropsType): React.ReactNode {
             }
           }
         }
-        if (parsedSearch.or?.length) {
-          for (const currTerm of parsedSearch.or) {
+        if (parsedSearchData.or?.length) {
+          for (const currTerm of parsedSearchData.or) {
             if (currTerm.term) {
               const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
               newTerm.key = uniqid();
@@ -156,11 +155,8 @@ export default function Search(props: PropsType): React.ReactNode {
           }
         }
         setSearchTerms(updatedSearchTerms);
-        logger.info(updatedSearchTerms);
       }
     }
-
-    logger.info(parsedSearch);
   }, [searchParams]);
 
   // The simple search performs a search in ad names AND ad accounts
@@ -269,7 +265,6 @@ export default function Search(props: PropsType): React.ReactNode {
       }
     }
     const encodedSearchData = btoa(JSON.stringify(newSearchData));
-    logger.info(newSearchData);
 
     props.startTransition(() => {
       const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
