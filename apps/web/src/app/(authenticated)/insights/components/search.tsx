@@ -75,7 +75,6 @@ export default function Search(props: PropsType): React.ReactNode {
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const [searchBoxValue, setSearchBoxValue] = useState<string>('');
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // const [searchData, setSearchData] = useState<InsightsSearchExpression>();
   const [searchTerms, setSearchTerms] = useState<SearchTermType[]>([]);
 
   const AND_OR_DATA = [
@@ -123,11 +122,11 @@ export default function Search(props: PropsType): React.ReactNode {
       : {};
 
     if (searchParams.get(searchKey)) {
-      // Simple search data
+      // Load simple search data
       if (parsedSearch.term?.value) {
         setSearchBoxValue(parsedSearch.term.value);
       }
-      // Advanced search data
+      // Load advanced search data
       else {
         let updatedSearchTerms: SearchTermType[] = [];
         if (parsedSearch.and?.length) {
@@ -164,7 +163,7 @@ export default function Search(props: PropsType): React.ReactNode {
     logger.info(parsedSearch);
   }, [searchParams]);
 
-  // The search performs a search in ad names and ad accounts
+  // The simple search performs a search in ad names AND ad accounts
   const handleSearchBoxValueChanged = (): void => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -189,7 +188,6 @@ export default function Search(props: PropsType): React.ReactNode {
           }
           newSearchData.or = [orQueryData];
         }
-        // setSearchData(newSearchData);
         const encodedSearchData = btoa(JSON.stringify(newSearchData));
 
         props.startTransition(() => {
@@ -211,10 +209,6 @@ export default function Search(props: PropsType): React.ReactNode {
         router.replace(newURL);
       });
     }
-  };
-
-  const openAdvancedSearchModal = (): void => {
-    open();
   };
 
   const addSearchTerm = (): void => {
@@ -302,7 +296,7 @@ export default function Search(props: PropsType): React.ReactNode {
       <Tooltip label={tGeneric('advancedSearch')}>
         <ActionIcon
           onClick={() => {
-            openAdvancedSearchModal();
+            open();
           }}
           disabled={props.isPending}
           variant="default"
