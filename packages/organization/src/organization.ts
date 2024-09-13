@@ -1,4 +1,4 @@
-import { Prisma, Tier, prisma } from '@repo/database';
+import { type Organization, Prisma, Tier, prisma } from '@repo/database';
 import { maxUsersPerTier } from '@repo/mappings';
 import { revokeIntegration } from '@repo/channel-utils';
 import { FireAndForget } from '@repo/utils';
@@ -28,7 +28,7 @@ export const switchTierHelper = async (
   organizationId: string,
   newTier: Tier,
   query: Omit<Prisma.OrganizationFindUniqueArgs, 'where'>,
-) => {
+): Promise<Organization> => {
   const organization = await prisma.organization.findUniqueOrThrow({
     ...query,
     where: { id: organizationId },
@@ -41,7 +41,7 @@ export const switchTierHelper = async (
     return organization;
   }
 
-  const disconnectIntegration = async (orgId: string) => {
+  const disconnectIntegration = async (orgId: string): Promise<void> => {
     const integrationCount = await prisma.integration.count({
       where: {
         organizationId: orgId,
@@ -64,7 +64,11 @@ export const switchTierHelper = async (
     }
   };
 
-  const removeUserFromOrganization = async (orgId: string, orgUsers: OrganizationWithUsers[`users`], tier: Tier) => {
+  const removeUserFromOrganization = async (
+    orgId: string,
+    orgUsers: OrganizationWithUsers[`users`],
+    tier: Tier,
+  ): Promise<void> => {
     const maxUsersInTier = maxUsersPerTier[tier].maxUsers;
 
     if (tier === Tier.Launch || tier === Tier.Build || tier === Tier.Grow) {
