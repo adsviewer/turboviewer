@@ -72,6 +72,17 @@
       "date": "Datum",
       "publisher": "Uitgever",
       "position": "Positie"
+    },
+    "search": {
+      "and": "En",
+      "or": "Of",
+      "contains": "Bevat",
+      "startsWith": "Het begint met",
+      "equals": "Het is",
+      "adName": "Advertentienaam",
+      "adAccountName": "Accountnaam",
+      "addSearchTerm": "Zoekparameter toevoegen",
+      "searchTermsHint": "Begin met het toevoegen van zoektermen om uw zoekopdracht te personaliseren"
     }
   },
   "integrations": {

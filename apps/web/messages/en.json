@@ -72,6 +72,17 @@
       "date": "Date",
       "publisher": "Publisher",
       "position": "Position"
+    },
+    "search": {
+      "and": "AND",
+      "or": "OR",
+      "contains": "Contains",
+      "startsWith": "Starts With",
+      "equals": "Equals",
+      "adName": "Ad Name",
+      "adAccountName": "Ad Account Name",
+      "addSearchTerm": "Add search term",
+      "searchTermsHint": "Start adding search terms to customize your search"
     }
   },
   "integrations": {
