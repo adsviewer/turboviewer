@@ -304,6 +304,7 @@ export default function Search(props: PropsType): React.ReactNode {
           onClick={() => {
             openAdvancedSearchModal();
           }}
+          disabled={props.isPending}
           variant="default"
           size={35}
           aria-label="Create Organization"
