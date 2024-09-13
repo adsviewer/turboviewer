@@ -20,6 +20,7 @@ import _ from 'lodash';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
+import uniqid from 'uniqid';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
   type InsightsSearchExpression,
@@ -33,7 +34,7 @@ interface PropsType {
 }
 
 interface SearchTermType {
-  key: number;
+  key: string;
   andOrValue: AndOrEnum;
   searchOperator: InsightsSearchOperator;
   searchField: InsightsSearchField;
@@ -56,7 +57,7 @@ const INITIAL_SEARCH_EXPRESSION: InsightsSearchExpression = {
 };
 
 const INITIAL_SEARCH_TERM: SearchTermType = {
-  key: 0,
+  key: '',
   andOrValue: AndOrEnum.AND,
   searchOperator: InsightsSearchOperator.Contains,
   searchField: InsightsSearchField.AdName,
@@ -76,7 +77,6 @@ export default function Search(props: PropsType): React.ReactNode {
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // const [searchData, setSearchData] = useState<InsightsSearchExpression>();
   const [searchTerms, setSearchTerms] = useState<SearchTermType[]>([]);
-  const [keys, setKeys] = useState<number[]>([]);
 
   const AND_OR_DATA = [
     {
@@ -122,9 +122,43 @@ export default function Search(props: PropsType): React.ReactNode {
         ) as InsightsSearchExpression)
       : {};
 
-    // Simple search
-    if (parsedSearch.term?.value) {
-      setSearchBoxValue(parsedSearch.term.value);
+    if (searchParams.get(searchKey)) {
+      // Simple search data
+      if (parsedSearch.term?.value) {
+        setSearchBoxValue(parsedSearch.term.value);
+      }
+      // Advanced search data
+      else {
+        let updatedSearchTerms: SearchTermType[] = [];
+        if (parsedSearch.and?.length) {
+          for (const currTerm of parsedSearch.and) {
+            if (currTerm.term) {
+              const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
+              newTerm.key = uniqid();
+              newTerm.andOrValue = AndOrEnum.AND;
+              newTerm.searchField = currTerm.term.field;
+              newTerm.searchOperator = currTerm.term.operator;
+              newTerm.searchValue = currTerm.term.value;
+              updatedSearchTerms = [...updatedSearchTerms, newTerm];
+            }
+          }
+        }
+        if (parsedSearch.or?.length) {
+          for (const currTerm of parsedSearch.or) {
+            if (currTerm.term) {
+              const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
+              newTerm.key = uniqid();
+              newTerm.andOrValue = AndOrEnum.OR;
+              newTerm.searchField = currTerm.term.field;
+              newTerm.searchOperator = currTerm.term.operator;
+              newTerm.searchValue = currTerm.term.value;
+              updatedSearchTerms = [...updatedSearchTerms, newTerm];
+            }
+          }
+        }
+        setSearchTerms(updatedSearchTerms);
+        logger.info(updatedSearchTerms);
+      }
     }
 
     logger.info(parsedSearch);
@@ -184,19 +218,69 @@ export default function Search(props: PropsType): React.ReactNode {
   };
 
   const addSearchTerm = (): void => {
-    let newKey = Math.random();
-    while (keys.includes(newKey)) {
-      newKey = Math.random();
-    }
-    setKeys([...keys, newKey]);
     const newSearchTerm = { ...INITIAL_SEARCH_TERM };
-    newSearchTerm.key = newKey;
+    newSearchTerm.key = uniqid();
     setSearchTerms([...searchTerms, { ...newSearchTerm }]);
   };
 
-  const removeSearchTerm = (keyToRemove: number): void => {
+  const removeSearchTerm = (keyToRemove: string): void => {
     const newSearchTerms = searchTerms.filter((term) => term.key !== keyToRemove);
     setSearchTerms(newSearchTerms);
+  };
+
+  const changeAndOrOperator = (operator: string, changeIndex: number): void => {
+    const updatedTerms = searchTerms.map((term, index) =>
+      changeIndex === index ? { ...term, andOrValue: operator as AndOrEnum } : term,
+    );
+    setSearchTerms(updatedTerms);
+  };
+
+  const changeSearchOperator = (operator: string, changeIndex: number): void => {
+    const updatedTerms = searchTerms.map((term, index) =>
+      changeIndex === index ? { ...term, searchOperator: operator as InsightsSearchOperator } : term,
+    );
+    setSearchTerms(updatedTerms);
+  };
+
+  const changeSearchField = (operator: string, changeIndex: number): void => {
+    const updatedTerms = searchTerms.map((term, index) =>
+      changeIndex === index ? { ...term, searchField: operator as InsightsSearchField } : term,
+    );
+    setSearchTerms(updatedTerms);
+  };
+
+  const changeSearchValue = (searchText: string, changeIndex: number): void => {
+    const updatedTerms = searchTerms.map((term, index) =>
+      changeIndex === index ? { ...term, searchValue: searchText } : term,
+    );
+    setSearchTerms(updatedTerms);
+  };
+
+  const handleSearch = (): void => {
+    close();
+    const newSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+
+    for (const term of searchTerms) {
+      const newData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+      if (newData.term) {
+        newData.term.operator = term.searchOperator;
+        newData.term.field = term.searchField;
+        newData.term.value = term.searchValue;
+      }
+
+      if (term.andOrValue === AndOrEnum.AND && newSearchData.and) {
+        newSearchData.and = [...newSearchData.and, newData];
+      } else if (term.andOrValue === AndOrEnum.OR && newSearchData.or) {
+        newSearchData.or = [...newSearchData.or, newData];
+      }
+    }
+    const encodedSearchData = btoa(JSON.stringify(newSearchData));
+    logger.info(newSearchData);
+
+    props.startTransition(() => {
+      const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
+      router.replace(newURL);
+    });
   };
 
   return (
@@ -233,31 +317,46 @@ export default function Search(props: PropsType): React.ReactNode {
         <Flex direction="column" mb="sm">
           <ScrollArea.Autosize mah={200} offsetScrollbars type="always">
             {searchTerms.length ? (
-              searchTerms.map((term) => {
+              searchTerms.map((term, index) => {
                 return (
                   <Flex align="center" gap="sm" my="sm" wrap={isMobile ? 'wrap' : 'nowrap'} key={term.key}>
                     <Select
                       placeholder="AND/OR Operator"
                       data={AND_OR_DATA}
-                      defaultValue={AndOrEnum.AND}
+                      defaultValue={term.andOrValue}
                       allowDeselect={false}
+                      onChange={(e) => {
+                        if (e) changeAndOrOperator(e, index);
+                      }}
                       comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
                     />
                     <Select
                       placeholder="Search operator"
                       data={SEARCH_OPERATOR_DATA}
-                      defaultValue={InsightsSearchOperator.Contains}
+                      defaultValue={term.searchOperator}
                       allowDeselect={false}
+                      onChange={(e) => {
+                        if (e) changeSearchOperator(e, index);
+                      }}
                       comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
                     />
                     <Select
                       placeholder="Search field"
                       data={SEARCH_FIELD_DATA}
-                      defaultValue={InsightsSearchField.AdName}
+                      defaultValue={term.searchField}
                       allowDeselect={false}
+                      onChange={(e) => {
+                        if (e) changeSearchField(e, index);
+                      }}
                       comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
                     />
-                    <TextInput placeholder={tGeneric('search')} />
+                    <TextInput
+                      placeholder={tGeneric('search')}
+                      defaultValue={term.searchValue}
+                      onChange={(e) => {
+                        changeSearchValue(e.target.value, index);
+                      }}
+                    />
                     <CloseButton
                       onClick={() => {
                         removeSearchTerm(term.key);
@@ -282,6 +381,17 @@ export default function Search(props: PropsType): React.ReactNode {
           }}
         >
           {tSearch('addSearchTerm')}
+        </Button>
+        <Button
+          fullWidth
+          leftSection={<IconSearch />}
+          mt="sm"
+          disabled={props.isPending || !searchTerms.length}
+          onClick={() => {
+            handleSearch();
+          }}
+        >
+          {tGeneric('search')}
         </Button>
       </Modal>
     </Flex>

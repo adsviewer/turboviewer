@@ -5,6 +5,7 @@ import { IconUserPlus } from '@tabler/icons-react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
 import React, { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import uniqid from 'uniqid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { OrganizationRoleEnum, type UserRolesInput } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
@@ -18,7 +19,7 @@ interface PropsType {
 interface SelectedUsersType {
   role: OrganizationRoleEnum;
   userId: string | null;
-  key: number;
+  key: string;
 }
 
 interface DropdownValueType {
@@ -30,7 +31,7 @@ interface DropdownValueType {
 const INITIAL_USER_VALUE: SelectedUsersType = {
   role: OrganizationRoleEnum.ORG_MEMBER,
   userId: null,
-  key: 0,
+  key: '',
 };
 
 export default function AddUsersModal(props: PropsType): ReactNode {
@@ -42,7 +43,6 @@ export default function AddUsersModal(props: PropsType): ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
   const [availableUsers, setAvailableUsers] = useState<DropdownValueType[]>([]);
   const [users, setUsers] = useState<SelectedUsersType[]>([]);
-  const [keys, setKeys] = useState<number[]>([]);
   const rolesData = [
     {
       label: tProfile('roleAdmin'),
@@ -80,12 +80,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
   const addUser = useCallback(
     (userId?: string, role?: OrganizationRoleEnum): void => {
       const newUser = { ...INITIAL_USER_VALUE };
-      let newKey = Math.random();
-      while (keys.includes(newKey)) {
-        newKey = Math.random();
-      }
-      setKeys([...keys, newKey]);
-      newUser.key = newKey;
+      newUser.key = uniqid();
       newUser.userId = userId ? userId : null;
       newUser.role = role ? role : OrganizationRoleEnum.ORG_MEMBER;
       setUsers(() => {
@@ -99,7 +94,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
         return [...users, newUser];
       });
     },
-    [keys, updateAvailableUsers, users],
+    [updateAvailableUsers, users],
   );
 
   const changeRole = (newRole: string, roleChangeIndex: number): void => {
@@ -153,7 +148,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
     });
   };
 
-  const deleteUser = (deletedUserKey: number): void => {
+  const deleteUser = (deletedUserKey: string): void => {
     setUsers(() => {
       const updatedUsers = users.filter((user) => user.key !== deletedUserKey);
       updateAvailableUsers(updatedUsers);
