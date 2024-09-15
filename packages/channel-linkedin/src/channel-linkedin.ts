@@ -324,14 +324,31 @@ class LinkedIn implements ChannelInterface {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
     const body = await response.json();
     if (!response.ok) {
-      logger.error(body, 'Failed to fetch data');
-      return new AError('Failed to fetch data');
+      const linkedInErrorSchema = z.object({
+        status: z.number(),
+        serviceErrorCode: z.number(),
+        code: z.string(),
+        message: z.string(),
+      });
+      const parsed = linkedInErrorSchema.safeParse(body);
+      if (!parsed.success) {
+        logger.error(body, 'Unknown linkedIn error');
+        return new AError('Unknown linkedIn error');
+      }
+      if (parsed.data.code === 'EXPIRED_ACCESS_TOKEN') {
+        await disConnectIntegrationOnError(integrationId, new Error(parsed.data.message), true);
+        return new AError('Expired access token');
+      }
+      logger.error(body, 'Unknown error code in LinkedIn response');
+      return new AError('Unknown error code in LinkedIn response');
     }
     const bigSchema = z.object({
       elements: schema.array(),
-      paging: z.object({
-        links: z.array(z.object({ rel: z.string(), href: z.string() })),
-      }),
+      paging: z
+        .object({
+          links: z.array(z.object({ rel: z.string(), href: z.string() })),
+        })
+        .optional(),
     });
     const parsed = bigSchema.safeParse(body);
     if (!parsed.success) {
@@ -339,7 +356,7 @@ class LinkedIn implements ChannelInterface {
       logger.error(parsed.error, msg);
       return new AError(msg);
     }
-    const next = parsed.data.paging.links.find((l) => l.rel === 'next');
+    const next = parsed.data.paging?.links.find((l) => l.rel === 'next');
     return { next, elements: parsed.data.elements };
   }
 
