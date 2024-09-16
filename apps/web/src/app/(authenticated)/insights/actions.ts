@@ -32,9 +32,15 @@ export interface SearchParams {
 }
 
 export default async function getInsights(searchParams: SearchParams): Promise<InsightsQuery> {
-  const parsedSearchData: InsightsSearchExpression = searchParams.search
-    ? (JSON.parse(Buffer.from(searchParams.search, 'base64').toString('utf-8')) as InsightsSearchExpression)
+  const parsedSearchData: InsightsSearchExpression & {
+    isAdvancedSearch?: boolean;
+  } = searchParams.search
+    ? (JSON.parse(Buffer.from(searchParams.search, 'base64').toString('utf-8')) as InsightsSearchExpression & {
+        isAdvancedSearch?: boolean;
+      })
     : {};
+
+  delete parsedSearchData.isAdvancedSearch;
 
   return await urqlClientSdk().insights({
     adAccountIds: searchParams.account,

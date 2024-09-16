@@ -82,6 +82,7 @@
       "adName": "Ad Name",
       "adAccountName": "Ad Account Name",
       "addSearchTerm": "Add search term",
+      "addSearchSubTerm": "Add subterm",
       "searchTermsHint": "Start adding search terms to customize your search."
     }
   },

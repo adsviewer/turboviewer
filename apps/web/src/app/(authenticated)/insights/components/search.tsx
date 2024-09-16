@@ -14,12 +14,13 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { IconSearch, IconAdjustmentsAlt, IconPlus } from '@tabler/icons-react';
+import { IconSearch, IconAdjustmentsAlt, IconPlus, IconCodePlus, IconCornerDownRight } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
+import React, { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
 import uniqid from 'uniqid';
+import { logger } from '@repo/logger';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
   type InsightsSearchExpression,
@@ -38,6 +39,8 @@ interface SearchTermType {
   searchOperator: InsightsSearchOperator;
   searchField: InsightsSearchField;
   searchValue: string;
+  searchTerms: SearchTermType[];
+  depth: number;
 }
 
 enum AndOrEnum {
@@ -45,7 +48,9 @@ enum AndOrEnum {
   OR = 'OR',
 }
 
-const INITIAL_SEARCH_EXPRESSION: InsightsSearchExpression = {
+const INITIAL_SEARCH_EXPRESSION: InsightsSearchExpression & {
+  isAdvancedSearch?: boolean;
+} = {
   and: [],
   or: [],
   term: {
@@ -61,6 +66,8 @@ const INITIAL_SEARCH_TERM: SearchTermType = {
   searchOperator: InsightsSearchOperator.Contains,
   searchField: InsightsSearchField.AdName,
   searchValue: '',
+  searchTerms: [],
+  depth: 0,
 };
 
 export default function Search(props: PropsType): React.ReactNode {
@@ -117,47 +124,59 @@ export default function Search(props: PropsType): React.ReactNode {
     const parsedSearchData = searchParams.get(searchKey)
       ? (JSON.parse(
           Buffer.from(String(searchParams.get(searchKey)), 'base64').toString('utf-8'),
-        ) as InsightsSearchExpression)
+        ) as InsightsSearchExpression & {
+          isAdvancedSearch?: boolean;
+        })
       : {};
 
     if (searchParams.get(searchKey)) {
       // Load simple search data
-      if (parsedSearchData.term?.value) {
+      if (!parsedSearchData.isAdvancedSearch && parsedSearchData.term) {
         setSearchBoxValue(parsedSearchData.term.value);
       }
       // Load advanced search data
-      else {
-        let updatedSearchTerms: SearchTermType[] = [];
-        if (parsedSearchData.and?.length) {
-          for (const currTerm of parsedSearchData.and) {
-            if (currTerm.term) {
-              const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
-              newTerm.key = uniqid();
-              newTerm.andOrValue = AndOrEnum.AND;
-              newTerm.searchField = currTerm.term.field;
-              newTerm.searchOperator = currTerm.term.operator;
-              newTerm.searchValue = currTerm.term.value;
-              updatedSearchTerms = [...updatedSearchTerms, newTerm];
-            }
-          }
-        }
-        if (parsedSearchData.or?.length) {
-          for (const currTerm of parsedSearchData.or) {
-            if (currTerm.term) {
-              const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
-              newTerm.key = uniqid();
-              newTerm.andOrValue = AndOrEnum.OR;
-              newTerm.searchField = currTerm.term.field;
-              newTerm.searchOperator = currTerm.term.operator;
-              newTerm.searchValue = currTerm.term.value;
-              updatedSearchTerms = [...updatedSearchTerms, newTerm];
-            }
-          }
-        }
+      else if (parsedSearchData.isAdvancedSearch) {
+        const updatedSearchTerms: SearchTermType[] = [];
+        // if (parsedSearchData.and?.length) {
+        //   for (const currTerm of parsedSearchData.and) {
+        //     if (currTerm.term) {
+        //       const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
+        //       newTerm.key = uniqid();
+        //       newTerm.andOrValue = AndOrEnum.AND;
+        //       newTerm.searchField = currTerm.term.field;
+        //       newTerm.searchOperator = currTerm.term.operator;
+        //       newTerm.searchValue = currTerm.term.value;
+        //       updatedSearchTerms = [...updatedSearchTerms, newTerm];
+        //     }
+        //   }
+        // }
+        // if (parsedSearchData.or?.length) {
+        //   for (const currTerm of parsedSearchData.or) {
+        //     if (currTerm.term) {
+        //       const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
+        //       newTerm.key = uniqid();
+        //       newTerm.andOrValue = AndOrEnum.OR;
+        //       newTerm.searchField = currTerm.term.field;
+        //       newTerm.searchOperator = currTerm.term.operator;
+        //       newTerm.searchValue = currTerm.term.value;
+        //       updatedSearchTerms = [...updatedSearchTerms, newTerm];
+        //     }
+        //   }
+        // }
         setSearchTerms(updatedSearchTerms);
       }
     }
   }, [searchParams]);
+
+  const addSubSearchTerm = (parentIndex: number, depth: number): void => {
+    logger.info(searchTerms);
+    const newSearchTerm = { ...INITIAL_SEARCH_TERM };
+    newSearchTerm.key = uniqid();
+    newSearchTerm.depth = depth;
+    const updatedSearchTerms = _.cloneDeep(searchTerms);
+    updatedSearchTerms[parentIndex].searchTerms.push(newSearchTerm);
+    setSearchTerms(updatedSearchTerms);
+  };
 
   // The simple search performs a search in ad names AND ad accounts
   const handleSearchBoxValueChanged = (): void => {
@@ -249,6 +268,7 @@ export default function Search(props: PropsType): React.ReactNode {
   const handleSearch = (): void => {
     close();
     const newSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+    newSearchData.isAdvancedSearch = true;
 
     for (const term of searchTerms) {
       const newData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
@@ -270,6 +290,90 @@ export default function Search(props: PropsType): React.ReactNode {
       const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
       router.replace(newURL);
     });
+  };
+
+  const renderSearchTerm = (term: SearchTermType, index: number, depth: number): React.ReactNode => {
+    return (
+      <Flex align="center" gap="sm" my="sm" wrap={isMobile ? 'wrap' : 'nowrap'} key={term.key}>
+        {depth > 0 ? <IconCornerDownRight /> : null}
+        {depth > 0 ? (
+          <Select
+            data={AND_OR_DATA}
+            defaultValue={term.andOrValue}
+            allowDeselect={false}
+            onChange={(e) => {
+              if (e) changeAndOrOperator(e, index);
+            }}
+            comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          />
+        ) : null}
+
+        <Select
+          data={SEARCH_OPERATOR_DATA}
+          defaultValue={term.searchOperator}
+          allowDeselect={false}
+          onChange={(e) => {
+            if (e) changeSearchOperator(e, index);
+          }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+        />
+        <Select
+          data={SEARCH_FIELD_DATA}
+          defaultValue={term.searchField}
+          allowDeselect={false}
+          onChange={(e) => {
+            if (e) changeSearchField(e, index);
+          }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+        />
+        <TextInput
+          placeholder={tGeneric('search')}
+          defaultValue={term.searchValue}
+          onChange={(e) => {
+            changeSearchValue(e.target.value, index);
+          }}
+        />
+        {depth === 0 ? (
+          <Tooltip label={tSearch('addSearchSubTerm')}>
+            <ActionIcon
+              disabled={props.isPending}
+              variant="transparent"
+              size={35}
+              onClick={() => {
+                addSubSearchTerm(index, 1);
+              }}
+            >
+              <IconCodePlus />
+            </ActionIcon>
+          </Tooltip>
+        ) : null}
+
+        <Tooltip label={tGeneric('remove')}>
+          <CloseButton
+            onClick={() => {
+              removeSearchTerm(term.key);
+            }}
+          />
+        </Tooltip>
+      </Flex>
+    );
+  };
+
+  const renderSearchTerms = (): React.ReactNode => {
+    logger.info(searchTerms);
+    const nodes = [];
+    // Depth 0
+    for (const [index0, term0] of searchTerms.entries()) {
+      nodes.push(renderSearchTerm(term0, index0, term0.depth));
+
+      if (term0.searchTerms.length) {
+        // Depth 1
+        for (const [index1, term1] of term0.searchTerms.entries()) {
+          nodes.push(renderSearchTerm(term1, index1, term1.depth));
+        }
+      }
+    }
+    return nodes;
   };
 
   return (
@@ -305,56 +409,9 @@ export default function Search(props: PropsType): React.ReactNode {
       {/* Advanced Search Modal */}
       <Modal opened={opened} onClose={close} title={tGeneric('advancedSearch')} size="xl">
         <Flex direction="column" mb="sm">
-          <ScrollArea.Autosize mah={200} offsetScrollbars type="always">
+          <ScrollArea.Autosize mah={350} offsetScrollbars type="always">
             {searchTerms.length ? (
-              searchTerms.map((term, index) => {
-                return (
-                  <Flex align="center" gap="sm" my="sm" wrap={isMobile ? 'wrap' : 'nowrap'} key={term.key}>
-                    <Select
-                      placeholder="AND/OR Operator"
-                      data={AND_OR_DATA}
-                      defaultValue={term.andOrValue}
-                      allowDeselect={false}
-                      onChange={(e) => {
-                        if (e) changeAndOrOperator(e, index);
-                      }}
-                      comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-                    />
-                    <Select
-                      placeholder="Search operator"
-                      data={SEARCH_OPERATOR_DATA}
-                      defaultValue={term.searchOperator}
-                      allowDeselect={false}
-                      onChange={(e) => {
-                        if (e) changeSearchOperator(e, index);
-                      }}
-                      comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-                    />
-                    <Select
-                      placeholder="Search field"
-                      data={SEARCH_FIELD_DATA}
-                      defaultValue={term.searchField}
-                      allowDeselect={false}
-                      onChange={(e) => {
-                        if (e) changeSearchField(e, index);
-                      }}
-                      comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-                    />
-                    <TextInput
-                      placeholder={tGeneric('search')}
-                      defaultValue={term.searchValue}
-                      onChange={(e) => {
-                        changeSearchValue(e.target.value, index);
-                      }}
-                    />
-                    <CloseButton
-                      onClick={() => {
-                        removeSearchTerm(term.key);
-                      }}
-                    />
-                  </Flex>
-                );
-              })
+              renderSearchTerms()
             ) : (
               <Text c="dimmed" ta="center" size="sm">
                 {tSearch('searchTermsHint')}
