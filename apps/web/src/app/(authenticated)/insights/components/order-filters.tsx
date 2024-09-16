@@ -281,7 +281,7 @@ export default function OrderFilters(): React.ReactNode {
           disabled={!isPending && isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
         >
           <Switch
-            label={t('showAdPreviews')}
+            description={t('showAdPreviews')}
             checked={getAdPreviewValue()}
             onChange={handleAdPreviewChange}
             disabled={isPending || !isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
@@ -289,7 +289,7 @@ export default function OrderFilters(): React.ReactNode {
         </Tooltip>
         {/* Change chart left metric */}
         {!getAdPreviewValue() ? (
-          <Flex align="flex-end" gap="md" wrap="wrap" ml="auto">
+          <Flex align="center" gap="md" wrap="wrap">
             <Select
               description={t('chartMetric')}
               placeholder="Pick value"
