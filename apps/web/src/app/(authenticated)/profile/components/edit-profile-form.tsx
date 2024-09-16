@@ -51,7 +51,8 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
         repeatPassword: '',
       });
     }
-  }, [form, props.userDetails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- works as intended - if the dependency is added it keeps calling it self infinitely, not sure if possible to fix this.
+  }, [props.userDetails]);
 
   const handleSubmit = (values: UpdateUserMutationVariables): void => {
     // Set unused fields as undefined
