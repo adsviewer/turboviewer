@@ -28,6 +28,10 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Config pnpm
+        run: |
+          pnpm config set store-dir /home/runner/.local/share/pnpm/store/v3 --global
+
       - name: Update packages
         run: pnpm run update
 
