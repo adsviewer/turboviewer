@@ -9,6 +9,11 @@ export interface GenericRequestResponseBody {
   };
 }
 
+export enum ChartMetricsEnum {
+  IMPRESSIONS = 'impressions',
+  SPENT = 'spent',
+}
+
 export const errorKey = 'error';
 export const groupedByKey = 'groupedBy';
 export const publisherKey = 'publisher';
@@ -24,6 +29,7 @@ export const dateFromKey = 'dateFrom';
 export const dateToKey = 'dateTo';
 export const fetchPreviewsKey = 'fetchPreviews';
 export const emailKey = 'email';
+export const chartMetricKey = 'chartMetric';
 
 export const positions = [
   'an_classic',
