@@ -1155,6 +1155,9 @@ importers:
       '@repo/logger':
         specifier: workspace:*
         version: link:../logger
+      '@repo/mappings':
+        specifier: workspace:*
+        version: link:../mappings
       '@repo/mode':
         specifier: workspace:*
         version: link:../mode
