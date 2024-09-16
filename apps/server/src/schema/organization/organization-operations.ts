@@ -158,7 +158,7 @@ builder.mutationFields((t) => ({
           name: args.name,
           domain,
           parentId: ctx.organizationId,
-          tier: ctx.organizationId ? await getTier(ctx.organizationId) : 'Launch',
+          tier: ctx.organizationId ? await getTier(ctx.organizationId) : Tier.Launch,
           users: {
             createMany: {
               skipDuplicates: true,
