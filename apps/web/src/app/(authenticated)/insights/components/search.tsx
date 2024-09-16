@@ -168,13 +168,12 @@ export default function Search(props: PropsType): React.ReactNode {
     }
   }, [searchParams]);
 
-  const addSubSearchTerm = (parentIndex: number, depth: number): void => {
-    logger.info(searchTerms);
+  const addSubSearchTerm = (index: number, depth: number): void => {
     const newSearchTerm = { ...INITIAL_SEARCH_TERM };
     newSearchTerm.key = uniqid();
     newSearchTerm.depth = depth;
     const updatedSearchTerms = _.cloneDeep(searchTerms);
-    updatedSearchTerms[parentIndex].searchTerms.push(newSearchTerm);
+    updatedSearchTerms[index].searchTerms = [...updatedSearchTerms[index].searchTerms, newSearchTerm];
     setSearchTerms(updatedSearchTerms);
   };
 
@@ -233,35 +232,89 @@ export default function Search(props: PropsType): React.ReactNode {
   };
 
   const removeSearchTerm = (keyToRemove: string): void => {
-    const newSearchTerms = searchTerms.filter((term) => term.key !== keyToRemove);
-    setSearchTerms(newSearchTerms);
+    const updatedTerms = _.cloneDeep(searchTerms);
+
+    const removeTermInPlace = (terms: SearchTermType[]): SearchTermType[] => {
+      return terms.filter((term) => {
+        if (term.key === keyToRemove) return false;
+        if (term.searchTerms.length) term.searchTerms = removeTermInPlace(term.searchTerms);
+        return true;
+      });
+    };
+
+    const finalTerms = removeTermInPlace(updatedTerms);
+    setSearchTerms(finalTerms);
   };
 
-  const changeAndOrOperator = (operator: string, changeIndex: number): void => {
-    const updatedTerms = searchTerms.map((term, index) =>
-      changeIndex === index ? { ...term, andOrValue: operator as AndOrEnum } : term,
-    );
+  const changeAndOrOperator = (operator: string, keyToChange: string): void => {
+    const updatedTerms = _.cloneDeep(searchTerms);
+    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
+      for (const term of terms) {
+        if (term.key === keyToChange) {
+          term.andOrValue = operator as AndOrEnum;
+          return true;
+        } else if (term.searchTerms.length) {
+          const found = updateTermInPlace(term.searchTerms);
+          if (found) return true;
+        }
+      }
+      return false;
+    };
+    updateTermInPlace(updatedTerms);
     setSearchTerms(updatedTerms);
   };
 
-  const changeSearchOperator = (operator: string, changeIndex: number): void => {
-    const updatedTerms = searchTerms.map((term, index) =>
-      changeIndex === index ? { ...term, searchOperator: operator as InsightsSearchOperator } : term,
-    );
+  const changeSearchOperator = (operator: string, keyToChange: string): void => {
+    const updatedTerms = _.cloneDeep(searchTerms);
+    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
+      for (const term of terms) {
+        if (term.key === keyToChange) {
+          term.searchOperator = operator as InsightsSearchOperator;
+          return true;
+        } else if (term.searchTerms.length) {
+          const found = updateTermInPlace(term.searchTerms);
+          if (found) return true;
+        }
+      }
+      return false;
+    };
+    updateTermInPlace(updatedTerms);
     setSearchTerms(updatedTerms);
   };
 
-  const changeSearchField = (operator: string, changeIndex: number): void => {
-    const updatedTerms = searchTerms.map((term, index) =>
-      changeIndex === index ? { ...term, searchField: operator as InsightsSearchField } : term,
-    );
+  const changeSearchField = (operator: string, keyToChange: string): void => {
+    const updatedTerms = _.cloneDeep(searchTerms);
+    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
+      for (const term of terms) {
+        if (term.key === keyToChange) {
+          term.searchField = operator as InsightsSearchField;
+          return true;
+        } else if (term.searchTerms.length) {
+          const found = updateTermInPlace(term.searchTerms);
+          if (found) return true;
+        }
+      }
+      return false;
+    };
+    updateTermInPlace(updatedTerms);
     setSearchTerms(updatedTerms);
   };
 
-  const changeSearchValue = (searchText: string, changeIndex: number): void => {
-    const updatedTerms = searchTerms.map((term, index) =>
-      changeIndex === index ? { ...term, searchValue: searchText } : term,
-    );
+  const changeSearchValue = (operator: string, keyToChange: string): void => {
+    const updatedTerms = _.cloneDeep(searchTerms);
+    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
+      for (const term of terms) {
+        if (term.key === keyToChange) {
+          term.searchValue = operator;
+          return true;
+        } else if (term.searchTerms.length) {
+          const found = updateTermInPlace(term.searchTerms);
+          if (found) return true;
+        }
+      }
+      return false;
+    };
+    updateTermInPlace(updatedTerms);
     setSearchTerms(updatedTerms);
   };
 
@@ -302,7 +355,7 @@ export default function Search(props: PropsType): React.ReactNode {
             defaultValue={term.andOrValue}
             allowDeselect={false}
             onChange={(e) => {
-              if (e) changeAndOrOperator(e, index);
+              if (e) changeAndOrOperator(e, term.key);
             }}
             comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           />
@@ -313,7 +366,7 @@ export default function Search(props: PropsType): React.ReactNode {
           defaultValue={term.searchOperator}
           allowDeselect={false}
           onChange={(e) => {
-            if (e) changeSearchOperator(e, index);
+            if (e) changeSearchOperator(e, term.key);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
         />
@@ -322,7 +375,7 @@ export default function Search(props: PropsType): React.ReactNode {
           defaultValue={term.searchField}
           allowDeselect={false}
           onChange={(e) => {
-            if (e) changeSearchField(e, index);
+            if (e) changeSearchField(e, term.key);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
         />
@@ -330,7 +383,7 @@ export default function Search(props: PropsType): React.ReactNode {
           placeholder={tGeneric('search')}
           defaultValue={term.searchValue}
           onChange={(e) => {
-            changeSearchValue(e.target.value, index);
+            changeSearchValue(e.target.value, term.key);
           }}
         />
         {depth === 0 ? (
