@@ -4,7 +4,8 @@ import { logger } from '@repo/logger';
 import { IconUserPlus } from '@tabler/icons-react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
-import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { OrganizationRoleEnum, type UserRolesInput } from '@/graphql/generated/schema-server';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import getOrganization from '@/app/(authenticated)/organization/actions';
@@ -56,6 +57,7 @@ export default function AddUsersModal(props: PropsType): ReactNode {
       value: OrganizationRoleEnum.ORG_MEMBER,
     },
   ];
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const updateAvailableUsers = useCallback(
     (updatedUsers: SelectedUsersType[]): void => {
@@ -89,6 +91,11 @@ export default function AddUsersModal(props: PropsType): ReactNode {
       setUsers(() => {
         const newUsers = [...users, newUser];
         updateAvailableUsers(newUsers);
+        setTimeout(() => {
+          scrollAreaRef.current
+            ? scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' })
+            : null;
+        }, 100);
         return [...users, newUser];
       });
     },
@@ -188,46 +195,61 @@ export default function AddUsersModal(props: PropsType): ReactNode {
         </Button>
         <Flex direction="column">
           <Flex direction="column" w="100%">
-            <ScrollArea.Autosize mah={400} offsetScrollbars type="always">
-              {users.length
-                ? users.map((userData, index) => {
-                    return (
-                      <Flex gap="md" mt={10} align="center" key={userData.key}>
-                        <Select
-                          data={availableUsers}
-                          value={userData.userId ? userData.userId : null}
-                          disabled={index === 0}
-                          description={tGeneric('user')}
-                          placeholder={tGeneric('user')}
-                          allowDeselect={false}
-                          onChange={(e) => {
-                            if (e) changeUser(e, index);
-                          }}
-                          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-                        />
-                        <Select
-                          data={rolesData}
-                          defaultValue={OrganizationRoleEnum.ORG_MEMBER}
-                          value={userData.role}
-                          disabled={index === 0}
-                          description={tGeneric('role')}
-                          allowDeselect={false}
-                          onChange={(e) => {
-                            if (e) changeRole(e, index);
-                          }}
-                          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-                        />
-                        <CloseButton
-                          mt={18}
-                          onClick={() => {
-                            deleteUser(userData.key);
-                          }}
-                          disabled={index === 0}
-                        />
-                      </Flex>
-                    );
-                  })
-                : null}
+            <ScrollArea.Autosize mah={400} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
+              <AnimatePresence>
+                {users.length
+                  ? users.map((userData, index) => {
+                      return (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          key={userData.key}
+                        >
+                          <Flex gap="md" mt={10} align="center">
+                            <Select
+                              data={availableUsers}
+                              value={userData.userId ? userData.userId : null}
+                              disabled={index === 0}
+                              description={tGeneric('user')}
+                              placeholder={tGeneric('user')}
+                              allowDeselect={false}
+                              onChange={(e) => {
+                                if (e) changeUser(e, index);
+                              }}
+                              comboboxProps={{
+                                shadow: 'sm',
+                                transitionProps: { transition: 'fade-down', duration: 200 },
+                              }}
+                            />
+                            <Select
+                              data={rolesData}
+                              defaultValue={OrganizationRoleEnum.ORG_MEMBER}
+                              value={userData.role}
+                              disabled={index === 0}
+                              description={tGeneric('role')}
+                              allowDeselect={false}
+                              onChange={(e) => {
+                                if (e) changeRole(e, index);
+                              }}
+                              comboboxProps={{
+                                shadow: 'sm',
+                                transitionProps: { transition: 'fade-down', duration: 200 },
+                              }}
+                            />
+                            <CloseButton
+                              mt={18}
+                              onClick={() => {
+                                deleteUser(userData.key);
+                              }}
+                              disabled={index === 0}
+                            />
+                          </Flex>
+                        </motion.div>
+                      );
+                    })
+                  : null}
+              </AnimatePresence>
             </ScrollArea.Autosize>
           </Flex>
           <Flex direction="column" gap="xs" mt="xl">
