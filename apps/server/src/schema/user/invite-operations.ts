@@ -3,7 +3,7 @@ import { FireAndForget, inviteHashLabel, isAError } from '@repo/utils';
 import { OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
-import { canAddUser, maxUsersPerTier } from '@repo/mappings';
+import { canAddUser, tierConstraints } from '@repo/mappings';
 import { builder } from '../builder';
 import { createPassword } from '../../contexts/user/user';
 import { createJwts } from '../../auth';
@@ -168,7 +168,7 @@ builder.mutationFields((t) => ({
 
           if (!canAddUser(currentTier, userOrganizationCount)) {
             return {
-              message: `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
+              message: `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${tierConstraints[currentTier].maxUsers.toString()}.`,
               email,
             };
           }

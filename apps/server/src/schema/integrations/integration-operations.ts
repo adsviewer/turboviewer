@@ -5,7 +5,7 @@ import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
 import { getRootOrganizationId, getTier } from '@repo/organization';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
-import { maxUsersPerTier } from '@repo/mappings';
+import { tierConstraints } from '@repo/mappings';
 import { builder } from '../builder';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import {
@@ -49,7 +49,7 @@ builder.queryFields((t) => ({
         },
       });
       const tierStatus = await getTier(ctx.organizationId);
-      const maxIntegrations = maxUsersPerTier[tierStatus].maxIntegrations ?? Infinity;
+      const maxIntegrations = tierConstraints[tierStatus].maxIntegrations;
 
       const currentIntegrations = Object.values(IntegrationTypeEnum).reduce((acc, ch) => {
         const status = integrationStatus(ch, integrations);

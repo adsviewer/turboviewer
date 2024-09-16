@@ -4,7 +4,7 @@ import { type EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus, U
 import { AError, inviteHashLabel, isAError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
-import { canAddUser, maxUsersPerTier } from '@repo/mappings';
+import { canAddUser, tierConstraints } from '@repo/mappings';
 import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
 import { env } from '../../config';
 import { type UserWithRoles } from './user-roles';
@@ -107,7 +107,7 @@ export const createInvitedUser = async (
 
   if (!canAddUser(currentTier, userOrganizationCount)) {
     return new AError(
-      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
+      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${tierConstraints[currentTier].maxUsers.toString()}.`,
     );
   }
 

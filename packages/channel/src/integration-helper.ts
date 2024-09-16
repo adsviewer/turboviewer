@@ -9,7 +9,7 @@ import type QueryString from 'qs';
 import { z } from 'zod';
 import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { isMode, MODE } from '@repo/mode';
-import { maxUsersPerTier } from '@repo/mappings';
+import { tierConstraints } from '@repo/mappings';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import { invokeChannelIngress } from './data-refresh';
@@ -91,15 +91,14 @@ const completeIntegration = async (
   }
 
   const tierStatus = await getTier(organizationId);
-  const maxIntegrations = maxUsersPerTier[tierStatus].maxIntegrations ?? Infinity;
+  const maxIntegrations = tierConstraints[tierStatus].maxIntegrations;
 
-  const integrations = await prisma.integration.findMany({
+  const currentIntegrations = await prisma.integration.count({
     where: {
       organizationId,
+      status: IntegrationStatus.CONNECTED,
     },
   });
-
-  const currentIntegrations = integrations.reduce((acc, el) => (el.status === 'CONNECTED' ? acc + 1 : acc), 1);
 
   if (currentIntegrations > maxIntegrations) {
     return new AError('Max integration limit reached for the current tier');

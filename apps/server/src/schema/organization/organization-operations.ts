@@ -158,7 +158,7 @@ builder.mutationFields((t) => ({
           name: args.name,
           domain,
           parentId: ctx.organizationId,
-          tier: await getTier(ctx.organizationId),
+          tier: ctx.organizationId ? await getTier(ctx.organizationId) : 'Launch',
           users: {
             createMany: {
               skipDuplicates: true,
@@ -370,9 +370,7 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, args, _ctx, _info) => {
       const { organizationId, tier: newTier } = args;
 
-      const updatedOrganization = switchTierHelper(organizationId, newTier, query);
-
-      return updatedOrganization;
+      return switchTierHelper(organizationId, newTier, query);
     },
   }),
 }));
