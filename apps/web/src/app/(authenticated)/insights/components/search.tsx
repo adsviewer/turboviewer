@@ -134,36 +134,61 @@ export default function Search(props: PropsType): React.ReactNode {
       if (!parsedSearchData.isAdvancedSearch && parsedSearchData.term) {
         setSearchBoxValue(parsedSearchData.term.value);
       }
-      // Load advanced search data
-      else if (parsedSearchData.isAdvancedSearch) {
-        const updatedSearchTerms: SearchTermType[] = [];
-        // if (parsedSearchData.and?.length) {
-        //   for (const currTerm of parsedSearchData.and) {
-        //     if (currTerm.term) {
-        //       const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
-        //       newTerm.key = uniqid();
-        //       newTerm.andOrValue = AndOrEnum.AND;
-        //       newTerm.searchField = currTerm.term.field;
-        //       newTerm.searchOperator = currTerm.term.operator;
-        //       newTerm.searchValue = currTerm.term.value;
-        //       updatedSearchTerms = [...updatedSearchTerms, newTerm];
-        //     }
-        //   }
-        // }
-        // if (parsedSearchData.or?.length) {
-        //   for (const currTerm of parsedSearchData.or) {
-        //     if (currTerm.term) {
-        //       const newTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
-        //       newTerm.key = uniqid();
-        //       newTerm.andOrValue = AndOrEnum.OR;
-        //       newTerm.searchField = currTerm.term.field;
-        //       newTerm.searchOperator = currTerm.term.operator;
-        //       newTerm.searchValue = currTerm.term.value;
-        //       updatedSearchTerms = [...updatedSearchTerms, newTerm];
-        //     }
-        //   }
-        // }
-        setSearchTerms(updatedSearchTerms);
+      // Load advanced search data (currently works for max depth of 2)
+      else if (parsedSearchData.isAdvancedSearch && parsedSearchData.and) {
+        let fetchedSearchTerms: SearchTermType[] = [];
+        logger.info(parsedSearchData);
+
+        // Depth 0
+        for (const data of parsedSearchData.and) {
+          if (data.term) {
+            const newSearchTerm = { ...INITIAL_SEARCH_TERM };
+            newSearchTerm.key = uniqid();
+            newSearchTerm.searchField = data.term.field;
+            newSearchTerm.searchOperator = data.term.operator;
+            newSearchTerm.searchValue = data.term.value;
+
+            // Depth 1
+            if (data.and) {
+              if (data.and.length) {
+                const depth1Data: SearchTermType[] = data.and.map((term) => {
+                  return {
+                    key: uniqid(),
+                    andOrValue: AndOrEnum.AND,
+                    searchField: term.term?.field ?? InsightsSearchField.AdName,
+                    searchOperator: term.term?.operator ?? InsightsSearchOperator.Contains,
+                    searchValue: term.term?.value ?? '',
+                    searchTerms: [],
+                    depth: 1,
+                  };
+                });
+
+                newSearchTerm.searchTerms = [...newSearchTerm.searchTerms, ...depth1Data];
+              }
+            }
+            if (data.or) {
+              if (data.or.length) {
+                const depth1Data: SearchTermType[] = data.or.map((term) => {
+                  return {
+                    key: uniqid(),
+                    andOrValue: AndOrEnum.OR,
+                    searchField: term.term?.field ?? InsightsSearchField.AdName,
+                    searchOperator: term.term?.operator ?? InsightsSearchOperator.Contains,
+                    searchValue: term.term?.value ?? '',
+                    searchTerms: [],
+                    depth: 1,
+                  };
+                });
+
+                newSearchTerm.searchTerms = [...newSearchTerm.searchTerms, ...depth1Data];
+              }
+            }
+
+            fetchedSearchTerms = [...fetchedSearchTerms, newSearchTerm];
+          }
+        }
+
+        setSearchTerms(fetchedSearchTerms);
       }
     }
   }, [searchParams]);
@@ -320,24 +345,39 @@ export default function Search(props: PropsType): React.ReactNode {
 
   const handleSearch = (): void => {
     close();
-    const newSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
-    newSearchData.isAdvancedSearch = true;
-
+    const newData = { ...INITIAL_SEARCH_EXPRESSION };
+    newData.isAdvancedSearch = true;
+    logger.info(searchTerms, 'search terms');
+    // Depth 0
     for (const term of searchTerms) {
-      const newData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
-      if (newData.term) {
-        newData.term.operator = term.searchOperator;
-        newData.term.field = term.searchField;
-        newData.term.value = term.searchValue;
-      }
+      const newExpression = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+      if (newExpression.term && newExpression.and && newExpression.or && newData.and) {
+        newExpression.term.field = term.searchField;
+        newExpression.term.operator = term.searchOperator;
+        newExpression.term.value = term.searchValue;
 
-      if (term.andOrValue === AndOrEnum.AND && newSearchData.and) {
-        newSearchData.and = [...newSearchData.and, newData];
-      } else if (term.andOrValue === AndOrEnum.OR && newSearchData.or) {
-        newSearchData.or = [...newSearchData.or, newData];
+        // Depth 1
+        if (term.searchTerms.length) {
+          for (const term1 of term.searchTerms) {
+            const expr = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+
+            if (expr.term) {
+              expr.term.field = term1.searchField;
+              expr.term.operator = term1.searchOperator;
+              expr.term.value = term1.searchValue;
+              if (term1.andOrValue === AndOrEnum.AND) newExpression.and = [...newExpression.and, expr];
+              else newExpression.or = [...newExpression.or, expr];
+            }
+          }
+        }
+
+        // Depth 0 expressions are always added inside AND
+        newData.and = [...newData.and, newExpression];
       }
     }
-    const encodedSearchData = btoa(JSON.stringify(newSearchData));
+
+    logger.info(newData, 'handle search data');
+    const encodedSearchData = btoa(JSON.stringify(newData));
 
     props.startTransition(() => {
       const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
@@ -413,7 +453,6 @@ export default function Search(props: PropsType): React.ReactNode {
   };
 
   const renderSearchTerms = (): React.ReactNode => {
-    logger.info(searchTerms);
     const nodes = [];
     // Depth 0
     for (const [index0, term0] of searchTerms.entries()) {
