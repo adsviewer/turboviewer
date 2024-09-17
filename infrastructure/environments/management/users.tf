@@ -115,3 +115,22 @@ resource "aws_identitystore_group_membership" "iresha_developer" {
   group_id          = aws_identitystore_group.developers.group_id
   member_id         = aws_identitystore_user.iresha.user_id
 }
+
+resource "aws_identitystore_user" "vlad" {
+  display_name      = "Vlad Tsaran"
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  name {
+    given_name  = "Vlad"
+    family_name = "Tsaran"
+  }
+  user_name = "vlad"
+
+  emails {
+    value = "vlad.tsaran@gmail.com"
+  }
+}
+resource "aws_identitystore_group_membership" "vlad_developer" {
+  identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
+  group_id          = aws_identitystore_group.developers.group_id
+  member_id         = aws_identitystore_user.vlad.user_id
+}
