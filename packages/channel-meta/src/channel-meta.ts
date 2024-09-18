@@ -32,6 +32,8 @@ import {
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
+  type ChannelAdSet,
+  type ChannelCampaign,
   type ChannelCreative,
   type ChannelIFrame,
   type ChannelInsight,
@@ -64,6 +66,20 @@ export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 const limit = 600;
 
 class Meta implements ChannelInterface {
+  private readonly insightFields = [
+    AdsInsights.Fields.account_id,
+    AdsInsights.Fields.ad_id,
+    AdsInsights.Fields.adset_name,
+    AdsInsights.Fields.adset_id,
+    AdsInsights.Fields.ad_name,
+    AdsInsights.Fields.campaign_name,
+    AdsInsights.Fields.campaign_id,
+    AdsInsights.Fields.date_start,
+    AdsInsights.Fields.impressions,
+    AdsInsights.Fields.inline_link_clicks, //clicks
+    AdsInsights.Fields.spend,
+  ];
+
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const scopes = ['ads_read'];
 
@@ -391,18 +407,26 @@ class Meta implements ChannelInterface {
     const adExternalIdMap = new Map<string, string>();
     const insightSchema = z.object({
       account_id: z.string(),
+      adset_id: z.string(),
+      adset_name: z.string(),
       ad_id: z.string(),
       ad_name: z.string(),
+      campaign_id: z.string(),
+      campaign_name: z.string(),
       date_start: z.coerce.date(),
       impressions: z.coerce.number(),
       spend: z.coerce.number(),
       device_platform: z.string(),
       publisher_platform: z.string(),
       platform_position: z.string(),
+      inline_link_clicks: z.coerce.number().optional(),
     });
 
-    const toInsightAndAd = (insight: z.infer<typeof insightSchema>): { insight: ChannelInsight; ad: ChannelAd } => ({
+    const toInsightAndAd = (
+      insight: z.infer<typeof insightSchema>,
+    ): { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; adCampaign: ChannelCampaign } => ({
       insight: {
+        clicks: insight.inline_link_clicks ?? 0,
         externalAdId: insight.ad_id,
         date: insight.date_start,
         externalAccountId: insight.account_id,
@@ -413,9 +437,20 @@ class Meta implements ChannelInterface {
         position: insight.platform_position,
       },
       ad: {
+        externalAdSetId: insight.adset_id,
         externalAdAccountId: insight.account_id,
         externalId: insight.ad_id,
         name: insight.ad_name,
+      },
+      adCampaign: {
+        externalAdAccountId: insight.account_id,
+        externalId: insight.campaign_id,
+        name: insight.campaign_name,
+      },
+      adSet: {
+        externalCampaignId: insight.campaign_id,
+        externalId: insight.adset_id,
+        name: insight.adset_name,
       },
     });
 
@@ -424,12 +459,7 @@ class Meta implements ChannelInterface {
     const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
     const getInsightsFn = report.getInsights(
       [
-        AdsInsights.Fields.account_id,
-        AdsInsights.Fields.ad_id,
-        AdsInsights.Fields.ad_name,
-        AdsInsights.Fields.date_start,
-        AdsInsights.Fields.spend,
-        AdsInsights.Fields.impressions,
+        ...this.insightFields,
         AdsInsights.Breakdowns.device_platform,
         AdsInsights.Breakdowns.publisher_platform,
         AdsInsights.Breakdowns.platform_position,
@@ -465,28 +495,19 @@ class Meta implements ChannelInterface {
     const resp = await Meta.sdk(async () => {
       const mtimeRange = { since: formatYYYMMDDDate(since), until: formatYYYMMDDDate(until) };
       logger.info(`Running report for account ${adAccount.id} with time range ${JSON.stringify(mtimeRange)}`);
-      return account.getInsightsAsync(
-        [
-          AdsInsights.Fields.account_id,
-          AdsInsights.Fields.ad_id,
-          AdsInsights.Fields.ad_name,
-          AdsInsights.Fields.date_start,
-          AdsInsights.Fields.spend,
-          AdsInsights.Fields.impressions,
+
+      return account.getInsightsAsync(this.insightFields, {
+        limit,
+        time_increment: 1,
+        filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
+        breakdowns: [
+          AdsInsights.Breakdowns.device_platform,
+          AdsInsights.Breakdowns.publisher_platform,
+          AdsInsights.Breakdowns.platform_position,
         ],
-        {
-          limit,
-          time_increment: 1,
-          filtering: [{ field: AdsInsights.Fields.spend, operator: 'GREATER_THAN', value: '0' }],
-          breakdowns: [
-            AdsInsights.Breakdowns.device_platform,
-            AdsInsights.Breakdowns.publisher_platform,
-            AdsInsights.Breakdowns.platform_position,
-          ],
-          level: AdsInsights.Level.ad,
-          time_range: mtimeRange,
-        },
-      );
+        level: AdsInsights.Level.ad,
+        time_range: mtimeRange,
+      });
     }, integration);
     if (isAError(resp)) {
       logger.error(resp, 'Failed to run ad report');

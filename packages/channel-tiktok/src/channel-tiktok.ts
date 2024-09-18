@@ -19,6 +19,8 @@ import {
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
+  type ChannelAdSet,
+  type ChannelCampaign,
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
@@ -55,13 +57,18 @@ enum PlacementsEnum {
 
 const insightsSchema = z.array(
   z.object({
-    '﻿Ad ID': z.string(),
+    'Ad ID': z.string(),
+    'Ad group ID': z.string(),
+    'Ad Group Name': z.string(),
     'Ad Name': z.string(),
+    '﻿Campaign ID': z.string(),
+    'Campaign name': z.string(),
     Placements: z.nativeEnum(PlacementsEnum),
     Date: z.coerce.date(),
     'Placements Types': z.string(),
     Impression: z.coerce.number().int(),
     Cost: z.coerce.number(),
+    'Clicks (Destination)': z.coerce.number().int(),
   }),
 );
 
@@ -221,7 +228,19 @@ export class Tiktok implements ChannelInterface {
         data_level: 'AUCTION_AD',
         dimensions: ['ad_id', 'placement', 'stat_time_day'],
         report_type: 'AUDIENCE',
-        metrics: ['ad_name', 'ad_id', 'placement_type', 'impressions', 'spend'],
+        metrics: [
+          'ad_name',
+          'ad_id',
+          'adgroup_id',
+          'adgroup_name',
+          'campaign_id',
+          'campaign_name',
+          'impressions',
+          'placement_type',
+          'spend',
+          'placement_type',
+          'clicks',
+        ],
       }),
     });
     const data = await Tiktok.baseValidation(response);
@@ -268,6 +287,8 @@ export class Tiktok implements ChannelInterface {
     until: Date,
   ): Promise<AError | undefined> {
     const adsMap = new Map<string, ChannelAd>();
+    const adSetMap = new Map<string, ChannelAdSet>();
+    const adCampaignMap = new Map<string, ChannelCampaign>();
     const adExternalIdMap = new Map<string, string>();
     const params = new URLSearchParams({
       advertiser_id: adAccount.integration.externalId,
@@ -293,6 +314,8 @@ export class Tiktok implements ChannelInterface {
         data,
         placementPublisherMap,
         adsMap,
+        adSetMap,
+        adCampaignMap,
         adExternalIdMap,
       );
     if (isAError(response)) return response;
@@ -474,6 +497,8 @@ export class Tiktok implements ChannelInterface {
     data: unknown[],
     placementPublisherMap: Map<PlacementsEnum, PublisherEnum>,
     adsMap: Map<string, ChannelAd>,
+    adSetMap: Map<string, ChannelAdSet>,
+    adCampaignMap: Map<string, ChannelCampaign>,
     adExternalIdMap: Map<string, string>,
   ): Promise<AError | undefined> => {
     const parsed = insightsSchema.safeParse(data);
@@ -485,7 +510,8 @@ export class Tiktok implements ChannelInterface {
     const insights: ChannelInsight[] = [];
     parsed.data.forEach((row) => {
       const insight: ChannelInsight = {
-        externalAdId: row['﻿Ad ID'],
+        clicks: row['Clicks (Destination)'],
+        externalAdId: row['Ad ID'],
         date: row.Date,
         externalAccountId: adAccount.externalId,
         impressions: row.Impression,
@@ -496,9 +522,20 @@ export class Tiktok implements ChannelInterface {
       };
       insights.push(insight);
       adsMap.set(insight.externalAdId, {
+        externalAdSetId: row['Ad group ID'],
         externalAdAccountId: adAccount.externalId,
         externalId: insight.externalAdId,
         name: row['Ad Name'],
+      });
+      adSetMap.set(row['Ad group ID'], {
+        externalCampaignId: row['﻿Campaign ID'],
+        externalId: row['Ad group ID'],
+        name: row['Ad Group Name'],
+      });
+      adCampaignMap.set(row['﻿Campaign ID'], {
+        externalAdAccountId: adAccount.externalId,
+        externalId: row['﻿Campaign ID'],
+        name: row['Campaign name'],
       });
     });
     const ads = Array.from(adsMap.values());

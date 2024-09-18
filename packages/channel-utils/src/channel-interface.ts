@@ -32,9 +32,22 @@ export interface ChannelAdAccount {
 }
 
 export interface ChannelAd {
+  externalAdSetId: string;
   externalAdAccountId: string;
   externalId: string;
   name?: string;
+}
+
+export interface ChannelAdSet {
+  externalCampaignId: string;
+  externalId: string;
+  name?: string;
+}
+
+export interface ChannelCampaign {
+  externalAdAccountId: string;
+  externalId: string;
+  name: string;
 }
 
 export interface ChannelCreative {
@@ -45,6 +58,7 @@ export interface ChannelCreative {
 }
 
 export interface ChannelInsight {
+  clicks: number;
   externalAdId: string;
   date: Date;
   externalAccountId: string;
