@@ -12,6 +12,8 @@ import {
   Tooltip,
   em,
   Text,
+  useMantineTheme,
+  Divider,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import {
@@ -20,13 +22,13 @@ import {
   IconCodePlus,
   IconCornerDownRight,
   IconParentheses,
+  IconTrash,
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
 import uniqid from 'uniqid';
-import { logger } from '@repo/logger';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
   type InsightsSearchExpression,
@@ -84,11 +86,13 @@ export default function Search(props: PropsType): React.ReactNode {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
+  const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const [searchBoxValue, setSearchBoxValue] = useState<string>('');
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchTerms, setSearchTerms] = useState<SearchTermType[]>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const AND_OR_DATA = [
     {
@@ -144,7 +148,6 @@ export default function Search(props: PropsType): React.ReactNode {
       // Load advanced search data (currently works for max depth of 2)
       else if (parsedSearchData.isAdvancedSearch && parsedSearchData.and) {
         let fetchedSearchTerms: SearchTermType[] = [];
-        logger.info(parsedSearchData);
 
         // Depth 0
         for (const data of parsedSearchData.and) {
@@ -200,6 +203,17 @@ export default function Search(props: PropsType): React.ReactNode {
     }
   }, [searchParams]);
 
+  const closeModal = (): void => {
+    close();
+  };
+
+  const scrollToBottom = (): void => {
+    setTimeout(() => {
+      if (scrollAreaRef.current)
+        scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    }, 100);
+  };
+
   const addSearchTerm = (andOrValue: AndOrEnum): void => {
     const newSearchTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
     newSearchTerm.isRoot = true;
@@ -212,19 +226,18 @@ export default function Search(props: PropsType): React.ReactNode {
     else updatedTerms = [newSearchTerm];
 
     setSearchTerms(updatedTerms);
+    scrollToBottom();
   };
 
   const addSearchSubTerm = (keyToAddTo: string, andOrValue: AndOrEnum): void => {
     const newSearchTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
     newSearchTerm.key = uniqid();
     newSearchTerm.andOrValue = andOrValue;
-    logger.info(`attempting to add inside ${keyToAddTo}`);
     const updatedTerms: SearchTermType[] = _.cloneDeep(searchTerms);
     if (searchTerms[0].key === keyToAddTo) {
       const indexToInsertBefore = updatedTerms[0].searchTerms.findIndex((term) => term.isRoot);
       if (indexToInsertBefore !== -1) updatedTerms[0].searchTerms.splice(indexToInsertBefore, 0, newSearchTerm);
       else updatedTerms[0].searchTerms = [...updatedTerms[0].searchTerms, newSearchTerm];
-      logger.info('success!');
     }
 
     if (searchTerms[0].searchTerms.length) {
@@ -234,15 +247,33 @@ export default function Search(props: PropsType): React.ReactNode {
             ...updatedTerms[0].searchTerms[index].searchTerms,
             newSearchTerm,
           ];
-          logger.info('success! (it was nested)');
           break;
         }
       }
     }
     setSearchTerms(updatedTerms);
+    scrollToBottom();
   };
 
   const removeSearchTerm = (keyToRemove: string): void => {
+    let updatedTerms = _.cloneDeep(searchTerms);
+    if (updatedTerms.length) {
+      if (updatedTerms[0].key === keyToRemove) updatedTerms = [];
+      else if (updatedTerms[0].searchTerms.length) {
+        for (const term of updatedTerms[0].searchTerms) {
+          if (term.key === keyToRemove) {
+            updatedTerms[0].searchTerms = updatedTerms[0].searchTerms.filter(
+              (currTerm) => currTerm.key !== keyToRemove,
+            );
+            break;
+          }
+        }
+      }
+      setSearchTerms(updatedTerms);
+    }
+  };
+
+  const removeSearchSubTerm = (keyToRemove: string): void => {
     const updatedTerms = _.cloneDeep(searchTerms);
     if (updatedTerms.length) {
       for (const [index, term] of updatedTerms[0].searchTerms.entries()) {
@@ -406,11 +437,10 @@ export default function Search(props: PropsType): React.ReactNode {
   };
 
   const handleAdvancedSearch = (): void => {
-    // close();
+    close();
 
     const rootExpression = { ...INITIAL_SEARCH_EXPRESSION };
     rootExpression.isAdvancedSearch = true;
-    logger.info(searchTerms, 'search terms');
 
     // First subterm of first term
     const newExpression = { ...INITIAL_SEARCH_EXPRESSION };
@@ -484,7 +514,6 @@ export default function Search(props: PropsType): React.ReactNode {
       }
     }
 
-    logger.info(rootExpression, 'BE search data!');
     const encodedSearchData = btoa(JSON.stringify(rootExpression));
 
     props.startTransition(() => {
@@ -495,38 +524,62 @@ export default function Search(props: PropsType): React.ReactNode {
 
   const renderSearchTermOperatorSetting = (key: string, andOrValue: AndOrEnum): React.ReactNode => {
     return (
-      <Flex align="center" gap="sm" pl={key !== searchTerms[0].key ? 25 : 0}>
-        <IconParentheses style={{ opacity: 0.25 }} />
-        <Select
-          data={AND_OR_DATA}
-          defaultValue={andOrValue}
-          value={andOrValue}
-          allowDeselect={false}
-          w={100}
-          onChange={(e) => {
-            if (e) changeAndOrOperator(e, key);
-          }}
-          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-        />
-        <Tooltip label={tSearch('addSearchSubTerm')}>
-          <ActionIcon
-            disabled={props.isPending}
-            variant="transparent"
-            size={35}
-            onClick={() => {
-              addSearchSubTerm(key, andOrValue);
+      <Flex direction="column">
+        {key !== searchTerms[0].key ? <Divider mb="sm" /> : null}
+        <Flex align="center" gap="sm" pl={key !== searchTerms[0].key ? 35 : 0}>
+          <IconParentheses style={{ opacity: 0.25 }} />
+          <Select
+            data={AND_OR_DATA}
+            defaultValue={andOrValue}
+            value={andOrValue}
+            allowDeselect={false}
+            w={100}
+            onChange={(e) => {
+              if (e) changeAndOrOperator(e, key);
             }}
-          >
-            <IconCodePlus />
-          </ActionIcon>
-        </Tooltip>
+            comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          />
+          <Tooltip label={tSearch('addSearchSubTerm')}>
+            <ActionIcon
+              disabled={props.isPending}
+              variant="transparent"
+              size={35}
+              onClick={() => {
+                addSearchSubTerm(key, andOrValue);
+              }}
+            >
+              <IconCodePlus />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={tGeneric('remove')}>
+            <ActionIcon
+              disabled={props.isPending}
+              variant="transparent"
+              size={35}
+              color={theme.colors.red[7]}
+              style={{ opacity: 0.75 }}
+              onClick={() => {
+                removeSearchTerm(key);
+              }}
+            >
+              <IconTrash />
+            </ActionIcon>
+          </Tooltip>
+        </Flex>
       </Flex>
     );
   };
 
-  const renderSearchTerm = (term: SearchTermType): React.ReactNode => {
+  const renderSearchTerm = (term: SearchTermType, depth = 1): React.ReactNode => {
     return (
-      <Flex align="center" gap="sm" my="sm" wrap={isMobile ? 'wrap' : 'nowrap'} key={term.key}>
+      <Flex
+        align="center"
+        gap="sm"
+        my="sm"
+        wrap={isMobile ? 'wrap' : 'nowrap'}
+        key={term.key}
+        pl={depth > 0 ? depth * 35 : 0}
+      >
         <IconCornerDownRight style={{ opacity: 0.25 }} />
         <Select
           data={SEARCH_FIELD_DATA}
@@ -562,7 +615,7 @@ export default function Search(props: PropsType): React.ReactNode {
           <CloseButton
             disabled={term.isRoot}
             onClick={() => {
-              removeSearchTerm(term.key);
+              removeSearchSubTerm(term.key);
             }}
           />
         </Tooltip>
@@ -581,7 +634,7 @@ export default function Search(props: PropsType): React.ReactNode {
           nodes = [...nodes, renderSearchTermOperatorSetting(term.key, term.andOrValue)];
           nodes = [...nodes, renderSearchTerm(term)];
           for (const childTerm of term.searchTerms) {
-            nodes = [...nodes, renderSearchTerm(childTerm)];
+            nodes = [...nodes, renderSearchTerm(childTerm, 1)];
           }
         }
         if (!term.isRoot) nodes = [...nodes, renderSearchTerm(term)];
@@ -612,18 +665,24 @@ export default function Search(props: PropsType): React.ReactNode {
             open();
           }}
           disabled={props.isPending}
-          variant="default"
+          variant={searchParams.get(searchKey) ? 'gradient' : 'default'}
           size={35}
-          aria-label="Create Organization"
         >
           <IconAdjustmentsAlt />
         </ActionIcon>
       </Tooltip>
 
       {/* Advanced Search Modal */}
-      <Modal opened={opened} onClose={close} title={tGeneric('advancedSearch')} size="xl">
+      <Modal
+        opened={opened}
+        onClose={() => {
+          closeModal();
+        }}
+        title={tGeneric('advancedSearch')}
+        size="xl"
+      >
         <Flex direction="column" mb="sm">
-          <ScrollArea.Autosize mah={350} offsetScrollbars type="always">
+          <ScrollArea.Autosize mah={500} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
             {searchTerms.length ? (
               renderSearchTerms()
             ) : (
@@ -635,22 +694,13 @@ export default function Search(props: PropsType): React.ReactNode {
         </Flex>
         <Button
           fullWidth
-          variant="outline"
+          variant="transparent"
           leftSection={<IconParentheses />}
           onClick={() => {
             addSearchTerm(AndOrEnum.AND);
           }}
         >
           {tSearch('addSearchTerm')}
-        </Button>
-        <Button
-          fullWidth
-          variant="outline"
-          onClick={() => {
-            logger.info(searchTerms);
-          }}
-        >
-          LOG TERMS
         </Button>
         <Button
           fullWidth
