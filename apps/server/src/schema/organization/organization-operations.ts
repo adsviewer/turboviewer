@@ -370,7 +370,13 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, args, _ctx, _info) => {
       const { organizationId, tier: newTier } = args;
 
-      return switchTierHelper(organizationId, newTier, query);
+      const updatedTier = await switchTierHelper(organizationId, newTier, query);
+
+      if (isAError(updatedTier)) {
+        throw new GraphQLError(updatedTier.message);
+      }
+
+      return updatedTier;
     },
   }),
 }));
