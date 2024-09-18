@@ -1,4 +1,4 @@
-import { type Organization, Prisma, Tier, prisma } from '@repo/database';
+import { type Organization, OrganizationRoleEnum, Prisma, Tier, prisma } from '@repo/database';
 import { tierConstraints } from '@repo/mappings';
 import { revokeIntegration } from '@repo/channel-utils';
 import { FireAndForget } from '@repo/utils';
@@ -13,11 +13,7 @@ export const getRootOrganizationId = async (organizationId: string): Promise<str
   return organization.id;
 };
 
-export const getTier = async (organizationId?: string): Promise<Tier> => {
-  if (!organizationId) {
-    return Tier.Launch;
-  }
-
+export const getTier = async (organizationId: string): Promise<Tier> => {
   const rootOrganizationId = await getRootOrganizationId(organizationId);
   const organization = await prisma.organization.findUniqueOrThrow({ where: { id: rootOrganizationId } });
 
@@ -40,7 +36,7 @@ export const switchTierHelper = async (
     });
 
     if (integrations.length > maxIntegrations) {
-      const integrationsToDisconnect = integrations.slice(1);
+      const integrationsToDisconnect = integrations.slice(maxIntegrations);
 
       integrationsToDisconnect.forEach((integration) => {
         fireAndForget.add(() => revokeIntegration(integration.externalId, integration.type));
@@ -54,33 +50,34 @@ export const switchTierHelper = async (
     subOrganizations: OrganizationWithUsers[],
   ): Promise<void> => {
     const maxUsersInTier = tierConstraints[tier].maxUsers;
+    const maxIntegrations = tierConstraints[tier].maxIntegrations;
 
     if (tier !== Tier.Launch && tier !== Tier.Build && tier !== Tier.Grow) {
       return;
     }
 
-    await disconnectIntegration(maxUsersInTier, orgId);
+    await disconnectIntegration(maxIntegrations, orgId);
 
     const allUsers = [...orgUsers];
     subOrganizations.forEach((subOrg) => allUsers.push(...subOrg.users));
 
-    const sortedUsers = allUsers.sort(
+    const sortedUsers = Array.from(new Set(allUsers)).sort(
       (a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime(),
     );
 
     const usersToKeep = sortedUsers.slice(0, maxUsersInTier);
 
-    const adminInKeptUsers = usersToKeep.some((user) => user.role === 'ORG_ADMIN');
+    const adminInKeptUsers = usersToKeep.some((user) => user.role === OrganizationRoleEnum.ORG_ADMIN);
 
     if (!adminInKeptUsers) {
-      const oldestAdmin = sortedUsers.find((user) => user.role === 'ORG_ADMIN');
+      const oldestAdmin = sortedUsers.find((user) => user.role === OrganizationRoleEnum.ORG_ADMIN);
       if (oldestAdmin) {
         usersToKeep.pop();
         usersToKeep.push(oldestAdmin);
       }
     }
 
-    const usersToRemove = allUsers.filter((user) => !usersToKeep.some((keep) => keep.userId === user.userId));
+    const usersToRemove = sortedUsers.filter((user) => !usersToKeep.some((keep) => keep.userId === user.userId));
     const subOrgIds = subOrganizations.map((subOrg) => subOrg.id);
     const organizationIds = [orgId, ...subOrgIds];
 
@@ -92,29 +89,39 @@ export const switchTierHelper = async (
     });
 
     for (const subOrg of subOrganizations) {
-      const subOrgAdmin = subOrg.users.find((user) => user.role === 'ORG_ADMIN');
+      const subOrgAdmin = Array.from(new Set(subOrg.users))
+        .sort((a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime())
+        .find((user) => user.role === OrganizationRoleEnum.ORG_ADMIN);
       if (!subOrgAdmin) {
-        const rootOrgAdmin = usersToKeep.find((user) => user.role === 'ORG_ADMIN');
+        const rootOrgAdmin = usersToKeep
+          .sort((a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime())
+          .find((user) => user.role === OrganizationRoleEnum.ORG_ADMIN);
+
         if (rootOrgAdmin) {
           await prisma.userOrganization.update({
             where: { userId_organizationId: { userId: rootOrgAdmin.userId, organizationId: subOrg.id } },
-            data: { role: 'ORG_ADMIN' },
+            data: { role: OrganizationRoleEnum.ORG_ADMIN },
           });
         }
       }
     }
   };
 
-  const organization = await prisma.organization.findUniqueOrThrow({
-    ...query,
-    where: { id: organizationId },
+  const organizations = await prisma.organization.findMany({
+    where: { OR: [{ id: organizationId }, { parentId: organizationId }] },
     ...organizationWithUsers,
   });
 
-  const currentTier = organization.tier;
+  const sortedOrganizations = organizations.sort((orgA, orgB) => {
+    if (orgA.id === organizationId) return -1; // Root organization comes first
+    if (orgB.id === organizationId) return 1;
+    return 0;
+  });
+
+  const currentTier = sortedOrganizations[0].tier;
 
   if (currentTier === newTier) {
-    return organization;
+    return sortedOrganizations[0];
   }
 
   const subOrganizations = await prisma.organization.findMany({
@@ -128,7 +135,7 @@ export const switchTierHelper = async (
     },
   });
 
-  await removeUserFromOrganization(organizationId, organization.users, newTier, subOrganizations);
+  await removeUserFromOrganization(organizationId, sortedOrganizations[0].users, newTier, subOrganizations);
 
   const updatedOrganization = await prisma.organization.update({
     ...query,
