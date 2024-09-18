@@ -45,21 +45,14 @@ export const switchTierHelper = async (
   };
   const removeUserFromOrganization = async (
     orgId: string,
-    orgUsers: OrganizationWithUsers[`users`],
+    allUsers: OrganizationWithUsers[`users`],
     tier: Tier,
     subOrganizations: OrganizationWithUsers[],
   ): Promise<void> => {
     const maxUsersInTier = tierConstraints[tier].maxUsers;
-    const maxIntegrations = tierConstraints[tier].maxIntegrations;
-
     if (tier !== Tier.Launch && tier !== Tier.Build && tier !== Tier.Grow) {
       return;
     }
-
-    await disconnectIntegration(maxIntegrations, orgId);
-
-    const allUsers = [...orgUsers];
-    subOrganizations.forEach((subOrg) => allUsers.push(...subOrg.users));
 
     const sortedUsers = Array.from(new Set(allUsers)).sort(
       (a, b) => new Date(a.user.createdAt).getTime() - new Date(b.user.createdAt).getTime(),
@@ -112,30 +105,19 @@ export const switchTierHelper = async (
     ...organizationWithUsers,
   });
 
-  const sortedOrganizations = organizations.sort((orgA, orgB) => {
-    if (orgA.id === organizationId) return -1; // Root organization comes first
-    if (orgB.id === organizationId) return 1;
-    return 0;
-  });
-
-  const currentTier = sortedOrganizations[0].tier;
+  const currentTier = organizations[0].tier;
 
   if (currentTier === newTier) {
-    return sortedOrganizations[0];
+    return organizations[0];
   }
 
-  const subOrganizations = await prisma.organization.findMany({
-    where: { parentId: organizationId },
-    include: {
-      users: {
-        include: {
-          user: true,
-        },
-      },
-    },
-  });
+  const subOrganizations = organizations.filter((org) => org.parentId === organizationId);
 
-  await removeUserFromOrganization(organizationId, sortedOrganizations[0].users, newTier, subOrganizations);
+  const allUsers = organizations.flatMap((orgItem) => orgItem.users);
+  const maxIntegrations = tierConstraints[newTier].maxIntegrations;
+
+  await removeUserFromOrganization(organizationId, allUsers, newTier, subOrganizations);
+  await disconnectIntegration(maxIntegrations, organizationId);
 
   const updatedOrganization = await prisma.organization.update({
     ...query,
