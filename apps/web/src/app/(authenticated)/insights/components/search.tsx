@@ -30,7 +30,6 @@ import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
 import uniqid from 'uniqid';
-import { logger } from '@repo/logger';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
   type InsightsSearchExpression,
@@ -43,7 +42,7 @@ interface PropsType {
   startTransition: TransitionStartFunction;
 }
 
-interface SearchTermType {
+export interface SearchTermType {
   key: string;
   andOrValue: AndOrEnum;
   searchOperator: InsightsSearchOperator;
@@ -61,6 +60,7 @@ enum AndOrEnum {
 
 const INITIAL_SEARCH_EXPRESSION: InsightsSearchExpression & {
   isAdvancedSearch?: boolean;
+  clientSearchTerms?: SearchTermType[];
 } = {
   and: [],
   or: [],
@@ -139,6 +139,7 @@ export default function Search(props: PropsType): React.ReactNode {
           Buffer.from(String(searchParams.get(searchKey)), 'base64').toString('utf-8'),
         ) as InsightsSearchExpression & {
           isAdvancedSearch?: boolean;
+          clientSearchTerms?: SearchTermType[];
         })
       : {};
 
@@ -148,9 +149,8 @@ export default function Search(props: PropsType): React.ReactNode {
         setSearchBoxValue(parsedSearchData.term.value);
       }
       // Load advanced search data
-      else if (parsedSearchData.isAdvancedSearch && parsedSearchData.and) {
-        const loadedSearchTerms: SearchTermType[] = [];
-        logger.info(loadedSearchTerms);
+      else if (parsedSearchData.isAdvancedSearch && parsedSearchData.clientSearchTerms) {
+        setSearchTerms(parsedSearchData.clientSearchTerms);
       }
     }
   }, [searchParams]);
@@ -466,6 +466,7 @@ export default function Search(props: PropsType): React.ReactNode {
       }
     }
 
+    rootExpression.clientSearchTerms = searchTerms; // is used when loading data in the useEffect!
     const encodedSearchData = btoa(JSON.stringify(rootExpression));
 
     props.startTransition(() => {
