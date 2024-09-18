@@ -23,12 +23,14 @@ import {
   IconCornerDownRight,
   IconParentheses,
   IconTrash,
+  IconCancel,
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
 import uniqid from 'uniqid';
+import { logger } from '@repo/logger';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
   type InsightsSearchExpression,
@@ -145,60 +147,10 @@ export default function Search(props: PropsType): React.ReactNode {
       if (!parsedSearchData.isAdvancedSearch && parsedSearchData.term) {
         setSearchBoxValue(parsedSearchData.term.value);
       }
-      // Load advanced search data (currently works for max depth of 2)
+      // Load advanced search data
       else if (parsedSearchData.isAdvancedSearch && parsedSearchData.and) {
-        let fetchedSearchTerms: SearchTermType[] = [];
-
-        // Depth 0
-        for (const data of parsedSearchData.and) {
-          if (data.term) {
-            const newSearchTerm = { ...INITIAL_SEARCH_TERM };
-            newSearchTerm.key = uniqid();
-            newSearchTerm.searchField = data.term.field;
-            newSearchTerm.searchOperator = data.term.operator;
-            newSearchTerm.searchValue = data.term.value;
-
-            // Depth 1
-            if (data.and) {
-              if (data.and.length) {
-                const depth1Data: SearchTermType[] = data.and.map((term) => {
-                  return {
-                    key: uniqid(),
-                    andOrValue: AndOrEnum.AND,
-                    searchField: term.term?.field ?? InsightsSearchField.AdName,
-                    searchOperator: term.term?.operator ?? InsightsSearchOperator.Contains,
-                    searchValue: term.term?.value ?? '',
-                    searchTerms: [],
-                    depth: 1,
-                  };
-                });
-
-                newSearchTerm.searchTerms = [...newSearchTerm.searchTerms, ...depth1Data];
-              }
-            }
-            if (data.or) {
-              if (data.or.length) {
-                const depth1Data: SearchTermType[] = data.or.map((term) => {
-                  return {
-                    key: uniqid(),
-                    andOrValue: AndOrEnum.OR,
-                    searchField: term.term?.field ?? InsightsSearchField.AdName,
-                    searchOperator: term.term?.operator ?? InsightsSearchOperator.Contains,
-                    searchValue: term.term?.value ?? '',
-                    searchTerms: [],
-                    depth: 1,
-                  };
-                });
-
-                newSearchTerm.searchTerms = [...newSearchTerm.searchTerms, ...depth1Data];
-              }
-            }
-
-            fetchedSearchTerms = [...fetchedSearchTerms, newSearchTerm];
-          }
-        }
-
-        setSearchTerms(fetchedSearchTerms);
+        const loadedSearchTerms: SearchTermType[] = [];
+        logger.info(loadedSearchTerms);
       }
     }
   }, [searchParams]);
@@ -522,6 +474,15 @@ export default function Search(props: PropsType): React.ReactNode {
     });
   };
 
+  const clearSearch = (): void => {
+    setSearchTerms([]);
+    props.startTransition(() => {
+      const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey);
+      router.replace(newURL);
+    });
+    close();
+  };
+
   const renderSearchTermOperatorSetting = (key: string, andOrValue: AndOrEnum): React.ReactNode => {
     return (
       <Flex direction="column">
@@ -712,6 +673,18 @@ export default function Search(props: PropsType): React.ReactNode {
           }}
         >
           {tGeneric('search')}
+        </Button>
+        <Button
+          fullWidth
+          leftSection={<IconCancel />}
+          mt="sm"
+          variant="outline"
+          disabled={props.isPending || (!searchParams.get(searchKey) && !searchTerms.length)}
+          onClick={() => {
+            clearSearch();
+          }}
+        >
+          {tSearch('clearSearch')}
         </Button>
       </Modal>
     </Flex>
