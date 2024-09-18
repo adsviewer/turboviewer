@@ -14,7 +14,13 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { IconSearch, IconAdjustmentsAlt, IconPlus, IconCodePlus, IconCornerDownRight } from '@tabler/icons-react';
+import {
+  IconSearch,
+  IconAdjustmentsAlt,
+  IconCodePlus,
+  IconCornerDownRight,
+  IconParentheses,
+} from '@tabler/icons-react';
 import _ from 'lodash';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -41,6 +47,7 @@ interface SearchTermType {
   searchValue: string;
   searchTerms: SearchTermType[];
   depth: number;
+  isRoot?: boolean;
 }
 
 enum AndOrEnum {
@@ -193,13 +200,68 @@ export default function Search(props: PropsType): React.ReactNode {
     }
   }, [searchParams]);
 
-  const addSubSearchTerm = (index: number, depth: number): void => {
-    const newSearchTerm = { ...INITIAL_SEARCH_TERM };
+  const addSearchTerm = (andOrValue: AndOrEnum): void => {
+    const newSearchTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
+    newSearchTerm.isRoot = true;
     newSearchTerm.key = uniqid();
-    newSearchTerm.depth = depth;
-    const updatedSearchTerms = _.cloneDeep(searchTerms);
-    updatedSearchTerms[index].searchTerms = [...updatedSearchTerms[index].searchTerms, newSearchTerm];
-    setSearchTerms(updatedSearchTerms);
+    newSearchTerm.andOrValue = andOrValue;
+
+    // This is fine since we only have one extra level of depth
+    let updatedTerms: SearchTermType[] = _.cloneDeep(searchTerms);
+    if (searchTerms.length) updatedTerms[0].searchTerms = [...updatedTerms[0].searchTerms, newSearchTerm];
+    else updatedTerms = [newSearchTerm];
+
+    setSearchTerms(updatedTerms);
+  };
+
+  const addSearchSubTerm = (keyToAddTo: string, andOrValue: AndOrEnum): void => {
+    const newSearchTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
+    newSearchTerm.key = uniqid();
+    newSearchTerm.andOrValue = andOrValue;
+    logger.info(`attempting to add inside ${keyToAddTo}`);
+    const updatedTerms: SearchTermType[] = _.cloneDeep(searchTerms);
+    if (searchTerms[0].key === keyToAddTo) {
+      const indexToInsertBefore = updatedTerms[0].searchTerms.findIndex((term) => term.isRoot);
+      if (indexToInsertBefore !== -1) updatedTerms[0].searchTerms.splice(indexToInsertBefore, 0, newSearchTerm);
+      else updatedTerms[0].searchTerms = [...updatedTerms[0].searchTerms, newSearchTerm];
+      logger.info('success!');
+    }
+
+    if (searchTerms[0].searchTerms.length) {
+      for (const [index, term] of searchTerms[0].searchTerms.entries()) {
+        if (term.key === keyToAddTo) {
+          updatedTerms[0].searchTerms[index].searchTerms = [
+            ...updatedTerms[0].searchTerms[index].searchTerms,
+            newSearchTerm,
+          ];
+          logger.info('success! (it was nested)');
+          break;
+        }
+      }
+    }
+    setSearchTerms(updatedTerms);
+  };
+
+  const removeSearchTerm = (keyToRemove: string): void => {
+    const updatedTerms = _.cloneDeep(searchTerms);
+    if (updatedTerms.length) {
+      for (const [index, term] of updatedTerms[0].searchTerms.entries()) {
+        if (term.key === keyToRemove) {
+          updatedTerms[0].searchTerms = updatedTerms[0].searchTerms.filter((currTerm) => currTerm.key !== keyToRemove);
+          break;
+        }
+        if (term.searchTerms.length) {
+          for (const childTerm of term.searchTerms) {
+            if (childTerm.key === keyToRemove) {
+              const newTerms = term.searchTerms.filter((currTerm) => currTerm.key !== keyToRemove);
+              updatedTerms[0].searchTerms[index].searchTerms = newTerms;
+              break;
+            }
+          }
+        }
+      }
+    }
+    setSearchTerms(updatedTerms);
   };
 
   // The simple search performs a search in ad names AND ad accounts
@@ -250,134 +312,180 @@ export default function Search(props: PropsType): React.ReactNode {
     }
   };
 
-  const addSearchTerm = (): void => {
-    const newSearchTerm = { ...INITIAL_SEARCH_TERM };
-    newSearchTerm.key = uniqid();
-    setSearchTerms([...searchTerms, { ...newSearchTerm }]);
-  };
-
-  const removeSearchTerm = (keyToRemove: string): void => {
-    const updatedTerms = _.cloneDeep(searchTerms);
-
-    const removeTermInPlace = (terms: SearchTermType[]): SearchTermType[] => {
-      return terms.filter((term) => {
-        if (term.key === keyToRemove) return false;
-        if (term.searchTerms.length) term.searchTerms = removeTermInPlace(term.searchTerms);
-        return true;
-      });
-    };
-
-    const finalTerms = removeTermInPlace(updatedTerms);
-    setSearchTerms(finalTerms);
-  };
-
   const changeAndOrOperator = (operator: string, keyToChange: string): void => {
     const updatedTerms = _.cloneDeep(searchTerms);
-    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
-      for (const term of terms) {
-        if (term.key === keyToChange) {
-          term.andOrValue = operator as AndOrEnum;
-          return true;
-        } else if (term.searchTerms.length) {
-          const found = updateTermInPlace(term.searchTerms);
-          if (found) return true;
+    if (updatedTerms[0].key === keyToChange) {
+      updatedTerms[0].andOrValue = operator as AndOrEnum;
+      for (const [childIndex, childTerm] of updatedTerms[0].searchTerms.entries()) {
+        if (childTerm.isRoot) break;
+        updatedTerms[0].searchTerms[childIndex].andOrValue = operator as AndOrEnum;
+      }
+    } else {
+      for (const [index, term] of searchTerms[0].searchTerms.entries()) {
+        if (term.isRoot && term.key === keyToChange) {
+          updatedTerms[0].searchTerms[index].andOrValue = operator as AndOrEnum;
+          for (const [childIndex, childTerm] of updatedTerms[0].searchTerms[index].searchTerms.entries()) {
+            if (childTerm.isRoot) break;
+            updatedTerms[0].searchTerms[index].searchTerms[childIndex].andOrValue = operator as AndOrEnum;
+          }
+          break;
         }
       }
-      return false;
-    };
-    updateTermInPlace(updatedTerms);
+    }
     setSearchTerms(updatedTerms);
   };
 
   const changeSearchOperator = (operator: string, keyToChange: string): void => {
     const updatedTerms = _.cloneDeep(searchTerms);
-    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
-      for (const term of terms) {
+    if (updatedTerms[0].key === keyToChange) {
+      updatedTerms[0].searchOperator = operator as InsightsSearchOperator;
+    } else {
+      for (const [index, term] of searchTerms[0].searchTerms.entries()) {
         if (term.key === keyToChange) {
-          term.searchOperator = operator as InsightsSearchOperator;
-          return true;
-        } else if (term.searchTerms.length) {
-          const found = updateTermInPlace(term.searchTerms);
-          if (found) return true;
+          updatedTerms[0].searchTerms[index].searchOperator = operator as InsightsSearchOperator;
+          break;
+        }
+        if (term.searchTerms.length) {
+          for (const [childIndex, childTerm] of term.searchTerms.entries()) {
+            if (childTerm.key === keyToChange) {
+              updatedTerms[0].searchTerms[index].searchTerms[childIndex].searchOperator =
+                operator as InsightsSearchOperator;
+              break;
+            }
+          }
         }
       }
-      return false;
-    };
-    updateTermInPlace(updatedTerms);
+    }
     setSearchTerms(updatedTerms);
   };
 
   const changeSearchField = (operator: string, keyToChange: string): void => {
     const updatedTerms = _.cloneDeep(searchTerms);
-    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
-      for (const term of terms) {
+    if (updatedTerms[0].key === keyToChange) {
+      updatedTerms[0].searchField = operator as InsightsSearchField;
+    } else {
+      for (const [index, term] of searchTerms[0].searchTerms.entries()) {
         if (term.key === keyToChange) {
-          term.searchField = operator as InsightsSearchField;
-          return true;
-        } else if (term.searchTerms.length) {
-          const found = updateTermInPlace(term.searchTerms);
-          if (found) return true;
+          updatedTerms[0].searchTerms[index].searchField = operator as InsightsSearchField;
+          break;
         }
-      }
-      return false;
-    };
-    updateTermInPlace(updatedTerms);
-    setSearchTerms(updatedTerms);
-  };
-
-  const changeSearchValue = (operator: string, keyToChange: string): void => {
-    const updatedTerms = _.cloneDeep(searchTerms);
-    const updateTermInPlace = (terms: SearchTermType[]): boolean => {
-      for (const term of terms) {
-        if (term.key === keyToChange) {
-          term.searchValue = operator;
-          return true;
-        } else if (term.searchTerms.length) {
-          const found = updateTermInPlace(term.searchTerms);
-          if (found) return true;
-        }
-      }
-      return false;
-    };
-    updateTermInPlace(updatedTerms);
-    setSearchTerms(updatedTerms);
-  };
-
-  const handleSearch = (): void => {
-    close();
-    const newData = { ...INITIAL_SEARCH_EXPRESSION };
-    newData.isAdvancedSearch = true;
-    logger.info(searchTerms, 'search terms');
-    // Depth 0
-    for (const term of searchTerms) {
-      const newExpression = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
-      if (newExpression.term && newExpression.and && newExpression.or && newData.and) {
-        newExpression.term.field = term.searchField;
-        newExpression.term.operator = term.searchOperator;
-        newExpression.term.value = term.searchValue;
-
-        // Depth 1
         if (term.searchTerms.length) {
-          for (const term1 of term.searchTerms) {
-            const expr = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
-
-            if (expr.term) {
-              expr.term.field = term1.searchField;
-              expr.term.operator = term1.searchOperator;
-              expr.term.value = term1.searchValue;
-              if (term1.andOrValue === AndOrEnum.AND) newExpression.and = [...newExpression.and, expr];
-              else newExpression.or = [...newExpression.or, expr];
+          for (const [childIndex, childTerm] of term.searchTerms.entries()) {
+            if (childTerm.key === keyToChange) {
+              updatedTerms[0].searchTerms[index].searchTerms[childIndex].searchField = operator as InsightsSearchField;
+              break;
             }
           }
         }
+      }
+    }
+    setSearchTerms(updatedTerms);
+  };
 
-        // Depth 0 expressions are always added inside AND
-        newData.and = [...newData.and, newExpression];
+  const changeSearchValue = (newValue: string, keyToChange: string): void => {
+    const updatedTerms = _.cloneDeep(searchTerms);
+    if (updatedTerms[0].key === keyToChange) {
+      updatedTerms[0].searchValue = newValue;
+    } else {
+      for (const [index, term] of searchTerms[0].searchTerms.entries()) {
+        if (term.key === keyToChange) {
+          updatedTerms[0].searchTerms[index].searchValue = newValue;
+          break;
+        }
+        if (term.searchTerms.length) {
+          for (const [childIndex, childTerm] of term.searchTerms.entries()) {
+            if (childTerm.key === keyToChange) {
+              updatedTerms[0].searchTerms[index].searchTerms[childIndex].searchValue = newValue;
+              break;
+            }
+          }
+        }
+      }
+    }
+    setSearchTerms(updatedTerms);
+  };
+
+  const handleAdvancedSearch = (): void => {
+    // close();
+
+    const rootExpression = { ...INITIAL_SEARCH_EXPRESSION };
+    rootExpression.isAdvancedSearch = true;
+    logger.info(searchTerms, 'search terms');
+
+    // First subterm of first term
+    const newExpression = { ...INITIAL_SEARCH_EXPRESSION };
+    newExpression.term = {
+      field: searchTerms[0].searchField,
+      operator: searchTerms[0].searchOperator,
+      value: searchTerms[0].searchValue,
+    };
+    if (searchTerms[0].andOrValue === AndOrEnum.AND && rootExpression.and)
+      rootExpression.and = [...rootExpression.and, newExpression];
+    else if (searchTerms[0].andOrValue === AndOrEnum.OR && rootExpression.or)
+      rootExpression.or = [...rootExpression.or, newExpression];
+
+    if (searchTerms.length) {
+      // Rest of the subterms of first term
+      let keysToIgnore: string[] = [];
+      for (const term of searchTerms[0].searchTerms) {
+        if (term.isRoot) break;
+        keysToIgnore = [...keysToIgnore, term.key];
+        const newExpression2 = { ...INITIAL_SEARCH_EXPRESSION };
+        newExpression2.term = {
+          field: term.searchField,
+          operator: term.searchOperator,
+          value: term.searchValue,
+        };
+
+        // Finally, add to the correct array of the root expression
+        if (term.andOrValue === AndOrEnum.AND && rootExpression.and)
+          rootExpression.and = [...rootExpression.and, newExpression2];
+        else if (term.andOrValue === AndOrEnum.OR && rootExpression.or)
+          rootExpression.or = [...rootExpression.or, newExpression2];
+      }
+
+      // Rest of the terms with their subterms
+      for (const term of searchTerms[0].searchTerms) {
+        if (term.isRoot) {
+          const newRootExpression = { ...INITIAL_SEARCH_EXPRESSION };
+          const newChildExpression = { ...INITIAL_SEARCH_EXPRESSION };
+          newChildExpression.term = {
+            field: term.searchField,
+            operator: term.searchOperator,
+            value: term.searchValue,
+          };
+
+          if (term.andOrValue === AndOrEnum.AND && newRootExpression.and)
+            newRootExpression.and = [...newRootExpression.and, newChildExpression];
+          else if (term.andOrValue === AndOrEnum.OR && newRootExpression.or)
+            newRootExpression.or = [...newRootExpression.or, newChildExpression];
+
+          if (term.searchTerms.length) {
+            for (const childTerm of term.searchTerms) {
+              const newChildExpression2 = { ...INITIAL_SEARCH_EXPRESSION };
+              newChildExpression2.term = {
+                field: childTerm.searchField,
+                operator: childTerm.searchOperator,
+                value: childTerm.searchValue,
+              };
+              if (childTerm.andOrValue === AndOrEnum.AND && newRootExpression.and)
+                newRootExpression.and = [...newRootExpression.and, newChildExpression2];
+              else if (childTerm.andOrValue === AndOrEnum.OR && newRootExpression.or)
+                newRootExpression.or = [...newRootExpression.or, newChildExpression2];
+            }
+          }
+
+          // Finally, add to the correct array of the root expression
+          if (searchTerms[0].andOrValue === AndOrEnum.AND && rootExpression.and)
+            rootExpression.and = [...rootExpression.and, newRootExpression];
+          else if (searchTerms[0].andOrValue === AndOrEnum.OR && rootExpression.or)
+            rootExpression.or = [...rootExpression.or, newRootExpression];
+        }
       }
     }
 
-    logger.info(newData, 'handle search data');
-    const encodedSearchData = btoa(JSON.stringify(newData));
+    logger.info(rootExpression, 'BE search data!');
+    const encodedSearchData = btoa(JSON.stringify(rootExpression));
 
     props.startTransition(() => {
       const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
@@ -385,64 +493,74 @@ export default function Search(props: PropsType): React.ReactNode {
     });
   };
 
-  const renderSearchTerm = (term: SearchTermType, index: number, depth: number): React.ReactNode => {
+  const renderSearchTermOperatorSetting = (key: string, andOrValue: AndOrEnum): React.ReactNode => {
     return (
-      <Flex align="center" gap="sm" my="sm" wrap={isMobile ? 'wrap' : 'nowrap'} key={term.key}>
-        {depth > 0 ? <IconCornerDownRight /> : null}
-        {depth > 0 ? (
-          <Select
-            data={AND_OR_DATA}
-            defaultValue={term.andOrValue}
-            allowDeselect={false}
-            onChange={(e) => {
-              if (e) changeAndOrOperator(e, term.key);
-            }}
-            comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
-          />
-        ) : null}
-
+      <Flex align="center" gap="sm" pl={key !== searchTerms[0].key ? 25 : 0}>
+        <IconParentheses style={{ opacity: 0.25 }} />
         <Select
-          data={SEARCH_OPERATOR_DATA}
-          defaultValue={term.searchOperator}
+          data={AND_OR_DATA}
+          defaultValue={andOrValue}
+          value={andOrValue}
           allowDeselect={false}
+          w={100}
           onChange={(e) => {
-            if (e) changeSearchOperator(e, term.key);
+            if (e) changeAndOrOperator(e, key);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
         />
+        <Tooltip label={tSearch('addSearchSubTerm')}>
+          <ActionIcon
+            disabled={props.isPending}
+            variant="transparent"
+            size={35}
+            onClick={() => {
+              addSearchSubTerm(key, andOrValue);
+            }}
+          >
+            <IconCodePlus />
+          </ActionIcon>
+        </Tooltip>
+      </Flex>
+    );
+  };
+
+  const renderSearchTerm = (term: SearchTermType): React.ReactNode => {
+    return (
+      <Flex align="center" gap="sm" my="sm" wrap={isMobile ? 'wrap' : 'nowrap'} key={term.key}>
+        <IconCornerDownRight style={{ opacity: 0.25 }} />
         <Select
           data={SEARCH_FIELD_DATA}
           defaultValue={term.searchField}
+          value={term.searchField}
           allowDeselect={false}
           onChange={(e) => {
             if (e) changeSearchField(e, term.key);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
         />
+        <Select
+          data={SEARCH_OPERATOR_DATA}
+          defaultValue={term.searchOperator}
+          value={term.searchOperator}
+          allowDeselect={false}
+          onChange={(e) => {
+            if (e) changeSearchOperator(e, term.key);
+          }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+        />
+
         <TextInput
           placeholder={tGeneric('search')}
           defaultValue={term.searchValue}
+          value={term.searchValue}
           onChange={(e) => {
             changeSearchValue(e.target.value, term.key);
           }}
         />
-        {depth === 0 ? (
-          <Tooltip label={tSearch('addSearchSubTerm')}>
-            <ActionIcon
-              disabled={props.isPending}
-              variant="transparent"
-              size={35}
-              onClick={() => {
-                addSubSearchTerm(index, 1);
-              }}
-            >
-              <IconCodePlus />
-            </ActionIcon>
-          </Tooltip>
-        ) : null}
 
-        <Tooltip label={tGeneric('remove')}>
+        <Tooltip label={tGeneric('remove')} disabled={term.isRoot}>
           <CloseButton
+            disabled={term.isRoot}
             onClick={() => {
               removeSearchTerm(term.key);
             }}
@@ -453,16 +571,20 @@ export default function Search(props: PropsType): React.ReactNode {
   };
 
   const renderSearchTerms = (): React.ReactNode => {
-    const nodes = [];
-    // Depth 0
-    for (const [index0, term0] of searchTerms.entries()) {
-      nodes.push(renderSearchTerm(term0, index0, term0.depth));
-
-      if (term0.searchTerms.length) {
-        // Depth 1
-        for (const [index1, term1] of term0.searchTerms.entries()) {
-          nodes.push(renderSearchTerm(term1, index1, term1.depth));
+    let nodes: React.ReactNode = [];
+    if (searchTerms.length) {
+      if (searchTerms[0].isRoot)
+        nodes = [...nodes, renderSearchTermOperatorSetting(searchTerms[0].key, searchTerms[0].andOrValue)];
+      nodes = [...nodes, renderSearchTerm(searchTerms[0])];
+      for (const term of searchTerms[0].searchTerms) {
+        if (term.isRoot) {
+          nodes = [...nodes, renderSearchTermOperatorSetting(term.key, term.andOrValue)];
+          nodes = [...nodes, renderSearchTerm(term)];
+          for (const childTerm of term.searchTerms) {
+            nodes = [...nodes, renderSearchTerm(childTerm)];
+          }
         }
+        if (!term.isRoot) nodes = [...nodes, renderSearchTerm(term)];
       }
     }
     return nodes;
@@ -513,13 +635,22 @@ export default function Search(props: PropsType): React.ReactNode {
         </Flex>
         <Button
           fullWidth
-          variant="transparent"
-          leftSection={<IconPlus />}
+          variant="outline"
+          leftSection={<IconParentheses />}
           onClick={() => {
-            addSearchTerm();
+            addSearchTerm(AndOrEnum.AND);
           }}
         >
           {tSearch('addSearchTerm')}
+        </Button>
+        <Button
+          fullWidth
+          variant="outline"
+          onClick={() => {
+            logger.info(searchTerms);
+          }}
+        >
+          LOG TERMS
         </Button>
         <Button
           fullWidth
@@ -527,7 +658,7 @@ export default function Search(props: PropsType): React.ReactNode {
           mt="sm"
           disabled={props.isPending || !searchTerms.length}
           onClick={() => {
-            handleSearch();
+            handleAdvancedSearch();
           }}
         >
           {tGeneric('search')}
