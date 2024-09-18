@@ -94,6 +94,12 @@ export default function Search(props: PropsType): React.ReactNode {
   const [searchBoxValue, setSearchBoxValue] = useState<string>('');
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchTerms, setSearchTerms] = useState<SearchTermType[]>([]);
+  const [loadedSearchData, setLoadedSearchData] = useState<
+    InsightsSearchExpression & {
+      isAdvancedSearch?: boolean;
+      clientSearchTerms?: SearchTermType[];
+    }
+  >();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const AND_OR_DATA = [
@@ -142,7 +148,7 @@ export default function Search(props: PropsType): React.ReactNode {
           clientSearchTerms?: SearchTermType[];
         })
       : {};
-
+    setLoadedSearchData(parsedSearchData);
     if (searchParams.get(searchKey)) {
       // Load simple search data
       if (!parsedSearchData.isAdvancedSearch && parsedSearchData.term) {
@@ -282,12 +288,19 @@ export default function Search(props: PropsType): React.ReactNode {
 
       setSearchBoxValue(newSearchValue);
     }
+    setSearchTerms([]); // empties advanced search modal
+  };
+
+  const emptySearchBox = (): void => {
+    if (searchBoxRef.current) {
+      searchBoxRef.current.value = '';
+      setSearchBoxValue('');
+    }
   };
 
   const clearSearchBoxValue = (): void => {
     if (searchBoxRef.current) {
-      searchBoxRef.current.value = '';
-      setSearchBoxValue('');
+      emptySearchBox();
       props.startTransition(() => {
         const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey);
         router.replace(newURL);
@@ -389,6 +402,7 @@ export default function Search(props: PropsType): React.ReactNode {
   };
 
   const handleAdvancedSearch = (): void => {
+    emptySearchBox();
     close();
 
     const rootExpression = { ...INITIAL_SEARCH_EXPRESSION };
@@ -627,7 +641,7 @@ export default function Search(props: PropsType): React.ReactNode {
             open();
           }}
           disabled={props.isPending}
-          variant={searchParams.get(searchKey) ? 'gradient' : 'default'}
+          variant={loadedSearchData?.isAdvancedSearch ? 'gradient' : 'default'}
           size={35}
         >
           <IconAdjustmentsAlt />
