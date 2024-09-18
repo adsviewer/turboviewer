@@ -9,7 +9,7 @@ import {
   UserOrganizationStatus,
   UserStatus,
 } from '@repo/database';
-import { canAddUser, maxUsersPerTier } from '@repo/mappings';
+import { canAddUser, tierConstraints } from '@repo/mappings';
 import { AError, isAError } from '@repo/utils';
 import * as changeCase from 'change-case';
 import { logger } from '@repo/logger';
@@ -107,7 +107,7 @@ export const createUser = async (args: SignupDataProvider | SignupDataPassword) 
 
   if (!canAddUser(currentTier, userOrganizationCount)) {
     return new AError(
-      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${maxUsersPerTier[currentTier].maxUsers.toString()}.`,
+      `Cannot add more users. The maximum number of users for the ${currentTier} tier is ${tierConstraints[currentTier].maxUsers.toString()}.`,
     );
   }
 

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
+import { getTier } from '@repo/organization';
 import { logger } from '@repo/logger';
 import { redisGet, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError } from '@repo/utils';
@@ -8,6 +9,7 @@ import type QueryString from 'qs';
 import { z } from 'zod';
 import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { isMode, MODE } from '@repo/mode';
+import { tierConstraints } from '@repo/mappings';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import { invokeChannelIngress } from './data-refresh';
@@ -88,6 +90,19 @@ const completeIntegration = async (
     return tokens;
   }
 
+  const tierStatus = await getTier(organizationId);
+  const maxIntegrations = tierConstraints[tierStatus].maxIntegrations;
+
+  const currentIntegrations = await prisma.integration.count({
+    where: {
+      organizationId,
+      status: IntegrationStatus.CONNECTED,
+    },
+  });
+
+  if (currentIntegrations > maxIntegrations) {
+    return new AError('Max integration limit reached for the current tier');
+  }
   const decryptedIntegration = await saveTokens(tokens, organizationId, integrationType).catch((e: unknown) => {
     if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
       const metaSchema = z.object({ modelName: z.string(), target: z.array(z.string()) });
@@ -111,6 +126,7 @@ const completeIntegration = async (
   fireAndForget.add(
     async () => await invokeChannelIngress({ initial: false, integrationIds: [decryptedIntegration.id] }),
   );
+
   return integrationType;
 };
 

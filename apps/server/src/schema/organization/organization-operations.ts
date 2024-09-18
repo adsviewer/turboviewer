@@ -1,7 +1,8 @@
-import { EmailType, OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from '@repo/database';
+import { EmailType, OrganizationRoleEnum, prisma, Tier, UserOrganizationStatus, UserStatus } from '@repo/database';
 import { GraphQLError } from 'graphql';
 import { AError, FireAndForget, isAError } from '@repo/utils';
 import { deleteInsightsCache } from '@repo/channel';
+import { getTier, switchTierHelper } from '@repo/organization';
 import { builder } from '../builder';
 import { createJwts } from '../../auth';
 import { TokensDto } from '../user/user-types';
@@ -9,7 +10,6 @@ import { deleteRedisInvite } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
 import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-types';
 import { sendOrganizationAddedEmail } from '../../email';
-import { getTier } from '../../contexts/organization';
 import { OrganizationDto, OrganizationRoleEnumDto, UserOrganizationDto, UserRolesInput } from './org-types';
 
 const fireAndForget = new FireAndForget();
@@ -158,7 +158,7 @@ builder.mutationFields((t) => ({
           name: args.name,
           domain,
           parentId: ctx.organizationId,
-          tier: await getTier(ctx.organizationId),
+          tier: ctx.organizationId ? await getTier(ctx.organizationId) : Tier.Launch,
           users: {
             createMany: {
               skipDuplicates: true,
@@ -357,6 +357,26 @@ builder.mutationFields((t) => ({
         where: { id: ctx.organizationId },
         data: { adAccounts: { set: newAdAccountsIds.map((id) => ({ id })) } },
       });
+    },
+  }),
+
+  switchTiers: t.withAuth({ isAdmin: true }).prismaField({
+    type: OrganizationDto,
+    nullable: false,
+    args: {
+      organizationId: t.arg.string({ required: true }),
+      tier: t.arg({ type: Tier, required: true }),
+    },
+    resolve: async (query, _root, args, _ctx, _info) => {
+      const { organizationId, tier: newTier } = args;
+
+      const updatedTier = await switchTierHelper(organizationId, newTier, query);
+
+      if (isAError(updatedTier)) {
+        throw new GraphQLError(updatedTier.message);
+      }
+
+      return updatedTier;
     },
   }),
 }));

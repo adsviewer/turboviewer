@@ -2,11 +2,12 @@ import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, FireAndForget } from '@repo/utils';
 import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
+import { getRootOrganizationId, getTier } from '@repo/organization';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
+import { tierConstraints } from '@repo/mappings';
 import { builder } from '../builder';
 import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
-import { getRootOrganizationId } from '../../contexts/organization';
 import {
   ChannelInitialProgressPayloadDto,
   getIntegrationStatus,
@@ -47,17 +48,29 @@ builder.queryFields((t) => ({
           organizationId: rootOrgId,
         },
       });
+      const tierStatus = await getTier(ctx.organizationId);
+      const maxIntegrations = tierConstraints[tierStatus].maxIntegrations;
+
+      const currentIntegrations = Object.values(IntegrationTypeEnum).reduce((acc, ch) => {
+        const status = integrationStatus(ch, integrations);
+        return status === IntegrationStatusEnum.Connected ? acc + 1 : acc;
+      }, 0);
+
+      const tierAllowIntegration = currentIntegrations < maxIntegrations;
 
       return Object.values(IntegrationTypeEnum).map((channel) => {
         const status = integrationStatus(channel, integrations);
-        const authUrl = ShouldConnectIntegrationStatuses.includes(status)
-          ? getIntegrationAuthUrl(channel, ctx.organizationId, ctx.currentUserId)
-          : undefined;
+        const authUrl =
+          ShouldConnectIntegrationStatuses.includes(status) && tierAllowIntegration
+            ? getIntegrationAuthUrl(channel, ctx.organizationId, ctx.currentUserId)
+            : null;
+
         authUrl && logger.info(`Integration ${channel} authUrl: ${authUrl}`);
         return {
           type: channel,
           status,
           authUrl,
+          tierAllowIntegration,
         };
       });
     },

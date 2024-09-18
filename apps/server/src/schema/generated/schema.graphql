@@ -610,6 +610,7 @@ type Mutation {
   signup(args: SignUpInput!): Tokens!
   subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
+  switchTiers(organizationId: String!, tier: Tier!): Organization!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!

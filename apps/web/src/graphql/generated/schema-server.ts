@@ -594,6 +594,7 @@ export type Mutation = {
   signup: Tokens;
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
+  switchTiers: Organization;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
@@ -679,6 +680,11 @@ export type MutationSubscribeNewsletterArgs = {
 
 export type MutationSwitchOrganizationArgs = {
   organizationId: Scalars['String']['input'];
+};
+
+export type MutationSwitchTiersArgs = {
+  organizationId: Scalars['String']['input'];
+  tier: Tier;
 };
 
 export type MutationUpdateOrganizationArgs = {

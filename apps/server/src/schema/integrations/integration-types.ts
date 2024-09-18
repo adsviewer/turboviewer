@@ -11,11 +11,11 @@ import {
 import { MetaError } from '@repo/channel-utils';
 import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
+import { getRootOrganizationId } from '@repo/organization';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
 import type { GraphQLContext } from '../../context';
-import { getRootOrganizationId } from '../../contexts/organization';
 import {
   type InsightsSearchExpression,
   InsightsSearchField,
