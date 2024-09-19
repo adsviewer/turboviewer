@@ -12,7 +12,7 @@ import {
   type PublisherEnum,
   type InsightsSearchExpression,
 } from '@/graphql/generated/schema-server';
-import { type SearchTermType } from './components/search';
+import { type SearchExpression, type SearchTermType } from './components/search/types-and-utils';
 
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
@@ -33,10 +33,7 @@ export interface SearchParams {
 }
 
 export default async function getInsights(searchParams: SearchParams): Promise<InsightsQuery> {
-  const parsedSearchData: InsightsSearchExpression & {
-    isAdvancedSearch?: boolean;
-    clientSearchTerms?: SearchTermType[];
-  } = searchParams.search
+  const parsedSearchData: SearchExpression = searchParams.search
     ? (JSON.parse(Buffer.from(searchParams.search, 'base64').toString('utf-8')) as InsightsSearchExpression & {
         isAdvancedSearch?: boolean;
         clientSearchTerms?: SearchTermType[];

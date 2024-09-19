@@ -24,7 +24,7 @@ import {
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
-import Search from './search';
+import Search from './search/search';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');

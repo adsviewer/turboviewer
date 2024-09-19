@@ -32,36 +32,18 @@ import React, { type TransitionStartFunction, useRef, useState, useEffect } from
 import uniqid from 'uniqid';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
-  type InsightsSearchExpression,
   InsightsSearchField,
   InsightsSearchOperator,
+  type InsightsSearchTerm,
 } from '@/graphql/generated/schema-server';
+import { AndOrEnum, isAndOrEnum, type SearchExpression, type SearchTermType } from './types-and-utils';
 
 interface PropsType {
   isPending: boolean;
   startTransition: TransitionStartFunction;
 }
 
-export interface SearchTermType {
-  key: string;
-  andOrValue: AndOrEnum;
-  searchOperator: InsightsSearchOperator;
-  searchField: InsightsSearchField;
-  searchValue: string;
-  searchTerms: SearchTermType[];
-  depth: number;
-  isRoot?: boolean;
-}
-
-enum AndOrEnum {
-  AND = 'AND',
-  OR = 'OR',
-}
-
-const INITIAL_SEARCH_EXPRESSION: InsightsSearchExpression & {
-  isAdvancedSearch?: boolean;
-  clientSearchTerms?: SearchTermType[];
-} = {
+const INITIAL_SEARCH_EXPRESSION: SearchExpression = {
   and: [],
   or: [],
 };
@@ -74,6 +56,12 @@ const INITIAL_SEARCH_TERM: SearchTermType = {
   searchValue: '',
   searchTerms: [],
   depth: 0,
+};
+
+const INITIAL_TERM: InsightsSearchTerm = {
+  field: InsightsSearchField.AdName,
+  operator: InsightsSearchOperator.Contains,
+  value: '',
 };
 
 export default function Search(props: PropsType): React.ReactNode {
@@ -89,12 +77,7 @@ export default function Search(props: PropsType): React.ReactNode {
   const [searchBoxValue, setSearchBoxValue] = useState<string>('');
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [searchTerms, setSearchTerms] = useState<SearchTermType[]>([]);
-  const [loadedSearchData, setLoadedSearchData] = useState<
-    InsightsSearchExpression & {
-      isAdvancedSearch?: boolean;
-      clientSearchTerms?: SearchTermType[];
-    }
-  >();
+  const [loadedSearchData, setLoadedSearchData] = useState<SearchExpression>();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const AND_OR_DATA = [
@@ -136,18 +119,14 @@ export default function Search(props: PropsType): React.ReactNode {
 
   useEffect(() => {
     const parsedSearchData = searchParams.get(searchKey)
-      ? (JSON.parse(
-          Buffer.from(String(searchParams.get(searchKey)), 'base64').toString('utf-8'),
-        ) as InsightsSearchExpression & {
-          isAdvancedSearch?: boolean;
-          clientSearchTerms?: SearchTermType[];
-        })
+      ? (JSON.parse(Buffer.from(String(searchParams.get(searchKey)), 'base64').toString('utf-8')) as SearchExpression)
       : {};
     setLoadedSearchData(parsedSearchData);
     if (searchParams.get(searchKey)) {
       // Load simple search data
-      if (!parsedSearchData.isAdvancedSearch && parsedSearchData.term) {
-        setSearchBoxValue(parsedSearchData.term.value);
+      if (!parsedSearchData.isAdvancedSearch && parsedSearchData.or) {
+        if (parsedSearchData.or.length && parsedSearchData.or[0].term?.value)
+          setSearchBoxValue(parsedSearchData.or[0].term.value);
       }
       // Load advanced search data
       else if (parsedSearchData.isAdvancedSearch && parsedSearchData.clientSearchTerms) {
@@ -175,8 +154,11 @@ export default function Search(props: PropsType): React.ReactNode {
 
     // This is fine since we only have one extra level of depth
     let updatedTerms: SearchTermType[] = _.cloneDeep(searchTerms);
-    if (searchTerms.length) updatedTerms[0].searchTerms = [...updatedTerms[0].searchTerms, newSearchTerm];
-    else updatedTerms = [newSearchTerm];
+    if (searchTerms.length) {
+      updatedTerms[0].searchTerms = [...updatedTerms[0].searchTerms, newSearchTerm];
+    } else {
+      updatedTerms = [newSearchTerm];
+    }
 
     setSearchTerms(updatedTerms);
     scrollToBottom();
@@ -248,7 +230,7 @@ export default function Search(props: PropsType): React.ReactNode {
     setSearchTerms(updatedTerms);
   };
 
-  // The simple search performs a search in ad names AND ad accounts
+  // The simple search performs a search in ad names and ad accounts by utilizing two OR statements
   const handleSearchBoxValueChanged = (): void => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -261,18 +243,23 @@ export default function Search(props: PropsType): React.ReactNode {
         router.replace(newURL);
       });
     } else {
+      // The timeout is reset every time a new input is given from the user,
+      // so that when they stop typing the search is performed.
       searchTimeoutRef.current = setTimeout(() => {
         const newSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
-        if (newSearchData.term) {
-          newSearchData.term.value = newSearchValue;
+        const adNameSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+        const adAccountNameSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
 
-          const orQueryData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
-          if (orQueryData.term) {
-            orQueryData.term.field = InsightsSearchField.AccountName;
-            orQueryData.term.value = newSearchValue;
-          }
-          newSearchData.or = [orQueryData];
-        }
+        adAccountNameSearchData.term = { ...INITIAL_TERM };
+        adNameSearchData.term = { ...INITIAL_TERM };
+        adNameSearchData.term.value = newSearchValue;
+        adNameSearchData.term.field = InsightsSearchField.AdName;
+        adNameSearchData.term.operator = InsightsSearchOperator.Contains;
+        adAccountNameSearchData.term.value = newSearchValue;
+        adAccountNameSearchData.term.field = InsightsSearchField.AccountName;
+        adAccountNameSearchData.term.operator = InsightsSearchOperator.Contains;
+        newSearchData.or = [adNameSearchData, adAccountNameSearchData];
+
         const encodedSearchData = btoa(JSON.stringify(newSearchData));
 
         props.startTransition(() => {
@@ -303,21 +290,21 @@ export default function Search(props: PropsType): React.ReactNode {
     }
   };
 
-  const changeAndOrOperator = (operator: string, keyToChange: string): void => {
+  const changeAndOrOperator = (operator: AndOrEnum, keyToChange: string): void => {
     const updatedTerms = _.cloneDeep(searchTerms);
     if (updatedTerms[0].key === keyToChange) {
-      updatedTerms[0].andOrValue = operator as AndOrEnum;
+      updatedTerms[0].andOrValue = operator;
       for (const [childIndex, childTerm] of updatedTerms[0].searchTerms.entries()) {
         if (childTerm.isRoot) break;
-        updatedTerms[0].searchTerms[childIndex].andOrValue = operator as AndOrEnum;
+        updatedTerms[0].searchTerms[childIndex].andOrValue = operator;
       }
     } else {
       for (const [index, term] of searchTerms[0].searchTerms.entries()) {
         if (term.isRoot && term.key === keyToChange) {
-          updatedTerms[0].searchTerms[index].andOrValue = operator as AndOrEnum;
+          updatedTerms[0].searchTerms[index].andOrValue = operator;
           for (const [childIndex, childTerm] of updatedTerms[0].searchTerms[index].searchTerms.entries()) {
             if (childTerm.isRoot) break;
-            updatedTerms[0].searchTerms[index].searchTerms[childIndex].andOrValue = operator as AndOrEnum;
+            updatedTerms[0].searchTerms[index].searchTerms[childIndex].andOrValue = operator;
           }
           break;
         }
@@ -506,7 +493,7 @@ export default function Search(props: PropsType): React.ReactNode {
             allowDeselect={false}
             w={100}
             onChange={(e) => {
-              if (e) changeAndOrOperator(e, key);
+              if (e && isAndOrEnum(e)) changeAndOrOperator(e, key);
             }}
             comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           />
