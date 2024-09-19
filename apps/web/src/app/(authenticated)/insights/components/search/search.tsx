@@ -139,13 +139,6 @@ export default function Search(props: PropsType): React.ReactNode {
     close();
   };
 
-  const scrollToBottom = (): void => {
-    setTimeout(() => {
-      if (scrollAreaRef.current)
-        scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
-    }, 100);
-  };
-
   const addSearchTerm = (andOrValue: AndOrEnum): void => {
     const newSearchTerm = _.cloneDeep(INITIAL_SEARCH_TERM);
     newSearchTerm.isRoot = true;
@@ -161,7 +154,6 @@ export default function Search(props: PropsType): React.ReactNode {
     }
 
     setSearchTerms(updatedTerms);
-    scrollToBottom();
   };
 
   const addSearchSubTerm = (keyToAddTo: string, andOrValue: AndOrEnum): void => {
@@ -187,7 +179,6 @@ export default function Search(props: PropsType): React.ReactNode {
       }
     }
     setSearchTerms(updatedTerms);
-    scrollToBottom();
   };
 
   const removeSearchTerm = (keyToRemove: string): void => {
