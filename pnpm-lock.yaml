@@ -1351,28 +1351,25 @@ importers:
 
   packages/organization:
     dependencies:
-      change-case:
-        specifier: ^5.4.4
-        version: 5.4.4
-    devDependencies:
       '@repo/channel-utils':
         specifier: workspace:*
         version: link:../channel-utils
       '@repo/database':
         specifier: workspace:*
         version: link:../database
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../config-eslint
       '@repo/mappings':
         specifier: workspace:*
         version: link:../mappings
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../config-typescript
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
       '@types/node':
         specifier: ^22.5.1
         version: 22.5.1
