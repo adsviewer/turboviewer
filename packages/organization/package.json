@@ -25,15 +25,14 @@
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
-    "change-case": "^5.4.4"
-  },
-  "devDependencies": {
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
+    "@repo/mappings": "workspace:*",
+    "@repo/utils": "workspace:*"
+  },
+  "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/mappings": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@types/node": "^22.5.1",
     "typescript": "^5.5.4"
   }
