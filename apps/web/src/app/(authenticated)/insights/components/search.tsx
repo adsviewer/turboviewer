@@ -30,6 +30,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
 import uniqid from 'uniqid';
+import { logger } from '@repo/logger';
 import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
 import {
   type InsightsSearchExpression,
@@ -64,11 +65,6 @@ const INITIAL_SEARCH_EXPRESSION: InsightsSearchExpression & {
 } = {
   and: [],
   or: [],
-  term: {
-    field: InsightsSearchField.AdName,
-    operator: InsightsSearchOperator.Contains,
-    value: '',
-  },
 };
 
 const INITIAL_SEARCH_TERM: SearchTermType = {
@@ -479,7 +475,7 @@ export default function Search(props: PropsType): React.ReactNode {
         }
       }
     }
-
+    logger.info(rootExpression);
     rootExpression.clientSearchTerms = searchTerms; // is used when loading data in the useEffect!
     const encodedSearchData = btoa(JSON.stringify(rootExpression));
 
