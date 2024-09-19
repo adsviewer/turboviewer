@@ -340,7 +340,7 @@ export const InsightsSearchTermDto = builder.inputRef<InsightsSearchTerm>('Insig
   fields: (t) => ({
     field: t.field({ type: InsightsSearchFieldDto, required: true }),
     operator: t.field({ type: InsightsSearchOperatorDto, required: true }),
-    value: t.string({ required: true }),
+    value: t.string({ required: true, validate: { minLength: 1 } }),
   }),
 });
 

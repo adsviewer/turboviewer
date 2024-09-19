@@ -7,7 +7,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development concurrently 'pnpm --filter=@repo/database start-dev' 'pnpm codegen' && tsx watch src/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
     "build": "tsc && pnpm run sentry:sourcemaps",
     "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
@@ -80,7 +80,6 @@
     "@types/node": "22.5.1",
     "@types/qs": "^6.9.15",
     "@types/sns-validator": "^0.3.3",
-    "concurrently": "^8.2.2",
     "tsx": "^4.19.0",
     "typescript": "5.5.4"
   }
