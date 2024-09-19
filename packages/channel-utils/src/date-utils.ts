@@ -8,28 +8,41 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
     where: { adAccountId },
     orderBy: { date: 'desc' },
   });
-  
+
   const organizations = latestInsight?.adAccount?.organizations ?? [];
-  
-  const organizationWithHighestTier = organizations.length > 0
-    ? organizations.sort((a, b) => tierConstraints[b.tier].order - tierConstraints[a.tier].order)[0].tier
-    : undefined;
-  
+
+  const organizationWithHighestTier =
+    organizations.length > 0
+      ? organizations.sort((a, b) => tierConstraints[b.tier].order - tierConstraints[a.tier].order)[0].tier
+      : undefined;
+
   if (initial) {
     const range = getLastXMonths();
-    
+
     if (!organizationWithHighestTier) {
       return splitTimeRange(tierConstraints[Tier.Launch].maxRecency, range.since, range.until);
     }
-  
+
     return splitTimeRange(tierConstraints[organizationWithHighestTier].maxRecency, range.since, range.until);
   }
-  const furthestDate = addInterval(new Date(), 'day', -tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency);
+  const furthestDate = addInterval(
+    new Date(),
+    'day',
+    -tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency,
+  );
   const range = latestInsight ? getDayPriorTillTomorrow(latestInsight.date) : getDayPriorTillTomorrow(furthestDate);
-  return splitTimeRange(tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency, range.since, range.until);
+  return splitTimeRange(
+    tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency,
+    range.since,
+    range.until,
+  );
 };
 
-export const splitTimeRange = (maxTimePeriodDays: number, since: Date, until: Date = new Date()): { since: Date; until: Date }[] => {
+export const splitTimeRange = (
+  maxTimePeriodDays: number,
+  since: Date,
+  until: Date = new Date(),
+): { since: Date; until: Date }[] => {
   const maxTimePeriod = 1000 * 60 * 60 * 24 * maxTimePeriodDays;
   if (since.getTime() > new Date().getTime()) return [];
 
@@ -38,9 +51,9 @@ export const splitTimeRange = (maxTimePeriodDays: number, since: Date, until: Da
   const diff = until.getTime() - since.getTime();
   if (diff < maxTimePeriod) return [{ since, until }];
 
-  const newDateUntil = addInterval(since, 'day', (maxTimePeriodDays) - 1);
+  const newDateUntil = addInterval(since, 'day', maxTimePeriodDays - 1);
   periods.push({ since, until: newDateUntil });
   const newDateSince = getTomorrowStartOfDay(newDateUntil);
-  periods.push(...splitTimeRange(maxTimePeriod, newDateSince, until));
+  periods.push(...splitTimeRange(maxTimePeriodDays, newDateSince, until));
   return periods;
 };
