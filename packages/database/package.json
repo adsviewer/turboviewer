@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start-dev": "concurrently 'pnpm db:migrate:deploy' 'pnpm generate'",
+    "dev": "concurrently 'pnpm db:migrate:deploy' 'pnpm generate'",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev --create-only",
     "db:migrate:revert": "npx prisma migrate diff --to-schema-datamodel prisma/schema.prisma --from-schema-datasource prisma/schema.prisma --script > down.sql",
