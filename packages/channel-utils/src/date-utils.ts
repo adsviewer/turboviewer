@@ -16,6 +16,8 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
       ? organizations.sort((a, b) => tierConstraints[b.tier].order - tierConstraints[a.tier].order)[0].tier
       : undefined;
 
+  const maxRecency = tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency;
+
   if (initial) {
     const range = getLastXMonths();
 
@@ -23,19 +25,12 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
       return splitTimeRange(tierConstraints[Tier.Launch].maxRecency, range.since, range.until);
     }
 
-    return splitTimeRange(tierConstraints[organizationWithHighestTier].maxRecency, range.since, range.until);
+    return splitTimeRange(maxRecency, range.since, range.until);
   }
-  const furthestDate = addInterval(
-    new Date(),
-    'day',
-    -tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency,
-  );
-  const range = latestInsight ? getDayPriorTillTomorrow(latestInsight.date) : getDayPriorTillTomorrow(furthestDate);
-  return splitTimeRange(
-    tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency,
-    range.since,
-    range.until,
-  );
+  const furthestDate = addInterval(new Date(), 'day', -maxRecency);
+  const insightDateWithinLimit = latestInsight && latestInsight.date > furthestDate ? latestInsight.date : furthestDate;
+  const range = getDayPriorTillTomorrow(insightDateWithinLimit);
+  return splitTimeRange(maxRecency, range.since, range.until);
 };
 
 export const splitTimeRange = (
