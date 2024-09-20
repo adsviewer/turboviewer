@@ -662,4 +662,32 @@ void describe('searchAdsToSQL tests', () => {
     const sql = searchAdsToSQL(expression);
     assert.strictEqual(sql, "AND (a.name ILIKE 'start%')");
   });
+
+  void it('should generate SQL for search adName or adAccountName', () => {
+    const expression: InsightsSearchExpression = {
+      and: [],
+      or: [
+        {
+          and: [],
+          or: [],
+          term: {
+            value: 'asdf',
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.Contains,
+          },
+        },
+        {
+          and: [],
+          or: [],
+          term: {
+            value: 'asdf',
+            field: InsightsSearchField.AccountName,
+            operator: InsightsSearchOperator.Contains,
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name ILIKE '%asdf%' OR aa.name ILIKE '%asdf%')");
+  });
 });
