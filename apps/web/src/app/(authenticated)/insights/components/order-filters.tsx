@@ -24,6 +24,7 @@ import {
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
+import Search from './search/search';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -182,6 +183,10 @@ export default function OrderFilters(): React.ReactNode {
 
   return (
     <Flex w="100%" wrap="wrap" direction="column">
+      <Flex wrap="wrap" mb="md" gap="xs">
+        {/* Search */}
+        <Search isPending={isPending} startTransition={startTransition} />
+      </Flex>
       {/* Filters */}
       <Flex wrap="wrap" mb="md" gap="xs">
         {/* Page size filter */}

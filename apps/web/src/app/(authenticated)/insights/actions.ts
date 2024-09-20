@@ -4,19 +4,21 @@ import { urqlClientSdk } from '@/lib/urql/urql-client';
 import {
   type DeviceEnum,
   type InsightsColumnsGroupBy,
-  type InsightsColumnsOrderBy,
+  InsightsColumnsOrderBy,
   InsightsInterval,
   type InsightsPosition,
   type InsightsQuery,
   type OrderBy,
   type PublisherEnum,
+  type InsightsSearchExpression,
 } from '@/graphql/generated/schema-server';
+import { type SearchExpression, type SearchTermType } from './components/search/types-and-utils';
 
 export interface SearchParams {
   orderBy?: InsightsColumnsOrderBy;
   order?: OrderBy;
-  page?: string;
-  pageSize?: string;
+  page?: number;
+  pageSize?: number;
   groupedBy?: InsightsColumnsGroupBy[];
   account?: string;
   adId?: string;
@@ -27,15 +29,20 @@ export interface SearchParams {
   fetchPreviews?: string;
   dateFrom?: number;
   dateTo?: number;
+  search?: string;
 }
 
-export default async function getInsights(
-  searchParams: SearchParams,
-  orderBy: InsightsColumnsOrderBy,
-  order: OrderBy,
-  pageSize: number,
-  page: number,
-): Promise<InsightsQuery> {
+export default async function getInsights(searchParams: SearchParams): Promise<InsightsQuery> {
+  const parsedSearchData: SearchExpression = searchParams.search
+    ? (JSON.parse(Buffer.from(searchParams.search, 'base64').toString('utf-8')) as InsightsSearchExpression & {
+        isAdvancedSearch?: boolean;
+        clientSearchTerms?: SearchTermType[];
+      })
+    : {};
+
+  delete parsedSearchData.isAdvancedSearch;
+  delete parsedSearchData.clientSearchTerms;
+
   return await urqlClientSdk().insights({
     adAccountIds: searchParams.account,
     adIds: searchParams.adId,
@@ -43,12 +50,13 @@ export default async function getInsights(
     dateTo: searchParams.dateTo ? new Date(Number(searchParams.dateTo)) : undefined,
     devices: searchParams.device,
     groupBy: searchParams.groupedBy,
-    order,
-    orderBy,
-    page,
-    pageSize,
+    order: searchParams.order,
+    orderBy: searchParams.orderBy ?? InsightsColumnsOrderBy.impressions_abs,
+    page: searchParams.page ? Number(searchParams.page) : 1,
+    pageSize: searchParams.pageSize ? Number(searchParams.pageSize) : 12,
     positions: searchParams.position,
     publishers: searchParams.publisher,
     interval: searchParams.interval ?? InsightsInterval.week,
+    search: parsedSearchData,
   });
 }

@@ -8,6 +8,7 @@
     "accessRootOrg": "This action can be performed only from the root organization!",
     "copied": "Copied to clipboard",
     "search": "Search",
+    "advancedSearch": "Advanced Search",
     "submit": "Submit",
     "remove": "Remove",
     "refresh": "Refresh",
@@ -71,6 +72,19 @@
       "date": "Date",
       "publisher": "Publisher",
       "position": "Position"
+    },
+    "search": {
+      "and": "AND",
+      "or": "OR",
+      "contains": "Contains",
+      "startsWith": "Starts With",
+      "equals": "Equals",
+      "adName": "Ad Name",
+      "adAccountName": "Ad Account Name",
+      "addSearchTerm": "Add search term",
+      "addSearchSubTerm": "Add subterm",
+      "searchTermsHint": "Start adding search terms to customize your search.",
+      "clearSearch": "Clear search"
     }
   },
   "integrations": {
