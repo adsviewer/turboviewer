@@ -51,7 +51,7 @@ export const getInsightsDateFrom = (
 };
 
 export const searchAdsToSQL = (expression: InsightsSearchExpression): string => {
-  function evaluateTerm(term: InsightsSearchTerm): string {
+  const evaluateTerm = (term: InsightsSearchTerm): string => {
     const field = term.field;
     const value = term.value;
     switch (term.operator) {
@@ -65,13 +65,13 @@ export const searchAdsToSQL = (expression: InsightsSearchExpression): string => 
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- intentional
         throw new Error(`Unknown operator: ${term.operator}`);
     }
-  }
+  };
 
   const evaluateExpression = (expr: InsightsSearchExpression): string | null => {
     if (expr.term) {
       return evaluateTerm(expr.term);
     }
-    if (expr.and) {
+    if (expr.and && expr.and.length !== 0) {
       return `(${expr.and
         .flatMap((subExpr) => {
           const evaluatedExpr = evaluateExpression(subExpr);
@@ -79,7 +79,7 @@ export const searchAdsToSQL = (expression: InsightsSearchExpression): string => 
         })
         .join(' AND ')})`;
     }
-    if (expr.or) {
+    if (expr.or && expr.or.length !== 0) {
       return `(${expr.or
         .flatMap((subExpr) => {
           const evaluatedExpr = evaluateExpression(subExpr);
