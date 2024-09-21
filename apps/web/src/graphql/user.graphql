@@ -33,6 +33,7 @@ fragment UserFields on User {
     name
     isRoot
     parentId
+    tier
     integrations {
       status
       type
