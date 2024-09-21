@@ -3,7 +3,7 @@
 import { Group, Avatar, Text, Flex } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useTranslations } from 'next-intl';
@@ -11,7 +11,6 @@ import { getUserDetails } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { IntegrationStatus, type Integration } from '@/graphql/generated/schema-server';
-import { organizationAtom } from '@/app/atoms/organization-atoms';
 import classes from './user-button.module.scss';
 
 export default function UserButton(): ReactNode {
@@ -19,7 +18,6 @@ export default function UserButton(): ReactNode {
   const tIntegrations = useTranslations('integrations');
   const router = useRouter();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
-  const setOrganization = useSetAtom(organizationAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const checkIntegrationTokensForExpiration = useCallback(
@@ -57,7 +55,7 @@ export default function UserButton(): ReactNode {
       .catch((error: unknown) => {
         logger.error(error);
       });
-  }, [checkIntegrationTokensForExpiration, setOrganization, setUserDetails]);
+  }, [checkIntegrationTokensForExpiration, setUserDetails]);
 
   const redirectToProfile = (): void => {
     router.push('profile');
