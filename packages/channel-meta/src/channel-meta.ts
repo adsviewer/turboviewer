@@ -667,8 +667,11 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
   const metaErrorValidatingAccessTokenChangedSession =
     'Error validating access token: The session has been invalidated because the user changed their password or Facebook has changed the session for security reasons.';
   const metaErrorNotAuthenticated = 'Error validating access token: The user has not authorized application';
+  const metaErrorFollowInstructions =
+    'You cannot access the app till you log in to www.facebook.com and follow the instructions given.';
   if (
     error.message === metaErrorValidatingAccessTokenChangedSession ||
+    error.message === metaErrorFollowInstructions ||
     error.message.startsWith(metaErrorNotAuthenticated)
   ) {
     await markErrorIntegrationById(integrationId, notify);
