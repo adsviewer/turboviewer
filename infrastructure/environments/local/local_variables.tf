@@ -4,7 +4,7 @@ variable "aws_region" {
 
 variable "developers" {
   type        = set(string)
-  default     = ["aaryan", "dennis", "giorgos", "iresha", "lefteris", "vlad"]
+  default     = ["aaryan", "dennis", "giorgos", "lefteris", "vlad"]
   description = "List of developers to be added to the team. This should be a list of aws usernames"
 }
 
