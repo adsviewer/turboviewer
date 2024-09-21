@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { type MeQuery } from '@/graphql/generated/schema-server';
+import { Tier, type MeQuery } from '@/graphql/generated/schema-server';
 
 export const initialUserDetails: MeQuery['me'] = {
   __typename: 'User',
@@ -13,6 +13,7 @@ export const initialUserDetails: MeQuery['me'] = {
     __typename: 'Organization',
     id: '',
     name: '',
+    tier: Tier.Launch,
     isRoot: false,
     parentId: null,
     integrations: [],
