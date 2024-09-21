@@ -108,7 +108,8 @@
     "ads": "advertenties",
     "tokenWarning": "Integratie verloopt bijna! Ga naar de Integratiepagina om opnieuw verbinding te maken!",
     "tokenWarningExtend": "Het is een goed idee om dit te doen!",
-    "erroredIntegrationWarning": "Er is een fout met deze integratie!"
+    "erroredIntegrationWarning": "Er is een fout met deze integratie!",
+    "maxIntegrationsWarning": "U hebt het maximale aantal integraties voor uw huidige abonnement bereikt."
   },
   "settings": {
     "title": "Instellingen",

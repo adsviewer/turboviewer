@@ -3,7 +3,7 @@
 import { Group, Avatar, Text, Flex } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useTranslations } from 'next-intl';
@@ -11,6 +11,8 @@ import { getUserDetails } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { IntegrationStatus, type Integration } from '@/graphql/generated/schema-server';
+import getOrganization from '@/app/(authenticated)/organization/actions';
+import { organizationAtom } from '@/app/atoms/organization-atoms';
 import classes from './user-button.module.scss';
 
 export default function UserButton(): ReactNode {
@@ -18,6 +20,7 @@ export default function UserButton(): ReactNode {
   const tIntegrations = useTranslations('integrations');
   const router = useRouter();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+  const setOrganization = useSetAtom(organizationAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const checkIntegrationTokensForExpiration = useCallback(
@@ -51,11 +54,21 @@ export default function UserButton(): ReactNode {
         checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
         setUserDetails(res);
         setIsDataLoaded(true);
+
+        void getOrganization()
+          .then((orgRes) => {
+            if (orgRes.data) {
+              setOrganization(orgRes.data);
+            }
+          })
+          .catch((err: unknown) => {
+            logger.error(err);
+          });
       })
       .catch((error: unknown) => {
         logger.error(error);
       });
-  }, [checkIntegrationTokensForExpiration, setUserDetails]);
+  }, [checkIntegrationTokensForExpiration, setOrganization, setUserDetails]);
 
   const redirectToProfile = (): void => {
     router.push('profile');

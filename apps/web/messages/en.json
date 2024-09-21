@@ -108,7 +108,8 @@
     "ads": "ads",
     "tokenWarning": "Integration token is close to expiration! Visit the Integrations page to extend!",
     "tokenWarningExtend": "Integration token is close to expiration and must be extended!",
-    "erroredIntegrationWarning": "There is an error with this integration!"
+    "erroredIntegrationWarning": "There is an error with this integration!",
+    "maxIntegrationsWarning": "You have reached the maximum amount of integrations for your current plan."
   },
   "settings": {
     "title": "Settings",

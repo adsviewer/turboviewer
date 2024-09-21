@@ -27,6 +27,7 @@ interface IntegrationProps {
   adCount: number;
   lastSyncedAt: Date | null | undefined;
   status: IntegrationStatus;
+  allowConnection: boolean;
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
@@ -71,6 +72,17 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
 
   const renderIntegrationButton = (): ReactNode => {
     if (props.isAvailable) {
+      if (!props.allowConnection) {
+        return (
+          <Tooltip label={t('maxIntegrationsWarning')}>
+            <Link href={props.authUrl ?? ''} passHref>
+              <Button w="100%" mt="lg" component="a" disabled>
+                {t('connect')}
+              </Button>
+            </Link>
+          </Tooltip>
+        );
+      }
       if (!props.isConnected) {
         return (
           <Tooltip

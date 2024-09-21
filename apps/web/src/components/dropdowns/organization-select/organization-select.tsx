@@ -23,6 +23,7 @@ export default function OrganizationSelect(): React.ReactNode {
           value: organization.organization.id,
         };
       });
+      logger.info(organizationsData, 'set organization!');
       setOrganizations(organizationsData);
     }
   }, [userDetails, userDetails.organizations]);
