@@ -29,12 +29,10 @@ import {
   getConnectedIntegrationByOrg,
   JobStatusEnum,
   saveAccounts,
-  saveAds,
-  saveInsights,
+  saveInsightsAdsAdsSetsCampaigns,
   type TokensResponse,
 } from '@repo/channel-utils';
 import csvParser from 'csv-parser';
-import _ from 'lodash';
 import { env } from './config';
 
 const apiVersion = 'v1.3';
@@ -286,10 +284,9 @@ export class Tiktok implements ChannelInterface {
     since: Date,
     until: Date,
   ): Promise<AError | undefined> {
-    const adsMap = new Map<string, ChannelAd>();
-    const adSetMap = new Map<string, ChannelAdSet>();
-    const adCampaignMap = new Map<string, ChannelCampaign>();
     const adExternalIdMap = new Map<string, string>();
+    const externalAdSetToIdMap = new Map<string, string>();
+    const externalCampaignToIdMap = new Map<string, string>();
     const params = new URLSearchParams({
       advertiser_id: adAccount.integration.externalId,
       task_id: taskId,
@@ -309,14 +306,12 @@ export class Tiktok implements ChannelInterface {
     const fn = (data: unknown[]): Promise<AError | undefined> =>
       Tiktok.processReportChunk(
         taskId,
-        adAccount.integration,
         adAccount,
         data,
         placementPublisherMap,
-        adsMap,
-        adSetMap,
-        adCampaignMap,
         adExternalIdMap,
+        externalAdSetToIdMap,
+        externalCampaignToIdMap,
       );
     if (isAError(response)) return response;
     await deleteOldInsights(adAccount.id, since, until);
@@ -492,57 +487,62 @@ export class Tiktok implements ChannelInterface {
 
   private static processReportChunk = async (
     taskId: string,
-    integration: Integration,
     adAccount: AdAccount,
     data: unknown[],
     placementPublisherMap: Map<PlacementsEnum, PublisherEnum>,
-    adsMap: Map<string, ChannelAd>,
-    adSetMap: Map<string, ChannelAdSet>,
-    adCampaignMap: Map<string, ChannelCampaign>,
     adExternalIdMap: Map<string, string>,
+    externalAdSetToIdMap: Map<string, string>,
+    externalCampaignToIdMap: Map<string, string>,
   ): Promise<AError | undefined> => {
     const parsed = insightsSchema.safeParse(data);
     if (!parsed.success) {
-      logger.error(parsed.error, `Failed to parse report for task ${taskId} and integration ${integration.id}`);
+      logger.error(parsed.error, `Failed to parse report for task ${taskId} and adAccount ${adAccount.id}`);
       return new AError('Failed to parse report');
     }
 
-    const insights: ChannelInsight[] = [];
-    parsed.data.forEach((row) => {
-      const insight: ChannelInsight = {
-        clicks: row['Clicks (Destination)'],
-        externalAdId: row['Ad ID'],
-        date: row.Date,
-        externalAccountId: adAccount.externalId,
-        impressions: row.Impression,
-        spend: Math.floor(row.Cost * 100),
-        device: DeviceEnum.Unknown,
-        publisher: placementPublisherMap.get(row.Placements) ?? PublisherEnum.TikTok,
-        position: row['Placements Types'],
-      };
-      insights.push(insight);
-      adsMap.set(insight.externalAdId, {
-        externalAdSetId: row['Ad group ID'],
-        externalAdAccountId: adAccount.externalId,
-        externalId: insight.externalAdId,
-        name: row['Ad Name'],
-      });
-      adSetMap.set(row['Ad group ID'], {
-        externalCampaignId: row['﻿Campaign ID'],
-        externalId: row['Ad group ID'],
-        name: row['Ad Group Name'],
-      });
-      adCampaignMap.set(row['﻿Campaign ID'], {
-        externalAdAccountId: adAccount.externalId,
-        externalId: row['﻿Campaign ID'],
-        name: row['Campaign name'],
-      });
-    });
-    const ads = Array.from(adsMap.values());
-    const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
-    const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
-    await saveAds(integration, newAds, adAccount.id, adExternalIdMap);
-    await saveInsights(insights, adExternalIdMap, adAccount);
+    const [insights, ads, adSets, campaigns] = parsed.data.reduce(
+      (acc, row) => {
+        acc[0].push({
+          clicks: row['Clicks (Destination)'],
+          externalAdId: row['Ad ID'],
+          date: row.Date,
+          externalAccountId: adAccount.externalId,
+          impressions: row.Impression,
+          spend: Math.floor(row.Cost * 100),
+          device: DeviceEnum.Unknown,
+          publisher: placementPublisherMap.get(row.Placements) ?? PublisherEnum.TikTok,
+          position: row['Placements Types'],
+        });
+        acc[1].push({
+          externalAdSetId: row['Ad group ID'],
+          externalAdAccountId: adAccount.externalId,
+          externalId: row['Ad ID'],
+          name: row['Ad Name'],
+        });
+        acc[2].push({
+          externalCampaignId: row['﻿Campaign ID'],
+          externalId: row['Ad group ID'],
+          name: row['Ad Group Name'],
+        });
+        acc[3].push({
+          externalAdAccountId: adAccount.externalId,
+          externalId: row['﻿Campaign ID'],
+          name: row['Campaign name'],
+        });
+        return acc;
+      },
+      [[] as ChannelInsight[], [] as ChannelAd[], [] as ChannelAdSet[], [] as ChannelCampaign[]],
+    );
+    await saveInsightsAdsAdsSetsCampaigns(
+      campaigns,
+      externalCampaignToIdMap,
+      adAccount,
+      adSets,
+      externalAdSetToIdMap,
+      ads,
+      adExternalIdMap,
+      insights,
+    );
   };
 
   getType(): IntegrationTypeEnum {

@@ -25,7 +25,6 @@ import {
   User,
 } from 'facebook-nodejs-business-sdk';
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
-import _ from 'lodash';
 import {
   type AdAccountWithIntegration,
   adReportsStatusesToRedis,
@@ -50,8 +49,7 @@ import {
   MetaError,
   revokeIntegration,
   saveAccounts,
-  saveAds,
-  saveInsights,
+  saveInsightsAdsAdsSetsCampaigns,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { retry } from '@lifeomic/attempt';
@@ -405,6 +403,8 @@ class Meta implements ChannelInterface {
     adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
     const reportId = taskId;
     const adExternalIdMap = new Map<string, string>();
+    const externalAdSetToIdMap = new Map<string, string>();
+    const externalCampaignToIdMap = new Map<string, string>();
     const insightSchema = z.object({
       account_id: z.string(),
       adset_id: z.string(),
@@ -424,7 +424,7 @@ class Meta implements ChannelInterface {
 
     const toInsightAndAd = (
       insight: z.infer<typeof insightSchema>,
-    ): { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; adCampaign: ChannelCampaign } => ({
+    ): { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; campaign: ChannelCampaign } => ({
       insight: {
         clicks: insight.inline_link_clicks ?? 0,
         externalAdId: insight.ad_id,
@@ -442,7 +442,7 @@ class Meta implements ChannelInterface {
         externalId: insight.ad_id,
         name: insight.ad_name,
       },
-      adCampaign: {
+      campaign: {
         externalAdAccountId: insight.account_id,
         externalId: insight.campaign_id,
         name: insight.campaign_name,
@@ -468,8 +468,21 @@ class Meta implements ChannelInterface {
         limit,
       },
     );
-    const insightsProcessFn = async (i: { insight: ChannelInsight; ad: ChannelAd }[]): Promise<undefined> => {
-      await this.saveAdsAndInsights(i, adExternalIdMap, adAccount);
+    const insightsProcessFn = async (
+      i: {
+        insight: ChannelInsight;
+        ad: ChannelAd;
+        adSet: ChannelAdSet;
+        campaign: ChannelCampaign;
+      }[],
+    ): Promise<undefined> => {
+      await this.saveAdsAdSetsCampaignsAndInsights(
+        i,
+        adExternalIdMap,
+        externalAdSetToIdMap,
+        externalCampaignToIdMap,
+        adAccount,
+      );
       return undefined;
     };
     await deleteOldInsights(adAccount.id, since, until);
@@ -521,24 +534,33 @@ class Meta implements ChannelInterface {
     return parsed.data.id;
   }
 
-  private async saveAdsAndInsights(
-    accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd }[],
+  private async saveAdsAdSetsCampaignsAndInsights(
+    accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; campaign: ChannelCampaign }[],
     adExternalIdMap: Map<string, string>,
+    externalAdSetToIdMap: Map<string, string>,
+    externalCampaignToIdMap: Map<string, string>,
     dbAccount: AdAccountWithIntegration,
   ): Promise<void> {
-    const [insights, ads] = accountInsightsAndAds.reduce(
+    const [insights, ads, adSets, campaigns] = accountInsightsAndAds.reduce(
       (acc, item) => {
         acc[0].push(item.insight);
         acc[1].push(item.ad);
+        acc[2].push(item.adSet);
+        acc[3].push(item.campaign);
         return acc;
       },
-      [[] as ChannelInsight[], [] as ChannelAd[]],
+      [[] as ChannelInsight[], [] as ChannelAd[], [] as ChannelAdSet[], [] as ChannelCampaign[]],
     );
-    const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
-    const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
-    await saveAds(dbAccount.integration, newAds, dbAccount.id, adExternalIdMap);
-
-    await saveInsights(insights, adExternalIdMap, dbAccount);
+    await saveInsightsAdsAdsSetsCampaigns(
+      campaigns,
+      externalCampaignToIdMap,
+      dbAccount,
+      adSets,
+      externalAdSetToIdMap,
+      ads,
+      adExternalIdMap,
+      insights,
+    );
   }
 
   private static async handlePagination<T, U extends ZodTypeAny>(

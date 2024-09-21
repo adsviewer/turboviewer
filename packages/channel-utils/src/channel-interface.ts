@@ -41,7 +41,7 @@ export interface ChannelAd {
 export interface ChannelAdSet {
   externalCampaignId: string;
   externalId: string;
-  name?: string;
+  name: string;
 }
 
 export interface ChannelCampaign {

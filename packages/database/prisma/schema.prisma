@@ -193,15 +193,48 @@ model AdAccount {
   creatives      Creative[]
   insights       Insight[]
   organizations  Organization[]
+  campaign       Campaign[]
 
   @@unique([externalId, type])
   @@index([name])
   @@map("ad_accounts")
 }
 
+model Campaign {
+  id          String   @id @default(cuid())
+  adAccountId String   @map("ad_account_id")
+  externalId  String   @map("external_id")
+  name        String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  adSets    AdSet[]
+
+  @@unique([adAccountId, externalId])
+  @@index([name])
+  @@map("campaigns")
+}
+
+model AdSet {
+  id         String   @id @default(cuid())
+  campaignId String   @map("campaign_id")
+  externalId String   @map("external_id")
+  name       String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  ads        Ad[]
+
+  @@unique([campaignId, externalId])
+  @@index([name])
+  @@map("ad_sets")
+}
+
 model Ad {
   id          String  @id @default(cuid())
   adAccountId String  @map("ad_account_id")
+  adSetId     String? @map("ad_set_id")
   creativeId  String?
 
   externalId String    @map("external_id")
@@ -209,7 +242,9 @@ model Ad {
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
   insights   Insight[]
   creative   Creative? @relation(fields: [creativeId], references: [id])
+  adSet      AdSet?    @relation(fields: [adSetId], references: [id])
 
+  @@unique([adSetId, externalId])
   @@unique([adAccountId, externalId])
   @@index([name])
   @@map("ads")
