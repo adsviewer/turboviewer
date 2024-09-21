@@ -23,7 +23,7 @@ import { useEffect, useState } from 'react';
 import { inviteHashLabel } from '@repo/utils';
 import { SignUpSchema, type SignUpSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
-import { addOrReplaceURLParams, emailKey, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from '../sign-in/actions';
 
@@ -41,7 +41,7 @@ export default function SignUp(): React.JSX.Element {
     initialValues: {
       firstName: '',
       lastName: '',
-      email: searchParams.get(emailKey) ?? '',
+      email: searchParams.get(urlKeys.email) ?? '',
       password: '',
       inviteHash: searchParams.get(inviteHashLabel) ?? '',
     },
@@ -77,7 +77,7 @@ export default function SignUp(): React.JSX.Element {
         }
 
         // Show errors
-        const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, data.error.message);
+        const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, data.error.message);
         router.replace(newURL);
       })
       .catch((error: unknown) => {
@@ -138,7 +138,7 @@ export default function SignUp(): React.JSX.Element {
                   {...form.getInputProps('email')}
                   required
                   mt="md"
-                  readOnly={searchParams.has(emailKey)}
+                  readOnly={searchParams.has(urlKeys.email)}
                 />
                 <PasswordInput
                   label={t('password')}

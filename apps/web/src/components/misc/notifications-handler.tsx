@@ -5,7 +5,7 @@ import { Notifications, notifications } from '@mantine/notifications';
 import { useEffect, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { sentenceCase } from 'change-case';
-import { errorKey } from '@/util/url-query-utils';
+import { urlKeys } from '@/util/url-query-utils';
 
 export default function NotificationsHandler(): ReactNode {
   const t = useTranslations('generic');
@@ -23,7 +23,7 @@ export default function NotificationsHandler(): ReactNode {
         color: 'red',
       });
       const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete(errorKey);
+      newSearchParams.delete(urlKeys.error);
       router.replace(`${pathname}?${newSearchParams.toString()}`);
     }
   }, [pathname, router, searchParams, t]);

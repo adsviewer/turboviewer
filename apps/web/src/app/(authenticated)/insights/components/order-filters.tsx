@@ -11,15 +11,7 @@ import {
   OrderDirection,
   addOrReplaceURLParams,
   isParamInSearchParams,
-  orderByKey,
-  orderDirectionKey,
-  pageSizeKey,
-  fetchPreviewsKey,
-  groupedByKey,
-  intervalKey,
-  dateFromKey,
-  dateToKey,
-  chartMetricKey,
+  urlKeys,
   ChartMetricsEnum,
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
@@ -37,11 +29,11 @@ export default function OrderFilters(): React.ReactNode {
   const setHasNextInsightsPageAtom = useSetAtom(hasNextInsightsPageAtom);
 
   // Date range values loading
-  const paramsDateFrom = searchParams.get(dateFromKey)
-    ? (new Date(Number(searchParams.get(dateFromKey))) as DateValue)
+  const paramsDateFrom = searchParams.get(urlKeys.dateFrom)
+    ? (new Date(Number(searchParams.get(urlKeys.dateFrom))) as DateValue)
     : null;
-  const paramsDateTo = searchParams.get(dateToKey)
-    ? (new Date(Number(searchParams.get(dateToKey))) as DateValue)
+  const paramsDateTo = searchParams.get(urlKeys.dateTo)
+    ? (new Date(Number(searchParams.get(urlKeys.dateTo))) as DateValue)
     : null;
   const [dateRangeValue, setDateRangeValue] = useState<[DateValue, DateValue]>([paramsDateFrom, paramsDateTo]);
 
@@ -51,51 +43,51 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const getPageSizeValue = (): string => {
-    if (isParamInSearchParams(searchParams, pageSizeKey, searchParams.get(pageSizeKey) ?? '12')) {
-      return searchParams.get(pageSizeKey) ?? '12';
+    if (isParamInSearchParams(searchParams, urlKeys.pageSize, searchParams.get(urlKeys.pageSize) ?? '12')) {
+      return searchParams.get(urlKeys.pageSize) ?? '12';
     }
     return '12';
   };
 
   const getOrderDirectionValue = (): string => {
-    if (isParamInSearchParams(searchParams, orderDirectionKey, OrderDirection.asc)) {
+    if (isParamInSearchParams(searchParams, urlKeys.orderDirection, OrderDirection.asc)) {
       return OrderDirection.asc;
     }
     return OrderDirection.desc;
   };
 
   const getAdPreviewValue = (): boolean => {
-    return isParamInSearchParams(searchParams, fetchPreviewsKey, 'true');
+    return isParamInSearchParams(searchParams, urlKeys.fetchPreviews, 'true');
   };
 
   const getOrderByValue = (): string => {
-    if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.impressions_rel)) {
+    if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel)) {
       return InsightsColumnsOrderBy.impressions_rel;
-    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.spend_rel)) {
+    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel)) {
       return InsightsColumnsOrderBy.spend_rel;
-    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.spend_abs)) {
+    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs)) {
       return InsightsColumnsOrderBy.spend_abs;
-    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_rel)) {
+    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel)) {
       return InsightsColumnsOrderBy.cpm_rel;
-    } else if (isParamInSearchParams(searchParams, orderByKey, InsightsColumnsOrderBy.cpm_abs)) {
+    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs)) {
       return InsightsColumnsOrderBy.cpm_abs;
     }
     return InsightsColumnsOrderBy.impressions_abs; // default
   };
 
   const getIntervalValue = (): string => {
-    if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.month)) {
+    if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.month)) {
       return InsightsInterval.month;
-    } else if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.week)) {
+    } else if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.week)) {
       return InsightsInterval.week;
-    } else if (isParamInSearchParams(searchParams, intervalKey, InsightsInterval.quarter)) {
+    } else if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.quarter)) {
       return InsightsInterval.quarter;
     }
     return InsightsInterval.day;
   };
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, chartMetricKey, ChartMetricsEnum.SPENT)) {
+    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SPENT)) {
       return ChartMetricsEnum.SPENT;
     }
     return ChartMetricsEnum.IMPRESSIONS;
@@ -103,7 +95,7 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
-    const newURL = addOrReplaceURLParams(pathname, searchParams, chartMetricKey, option.value);
+    const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.chartMetric, option.value);
     startTransition(() => {
       router.replace(newURL);
     });
@@ -111,7 +103,7 @@ export default function OrderFilters(): React.ReactNode {
 
   const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
-    const newURL = addOrReplaceURLParams(pathname, searchParams, pageSizeKey, option.value);
+    const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.pageSize, option.value);
     startTransition(() => {
       router.replace(newURL);
     });
@@ -119,7 +111,7 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
-    const newURL = addOrReplaceURLParams(pathname, searchParams, orderByKey, option.value);
+    const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderBy, option.value);
     startTransition(() => {
       router.replace(newURL);
     });
@@ -127,7 +119,7 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
-    const newURL = addOrReplaceURLParams(pathname, searchParams, orderDirectionKey, option.value);
+    const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderDirection, option.value);
     startTransition(() => {
       router.replace(newURL);
     });
@@ -135,7 +127,7 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleIntervalChange = (value: string | null, option: ComboboxItem): void => {
     resetInsights();
-    const newURL = addOrReplaceURLParams(pathname, searchParams, intervalKey, option.value);
+    const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.interval, option.value);
     startTransition(() => {
       router.replace(newURL);
     });
@@ -149,8 +141,8 @@ export default function OrderFilters(): React.ReactNode {
     // Perform new fetching only if both dates are given
     if (dateFrom && dateTo) {
       resetInsights();
-      newParams.set(dateFromKey, String(dateFrom.getTime()));
-      newParams.set(dateToKey, String(dateTo.getTime()));
+      newParams.set(urlKeys.dateFrom, String(dateFrom.getTime()));
+      newParams.set(urlKeys.dateTo, String(dateTo.getTime()));
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
@@ -159,8 +151,8 @@ export default function OrderFilters(): React.ReactNode {
     // Clear logic
     else if (!dateFrom && !dateTo) {
       resetInsights();
-      newParams.delete(dateFromKey);
-      newParams.delete(dateToKey);
+      newParams.delete(urlKeys.dateFrom);
+      newParams.delete(urlKeys.dateTo);
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
@@ -172,9 +164,9 @@ export default function OrderFilters(): React.ReactNode {
     resetInsights();
     let newURL: string;
     if (e.target.checked) {
-      newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey, 'true');
+      newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews, 'true');
     } else {
-      newURL = addOrReplaceURLParams(pathname, searchParams, fetchPreviewsKey);
+      newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews);
     }
     startTransition(() => {
       router.replace(newURL);
@@ -283,13 +275,13 @@ export default function OrderFilters(): React.ReactNode {
           label={t('adPreviewsTooltip')}
           refProp="rootRef"
           position="top-start"
-          disabled={!isPending && isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
+          disabled={!isPending && isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
         >
           <Switch
             description={t('showAdPreviews')}
             checked={getAdPreviewValue()}
             onChange={handleAdPreviewChange}
-            disabled={isPending || !isParamInSearchParams(searchParams, groupedByKey, InsightsColumnsGroupBy.adId)}
+            disabled={isPending || !isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
           />
         </Tooltip>
         {/* Change chart left metric */}

@@ -17,7 +17,7 @@ import {
 import LoaderCentered from '@/components/misc/loader-centered';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import {
   getAvailableOrganizationAdAccounts,
   getOrganizationAdAccounts,
@@ -151,7 +151,7 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
       .then((res) => {
         if (!res.success) {
           logger.error(res.error);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, String(res.error));
           router.replace(newURL);
         }
 

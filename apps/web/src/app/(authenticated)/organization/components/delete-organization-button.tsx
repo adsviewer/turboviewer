@@ -10,7 +10,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logger } from '@repo/logger';
 import { isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import { deleteOrganizationAndRefreshJWT } from '../actions';
 
 export interface PropsType {
@@ -42,7 +42,7 @@ export default function DeleteOrganizationButton(props: PropsType): React.ReactN
         } else {
           setIsDeleteDone(true);
           logger.error(res.error);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, String(res.error));
           router.replace(newURL);
         }
       });

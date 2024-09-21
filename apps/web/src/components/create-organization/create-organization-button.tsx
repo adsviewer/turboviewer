@@ -13,7 +13,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { type UserRolesInput, type CreateOrganizationMutationVariables } from '@/graphql/generated/schema-server';
 import { createAndSwitchOrganization } from '@/app/(authenticated)/organization/actions';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import AddUsersModal from './add-users-modal';
 
 export default function CreateOrganizationButton(): ReactNode {
@@ -50,7 +50,7 @@ export default function CreateOrganizationButton(): ReactNode {
       .then((res) => {
         if (!res.success) {
           logger.error(res.error);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, String(res.error));
           router.replace(newURL);
           return;
         }

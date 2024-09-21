@@ -30,7 +30,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { type TransitionStartFunction, useRef, useState, useEffect } from 'react';
 import uniqid from 'uniqid';
-import { addOrReplaceURLParams, searchKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import {
   InsightsSearchField,
   InsightsSearchOperator,
@@ -118,11 +118,13 @@ export default function Search(props: PropsType): React.ReactNode {
   ];
 
   useEffect(() => {
-    const parsedSearchData = searchParams.get(searchKey)
-      ? (JSON.parse(Buffer.from(String(searchParams.get(searchKey)), 'base64').toString('utf-8')) as SearchExpression)
+    const parsedSearchData = searchParams.get(urlKeys.search)
+      ? (JSON.parse(
+          Buffer.from(String(searchParams.get(urlKeys.search)), 'base64').toString('utf-8'),
+        ) as SearchExpression)
       : {};
     setLoadedSearchData(parsedSearchData);
-    if (searchParams.get(searchKey)) {
+    if (searchParams.get(urlKeys.search)) {
       // Load simple search data
       if (!parsedSearchData.isAdvancedSearch && parsedSearchData.or) {
         if (parsedSearchData.or.length && parsedSearchData.or[0].term?.value)
@@ -230,7 +232,7 @@ export default function Search(props: PropsType): React.ReactNode {
     const newSearchValue = searchBoxRef.current ? searchBoxRef.current.value : '';
     if (!newSearchValue) {
       props.startTransition(() => {
-        const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey);
+        const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search);
         router.replace(newURL);
       });
     } else {
@@ -254,7 +256,7 @@ export default function Search(props: PropsType): React.ReactNode {
         const encodedSearchData = btoa(JSON.stringify(newSearchData));
 
         props.startTransition(() => {
-          const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, encodedSearchData);
           router.replace(newURL);
         });
       }, 1000);
@@ -275,7 +277,7 @@ export default function Search(props: PropsType): React.ReactNode {
     if (searchBoxRef.current) {
       emptySearchBox();
       props.startTransition(() => {
-        const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey);
+        const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search);
         router.replace(newURL);
       });
     }
@@ -457,7 +459,7 @@ export default function Search(props: PropsType): React.ReactNode {
     const encodedSearchData = btoa(JSON.stringify(rootExpression));
 
     props.startTransition(() => {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey, encodedSearchData);
+      const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, encodedSearchData);
       router.replace(newURL);
     });
   };
@@ -465,7 +467,7 @@ export default function Search(props: PropsType): React.ReactNode {
   const clearSearch = (): void => {
     setSearchTerms([]);
     props.startTransition(() => {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, searchKey);
+      const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search);
       router.replace(newURL);
     });
     close();
@@ -667,7 +669,7 @@ export default function Search(props: PropsType): React.ReactNode {
           leftSection={<IconCancel />}
           mt="sm"
           variant="outline"
-          disabled={props.isPending || (!searchParams.get(searchKey) && !searchTerms.length)}
+          disabled={props.isPending || (!searchParams.get(urlKeys.search) && !searchTerms.length)}
           onClick={() => {
             clearSearch();
           }}
