@@ -93,7 +93,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
   const allowNewConnectionBasedOnTier = (): boolean => {
     if (userDetails.currentOrganization?.tier) {
       if (
-        userDetails.currentOrganization.integrations.length >=
+        userDetails.currentOrganization.integrations.filter((i) => i.status === IntegrationStatus.Connected).length >=
         tierConstraints[userDetails.currentOrganization.tier].maxIntegrations
       )
         return false;
