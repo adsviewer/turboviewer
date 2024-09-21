@@ -23,7 +23,7 @@ import {
 import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
-import { chartMetricKey, ChartMetricsEnum, fetchPreviewsKey } from '@/util/url-query-utils';
+import { urlKeys, ChartMetricsEnum } from '@/util/url-query-utils';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -134,7 +134,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   };
 
   const getChartSeries = (): AreaChartSeries[] => {
-    if (searchParams.get(chartMetricKey) === ChartMetricsEnum.SPENT) {
+    if (searchParams.get(urlKeys.chartMetric) === ChartMetricsEnum.SPENT) {
       return [
         {
           yAxisId: 'left',
@@ -160,7 +160,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
         </Title>
       </Flex>
 
-      {!searchParams.has(fetchPreviewsKey) ? (
+      {!searchParams.has(urlKeys.fetchPreviews) ? (
         // Chart Analytics
         <Box>
           <AreaChart

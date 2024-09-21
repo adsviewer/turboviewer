@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 import { useSetAtom, useAtom } from 'jotai/index';
-import { addOrReplaceURLParams, pageKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 
 export default function PageControls(): React.ReactNode {
@@ -25,18 +25,18 @@ export default function PageControls(): React.ReactNode {
   const handlePageChange = (type: 'next' | 'prev'): void => {
     resetInsights();
     if (type === 'next') {
-      const nextPage = String(Number(searchParams.get(pageKey) ?? '1') + 1);
-      router.replace(addOrReplaceURLParams(pathname, searchParams, pageKey, nextPage));
+      const nextPage = String(Number(searchParams.get(urlKeys.page) ?? '1') + 1);
+      router.replace(addOrReplaceURLParams(pathname, searchParams, urlKeys.page, nextPage));
       return;
     }
-    const prevPage = String(Number(searchParams.get(pageKey) ?? '1') - 1);
-    router.replace(addOrReplaceURLParams(pathname, searchParams, pageKey, prevPage));
+    const prevPage = String(Number(searchParams.get(urlKeys.page) ?? '1') - 1);
+    router.replace(addOrReplaceURLParams(pathname, searchParams, urlKeys.page, prevPage));
   };
 
   return (
     <Flex justify="space-between" my="lg" gap="sm">
       <Button
-        disabled={!searchParams.get(pageKey) || searchParams.get(pageKey) === '1'}
+        disabled={!searchParams.get(urlKeys.page) || searchParams.get(urlKeys.page) === '1'}
         leftSection={<IconArrowLeft size={14} />}
         variant="default"
         onClick={() => {

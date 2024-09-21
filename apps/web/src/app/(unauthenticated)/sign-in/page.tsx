@@ -21,7 +21,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schemas';
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
-import { addOrReplaceURLParams, errorKey, type GenericRequestResponseBody } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import { env } from '@/env.mjs';
 import LoginProviders from '../components/login-providers';
 import { getLoginProviders } from './actions';
@@ -82,7 +82,7 @@ export default function SignIn(): React.JSX.Element {
           }
 
           // Show errors
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, data.error.message);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, data.error.message);
           router.replace(newURL);
         })
         .catch((error: unknown) => {

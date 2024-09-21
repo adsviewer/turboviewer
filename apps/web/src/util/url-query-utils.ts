@@ -14,23 +14,25 @@ export enum ChartMetricsEnum {
   SPENT = 'spent',
 }
 
-export const errorKey = 'error';
-export const groupedByKey = 'groupedBy';
-export const publisherKey = 'publisher';
-export const deviceKey = 'device';
-export const positionKey = 'position';
-export const accountKey = 'account';
-export const pageKey = 'page';
-export const pageSizeKey = 'pageSize';
-export const orderDirectionKey = 'order';
-export const orderByKey = 'orderBy';
-export const intervalKey = 'interval';
-export const dateFromKey = 'dateFrom';
-export const dateToKey = 'dateTo';
-export const fetchPreviewsKey = 'fetchPreviews';
-export const emailKey = 'email';
-export const searchKey = 'search';
-export const chartMetricKey = 'chartMetric';
+export const urlKeys = {
+  error: 'error',
+  groupedBy: 'groupedBy',
+  publisher: 'publisher',
+  device: 'device',
+  position: 'position',
+  account: 'account',
+  page: 'page',
+  pageSize: 'pageSize',
+  orderDirection: 'order',
+  orderBy: 'orderBy',
+  interval: 'interval',
+  dateFrom: 'dateFrom',
+  dateTo: 'dateTo',
+  fetchPreviews: 'fetchPreviews',
+  email: 'email',
+  search: 'search',
+  chartMetric: 'chartMetric',
+};
 
 export const positions = [
   'an_classic',
@@ -82,11 +84,11 @@ export const addOrReplaceURLParams = (
   key: string,
   newValue?: string,
 ): string => {
-  const multiKeyParams = [groupedByKey, publisherKey, deviceKey, positionKey, accountKey];
+  const multiKeyParams = [urlKeys.groupedBy, urlKeys.publisher, urlKeys.device, urlKeys.position, urlKeys.account];
   const newParams = new URLSearchParams(searchParams.toString());
 
   // First, make sure to remove the 'page' param so that the new results start from the 1st page
-  newParams.delete(pageKey);
+  newParams.delete(urlKeys.page);
 
   // Specific case for handling keys that can co-exist with different values
   if (multiKeyParams.includes(key)) {
@@ -99,8 +101,8 @@ export const addOrReplaceURLParams = (
     newParams.delete(key, newValue);
 
     // (Special case) Don't allow preview fetching if adId is not in group filters!
-    if (!newParams.has(groupedByKey, InsightsColumnsGroupBy.adId)) {
-      newParams.delete(fetchPreviewsKey);
+    if (!newParams.has(urlKeys.groupedBy, InsightsColumnsGroupBy.adId)) {
+      newParams.delete(urlKeys.fetchPreviews);
     }
 
     return `${pathname}?${newParams.toString()}`;

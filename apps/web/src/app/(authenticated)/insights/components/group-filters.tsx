@@ -6,16 +6,7 @@ import { useTransition } from 'react';
 import { sentenceCase } from 'change-case';
 import { useSetAtom } from 'jotai/index';
 import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
-import {
-  addOrReplaceURLParams,
-  deviceKey,
-  groupedByKey,
-  isParamInSearchParams,
-  positionKey,
-  positions,
-  publisherKey,
-  accountKey,
-} from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys, isParamInSearchParams, positions } from '@/util/url-query-utils';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import getAccounts from '../../actions';
 
@@ -72,7 +63,7 @@ export default function GroupFilters(): ReactNode {
     let values: string[] = [];
     for (const account of accounts) {
       const value = account.value;
-      if (isParamInSearchParams(searchParams, accountKey, value)) {
+      if (isParamInSearchParams(searchParams, urlKeys.account, value)) {
         values = [...values, value];
       }
     }
@@ -93,7 +84,7 @@ export default function GroupFilters(): ReactNode {
     let values: string[] = [];
     for (const position of positions) {
       const value = position.value;
-      if (isParamInSearchParams(searchParams, positionKey, value)) {
+      if (isParamInSearchParams(searchParams, urlKeys.position, value)) {
         values = [...values, value];
       }
     }
@@ -114,7 +105,7 @@ export default function GroupFilters(): ReactNode {
     let values: string[] = [];
     for (const key of Object.keys(PublisherEnum)) {
       const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
-      if (isParamInSearchParams(searchParams, publisherKey, enumValue)) {
+      if (isParamInSearchParams(searchParams, urlKeys.publisher, enumValue)) {
         values = [...values, enumValue];
       }
     }
@@ -135,7 +126,7 @@ export default function GroupFilters(): ReactNode {
     let values: string[] = [];
     for (const key of Object.keys(DeviceEnum)) {
       const enumValue = DeviceEnum[key as keyof typeof DeviceEnum];
-      if (isParamInSearchParams(searchParams, deviceKey, enumValue)) {
+      if (isParamInSearchParams(searchParams, urlKeys.device, enumValue)) {
         values = [...values, enumValue];
       }
     }
@@ -164,17 +155,17 @@ export default function GroupFilters(): ReactNode {
       const isChecked = e.target.checked;
 
       if (isChecked) {
-        const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
+        const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.groupedBy, e.target.defaultValue);
         router.replace(newURL);
       } else {
-        const newURL = addOrReplaceURLParams(pathname, searchParams, groupedByKey, e.target.defaultValue);
+        const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.groupedBy, e.target.defaultValue);
         router.replace(newURL);
       }
     });
   };
 
   const isChecked = (groupByValue: InsightsColumnsGroupBy): boolean =>
-    isParamInSearchParams(searchParams, groupedByKey, groupByValue);
+    isParamInSearchParams(searchParams, urlKeys.groupedBy, groupByValue);
 
   return (
     <ScrollArea offsetScrollbars>
@@ -191,10 +182,10 @@ export default function GroupFilters(): ReactNode {
               data={populateAccountsAvailableValues()}
               value={getAccountCurrentValues()}
               onOptionSubmit={(value) => {
-                handleMultiFilterAdd(accountKey, value);
+                handleMultiFilterAdd(urlKeys.account, value);
               }}
               onRemove={(value) => {
-                handleMultiFilterRemove(accountKey, value);
+                handleMultiFilterRemove(urlKeys.account, value);
               }}
               comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
               my={4}
@@ -212,10 +203,10 @@ export default function GroupFilters(): ReactNode {
           data={populatePositionAvailableValues()}
           value={getPositionCurrentValues()}
           onOptionSubmit={(value) => {
-            handleMultiFilterAdd(positionKey, value);
+            handleMultiFilterAdd(urlKeys.position, value);
           }}
           onRemove={(value) => {
-            handleMultiFilterRemove(positionKey, value);
+            handleMultiFilterRemove(urlKeys.position, value);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
@@ -230,10 +221,10 @@ export default function GroupFilters(): ReactNode {
           data={populateDeviceAvailableValues()}
           value={getDeviceCurrentValues()}
           onOptionSubmit={(value) => {
-            handleMultiFilterAdd(deviceKey, value);
+            handleMultiFilterAdd(urlKeys.device, value);
           }}
           onRemove={(value) => {
-            handleMultiFilterRemove(deviceKey, value);
+            handleMultiFilterRemove(urlKeys.device, value);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
@@ -248,10 +239,10 @@ export default function GroupFilters(): ReactNode {
           data={populatePublisherAvailableValues()}
           value={getPublisherCurrentValues()}
           onOptionSubmit={(value) => {
-            handleMultiFilterAdd(publisherKey, value);
+            handleMultiFilterAdd(urlKeys.publisher, value);
           }}
           onRemove={(value) => {
-            handleMultiFilterRemove(publisherKey, value);
+            handleMultiFilterRemove(urlKeys.publisher, value);
           }}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}

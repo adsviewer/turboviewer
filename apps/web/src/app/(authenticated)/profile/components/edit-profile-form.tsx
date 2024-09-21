@@ -11,7 +11,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { EditProfileSchema } from '@/util/schemas/profile-schemas';
 import { type UpdateUserMutationVariables, type MeQuery } from '@/graphql/generated/schema-server';
 import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
-import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import { updateUserDetails } from '../actions';
 
 interface PropsType {
@@ -66,7 +66,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
       void updateUserDetails(data).then((res) => {
         if (!res.success) {
           logger.error(res.error);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, String(res.error));
           router.replace(newURL);
         } else {
           setUserDetails(res.data.updateUser);

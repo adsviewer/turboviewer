@@ -23,7 +23,7 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { tierConstraints } from '@repo/mappings';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import { AllRoles, OrganizationRoleEnum, UserOrganizationStatus } from '@/graphql/generated/schema-server';
-import { addOrReplaceURLParams, errorKey } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, urlKeys } from '@/util/url-query-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import { isMember, isOperator, isOrgAdmin } from '@/util/access-utils';
 import getOrganization, { removeUserFromOrganization, updateOrganizationUser } from '../actions';
@@ -130,7 +130,7 @@ export function UsersTable(): React.ReactNode {
         .then((res) => {
           if (!res.success) {
             logger.error(res.error);
-            const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+            const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, String(res.error));
             router.replace(newURL);
           }
           refreshMembers();
@@ -150,7 +150,7 @@ export function UsersTable(): React.ReactNode {
       .then((res) => {
         if (!res.success) {
           logger.error(res.error);
-          const newURL = addOrReplaceURLParams(pathname, searchParams, errorKey, String(res.error));
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.error, String(res.error));
           router.replace(newURL);
           return;
         }
