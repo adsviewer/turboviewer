@@ -604,19 +604,6 @@ class Meta implements ChannelInterface {
         await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
       };
 
-      // for (const metaAd of accountAds) {
-      //   const adSdk = new Ad(metaAd.externalId);
-      //   const adDetails = await adSdk.get([
-      //     Ad.Fields.id,
-      //     Ad.Fields.campaign_id,
-      //     `${Ad.Fields.campaign}{name}`,
-      //     Ad.Fields.adset_id,
-      //     `${Ad.Fields.adset}{name}`,
-      //   ]);
-      //
-      //   await processFn([adCampaignAdSet]);
-      // }
-
       let start = 0;
       let smallAccountAds = accountAds.slice(start, start + limit);
       while (smallAccountAds.length > 0) {
@@ -633,7 +620,16 @@ class Meta implements ChannelInterface {
           ],
           {
             limit,
-            filtering: [{ field: Ad.Fields.id, operator: 'IN', value: [...smallAccountAds.map((a) => a.externalId)] }],
+            effective_status: [
+              'ACTIVE',
+              'PAUSED',
+              'DISAPPROVED',
+              'PENDING_REVIEW',
+              'CAMPAIGN_PAUSED',
+              'ARCHIVED',
+              'ADSET_PAUSED',
+            ],
+            filtering: [{ field: Ad.Fields.id, operator: 'IN', value: smallAccountAds.map((a) => a.externalId) }],
           },
         );
         await Meta.handlePaginationFn(integration, callFn, schema, toAdSetAdAndCampaign, processFn);
