@@ -1,4 +1,5 @@
 export * from './date-utils';
+export * from './data-object-utils';
 export * from './env-helper';
 export * from './error-helper';
 export * from './fire-and-forget';

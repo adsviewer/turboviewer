@@ -28,6 +28,7 @@ import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import {
   type AdAccountWithIntegration,
   adReportsStatusesToRedis,
+  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -532,6 +533,113 @@ class Meta implements ChannelInterface {
       return new AError('Failed to parse meta ad report run');
     }
     return parsed.data.id;
+  }
+
+  async saveOldInsightsAdsAdsSetsCampaigns(
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ): Promise<undefined | AError> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
+    for (const [_, accountAds] of groupByAdAccount) {
+      const adAccount = accountAds[0].adAccount;
+
+      const schema = z.object({
+        id: z.string(),
+        campaign_id: z.string(),
+        campaign: z.object({ name: z.string() }),
+        adset_id: z.string(),
+        adset: z.object({ name: z.string() }),
+      });
+      const toAdSetAdAndCampaign = (
+        ad: z.infer<typeof schema>,
+      ): {
+        adId: string;
+        adSetId: string;
+        campaignId: string;
+        campaignName: string;
+        adSetName: string;
+      } => ({
+        adId: ad.id,
+        adSetId: ad.adset_id,
+        campaignId: ad.campaign_id,
+        campaignName: ad.campaign.name,
+        adSetName: ad.adset.name,
+      });
+
+      const processFn = async (
+        adSetAdAndCampaigns: {
+          adId: string;
+          adSetId: string;
+          campaignId: string;
+          campaignName: string;
+          adSetName: string;
+        }[],
+      ): Promise<undefined> => {
+        const { campaigns, adSets, ads } = adSetAdAndCampaigns.reduce<{
+          ads: ChannelAd[];
+          adSets: ChannelAdSet[];
+          campaigns: ChannelCampaign[];
+        }>(
+          (acc, row) => {
+            acc.ads.push({
+              externalAdSetId: String(row.adSetId),
+              externalAdAccountId: adAccount.externalId,
+              externalId: row.adId,
+              name: row.adSetName,
+            });
+            acc.adSets.push({
+              externalCampaignId: row.campaignId,
+              externalId: row.adSetId,
+              name: row.campaignName,
+            });
+            acc.campaigns.push({
+              externalAdAccountId: adAccount.externalId,
+              externalId: row.campaignId,
+              name: row.campaignName,
+            });
+            return acc;
+          },
+          { ads: [], adSets: [], campaigns: [] },
+        );
+        await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+      };
+
+      // for (const metaAd of accountAds) {
+      //   const adSdk = new Ad(metaAd.externalId);
+      //   const adDetails = await adSdk.get([
+      //     Ad.Fields.id,
+      //     Ad.Fields.campaign_id,
+      //     `${Ad.Fields.campaign}{name}`,
+      //     Ad.Fields.adset_id,
+      //     `${Ad.Fields.adset}{name}`,
+      //   ]);
+      //
+      //   await processFn([adCampaignAdSet]);
+      // }
+
+      let start = 0;
+      let smallAccountAds = accountAds.slice(start, start + limit);
+      while (smallAccountAds.length > 0) {
+        smallAccountAds = accountAds.slice(start, start + limit);
+        start += limit;
+        const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
+        const callFn = account.getAds(
+          [
+            Ad.Fields.id,
+            Ad.Fields.campaign_id,
+            `${Ad.Fields.campaign}{name}`,
+            Ad.Fields.adset_id,
+            `${Ad.Fields.adset}{name}`,
+          ],
+          {
+            limit,
+            filtering: [{ field: Ad.Fields.id, operator: 'IN', value: [...smallAccountAds.map((a) => a.externalId)] }],
+          },
+        );
+        await Meta.handlePaginationFn(integration, callFn, schema, toAdSetAdAndCampaign, processFn);
+      }
+    }
+    return Promise.resolve(undefined);
   }
 
   private async saveAdsAdSetsCampaignsAndInsights(

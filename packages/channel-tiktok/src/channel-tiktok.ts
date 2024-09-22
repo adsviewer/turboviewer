@@ -10,12 +10,13 @@ import {
   PublisherEnum,
 } from '@repo/database';
 import { AError, formatYYYMMDDDate, isAError } from '@repo/utils';
-import { z } from 'zod';
+import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountWithIntegration,
   adReportsStatusesToRedis,
+  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -385,6 +386,42 @@ export class Tiktok implements ChannelInterface {
     return response;
   };
 
+  private static baseListValidation = async (
+    response: Response | Error,
+  ): Promise<
+    | AError
+    | {
+        list: unknown[];
+        pageInfo: { page: number; pageSize: number; totalPage: number; totalNumber: number };
+      }
+  > => {
+    const data = await Tiktok.baseValidation(response);
+    const schema = z.object({
+      list: z.array(z.unknown()),
+      page_info: z.object({
+        page: z.number().int(),
+        page_size: z.number().int(),
+        total_page: z.number().int(),
+        total_number: z.number().int(),
+      }),
+    });
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      return new AError('Failed to parse response');
+    }
+
+    return {
+      list: parsed.data.list,
+      pageInfo: {
+        page: parsed.data.page_info.page,
+        pageSize: parsed.data.page_info.page_size,
+        totalPage: parsed.data.page_info.total_page,
+        totalNumber: parsed.data.page_info.total_number,
+      },
+    };
+  };
+
   private static baseValidation = async (response: Response | Error): Promise<unknown> => {
     const data = await Tiktok.baseValidationWithOuter(response);
     if (isAError(data)) return response;
@@ -547,6 +584,133 @@ export class Tiktok implements ChannelInterface {
 
   getType(): IntegrationTypeEnum {
     return IntegrationTypeEnum.TIKTOK;
+  }
+
+  async saveOldInsightsAdsAdsSetsCampaigns(
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ): Promise<AError | undefined> {
+    for (const [_, accountAds] of groupByAdAccount) {
+      const adAccount = accountAds[0].adAccount;
+      const url = `${baseUrl}/ad/get/?advertiser_id=${adAccount.externalId}&filtering={"ad_ids":["${Array.from(new Set(accountAds.map((a) => a.externalId))).join('","')}"]}&fields=["ad_id","ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name"]`;
+      // const response = await Tiktok.tikTokFetch('539a9deb68244caf241e5746a1ec34d52958011d', url);
+
+      const schema = z.object({
+        ad_id: z.coerce.number().int(),
+        ad_name: z.string(),
+        adgroup_id: z.coerce.number().int(),
+        adgroup_name: z.string(),
+        campaign_id: z.coerce.number().int(),
+        campaign_name: z.string(),
+      });
+
+      const toCampaignAdSetAd = (
+        data: z.infer<typeof schema>[],
+      ): { ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] } => {
+        return data.reduce<{ ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] }>(
+          (acc, row) => {
+            acc.ads.push({
+              externalAdSetId: String(row.adgroup_id),
+              externalAdAccountId: adAccount.externalId,
+              externalId: row.ad_id.toString(),
+              name: row.ad_name,
+            });
+            acc.adSets.push({
+              externalCampaignId: row.campaign_id.toString(),
+              externalId: row.adgroup_id.toString(),
+              name: row.adgroup_name,
+            });
+            acc.campaigns.push({
+              externalAdAccountId: adAccount.externalId,
+              externalId: row.campaign_id.toString(),
+              name: row.campaign_name,
+            });
+            return acc;
+          },
+          { ads: [], adSets: [], campaigns: [] },
+        );
+      };
+
+      const processFn = async ({
+        ads,
+        adSets,
+        campaigns,
+      }: {
+        ads: ChannelAd[];
+        adSets: ChannelAdSet[];
+        campaigns: ChannelCampaign[];
+      }): Promise<void> => {
+        await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+      };
+
+      await Tiktok.processPagination(integration.accessToken, url, schema, toCampaignAdSetAd, processFn);
+    }
+    return undefined;
+  }
+
+  private static async handlePagination<T, U extends ZodTypeAny>(
+    accessToken: string,
+    url: string,
+    schema: U,
+    parseCallback: (result: z.infer<U>) => T,
+  ): Promise<T[] | AError> {
+    const pagedUrl = `${url}&page_size=1000`;
+    const response = await Tiktok.tikTokFetch(accessToken, pagedUrl);
+    const data = await Tiktok.baseListValidation(response);
+    if (isAError(data)) return data;
+    const arraySchema = z.array(schema);
+    const parsed = arraySchema.safeParse(data.list);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      return new AError('Failed to parse response');
+    }
+    const retVal = parsed.data.map(parseCallback);
+    while (data.pageInfo.page !== data.pageInfo.totalPage) {
+      const nextUrl = `${pagedUrl}&page=${String(data.pageInfo.page + 1)}`;
+      const nextResponse = await Tiktok.tikTokFetch(accessToken, nextUrl);
+      const nextData = await Tiktok.baseListValidation(nextResponse);
+      if (isAError(nextData)) return nextData;
+      const nextParsed = arraySchema.safeParse(nextData.list);
+      if (!nextParsed.success) {
+        logger.error(nextParsed.error, 'Failed to parse list tik-tok response');
+        return new AError('Failed to parse response');
+      }
+      retVal.push(...nextParsed.data.map(parseCallback));
+    }
+    return retVal;
+  }
+
+  private static async processPagination<T, U extends ZodTypeAny>(
+    accessToken: string,
+    url: string,
+    schema: U,
+    parseCallback: (result: z.infer<U>[]) => T,
+    processCallback: (result: T) => Promise<void>,
+  ): Promise<undefined | AError> {
+    const pagedUrl = `${url}&page_size=1000`;
+    const response = await Tiktok.tikTokFetch(accessToken, pagedUrl);
+    const data = await Tiktok.baseListValidation(response);
+    if (isAError(data)) return data;
+    const arraySchema = z.array(schema);
+    const parsed = arraySchema.safeParse(data.list);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      return new AError('Failed to parse response');
+    }
+    let resultsP = processCallback(parseCallback(parsed.data));
+    while (data.pageInfo.page !== data.pageInfo.totalPage) {
+      const nextUrl = `${pagedUrl}&page=${String(data.pageInfo.page + 1)}`;
+      const nextResponse = await Tiktok.tikTokFetch(accessToken, nextUrl);
+      const nextData = await Tiktok.baseListValidation(nextResponse);
+      if (isAError(nextData)) return nextData;
+      const nextParsed = arraySchema.safeParse(nextData.list);
+      if (nextParsed.success) {
+        await resultsP;
+        resultsP = processCallback(parseCallback(parsed.data));
+      } else {
+        logger.error(nextParsed, 'Failed to parse paginated function');
+      }
+    }
   }
 }
 

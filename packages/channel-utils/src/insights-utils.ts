@@ -193,6 +193,11 @@ export const adAccountWithIntegration = Prisma.validator<Prisma.AdAccountDefault
 });
 export type AdAccountWithIntegration = Prisma.AdAccountGetPayload<typeof adAccountWithIntegration>;
 
+export const adWithAdAccount = Prisma.validator<Prisma.AdDefaultArgs>()({
+  include: { adAccount: true },
+});
+export type AdWithAdAccount = Prisma.AdGetPayload<typeof adWithAdAccount>;
+
 export const saveInsightsAdsAdsSetsCampaigns = async (
   campaigns: ChannelCampaign[],
   externalCampaignToIdMap: Map<string, string>,

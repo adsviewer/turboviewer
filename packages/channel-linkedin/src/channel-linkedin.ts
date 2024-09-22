@@ -15,6 +15,7 @@ import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountWithIntegration,
+  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -130,7 +131,11 @@ class LinkedIn implements ChannelInterface {
         const campaigns = await this.getCampaignGroupsAsCampaigns(integration, analytics.campaignGroupIds, dbAccount);
         if (isAError(campaigns)) return campaigns;
 
-        const adSets = await this.getCampaignsAsAdSets(integration, analytics.campaignIds, dbAccount);
+        const adSets = await this.getCampaignsAsAdSets(
+          integration,
+          new Set(Array.from(analytics.campaignIds).map((c) => c.externalCampaignId)),
+          dbAccount,
+        );
         if (isAError(adSets)) return adSets;
         const ads: ChannelAd[] = Array.from(analytics.creativeIds).map((c) => ({
           externalAdAccountId: dbAccount.externalId,
@@ -213,6 +218,40 @@ class LinkedIn implements ChannelInterface {
     return await saveAccounts(channelAccounts, integration);
   }
 
+  async saveOldInsightsAdsAdsSetsCampaigns(
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ): Promise<undefined | AError> {
+    for (const [_, accountAds] of groupByAdAccount) {
+      const adAccount = accountAds[0].adAccount;
+      const creatives = await this.getCreativesAsAds(
+        integration,
+        new Set(accountAds.map((a) => a.externalId)),
+        adAccount.externalId,
+      );
+      if (isAError(creatives)) return creatives;
+      const adSetIds = new Set(creatives.map((c) => c.externalAdSetId));
+      const adSets = await this.getCampaignsAsAdSets(integration, adSetIds, adAccount);
+      if (isAError(adSets)) return adSets;
+      const campaigns = await this.getCampaignGroupsAsCampaigns(
+        integration,
+        new Set(adSets.map((a) => a.externalCampaignId)),
+        adAccount,
+      );
+      if (isAError(campaigns)) return campaigns;
+      await saveInsightsAdsAdsSetsCampaigns(
+        campaigns,
+        new Map<string, string>(),
+        adAccount,
+        adSets,
+        new Map<string, string>(),
+        creatives,
+        new Map<string, string>(),
+        [],
+      );
+    }
+  }
+
   private async getAdAnalytics(
     integration: Integration,
     range: { since: Date; until: Date },
@@ -278,6 +317,26 @@ class LinkedIn implements ChannelInterface {
       })
       .flatMap((i) => (i ? [i] : []));
     return { creativeIds, campaignIds, campaignGroupIds, insights };
+  }
+
+  private async getCreativesAsAds(
+    integration: Integration,
+    creativeIds: Set<string>,
+    externalAdAccountId: string,
+  ): Promise<AError | ChannelAd[]> {
+    const creatives = await LinkedIn.handlePagination(
+      integration,
+      `/adAccounts/${externalAdAccountId}/creatives?creatives=List(${Array.from(creativeIds)
+        .map((c) => `urn%3Ali%3AsponsoredCreative%3A${c}`)
+        .join(',')})&q=criteria`,
+      z.object({ id: z.string(), campaign: z.string() }),
+    );
+    if (isAError(creatives)) return creatives;
+    return creatives.map((c) => ({
+      externalId: c.id.split(':')[3],
+      externalAdSetId: c.campaign.split(':')[3],
+      externalAdAccountId,
+    }));
   }
 
   private static async handlePagination<T extends ZodTypeAny>(
@@ -441,14 +500,14 @@ class LinkedIn implements ChannelInterface {
 
   private async getCampaignsAsAdSets(
     integration: Integration,
-    campaignIds: Set<{ externalCampaignId: string; externalCampaignGroupId: string }>,
+    campaignIds: Set<string>,
     dbAccount: AdAccount,
   ): Promise<AError | ChannelAdSet[]> {
     if (campaignIds.size === 0) return [];
     const campaigns = await LinkedIn.handlePagination(
       integration,
       `/adAccounts/${dbAccount.externalId}/adCampaigns?q=search&search=(id:(values:List(${Array.from(campaignIds)
-        .map((c) => `urn%3Ali%3AsponsoredCampaign%3A${c.externalCampaignId}`)
+        .map((c) => `urn%3Ali%3AsponsoredCampaign%3A${c}`)
         .join(',')})))`,
       z.object({ id: z.number().int(), name: z.string(), campaignGroup: z.string() }),
     );
@@ -457,28 +516,6 @@ class LinkedIn implements ChannelInterface {
       externalId: String(c.id),
       name: c.name,
       externalCampaignId: c.campaignGroup.split(':')[3],
-    }));
-  }
-
-  private async getCreativesAsAds(
-    integration: Integration,
-    creativeIds: Set<{ externalCreativeId: string; externalCampaignId: string }>,
-    dbAccount: AdAccount,
-  ): Promise<AError | ChannelAd[]> {
-    if (creativeIds.size === 0) return [];
-    const creatives = await LinkedIn.handlePagination(
-      integration,
-      `/adAccounts/${dbAccount.externalId}/creatives?creatives=List(${Array.from(creativeIds)
-        .map((c) => `urn%3Ali%3AsponsoredCreative%3A${c.externalCreativeId}`)
-        .join(',')})&q=criteria`,
-      z.object({ id: z.string(), campaign: z.string() }),
-    );
-    if (isAError(creatives)) return creatives;
-    return creatives.map((c) => ({
-      externalId: c.id.split(':')[3],
-      name: '',
-      externalAdSetId: c.campaign.split(':')[3],
-      externalAdAccountId: dbAccount.externalId,
     }));
   }
 }

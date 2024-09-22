@@ -1,7 +1,10 @@
 import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
 import { Kind } from 'graphql/language';
-import { FireAndForget, isAError } from '@repo/utils';
+import { FireAndForget, isAError, groupBy as groupByUtil } from '@repo/utils';
 import {
+  adWithAdAccount,
+  getChannel,
+  getDecryptedIntegration,
   getInsightsCache,
   iFramePerInsight,
   IFrameTypeEnum,
@@ -10,7 +13,7 @@ import {
   setInsightsCache,
 } from '@repo/channel';
 import * as changeCase from 'change-case';
-import { groupBy as groupByUtil } from '../../utils/data-object-utils';
+import { logger } from '@repo/logger';
 import { builder } from '../builder';
 import { groupedInsights, insightsDatapoints } from '../../utils/insights-query-builder';
 import {
@@ -198,6 +201,44 @@ builder.mutationFields((t) => ({
     },
     resolve: async (_root, args, _ctx, _info) => {
       await invokeChannelIngress({ initial: args.initial, integrationIds: args.integrationIds ?? undefined });
+      return true;
+    },
+  }),
+  fillAdSetsAndCampaigns: t.withAuth({ isAdmin: true }).field({
+    type: 'Boolean',
+    nullable: false,
+    args: {
+      integrationIds: t.arg.stringList({ required: false }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const integrations = await prisma.integration.findMany({
+        where: {
+          id: { in: args.integrationIds ?? undefined },
+        },
+      });
+
+      for (const integration of integrations) {
+        const decryptedIntegration = await getDecryptedIntegration(integration.id);
+        if (isAError(decryptedIntegration)) {
+          logger.error(`Failed to decrypt integration ${integration.id}`);
+          continue;
+        }
+
+        const ads = await prisma.ad.findMany({
+          where: {
+            adSetId: null,
+            adAccount: {
+              integration: {
+                id: decryptedIntegration.id,
+              },
+            },
+          },
+          ...adWithAdAccount,
+        });
+        const groupByAdAccount = groupByUtil(ads, (a) => a.adAccountId);
+        const channel = getChannel(integration.type);
+        await channel.saveOldInsightsAdsAdsSetsCampaigns(decryptedIntegration, groupByAdAccount);
+      }
       return true;
     },
   }),
