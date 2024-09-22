@@ -1,7 +1,8 @@
 import { type AdAccount, type Integration, Prisma, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
-import type { ChannelAd, ChannelAdAccount, ChannelInsight } from './channel-interface';
+import _ from 'lodash';
+import type { ChannelAd, ChannelAdAccount, ChannelAdSet, ChannelCampaign, ChannelInsight } from './channel-interface';
 import { currencyToEuro } from './currency-to-eur-cacheable';
 
 export const saveAccounts = async (
@@ -30,11 +31,71 @@ export const saveAccounts = async (
     ),
   );
 
+export const saveCampaigns = async (
+  campaigns: ChannelCampaign[],
+  adAccountId: string,
+  externalCampaignToIdMap: Map<string, string>,
+): Promise<void> => {
+  logger.info('Saving %d campaigns', campaigns.length);
+  await Promise.all(
+    campaigns.map((campaign) =>
+      prisma.campaign
+        .upsert({
+          where: {
+            adAccountId_externalId: {
+              adAccountId,
+              externalId: campaign.externalId,
+            },
+          },
+          update: {
+            name: campaign.name,
+          },
+          create: {
+            adAccountId,
+            externalId: campaign.externalId,
+            name: campaign.name,
+          },
+        })
+        .then(({ id }) => externalCampaignToIdMap.set(campaign.externalId, id)),
+    ),
+  );
+};
+
+export const saveAdSets = async (
+  adSets: ChannelAdSet[],
+  externalCampaignToIdMap: Map<string, string>,
+  externalAdSetToIdMap: Map<string, string>,
+): Promise<void> => {
+  logger.info('Saving %d ad sets', adSets.length);
+  await Promise.all(
+    adSets.map((adSet) =>
+      prisma.adSet
+        .upsert({
+          where: {
+            campaignId_externalId: {
+              campaignId: externalCampaignToIdMap.get(adSet.externalCampaignId) ?? '',
+              externalId: adSet.externalId,
+            },
+          },
+          update: {
+            name: adSet.name,
+          },
+          create: {
+            campaignId: externalCampaignToIdMap.get(adSet.externalCampaignId) ?? '',
+            externalId: adSet.externalId,
+            name: adSet.name,
+          },
+        })
+        .then(({ id }) => externalAdSetToIdMap.set(adSet.externalId, id)),
+    ),
+  );
+};
+
 export const saveAds = async (
-  integration: Integration,
   ads: ChannelAd[],
   adAccountId: string,
   adExternalIdMap: Map<string, string>,
+  externalAdSetToIdMap: Map<string, string>,
 ): Promise<void> => {
   logger.info('Saving %d ads for %s', ads.length, adAccountId);
   await Promise.all(
@@ -47,15 +108,22 @@ export const saveAds = async (
             name: channelAd.name,
             adAccount: {
               connect: {
-                externalId_type: {
-                  type: integration.type,
-                  externalId: channelAd.externalAdAccountId,
-                },
+                id: adAccountId,
+              },
+            },
+            adSet: {
+              connect: {
+                id: externalAdSetToIdMap.get(channelAd.externalAdSetId) ?? '',
               },
             },
           },
           update: {
             name: channelAd.name,
+            adSet: {
+              connect: {
+                id: externalAdSetToIdMap.get(channelAd.externalAdSetId) ?? '',
+              },
+            },
           },
           where: {
             adAccountId_externalId: {
@@ -124,3 +192,33 @@ export const adAccountWithIntegration = Prisma.validator<Prisma.AdAccountDefault
   include: { integration: true },
 });
 export type AdAccountWithIntegration = Prisma.AdAccountGetPayload<typeof adAccountWithIntegration>;
+
+export const adWithAdAccount = Prisma.validator<Prisma.AdDefaultArgs>()({
+  include: { adAccount: true },
+});
+export type AdWithAdAccount = Prisma.AdGetPayload<typeof adWithAdAccount>;
+
+export const saveInsightsAdsAdsSetsCampaigns = async (
+  campaigns: ChannelCampaign[],
+  externalCampaignToIdMap: Map<string, string>,
+  adAccount: AdAccount,
+  adSets: ChannelAdSet[],
+  externalAdSetToIdMap: Map<string, string>,
+  ads: ChannelAd[],
+  adExternalIdMap: Map<string, string>,
+  insights: ChannelInsight[],
+): Promise<void> => {
+  const uniqueCampaigns = _.uniqBy(campaigns, (campaign) => campaign.externalId);
+  const newCampaigns = uniqueCampaigns.filter((campaign) => !externalCampaignToIdMap.has(campaign.externalId));
+  await saveCampaigns(newCampaigns, adAccount.id, externalCampaignToIdMap);
+
+  const uniqueAdSets = _.uniqBy(adSets, (adSet) => adSet.externalId);
+  const newAdSets = uniqueAdSets.filter((adSet) => !externalAdSetToIdMap.has(adSet.externalId));
+  await saveAdSets(newAdSets, externalCampaignToIdMap, externalAdSetToIdMap);
+
+  const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
+  const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
+  await saveAds(newAds, adAccount.id, adExternalIdMap, externalAdSetToIdMap);
+
+  await saveInsights(insights, adExternalIdMap, adAccount);
+};

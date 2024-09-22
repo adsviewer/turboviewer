@@ -15,9 +15,12 @@ import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountWithIntegration,
+  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
+  type ChannelAdSet,
+  type ChannelCampaign,
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
@@ -28,8 +31,7 @@ import {
   JobStatusEnum,
   markErrorIntegrationById,
   saveAccounts,
-  saveAds,
-  saveInsights,
+  saveInsightsAdsAdsSetsCampaigns,
   timeRanges,
   type TokensResponse,
 } from '@repo/channel-utils';
@@ -42,7 +44,7 @@ const authClient = new AuthClient({
 });
 
 const restliClient = new RestliClient();
-const versionString = '202405';
+const versionString = '202408';
 const baseUrl = 'https://api.linkedin.com';
 
 class LinkedIn implements ChannelInterface {
@@ -126,11 +128,31 @@ class LinkedIn implements ChannelInterface {
         const analytics = await this.getAdAnalytics(integration, range, dbAccount);
         if (isAError(analytics)) return analytics;
 
-        const adExternalIdMap = await this.saveCreativesAsAds(integration, analytics.creativeIds, dbAccount);
-        if (isAError(adExternalIdMap)) return adExternalIdMap;
+        const campaigns = await this.getCampaignGroupsAsCampaigns(integration, analytics.campaignGroupIds, dbAccount);
+        if (isAError(campaigns)) return campaigns;
 
+        const adSets = await this.getCampaignsAsAdSets(
+          integration,
+          new Set(Array.from(analytics.campaignIds).map((c) => c.externalCampaignId)),
+          dbAccount,
+        );
+        if (isAError(adSets)) return adSets;
+        const ads: ChannelAd[] = Array.from(analytics.creativeIds).map((c) => ({
+          externalAdAccountId: dbAccount.externalId,
+          externalId: c.externalCreativeId,
+          externalAdSetId: c.externalCampaignId,
+        }));
         await deleteOldInsights(dbAccount.id, range.since, range.until);
-        await saveInsights(analytics.insights, adExternalIdMap, dbAccount);
+        await saveInsightsAdsAdsSetsCampaigns(
+          campaigns,
+          new Map<string, string>(),
+          dbAccount,
+          adSets,
+          new Map<string, string>(),
+          ads,
+          new Map<string, string>(),
+          analytics.insights,
+        );
       }
     }
     return Promise.resolve(undefined);
@@ -196,14 +218,56 @@ class LinkedIn implements ChannelInterface {
     return await saveAccounts(channelAccounts, integration);
   }
 
+  async saveOldInsightsAdsAdsSetsCampaigns(
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ): Promise<undefined | AError> {
+    for (const [_, accountAds] of groupByAdAccount) {
+      const adAccount = accountAds[0].adAccount;
+      const creatives = await this.getCreativesAsAds(
+        integration,
+        new Set(accountAds.map((a) => a.externalId)),
+        adAccount.externalId,
+      );
+      if (isAError(creatives)) return creatives;
+      const adSetIds = new Set(creatives.map((c) => c.externalAdSetId));
+      const adSets = await this.getCampaignsAsAdSets(integration, adSetIds, adAccount);
+      if (isAError(adSets)) return adSets;
+      const campaigns = await this.getCampaignGroupsAsCampaigns(
+        integration,
+        new Set(adSets.map((a) => a.externalCampaignId)),
+        adAccount,
+      );
+      if (isAError(campaigns)) return campaigns;
+      await saveInsightsAdsAdsSetsCampaigns(
+        campaigns,
+        new Map<string, string>(),
+        adAccount,
+        adSets,
+        new Map<string, string>(),
+        creatives,
+        new Map<string, string>(),
+        [],
+      );
+    }
+  }
+
   private async getAdAnalytics(
     integration: Integration,
     range: { since: Date; until: Date },
     dbAccount: AdAccount,
-  ): Promise<AError | { creativeIds: Set<string>; insights: ChannelInsight[] }> {
+  ): Promise<
+    | AError
+    | {
+        creativeIds: Set<{ externalCreativeId: string; externalCampaignId: string }>;
+        campaignIds: Set<{ externalCampaignId: string; externalCampaignGroupId: string }>;
+        campaignGroupIds: Set<string>;
+        insights: ChannelInsight[];
+      }
+  > {
     const params = {
       q: 'statistics',
-      pivots: 'List(CREATIVE,IMPRESSION_DEVICE_TYPE)',
+      pivots: 'List(CAMPAIGN_GROUP,CAMPAIGN,CREATIVE,IMPRESSION_DEVICE_TYPE)',
       timeGranularity: 'DAILY',
       accounts: `List(${encodeURIComponent(`urn:li:sponsoredAccount:${dbAccount.externalId}`)})`,
       dateRange: linkedInTimeRange(range),
@@ -224,58 +288,55 @@ class LinkedIn implements ChannelInterface {
       }),
     );
     if (isAError(adAnalytics)) return adAnalytics;
-    const creativeIds = new Set<string>();
+    const creativeIds = new Set<{ externalCreativeId: string; externalCampaignId: string }>();
+    const campaignIds = new Set<{ externalCampaignId: string; externalCampaignGroupId: string }>();
+    const campaignGroupIds = new Set<string>();
     const insights: ChannelInsight[] = adAnalytics
       .map((a) => {
         const creativeExternalId = a.pivotValues.find((v) => v.startsWith('urn:li:sponsoredCreative:'))?.split(':')[3];
-        if (!creativeExternalId) return undefined;
-        creativeIds.add(creativeExternalId);
+        const campaignExternalId = a.pivotValues.find((v) => v.startsWith('urn:li:sponsoredCampaign:'))?.split(':')[3];
+        const campaignGroupExternalId = a.pivotValues
+          .find((v) => v.startsWith('urn:li:sponsoredCampaignGroup:'))
+          ?.split(':')[3];
+        if (!creativeExternalId || !campaignExternalId || !campaignGroupExternalId) return undefined;
+        creativeIds.add({ externalCreativeId: creativeExternalId, externalCampaignId: campaignExternalId });
+        campaignIds.add({ externalCampaignId: campaignExternalId, externalCampaignGroupId: campaignGroupExternalId });
+        campaignGroupIds.add(campaignGroupExternalId);
         const device = a.pivotValues.find((v) => Array.from(LinkedIn.deviceEnumMap.keys()).includes(v));
         return {
           externalAdId: creativeExternalId,
           date: new Date(a.dateRange.start.year, a.dateRange.start.month - 1, a.dateRange.start.day),
           externalAccountId: dbAccount.externalId,
           impressions: a.impressions,
+          clicks: a.clicks,
           spend: a.costInLocalCurrency * 100,
           device: device ? (LinkedIn.deviceEnumMap.get(device) ?? DeviceEnum.Unknown) : DeviceEnum.Unknown,
           publisher: PublisherEnum.LinkedIn,
-          position: '',
+          position: 'feed',
         };
       })
       .flatMap((i) => (i ? [i] : []));
-    return { creativeIds, insights };
+    return { creativeIds, campaignIds, campaignGroupIds, insights };
   }
 
-  async saveCreativesAsAds(
+  private async getCreativesAsAds(
     integration: Integration,
     creativeIds: Set<string>,
-    dbAccount: AdAccount,
-  ): Promise<AError | Map<string, string>> {
-    const channelAds: ChannelAd[] = Array.from(creativeIds).map((c) => ({
-      externalAdAccountId: dbAccount.externalId,
-      externalId: c,
-    }));
-    const adExternalIdMap = new Map<string, string>();
-    await saveAds(integration, channelAds, dbAccount.id, adExternalIdMap);
-    return adExternalIdMap;
-  }
-
-  // This will prove useful when we will start saving campaigns
-  private async getAndSaveCampaigns(
-    integration: Integration,
-    campaignIds: Set<string>,
-    dbAccount: AdAccount,
-  ): Promise<AError | z.infer<typeof schema>[]> {
-    const params = {
-      q: 'search',
-      search: `(id:(values:List(${Array.from(campaignIds).join(',')})))`,
-    };
-    const schema = z.object({ name: z.string(), id: z.number().int() });
-    return await LinkedIn.handlePagination(
+    externalAdAccountId: string,
+  ): Promise<AError | ChannelAd[]> {
+    const creatives = await LinkedIn.handlePagination(
       integration,
-      `/adAccounts/${dbAccount.externalId}/adCampaigns?${queryParams(params)}`,
-      schema,
+      `/adAccounts/${externalAdAccountId}/creatives?creatives=List(${Array.from(creativeIds)
+        .map((c) => `urn%3Ali%3AsponsoredCreative%3A${c}`)
+        .join(',')})&q=criteria`,
+      z.object({ id: z.string(), campaign: z.string() }),
     );
+    if (isAError(creatives)) return creatives;
+    return creatives.map((c) => ({
+      externalId: c.id.split(':')[3],
+      externalAdSetId: c.campaign.split(':')[3],
+      externalAdAccountId,
+    }));
   }
 
   private static async handlePagination<T extends ZodTypeAny>(
@@ -356,7 +417,7 @@ class LinkedIn implements ChannelInterface {
       logger.error(parsed.error, msg);
       return new AError(msg);
     }
-    const next = parsed.data.paging?.links.find((l) => l.rel === 'next');
+    const next = parsed.data.paging?.links.find((l) => l.rel === 'next') ?? undefined;
     return { next, elements: parsed.data.elements };
   }
 
@@ -412,6 +473,50 @@ class LinkedIn implements ChannelInterface {
 
   getType(): IntegrationTypeEnum {
     return IntegrationTypeEnum.LINKEDIN;
+  }
+
+  private async getCampaignGroupsAsCampaigns(
+    integration: Integration,
+    campaignGroupIds: Set<string>,
+    dbAccount: AdAccount,
+  ): Promise<AError | ChannelCampaign[]> {
+    if (campaignGroupIds.size === 0) return [];
+    const campaignGroups = await LinkedIn.handlePagination(
+      integration,
+      `/adAccounts/${dbAccount.externalId}/adCampaignGroups?q=search&search=(id:(values:List(${Array.from(
+        campaignGroupIds,
+      )
+        .map((c) => `urn%3Ali%3AsponsoredCampaignGroup%3A${c}`)
+        .join(',')})))`,
+      z.object({ id: z.number().int(), name: z.string() }),
+    );
+    if (isAError(campaignGroups)) return campaignGroups;
+    return campaignGroups.map((c) => ({
+      externalId: String(c.id),
+      name: c.name,
+      externalAdAccountId: dbAccount.externalId,
+    }));
+  }
+
+  private async getCampaignsAsAdSets(
+    integration: Integration,
+    campaignIds: Set<string>,
+    dbAccount: AdAccount,
+  ): Promise<AError | ChannelAdSet[]> {
+    if (campaignIds.size === 0) return [];
+    const campaigns = await LinkedIn.handlePagination(
+      integration,
+      `/adAccounts/${dbAccount.externalId}/adCampaigns?q=search&search=(id:(values:List(${Array.from(campaignIds)
+        .map((c) => `urn%3Ali%3AsponsoredCampaign%3A${c}`)
+        .join(',')})))`,
+      z.object({ id: z.number().int(), name: z.string(), campaignGroup: z.string() }),
+    );
+    if (isAError(campaigns)) return campaigns;
+    return campaigns.map((c) => ({
+      externalId: String(c.id),
+      name: c.name,
+      externalCampaignId: c.campaignGroup.split(':')[3],
+    }));
   }
 }
 

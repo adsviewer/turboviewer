@@ -11,7 +11,7 @@ import {
 import { type MetaError } from './errors';
 import { type ChannelIFrame } from './iframe-helper';
 import { type JobStatusEnum } from './report-async-start';
-import { type AdAccountWithIntegration } from './insights-utils';
+import { type AdAccountWithIntegration, type AdWithAdAccount } from './insights-utils';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -32,9 +32,22 @@ export interface ChannelAdAccount {
 }
 
 export interface ChannelAd {
+  externalAdSetId: string;
   externalAdAccountId: string;
   externalId: string;
   name?: string;
+}
+
+export interface ChannelAdSet {
+  externalCampaignId: string;
+  externalId: string;
+  name: string;
+}
+
+export interface ChannelCampaign {
+  externalAdAccountId: string;
+  externalId: string;
+  name: string;
 }
 
 export interface ChannelCreative {
@@ -45,6 +58,7 @@ export interface ChannelCreative {
 }
 
 export interface ChannelInsight {
+  clicks: number;
   externalAdId: string;
   date: Date;
   externalAccountId: string;
@@ -86,4 +100,8 @@ export interface ChannelInterface {
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   getType: () => IntegrationTypeEnum;
+  saveOldInsightsAdsAdsSetsCampaigns: (
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ) => Promise<undefined | AError>;
 }

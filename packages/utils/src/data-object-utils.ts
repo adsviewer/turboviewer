@@ -1,4 +1,4 @@
-export const groupBy = <K, V>(array: V[], grouper: (item: V) => K) =>
+export const groupBy = <K, V>(array: V[], grouper: (item: V) => K): Map<K, V[]> =>
   array.reduce((acc, item) => {
     const key = grouper(item);
     if (!acc.has(key)) {
@@ -10,7 +10,7 @@ export const groupBy = <K, V>(array: V[], grouper: (item: V) => K) =>
     return acc;
   }, new Map<K, V[]>());
 
-export const uniqueBy = <K, V>(array: V[], grouper: (item: V) => K) =>
+export const uniqueBy = <K, V>(array: V[], grouper: (item: V) => K): Set<K> =>
   array.reduce((acc, item) => {
     const key = grouper(item);
     if (!acc.has(key)) {

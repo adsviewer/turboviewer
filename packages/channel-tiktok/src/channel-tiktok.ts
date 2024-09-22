@@ -10,15 +10,18 @@ import {
   PublisherEnum,
 } from '@repo/database';
 import { AError, formatYYYMMDDDate, isAError } from '@repo/utils';
-import { z } from 'zod';
+import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountWithIntegration,
   adReportsStatusesToRedis,
+  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
+  type ChannelAdSet,
+  type ChannelCampaign,
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
@@ -27,12 +30,10 @@ import {
   getConnectedIntegrationByOrg,
   JobStatusEnum,
   saveAccounts,
-  saveAds,
-  saveInsights,
+  saveInsightsAdsAdsSetsCampaigns,
   type TokensResponse,
 } from '@repo/channel-utils';
 import csvParser from 'csv-parser';
-import _ from 'lodash';
 import { env } from './config';
 
 const apiVersion = 'v1.3';
@@ -55,13 +56,18 @@ enum PlacementsEnum {
 
 const insightsSchema = z.array(
   z.object({
-    '﻿Ad ID': z.string(),
+    'Ad ID': z.string(),
+    'Ad group ID': z.string(),
+    'Ad Group Name': z.string(),
     'Ad Name': z.string(),
+    '﻿Campaign ID': z.string(),
+    'Campaign name': z.string(),
     Placements: z.nativeEnum(PlacementsEnum),
     Date: z.coerce.date(),
     'Placements Types': z.string(),
     Impression: z.coerce.number().int(),
     Cost: z.coerce.number(),
+    'Clicks (Destination)': z.coerce.number().int(),
   }),
 );
 
@@ -221,7 +227,19 @@ export class Tiktok implements ChannelInterface {
         data_level: 'AUCTION_AD',
         dimensions: ['ad_id', 'placement', 'stat_time_day'],
         report_type: 'AUDIENCE',
-        metrics: ['ad_name', 'ad_id', 'placement_type', 'impressions', 'spend'],
+        metrics: [
+          'ad_name',
+          'ad_id',
+          'adgroup_id',
+          'adgroup_name',
+          'campaign_id',
+          'campaign_name',
+          'impressions',
+          'placement_type',
+          'spend',
+          'placement_type',
+          'clicks',
+        ],
       }),
     });
     const data = await Tiktok.baseValidation(response);
@@ -267,8 +285,9 @@ export class Tiktok implements ChannelInterface {
     since: Date,
     until: Date,
   ): Promise<AError | undefined> {
-    const adsMap = new Map<string, ChannelAd>();
     const adExternalIdMap = new Map<string, string>();
+    const externalAdSetToIdMap = new Map<string, string>();
+    const externalCampaignToIdMap = new Map<string, string>();
     const params = new URLSearchParams({
       advertiser_id: adAccount.integration.externalId,
       task_id: taskId,
@@ -288,12 +307,12 @@ export class Tiktok implements ChannelInterface {
     const fn = (data: unknown[]): Promise<AError | undefined> =>
       Tiktok.processReportChunk(
         taskId,
-        adAccount.integration,
         adAccount,
         data,
         placementPublisherMap,
-        adsMap,
         adExternalIdMap,
+        externalAdSetToIdMap,
+        externalCampaignToIdMap,
       );
     if (isAError(response)) return response;
     await deleteOldInsights(adAccount.id, since, until);
@@ -365,6 +384,42 @@ export class Tiktok implements ChannelInterface {
       return new AError('Unknown error');
     }
     return response;
+  };
+
+  private static baseListValidation = async (
+    response: Response | Error,
+  ): Promise<
+    | AError
+    | {
+        list: unknown[];
+        pageInfo: { page: number; pageSize: number; totalPage: number; totalNumber: number };
+      }
+  > => {
+    const data = await Tiktok.baseValidation(response);
+    const schema = z.object({
+      list: z.array(z.unknown()),
+      page_info: z.object({
+        page: z.number().int(),
+        page_size: z.number().int(),
+        total_page: z.number().int(),
+        total_number: z.number().int(),
+      }),
+    });
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      return new AError('Failed to parse response');
+    }
+
+    return {
+      list: parsed.data.list,
+      pageInfo: {
+        page: parsed.data.page_info.page,
+        pageSize: parsed.data.page_info.page_size,
+        totalPage: parsed.data.page_info.total_page,
+        totalNumber: parsed.data.page_info.total_number,
+      },
+    };
   };
 
   private static baseValidation = async (response: Response | Error): Promise<unknown> => {
@@ -469,47 +524,193 @@ export class Tiktok implements ChannelInterface {
 
   private static processReportChunk = async (
     taskId: string,
-    integration: Integration,
     adAccount: AdAccount,
     data: unknown[],
     placementPublisherMap: Map<PlacementsEnum, PublisherEnum>,
-    adsMap: Map<string, ChannelAd>,
     adExternalIdMap: Map<string, string>,
+    externalAdSetToIdMap: Map<string, string>,
+    externalCampaignToIdMap: Map<string, string>,
   ): Promise<AError | undefined> => {
     const parsed = insightsSchema.safeParse(data);
     if (!parsed.success) {
-      logger.error(parsed.error, `Failed to parse report for task ${taskId} and integration ${integration.id}`);
+      logger.error(parsed.error, `Failed to parse report for task ${taskId} and adAccount ${adAccount.id}`);
       return new AError('Failed to parse report');
     }
 
-    const insights: ChannelInsight[] = [];
-    parsed.data.forEach((row) => {
-      const insight: ChannelInsight = {
-        externalAdId: row['﻿Ad ID'],
-        date: row.Date,
-        externalAccountId: adAccount.externalId,
-        impressions: row.Impression,
-        spend: Math.floor(row.Cost * 100),
-        device: DeviceEnum.Unknown,
-        publisher: placementPublisherMap.get(row.Placements) ?? PublisherEnum.TikTok,
-        position: row['Placements Types'],
-      };
-      insights.push(insight);
-      adsMap.set(insight.externalAdId, {
-        externalAdAccountId: adAccount.externalId,
-        externalId: insight.externalAdId,
-        name: row['Ad Name'],
-      });
-    });
-    const ads = Array.from(adsMap.values());
-    const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
-    const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
-    await saveAds(integration, newAds, adAccount.id, adExternalIdMap);
-    await saveInsights(insights, adExternalIdMap, adAccount);
+    const [insights, ads, adSets, campaigns] = parsed.data.reduce(
+      (acc, row) => {
+        acc[0].push({
+          clicks: row['Clicks (Destination)'],
+          externalAdId: row['Ad ID'],
+          date: row.Date,
+          externalAccountId: adAccount.externalId,
+          impressions: row.Impression,
+          spend: Math.floor(row.Cost * 100),
+          device: DeviceEnum.Unknown,
+          publisher: placementPublisherMap.get(row.Placements) ?? PublisherEnum.TikTok,
+          position: row['Placements Types'],
+        });
+        acc[1].push({
+          externalAdSetId: row['Ad group ID'],
+          externalAdAccountId: adAccount.externalId,
+          externalId: row['Ad ID'],
+          name: row['Ad Name'],
+        });
+        acc[2].push({
+          externalCampaignId: row['﻿Campaign ID'],
+          externalId: row['Ad group ID'],
+          name: row['Ad Group Name'],
+        });
+        acc[3].push({
+          externalAdAccountId: adAccount.externalId,
+          externalId: row['﻿Campaign ID'],
+          name: row['Campaign name'],
+        });
+        return acc;
+      },
+      [[] as ChannelInsight[], [] as ChannelAd[], [] as ChannelAdSet[], [] as ChannelCampaign[]],
+    );
+    await saveInsightsAdsAdsSetsCampaigns(
+      campaigns,
+      externalCampaignToIdMap,
+      adAccount,
+      adSets,
+      externalAdSetToIdMap,
+      ads,
+      adExternalIdMap,
+      insights,
+    );
   };
 
   getType(): IntegrationTypeEnum {
     return IntegrationTypeEnum.TIKTOK;
+  }
+
+  async saveOldInsightsAdsAdsSetsCampaigns(
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ): Promise<AError | undefined> {
+    for (const [_, accountAds] of groupByAdAccount) {
+      const adAccount = accountAds[0].adAccount;
+      const url = `${baseUrl}/ad/get/?advertiser_id=${adAccount.externalId}&filtering={"ad_ids":["${Array.from(new Set(accountAds.map((a) => a.externalId))).join('","')}"]}&fields=["ad_id","ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name"]`;
+      // const response = await Tiktok.tikTokFetch('539a9deb68244caf241e5746a1ec34d52958011d', url);
+
+      const schema = z.object({
+        ad_id: z.coerce.number().int(),
+        ad_name: z.string(),
+        adgroup_id: z.coerce.number().int(),
+        adgroup_name: z.string(),
+        campaign_id: z.coerce.number().int(),
+        campaign_name: z.string(),
+      });
+
+      const toCampaignAdSetAd = (
+        data: z.infer<typeof schema>[],
+      ): { ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] } => {
+        return data.reduce<{ ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] }>(
+          (acc, row) => {
+            acc.ads.push({
+              externalAdSetId: String(row.adgroup_id),
+              externalAdAccountId: adAccount.externalId,
+              externalId: row.ad_id.toString(),
+              name: row.ad_name,
+            });
+            acc.adSets.push({
+              externalCampaignId: row.campaign_id.toString(),
+              externalId: row.adgroup_id.toString(),
+              name: row.adgroup_name,
+            });
+            acc.campaigns.push({
+              externalAdAccountId: adAccount.externalId,
+              externalId: row.campaign_id.toString(),
+              name: row.campaign_name,
+            });
+            return acc;
+          },
+          { ads: [], adSets: [], campaigns: [] },
+        );
+      };
+
+      const processFn = async ({
+        ads,
+        adSets,
+        campaigns,
+      }: {
+        ads: ChannelAd[];
+        adSets: ChannelAdSet[];
+        campaigns: ChannelCampaign[];
+      }): Promise<void> => {
+        await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+      };
+
+      await Tiktok.processPagination(integration.accessToken, url, schema, toCampaignAdSetAd, processFn);
+    }
+    return undefined;
+  }
+
+  private static async handlePagination<T, U extends ZodTypeAny>(
+    accessToken: string,
+    url: string,
+    schema: U,
+    parseCallback: (result: z.infer<U>) => T,
+  ): Promise<T[] | AError> {
+    const pagedUrl = `${url}&page_size=1000`;
+    const response = await Tiktok.tikTokFetch(accessToken, pagedUrl);
+    const data = await Tiktok.baseListValidation(response);
+    if (isAError(data)) return data;
+    const arraySchema = z.array(schema);
+    const parsed = arraySchema.safeParse(data.list);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      return new AError('Failed to parse response');
+    }
+    const retVal = parsed.data.map(parseCallback);
+    while (data.pageInfo.page !== data.pageInfo.totalPage) {
+      const nextUrl = `${pagedUrl}&page=${String(data.pageInfo.page + 1)}`;
+      const nextResponse = await Tiktok.tikTokFetch(accessToken, nextUrl);
+      const nextData = await Tiktok.baseListValidation(nextResponse);
+      if (isAError(nextData)) return nextData;
+      const nextParsed = arraySchema.safeParse(nextData.list);
+      if (!nextParsed.success) {
+        logger.error(nextParsed.error, 'Failed to parse list tik-tok response');
+        return new AError('Failed to parse response');
+      }
+      retVal.push(...nextParsed.data.map(parseCallback));
+    }
+    return retVal;
+  }
+
+  private static async processPagination<T, U extends ZodTypeAny>(
+    accessToken: string,
+    url: string,
+    schema: U,
+    parseCallback: (result: z.infer<U>[]) => T,
+    processCallback: (result: T) => Promise<void>,
+  ): Promise<undefined | AError> {
+    const pagedUrl = `${url}&page_size=1000`;
+    const response = await Tiktok.tikTokFetch(accessToken, pagedUrl);
+    const data = await Tiktok.baseListValidation(response);
+    if (isAError(data)) return data;
+    const arraySchema = z.array(schema);
+    const parsed = arraySchema.safeParse(data.list);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      return new AError('Failed to parse response');
+    }
+    let resultsP = processCallback(parseCallback(parsed.data));
+    while (data.pageInfo.page !== data.pageInfo.totalPage) {
+      const nextUrl = `${pagedUrl}&page=${String(data.pageInfo.page + 1)}`;
+      const nextResponse = await Tiktok.tikTokFetch(accessToken, nextUrl);
+      const nextData = await Tiktok.baseListValidation(nextResponse);
+      if (isAError(nextData)) return nextData;
+      const nextParsed = arraySchema.safeParse(nextData.list);
+      if (nextParsed.success) {
+        await resultsP;
+        resultsP = processCallback(parseCallback(parsed.data));
+      } else {
+        logger.error(nextParsed, 'Failed to parse paginated function');
+      }
+    }
   }
 }
 
