@@ -19,10 +19,10 @@ export default function InsightsGrid(props: PropsType): ReactNode {
   return (
     <>
       {/* Loading */}
-      {!props.isPending ? <LoaderCentered type="dots" /> : null}
+      {props.isPending ? <LoaderCentered type="dots" /> : null}
 
       {/* Empty insights data */}
-      {props.isPending && !insights.length ? (
+      {!props.isPending && !insights.length ? (
         <Text c="dimmed" ta="center">
           {t('noResultsFound')}
         </Text>

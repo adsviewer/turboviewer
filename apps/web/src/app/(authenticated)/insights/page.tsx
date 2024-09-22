@@ -4,38 +4,50 @@ import { type ReactNode, Suspense, useEffect, useState } from 'react';
 import { Box, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useSetAtom } from 'jotai';
+import { useTranslations } from 'next-intl';
+import { notifications } from '@mantine/notifications';
 import LoaderCentered from '@/components/misc/loader-centered';
-import getInsights, { type SearchParams } from '@/app/(authenticated)/insights/actions';
+import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import InsightsGrid from './components/insights-grid';
 import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
 
 interface InsightsProps {
-  searchParams: SearchParams;
+  searchParams: InsightsParams;
 }
 
-export default function Insights({ searchParams }: InsightsProps): ReactNode {
+export default function Insights(props: InsightsProps): ReactNode {
+  const tGeneric = useTranslations('generic');
   const setInsights = useSetAtom(insightsAtom);
   const setHasNextInsightsPage = useSetAtom(hasNextInsightsPageAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsPending(false);
+    setIsPending(true);
     setInsights([]);
-    void getInsights(searchParams)
+    void getInsights(props.searchParams)
       .then((res) => {
-        setInsights(res.insights.edges);
-        setHasNextInsightsPage(res.insights.hasNext);
-        setIsPending(true);
+        if (!res.success) {
+          notifications.show({
+            title: tGeneric('error'),
+            message: String(res.error),
+            color: 'red',
+          });
+        }
+
+        if (res.data) {
+          setInsights(res.data.insights.edges);
+          setHasNextInsightsPage(res.data.insights.hasNext);
+        }
       })
       .catch((error: unknown) => {
         logger.error(error);
       })
       .finally(() => {
-        setIsPending(true);
+        setIsPending(false);
       });
-  }, [searchParams, setHasNextInsightsPage, setInsights]);
+  }, [props.searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
 
   return (
     <Box pos="relative">

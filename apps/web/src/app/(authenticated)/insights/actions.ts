@@ -10,11 +10,11 @@ import {
   type InsightsQuery,
   type OrderBy,
   type PublisherEnum,
-  type InsightsSearchExpression,
 } from '@/graphql/generated/schema-server';
-import { type SearchExpression, type SearchTermType } from './components/search/types-and-utils';
+import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
+import { type SearchExpression } from './components/search/types-and-utils';
 
-export interface SearchParams {
+export interface InsightsParams {
   orderBy?: InsightsColumnsOrderBy;
   order?: OrderBy;
   page?: number;
@@ -32,29 +32,28 @@ export interface SearchParams {
   search?: string;
 }
 
-export default async function getInsights(searchParams: SearchParams): Promise<InsightsQuery> {
-  const parsedSearchData: SearchExpression = searchParams.search
-    ? (JSON.parse(Buffer.from(searchParams.search, 'base64').toString('utf-8')) as InsightsSearchExpression & {
-        isAdvancedSearch?: boolean;
-        clientSearchTerms?: SearchTermType[];
-      })
+export default async function getInsights(insightsParams: InsightsParams): Promise<UrqlResult<InsightsQuery>> {
+  const parsedSearchData: SearchExpression = insightsParams.search
+    ? (JSON.parse(Buffer.from(insightsParams.search, 'base64').toString('utf-8')) as SearchExpression)
     : {};
 
   delete parsedSearchData.isAdvancedSearch;
   delete parsedSearchData.clientSearchTerms;
 
-  return await urqlClientSdk().insights({
-    dateFrom: searchParams.dateFrom ? new Date(Number(searchParams.dateFrom)) : undefined,
-    dateTo: searchParams.dateTo ? new Date(Number(searchParams.dateTo)) : undefined,
-    devices: searchParams.device,
-    groupBy: searchParams.groupedBy,
-    order: searchParams.order,
-    orderBy: searchParams.orderBy ?? InsightsColumnsOrderBy.impressions_abs,
-    page: searchParams.page ? Number(searchParams.page) : 1,
-    pageSize: searchParams.pageSize ? Number(searchParams.pageSize) : 12,
-    positions: searchParams.position,
-    publishers: searchParams.publisher,
-    interval: searchParams.interval ?? InsightsInterval.week,
-    search: parsedSearchData,
-  });
+  return await handleUrqlRequest(
+    urqlClientSdk().insights({
+      dateFrom: insightsParams.dateFrom ? new Date(Number(insightsParams.dateFrom)) : undefined,
+      dateTo: insightsParams.dateTo ? new Date(Number(insightsParams.dateTo)) : undefined,
+      devices: insightsParams.device,
+      groupBy: insightsParams.groupedBy,
+      order: insightsParams.order,
+      orderBy: insightsParams.orderBy ?? InsightsColumnsOrderBy.impressions_abs,
+      page: insightsParams.page ? Number(insightsParams.page) : 1,
+      pageSize: insightsParams.pageSize ? Number(insightsParams.pageSize) : 12,
+      positions: insightsParams.position,
+      publishers: insightsParams.publisher,
+      interval: insightsParams.interval ?? InsightsInterval.week,
+      search: parsedSearchData,
+    }),
+  );
 }
