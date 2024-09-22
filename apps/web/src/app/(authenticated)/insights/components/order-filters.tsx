@@ -43,16 +43,13 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const getPageSizeValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.pageSize, searchParams.get(urlKeys.pageSize) ?? '12')) {
+    if (isParamInSearchParams(searchParams, urlKeys.pageSize, searchParams.get(urlKeys.pageSize) ?? '12'))
       return searchParams.get(urlKeys.pageSize) ?? '12';
-    }
     return '12';
   };
 
   const getOrderDirectionValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.orderDirection, OrderDirection.asc)) {
-      return OrderDirection.asc;
-    }
+    if (isParamInSearchParams(searchParams, urlKeys.orderDirection, OrderDirection.asc)) return OrderDirection.asc;
     return OrderDirection.desc;
   };
 
@@ -61,35 +58,31 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const getOrderByValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel)) {
+    if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
       return InsightsColumnsOrderBy.impressions_rel;
-    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel)) {
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel))
       return InsightsColumnsOrderBy.spend_rel;
-    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs)) {
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs))
       return InsightsColumnsOrderBy.spend_abs;
-    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel)) {
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel))
       return InsightsColumnsOrderBy.cpm_rel;
-    } else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs)) {
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
       return InsightsColumnsOrderBy.cpm_abs;
-    }
+
     return InsightsColumnsOrderBy.impressions_abs; // default
   };
 
   const getIntervalValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.month)) {
-      return InsightsInterval.month;
-    } else if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.week)) {
-      return InsightsInterval.week;
-    } else if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.quarter)) {
+    if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.month)) return InsightsInterval.month;
+    else if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.week)) return InsightsInterval.week;
+    else if (isParamInSearchParams(searchParams, urlKeys.interval, InsightsInterval.quarter))
       return InsightsInterval.quarter;
-    }
+
     return InsightsInterval.day;
   };
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SPENT)) {
-      return ChartMetricsEnum.SPENT;
-    }
+    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SPENT)) return ChartMetricsEnum.SPENT;
     return ChartMetricsEnum.IMPRESSIONS;
   };
 
@@ -163,24 +156,36 @@ export default function OrderFilters(): React.ReactNode {
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
     resetInsights();
     let newURL: string;
-    if (e.target.checked) {
-      newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews, 'true');
-    } else {
-      newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews);
-    }
+    if (e.target.checked) newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews, 'true');
+    else newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews);
     startTransition(() => {
       router.replace(newURL);
     });
   };
 
   return (
-    <Flex w="100%" wrap="wrap" direction="column">
-      <Flex wrap="wrap" mb="md" gap="xs">
+    <Flex w="100%" wrap="wrap" direction="column" gap="md" mb="lg">
+      <Flex wrap="wrap" align="center" gap="md">
         {/* Search */}
         <Search isPending={isPending} startTransition={startTransition} />
+        {/* Toggle ad previews */}
+        <Tooltip
+          withArrow
+          label={t('adPreviewsTooltip')}
+          refProp="rootRef"
+          position="top-start"
+          disabled={!isPending && isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
+        >
+          <Switch
+            description={t('showAdPreviews')}
+            checked={getAdPreviewValue()}
+            onChange={handleAdPreviewChange}
+            disabled={isPending || !isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
+          />
+        </Tooltip>
       </Flex>
       {/* Filters */}
-      <Flex wrap="wrap" mb="md" gap="xs">
+      <Flex wrap="wrap" gap="md" align="center">
         {/* Page size filter */}
         <Flex align="flex-end" mr="sm">
           <Select
@@ -268,22 +273,7 @@ export default function OrderFilters(): React.ReactNode {
       </Flex>
 
       {/* Misc. controls */}
-      <Flex align="center" gap="md" mb="md" wrap="wrap">
-        {/* Toggle ad previews */}
-        <Tooltip
-          withArrow
-          label={t('adPreviewsTooltip')}
-          refProp="rootRef"
-          position="top-start"
-          disabled={!isPending && isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
-        >
-          <Switch
-            description={t('showAdPreviews')}
-            checked={getAdPreviewValue()}
-            onChange={handleAdPreviewChange}
-            disabled={isPending || !isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
-          />
-        </Tooltip>
+      <Flex align="center" gap="md" wrap="wrap">
         {/* Change chart left metric */}
         {!getAdPreviewValue() ? (
           <Flex align="center" gap="md" wrap="wrap">
