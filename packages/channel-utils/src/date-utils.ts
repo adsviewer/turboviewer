@@ -1,6 +1,15 @@
 import { addInterval, getDayPriorTillTomorrow, getLastXMonths, getTomorrowStartOfDay } from '@repo/utils';
-import { prisma, Tier } from '@repo/database';
+import { type Insight, prisma, Tier } from '@repo/database';
 import { tierConstraints } from '@repo/mappings';
+
+interface LatestInsightResult {
+  date: Date;
+  adAccount?: {
+    organizations: {
+      tier: Tier;
+    }[];
+  };
+}
 
 export const timeRanges = async (initial: boolean, adAccountId: string): Promise<{ since: Date; until: Date }[]> => {
   const latestInsight = await prisma.insight.findFirst({
@@ -51,4 +60,32 @@ export const splitTimeRange = (
   const newDateSince = getTomorrowStartOfDay(newDateUntil);
   periods.push(...splitTimeRange(maxTimePeriodDays, newDateSince, until));
   return periods;
+};
+
+export const testTimeRange = (
+  initial: boolean,
+  latestInsight?: Partial<Insight> & LatestInsightResult,
+): { since: Date; until: Date }[] => {
+  const organizations = latestInsight ? (latestInsight.adAccount?.organizations ?? []) : [];
+
+  const organizationWithHighestTier =
+    organizations.length > 0
+      ? organizations.sort((a, b) => tierConstraints[b.tier].order - tierConstraints[a.tier].order)[0].tier
+      : undefined;
+
+  const maxRecency = tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency;
+
+  if (initial) {
+    const range = getLastXMonths();
+
+    if (!organizationWithHighestTier) {
+      return splitTimeRange(tierConstraints[Tier.Launch].maxRecency, range.since, range.until);
+    }
+
+    return splitTimeRange(maxRecency, range.since, range.until);
+  }
+  const furthestDate = addInterval(new Date(), 'day', -maxRecency);
+  const insightDateWithinLimit = latestInsight && latestInsight.date > furthestDate ? latestInsight.date : furthestDate;
+  const range = getDayPriorTillTomorrow(insightDateWithinLimit);
+  return splitTimeRange(maxRecency, range.since, range.until);
 };

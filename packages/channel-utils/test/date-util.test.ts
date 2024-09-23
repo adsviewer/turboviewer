@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import * as assert from 'node:assert';
-import { splitTimeRange } from '../src/date-utils';
+import { Tier } from '@repo/database';
+import { splitTimeRange, testTimeRange } from '../src/date-utils';
 
 void describe('splitTimeRange tests', () => {
   const maxTimePeriodDays = 90;
@@ -92,5 +93,32 @@ void describe('splitTimeRange tests', () => {
     assert.strictEqual(ranges[1].until.toISOString(), '2021-06-29T00:00:00.000Z');
     assert.strictEqual(ranges[2].since.toISOString(), '2021-06-30T00:00:00.000Z');
     assert.strictEqual(ranges[2].until.toISOString(), '2021-09-25T00:00:00.000Z');
+  });
+
+  void it('returns split time range when passed with false initial', () => {
+    const dummyInsight = {
+      date: new Date('2024-06-25T18:30:00.000Z'),
+      adAccount: { organizations: [{ tier: Tier.Build }] },
+    };
+
+    const ranges = testTimeRange(false, dummyInsight);
+    assert.strictEqual(ranges.length, 2);
+    assert.strictEqual(ranges[0].since.toISOString(), '2024-06-24T00:00:00.000Z');
+    assert.strictEqual(ranges[0].until.toISOString(), '2024-09-21T00:00:00.000Z');
+    assert.strictEqual(ranges[1].since.toISOString(), '2024-09-22T00:00:00.000Z');
+  });
+
+  void it('returns split time range when passed with true initial', () => {
+    const dummyInsight = {
+      date: new Date('2024-06-25T18:30:00.000Z'),
+      adAccount: { organizations: [{ tier: Tier.Build }] },
+    };
+    const ranges = testTimeRange(true, dummyInsight);
+    assert.strictEqual(ranges.length, 3);
+    assert.strictEqual(ranges[0].since.toISOString(), '2024-01-01T00:00:00.000Z');
+    assert.strictEqual(ranges[0].until.toISOString(), '2024-03-30T00:00:00.000Z');
+    assert.strictEqual(ranges[1].since.toISOString(), '2024-03-31T00:00:00.000Z');
+    assert.strictEqual(ranges[1].until.toISOString(), '2024-06-28T00:00:00.000Z');
+    assert.strictEqual(ranges[2].since.toISOString(), '2024-06-29T00:00:00.000Z');
   });
 });
