@@ -297,6 +297,22 @@ export type Error = {
   message: Scalars['String']['output'];
 };
 
+export type Feedback = {
+  __typename: 'Feedback';
+  message: Scalars['String']['output'];
+  type?: Maybe<FeedbackType>;
+  userId: Scalars['String']['output'];
+};
+
+export enum FeedbackType {
+  /** Report a bug */
+  BUG_REPORT = 'BUG_REPORT',
+  /** Suggest a feature */
+  FEATURE_SUGGESTION = 'FEATURE_SUGGESTION',
+  /** Other feedback */
+  OTHER = 'OTHER',
+}
+
 export type FilterInsightsInput = {
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
@@ -596,6 +612,7 @@ export type Mutation = {
   removeUserFromOrganization: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
+  sendFeedback: Feedback;
   sendLandingPageSupportMessage: LandingPageSupportMessage;
   /** Use this mutation after the user has clicked on the personalized invite link on their email and they don't have an account yet */
   signUpInvitedUser: Tokens;
@@ -669,6 +686,12 @@ export type MutationRemoveUserFromOrganizationArgs = {
 export type MutationResetPasswordArgs = {
   password: Scalars['String']['input'];
   token: Scalars['String']['input'];
+};
+
+export type MutationSendFeedbackArgs = {
+  message: Scalars['String']['input'];
+  type: FeedbackType;
+  userId: Scalars['String']['input'];
 };
 
 export type MutationSendLandingPageSupportMessageArgs = {

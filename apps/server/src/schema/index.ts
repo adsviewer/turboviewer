@@ -8,6 +8,7 @@ import './organization/organization-operations';
 import './user/social-login-operations';
 import './user/invite-operations';
 import './user/user-operations';
+import './feedback/feedback-operation';
 
 builder.queryType({
   fields: (_t) => ({}),
