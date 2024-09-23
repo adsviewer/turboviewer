@@ -36,18 +36,29 @@ export const getInsightsDateFrom = (
   dataPointsPerInterval: number,
   interval: IntervalType,
 ) => {
-  if (!dateFrom && !dateTo)
-    return `AND i.date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
-  if (!dateFrom && dateTo)
-    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+  const intervalMapping = (): string => {
+    if (interval === 'quarter') {
+      return '3 months';
+    }
+    return `${String(dataPointsPerInterval)} ${interval}`;
+  };
+
+  const mappedInterval = intervalMapping();
+
+  if (!dateFrom && !dateTo) {
+    return `AND i.date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '${mappedInterval}')`;
+  }
+  if (!dateFrom && dateTo) {
+    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${mappedInterval}')`;
+  }
   if (dateFrom && !dateTo) {
     if (isDateWithinInterval(dateFrom, interval, new Date(), dataPointsPerInterval)) {
-      return `AND i.date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+      return `AND i.date >= DATE_TRUNC('${interval}', CURRENT_DATE - INTERVAL '${mappedInterval}')`;
     }
     return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom.toISOString()}')`;
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
-  return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${String(dataPointsPerInterval)} ${interval}')`;
+  return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${mappedInterval}')`;
 };
 
 export const searchAdsToSQL = (expression: InsightsSearchExpression): string => {
@@ -127,9 +138,12 @@ export const lastInterval = (
       ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
       : `SUM(i.${orderColumn}) AS ${orderColumn}`;
   const relative = orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : '';
+
+  const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
+
   return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
                                         AND date < DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}${relative})`;
 };
@@ -145,10 +159,14 @@ export const intervalBeforeLast = (
     orderColumn === 'cpm'
       ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
       : `SUM(i.${orderColumn}) AS ${orderColumn}`;
+
+  const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
+  const doubleIntervalInMonths = interval === 'quarter' ? '6 months' : `2 ${interval}`;
+
   return `interval_before_last AS (SELECT ${group}, ${sqlOrderColumn}
                                              FROM organization_insights i
-                                             WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '2 ${interval}')
-                                               AND date < DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
+                                             WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${doubleIntervalInMonths}')
+                                               AND date < DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
                                              GROUP BY ${group}
                                              ${orderColumn === 'cpm' ? 'HAVING SUM(i.impressions) > 0' : ''})`;
 };
@@ -188,18 +206,29 @@ export const orderColumnTrendAbsolute = (
   dateTo?: Date | null,
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
+
+  const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
+
   const sqlOrderColumn =
     orderColumn === 'cpm'
       ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend'
       : `SUM(i.${orderColumn}) AS trend`;
+
   return `order_column_trend AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '1 ${interval}')
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
                                         AND date < DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}
                                       ${orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : ''}
                                       ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
+};
+
+const getInterval = (interval: string, dataPointsPerInterval: number) => {
+  if (interval === 'quarter') {
+    return `${String(dataPointsPerInterval * 3)} months`;
+  }
+  return `${String(dataPointsPerInterval)} ${interval}`; // Default case
 };
 
 export const groupedInsights = (args: FilterInsightsInputType, organizationId: string, locale: string) => {
@@ -212,6 +241,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   const limit = args.pageSize + 1;
   const offset = (args.page - 1) * args.pageSize;
   const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
+  const dateInterval = getInterval(args.interval, dataPointsPerInterval);
 
   const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)}, 
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
@@ -219,7 +249,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
-  WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${String(dataPointsPerInterval)} ${args.interval}')
+  WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
     AND i.date < DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
   ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
