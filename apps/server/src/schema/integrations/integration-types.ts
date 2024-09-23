@@ -392,7 +392,7 @@ export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
           args.dateFrom &&
           args.dateTo &&
           args.interval === 'day' &&
-          args.dateFrom.getTime() - args.dateTo.getTime() < 1000 * 60 * 60 * 24 * 90
+          args.dateTo.getTime() - args.dateFrom.getTime() > 1000 * 60 * 60 * 24 * 90
         ),
       { message: 'Day intervals cannot be more than 90 days' },
     ],
