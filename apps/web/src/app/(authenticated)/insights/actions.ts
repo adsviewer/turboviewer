@@ -44,8 +44,6 @@ export default async function getInsights(searchParams: SearchParams): Promise<I
   delete parsedSearchData.clientSearchTerms;
 
   return await urqlClientSdk().insights({
-    adAccountIds: searchParams.account,
-    adIds: searchParams.adId,
     dateFrom: searchParams.dateFrom ? new Date(Number(searchParams.dateFrom)) : undefined,
     dateTo: searchParams.dateTo ? new Date(Number(searchParams.dateTo)) : undefined,
     devices: searchParams.device,

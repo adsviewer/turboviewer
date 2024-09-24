@@ -1,7 +1,6 @@
 import {
   CurrencyEnum,
   DeviceEnum,
-  type Insight,
   type Integration,
   IntegrationStatus,
   IntegrationTypeEnum,
@@ -219,15 +218,16 @@ export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderB
   values: insightsColumnsOrderBy,
 });
 
-export type InsightsPossibleGrouping = 'adAccountId' | 'adId' | 'device' | 'position' | 'publisher';
-export type InsightsColumnsGroupByType = keyof Pick<Insight, InsightsPossibleGrouping>;
-const insightsColumnsGroupBy: InsightsColumnsGroupByType[] = [
+const insightsColumnsGroupBy = [
   'adAccountId',
   'adId',
+  'adSetId',
+  'campaignId',
   'device',
   'position',
   'publisher',
 ] as const;
+export type InsightsColumnsGroupByType = (typeof insightsColumnsGroupBy)[number];
 export const InsightsColumnsGroupByDto = builder.enumType('InsightsColumnsGroupBy', {
   values: insightsColumnsGroupBy,
 });
@@ -356,8 +356,6 @@ export const InsightsSearchExpressionDto = builder
 
 export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
   fields: (t) => ({
-    adAccountIds: t.stringList({ required: false }),
-    adIds: t.stringList({ required: false }),
     dateFrom: t.field({ type: 'Date', required: false }),
     dateTo: t.field({ type: 'Date', required: false }),
     devices: t.field({ type: [DeviceEnumDto], required: false }),
@@ -405,6 +403,8 @@ export const InsightsDatapointsInput = builder.inputType('InsightsDatapointsInpu
   fields: (t) => ({
     adAccountId: t.string({ required: false }),
     adId: t.string({ required: false }),
+    adSetId: t.string({ required: false }),
+    campaignId: t.string({ required: false }),
     dateFrom: t.field({ type: 'Date', required: true }),
     dateTo: t.field({ type: 'Date', required: true }),
     device: t.field({ type: DeviceEnumDto, required: false }),

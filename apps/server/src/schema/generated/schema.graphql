@@ -270,8 +270,6 @@ interface Error {
 }
 
 input FilterInsightsInput {
-  adAccountIds: [String!]
-  adIds: [String!]
   dateFrom: Date
   dateTo: Date
   devices: [DeviceEnum!]
@@ -300,7 +298,6 @@ type GroupedInsight implements Pagination {
   hasNext: Boolean!
   page: Int!
   pageSize: Int!
-  totalCount: Int!
 }
 
 type GroupedInsights {
@@ -308,6 +305,10 @@ type GroupedInsights {
   adAccountName: String
   adId: String
   adName: String
+  adSetId: String
+  adSetName: String
+  campaignId: String
+  campaignName: String
   currency: CurrencyEnum!
   datapoints: [InsightsDatapoints!]!
   device: DeviceEnum
@@ -348,6 +349,8 @@ type Insight {
 enum InsightsColumnsGroupBy {
   adAccountId
   adId
+  adSetId
+  campaignId
   device
   position
   publisher
@@ -376,6 +379,8 @@ type InsightsDatapoints {
 input InsightsDatapointsInput {
   adAccountId: String
   adId: String
+  adSetId: String
+  campaignId: String
   dateFrom: Date!
   dateTo: Date!
   device: DeviceEnum
@@ -682,7 +687,6 @@ interface Pagination {
   hasNext: Boolean!
   page: Int!
   pageSize: Int!
-  totalCount: Int!
 }
 
 type PrismaClientKnownRequestError implements Error {

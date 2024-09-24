@@ -1,6 +1,5 @@
-import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, Prisma, type PublisherEnum } from '@repo/database';
-import { Kind } from 'graphql/language';
-import { FireAndForget, isAError, groupBy as groupByUtil } from '@repo/utils';
+import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, type PublisherEnum } from '@repo/database';
+import { FireAndForget, groupBy as groupByUtil, isAError } from '@repo/utils';
 import {
   adWithAdAccount,
   getChannel,
@@ -21,11 +20,10 @@ import {
   CurrencyEnumDto,
   DeviceEnumDto,
   FilterInsightsInput,
+  type InsightsColumnsGroupByType,
   InsightsDatapointsInput,
   PublisherEnumDto,
 } from './integration-types';
-import InsightWhereInput = Prisma.InsightWhereInput;
-import InsightScalarFieldEnum = Prisma.InsightScalarFieldEnum;
 
 const fireAndForget = new FireAndForget();
 
@@ -54,20 +52,11 @@ builder.queryFields((t) => ({
     args: {
       filter: t.arg({ type: FilterInsightsInput, required: true }),
     },
-    resolve: async (_root, args, ctx, info) => {
+    resolve: async (_root, args, ctx, _info) => {
       const redisValue = await getInsightsCache<GroupedInsightsType>(ctx.organizationId, args.filter);
       if (redisValue) return redisValue;
 
-      const where: InsightWhereInput = {
-        adAccountId: { in: args.filter.adAccountIds ?? undefined },
-        adId: { in: args.filter.adIds ?? undefined },
-        device: { in: args.filter.devices ?? undefined },
-        publisher: { in: args.filter.publishers ?? undefined },
-        position: { in: args.filter.positions ?? undefined },
-        ad: { adAccount: { integration: { organizationId: ctx.organizationId } } },
-      };
-
-      const groupBy: InsightScalarFieldEnum[] = [...(args.filter.groupBy ?? []), 'currency'];
+      const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.filter.groupBy ?? []), 'currency'];
 
       const insightsRaw: Record<string, never>[] = await prisma.$queryRawUnsafe(
         groupedInsights(args.filter, ctx.organizationId, ctx.acceptedLocale),
@@ -82,14 +71,12 @@ builder.queryFields((t) => ({
           }
         }
         return newObj;
-      }) as unknown as (Insight & { cpm: number })[];
+      }) as unknown as (Insight & { cpm: number; campaignId: string; adSetId: string })[];
 
       const ret: {
         id: string;
         adAccountId?: string;
-        adAccountName?: string;
         adId?: string;
-        adName?: string | null;
         position?: string;
         device?: DeviceEnum;
         publisher?: PublisherEnum;
@@ -118,21 +105,7 @@ builder.queryFields((t) => ({
       const hasNext = ret.length > args.filter.pageSize;
       if (hasNext) ret.pop();
 
-      // Only if totalCount is requested, we need to fetch all elements
-      const totalElementsP = info.fieldNodes.some((f) =>
-        f.selectionSet?.selections.some((s) => s.kind === Kind.FIELD && s.name.value === 'totalCount'),
-      )
-        ? prisma.insight
-            .findMany({
-              select: { id: true },
-              distinct: groupBy,
-              where,
-            })
-            .then((ins) => ins.length)
-        : 0;
-
       const retVal = {
-        totalCount: await totalElementsP,
         hasNext,
         page: args.filter.page,
         pageSize: args.filter.pageSize,
@@ -246,7 +219,6 @@ builder.mutationFields((t) => ({
 
 export const PaginationDto = builder.simpleInterface('Pagination', {
   fields: (t) => ({
-    totalCount: t.int({ nullable: false }),
     hasNext: t.boolean({ nullable: false }),
     page: t.int({ nullable: false }),
     pageSize: t.int({ nullable: false }),
@@ -282,6 +254,8 @@ const GroupedInsightDto = builder.simpleObject(
       id: t.string({ nullable: false }),
       adId: t.string({ nullable: true }),
       adAccountId: t.string({ nullable: true }),
+      adSetId: t.string({ nullable: true }),
+      campaignId: t.string({ nullable: true }),
       currency: t.field({ type: CurrencyEnumDto, nullable: false }),
       device: t.field({ type: DeviceEnumDto, nullable: true }),
       publisher: t.field({ type: PublisherEnumDto, nullable: true }),
@@ -313,6 +287,28 @@ const GroupedInsightDto = builder.simpleObject(
       resolve: async (root, _args, _ctx, _info) => {
         if (root.adId) {
           const { name } = await prisma.ad.findUniqueOrThrow({ where: { id: root.adId } });
+          return name;
+        }
+        return null;
+      },
+    }),
+    adSetName: t.field({
+      type: 'String',
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) => {
+        if (root.adSetId) {
+          const { name } = await prisma.adSet.findUniqueOrThrow({ where: { id: root.adSetId } });
+          return name;
+        }
+        return null;
+      },
+    }),
+    campaignName: t.field({
+      type: 'String',
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) => {
+        if (root.campaignId) {
+          const { name } = await prisma.campaign.findUniqueOrThrow({ where: { id: root.campaignId } });
           return name;
         }
         return null;
