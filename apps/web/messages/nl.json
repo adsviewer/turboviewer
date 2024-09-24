@@ -28,6 +28,8 @@
   },
   "navbar": {
     "insights": "Inzichten",
+    "summary": "Samenvatting",
+    "analytical": "Gedetailleerd",
     "integrations": "Integraties",
     "settings": "Instellingen",
     "organization": "Organisatie",
@@ -90,6 +92,9 @@
       "searchTermsHint": "Begin met het toevoegen van zoektermen om uw zoekopdracht te personaliseren.",
       "clearSearch": "Zoekopdracht wissen"
     }
+  },
+  "summary": {
+    "title": "Samenvatting"
   },
   "integrations": {
     "title": "Integraties",

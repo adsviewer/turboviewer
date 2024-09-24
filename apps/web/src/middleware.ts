@@ -8,7 +8,8 @@ import { env } from './env.mjs';
 import { urlKeys } from './util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsInterval, UserStatus } from './graphql/generated/schema-server';
 
-const defaultMissingOrgURL = '/organization-warning';
+export const DEFAULT_HOME_PATH = '/summary';
+const DEFAULT_MISSING_ORG_PATH = '/organization-warning';
 const publicPaths = [
   '/',
   '/sign-in',
@@ -76,7 +77,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  // If attempting to visit a public URL or the defaultMissingOrgURL while already signed in, redirect to default page
+  // If attempting to visit a public URL or the DEFAULT_MISSING_ORG_PATH while already signed in, redirect to default page
   if (isPublic(request.nextUrl.pathname) && token) {
     const redirectUrl = getDefaultRedirectURL(request, tokenData);
     return NextResponse.redirect(redirectUrl);
@@ -97,20 +98,20 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If user has no current org, redirect to defaultMissingOrgURL
+  // If user has no current org, redirect to DEFAULT_MISSING_ORG_PATH
   if (
     tokenData &&
     !tokenData.organizationId &&
     request.nextUrl.pathname !== '/api/auth/sign-out' &&
-    request.nextUrl.pathname !== defaultMissingOrgURL
+    request.nextUrl.pathname !== DEFAULT_MISSING_ORG_PATH
   ) {
-    const redirectUrl = new URL(defaultMissingOrgURL, request.url);
+    const redirectUrl = new URL(DEFAULT_MISSING_ORG_PATH, request.url);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If user has a current org and tries to visit the missing org screen, redirect to insights
-  if (request.nextUrl.pathname === defaultMissingOrgURL && tokenData?.organizationId) {
-    const redirectUrl = new URL('/insights', request.url);
+  // If user has a current org and tries to visit the missing org screen, redirect to home
+  if (request.nextUrl.pathname === DEFAULT_MISSING_ORG_PATH && tokenData?.organizationId) {
+    const redirectUrl = new URL(DEFAULT_HOME_PATH, request.url);
     return NextResponse.redirect(redirectUrl);
   }
   return NextResponse.next();
@@ -162,9 +163,9 @@ const tryRefreshToken = async (
 // The default redirect is on insights, but if no current org exists then the user should be redirected to the org warning page
 const getDefaultRedirectURL = (request: NextRequest, tokenData: JWTPayload | undefined): URL => {
   if (tokenData?.organizationId) {
-    return new URL('/insights', request.url);
+    return new URL(DEFAULT_HOME_PATH, request.url);
   }
-  return new URL(defaultMissingOrgURL, request.url);
+  return new URL(DEFAULT_MISSING_ORG_PATH, request.url);
 };
 
 const isPublic = (path: string): boolean => {

@@ -2,7 +2,7 @@
 
 import { Group, Avatar, Text, Flex } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
@@ -17,6 +17,7 @@ export default function UserButton(): ReactNode {
   const tGeneric = useTranslations('generic');
   const tIntegrations = useTranslations('integrations');
   const router = useRouter();
+  const pathname = usePathname();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
@@ -62,7 +63,10 @@ export default function UserButton(): ReactNode {
   };
 
   return (
-    <Flex justify="flex-start" className={classes.user}>
+    <Flex
+      justify="flex-start"
+      className={pathname === '/profile' ? `${classes.user} ${classes.buttonActive}` : classes.user}
+    >
       {isDataLoaded ? (
         <Group onClick={redirectToProfile}>
           <Avatar src={userDetails.photoUrl} radius="xl" />
