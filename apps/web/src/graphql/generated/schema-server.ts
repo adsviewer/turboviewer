@@ -461,6 +461,8 @@ export type InsightsSearchExpression = {
 export enum InsightsSearchField {
   AdName = 'AdName',
   AccountName = 'AccountName',
+  AdSetName = 'AdSetName',
+  CampaignName = 'CampaignName',
 }
 
 export enum InsightsSearchOperator {

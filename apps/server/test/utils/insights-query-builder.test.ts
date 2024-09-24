@@ -585,7 +585,7 @@ void describe('searchAdsToSQL tests', () => {
             },
             {
               term: {
-                field: InsightsSearchField.AccountName,
+                field: InsightsSearchField.CampaignName,
                 operator: InsightsSearchOperator.Equals,
                 value: 'account',
               },
@@ -594,7 +594,7 @@ void describe('searchAdsToSQL tests', () => {
         },
         {
           term: {
-            field: InsightsSearchField.AdName,
+            field: InsightsSearchField.AdSetName,
             operator: InsightsSearchOperator.StartsWith,
             value: 'start',
           },
@@ -602,7 +602,7 @@ void describe('searchAdsToSQL tests', () => {
       ],
     };
     const sql = searchAdsToSQL(expression);
-    assert.strictEqual(sql, "AND ((a.name ILIKE '%test%' OR aa.name = 'account') AND a.name ILIKE 'start%')");
+    assert.strictEqual(sql, "AND ((a.name ILIKE '%test%' OR c.name = 'account') AND ase.name ILIKE 'start%')");
   });
 
   void it('should generate SQL for nested expressions with nested null expression', () => {

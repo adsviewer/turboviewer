@@ -261,6 +261,22 @@ export default function GroupFilters(): ReactNode {
         />
         <Checkbox
           disabled={isPending}
+          label={t('adSetId')}
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.adSetId}
+          checked={isChecked(InsightsColumnsGroupBy.adSetId)}
+        />
+        <Checkbox
+          disabled={isPending}
+          label={t('campaignId')}
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.campaignId}
+          checked={isChecked(InsightsColumnsGroupBy.campaignId)}
+        />
+        <Checkbox
+          disabled={isPending}
           label={t('adId')}
           my={4}
           onChange={handleCheckboxFilter}

@@ -112,6 +112,14 @@ export default function Search(props: PropsType): React.ReactNode {
       value: InsightsSearchField.AdName,
     },
     {
+      label: tSearch('adSetName'),
+      value: InsightsSearchField.AdSetName,
+    },
+    {
+      label: tSearch('campaignName'),
+      value: InsightsSearchField.CampaignName,
+    },
+    {
       label: tSearch('adAccountName'),
       value: InsightsSearchField.AccountName,
     },
@@ -241,6 +249,8 @@ export default function Search(props: PropsType): React.ReactNode {
       searchTimeoutRef.current = setTimeout(() => {
         const newSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
         const adNameSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+        const adSetNameSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
+        const campaignNameSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
         const adAccountNameSearchData = _.cloneDeep(INITIAL_SEARCH_EXPRESSION);
 
         adAccountNameSearchData.term = { ...INITIAL_TERM };
@@ -248,10 +258,18 @@ export default function Search(props: PropsType): React.ReactNode {
         adNameSearchData.term.value = newSearchValue;
         adNameSearchData.term.field = InsightsSearchField.AdName;
         adNameSearchData.term.operator = InsightsSearchOperator.Contains;
+        adSetNameSearchData.term = { ...INITIAL_TERM };
+        adSetNameSearchData.term.value = newSearchValue;
+        adSetNameSearchData.term.field = InsightsSearchField.AdSetName;
+        adSetNameSearchData.term.operator = InsightsSearchOperator.Contains;
+        campaignNameSearchData.term = { ...INITIAL_TERM };
+        campaignNameSearchData.term.value = newSearchValue;
+        campaignNameSearchData.term.field = InsightsSearchField.CampaignName;
+        campaignNameSearchData.term.operator = InsightsSearchOperator.Contains;
         adAccountNameSearchData.term.value = newSearchValue;
         adAccountNameSearchData.term.field = InsightsSearchField.AccountName;
         adAccountNameSearchData.term.operator = InsightsSearchOperator.Contains;
-        newSearchData.or = [adNameSearchData, adAccountNameSearchData];
+        newSearchData.or = [adNameSearchData, adSetNameSearchData, campaignNameSearchData, adAccountNameSearchData];
 
         const encodedSearchData = btoa(JSON.stringify(newSearchData));
 
