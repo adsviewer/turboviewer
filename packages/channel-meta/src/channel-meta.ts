@@ -607,8 +607,6 @@ class Meta implements ChannelInterface {
       let start = 0;
       let smallAccountAds = accountAds.slice(start, start + limit);
       while (smallAccountAds.length > 0) {
-        smallAccountAds = accountAds.slice(start, start + limit);
-        start += limit;
         const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
         const callFn = account.getAds(
           [
@@ -628,11 +626,15 @@ class Meta implements ChannelInterface {
               'CAMPAIGN_PAUSED',
               'ARCHIVED',
               'ADSET_PAUSED',
+              'IN_PROCESS',
+              'WITH_ISSUES',
             ],
             filtering: [{ field: Ad.Fields.id, operator: 'IN', value: smallAccountAds.map((a) => a.externalId) }],
           },
         );
         await Meta.handlePaginationFn(integration, callFn, schema, toAdSetAdAndCampaign, processFn);
+        start += limit;
+        smallAccountAds = accountAds.slice(start, start + limit);
       }
     }
     return Promise.resolve(undefined);

@@ -407,7 +407,7 @@ export class Tiktok implements ChannelInterface {
     });
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
-      logger.error(parsed.error, 'Failed to parse list tik-tok response');
+      logger.error(parsed.error, 'Failed to parse paginated list tik-tok response');
       return new AError('Failed to parse response');
     }
 
@@ -592,58 +592,65 @@ export class Tiktok implements ChannelInterface {
   ): Promise<AError | undefined> {
     for (const [_, accountAds] of groupByAdAccount) {
       const adAccount = accountAds[0].adAccount;
-      const url = `${baseUrl}/ad/get/?advertiser_id=${adAccount.externalId}&filtering={"ad_ids":["${Array.from(new Set(accountAds.map((a) => a.externalId))).join('","')}"]}&fields=["ad_id","ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name"]`;
-      // const response = await Tiktok.tikTokFetch('539a9deb68244caf241e5746a1ec34d52958011d', url);
 
-      const schema = z.object({
-        ad_id: z.coerce.number().int(),
-        ad_name: z.string(),
-        adgroup_id: z.coerce.number().int(),
-        adgroup_name: z.string(),
-        campaign_id: z.coerce.number().int(),
-        campaign_name: z.string(),
-      });
+      let start = 0;
+      const limit = 50;
+      let smallAccountAds = accountAds.slice(start, start + limit);
+      while (smallAccountAds.length > 0) {
+        const url = `${baseUrl}/ad/get/?advertiser_id=${adAccount.externalId}&filtering={"ad_ids":["${Array.from(new Set(smallAccountAds.map((a) => a.externalId))).join('","')}"]}&fields=["ad_id","ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name"]`;
 
-      const toCampaignAdSetAd = (
-        data: z.infer<typeof schema>[],
-      ): { ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] } => {
-        return data.reduce<{ ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] }>(
-          (acc, row) => {
-            acc.ads.push({
-              externalAdSetId: String(row.adgroup_id),
-              externalAdAccountId: adAccount.externalId,
-              externalId: row.ad_id.toString(),
-              name: row.ad_name,
-            });
-            acc.adSets.push({
-              externalCampaignId: row.campaign_id.toString(),
-              externalId: row.adgroup_id.toString(),
-              name: row.adgroup_name,
-            });
-            acc.campaigns.push({
-              externalAdAccountId: adAccount.externalId,
-              externalId: row.campaign_id.toString(),
-              name: row.campaign_name,
-            });
-            return acc;
-          },
-          { ads: [], adSets: [], campaigns: [] },
-        );
-      };
+        const schema = z.object({
+          ad_id: z.coerce.number().int(),
+          ad_name: z.string(),
+          adgroup_id: z.coerce.number().int(),
+          adgroup_name: z.string(),
+          campaign_id: z.coerce.number().int(),
+          campaign_name: z.string(),
+        });
 
-      const processFn = async ({
-        ads,
-        adSets,
-        campaigns,
-      }: {
-        ads: ChannelAd[];
-        adSets: ChannelAdSet[];
-        campaigns: ChannelCampaign[];
-      }): Promise<void> => {
-        await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
-      };
+        const toCampaignAdSetAd = (
+          data: z.infer<typeof schema>[],
+        ): { ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] } => {
+          return data.reduce<{ ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] }>(
+            (acc, row) => {
+              acc.ads.push({
+                externalAdSetId: String(row.adgroup_id),
+                externalAdAccountId: adAccount.externalId,
+                externalId: row.ad_id.toString(),
+                name: row.ad_name,
+              });
+              acc.adSets.push({
+                externalCampaignId: row.campaign_id.toString(),
+                externalId: row.adgroup_id.toString(),
+                name: row.adgroup_name,
+              });
+              acc.campaigns.push({
+                externalAdAccountId: adAccount.externalId,
+                externalId: row.campaign_id.toString(),
+                name: row.campaign_name,
+              });
+              return acc;
+            },
+            { ads: [], adSets: [], campaigns: [] },
+          );
+        };
 
-      await Tiktok.processPagination(integration.accessToken, url, schema, toCampaignAdSetAd, processFn);
+        const processFn = async ({
+          ads,
+          adSets,
+          campaigns,
+        }: {
+          ads: ChannelAd[];
+          adSets: ChannelAdSet[];
+          campaigns: ChannelCampaign[];
+        }): Promise<void> => {
+          await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+        };
+
+        await Tiktok.processPagination(integration.accessToken, url, schema, toCampaignAdSetAd, processFn);
+        start += limit;
+        smallAccountAds = accountAds.slice(start, start + limit);
+      }
     }
     return undefined;
   }
@@ -698,7 +705,7 @@ export class Tiktok implements ChannelInterface {
       return new AError('Failed to parse response');
     }
     let resultsP = processCallback(parseCallback(parsed.data));
-    while (data.pageInfo.page !== data.pageInfo.totalPage) {
+    while (data.pageInfo.totalPage !== 0 && data.pageInfo.page !== data.pageInfo.totalPage) {
       const nextUrl = `${pagedUrl}&page=${String(data.pageInfo.page + 1)}`;
       const nextResponse = await Tiktok.tikTokFetch(accessToken, nextUrl);
       const nextData = await Tiktok.baseListValidation(nextResponse);
