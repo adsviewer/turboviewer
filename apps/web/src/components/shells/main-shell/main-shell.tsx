@@ -16,6 +16,7 @@ import { IconBuilding, IconGraph, IconLogout, IconPlugConnected } from '@tabler/
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAtomValue } from 'jotai/index';
+import uniqid from 'uniqid';
 import { LogoFull } from '@/components/misc/logo-full';
 import SettingsButton from '@/components/buttons/settings-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
@@ -25,6 +26,7 @@ import OrganizationSelect from '@/components/dropdowns/organization-select/organ
 import CreateOrganizationButton from '@/components/create-organization/create-organization-button';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import FeedbackButton from '@/components/buttons/feedback-button';
+import SubNavlinkButton from '@/components/buttons/sub-navlink-button/sub-navlink-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -36,8 +38,12 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     {
       iconNode: <IconGraph />,
       label: t('insights'),
-      href: '/insights',
-      isActive: pathname === '/insights',
+      href: '/summary',
+      isActive: pathname === '/summary',
+      subLinks: [
+        { label: t('summary'), href: '/summary' },
+        { label: t('analytical'), href: '/insights' },
+      ],
     },
     {
       iconNode: <IconPlugConnected />,
@@ -80,15 +86,44 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         <Flex direction="column" h="100%">
           {/* Navigation */}
           {navLinksData.length && userDetails.currentOrganization?.id ? (
-            navLinksData.map((navLink) => (
-              <NavlinkButton
-                key={navLink.href}
-                iconNode={navLink.iconNode}
-                label={navLink.label}
-                href={navLink.href}
-                isActive={pathname === navLink.href}
-              />
-            ))
+            navLinksData.map((navLink) => {
+              let isSublinkActive = false;
+              let nodesToRender: React.ReactNode[] = [];
+
+              // Handle sublinks
+              let subLinksNodes: React.ReactNode[] = [];
+              if (navLink.subLinks?.length) {
+                for (const subLinkData of navLink.subLinks) {
+                  if (pathname === subLinkData.href) isSublinkActive = true;
+                  subLinksNodes = [
+                    ...subLinksNodes,
+                    <SubNavlinkButton
+                      label={subLinkData.label}
+                      href={subLinkData.href}
+                      isActive={pathname === subLinkData.href}
+                      key={uniqid()}
+                    />,
+                  ];
+                }
+              }
+
+              const MAIN_LINK_NODE = (
+                <NavlinkButton
+                  key={uniqid()}
+                  iconNode={navLink.iconNode}
+                  label={navLink.label}
+                  href={navLink.href}
+                  isActive={pathname === navLink.href || isSublinkActive}
+                />
+              );
+              nodesToRender = [MAIN_LINK_NODE];
+              nodesToRender = [...nodesToRender, ...subLinksNodes];
+              return (
+                <Flex key={uniqid()} direction="column">
+                  {nodesToRender}
+                </Flex>
+              );
+            })
           ) : (
             <Text ta="center" c="dimmed">
               {t('noOrganizationData')}

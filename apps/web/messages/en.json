@@ -28,6 +28,8 @@
   },
   "navbar": {
     "insights": "Insights",
+    "summary": "Summary",
+    "analytical": "Analytical",
     "integrations": "Integrations",
     "settings": "Settings",
     "organization": "Organization",
@@ -90,6 +92,9 @@
       "searchTermsHint": "Start adding search terms to customize your search.",
       "clearSearch": "Clear search"
     }
+  },
+  "summary": {
+    "title": "Summary"
   },
   "integrations": {
     "title": "Integrations",
