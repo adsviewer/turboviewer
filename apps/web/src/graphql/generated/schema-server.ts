@@ -298,8 +298,6 @@ export type Error = {
 };
 
 export type FilterInsightsInput = {
-  adAccountIds?: InputMaybe<Array<Scalars['String']['input']>>;
-  adIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
@@ -327,7 +325,6 @@ export type GroupedInsight = Pagination & {
   hasNext: Scalars['Boolean']['output'];
   page: Scalars['Int']['output'];
   pageSize: Scalars['Int']['output'];
-  totalCount: Scalars['Int']['output'];
 };
 
 export type GroupedInsights = {
@@ -336,6 +333,10 @@ export type GroupedInsights = {
   adAccountName?: Maybe<Scalars['String']['output']>;
   adId?: Maybe<Scalars['String']['output']>;
   adName?: Maybe<Scalars['String']['output']>;
+  adSetId?: Maybe<Scalars['String']['output']>;
+  adSetName?: Maybe<Scalars['String']['output']>;
+  campaignId?: Maybe<Scalars['String']['output']>;
+  campaignName?: Maybe<Scalars['String']['output']>;
   currency: CurrencyEnum;
   datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;
@@ -375,6 +376,8 @@ export type Insight = {
 export enum InsightsColumnsGroupBy {
   adAccountId = 'adAccountId',
   adId = 'adId',
+  adSetId = 'adSetId',
+  campaignId = 'campaignId',
   device = 'device',
   position = 'position',
   publisher = 'publisher',
@@ -401,6 +404,8 @@ export type InsightsDatapoints = {
 export type InsightsDatapointsInput = {
   adAccountId?: InputMaybe<Scalars['String']['input']>;
   adId?: InputMaybe<Scalars['String']['input']>;
+  adSetId?: InputMaybe<Scalars['String']['input']>;
+  campaignId?: InputMaybe<Scalars['String']['input']>;
   dateFrom: Scalars['Date']['input'];
   dateTo: Scalars['Date']['input'];
   device?: InputMaybe<DeviceEnum>;
@@ -456,6 +461,8 @@ export type InsightsSearchExpression = {
 export enum InsightsSearchField {
   AdName = 'AdName',
   AccountName = 'AccountName',
+  AdSetName = 'AdSetName',
+  CampaignName = 'CampaignName',
 }
 
 export enum InsightsSearchOperator {
@@ -774,7 +781,6 @@ export type Pagination = {
   hasNext: Scalars['Boolean']['output'];
   page: Scalars['Int']['output'];
   pageSize: Scalars['Int']['output'];
-  totalCount: Scalars['Int']['output'];
 };
 
 export type PrismaClientKnownRequestError = Error & {
@@ -958,8 +964,6 @@ export type AdAccountsQuery = {
 };
 
 export type InsightsQueryVariables = Exact<{
-  adAccountIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-  adIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
@@ -1386,8 +1390,6 @@ export const AdAccountsDocument = gql`
 `;
 export const InsightsDocument = gql`
   query insights(
-    $adAccountIds: [String!]
-    $adIds: [String!]
     $dateFrom: Date
     $dateTo: Date
     $devices: [DeviceEnum!]
@@ -1403,8 +1405,6 @@ export const InsightsDocument = gql`
   ) {
     insights(
       filter: {
-        adAccountIds: $adAccountIds
-        adIds: $adIds
         dateFrom: $dateFrom
         dateTo: $dateTo
         devices: $devices

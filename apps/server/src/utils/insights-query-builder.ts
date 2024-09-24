@@ -99,15 +99,15 @@ export const getOrganizationalInsights = (
   filter: FilterInsightsInputType,
   dataPointsPerInterval: number,
 ): string =>
-  `organization_insights AS (SELECT i.*
+  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = '${organizationId}'
                                                 ${filter.search ? searchAdsToSQL(filter.search) : ''}
-                                                ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
-                                                ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, dataPointsPerInterval, filter.interval)}
                                                 ${filter.dateTo ? `AND i.date < TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
                                                 ${filter.devices ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}
@@ -234,13 +234,17 @@ export const insightsDatapoints = (args: InsightsDatapointsInputType, organizati
           SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
    FROM insights i
             JOIN ads a on i.ad_id = a.id
-            JOIN ad_accounts aa on a.ad_account_id = aa.id
+            JOIN ad_sets ase on a.ad_set_id = ase.id
+            JOIN campaigns c on ase.campaign_id = c.id
+            JOIN ad_accounts aa on c.ad_account_id = aa.id
             JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
    WHERE ao."B" = '${organizationId}'
      AND i.date >= DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateFrom.toISOString()}')
      AND i.date < DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateTo.toISOString()}')
-       ${args.adAccountId ? `AND i.ad_account_id = '${args.adAccountId}'` : ''}
+       ${args.adAccountId ? `AND c.ad_account_id = '${args.adAccountId}'` : ''}
            ${args.adId ? `AND i.ad_id = '${args.adId}'` : ''}
+           ${args.adSetId ? `AND a.ad_set_id = '${args.adSetId}'` : ''}
+           ${args.campaignId ? `AND ase.campaign_id = '${args.campaignId}'` : ''}
            ${args.device ? `AND i.device = '${args.device}'` : ''}
            ${args.position ? `AND i.position = '${args.position}'` : ''}
            ${args.publisher ? `AND i.publisher = '${args.publisher}'` : ''}

@@ -151,47 +151,20 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
-                                              )`,
-    );
-  });
-  void it('get insights ad account filter', () => {
-    const args: FilterInsightsInputType = {
-      adAccountIds: ['clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491'],
-      orderBy: 'spend_rel',
-      page: 1,
-      pageSize: 10,
-      groupBy: ['adId', 'publisher'],
-      interval: 'week',
-      order: 'desc',
-      search: { term: { field: InsightsSearchField.AdName, operator: InsightsSearchOperator.Equals, value: 'chair' } },
-    };
-
-    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
-    assertSql(
-      insights,
-      `organization_insights AS (SELECT i.*
-                                              FROM insights i
-                                                       JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
-                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
-                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND a.name = 'chair'
-                                                AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
                                               )`,
     );
   });
   void it('get insights all filters', () => {
     const args: FilterInsightsInputType = {
-      adAccountIds: ['clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491'],
-      adIds: ['clwnqvgwx000008mlbmkchjwg'],
       dateFrom: new Date('2024-04-01'),
       dateTo: new Date('2024-05-28'),
       devices: [DeviceEnum.MobileWeb, DeviceEnum.MobileApp],
@@ -209,14 +182,14 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND aa.id IN ('clwnaip1s000008k00nuu3xez', 'clwnaivx3000108k04kc7a491')
-                                                AND a.id IN ('clwnqvgwx000008mlbmkchjwg')
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                                 AND i.device IN ('MobileWeb', 'MobileApp')
@@ -368,10 +341,12 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB');
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
@@ -414,10 +389,12 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB');
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
@@ -452,10 +429,12 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB');
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
-                                                       JOIN ad_accounts aa on a.ad_account_id = aa.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
@@ -490,6 +469,8 @@ void describe('insights query builder tests', () => {
     const args: InsightsDatapointsInputType = {
       adAccountId: 'clwnaip1s000008k00nuu3xez',
       adId: 'clwojj3kp000008l7bfk10qg1',
+      adSetId: 'cm1gfkt5v000009kzexbw69eo',
+      campaignId: 'cm1gfkzsi000008mgfrld71p1',
       dateFrom: new Date('2024-04-01'),
       dateTo: new Date('2024-05-27'),
       device: DeviceEnum.MobileWeb,
@@ -505,13 +486,17 @@ void describe('insights query builder tests', () => {
                              SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
                       FROM insights i
                                JOIN ads a on i.ad_id = a.id
-                               JOIN ad_accounts aa on a.ad_account_id = aa.id
+                               JOIN ad_sets ase on a.ad_set_id = ase.id
+                               JOIN campaigns c on ase.campaign_id = c.id
+                               JOIN ad_accounts aa on c.ad_account_id = aa.id
                                JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                       WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                         AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-04-01T00:00:00.000Z')
                         AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-27T00:00:00.000Z')
-                        AND i.ad_account_id = 'clwnaip1s000008k00nuu3xez'
+                        AND c.ad_account_id = 'clwnaip1s000008k00nuu3xez'
                         AND i.ad_id = 'clwojj3kp000008l7bfk10qg1'
+                        AND a.ad_set_id = 'cm1gfkt5v000009kzexbw69eo'
+                        AND ase.campaign_id = 'cm1gfkzsi000008mgfrld71p1'
                         AND i.device = 'MobileWeb'
                         AND i.position = 'feed'
                         AND i.publisher = 'Facebook'
@@ -600,7 +585,7 @@ void describe('searchAdsToSQL tests', () => {
             },
             {
               term: {
-                field: InsightsSearchField.AccountName,
+                field: InsightsSearchField.CampaignName,
                 operator: InsightsSearchOperator.Equals,
                 value: 'account',
               },
@@ -609,7 +594,7 @@ void describe('searchAdsToSQL tests', () => {
         },
         {
           term: {
-            field: InsightsSearchField.AdName,
+            field: InsightsSearchField.AdSetName,
             operator: InsightsSearchOperator.StartsWith,
             value: 'start',
           },
@@ -617,7 +602,7 @@ void describe('searchAdsToSQL tests', () => {
       ],
     };
     const sql = searchAdsToSQL(expression);
-    assert.strictEqual(sql, "AND ((a.name ILIKE '%test%' OR aa.name = 'account') AND a.name ILIKE 'start%')");
+    assert.strictEqual(sql, "AND ((a.name ILIKE '%test%' OR c.name = 'account') AND ase.name ILIKE 'start%')");
   });
 
   void it('should generate SQL for nested expressions with nested null expression', () => {
