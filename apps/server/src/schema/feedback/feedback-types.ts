@@ -10,7 +10,6 @@ export const FeedbackTypeEnum = builder.enumType('FeedbackType', {
 
 export const FeedbackDto = builder.simpleObject('Feedback', {
   fields: (t) => ({
-    userId: t.string({ nullable: false }),
     type: t.field({
       type: FeedbackTypeEnum,
     }),

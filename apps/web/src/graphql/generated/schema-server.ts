@@ -301,7 +301,6 @@ export type Feedback = {
   __typename: 'Feedback';
   message: Scalars['String']['output'];
   type?: Maybe<FeedbackType>;
-  userId: Scalars['String']['output'];
 };
 
 export enum FeedbackType {
@@ -691,7 +690,6 @@ export type MutationResetPasswordArgs = {
 export type MutationSendFeedbackArgs = {
   message: Scalars['String']['input'];
   type: FeedbackType;
-  userId: Scalars['String']['input'];
 };
 
 export type MutationSendLandingPageSupportMessageArgs = {

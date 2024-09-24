@@ -272,7 +272,6 @@ interface Error {
 type Feedback {
   message: String!
   type: FeedbackType
-  userId: String!
 }
 
 enum FeedbackType {
@@ -632,7 +631,7 @@ type Mutation {
   removeUserFromOrganization(userId: String!): Boolean!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
-  sendFeedback(message: String!, type: FeedbackType!, userId: String!): Feedback!
+  sendFeedback(message: String!, type: FeedbackType!): Feedback!
   sendLandingPageSupportMessage(args: LandingPageSupportMessageInput!): LandingPageSupportMessage!
 
   """
