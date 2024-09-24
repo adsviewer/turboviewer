@@ -41,3 +41,10 @@ fragment UserFields on User {
     }
   }
 }
+
+mutation sendFeedback($type: FeedbackTypeEnum!, $message: String!) {
+  sendFeedback(type: $type, message: $message) {
+    type
+    message
+  }
+}

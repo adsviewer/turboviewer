@@ -17,7 +17,7 @@ export default function SettingsButton(): ReactNode {
     <Group justify="center">
       {/* Icon Button */}
       <Tooltip label={t('title')}>
-        <ActionIcon onClick={open} variant="default" size={35} aria-label="Settings">
+        <ActionIcon onClick={open} variant="default" size={35}>
           <IconSettings />
         </ActionIcon>
       </Tooltip>

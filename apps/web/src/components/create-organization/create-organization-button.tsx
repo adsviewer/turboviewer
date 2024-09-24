@@ -84,7 +84,6 @@ export default function CreateOrganizationButton(): ReactNode {
           onClick={open}
           variant="default"
           size={35}
-          aria-label="Create Organization"
         >
           <IconPlus />
         </ActionIcon>

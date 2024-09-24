@@ -120,6 +120,16 @@
     "changeLanguage": "Taal wijzigen",
     "changeColorScheme": "Kleurenthema"
   },
+  "feedback": {
+    "title": "Feedback",
+    "category": "Categorie",
+    "message": "Bericht",
+    "messageHint": "We waarderen je feedback! Deel hier je gedachten, suggesties of problemen met ons.",
+    "bugReport": "Bugrapport",
+    "featureSuggestion": "Functievoorstel",
+    "other": "Overig",
+    "successMessage": "Bedankt voor je feedback! Ons team zal je opmerkingen zorgvuldig bekijken en evalueren."
+  },
   "authentication": {
     "noAccount": "Heb je geen account?",
     "alreadyHaveAccount": "Heb je al een account?",

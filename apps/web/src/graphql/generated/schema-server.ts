@@ -1368,6 +1368,16 @@ export type UserFieldsFragment = {
   } | null;
 };
 
+export type SendFeedbackMutationVariables = Exact<{
+  type: FeedbackTypeEnum;
+  message: Scalars['String']['input'];
+}>;
+
+export type SendFeedbackMutation = {
+  __typename: 'Mutation';
+  sendFeedback: { __typename: 'Feedback'; type: FeedbackTypeEnum; message: string };
+};
+
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
@@ -1692,6 +1702,14 @@ export const MeDocument = gql`
   }
   ${UserFieldsFragmentDoc}
 `;
+export const SendFeedbackDocument = gql`
+  mutation sendFeedback($type: FeedbackTypeEnum!, $message: String!) {
+    sendFeedback(type: $type, message: $message) {
+      type
+      message
+    }
+  }
+`;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
@@ -1912,6 +1930,13 @@ export function getSdk<C>(requester: Requester<C>) {
     },
     me(variables?: MeQueryVariables, options?: C): Promise<MeQuery> {
       return requester<MeQuery, MeQueryVariables>(MeDocument, variables, options) as Promise<MeQuery>;
+    },
+    sendFeedback(variables: SendFeedbackMutationVariables, options?: C): Promise<SendFeedbackMutation> {
+      return requester<SendFeedbackMutation, SendFeedbackMutationVariables>(
+        SendFeedbackDocument,
+        variables,
+        options,
+      ) as Promise<SendFeedbackMutation>;
     },
   };
 }
