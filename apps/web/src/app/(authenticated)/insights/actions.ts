@@ -23,7 +23,7 @@ export interface InsightsParams {
   account?: string;
   adId?: string;
   device?: DeviceEnum;
-  publisher?: PublisherEnum;
+  publisher?: PublisherEnum[];
   position?: InsightsPosition;
   interval?: InsightsInterval;
   fetchPreviews?: string;
