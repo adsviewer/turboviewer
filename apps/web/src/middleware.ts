@@ -91,9 +91,16 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(signInUrl);
   }
 
-  // (Insights only) If page is loaded without any query params, set the following initial group filters
+  // (Insights only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
     const newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
+    const redirectUrl = new URL(newURL, request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // (Summary only) If page is loaded without any query params, set the following initial params
+  if (request.nextUrl.pathname === '/summary' && !request.nextUrl.search) {
+    const newURL = `/summary?${urlKeys.fetchPreviews}=true`;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }

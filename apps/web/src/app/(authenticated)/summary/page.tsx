@@ -5,6 +5,7 @@ import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, type ReactNode } from 'react';
 import { logger } from '@repo/logger';
+import { notifications } from '@mantine/notifications';
 import { insightsAtom } from '@/app/atoms/insights-atoms';
 import {
   InsightsColumnsGroupBy,
@@ -13,9 +14,9 @@ import {
   PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import InsightsGrid from '@/components/insights/insights-grid';
-import getInsights, { type SearchParams } from '../insights/actions';
+import getInsights, { type InsightsParams } from '../insights/actions';
 
-const TOP_ADS_PARAMS: SearchParams = {
+const TOP_ADS_INITIAL_PARAMS: InsightsParams = {
   orderBy: InsightsColumnsOrderBy.impressions_abs,
   pageSize: 3,
   groupedBy: [InsightsColumnsGroupBy.adId],
@@ -25,18 +26,25 @@ const TOP_ADS_PARAMS: SearchParams = {
 
 export default function Summary(): ReactNode {
   const t = useTranslations('summary');
+  const tGeneric = useTranslations('generic');
   const setInsights = useSetAtom(insightsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
   useEffect(() => {
-    logger.info(TOP_ADS_PARAMS);
+    const topAdsParams = { ...TOP_ADS_INITIAL_PARAMS };
+
     setIsPending(true);
     setInsights([]);
-    void getInsights(TOP_ADS_PARAMS)
+    void getInsights(topAdsParams)
       .then((res) => {
-        setInsights(res.insights.edges);
-        setIsPending(true);
-        logger.info(res.insights.edges);
+        if (!res.success) {
+          notifications.show({
+            title: tGeneric('error'),
+            message: String(res.error),
+            color: 'red',
+          });
+        }
+        if (res.data) setInsights(res.data.insights.edges);
       })
       .catch((error: unknown) => {
         logger.error(error);
@@ -44,7 +52,7 @@ export default function Summary(): ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [setInsights]);
+  }, [setInsights, tGeneric]);
 
   return (
     <Flex direction="column">
