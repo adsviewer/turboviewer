@@ -1,12 +1,13 @@
 'use client';
 
-import { Flex, Title } from '@mantine/core';
-import { useSetAtom } from 'jotai';
+import { type ComboboxItem, Flex, Select, Title } from '@mantine/core';
+import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState, type ReactNode } from 'react';
+import { startTransition, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
-import { insightsAtom } from '@/app/atoms/insights-atoms';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
@@ -14,27 +15,74 @@ import {
   PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import InsightsGrid from '@/components/insights/insights-grid';
+import { addOrReplaceURLParams, isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
 import getInsights, { type InsightsParams } from '../insights/actions';
+
+const INITIAL_ORDER_BY_VALUE = InsightsColumnsOrderBy.impressions_abs;
 
 const TOP_ADS_INITIAL_PARAMS: InsightsParams = {
   orderBy: InsightsColumnsOrderBy.impressions_abs,
   pageSize: 3,
-  groupedBy: [InsightsColumnsGroupBy.adId],
+  groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
   order: OrderBy.desc,
-  publisher: PublisherEnum.Facebook,
+  publisher: [
+    PublisherEnum.Facebook,
+    PublisherEnum.AudienceNetwork,
+    PublisherEnum.GlobalAppBundle,
+    PublisherEnum.Instagram,
+    PublisherEnum.LinkedIn,
+    PublisherEnum.Messenger,
+    PublisherEnum.Pangle,
+    PublisherEnum.TikTok,
+    PublisherEnum.Unknown,
+  ], // temporarily for ALL publishers, later we'll switch to a per integration logic once BE is done!
 };
 
 export default function Summary(): ReactNode {
   const t = useTranslations('summary');
+  const tInsights = useTranslations('insights');
   const tGeneric = useTranslations('generic');
-  const setInsights = useSetAtom(insightsAtom);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
+
+  const resetInsightsTopAds = useCallback((): void => {
+    setInsightsTopAds([]);
+  }, [setInsightsTopAds]);
+
+  const getOrderByValue = (): string => {
+    if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
+      return InsightsColumnsOrderBy.impressions_rel;
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel))
+      return InsightsColumnsOrderBy.spend_rel;
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs))
+      return InsightsColumnsOrderBy.spend_abs;
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel))
+      return InsightsColumnsOrderBy.cpm_rel;
+    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
+      return InsightsColumnsOrderBy.cpm_abs;
+    return INITIAL_ORDER_BY_VALUE; // default
+  };
+
+  const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
+    resetInsightsTopAds();
+    const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderBy, option.value);
+    startTransition(() => {
+      router.replace(newURL);
+    });
+  };
 
   useEffect(() => {
     const topAdsParams = { ...TOP_ADS_INITIAL_PARAMS };
+    const orderByValue = searchParams.get(urlKeys.orderBy);
+    topAdsParams.orderBy = orderByValue ? (orderByValue as InsightsColumnsOrderBy) : INITIAL_ORDER_BY_VALUE;
 
+    resetInsightsTopAds();
+
+    // Get top ads' insights
     setIsPending(true);
-    setInsights([]);
     void getInsights(topAdsParams)
       .then((res) => {
         if (!res.success) {
@@ -43,8 +91,9 @@ export default function Summary(): ReactNode {
             message: String(res.error),
             color: 'red',
           });
+          return;
         }
-        if (res.data) setInsights(res.data.insights.edges);
+        setInsightsTopAds(res.data.insights.edges);
       })
       .catch((error: unknown) => {
         logger.error(error);
@@ -52,12 +101,35 @@ export default function Summary(): ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [setInsights, tGeneric]);
+  }, [resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric]);
 
   return (
     <Flex direction="column">
       <Title mb="md">{t('topAds')}</Title>
-      <InsightsGrid isPending={isPending} />
+      <Flex align="flex-end" gap="md" wrap="wrap" mb="md">
+        <Select
+          description={tInsights('orderBy')}
+          data={[
+            { value: InsightsColumnsOrderBy.spend_rel, label: `${tInsights('spent')} (${tInsights('relative')})` },
+            {
+              value: InsightsColumnsOrderBy.impressions_rel,
+              label: `${tInsights('impressions')} (${tInsights('relative')})`,
+            },
+            { value: InsightsColumnsOrderBy.cpm_rel, label: `CPM (${tInsights('relative')})` },
+            { value: InsightsColumnsOrderBy.spend_abs, label: tInsights('spent') },
+            { value: InsightsColumnsOrderBy.impressions_abs, label: tInsights('impressions') },
+            { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
+          ]}
+          value={getOrderByValue()}
+          onChange={handleOrderByChange}
+          allowDeselect={false}
+          comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+          scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+          maw={150}
+          disabled={isPending}
+        />
+      </Flex>
+      <InsightsGrid insights={insightsTopAds} isPending={isPending} />
     </Flex>
   );
 }

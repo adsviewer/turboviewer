@@ -3,18 +3,17 @@
 import { Text, SimpleGrid } from '@mantine/core';
 import { type Key, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { useAtomValue } from 'jotai/index';
 import LoaderCentered from '@/components/misc/loader-centered';
-import { insightsAtom } from '@/app/atoms/insights-atoms';
+import { type InsightsQuery } from '@/graphql/generated/schema-server';
 import InsightCard from './insight-card';
 
 interface PropsType {
   isPending: boolean;
+  insights: InsightsQuery['insights']['edges'];
 }
 
 export default function InsightsGrid(props: PropsType): ReactNode {
   const t = useTranslations('insights');
-  const insights = useAtomValue(insightsAtom);
 
   return (
     <>
@@ -22,7 +21,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
       {props.isPending ? <LoaderCentered type="dots" /> : null}
 
       {/* Empty insights data */}
-      {!props.isPending && !insights.length ? (
+      {!props.isPending && !props.insights.length ? (
         <Text c="dimmed" ta="center">
           {t('noResultsFound')}
         </Text>
@@ -30,8 +29,8 @@ export default function InsightsGrid(props: PropsType): ReactNode {
 
       {/* Render insights */}
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} style={{ display: 'relative' }}>
-        {insights.length
-          ? insights.map((insight) => (
+        {props.insights.length
+          ? props.insights.map((insight) => (
               <InsightCard
                 key={insight.id as Key}
                 heading={insight.publisher ?? t('insight')}
