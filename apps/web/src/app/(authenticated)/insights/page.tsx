@@ -9,7 +9,7 @@ import { notifications } from '@mantine/notifications';
 import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
-import InsightsGrid from './components/insights-grid';
+import InsightsGrid from '../../../components/insights/insights-grid';
 import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
 import Graphics from './components/graphics';

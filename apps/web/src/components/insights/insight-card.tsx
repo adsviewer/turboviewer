@@ -49,7 +49,7 @@ interface Datapoint {
   cpm: bigint;
 }
 
-export default function InsightsGrid(props: InsightCardProps): ReactNode {
+export default function InsightCard(props: InsightCardProps): ReactNode {
   const format = useFormatter();
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');

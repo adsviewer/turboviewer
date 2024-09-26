@@ -69,9 +69,9 @@
       "selectPublishers": "Select publishers",
       "groupBy": "Group By",
       "account": "Account",
-      "adId": "Ad Id",
-      "adSetId": "Ad Set Id",
-      "campaignId": "Campaign Id",
+      "adId": "Ad ID",
+      "adSetId": "Ad Set ID",
+      "campaignId": "Campaign ID",
       "device": "Device",
       "date": "Date",
       "publisher": "Publisher",
@@ -94,7 +94,8 @@
     }
   },
   "summary": {
-    "title": "Summary"
+    "title": "Summary",
+    "topAds": "Top Ads"
   },
   "integrations": {
     "title": "Integrations",
