@@ -1276,6 +1276,7 @@ export type UpdateUserMutation = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
+      tier: Tier;
       integrations: Array<{
         __typename: 'Integration';
         status: IntegrationStatus;
@@ -1309,6 +1310,7 @@ export type MeQuery = {
       name: string;
       isRoot: boolean;
       parentId?: string | null;
+      tier: Tier;
       integrations: Array<{
         __typename: 'Integration';
         status: IntegrationStatus;
@@ -1338,6 +1340,7 @@ export type UserFieldsFragment = {
     name: string;
     isRoot: boolean;
     parentId?: string | null;
+    tier: Tier;
     integrations: Array<{
       __typename: 'Integration';
       status: IntegrationStatus;
@@ -1367,6 +1370,7 @@ export const UserFieldsFragmentDoc = gql`
       name
       isRoot
       parentId
+      tier
       integrations {
         status
         type

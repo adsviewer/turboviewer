@@ -4,12 +4,15 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { SimpleGrid, Transition } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { tierConstraints } from '@repo/mappings';
+import { useAtomValue } from 'jotai';
 import {
   type IntegrationsQuery,
   IntegrationStatus,
   IntegrationType,
   type SettingsChannelsQuery,
 } from '@/graphql/generated/schema-server';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
 import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
 import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
@@ -70,6 +73,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
   const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [integrationsData, setIntegrationsData] = useState<IntegrationsDataType>(initialIntegrationsData);
+  const userDetails = useAtomValue(userDetailsAtom);
 
   const updateIntegrationsData = useCallback(() => {
     const newIntegrationsData = { ...initialIntegrationsData };
@@ -85,6 +89,17 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
       setIntegrationsData(newIntegrationsData);
     }
   }, [props.metadata]);
+
+  const allowNewConnectionBasedOnTier = (): boolean => {
+    if (userDetails.currentOrganization?.tier) {
+      if (
+        userDetails.currentOrganization.integrations.filter((i) => i.status === IntegrationStatus.Connected).length >=
+        tierConstraints[userDetails.currentOrganization.tier].maxIntegrations
+      )
+        return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
     updateIntegrationsData();
@@ -143,6 +158,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
                   isConnected={isIntegrationConnected(integration.status)}
                   isAvailable={isIntegrationAvailable(integration.status)}
                   isErrored={isIntegrationErrored(integration.status)}
+                  allowNewConnection={allowNewConnectionBasedOnTier()}
                   image={<Image src={imageSrc} alt={title} width={100} priority />}
                   adCount={integrationsData[integration.type].adCount}
                   lastSyncedAt={integrationsData[integration.type].lastSyncedAt}

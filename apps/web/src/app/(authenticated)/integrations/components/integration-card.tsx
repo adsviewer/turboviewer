@@ -1,6 +1,19 @@
 'use client';
 
-import { Badge, Button, Card, Flex, Group, Text, useMantineTheme, Modal, Alert, Input, Tooltip } from '@mantine/core';
+import {
+  Badge,
+  Button,
+  Card,
+  Flex,
+  Group,
+  Text,
+  useMantineTheme,
+  Modal,
+  Alert,
+  Input,
+  Tooltip,
+  Container,
+} from '@mantine/core';
 import { useDisclosure, useInputState } from '@mantine/hooks';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
@@ -27,6 +40,7 @@ interface IntegrationProps {
   adCount: number;
   lastSyncedAt: Date | null | undefined;
   status: IntegrationStatus;
+  allowNewConnection: boolean;
 }
 
 export default function IntegrationCard(props: IntegrationProps): ReactNode {
@@ -72,6 +86,22 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
   const renderIntegrationButton = (): ReactNode => {
     if (props.isAvailable) {
       if (!props.isConnected) {
+        // Disallow new connection
+        if (!props.allowNewConnection) {
+          return (
+            <Container mt="lg" w="100%" p={0}>
+              <Tooltip label={t('maxIntegrationsWarning')}>
+                <Link href={props.authUrl ?? ''} passHref>
+                  <Button w="100%" component="a" disabled>
+                    {t('connect')}
+                  </Button>
+                </Link>
+              </Tooltip>
+            </Container>
+          );
+        }
+
+        // Allow new connection
         return (
           <Tooltip
             label={tGeneric('accessOrgAdminRoot')}
@@ -93,6 +123,8 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
           </Tooltip>
         );
       }
+
+      // Buttons for already connected integrations
       return (
         <Flex direction="column" gap="xs" mt="xs">
           <AdAccountsButton channel={props.integrationType} integrationTitle={props.title} />
