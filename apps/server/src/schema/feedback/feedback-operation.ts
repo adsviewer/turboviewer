@@ -1,5 +1,5 @@
 import { prisma } from '@repo/database';
-import { FireAndForget } from '@repo/utils';
+import { FireAndForget, MessageSchema } from '@repo/utils';
 import { builder } from '../builder';
 import { sendFeedbackReceivedEmail } from '../../email';
 import { FeedbackDto, FeedbackType } from './feedback-types';
@@ -11,7 +11,7 @@ builder.mutationFields((t) => ({
     nullable: false,
     type: FeedbackDto,
     args: {
-      message: t.arg.string({ required: true }),
+      message: t.arg.string({ required: true, validate: { schema: MessageSchema } }),
       type: t.arg({
         type: FeedbackType,
         required: true,
