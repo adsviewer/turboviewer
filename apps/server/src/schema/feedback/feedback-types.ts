@@ -1,18 +1,16 @@
+import { FeedbackTypeEnum } from '@repo/database';
 import { builder } from '../builder';
 
-export const FeedbackTypeEnum = builder.enumType('FeedbackType', {
-  values: {
-    BUG_REPORT: { description: 'Report a bug' },
-    FEATURE_SUGGESTION: { description: 'Suggest a feature' },
-    OTHER: { description: 'Other feedback' },
-  },
+export const FeedbackType = builder.enumType(FeedbackTypeEnum, {
+  name: 'FeedbackTypeEnum',
 });
 
-export const FeedbackDto = builder.simpleObject('Feedback', {
+export const FeedbackDto = builder.prismaObject('Feedback', {
   fields: (t) => ({
-    type: t.field({
-      type: FeedbackTypeEnum,
+    type: t.expose('type', {
+      type: FeedbackType,
+      nullable: false,
     }),
-    message: t.string({ nullable: false }),
+    message: t.exposeString('message', { nullable: false }),
   }),
 });

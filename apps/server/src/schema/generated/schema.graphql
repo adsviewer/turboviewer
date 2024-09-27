@@ -271,23 +271,12 @@ interface Error {
 
 type Feedback {
   message: String!
-  type: FeedbackType
+  type: FeedbackTypeEnum!
 }
 
-enum FeedbackType {
-  """
-  Report a bug
-  """
+enum FeedbackTypeEnum {
   BUG_REPORT
-
-  """
-  Suggest a feature
-  """
   FEATURE_SUGGESTION
-
-  """
-  Other feedback
-  """
   OTHER
 }
 
@@ -631,7 +620,7 @@ type Mutation {
   removeUserFromOrganization(userId: String!): Boolean!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
-  sendFeedback(message: String!, type: FeedbackType!): Feedback!
+  sendFeedback(message: String!, type: FeedbackTypeEnum!): Feedback!
   sendLandingPageSupportMessage(args: LandingPageSupportMessageInput!): LandingPageSupportMessage!
 
   """

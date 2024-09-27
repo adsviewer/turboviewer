@@ -300,15 +300,12 @@ export type Error = {
 export type Feedback = {
   __typename: 'Feedback';
   message: Scalars['String']['output'];
-  type?: Maybe<FeedbackType>;
+  type: FeedbackTypeEnum;
 };
 
-export enum FeedbackType {
-  /** Report a bug */
+export enum FeedbackTypeEnum {
   BUG_REPORT = 'BUG_REPORT',
-  /** Suggest a feature */
   FEATURE_SUGGESTION = 'FEATURE_SUGGESTION',
-  /** Other feedback */
   OTHER = 'OTHER',
 }
 
@@ -689,7 +686,7 @@ export type MutationResetPasswordArgs = {
 
 export type MutationSendFeedbackArgs = {
   message: Scalars['String']['input'];
-  type: FeedbackType;
+  type: FeedbackTypeEnum;
 };
 
 export type MutationSendLandingPageSupportMessageArgs = {

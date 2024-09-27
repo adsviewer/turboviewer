@@ -80,19 +80,21 @@ model User {
   @@map("users")
 }
 
-enum FeedbackType {
+enum FeedbackTypeEnum {
   BUG_REPORT
   FEATURE_SUGGESTION
   OTHER
 }
 
 model Feedback {
-  id        String       @id @default(cuid())
-  user      User         @relation(fields: [userId], references: [id])
-  userId    String
-  type      FeedbackType
+  id        String           @id @default(cuid())
+  user      User             @relation(fields: [userId], references: [id])
+  userId    String           @map("user_id")
+  type      FeedbackTypeEnum
   message   String
-  createdAt DateTime     @default(now()) @map("created_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  @@map("feedbacks")
 }
 
 enum LoginProviderEnum {
