@@ -155,7 +155,6 @@ export default function OrderFilters(): React.ReactNode {
 
   const handleAdPreviewChange = (e: ChangeEvent<HTMLInputElement>): void => {
     resetInsights();
-    let newURL: string;
     const newURL = e.target.checked
       ? addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews, 'true')
       : addOrReplaceURLParams(pathname, searchParams, urlKeys.fetchPreviews);
