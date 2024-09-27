@@ -10,6 +10,7 @@ on:
       - packages/**
       - infrastructure/**
       - .github/workflows/**
+      - Service.Dockerfile
 
 jobs:
   build_deploy:

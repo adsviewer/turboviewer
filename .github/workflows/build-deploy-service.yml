@@ -93,7 +93,8 @@ jobs:
             TURBO_TEAM=${{ secrets.turbo_team }}
             TURBO_TOKEN=${{ secrets.turbo_token }}
             SENTRY_AUTH_TOKEN=${{ secrets.sentry_auth_token }}
-          file: ./apps/${{ inputs.service_name }}/Dockerfile
+            APP_NAME=${{ inputs.service_name }}
+          file: ./Service.Dockerfile
           platforms: ${{ matrix.platform }}
           cache-from: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache
           cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache,mode=max
