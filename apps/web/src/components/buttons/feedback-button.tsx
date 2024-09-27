@@ -9,9 +9,9 @@ import { useTranslations } from 'next-intl';
 import { useForm, zodResolver } from '@mantine/form';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
+import { SendFeedbackSchema } from '@repo/utils';
 import { FeedbackTypeEnum, type SendFeedbackMutationVariables } from '@/graphql/generated/schema-server';
 import { sendFeedback } from '@/app/(authenticated)/actions';
-import { SendFeedbackSchema } from '@/util/schemas/user-schemas';
 
 export default function FeedbackButton(): ReactNode {
   const t = useTranslations('feedback');
