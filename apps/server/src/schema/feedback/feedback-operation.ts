@@ -25,6 +25,7 @@ builder.mutationFields((t) => ({
       fireAndForget.add(() => sendFeedbackReceivedEmail(user.email, user.firstName, user.lastName));
 
       return await prisma.feedback.create({
+        ...query,
         data: {
           userId: ctx.currentUserId,
           message,

@@ -299,8 +299,11 @@ export type Error = {
 
 export type Feedback = {
   __typename: 'Feedback';
+  createdAt: Scalars['Date']['output'];
   message: Scalars['String']['output'];
   type: FeedbackTypeEnum;
+  user: User;
+  userId: Scalars['ID']['output'];
 };
 
 export enum FeedbackTypeEnum {

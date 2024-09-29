@@ -1,5 +1,6 @@
 import { FeedbackTypeEnum } from '@repo/database';
 import { builder } from '../builder';
+import { UserDto } from '../user/user-types';
 
 export const FeedbackType = builder.enumType(FeedbackTypeEnum, {
   name: 'FeedbackTypeEnum',
@@ -12,5 +13,8 @@ export const FeedbackDto = builder.prismaObject('Feedback', {
       nullable: false,
     }),
     message: t.exposeString('message', { nullable: false }),
+    createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
+    userId: t.exposeID('userId', { nullable: false }),
+    user: t.relation('user', { nullable: false, type: UserDto }),
   }),
 });
