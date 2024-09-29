@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useForm, zodResolver } from '@mantine/form';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
-import { SendFeedbackSchema } from '@repo/utils';
+import { sendFeedbackSchema } from '@repo/utils';
 import { FeedbackTypeEnum, type SendFeedbackMutationVariables } from '@/graphql/generated/schema-server';
 import { sendFeedback } from '@/app/(authenticated)/actions';
 
@@ -24,7 +24,7 @@ export default function FeedbackButton(): ReactNode {
       type: FeedbackTypeEnum.FEATURE_SUGGESTION,
       message: '',
     },
-    validate: zodResolver(SendFeedbackSchema),
+    validate: zodResolver(sendFeedbackSchema),
   });
 
   const FEEDBACK_TYPE_DATA = [
