@@ -24,6 +24,7 @@ import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
 import OrganizationSelect from '@/components/dropdowns/organization-select/organization-select';
 import CreateOrganizationButton from '@/components/create-organization/create-organization-button';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import FeedbackButton from '@/components/buttons/feedback-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -68,6 +69,8 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             <OrganizationSelect />
             <CreateOrganizationButton />
             <SettingsButton />
+            <Divider orientation="vertical" />
+            <FeedbackButton />
           </Flex>
         </Flex>
       </AppShellHeader>

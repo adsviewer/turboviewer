@@ -120,6 +120,16 @@
     "changeLanguage": "Change language",
     "changeColorScheme": "Color theme"
   },
+  "feedback": {
+    "title": "Feedback",
+    "category": "Category",
+    "message": "Message",
+    "messageHint": "We value your feedback! Share your thoughts, suggestions, or issues with us here.",
+    "bugReport": "Bug Report",
+    "featureSuggestion": "Feature Suggestion",
+    "other": "Other",
+    "successMessage": "Thank you for your feedback! Our team is carefully going to review and evaluate your comments."
+  },
   "authentication": {
     "noAccount": "Don't have an account?",
     "alreadyHaveAccount": "Already have an account?",

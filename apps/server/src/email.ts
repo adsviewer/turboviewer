@@ -296,3 +296,33 @@ const createSignupEmailBody = (data: SignupEmailData) => {
     </body>
     </html>`;
 };
+
+export const sendFeedbackReceivedEmail = async (email: string, firstName?: string, lastName?: string) => {
+  logger.info(`User feedback from ${email} `);
+  const command = await client
+    .send(
+      new SendEmailCommand({
+        Destination: {
+          ToAddresses: [email],
+        },
+        Source: `The AdsViewer Team <hello@${baseDomain()}>`,
+        Message: {
+          Subject: {
+            Data: 'You have been added to an AdsViewer organization!',
+          },
+          Body: {
+            Html: {
+              Data: `<p>${[
+                `Hi${firstName ? ` ${firstName}` : ''}${lastName ? ` ${lastName}` : ''},`,
+                `We have received your feedback. Thank you`,
+              ].join('<br />')}</p>`,
+            },
+          },
+        },
+      }),
+    )
+    .catch((err: unknown) => {
+      logger.error(err);
+    });
+  logger.info(JSON.stringify(command));
+};
