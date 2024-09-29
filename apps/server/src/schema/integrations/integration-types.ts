@@ -95,7 +95,7 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     adAccounts: t.relation('adAccounts', {
       nullable: false,
       ...offspringOrgFieldProps,
-      query: (args, ctx) =>
+      query: (_args, ctx) =>
         ctx.isAdmin
           ? {}
           : {
@@ -182,7 +182,7 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
     integration: t.relation('integration', { nullable: false }),
     organizations: t.relation('organizations', {
       nullable: false,
-      query: (args, ctx) =>
+      query: (_args, ctx) =>
         ctx.isAdmin
           ? {}
           : {

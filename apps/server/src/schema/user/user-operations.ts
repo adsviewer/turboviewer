@@ -29,7 +29,7 @@ builder.queryFields((t) => ({
   me: t.withAuth({ authenticated: true, emailUnconfirmed: true }).prismaField({
     type: UserDto,
     nullable: false,
-    resolve: async (query, root, args, ctx, _info) => {
+    resolve: async (query, _root, _args, ctx, _info) => {
       return await prisma.user.findUniqueOrThrow({
         ...query,
         where: { id: ctx.currentUserId },
@@ -152,7 +152,7 @@ builder.mutationFields((t) => ({
       token: t.arg.string({ required: false }),
     },
     validate: (args) => Boolean(loginSchema.parse(args)),
-    resolve: async (root, args, _ctx, _info) => {
+    resolve: async (_root, args, _ctx, _info) => {
       const user = await prisma.user.findUnique({
         ...userWithRoles,
         where: { email: args.email },
@@ -182,7 +182,7 @@ builder.mutationFields((t) => ({
     },
     validate: (args) =>
       Boolean(updateUserSchema.parse(args)) && Boolean(args.oldPassword) === Boolean(args.newPassword),
-    resolve: async (query, root, args, ctx, _info) => {
+    resolve: async (query, _root, args, ctx, _info) => {
       if (args.oldPassword && args.newPassword) {
         const user = await prisma.user.findUnique({
           where: { id: ctx.currentUserId },
@@ -215,7 +215,7 @@ builder.mutationFields((t) => ({
     args: {
       email: t.arg.string({ required: true, validate: { email: true } }),
     },
-    resolve: async (root, args, _ctx, _info) => {
+    resolve: async (_root, args, _ctx, _info) => {
       const forgotPasswordDurationSec = 60 * 60 * 24; // 1 day
 
       const user = await prisma.user.findUnique({
