@@ -108,7 +108,7 @@ export function decryptAesGcm<T extends object = never>(
 
     try {
       return JSON.parse(decrypted) as T;
-    } catch (error) {
+    } catch (_error) {
       return decrypted;
     }
   } catch (error) {
