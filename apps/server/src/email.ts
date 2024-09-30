@@ -308,7 +308,7 @@ export const sendFeedbackReceivedEmail = async (email: string, firstName?: strin
         Source: `The AdsViewer Team <hello@${baseDomain()}>`,
         Message: {
           Subject: {
-            Data: 'You have been added to an AdsViewer organization!',
+            Data: 'We have received your feedback!',
           },
           Body: {
             Html: {
