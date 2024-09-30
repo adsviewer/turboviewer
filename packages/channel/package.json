@@ -35,6 +35,7 @@
     "@repo/organization": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
+    "change-case": "^5.4.4",
     "lodash": "^4.17.21",
     "zod": "^3.23.8"
   },

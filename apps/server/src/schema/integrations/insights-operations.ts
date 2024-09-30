@@ -1,31 +1,27 @@
-import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, type PublisherEnum } from '@repo/database';
-import { FireAndForget, groupBy as groupByUtil, isAError } from '@repo/utils';
+import { prisma } from '@repo/database';
+import { groupBy as groupByUtil, isAError } from '@repo/utils';
 import {
   adWithAdAccount,
   getChannel,
   getDecryptedIntegration,
-  getInsightsCache,
+  getInsightsHelper,
+  type GroupedInsightsWithEdges,
   iFramePerInsight,
   IFrameTypeEnum,
   type IFrameWithType,
-  invokeChannelIngress,
-  setInsightsCache,
+  invokeChannelIngress
 } from '@repo/channel';
-import * as changeCase from 'change-case';
 import { logger } from '@repo/logger';
 import { builder } from '../builder';
-import { groupedInsights, insightsDatapoints } from '../../utils/insights-query-builder';
+import { insightsDatapoints } from '../../utils/insights-datapoint-query-builder';
 import {
   AdDto,
   CurrencyEnumDto,
   DeviceEnumDto,
-  FilterInsightsInput,
-  type InsightsColumnsGroupByType,
+  FilterInsightsInputDto,
   InsightsDatapointsInput,
   PublisherEnumDto,
 } from './integration-types';
-
-const fireAndForget = new FireAndForget();
 
 builder.queryFields((t) => ({
   lastThreeMonthsAds: t.withAuth({ isInOrg: true }).prismaField({
@@ -50,69 +46,10 @@ builder.queryFields((t) => ({
     type: GroupedInsightsDto,
     nullable: false,
     args: {
-      filter: t.arg({ type: FilterInsightsInput, required: true }),
+      filter: t.arg({ type: FilterInsightsInputDto, required: true }),
     },
     resolve: async (_root, args, ctx, _info) => {
-      const redisValue = await getInsightsCache<GroupedInsightsType>(ctx.organizationId, args.filter);
-      if (redisValue) return redisValue;
-
-      const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.filter.groupBy ?? []), 'currency'];
-
-      const insightsRaw: Record<string, never>[] = await prisma.$queryRawUnsafe(
-        groupedInsights(args.filter, ctx.organizationId, ctx.acceptedLocale),
-      );
-      const insightsTransformed = insightsRaw.map((obj) => {
-        const newObj: Record<string, never> = {};
-        for (const key in obj) {
-          if (key === 'interval_start') {
-            newObj.date = obj[key];
-          } else {
-            newObj[changeCase.camelCase(key)] = obj[key];
-          }
-        }
-        return newObj;
-      }) as unknown as (Insight & { cpm: number; campaignId: string; adSetId: string })[];
-
-      const ret: {
-        id: string;
-        adAccountId?: string;
-        adId?: string;
-        position?: string;
-        device?: DeviceEnum;
-        publisher?: PublisherEnum;
-        currency: CurrencyEnum;
-        datapoints: { spend: bigint; impressions: bigint; date: Date; cpm: bigint }[];
-      }[] = [];
-      const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
-        return groupBy.map((group) => insight[group]).join('-');
-      });
-      for (const [_, value] of insightsGrouped) {
-        if (value.length > 0) {
-          const valueWithoutDatapoints = { ...value[0], date: undefined, impressions: undefined, spend: undefined };
-          ret.push({
-            ...valueWithoutDatapoints,
-            id: groupBy.map((group) => value[0][group]).join('-'),
-            datapoints: value.map((v) => ({
-              spend: BigInt(v.spend),
-              impressions: BigInt(v.impressions),
-              date: v.date,
-              cpm: BigInt(Math.round(v.cpm)),
-            })),
-          });
-        }
-      }
-
-      const hasNext = ret.length > args.filter.pageSize;
-      if (hasNext) ret.pop();
-
-      const retVal = {
-        hasNext,
-        page: args.filter.page,
-        pageSize: args.filter.pageSize,
-        edges: ret,
-      };
-      fireAndForget.add(() => setInsightsCache(ctx.organizationId, args.filter, retVal));
-      return retVal;
+      return getInsightsHelper(args.filter, ctx.organizationId, ctx.acceptedLocale)
     },
   }),
 
@@ -225,13 +162,15 @@ export const PaginationDto = builder.simpleInterface('Pagination', {
   }),
 });
 
-const GroupedInsightsDto = builder.simpleObject('GroupedInsight', {
+const GroupedInsightsDto = builder.objectRef<GroupedInsightsWithEdges>('GroupedInsights').implement({
   interfaces: [PaginationDto],
   fields: (t) => ({
-    edges: t.field({ type: [GroupedInsightDto], nullable: false }),
+    edges: t.expose('edges', { type: [GroupedInsightDto], nullable: false }),
+    hasNext: t.exposeBoolean('hasNext', { nullable: false }),
+    page: t.exposeInt('page', { nullable: false }),
+    pageSize: t.exposeInt('pageSize', { nullable: false }),
   }),
 });
-type GroupedInsightsType = typeof GroupedInsightsDto.$inferType;
 
 const IFrameTypeEnumDTO = builder.enumType(IFrameTypeEnum, {
   name: 'IFrameType',
@@ -247,8 +186,7 @@ const IFrameDTO = builder.objectRef<IFrameWithType>('IFrame').implement({
 });
 
 const GroupedInsightDto = builder.simpleObject(
-  'GroupedInsights',
-  {
+'GroupedInsight', {
     fields: (t) => ({
       datapoints: t.field({ type: [InsightsDatapointsDto], nullable: false }),
       id: t.string({ nullable: false }),

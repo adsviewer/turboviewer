@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { deleteInsightsCache } from './insights-cache';
 import { getChannel } from './channel-helper';
 import { asyncReportChannels } from './report-process';
+import { getInsightsHelper } from './insights-helper';
 
 const refreshDataOf = async (integration: Integration, initial: boolean): Promise<void> => {
   await saveChannelData(integration, initial).catch((e: unknown) => {
@@ -59,6 +60,8 @@ export const refreshData = async ({
       await refreshDataOf(integration, initial);
       deleteInsightsCache(integration.organizationId);
     }
+
+    await getInsightsHelper()
   } else {
     await refreshDataAll(initial);
     deleteInsightsCache();

@@ -974,6 +974,9 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+      change-case:
+        specifier: ^5.4.4
+        version: 5.4.4
       lodash:
         specifier: ^4.17.21
         version: 4.17.21

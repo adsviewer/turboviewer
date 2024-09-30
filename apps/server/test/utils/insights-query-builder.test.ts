@@ -5,25 +5,27 @@ import { DeviceEnum, PublisherEnum } from '@repo/database';
 import { addInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
-  type InsightsDatapointsInputType,
-} from '../../src/schema/integrations/integration-types';
-import {
-  calculateDataPointsPerInterval,
-  getInsightsDateFrom,
-  getOrganizationalInsights,
-  groupedInsights,
-  insightsDatapoints,
-  intervalBeforeLast,
-  lastInterval,
-  orderColumnTrend,
-  orderColumnTrendAbsolute,
-  searchAdsToSQL,
-} from '../../src/utils/insights-query-builder';
-import {
   type InsightsSearchExpression,
   InsightsSearchField,
   InsightsSearchOperator,
-} from '../../src/contexts/insights';
+} from '@repo/channel-utils';
+import {
+calculateDataPointsPerInterval,
+getInsightsDateFrom,
+getOrganizationalInsights,
+groupedInsights,
+intervalBeforeLast,
+lastInterval,
+orderColumnTrend,
+orderColumnTrendAbsolute,
+searchAdsToSQL
+} from '@repo/channel'
+import {
+  type InsightsDatapointsInputType,
+} from '../../src/schema/integrations/integration-types';
+import {
+  insightsDatapoints,
+} from '../../src/utils/insights-datapoint-query-builder';
 
 const getNoEmptyLines = (str: string) =>
   str
