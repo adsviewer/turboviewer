@@ -18,7 +18,8 @@
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
     "clean": "rm -rf .turbo .next node_modules dist",
-    "update": "pnpm update --latest"
+    "update": "pnpm update --latest",
+    "test": "cross-env EXCHANGE_RATES_API_KEY=test node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-batch": "^3.658.1",
