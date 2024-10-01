@@ -21,14 +21,14 @@ import {
   searchAdsToSQL,
 } from '../src/insights-query-builder';
 
-const getNoEmptyLines = (str: string) =>
+const getNoEmptyLines = (str: string): string =>
   str
     .replace(/\n\s*\n/g, '\n')
     .split('\n')
     .map((l) => l.replace(/\s+/g, ' '))
     .join('\n');
 
-const assertSql = (actual: string, expected: string) => {
+const assertSql = (actual: string, expected: string): void => {
   const actualNoEmptyLines = getNoEmptyLines(actual);
   const expectedNoEmptyLines = getNoEmptyLines(expected);
   assert.strictEqual(actualNoEmptyLines, expectedNoEmptyLines);

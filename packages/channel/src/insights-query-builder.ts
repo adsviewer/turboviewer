@@ -1,7 +1,10 @@
 import * as changeCase from 'change-case';
 import { getCalendarDateDiffIn, type IntervalType, isDateWithinInterval } from '@repo/utils';
 import {
-  type FilterInsightsInputType, type InsightsSearchExpression, InsightsSearchOperator, type InsightsSearchTerm
+  type FilterInsightsInputType,
+  type InsightsSearchExpression,
+  InsightsSearchOperator,
+  type InsightsSearchTerm,
 } from '@repo/channel-utils';
 
 export const calculateDataPointsPerInterval = (
@@ -33,7 +36,7 @@ export const getInsightsDateFrom = (
   dateTo: Date | undefined | null,
   dataPointsPerInterval: number,
   interval: IntervalType,
-) => {
+): string => {
   const intervalMapping = (): string => {
     if (interval === 'quarter') {
       return '3 months';
@@ -171,7 +174,7 @@ export const intervalBeforeLast = (
                                              ${orderColumn === 'cpm' ? 'HAVING SUM(i.impressions) > 0' : ''})`;
 };
 
-const joinFn = (columns: string[], table: string, left: string) => {
+const joinFn = (columns: string[], table: string, left: string): string => {
   const right = abbreviateSnakeCase(table);
   return `JOIN ${table} ${right} ON ${columns.map((column) => `${left}.${column} = ${right}.${column}`).join(' AND ')}`;
 };
@@ -224,14 +227,14 @@ export const orderColumnTrendAbsolute = (
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
 
-const getInterval = (interval: string, dataPointsPerInterval: number) => {
+const getInterval = (interval: string, dataPointsPerInterval: number): string => {
   if (interval === 'quarter') {
     return `${String(dataPointsPerInterval * 3)} months`;
   }
   return `${String(dataPointsPerInterval)} ${interval}`; // Default case
 };
 
-export const groupedInsights = (args: FilterInsightsInputType, organizationId: string, locale: string) => {
+export const groupedInsights = (args: FilterInsightsInputType, organizationId: string, locale: string): string => {
   const dataPointsPerInterval = calculateDataPointsPerInterval(args.dateFrom, args.dateTo, args.interval, locale);
   const groupBy = [...(args.groupBy ?? []), 'currency'];
   const orderBy = getOrderByColumn(args.orderBy);
@@ -257,7 +260,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   return sql.replace(/\n\s*\n/g, '\n');
 };
 
-const abbreviateSnakeCase = (snakeCaseString: string) =>
+const abbreviateSnakeCase = (snakeCaseString: string): string =>
   snakeCaseString
     .split('_')
     .map((word) => word[0])
