@@ -140,7 +140,7 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
   };
 
   const getChartSeries = (): AreaChartSeries[] => {
-    if (searchParams.get(urlKeys.chartMetric) === ChartMetricsEnum.SPENT) {
+    if (searchParams.get(urlKeys.chartMetric) === ChartMetricsEnum.SpentCPM) {
       return [
         {
           yAxisId: 'left',
