@@ -102,7 +102,7 @@ export default function FeedbackButton(): ReactNode {
               minRows={6}
               maxRows={6}
             />
-            <Button type="submit" disabled={isPending || !form.isValid()}>
+            <Button type="submit" disabled={!form.isValid()} loading={isPending}>
               {tGeneric('submit')}
             </Button>
           </Flex>

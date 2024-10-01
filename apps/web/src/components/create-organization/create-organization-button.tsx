@@ -110,7 +110,7 @@ export default function CreateOrganizationButton(): ReactNode {
           <AddUsersModal setNewUsers={updateSelectedUsers} />
 
           <Flex>
-            <Button type="submit" disabled={isPending || !form.isDirty() || !form.values.name}>
+            <Button type="submit" disabled={!form.isDirty() || !form.values.name} loading={isPending}>
               {t('submit')}
             </Button>
           </Flex>

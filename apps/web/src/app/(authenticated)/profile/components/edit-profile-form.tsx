@@ -138,7 +138,7 @@ export default function EditProfileForm(props: PropsType): React.ReactNode {
           mb="md"
         />
         <Group mt="md">
-          <Button disabled={isPending || !form.isDirty()} type="submit" w={200}>
+          <Button disabled={!form.isDirty()} loading={isPending} type="submit" w={200}>
             {t('submit')}
           </Button>
         </Group>

@@ -71,7 +71,7 @@ export default function ForgotPasswordForm(): React.JSX.Element {
               required
               autoComplete="email"
             />
-            <Button type="submit" fullWidth mt="xl" disabled={isPending}>
+            <Button type="submit" fullWidth mt="xl" loading={isPending}>
               {t('sendResetLink')}!
             </Button>
           </form>

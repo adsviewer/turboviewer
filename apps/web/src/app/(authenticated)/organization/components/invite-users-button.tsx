@@ -241,7 +241,7 @@ export default function InviteUsersButton(props: PropsType): React.ReactNode {
             value={selectedRole}
             onChange={onRoleChanged}
           />
-          <Button color="blue" disabled={!emails.length || isPending} onClick={performUserInvites}>
+          <Button color="blue" disabled={!emails.length} loading={isPending} onClick={performUserInvites}>
             {t('invite')}
           </Button>
         </Flex>

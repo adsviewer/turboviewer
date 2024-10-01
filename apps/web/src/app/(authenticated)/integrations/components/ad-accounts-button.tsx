@@ -229,7 +229,8 @@ export default function AdAccountsButton(props: PropsType): ReactNode {
           <Button
             variant="filled"
             fullWidth
-            disabled={_.isEqual(adAccounts, initialAdAccounts) || isPending}
+            disabled={_.isEqual(adAccounts, initialAdAccounts)}
+            loading={isPending}
             onClick={handleSubmit}
           >
             {tGeneric('submit')}

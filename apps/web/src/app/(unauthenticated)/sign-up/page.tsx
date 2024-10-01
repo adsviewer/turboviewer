@@ -161,7 +161,7 @@ export default function SignUp(): React.JSX.Element {
                     required
                   />
                 </Group>
-                <Button type="submit" fullWidth mt="xl" disabled={isPending}>
+                <Button type="submit" fullWidth mt="xl" loading={isPending}>
                   {t('signUp')}!
                 </Button>
               </form>

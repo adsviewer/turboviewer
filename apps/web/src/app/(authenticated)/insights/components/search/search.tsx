@@ -675,7 +675,8 @@ export default function Search(props: PropsType): React.ReactNode {
           fullWidth
           leftSection={<IconSearch />}
           mt="sm"
-          disabled={props.isPending || !searchTerms.length}
+          disabled={!searchTerms.length}
+          loading={props.isPending}
           onClick={() => {
             handleAdvancedSearch();
           }}

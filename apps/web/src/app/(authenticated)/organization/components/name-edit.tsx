@@ -70,7 +70,8 @@ export default function NameEdit(props: PropsType): React.ReactNode {
         <Button
           type="submit"
           variant="outline"
-          disabled={(!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)) || props.isPending}
+          disabled={!isOrgAdmin(userDetails.allRoles) && !isOperator(userDetails.allRoles)}
+          loading={props.isPending}
         >
           {t('save')}
         </Button>
