@@ -82,8 +82,9 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SPENT)) return ChartMetricsEnum.SPENT;
-    return ChartMetricsEnum.IMPRESSIONS;
+    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))
+      return ChartMetricsEnum.SpentCPM;
+    return ChartMetricsEnum.ImpressionsCPM;
   };
 
   const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
@@ -281,10 +282,10 @@ export default function OrderFilters(): React.ReactNode {
               description={t('chartMetric')}
               placeholder="Pick value"
               data={[
-                { value: ChartMetricsEnum.IMPRESSIONS, label: t('impressions') },
-                { value: ChartMetricsEnum.SPENT, label: t('spent') },
+                { value: ChartMetricsEnum.ImpressionsCPM, label: t('impressions') },
+                { value: ChartMetricsEnum.SpentCPM, label: t('spent') },
               ]}
-              defaultValue={ChartMetricsEnum.IMPRESSIONS}
+              defaultValue={ChartMetricsEnum.ImpressionsCPM}
               value={getChartMetricValue()}
               onChange={handleChartMetricChange}
               allowDeselect={false}
