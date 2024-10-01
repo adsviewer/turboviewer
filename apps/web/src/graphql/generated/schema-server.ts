@@ -313,6 +313,8 @@ export enum FeedbackTypeEnum {
 }
 
 export type FilterInsightsInput = {
+  adAccountIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
@@ -985,6 +987,8 @@ export type AdAccountsQuery = {
 };
 
 export type InsightsQueryVariables = Exact<{
+  adAccountIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  adIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
@@ -1425,6 +1429,8 @@ export const AdAccountsDocument = gql`
 `;
 export const InsightsDocument = gql`
   query insights(
+    $adAccountIds: [String!]
+    $adIds: [String!]
     $dateFrom: Date
     $dateTo: Date
     $devices: [DeviceEnum!]
@@ -1440,6 +1446,8 @@ export const InsightsDocument = gql`
   ) {
     insights(
       filter: {
+        adAccountIds: $adAccountIds
+        adIds: $adIds
         dateFrom: $dateFrom
         dateTo: $dateTo
         devices: $devices

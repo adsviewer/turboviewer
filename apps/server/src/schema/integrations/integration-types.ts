@@ -356,6 +356,8 @@ export const InsightsSearchExpressionDto = builder
 
 export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
   fields: (t) => ({
+    adAccountIds: t.stringList({ required: false }),
+    adIds: t.stringList({ required: false }),
     dateFrom: t.field({ type: 'Date', required: false }),
     dateTo: t.field({ type: 'Date', required: false }),
     devices: t.field({ type: [DeviceEnumDto], required: false }),
