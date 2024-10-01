@@ -21,7 +21,7 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.659.0",
+    "@aws-sdk/client-lambda": "^3.637.0",
     "@repo/logger": "workspace:*",
     "@repo/mode": "workspace:*",
     "@repo/utils": "workspace:*",
@@ -31,7 +31,7 @@
     "@repo/database": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.7.4",
-    "typescript": "^5.6.2"
+    "@types/node": "^22.5.1",
+    "typescript": "^5.5.4"
   }
 }
