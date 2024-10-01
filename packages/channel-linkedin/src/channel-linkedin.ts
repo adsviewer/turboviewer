@@ -93,11 +93,13 @@ class LinkedIn implements ChannelInterface {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: env.LINKEDIN_APPLICATION_ID,
-        client_secret: env.LINKEDIN_APPLICATION_SECRET,
-        token: integration.accessToken,
-      }),
+      body: JSON.stringify(
+        new URLSearchParams({
+          client_id: env.LINKEDIN_APPLICATION_ID,
+          client_secret: env.LINKEDIN_APPLICATION_SECRET,
+          token: integration.accessToken,
+        }),
+      ),
     }).catch((error: unknown) => {
       logger.error('Failed to de-authorize %o', { error });
       return error instanceof Error ? error : new Error(JSON.stringify(error));

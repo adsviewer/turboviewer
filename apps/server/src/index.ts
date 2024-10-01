@@ -53,11 +53,8 @@ const index = (): void => {
   });
 
   app.get(`/api${authEndpoint}`, authCallback);
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.get(`/api${authLoginEndpoint}`, loginProviderRateLimiter, authLoginCallback);
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.get(`/api${authConfirmUserEmailEndpoint}`, authConfirmUserEmailRateLimiter, authConfirmUserEmailCallback);
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.get(`/api${authConfirmInvitedUserEndpoint}`, authConfirmInvitedUserRateLimiter, authConfirmInvitedUserCallback);
   app.post('/api/channel/refresh', snsMiddleware, channelDataRefreshWebhook);
   app.post(
@@ -73,7 +70,6 @@ const index = (): void => {
     next();
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- This is the entry point
   app.use(yoga.graphqlEndpoint, yoga);
 
   const port = env.PORT;

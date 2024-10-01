@@ -28,14 +28,17 @@ interface SNSMessageCommon {
   SigningCertURL: string;
 }
 
-const snsMiddlewareInner = async (req: Request<never, never, SNSMessage>, res: Response, next: NextFunction) => {
+const snsMiddlewareInner = async (
+  req: Request<never, never, SNSMessage>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   const validated = await validateSnsMessage(req);
   if (validated) {
     await confirmSubscription(req);
     next();
   } else {
-    res.status(403);
-    return res.send({
+    res.status(403).send({
       message: 'Invalid SNS signature',
     });
   }
