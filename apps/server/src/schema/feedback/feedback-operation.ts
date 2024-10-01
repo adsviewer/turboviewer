@@ -1,10 +1,7 @@
 import { prisma } from '@repo/database';
-import { FireAndForget, messageSchema } from '@repo/utils';
+import { messageSchema } from '@repo/utils';
 import { builder } from '../builder';
-import { sendFeedbackReceivedEmail } from '../../email';
 import { FeedbackDto, FeedbackType } from './feedback-types';
-
-const fireAndForget = new FireAndForget();
 
 builder.mutationFields((t) => ({
   sendFeedback: t.withAuth({ authenticated: true }).prismaField({
@@ -19,10 +16,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, args, ctx, _info) => {
       const { message, type } = args;
-
-      const user = await prisma.user.findUniqueOrThrow({ where: { id: ctx.currentUserId } });
-
-      fireAndForget.add(() => sendFeedbackReceivedEmail(user.email, user.firstName, user.lastName));
 
       return await prisma.feedback.create({
         ...query,
