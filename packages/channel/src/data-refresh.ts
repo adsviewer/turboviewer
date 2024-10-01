@@ -61,7 +61,7 @@ export const refreshData = async ({
       deleteInsightsCache(integration.organizationId);
     }
 
-    await getInsightsHelper()
+    await getInsightsHelper();
   } else {
     await refreshDataAll(initial);
     deleteInsightsCache();

@@ -1,6 +1,4 @@
-import {
-  type InsightsDatapointsInputType,
-} from '../schema/integrations/integration-types';
+import { type InsightsDatapointsInputType } from '../schema/integrations/integration-types';
 
 export const insightsDatapoints = (args: InsightsDatapointsInputType, organizationId: string) =>
   `SELECT DATE_TRUNC('${args.interval}', i.date)                     AS date,

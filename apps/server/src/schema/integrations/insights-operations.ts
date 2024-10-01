@@ -9,7 +9,7 @@ import {
   iFramePerInsight,
   IFrameTypeEnum,
   type IFrameWithType,
-  invokeChannelIngress
+  invokeChannelIngress,
 } from '@repo/channel';
 import { logger } from '@repo/logger';
 import { builder } from '../builder';
@@ -49,7 +49,7 @@ builder.queryFields((t) => ({
       filter: t.arg({ type: FilterInsightsInputDto, required: true }),
     },
     resolve: async (_root, args, ctx, _info) => {
-      return getInsightsHelper(args.filter, ctx.organizationId, ctx.acceptedLocale)
+      return getInsightsHelper(args.filter, ctx.organizationId, ctx.acceptedLocale);
     },
   }),
 
@@ -186,7 +186,8 @@ const IFrameDTO = builder.objectRef<IFrameWithType>('IFrame').implement({
 });
 
 const GroupedInsightDto = builder.simpleObject(
-'GroupedInsight', {
+  'GroupedInsight',
+  {
     fields: (t) => ({
       datapoints: t.field({ type: [InsightsDatapointsDto], nullable: false }),
       id: t.string({ nullable: false }),

@@ -1,7 +1,11 @@
 import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, type PublisherEnum } from '@repo/database';
 import { AError, FireAndForget, groupBy as groupByUtil } from '@repo/utils';
 import * as changeCase from 'change-case';
-import { type FilterInsightsInputType, type InsightsColumnsGroupByType, type GroupedInsightsWithEdges } from '@repo/channel-utils';
+import {
+  type FilterInsightsInputType,
+  type InsightsColumnsGroupByType,
+  type GroupedInsightsWithEdges,
+} from '@repo/channel-utils';
 import { getInsightsCache, setInsightsCache } from './insights-cache';
 import { groupedInsights } from './insights-query-builder';
 
@@ -26,7 +30,7 @@ export const getInsightsHelper = async (
   acceptedLocale?: string,
 ): Promise<GroupedInsightsWithEdges> => {
   // TODO :remove the condition and make the parameters required
-  if( !filter || !organizationId || !acceptedLocale ) throw new AError("Required parameters not passed")
+  if (!filter || !organizationId || !acceptedLocale) throw new AError('Required parameters not passed');
 
   const redisValue = await getInsightsCache<GroupedInsightsWithEdges>(organizationId, filter);
   if (redisValue) return redisValue;

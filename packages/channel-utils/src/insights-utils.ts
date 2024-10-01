@@ -1,4 +1,12 @@
-import { type AdAccount, type CurrencyEnum, type DeviceEnum, type Integration, Prisma, prisma, type PublisherEnum } from '@repo/database';
+import {
+  type AdAccount,
+  type CurrencyEnum,
+  type DeviceEnum,
+  type Integration,
+  Prisma,
+  prisma,
+  type PublisherEnum,
+} from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
 import _ from 'lodash';
@@ -260,10 +268,28 @@ export const insightsColumnsOrderBy = [
 ] as const;
 
 export type InsightsColumnsOrderByType = (typeof insightsColumnsOrderBy)[number];
-  export type InsightsPositionType = 'an_classic' | 'biz_disco_feed' | 'facebook_reels' | 'facebook_reels_overlay' | 'facebook_stories' | 
-'feed' | 'instagram_explore' | 'instagram_explore_grid_home' | 'instagram_profile_feed' | 'instagram_reels' | 
-'instagram_search' | 'instagram_stories' | 'instream_video' | 'marketplace' | 'messenger_inbox' | 
-'messenger_stories' | 'rewarded_video' | 'right_hand_column' | 'search' | 'video_feeds' | 'unknown';
+export type InsightsPositionType =
+  | 'an_classic'
+  | 'biz_disco_feed'
+  | 'facebook_reels'
+  | 'facebook_reels_overlay'
+  | 'facebook_stories'
+  | 'feed'
+  | 'instagram_explore'
+  | 'instagram_explore_grid_home'
+  | 'instagram_profile_feed'
+  | 'instagram_reels'
+  | 'instagram_search'
+  | 'instagram_stories'
+  | 'instream_video'
+  | 'marketplace'
+  | 'messenger_inbox'
+  | 'messenger_stories'
+  | 'rewarded_video'
+  | 'right_hand_column'
+  | 'search'
+  | 'video_feeds'
+  | 'unknown';
 
 export const insightsColumnsGroupBy = [
   'adAccountId',
@@ -299,8 +325,6 @@ export interface InsightsSearchExpression {
   or?: InsightsSearchExpression[] | null;
   term?: InsightsSearchTerm | null;
 }
-
-
 
 export interface FilterInsightsInputType {
   dateFrom?: Date | null;
