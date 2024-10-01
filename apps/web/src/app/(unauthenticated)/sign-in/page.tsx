@@ -133,7 +133,7 @@ export default function SignIn(): React.JSX.Element {
                   required
                   mt="md"
                 />
-                <Button type="submit" fullWidth mt="xl" disabled={isPending}>
+                <Button type="submit" fullWidth mt="xl" loading={isPending}>
                   {t('signIn')}!
                 </Button>
                 <Flex justify="flex-end" mt="sm">

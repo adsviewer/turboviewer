@@ -246,9 +246,9 @@ export function UsersTable(): React.ReactNode {
           <ActionIcon
             variant="default"
             size="md"
-            disabled={isPending}
             onClick={refreshMembers}
             style={{ cursor: 'pointer' }}
+            loading={isPending}
           >
             <IconRefresh size={20} />
           </ActionIcon>

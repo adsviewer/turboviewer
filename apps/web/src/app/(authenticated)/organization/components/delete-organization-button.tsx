@@ -73,7 +73,12 @@ export default function DeleteOrganizationButton(props: PropsType): React.ReactN
               setDeleteFieldValue(event.currentTarget.value);
             }}
           />
-          <Button color="red" disabled={deleteFieldValue !== 'DELETE' || !isDeleteDone} onClick={performDeletion}>
+          <Button
+            color="red"
+            disabled={deleteFieldValue !== 'DELETE'}
+            loading={!isDeleteDone}
+            onClick={performDeletion}
+          >
             {t('delete')} {userDetails.currentOrganization?.name}
           </Button>
         </Flex>

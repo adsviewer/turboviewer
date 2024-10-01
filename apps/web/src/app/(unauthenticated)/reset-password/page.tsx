@@ -84,7 +84,7 @@ export default function ForgotPasswordForm(): React.JSX.Element {
             required
             mt="md"
           />
-          <Button type="submit" fullWidth mt="xl" disabled={isPending}>
+          <Button type="submit" fullWidth mt="xl" loading={isPending}>
             {t('submit')}!
           </Button>
         </form>
