@@ -11,6 +11,8 @@ query adAccounts {
 }
 
 query insights(
+  $adAccountIds: [String!]
+  $adIds: [String!]
   $dateFrom: Date
   $dateTo: Date
   $devices: [DeviceEnum!]
@@ -26,6 +28,8 @@ query insights(
 ) {
   insights(
     filter: {
+      adAccountIds: $adAccountIds
+      adIds: $adIds
       dateFrom: $dateFrom
       dateTo: $dateTo
       devices: $devices

@@ -313,6 +313,8 @@ export enum FeedbackTypeEnum {
 }
 
 export type FilterInsightsInput = {
+  adAccountIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  adIds?: InputMaybe<Array<Scalars['String']['input']>>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
