@@ -36,9 +36,10 @@ const authConfirmInvitedUserLimitRule: RateLimiterRule = {
   },
 };
 
-const rateLimiter = (rule: RateLimiterRule) => {
-  const { endpoint, rateLimit } = rule;
-  return async (request: Request, response: Response, next: NextFunction) => {
+const rateLimiter =
+  (rule: RateLimiterRule): ((req: Request, res: Response, next: NextFunction) => void) =>
+  async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+    const { endpoint, rateLimit } = rule;
     const ipAddress = request.ip;
     const redisId = `rate_limiter-${endpoint}/${String(ipAddress)}`;
 
@@ -49,13 +50,13 @@ const rateLimiter = (rule: RateLimiterRule) => {
     }
 
     if (requests > rateLimit.limit) {
-      return response.status(429).send({
+      response.status(429).send({
         message: 'too many requests, please try again later',
       });
+    } else {
+      next();
     }
-    next();
   };
-};
 
 export const loginProviderRateLimiter = rateLimiter(signInProviderLimitRule);
 export const authConfirmUserEmailRateLimiter = rateLimiter(authConfirmUserEmailLimitRule);

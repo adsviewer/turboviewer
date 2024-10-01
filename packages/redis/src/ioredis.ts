@@ -18,7 +18,7 @@ export const redisGet = async <T extends object | string | boolean>(key: string)
   if (!serializedValue) return null;
   try {
     return JSON.parse(serializedValue) as T;
-  } catch (e) {
+  } catch (_e) {
     return serializedValue as T;
   }
 };
@@ -27,7 +27,7 @@ export const getAllSet = async <T extends object | string | boolean>(key: string
   const serializedValue = await ioredis.smembers(key);
   try {
     return serializedValue.map((value) => JSON.parse(value) as T);
-  } catch (e) {
+  } catch (_e) {
     return serializedValue as T[];
   }
 };
