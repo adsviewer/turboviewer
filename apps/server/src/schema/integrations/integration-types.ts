@@ -342,7 +342,8 @@ export const InsightsSearchExpressionDto = builder
 export const FilterInsightsInputDto = builder.inputRef<FilterInsightsInputType>('FilterInsightsInput').implement({
   fields: (t) => ({
     adAccountIds: t.stringList({ required: false }),
-    adIds: t.stringList({ required: false }),dateFrom: t.field({ type: 'Date', required: false }),
+    adIds: t.stringList({ required: false }),
+    dateFrom: t.field({ type: 'Date', required: false }),
     dateTo: t.field({ type: 'Date', required: false }),
     devices: t.field({ type: [DeviceEnumDto], required: false }),
     groupBy: t.field({ type: [InsightsColumnsGroupByDto], required: false }),

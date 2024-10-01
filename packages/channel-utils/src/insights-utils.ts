@@ -327,6 +327,8 @@ export interface InsightsSearchExpression {
 }
 
 export interface FilterInsightsInputType {
+  adAccountIds?: string[] | null;
+  adIds?: string[] | null;
   dateFrom?: Date | null;
   dateTo?: Date | null;
   devices?: DeviceEnum[] | null;
