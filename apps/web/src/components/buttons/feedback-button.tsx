@@ -65,6 +65,7 @@ export default function FeedbackButton(): ReactNode {
           message: t('successMessage'),
           color: 'blue',
           position: 'top-center',
+          autoClose: 5000,
         });
         setIsSuccess(true);
       })
