@@ -96,7 +96,7 @@ export default function FeedbackButton(): ReactNode {
               comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
             />
             <Indicator
-              label={`${String(messageRef.current?.value.length)} / ${String(MAX_MESSAGE_LENGTH)}`}
+              label={`${String(messageRef.current?.value.length ?? 0)} / ${String(MAX_MESSAGE_LENGTH)}`}
               size={16}
               position="top-end"
               offset={24}
