@@ -61,7 +61,18 @@ export const refreshData = async ({
       deleteInsightsCache(integration.organizationId);
     }
 
-    await getInsightsHelper();
+    const organizationIds = new Set(integrations.map((integration) => integration.organizationId));
+    for (const organizationId of organizationIds) {
+      await getInsightsHelper(
+        {
+          interval: 'week',
+          orderBy: 'spend_abs',
+          page: 0,
+          pageSize: 3,
+        },
+        organizationId,
+      );
+    }
   } else {
     await refreshDataAll(initial);
     deleteInsightsCache();

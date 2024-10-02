@@ -1,5 +1,5 @@
 import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, type PublisherEnum } from '@repo/database';
-import { AError, FireAndForget, groupBy as groupByUtil } from '@repo/utils';
+import { FireAndForget, groupBy as groupByUtil, Language } from '@repo/utils';
 import * as changeCase from 'change-case';
 import {
   type FilterInsightsInputType,
@@ -25,13 +25,10 @@ export interface FieldNode {
 }
 
 export const getInsightsHelper = async (
-  filter?: FilterInsightsInputType, // TODO: should be required
-  organizationId?: string, // TODO: should be required
-  acceptedLocale?: string,
+  filter: FilterInsightsInputType,
+  organizationId: string,
+  acceptedLocale = Language.EN,
 ): Promise<GroupedInsightsWithEdges> => {
-  // TODO :remove the condition and make the parameters required
-  if (!filter || !organizationId || !acceptedLocale) throw new AError('Required parameters not passed');
-
   const redisValue = await getInsightsCache<GroupedInsightsWithEdges>(organizationId, filter);
   if (redisValue) return redisValue;
 
