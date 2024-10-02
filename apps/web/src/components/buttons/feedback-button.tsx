@@ -1,23 +1,29 @@
 'use client';
 
 import { useDisclosure } from '@mantine/hooks';
-import { ActionIcon, Button, Flex, Group, Modal, Select, Textarea, Tooltip } from '@mantine/core';
+import { ActionIcon, Button, Flex, Group, Modal, Select, Textarea, Tooltip, Indicator } from '@mantine/core';
 import { IconMessageReport } from '@tabler/icons-react';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm, zodResolver } from '@mantine/form';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
-import { sendFeedbackSchema } from '@repo/utils';
+import { MIN_FEEDBACK_MESSAGE_CHARACTERS, sendFeedbackSchema } from '@repo/utils';
 import { FeedbackTypeEnum, type SendFeedbackMutationVariables } from '@/graphql/generated/schema-server';
 import { sendFeedback } from '@/app/(authenticated)/actions';
+import confettiAnimationData from '../../../public/lotties/confetti.json';
+import LottieContainer from '../misc/lottie-container';
+
+const MAX_MESSAGE_LENGTH = 1000;
 
 export default function FeedbackButton(): ReactNode {
   const t = useTranslations('feedback');
   const tGeneric = useTranslations('generic');
   const [opened, { open, close }] = useDisclosure(false);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const form = useForm({
     mode: 'controlled',
     initialValues: {
@@ -58,7 +64,10 @@ export default function FeedbackButton(): ReactNode {
           title: tGeneric('success'),
           message: t('successMessage'),
           color: 'blue',
+          position: 'top-center',
+          autoClose: 5000,
         });
+        setIsSuccess(true);
       })
       .catch((error: unknown) => {
         logger.error(error);
@@ -76,7 +85,6 @@ export default function FeedbackButton(): ReactNode {
           <IconMessageReport />
         </ActionIcon>
       </Tooltip>
-
       {/* Modal */}
       <Modal opened={opened} onClose={close} title={t('title')} size="lg">
         <form
@@ -93,21 +101,41 @@ export default function FeedbackButton(): ReactNode {
               allowDeselect={false}
               comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
             />
-            <Textarea
-              description={t('message')}
-              key={form.key('message')}
-              {...form.getInputProps('message')}
-              placeholder={t('messageHint')}
-              autosize
-              minRows={6}
-              maxRows={6}
-            />
+            <Indicator
+              label={`${String(messageRef.current?.value.length ?? 0)} / ${String(MAX_MESSAGE_LENGTH)}`}
+              size={16}
+              position="top-end"
+              offset={24}
+            >
+              <Textarea
+                ref={messageRef}
+                description={`${t('message')} (${t('messageCharLimitHint', { minCharsCount: MIN_FEEDBACK_MESSAGE_CHARACTERS })})`}
+                key={form.key('message')}
+                {...form.getInputProps('message')}
+                placeholder={t('messageHint')}
+                autosize
+                minRows={6}
+                maxRows={6}
+                maxLength={MAX_MESSAGE_LENGTH}
+              />
+            </Indicator>
             <Button type="submit" disabled={!form.isValid()} loading={isPending}>
               {tGeneric('submit')}
             </Button>
           </Flex>
         </form>
       </Modal>
+
+      {/* Success Animation */}
+      <LottieContainer
+        animationData={confettiAnimationData}
+        loop={false}
+        fullscreen
+        playAnimation={isSuccess}
+        onComplete={() => {
+          setIsSuccess(false);
+        }}
+      />
     </Group>
   );
 }

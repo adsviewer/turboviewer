@@ -128,7 +128,8 @@
     "bugReport": "Bugrapport",
     "featureSuggestion": "Functievoorstel",
     "other": "Overig",
-    "successMessage": "Bedankt voor je feedback! Ons team zal je opmerkingen zorgvuldig bekijken en evalueren."
+    "successMessage": "Bedankt voor je feedback! Ons team zal je opmerkingen zorgvuldig bekijken en evalueren.",
+    "messageCharLimitHint": "Voer minimaal {minCharsCount} tekens in"
   },
   "authentication": {
     "noAccount": "Heb je geen account?",

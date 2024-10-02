@@ -128,7 +128,8 @@
     "bugReport": "Bug Report",
     "featureSuggestion": "Feature Suggestion",
     "other": "Other",
-    "successMessage": "Thank you for your feedback! Our team is carefully going to review and evaluate your comments."
+    "successMessage": "Thank you for your feedback! Our team is carefully going to review and evaluate your comments.",
+    "messageCharLimitHint": "Enter at least {minCharsCount} characters"
   },
   "authentication": {
     "noAccount": "Don't have an account?",
