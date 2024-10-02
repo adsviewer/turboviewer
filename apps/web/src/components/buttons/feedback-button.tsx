@@ -61,6 +61,7 @@ export default function FeedbackButton(): ReactNode {
           title: tGeneric('success'),
           message: t('successMessage'),
           color: 'blue',
+          position: 'top-center',
         });
       })
       .catch((error: unknown) => {
