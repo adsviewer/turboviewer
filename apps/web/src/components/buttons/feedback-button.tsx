@@ -1,7 +1,7 @@
 'use client';
 
 import { useDisclosure } from '@mantine/hooks';
-import { ActionIcon, Button, Flex, Group, Modal, Select, Textarea, Tooltip, Indicator, Container } from '@mantine/core';
+import { ActionIcon, Button, Flex, Group, Modal, Select, Textarea, Tooltip, Indicator } from '@mantine/core';
 import { IconMessageReport } from '@tabler/icons-react';
 import React, { useRef, useState } from 'react';
 import { type ReactNode } from 'react';
@@ -23,6 +23,7 @@ export default function FeedbackButton(): ReactNode {
   const [opened, { open, close }] = useDisclosure(false);
   const [isPending, setIsPending] = useState<boolean>(false);
   const messageRef = useRef<HTMLTextAreaElement>(null);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const form = useForm({
     mode: 'controlled',
     initialValues: {
@@ -65,6 +66,7 @@ export default function FeedbackButton(): ReactNode {
           color: 'blue',
           position: 'top-center',
         });
+        setIsSuccess(true);
       })
       .catch((error: unknown) => {
         logger.error(error);
@@ -122,9 +124,17 @@ export default function FeedbackButton(): ReactNode {
           </Flex>
         </form>
       </Modal>
-      <Container pos="absolute" w="100vw" h="100vw">
-        <LottieContainer animationData={confettiAnimationData} loop autoplay />
-      </Container>
+
+      {/* Success Animation */}
+      <LottieContainer
+        animationData={confettiAnimationData}
+        loop={false}
+        fullscreen
+        playAnimation={isSuccess}
+        onComplete={() => {
+          setIsSuccess(false);
+        }}
+      />
     </Group>
   );
 }
