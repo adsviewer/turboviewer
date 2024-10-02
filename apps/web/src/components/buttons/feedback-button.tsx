@@ -1,7 +1,7 @@
 'use client';
 
 import { useDisclosure } from '@mantine/hooks';
-import { ActionIcon, Button, Flex, Group, Modal, Select, Textarea, Tooltip, Indicator } from '@mantine/core';
+import { ActionIcon, Button, Flex, Group, Modal, Select, Textarea, Tooltip, Indicator, Container } from '@mantine/core';
 import { IconMessageReport } from '@tabler/icons-react';
 import React, { useRef, useState } from 'react';
 import { type ReactNode } from 'react';
@@ -12,6 +12,8 @@ import { notifications } from '@mantine/notifications';
 import { MIN_FEEDBACK_MESSAGE_CHARACTERS, sendFeedbackSchema } from '@repo/utils';
 import { FeedbackTypeEnum, type SendFeedbackMutationVariables } from '@/graphql/generated/schema-server';
 import { sendFeedback } from '@/app/(authenticated)/actions';
+import confettiAnimationData from '../../../public/lotties/confetti.json';
+import LottieContainer from '../misc/lottie-container';
 
 const MAX_MESSAGE_LENGTH = 1000;
 
@@ -120,6 +122,9 @@ export default function FeedbackButton(): ReactNode {
           </Flex>
         </form>
       </Modal>
+      <Container pos="absolute" w="100vw" h="100vw">
+        <LottieContainer animationData={confettiAnimationData} loop autoplay />
+      </Container>
     </Group>
   );
 }
