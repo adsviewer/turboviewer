@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export const messageSchema = z.string().min(24, { message: 'Message must be at least 24 characters' });
+export const MIN_FEEDBACK_MESSAGE_CHARACTERS = 24;
+
+export const messageSchema = z.string().min(MIN_FEEDBACK_MESSAGE_CHARACTERS, {
+  message: `Message must be at least ${String(MIN_FEEDBACK_MESSAGE_CHARACTERS)} characters long`,
+});
 
 export const sendFeedbackSchema = z.object({
   type: z.string(),
