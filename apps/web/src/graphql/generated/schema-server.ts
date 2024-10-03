@@ -398,6 +398,7 @@ export enum InsightsColumnsGroupBy {
   device = 'device',
   position = 'position',
   publisher = 'publisher',
+  integrationType = 'integrationType',
 }
 
 export enum InsightsColumnsOrderBy {

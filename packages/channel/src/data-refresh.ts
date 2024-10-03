@@ -67,7 +67,7 @@ export const refreshData = async ({
         {
           interval: 'week',
           orderBy: 'spend_abs',
-          page: 0,
+          page: 1,
           pageSize: 3,
         },
         organizationId,

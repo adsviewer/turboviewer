@@ -299,6 +299,7 @@ export const insightsColumnsGroupBy = [
   'device',
   'position',
   'publisher',
+  'integrationType',
 ] as const;
 export type InsightsColumnsGroupByType = (typeof insightsColumnsGroupBy)[number];
 

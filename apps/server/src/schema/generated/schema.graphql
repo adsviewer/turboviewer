@@ -370,6 +370,7 @@ enum InsightsColumnsGroupBy {
   device
   position
   publisher
+  integrationType
 }
 
 enum InsightsColumnsOrderBy {

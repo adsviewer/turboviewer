@@ -1,4 +1,11 @@
-import { type CurrencyEnum, type DeviceEnum, type Insight, prisma, type PublisherEnum } from '@repo/database';
+import {
+  type CurrencyEnum,
+  type DeviceEnum,
+  type Insight,
+  type IntegrationTypeEnum,
+  prisma,
+  type PublisherEnum,
+} from '@repo/database';
 import { FireAndForget, groupBy as groupByUtil, Language } from '@repo/utils';
 import * as changeCase from 'change-case';
 import {
@@ -35,8 +42,9 @@ export const getInsightsHelper = async (
   const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(filter.groupBy ?? []), 'currency'];
 
   const insightsRaw: Record<string, never>[] = await prisma.$queryRawUnsafe(
-    groupedInsights(filter, organizationId, acceptedLocale),
+    groupedInsights(filter, organizationId, acceptedLocale, groupBy),
   );
+
   const insightsTransformed = insightsRaw.map((obj) => {
     const newObj: Record<string, never> = {};
     for (const key in obj) {
@@ -47,7 +55,12 @@ export const getInsightsHelper = async (
       }
     }
     return newObj;
-  }) as unknown as (Insight & { cpm: number; campaignId: string; adSetId: string })[];
+  }) as unknown as (Insight & {
+    cpm: number;
+    campaignId: string;
+    adSetId: string;
+    integrationType: IntegrationTypeEnum;
+  })[];
 
   const ret: {
     id: string;

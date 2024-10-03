@@ -2,6 +2,7 @@ import * as changeCase from 'change-case';
 import { getCalendarDateDiffIn, type IntervalType, isDateWithinInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
+  type InsightsColumnsGroupByType,
   type InsightsSearchExpression,
   InsightsSearchOperator,
   type InsightsSearchTerm,
@@ -111,7 +112,7 @@ export const getOrganizationalInsights = (
   filter: FilterInsightsInputType,
   dataPointsPerInterval: number,
 ): string =>
-  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -234,9 +235,13 @@ const getInterval = (interval: string, dataPointsPerInterval: number): string =>
   return `${String(dataPointsPerInterval)} ${interval}`; // Default case
 };
 
-export const groupedInsights = (args: FilterInsightsInputType, organizationId: string, locale: string): string => {
+export const groupedInsights = (
+  args: FilterInsightsInputType,
+  organizationId: string,
+  locale: string,
+  groupBy: (InsightsColumnsGroupByType | 'currency')[],
+): string => {
   const dataPointsPerInterval = calculateDataPointsPerInterval(args.dateFrom, args.dateTo, args.interval, locale);
-  const groupBy = [...(args.groupBy ?? []), 'currency'];
   const orderBy = getOrderByColumn(args.orderBy);
   const isRelative = args.orderBy === 'spend_rel' || args.orderBy === 'impressions_rel' || args.orderBy === 'cpm_rel';
   const snakeGroup = groupBy.map((group) => changeCase.snakeCase(group));
