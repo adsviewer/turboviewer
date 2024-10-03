@@ -13,7 +13,7 @@ import { MIN_FEEDBACK_MESSAGE_CHARACTERS, sendFeedbackSchema } from '@repo/utils
 import { FeedbackTypeEnum, type SendFeedbackMutationVariables } from '@/graphql/generated/schema-server';
 import { sendFeedback } from '@/app/(authenticated)/actions';
 import confettiAnimationData from '../../../public/lotties/confetti.json';
-import LottieContainer from '../misc/lottie-container';
+import LottieContainer from '../misc/lottie-animation';
 
 const MAX_MESSAGE_LENGTH = 1000;
 

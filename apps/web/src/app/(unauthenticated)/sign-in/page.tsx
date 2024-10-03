@@ -3,18 +3,7 @@
 import Link from 'next/link';
 import { useForm, zodResolver } from '@mantine/form';
 import { redirect, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  Anchor,
-  Button,
-  Container,
-  Flex,
-  Paper,
-  PasswordInput,
-  Text,
-  TextInput,
-  Title,
-  Transition,
-} from '@mantine/core';
+import { Anchor, Box, Button, Container, Flex, Paper, PasswordInput, Text, TextInput, Title } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
@@ -23,7 +12,9 @@ import { SignInSchema, type SignInSchemaType } from '@/util/schemas/login-schema
 import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, urlKeys, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import { env } from '@/env.mjs';
+import LottieAnimation from '@/components/misc/lottie-animation';
 import LoginProviders from '../components/login-providers';
+import analyticalPersonAnimation from '../../../../public/lotties/analytical-person.json';
 import { getLoginProviders } from './actions';
 
 export default function SignIn(): React.JSX.Element {
@@ -33,7 +24,6 @@ export default function SignIn(): React.JSX.Element {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [loginProviders, setLoginProviders] = useState<LoginProvidersQuery['loginProviders']>([]);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -51,12 +41,6 @@ export default function SignIn(): React.JSX.Element {
       .catch((error: unknown) => {
         logger.error(error);
       });
-
-    // Play animation
-    setIsMounted(false);
-    setTimeout(() => {
-      setIsMounted(true);
-    }, 0);
   }, []);
 
   const handleSubmit = (values: SignInSchemaType): void => {
@@ -92,62 +76,76 @@ export default function SignIn(): React.JSX.Element {
   };
 
   return (
-    <Transition mounted={isMounted} transition="skew-up" duration={400} timingFunction="ease">
-      {(styles) => (
-        <div style={styles}>
-          <Container size={420} my={40}>
-            <Paper withBorder shadow="sm" p={30} mt={30} radius="md">
-              <Flex direction="column" align="center" justify="center" mb="xl">
-                <Title ta="center">{t('signIn')}</Title>
-                <Text c="dimmed" size="sm" ta="center" mt={5}>
-                  {t('noAccount')}{' '}
-                  <Anchor
-                    size="sm"
-                    component="button"
-                    onClick={() => {
-                      router.push('/sign-up');
-                    }}
-                  >
-                    {t('signUp')}!
-                  </Anchor>
-                </Text>
-              </Flex>
+    <Container size={420} my={40}>
+      <Box>
+        <LottieAnimation
+          animationData={analyticalPersonAnimation}
+          speed={0.5}
+          loop
+          playAnimation
+          allowOnMobile
+          customStyles={{
+            position: 'absolute',
+            top: 0,
+            right: 34,
+            zIndex: -9999,
+            width: '35rem',
+            transform: 'rotate(-5deg)',
+            opacity: 0.5,
+          }}
+        />
+      </Box>
 
-              <form
-                onSubmit={form.onSubmit((values) => {
-                  handleSubmit(values);
-                })}
-              >
-                <TextInput
-                  label="Email"
-                  placeholder="you@example.com"
-                  key={form.key('email')}
-                  {...form.getInputProps('email')}
-                  required
-                />
-                <PasswordInput
-                  label={t('password')}
-                  placeholder={t('yourPassword')}
-                  key={form.key('password')}
-                  {...form.getInputProps('password')}
-                  required
-                  mt="md"
-                />
-                <Button type="submit" fullWidth mt="xl" loading={isPending}>
-                  {t('signIn')}!
-                </Button>
-                <Flex justify="flex-end" mt="sm">
-                  <Anchor size="sm" component={Link} href="/forgot-password">
-                    {t('forgotPassword')}
-                  </Anchor>
-                </Flex>
-              </form>
-            </Paper>
+      {/* Layout */}
+      <Paper withBorder shadow="sm" p={30} mt={30} radius="md">
+        <Flex direction="column" align="center" justify="center" mb="xl">
+          <Title ta="center">{t('signIn')}</Title>
+          <Text c="dimmed" size="sm" ta="center" mt={5}>
+            {t('noAccount')}{' '}
+            <Anchor
+              size="sm"
+              component="button"
+              onClick={() => {
+                router.push('/sign-up');
+              }}
+            >
+              {t('signUp')}!
+            </Anchor>
+          </Text>
+        </Flex>
 
-            <LoginProviders loginProviders={loginProviders} />
-          </Container>
-        </div>
-      )}
-    </Transition>
+        <form
+          onSubmit={form.onSubmit((values) => {
+            handleSubmit(values);
+          })}
+        >
+          <TextInput
+            label="Email"
+            placeholder="you@example.com"
+            key={form.key('email')}
+            {...form.getInputProps('email')}
+            required
+          />
+          <PasswordInput
+            label={t('password')}
+            placeholder={t('yourPassword')}
+            key={form.key('password')}
+            {...form.getInputProps('password')}
+            required
+            mt="md"
+          />
+          <Button type="submit" fullWidth mt="xl" loading={isPending}>
+            {t('signIn')}!
+          </Button>
+          <Flex justify="flex-end" mt="sm">
+            <Anchor size="sm" component={Link} href="/forgot-password">
+              {t('forgotPassword')}
+            </Anchor>
+          </Flex>
+        </form>
+      </Paper>
+
+      <LoginProviders loginProviders={loginProviders} />
+    </Container>
   );
 }

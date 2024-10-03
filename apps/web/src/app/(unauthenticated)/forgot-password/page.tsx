@@ -8,6 +8,9 @@ import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { ForgotPasswordSchema, type ForgotPasswordSchemaType } from '@/util/schemas/login-schemas';
+import LottieAnimation from '@/components/misc/lottie-animation';
+import thinkingPersonAnimation from '../../../../public/lotties/thinking-person.json';
+import mailboxAnimation from '../../../../public/lotties/mailbox.json';
 
 export default function ForgotPasswordForm(): React.JSX.Element {
   const t = useTranslations('authentication');
@@ -48,6 +51,22 @@ export default function ForgotPasswordForm(): React.JSX.Element {
     <Container size={420} my={40}>
       {!success ? (
         <Paper withBorder shadow="sm" p={30} mt={30} radius="md">
+          <LottieAnimation
+            animationData={thinkingPersonAnimation}
+            speed={0.5}
+            loop
+            playAnimation
+            customStyles={{
+              position: 'absolute',
+              top: 320,
+              left: 250,
+              zIndex: -9999,
+              width: '35rem',
+              transform: 'rotate(-7deg)',
+              opacity: 0.5,
+            }}
+          />
+
           <ActionIcon component={Link} href="/sign-in" c="dimmed" variant="transparent" aria-label="Back">
             <IconArrowLeft />
           </ActionIcon>
@@ -77,7 +96,12 @@ export default function ForgotPasswordForm(): React.JSX.Element {
           </form>
         </Paper>
       ) : (
-        <Text ta="center">{t('resetLinkSent')}!</Text>
+        <>
+          <Text ta="center">{t('resetLinkSent')}!</Text>
+          <Flex mt="lg" justify="center" align="center">
+            <LottieAnimation animationData={mailboxAnimation} speed={0.75} loop playAnimation allowOnMobile />
+          </Flex>
+        </>
       )}
     </Container>
   );

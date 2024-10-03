@@ -1,11 +1,13 @@
 'use client';
 
 import { useMantineTheme, useComputedColorScheme } from '@mantine/core';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export function LogoSimple(props: React.ComponentProps<'svg'>): React.ReactElement | null {
   const computedColorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
+  const router = useRouter();
   const [colors, setColors] = useState({
     stroke: theme.colors.dark[9],
     fill: theme.colors.dark[9],
@@ -29,6 +31,9 @@ export function LogoSimple(props: React.ComponentProps<'svg'>): React.ReactEleme
       viewBox="0 0 200 26"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
+      onClick={() => {
+        router.replace('/');
+      }}
     >
       <line x1="9.19527" y1="2.28171" x2="1.28172" y2="24.024" strokeWidth="2" strokeLinecap="round" />
       <line

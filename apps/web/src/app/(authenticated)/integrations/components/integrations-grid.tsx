@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { SimpleGrid, Transition } from '@mantine/core';
+import { SimpleGrid } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { tierConstraints } from '@repo/mappings';
 import { useAtomValue } from 'jotai';
@@ -13,12 +13,14 @@ import {
   type SettingsChannelsQuery,
 } from '@/graphql/generated/schema-server';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import LottieAnimation from '@/components/misc/lottie-animation';
 import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
 import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
 import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
 import googleLogo from '../../../../../public/integrations/google-logo-icon.svg';
 import snapchatLogo from '../../../../../public/integrations/snapchat-logo-icon.svg';
 import redditLogo from '../../../../../public/integrations/reddit-logo-icon.svg';
+import blocksAnimation from '../../../../../public/lotties/blocks.json';
 import IntegrationCard from './integration-card';
 
 interface IntegrationProps {
@@ -71,7 +73,6 @@ const initialIntegrationsData: IntegrationsDataType = {
 
 export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
   const searchParams = useSearchParams();
-  const [isMounted, setIsMounted] = useState<boolean>(false);
   const [integrationsData, setIntegrationsData] = useState<IntegrationsDataType>(initialIntegrationsData);
   const userDetails = useAtomValue(userDetailsAtom);
 
@@ -103,12 +104,6 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
 
   useEffect(() => {
     updateIntegrationsData();
-
-    // Animation init
-    setIsMounted(false); // Reset isMounted to false
-    setTimeout(() => {
-      setIsMounted(true); // Set isMounted to true after a delay to allow the transition to play
-    }, 0);
   }, [searchParams, updateIntegrationsData]);
 
   const isIntegrationErrored = (status: IntegrationStatus): boolean => status === IntegrationStatus.Errored;
@@ -138,37 +133,46 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
   ]);
 
   return (
-    <Transition mounted={isMounted} transition="fade" duration={400} timingFunction="ease">
-      {(styles) => (
-        <div style={styles}>
-          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-            {props.integrations.map((integration) => {
-              const info = map.get(integration.type);
-              if (!info) return null;
-              const { title, description, imageSrc } = info;
-              return (
-                <IntegrationCard
-                  key={integration.type}
-                  title={title}
-                  description={
-                    description ?? `Connect your ${title} account and manage all your ${title} advertisments!`
-                  }
-                  authUrl={integration.authUrl}
-                  integrationType={integration.type}
-                  isConnected={isIntegrationConnected(integration.status)}
-                  isAvailable={isIntegrationAvailable(integration.status)}
-                  isErrored={isIntegrationErrored(integration.status)}
-                  allowNewConnection={allowNewConnectionBasedOnTier()}
-                  image={<Image src={imageSrc} alt={title} width={100} priority />}
-                  adCount={integrationsData[integration.type].adCount}
-                  lastSyncedAt={integrationsData[integration.type].lastSyncedAt}
-                  status={integrationsData[integration.type].status}
-                />
-              );
-            })}
-          </SimpleGrid>
-        </div>
-      )}
-    </Transition>
+    <>
+      <LottieAnimation
+        animationData={blocksAnimation}
+        speed={0.5}
+        loop
+        playAnimation
+        customStyles={{
+          position: 'absolute',
+          top: 20,
+          right: 34,
+          zIndex: -9999,
+          width: '18rem',
+          transform: 'rotate(-5deg)',
+          opacity: 0.2,
+        }}
+      />
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
+        {props.integrations.map((integration) => {
+          const info = map.get(integration.type);
+          if (!info) return null;
+          const { title, description, imageSrc } = info;
+          return (
+            <IntegrationCard
+              key={integration.type}
+              title={title}
+              description={description ?? `Connect your ${title} account and manage all your ${title} advertisments!`}
+              authUrl={integration.authUrl}
+              integrationType={integration.type}
+              isConnected={isIntegrationConnected(integration.status)}
+              isAvailable={isIntegrationAvailable(integration.status)}
+              isErrored={isIntegrationErrored(integration.status)}
+              allowNewConnection={allowNewConnectionBasedOnTier()}
+              image={<Image src={imageSrc} alt={title} width={100} priority />}
+              adCount={integrationsData[integration.type].adCount}
+              lastSyncedAt={integrationsData[integration.type].lastSyncedAt}
+              status={integrationsData[integration.type].status}
+            />
+          );
+        })}
+      </SimpleGrid>
+    </>
   );
 }
