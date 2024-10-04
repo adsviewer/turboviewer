@@ -34,7 +34,7 @@ export interface FieldNode {
 export const getInsightsHelper = async (
   filter: FilterInsightsInputType,
   organizationId: string,
-  acceptedLocale = Language.EN,
+  acceptedLocale: string = Language.EN,
 ): Promise<GroupedInsightsWithEdges> => {
   const redisValue = await getInsightsCache<GroupedInsightsWithEdges>(organizationId, filter);
   if (redisValue) return redisValue;

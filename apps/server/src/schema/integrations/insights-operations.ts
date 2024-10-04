@@ -1,5 +1,5 @@
 import { prisma } from '@repo/database';
-import { groupBy as groupByUtil, isAError, Language } from '@repo/utils';
+import { groupBy as groupByUtil, isAError } from '@repo/utils';
 import {
   adWithAdAccount,
   getChannel,
@@ -49,11 +49,7 @@ builder.queryFields((t) => ({
       filter: t.arg({ type: FilterInsightsInputDto, required: true }),
     },
     resolve: async (_root, args, ctx, _info) => {
-      return getInsightsHelper(
-        args.filter,
-        ctx.organizationId,
-        Language[ctx.acceptedLocale.toUpperCase() as keyof typeof Language],
-      );
+      return getInsightsHelper(args.filter, ctx.organizationId, ctx.acceptedLocale);
     },
   }),
 
