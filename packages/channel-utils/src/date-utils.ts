@@ -57,11 +57,8 @@ export const timeRangeHelper = (
   if (initial) {
     const range = getLastXMonths();
 
-    if (!organizationWithHighestTier) {
-      return splitTimeRange(tierConstraints[Tier.Launch].maxRecency, range.since, range.until);
-    }
-
-    return splitTimeRange(maxRecency, range.since, range.until);
+    const adjustedSince = addInterval(range.until, 'day', -maxRecency);
+    return splitTimeRange(maxRecency, adjustedSince, range.until);
   }
   const furthestDate = addInterval(new Date(), 'day', -maxRecency);
   const insightDateWithinLimit = latestInsight && latestInsight.date > furthestDate ? latestInsight.date : furthestDate;
