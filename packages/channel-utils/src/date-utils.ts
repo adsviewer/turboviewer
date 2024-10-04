@@ -1,5 +1,5 @@
 import { addInterval, getDayPriorTillTomorrow, getLastXMonths, getTomorrowStartOfDay } from '@repo/utils';
-import { type Insight, prisma, Tier } from '@repo/database';
+import { prisma, Tier } from '@repo/database';
 import { tierConstraints } from '@repo/mappings';
 
 interface LatestInsightResult {
@@ -8,7 +8,7 @@ interface LatestInsightResult {
     organizations: {
       tier: Tier;
     }[];
-  };
+  } | null;
 }
 
 export const timeRanges = async (initial: boolean, adAccountId: string): Promise<{ since: Date; until: Date }[]> => {
@@ -18,28 +18,7 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
     orderBy: { date: 'desc' },
   });
 
-  const organizations = latestInsight?.adAccount?.organizations ?? [];
-
-  const organizationWithHighestTier =
-    organizations.length > 0
-      ? organizations.sort((a, b) => tierConstraints[b.tier].order - tierConstraints[a.tier].order)[0].tier
-      : undefined;
-
-  const maxRecency = tierConstraints[organizationWithHighestTier ?? Tier.Launch].maxRecency;
-
-  if (initial) {
-    const range = getLastXMonths();
-
-    if (!organizationWithHighestTier) {
-      return splitTimeRange(tierConstraints[Tier.Launch].maxRecency, range.since, range.until);
-    }
-
-    return splitTimeRange(maxRecency, range.since, range.until);
-  }
-  const furthestDate = addInterval(new Date(), 'day', -maxRecency);
-  const insightDateWithinLimit = latestInsight && latestInsight.date > furthestDate ? latestInsight.date : furthestDate;
-  const range = getDayPriorTillTomorrow(insightDateWithinLimit);
-  return splitTimeRange(maxRecency, range.since, range.until);
+  return timeRangeHelper(initial, latestInsight ?? undefined);
 };
 
 export const splitTimeRange = (
@@ -62,9 +41,9 @@ export const splitTimeRange = (
   return periods;
 };
 
-export const testTimeRange = (
+export const timeRangeHelper = (
   initial: boolean,
-  latestInsight?: Partial<Insight> & LatestInsightResult,
+  latestInsight?: LatestInsightResult,
 ): { since: Date; until: Date }[] => {
   const organizations = latestInsight ? (latestInsight.adAccount?.organizations ?? []) : [];
 

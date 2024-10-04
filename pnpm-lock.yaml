@@ -977,6 +977,9 @@ importers:
       change-case:
         specifier: ^5.4.4
         version: 5.4.4
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1002,9 +1005,6 @@ importers:
       '@types/qs':
         specifier: ^6.9.16
         version: 6.9.16
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
