@@ -250,7 +250,7 @@ importers:
         version: 1.79.4
       tailwindcss:
         specifier: ^3.4.13
-        version: 3.4.13(ts-node@10.9.2(typescript@5.6.2))
+        version: 3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -485,7 +485,7 @@ importers:
         version: 7.0.1(postcss@8.4.47)
       tailwindcss:
         specifier: ^3.4.13
-        version: 3.4.13(ts-node@10.9.2(typescript@5.6.2))
+        version: 3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -925,7 +925,7 @@ importers:
         version: 1.79.4
       tailwindcss:
         specifier: ^3.4.13
-        version: 3.4.13(ts-node@10.9.2(typescript@5.6.2))
+        version: 3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -974,6 +974,9 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+      change-case:
+        specifier: ^5.4.4
+        version: 5.4.4
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -999,6 +1002,9 @@ importers:
       '@types/qs':
         specifier: ^6.9.16
         version: 6.9.16
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
@@ -1203,7 +1209,7 @@ importers:
         version: link:../config-typescript
       tailwindcss:
         specifier: ^3.4.13
-        version: 3.4.13(ts-node@10.9.2(typescript@5.6.2))
+        version: 3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
 
   packages/config-typescript: {}
 
@@ -1460,7 +1466,7 @@ importers:
         version: 18.3.1(react@18.3.1)
       tailwindcss:
         specifier: ^3.4.1
-        version: 3.4.13(ts-node@10.9.2(typescript@5.6.2))
+        version: 3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
     devDependencies:
       '@radix-ui/react-label':
         specifier: ^2.1.0
@@ -17306,7 +17312,7 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.47
 
-  postcss-load-config@4.0.2(postcss@8.4.47)(ts-node@10.9.2(typescript@5.6.2)):
+  postcss-load-config@4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2)):
     dependencies:
       lilconfig: 3.1.2
       yaml: 2.5.1
@@ -18340,7 +18346,7 @@ snapshots:
 
   tailwind-merge@2.5.2: {}
 
-  tailwindcss@3.4.13(ts-node@10.9.2(typescript@5.6.2)):
+  tailwindcss@3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -18359,7 +18365,7 @@ snapshots:
       postcss: 8.4.47
       postcss-import: 15.1.0(postcss@8.4.47)
       postcss-js: 4.0.1(postcss@8.4.47)
-      postcss-load-config: 4.0.2(postcss@8.4.47)(ts-node@10.9.2(typescript@5.6.2))
+      postcss-load-config: 4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
       postcss-nested: 6.2.0(postcss@8.4.47)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.8

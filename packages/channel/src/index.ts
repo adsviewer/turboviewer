@@ -5,3 +5,5 @@ export * from './iframe-cacheable';
 export * from './insights-cache';
 export * from './integration-helper';
 export * from './report-process';
+export * from './insights-helper';
+export * from './insights-query-builder';

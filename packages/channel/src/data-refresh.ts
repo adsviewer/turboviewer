@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { deleteInsightsCache } from './insights-cache';
 import { getChannel } from './channel-helper';
 import { asyncReportChannels } from './report-process';
+import { getInsightsHelper } from './insights-helper';
 
 const refreshDataOf = async (integration: Integration, initial: boolean): Promise<void> => {
   await saveChannelData(integration, initial).catch((e: unknown) => {
@@ -58,6 +59,20 @@ export const refreshData = async ({
     for (const integration of integrations) {
       await refreshDataOf(integration, initial);
       deleteInsightsCache(integration.organizationId);
+    }
+
+    const organizationIds = new Set(integrations.map((integration) => integration.organizationId));
+    for (const organizationId of organizationIds) {
+      await getInsightsHelper(
+        {
+          interval: 'week',
+          orderBy: 'spend_abs',
+          page: 1,
+          pageSize: 3,
+          groupBy: ['integrationType'],
+        },
+        organizationId,
+      );
     }
   } else {
     await refreshDataAll(initial);

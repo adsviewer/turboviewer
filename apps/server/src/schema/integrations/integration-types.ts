@@ -7,7 +7,16 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
-import { MetaError } from '@repo/channel-utils';
+import {
+  type FilterInsightsInputType,
+  insightsColumnsGroupBy,
+  insightsColumnsOrderBy,
+  MetaError,
+  type InsightsSearchExpression,
+  InsightsSearchField,
+  InsightsSearchOperator,
+  type InsightsSearchTerm,
+} from '@repo/channel-utils';
 import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
 import { getRootOrganizationId } from '@repo/organization';
@@ -15,12 +24,6 @@ import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';
 import type { GraphQLContext } from '../../context';
-import {
-  type InsightsSearchExpression,
-  InsightsSearchField,
-  InsightsSearchOperator,
-  type InsightsSearchTerm,
-} from '../../contexts/insights';
 
 export enum IntegrationStatusEnum {
   ComingSoon = 'ComingSoon',
@@ -206,28 +209,10 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
   }),
 });
 
-const insightsColumnsOrderBy = [
-  'spend_abs',
-  'impressions_abs',
-  'cpm_abs',
-  'spend_rel',
-  'impressions_rel',
-  'cpm_rel',
-] as const;
 export const InsightsColumnsOrderByDto = builder.enumType('InsightsColumnsOrderBy', {
   values: insightsColumnsOrderBy,
 });
 
-const insightsColumnsGroupBy = [
-  'adAccountId',
-  'adId',
-  'adSetId',
-  'campaignId',
-  'device',
-  'position',
-  'publisher',
-] as const;
-export type InsightsColumnsGroupByType = (typeof insightsColumnsGroupBy)[number];
 export const InsightsColumnsGroupByDto = builder.enumType('InsightsColumnsGroupBy', {
   values: insightsColumnsGroupBy,
 });
@@ -354,7 +339,7 @@ export const InsightsSearchExpressionDto = builder
     }),
   });
 
-export const FilterInsightsInput = builder.inputType('FilterInsightsInput', {
+export const FilterInsightsInputDto = builder.inputRef<FilterInsightsInputType>('FilterInsightsInput').implement({
   fields: (t) => ({
     adAccountIds: t.stringList({ required: false }),
     adIds: t.stringList({ required: false }),
@@ -416,7 +401,6 @@ export const InsightsDatapointsInput = builder.inputType('InsightsDatapointsInpu
   }),
 });
 
-export type FilterInsightsInputType = typeof FilterInsightsInput.$inferInput;
 export type InsightsDatapointsInputType = typeof InsightsDatapointsInput.$inferInput;
 
 export const getIntegrationStatus = (integration: Integration | undefined): IntegrationStatusEnum => {

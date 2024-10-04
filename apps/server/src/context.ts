@@ -1,10 +1,10 @@
 import { type YogaInitialContext } from 'graphql-yoga';
 import { $Enums, OrganizationRoleEnum, UserStatus } from '@repo/database';
-import { isAError } from '@repo/utils';
+import { isAError, type Language } from '@repo/utils';
 import { GraphQLError } from 'graphql/index';
 import { setContext, setUser } from '@sentry/node';
 import { decodeJwt } from './auth';
-import { acceptedLanguage, acceptedLocale, type Language } from './language';
+import { acceptedLanguage, acceptedLocale } from './language';
 import RoleEnum = $Enums.RoleEnum;
 
 export interface GraphQLContext {

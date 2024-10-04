@@ -1,6 +1,4 @@
-export enum Language {
-  EN = 'en',
-}
+import { Language } from '@repo/utils';
 
 export const acceptedLanguage = (request: Request): Language => {
   const header = request.headers.get('accept-language');

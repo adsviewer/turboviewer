@@ -2,9 +2,11 @@ import * as changeCase from 'change-case';
 import { getCalendarDateDiffIn, type IntervalType, isDateWithinInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
-  type InsightsDatapointsInputType,
-} from '../schema/integrations/integration-types';
-import { type InsightsSearchExpression, InsightsSearchOperator, type InsightsSearchTerm } from '../contexts/insights';
+  type InsightsColumnsGroupByType,
+  type InsightsSearchExpression,
+  InsightsSearchOperator,
+  type InsightsSearchTerm,
+} from '@repo/channel-utils';
 
 export const calculateDataPointsPerInterval = (
   dateFrom: Date | null | undefined,
@@ -35,7 +37,7 @@ export const getInsightsDateFrom = (
   dateTo: Date | undefined | null,
   dataPointsPerInterval: number,
   interval: IntervalType,
-) => {
+): string => {
   const intervalMapping = (): string => {
     if (interval === 'quarter') {
       return '3 months';
@@ -110,7 +112,7 @@ export const getOrganizationalInsights = (
   filter: FilterInsightsInputType,
   dataPointsPerInterval: number,
 ): string =>
-  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -173,7 +175,7 @@ export const intervalBeforeLast = (
                                              ${orderColumn === 'cpm' ? 'HAVING SUM(i.impressions) > 0' : ''})`;
 };
 
-const joinFn = (columns: string[], table: string, left: string) => {
+const joinFn = (columns: string[], table: string, left: string): string => {
   const right = abbreviateSnakeCase(table);
   return `JOIN ${table} ${right} ON ${columns.map((column) => `${left}.${column} = ${right}.${column}`).join(' AND ')}`;
 };
@@ -226,16 +228,20 @@ export const orderColumnTrendAbsolute = (
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
 
-const getInterval = (interval: string, dataPointsPerInterval: number) => {
+const getInterval = (interval: string, dataPointsPerInterval: number): string => {
   if (interval === 'quarter') {
     return `${String(dataPointsPerInterval * 3)} months`;
   }
   return `${String(dataPointsPerInterval)} ${interval}`; // Default case
 };
 
-export const groupedInsights = (args: FilterInsightsInputType, organizationId: string, locale: string) => {
+export const groupedInsights = (
+  args: FilterInsightsInputType,
+  organizationId: string,
+  locale: string,
+  groupBy: (InsightsColumnsGroupByType | 'currency')[],
+): string => {
   const dataPointsPerInterval = calculateDataPointsPerInterval(args.dateFrom, args.dateTo, args.interval, locale);
-  const groupBy = [...(args.groupBy ?? []), 'currency'];
   const orderBy = getOrderByColumn(args.orderBy);
   const isRelative = args.orderBy === 'spend_rel' || args.orderBy === 'impressions_rel' || args.orderBy === 'cpm_rel';
   const snakeGroup = groupBy.map((group) => changeCase.snakeCase(group));
@@ -259,32 +265,7 @@ export const groupedInsights = (args: FilterInsightsInputType, organizationId: s
   return sql.replace(/\n\s*\n/g, '\n');
 };
 
-export const insightsDatapoints = (args: InsightsDatapointsInputType, organizationId: string) =>
-  `SELECT DATE_TRUNC('${args.interval}', i.date)                     AS date,
-          SUM(i.spend)                                               AS spend,
-          SUM(i.impressions)                                         AS impressions,
-          SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
-   FROM insights i
-            JOIN ads a on i.ad_id = a.id
-            JOIN ad_sets ase on a.ad_set_id = ase.id
-            JOIN campaigns c on ase.campaign_id = c.id
-            JOIN ad_accounts aa on c.ad_account_id = aa.id
-            JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
-   WHERE ao."B" = '${organizationId}'
-     AND i.date >= DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateFrom.toISOString()}')
-     AND i.date < DATE_TRUNC('${args.interval}', TIMESTAMP '${args.dateTo.toISOString()}')
-       ${args.adAccountId ? `AND c.ad_account_id = '${args.adAccountId}'` : ''}
-           ${args.adId ? `AND i.ad_id = '${args.adId}'` : ''}
-           ${args.adSetId ? `AND a.ad_set_id = '${args.adSetId}'` : ''}
-           ${args.campaignId ? `AND ase.campaign_id = '${args.campaignId}'` : ''}
-           ${args.device ? `AND i.device = '${args.device}'` : ''}
-           ${args.position ? `AND i.position = '${args.position}'` : ''}
-           ${args.publisher ? `AND i.publisher = '${args.publisher}'` : ''}
-   GROUP BY date
-   HAVING SUM(i.impressions) > 0
-   ORDER BY date;`;
-
-const abbreviateSnakeCase = (snakeCaseString: string) =>
+const abbreviateSnakeCase = (snakeCaseString: string): string =>
   snakeCaseString
     .split('_')
     .map((word) => word[0])

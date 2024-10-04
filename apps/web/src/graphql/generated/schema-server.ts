@@ -336,16 +336,8 @@ export type GenerateGoogleAuthUrlResponse = {
   url: Scalars['String']['output'];
 };
 
-export type GroupedInsight = Pagination & {
+export type GroupedInsight = {
   __typename: 'GroupedInsight';
-  edges: Array<GroupedInsights>;
-  hasNext: Scalars['Boolean']['output'];
-  page: Scalars['Int']['output'];
-  pageSize: Scalars['Int']['output'];
-};
-
-export type GroupedInsights = {
-  __typename: 'GroupedInsights';
   adAccountId?: Maybe<Scalars['String']['output']>;
   adAccountName?: Maybe<Scalars['String']['output']>;
   adId?: Maybe<Scalars['String']['output']>;
@@ -361,6 +353,14 @@ export type GroupedInsights = {
   id: Scalars['String']['output'];
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
+};
+
+export type GroupedInsights = Pagination & {
+  __typename: 'GroupedInsights';
+  edges: Array<GroupedInsight>;
+  hasNext: Scalars['Boolean']['output'];
+  page: Scalars['Int']['output'];
+  pageSize: Scalars['Int']['output'];
 };
 
 export type IFrame = {
@@ -398,6 +398,7 @@ export enum InsightsColumnsGroupBy {
   device = 'device',
   position = 'position',
   publisher = 'publisher',
+  integrationType = 'integrationType',
 }
 
 export enum InsightsColumnsOrderBy {
@@ -831,7 +832,7 @@ export type Query = {
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
-  insights: GroupedInsight;
+  insights: GroupedInsights;
   integrations: Array<Integration>;
   /** Returns the invitation links for the signed in org */
   inviteLinks: Array<InviteLinks>;
@@ -1006,10 +1007,10 @@ export type InsightsQueryVariables = Exact<{
 export type InsightsQuery = {
   __typename: 'Query';
   insights: {
-    __typename: 'GroupedInsight';
+    __typename: 'GroupedInsights';
     hasNext: boolean;
     edges: Array<{
-      __typename: 'GroupedInsights';
+      __typename: 'GroupedInsight';
       id: string;
       adAccountId?: string | null;
       adAccountName?: string | null;

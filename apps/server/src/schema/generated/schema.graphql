@@ -309,14 +309,7 @@ type GenerateGoogleAuthUrlResponse {
   url: String!
 }
 
-type GroupedInsight implements Pagination {
-  edges: [GroupedInsights!]!
-  hasNext: Boolean!
-  page: Int!
-  pageSize: Int!
-}
-
-type GroupedInsights {
+type GroupedInsight {
   adAccountId: String
   adAccountName: String
   adId: String
@@ -332,6 +325,13 @@ type GroupedInsights {
   id: String!
   position: String
   publisher: PublisherEnum
+}
+
+type GroupedInsights implements Pagination {
+  edges: [GroupedInsight!]!
+  hasNext: Boolean!
+  page: Int!
+  pageSize: Int!
 }
 
 type IFrame {
@@ -370,6 +370,7 @@ enum InsightsColumnsGroupBy {
   device
   position
   publisher
+  integrationType
 }
 
 enum InsightsColumnsOrderBy {
@@ -733,7 +734,7 @@ type Query {
   checkConfirmInvitedUserHashValidity(invitedHash: String!): Boolean!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
-  insights(filter: FilterInsightsInput!): GroupedInsight!
+  insights(filter: FilterInsightsInput!): GroupedInsights!
   integrations(type: IntegrationType): [Integration!]!
 
   """

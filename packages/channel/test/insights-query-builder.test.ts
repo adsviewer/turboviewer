@@ -1,38 +1,35 @@
-import 'dotenv/config';
-import { describe, it } from 'node:test';
+import { after, describe, it } from 'node:test';
 import * as assert from 'node:assert';
 import { DeviceEnum, PublisherEnum } from '@repo/database';
 import { addInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
-  type InsightsDatapointsInputType,
-} from '../../src/schema/integrations/integration-types';
+  type InsightsColumnsGroupByType,
+  type InsightsSearchExpression,
+  InsightsSearchField,
+  InsightsSearchOperator,
+} from '@repo/channel-utils';
+import { redisQuit } from '@repo/redis';
 import {
   calculateDataPointsPerInterval,
   getInsightsDateFrom,
   getOrganizationalInsights,
   groupedInsights,
-  insightsDatapoints,
   intervalBeforeLast,
   lastInterval,
   orderColumnTrend,
   orderColumnTrendAbsolute,
   searchAdsToSQL,
-} from '../../src/utils/insights-query-builder';
-import {
-  type InsightsSearchExpression,
-  InsightsSearchField,
-  InsightsSearchOperator,
-} from '../../src/contexts/insights';
+} from '../src/insights-query-builder';
 
-const getNoEmptyLines = (str: string) =>
+const getNoEmptyLines = (str: string): string =>
   str
     .replace(/\n\s*\n/g, '\n')
     .split('\n')
     .map((l) => l.replace(/\s+/g, ' '))
     .join('\n');
 
-const assertSql = (actual: string, expected: string) => {
+const assertSql = (actual: string, expected: string): void => {
   const actualNoEmptyLines = getNoEmptyLines(actual);
   const expectedNoEmptyLines = getNoEmptyLines(expected);
   assert.strictEqual(actualNoEmptyLines, expectedNoEmptyLines);
@@ -151,7 +148,7 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -182,7 +179,7 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -337,11 +334,13 @@ void describe('insights query builder tests', () => {
       interval: 'week',
       order: 'asc',
     };
+
+    const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = groupedInsights(args, organizationId, 'en-GB');
+    const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -385,11 +384,12 @@ void describe('insights query builder tests', () => {
       interval: 'week',
       order: 'desc',
     };
+    const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = groupedInsights(args, organizationId, 'en-GB');
+    const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -425,11 +425,12 @@ void describe('insights query builder tests', () => {
       interval: 'week',
       order: 'desc',
     };
+    const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = groupedInsights(args, organizationId, 'en-GB');
+    const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -465,49 +466,64 @@ void describe('insights query builder tests', () => {
   ORDER BY oct.trend DESC, interval_start;`,
     );
   });
-  void it('insights datapoints', () => {
-    const args: InsightsDatapointsInputType = {
-      adAccountId: 'clwnaip1s000008k00nuu3xez',
-      adId: 'clwojj3kp000008l7bfk10qg1',
-      adSetId: 'cm1gfkt5v000009kzexbw69eo',
-      campaignId: 'cm1gfkzsi000008mgfrld71p1',
+  void it('grouped insights with integrationGroupby filter', () => {
+    const args: FilterInsightsInputType = {
+      orderBy: 'spend_rel',
+      page: 1,
+      pageSize: 10,
       dateFrom: new Date('2024-04-01'),
-      dateTo: new Date('2024-05-27'),
-      device: DeviceEnum.MobileWeb,
+      dateTo: new Date('2024-05-28'),
+      groupBy: ['adId', 'publisher', 'integrationType'],
       interval: 'week',
-      position: 'feed',
-      publisher: PublisherEnum.Facebook,
+      order: 'desc',
     };
+    const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
     const organizationId = 'clwkdrdn7000008k708vfchyr';
-    const insights = insightsDatapoints(args, organizationId);
-    const expected = `SELECT DATE_TRUNC('week', i.date)          AS date,
-                             SUM(i.spend)                                               AS spend,
-                             SUM(i.impressions)                                         AS impressions,
-                             SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
-                      FROM insights i
-                               JOIN ads a on i.ad_id = a.id
-                               JOIN ad_sets ase on a.ad_set_id = ase.id
-                               JOIN campaigns c on ase.campaign_id = c.id
-                               JOIN ad_accounts aa on c.ad_account_id = aa.id
-                               JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
-                      WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                        AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-04-01T00:00:00.000Z')
-                        AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-27T00:00:00.000Z')
-                        AND c.ad_account_id = 'clwnaip1s000008k00nuu3xez'
-                        AND i.ad_id = 'clwojj3kp000008l7bfk10qg1'
-                        AND a.ad_set_id = 'cm1gfkt5v000009kzexbw69eo'
-                        AND ase.campaign_id = 'cm1gfkzsi000008mgfrld71p1'
-                        AND i.device = 'MobileWeb'
-                        AND i.position = 'feed'
-                        AND i.publisher = 'Facebook'
-                      GROUP BY date
-                      HAVING SUM(i.impressions) > 0
-                      ORDER BY date;`;
-    assertSql(insights, expected);
+    const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
+    assertSql(
+      insights,
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+                                              FROM insights i
+                                                       JOIN ads a on i.ad_id = a.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                                AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
+                                                AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
+                                              ), 
+  last_interval AS (SELECT ad_id, publisher, integration_type, currency, SUM(i.spend_eur) AS spend_eur
+                                      FROM organization_insights i
+                                      WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
+                                        AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
+                                      GROUP BY ad_id, publisher, integration_type, currency),
+  interval_before_last AS (SELECT ad_id, publisher, integration_type, currency, SUM(i.spend_eur) AS spend_eur
+                                             FROM organization_insights i
+                                             WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '2 week')
+                                               AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
+                                             GROUP BY ad_id, publisher, integration_type, currency
+                                             ),
+  order_column_trend AS (SELECT li.ad_id, li.publisher, li.integration_type, li.currency, li.spend_eur / ibl.spend_eur::decimal trend
+                                      FROM last_interval li JOIN interval_before_last ibl ON li.ad_id = ibl.ad_id AND li.publisher = ibl.publisher AND li.integration_type = ibl.integration_type AND li.currency = ibl.currency
+                                      WHERE ibl.spend_eur
+                                          > 0
+                                      ORDER BY trend DESC
+                                      LIMIT 11 OFFSET 0)
+  SELECT i.ad_id, i.publisher, i.integration_type, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
+  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.integration_type = oct.integration_type AND i.currency = oct.currency
+  WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
+    AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
+  GROUP BY i.ad_id, i.publisher, i.integration_type, i.currency, interval_start, oct.trend
+  ORDER BY oct.trend DESC, interval_start;`,
+    );
   });
 });
 
 void describe('searchAdsToSQL tests', () => {
+  after(async () => {
+    await redisQuit();
+  });
   void it('should generate SQL for no expression', () => {
     const sql = searchAdsToSQL({});
     assert.strictEqual(sql, '');

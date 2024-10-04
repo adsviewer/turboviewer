@@ -77,3 +77,7 @@ export const redisDelPattern = (pattern: string): void => {
     }
   });
 };
+
+export const redisQuit = async (): Promise<void> => {
+  await ioredis.quit();
+};
