@@ -47,6 +47,9 @@ export default function TopAdsContainer(): React.ReactNode {
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
+  // Top ads parameters that will re-render only the top ads when url state changes
+  const orderByParam = searchParams.get(urlKeys.orderBy);
+
   const getOrderByValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
       return InsightsColumnsOrderBy.impressions_rel;
@@ -91,13 +94,13 @@ export default function TopAdsContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric]);
+  }, [resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric, orderByParam]);
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsightsTopAds();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderBy, option.value);
     startTransition(() => {
-      router.replace(newURL);
+      router.replace(newURL, { scroll: false });
     });
   };
   return (
