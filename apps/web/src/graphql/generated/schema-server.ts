@@ -1021,10 +1021,10 @@ export type InsightsQuery = {
       adId?: string | null;
       adName?: string | null;
       currency: CurrencyEnum;
+      integration?: IntegrationType | null;
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
       position?: string | null;
-      integration?: IntegrationType | null;
       datapoints: Array<{
         __typename: 'InsightsDatapoints';
         date: Date;
@@ -1488,10 +1488,10 @@ export const InsightsDocument = gql`
           height
           type
         }
+        integration
         device
         publisher
         position
-        integration
       }
     }
   }

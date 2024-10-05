@@ -64,10 +64,10 @@ query insights(
         height
         type
       }
+      integration
       device
       publisher
       position
-      integration
     }
   }
 }

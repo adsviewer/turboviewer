@@ -3,8 +3,9 @@
 import { Text, SimpleGrid } from '@mantine/core';
 import { type Key, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { sentenceCase } from 'change-case';
 import LoaderCentered from '@/components/misc/loader-centered';
-import { type InsightsQuery } from '@/graphql/generated/schema-server';
+import { type GroupedInsight, type InsightsQuery } from '@/graphql/generated/schema-server';
 import InsightCard from './insight-card';
 
 interface PropsType {
@@ -14,6 +15,12 @@ interface PropsType {
 
 export default function InsightsGrid(props: PropsType): ReactNode {
   const t = useTranslations('insights');
+
+  const getInsightHeading = (insight: GroupedInsight): string => {
+    if (insight.publisher) return sentenceCase(insight.publisher);
+    else if (insight.integration) return sentenceCase(insight.integration);
+    return t('insight');
+  };
 
   return (
     <>
@@ -33,7 +40,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
           ? props.insights.map((insight) => (
               <InsightCard
                 key={insight.id as Key}
-                heading={insight.publisher ?? t('insight')}
+                heading={getInsightHeading(insight)}
                 title={insight.adName ?? t('insight')}
                 description={insight.position}
                 device={insight.device}
