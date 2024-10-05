@@ -7,6 +7,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAtom } from 'jotai';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
+import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
+import { IconCalendarMonth } from '@tabler/icons-react';
 import { addOrReplaceURLParams, ChartMetricsEnum, isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
 import { insightsChartAtom } from '@/app/atoms/insights-atoms';
 import {
@@ -27,8 +29,19 @@ export default function ChartContainer(): React.ReactNode {
   const [insightsChart, setInsightsChart] = useAtom(insightsChartAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
+  // Date range values loading
+  const paramsDateFrom = searchParams.get(urlKeys.dateFrom)
+    ? (new Date(Number(searchParams.get(urlKeys.dateFrom))) as DateValue)
+    : null;
+  const paramsDateTo = searchParams.get(urlKeys.dateTo)
+    ? (new Date(Number(searchParams.get(urlKeys.dateTo))) as DateValue)
+    : null;
+  const [dateRangeValue, setDateRangeValue] = useState<[DateValue, DateValue]>([paramsDateFrom, paramsDateTo]);
+
   // Chart parameters that will re-render only the chart when url state changes
   const [chartMetricValue, setChartMetricValue] = useState<string | null>(null);
+  const [dateFromValue, setDateFromValue] = useState<string | null>(null);
+  const [dateToValue, setDateToValue] = useState<string | null>(null);
 
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
@@ -38,14 +51,30 @@ export default function ChartContainer(): React.ReactNode {
   useEffect(() => {
     // Logic to allow re-render only for search params of this component
     const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
-    if (chartMetricValue === currChartMetricValue) return;
+    const currDateFromValue = searchParams.get(urlKeys.dateFrom);
+    const currDateToValue = searchParams.get(urlKeys.dateTo);
+    if (
+      chartMetricValue === currChartMetricValue &&
+      dateFromValue === currDateFromValue &&
+      dateToValue === currDateToValue
+    )
+      return;
     setChartMetricValue(currChartMetricValue);
+    setDateFromValue(currDateFromValue);
+    setDateToValue(currDateToValue);
 
     // Params
+    let dateFrom, dateTo;
+    if (dateRangeValue[0] && dateRangeValue[1]) {
+      dateFrom = dateRangeValue[0].getTime();
+      dateTo = dateRangeValue[1].getTime();
+    }
     const chartParams: InsightsParams = {
+      dateFrom,
+      dateTo,
       orderBy: InsightsColumnsOrderBy.impressions_abs,
-      pageSize: 3,
-      groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+      pageSize: Object.keys(PublisherEnum).length, // page size is the same as the publishers that we manage since we group per publisher
+      groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,
       publisher: [
         PublisherEnum.Facebook,
@@ -61,6 +90,7 @@ export default function ChartContainer(): React.ReactNode {
     };
 
     // Get chart's insights
+    logger.info(chartParams);
     resetInsightsChart();
     void getInsights(chartParams)
       .then((res) => {
@@ -80,7 +110,16 @@ export default function ChartContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [chartMetricValue, resetInsightsChart, searchParams, setInsightsChart, tGeneric]);
+  }, [
+    chartMetricValue,
+    dateFromValue,
+    dateRangeValue,
+    dateToValue,
+    resetInsightsChart,
+    searchParams,
+    setInsightsChart,
+    tGeneric,
+  ]);
 
   const getChartMetricValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))
@@ -100,9 +139,34 @@ export default function ChartContainer(): React.ReactNode {
     });
   };
 
+  const handleDateRangeChange = (dates: DatesRangeValue): void => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    const dateFrom = dates[0];
+    const dateTo = dates[1];
+    setDateRangeValue([dateFrom, dateTo]);
+    // Perform new fetching only if both dates are given
+    if (dateFrom && dateTo) {
+      newParams.set(urlKeys.dateFrom, String(dateFrom.getTime()));
+      newParams.set(urlKeys.dateTo, String(dateTo.getTime()));
+      const newURL = `${pathname}?${newParams.toString()}`;
+      startTransition(() => {
+        router.replace(newURL);
+      });
+    }
+    // Clear logic
+    else if (!dateFrom && !dateTo) {
+      newParams.delete(urlKeys.dateFrom);
+      newParams.delete(urlKeys.dateTo);
+      const newURL = `${pathname}?${newParams.toString()}`;
+      startTransition(() => {
+        router.replace(newURL);
+      });
+    }
+  };
+
   return (
-    <>
-      <Flex align="center" gap="md" wrap="wrap">
+    <Flex direction="column">
+      <Flex align="center" gap="md" wrap="wrap" mb="md">
         <Select
           description={tInsights('chartMetric')}
           data={[
@@ -117,13 +181,24 @@ export default function ChartContainer(): React.ReactNode {
           allowDeselect={false}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
-          maw={200}
+          maw={280}
           disabled={isPending || !insightsChart.length}
+        />
+        <DatePickerInput
+          mt="auto"
+          ml="auto"
+          type="range"
+          maxDate={new Date()}
+          placeholder={tGeneric('pickDateRange')}
+          leftSection={<IconCalendarMonth />}
+          clearable
+          onChange={handleDateRangeChange}
+          value={dateRangeValue}
         />
       </Flex>
       <Flex align="flex-end" gap="md" wrap="wrap" mb="md">
         <Chart insights={insightsChart} isPending={isPending} />
       </Flex>
-    </>
+    </Flex>
   );
 }
