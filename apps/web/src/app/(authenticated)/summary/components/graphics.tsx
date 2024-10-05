@@ -12,21 +12,6 @@ export default function Graphics(): React.ReactNode {
         playAnimation
         customStyles={{
           position: 'absolute',
-          top: 20,
-          right: 55,
-          zIndex: -9999,
-          width: '19rem',
-          transform: 'rotate(-140deg)',
-          opacity: 0.08,
-        }}
-      />
-      <LottieAnimation
-        animationData={nodesGraphAnimation}
-        speed={0.3}
-        loop
-        playAnimation
-        customStyles={{
-          position: 'absolute',
           top: 550,
           right: 300,
           zIndex: -9999,
