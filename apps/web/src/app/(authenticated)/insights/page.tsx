@@ -9,11 +9,10 @@ import { notifications } from '@mantine/notifications';
 import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
-import LottieAnimation from '@/components/misc/lottie-animation';
-import nodesGraphAnimation from '../../../../public/lotties/nodes-graph.json';
 import InsightsGrid from './components/insights-grid';
 import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
+import Graphics from './components/graphics';
 
 interface InsightsProps {
   searchParams: InsightsParams;
@@ -53,35 +52,7 @@ export default function Insights(props: InsightsProps): ReactNode {
 
   return (
     <Box pos="relative">
-      <LottieAnimation
-        animationData={nodesGraphAnimation}
-        speed={0.2}
-        loop
-        playAnimation
-        customStyles={{
-          position: 'absolute',
-          top: -40,
-          right: 34,
-          zIndex: -9999,
-          width: '18rem',
-          opacity: 0.05,
-        }}
-      />
-      <LottieAnimation
-        animationData={nodesGraphAnimation}
-        speed={0.3}
-        loop
-        playAnimation
-        customStyles={{
-          position: 'absolute',
-          top: 0,
-          right: 170,
-          zIndex: -9999,
-          width: '19rem',
-          transform: 'rotate(-140deg)',
-          opacity: 0.08,
-        }}
-      />
+      <Graphics />
       <OrderFilters />
       <Suspense fallback={<LoaderCentered type="dots" />}>
         <Flex direction="column">
