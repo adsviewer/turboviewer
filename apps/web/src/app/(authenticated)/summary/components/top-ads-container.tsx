@@ -18,25 +18,6 @@ import InsightsGrid from '@/components/insights/insights-grid';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
-const INITIAL_ORDER_BY_VALUE = InsightsColumnsOrderBy.impressions_abs;
-const TOP_ADS_INITIAL_PARAMS: InsightsParams = {
-  orderBy: InsightsColumnsOrderBy.impressions_abs,
-  pageSize: 3,
-  groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
-  order: OrderBy.desc,
-  publisher: [
-    PublisherEnum.Facebook,
-    PublisherEnum.AudienceNetwork,
-    PublisherEnum.GlobalAppBundle,
-    PublisherEnum.Instagram,
-    PublisherEnum.LinkedIn,
-    PublisherEnum.Messenger,
-    PublisherEnum.Pangle,
-    PublisherEnum.TikTok,
-    PublisherEnum.Unknown,
-  ], // temporarily for ALL publishers, later we'll switch to a per integration logic once BE is done!
-};
-
 export default function TopAdsContainer(): React.ReactNode {
   const t = useTranslations('summary');
   const tGeneric = useTranslations('generic');
@@ -48,7 +29,7 @@ export default function TopAdsContainer(): React.ReactNode {
   const [isPending, setIsPending] = useState<boolean>(false);
 
   // Top ads parameters that will re-render only the top ads when url state changes
-  const orderByParam = searchParams.get(urlKeys.orderBy);
+  const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
 
   const getOrderByValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
@@ -61,7 +42,7 @@ export default function TopAdsContainer(): React.ReactNode {
       return InsightsColumnsOrderBy.cpm_rel;
     else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
       return InsightsColumnsOrderBy.cpm_abs;
-    return INITIAL_ORDER_BY_VALUE; // default
+    return InsightsColumnsOrderBy.impressions_abs;
   };
 
   const resetInsightsTopAds = useCallback((): void => {
@@ -69,12 +50,34 @@ export default function TopAdsContainer(): React.ReactNode {
   }, [setInsightsTopAds]);
 
   useEffect(() => {
-    const topAdsParams = { ...TOP_ADS_INITIAL_PARAMS };
-    const orderByValue = searchParams.get(urlKeys.orderBy);
-    topAdsParams.orderBy = orderByValue ? (orderByValue as InsightsColumnsOrderBy) : INITIAL_ORDER_BY_VALUE;
-    resetInsightsTopAds();
+    // Logic to allow re-render only for search params of this component
+    const currOrderByValue = searchParams.get(urlKeys.orderBy);
+    if (currOrderByValue && orderByParamValue === currOrderByValue) return;
+    setOrderByParamValue(currOrderByValue);
+
+    // Params
+    const topAdsParams: InsightsParams = {
+      orderBy: searchParams.get(urlKeys.orderBy)
+        ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
+        : InsightsColumnsOrderBy.impressions_abs,
+      pageSize: 3,
+      groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+      order: OrderBy.desc,
+      publisher: [
+        PublisherEnum.Facebook,
+        PublisherEnum.AudienceNetwork,
+        PublisherEnum.GlobalAppBundle,
+        PublisherEnum.Instagram,
+        PublisherEnum.LinkedIn,
+        PublisherEnum.Messenger,
+        PublisherEnum.Pangle,
+        PublisherEnum.TikTok,
+        PublisherEnum.Unknown,
+      ], // temporarily for ALL publishers, later we'll switch to a per integration logic once BE is done!
+    };
 
     // Get top ads' insights
+    resetInsightsTopAds();
     setIsPending(true);
     void getInsights(topAdsParams)
       .then((res) => {
@@ -94,7 +97,7 @@ export default function TopAdsContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric, orderByParam]);
+  }, [orderByParamValue, resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric]);
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsightsTopAds();

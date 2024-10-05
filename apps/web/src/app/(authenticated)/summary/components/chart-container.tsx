@@ -18,24 +18,6 @@ import {
 import getInsights, { type InsightsParams } from '../../insights/actions';
 import Chart from './chart';
 
-const CHART_INITIAL_PARAMS: InsightsParams = {
-  orderBy: InsightsColumnsOrderBy.impressions_abs,
-  pageSize: 3,
-  groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
-  order: OrderBy.desc,
-  publisher: [
-    PublisherEnum.Facebook,
-    PublisherEnum.AudienceNetwork,
-    PublisherEnum.GlobalAppBundle,
-    PublisherEnum.Instagram,
-    PublisherEnum.LinkedIn,
-    PublisherEnum.Messenger,
-    PublisherEnum.Pangle,
-    PublisherEnum.TikTok,
-    PublisherEnum.Unknown,
-  ],
-};
-
 export default function ChartContainer(): React.ReactNode {
   const tInsights = useTranslations('insights');
   const tGeneric = useTranslations('generic');
@@ -46,17 +28,39 @@ export default function ChartContainer(): React.ReactNode {
   const [isPending, setIsPending] = useState<boolean>(false);
 
   // Chart parameters that will re-render only the chart when url state changes
-  const chartMetricParam = searchParams.get(urlKeys.chartMetric);
+  const [chartMetricValue, setChartMetricValue] = useState<string | null>(null);
 
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
   }, [setInsightsChart]);
 
   useEffect(() => {
-    const chartParams = { ...CHART_INITIAL_PARAMS };
-    resetInsightsChart();
+    // Logic to allow re-render only for search params of this component
+    const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
+    if (chartMetricValue === currChartMetricValue) return;
+    setChartMetricValue(currChartMetricValue);
+
+    // Params
+    const chartParams: InsightsParams = {
+      orderBy: InsightsColumnsOrderBy.impressions_abs,
+      pageSize: 3,
+      groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+      order: OrderBy.desc,
+      publisher: [
+        PublisherEnum.Facebook,
+        PublisherEnum.AudienceNetwork,
+        PublisherEnum.GlobalAppBundle,
+        PublisherEnum.Instagram,
+        PublisherEnum.LinkedIn,
+        PublisherEnum.Messenger,
+        PublisherEnum.Pangle,
+        PublisherEnum.TikTok,
+        PublisherEnum.Unknown,
+      ],
+    };
 
     // Get chart's insights
+    resetInsightsChart();
     setIsPending(true);
     void getInsights(chartParams)
       .then((res) => {
@@ -76,7 +80,7 @@ export default function ChartContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [resetInsightsChart, setInsightsChart, tGeneric, chartMetricParam]);
+  }, [chartMetricValue, resetInsightsChart, searchParams, setInsightsChart, tGeneric]);
 
   const getChartMetricValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))

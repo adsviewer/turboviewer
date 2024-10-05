@@ -5,8 +5,13 @@ import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
 import { type AJwtPayload } from '@repo/shared-types';
 import { env } from './env.mjs';
-import { urlKeys } from './util/url-query-utils';
-import { InsightsColumnsGroupBy, InsightsInterval, UserStatus } from './graphql/generated/schema-server';
+import { ChartMetricsEnum, urlKeys } from './util/url-query-utils';
+import {
+  InsightsColumnsGroupBy,
+  InsightsColumnsOrderBy,
+  InsightsInterval,
+  UserStatus,
+} from './graphql/generated/schema-server';
 
 export const DEFAULT_HOME_PATH = '/summary';
 const DEFAULT_MISSING_ORG_PATH = '/organization-warning';
@@ -100,7 +105,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Summary only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/summary' && !request.nextUrl.search) {
-    const newURL = `/summary?${urlKeys.fetchPreviews}=true`;
+    const newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}`;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
