@@ -148,7 +148,7 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -179,7 +179,7 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -340,7 +340,7 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -389,7 +389,7 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -430,7 +430,7 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -473,7 +473,7 @@ void describe('insights query builder tests', () => {
       pageSize: 10,
       dateFrom: new Date('2024-04-01'),
       dateTo: new Date('2024-05-28'),
-      groupBy: ['adId', 'publisher', 'integrationType'],
+      groupBy: ['adId', 'publisher', 'integration'],
       interval: 'week',
       order: 'desc',
     };
@@ -482,7 +482,7 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
@@ -493,28 +493,28 @@ void describe('insights query builder tests', () => {
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                               ), 
-  last_interval AS (SELECT ad_id, publisher, integration_type, currency, SUM(i.spend_eur) AS spend_eur
+  last_interval AS (SELECT ad_id, publisher, integration, currency, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
                                         AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
-                                      GROUP BY ad_id, publisher, integration_type, currency),
-  interval_before_last AS (SELECT ad_id, publisher, integration_type, currency, SUM(i.spend_eur) AS spend_eur
+                                      GROUP BY ad_id, publisher, integration, currency),
+  interval_before_last AS (SELECT ad_id, publisher, integration, currency, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '2 week')
                                                AND date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
-                                             GROUP BY ad_id, publisher, integration_type, currency
+                                             GROUP BY ad_id, publisher, integration, currency
                                              ),
-  order_column_trend AS (SELECT li.ad_id, li.publisher, li.integration_type, li.currency, li.spend_eur / ibl.spend_eur::decimal trend
-                                      FROM last_interval li JOIN interval_before_last ibl ON li.ad_id = ibl.ad_id AND li.publisher = ibl.publisher AND li.integration_type = ibl.integration_type AND li.currency = ibl.currency
+  order_column_trend AS (SELECT li.ad_id, li.publisher, li.integration, li.currency, li.spend_eur / ibl.spend_eur::decimal trend
+                                      FROM last_interval li JOIN interval_before_last ibl ON li.ad_id = ibl.ad_id AND li.publisher = ibl.publisher AND li.integration = ibl.integration AND li.currency = ibl.currency
                                       WHERE ibl.spend_eur
                                           > 0
                                       ORDER BY trend DESC
                                       LIMIT 11 OFFSET 0)
-  SELECT i.ad_id, i.publisher, i.integration_type, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.integration_type = oct.integration_type AND i.currency = oct.currency
+  SELECT i.ad_id, i.publisher, i.integration, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
+  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.integration = oct.integration AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
     AND i.date < DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
-  GROUP BY i.ad_id, i.publisher, i.integration_type, i.currency, interval_start, oct.trend
+  GROUP BY i.ad_id, i.publisher, i.integration, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
   });

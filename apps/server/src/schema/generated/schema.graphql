@@ -323,6 +323,7 @@ type GroupedInsight {
   device: DeviceEnum
   iFrame: IFrame
   id: String!
+  integration: IntegrationType
   position: String
   publisher: PublisherEnum
 }
@@ -370,7 +371,7 @@ enum InsightsColumnsGroupBy {
   device
   position
   publisher
-  integrationType
+  integration
 }
 
 enum InsightsColumnsOrderBy {

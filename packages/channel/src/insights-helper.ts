@@ -59,7 +59,7 @@ export const getInsightsHelper = async (
     cpm: number;
     campaignId: string;
     adSetId: string;
-    integrationType: IntegrationTypeEnum;
+    integration: IntegrationTypeEnum;
   })[];
 
   const ret: {
@@ -71,6 +71,7 @@ export const getInsightsHelper = async (
     publisher?: PublisherEnum;
     currency: CurrencyEnum;
     datapoints: { spend: bigint; impressions: bigint; date: Date; cpm: bigint }[];
+    integration: IntegrationTypeEnum;
   }[] = [];
   const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
     return groupBy.map((group) => insight[group]).join('-');

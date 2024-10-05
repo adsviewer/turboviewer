@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database';
+import { IntegrationTypeEnum, prisma } from '@repo/database';
 import { groupBy as groupByUtil, isAError } from '@repo/utils';
 import {
   adWithAdAccount,
@@ -199,6 +199,7 @@ const GroupedInsightDto = builder.simpleObject(
       device: t.field({ type: DeviceEnumDto, nullable: true }),
       publisher: t.field({ type: PublisherEnumDto, nullable: true }),
       position: t.string({ nullable: true }),
+      integration: t.field({ type: IntegrationTypeEnum, nullable: true }),
     }),
   },
   (t) => ({

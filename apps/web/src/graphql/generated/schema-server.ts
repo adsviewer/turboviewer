@@ -351,6 +351,7 @@ export type GroupedInsight = {
   device?: Maybe<DeviceEnum>;
   iFrame?: Maybe<IFrame>;
   id: Scalars['String']['output'];
+  integration?: Maybe<IntegrationType>;
   position?: Maybe<Scalars['String']['output']>;
   publisher?: Maybe<PublisherEnum>;
 };
@@ -398,7 +399,7 @@ export enum InsightsColumnsGroupBy {
   device = 'device',
   position = 'position',
   publisher = 'publisher',
-  integrationType = 'integrationType',
+  integration = 'integration',
 }
 
 export enum InsightsColumnsOrderBy {
