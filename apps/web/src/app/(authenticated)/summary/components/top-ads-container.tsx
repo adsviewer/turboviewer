@@ -42,6 +42,7 @@ export default function TopAdsContainer(): React.ReactNode {
 
   const resetInsightsTopAds = useCallback((): void => {
     setInsightsTopAds([]);
+    setIsPending(true);
   }, [setInsightsTopAds]);
 
   useEffect(() => {
@@ -62,7 +63,6 @@ export default function TopAdsContainer(): React.ReactNode {
 
     // Get top ads' insights
     resetInsightsTopAds();
-    setIsPending(true);
     void getInsights(topAdsParams)
       .then((res) => {
         if (!res.success) {

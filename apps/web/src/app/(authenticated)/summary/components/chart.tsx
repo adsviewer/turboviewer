@@ -9,7 +9,7 @@ import { getCurrencySymbol } from '@/util/currency-utils';
 import { ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
 import { CurrencyEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
-import { placeholderDatapoints } from '@/util/charts-utils';
+import { placeholderDatapoints, placeholderSeries } from '@/util/charts-utils';
 
 interface PropsType {
   isPending: boolean;
@@ -106,10 +106,7 @@ export default function Chart(props: PropsType): ReactNode {
             valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
             dataKey="date"
             data={placeholderDatapoints}
-            series={[
-              { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: tInsights('impressions') },
-              { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
-            ]}
+            series={placeholderSeries}
           />
         </Flex>
       ) : (
