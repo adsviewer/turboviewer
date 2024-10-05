@@ -24,7 +24,7 @@ export const getLastXMonths = (): { until: Date; since: Date } => {
   const lastXMonths = getBeforeXMonths();
   return {
     since: lastXMonths,
-    until: tomorrow,
+    until: today,
   };
 };
 

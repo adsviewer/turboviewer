@@ -1,4 +1,4 @@
-import { addInterval, getDayPriorTillTomorrow, getLastXMonths } from '@repo/utils';
+import { addInterval, getDayPriorTillTomorrow, getLastXMonths, getTomorrowStartOfDay, getYesterday } from '@repo/utils';
 import { prisma, Tier } from '@repo/database';
 import { tierConstraints } from '@repo/mappings';
 
@@ -66,10 +66,20 @@ export const timeRangeHelper = (
     const range = getLastXMonths();
 
     const adjustedSince = addInterval(range.until, 'day', -maxRecency);
-    return splitTimeRange(maxRecency, adjustedSince, range.until);
+    const splitRange = splitTimeRange(maxRecency, adjustedSince, range.until);
+    const adjustInitialDate = getYesterday(splitRange[0].since);
+    const adjustedUntil = getTomorrowStartOfDay(splitRange[splitRange.length - 1].until);
+    splitRange[0].since = adjustInitialDate;
+    splitRange[splitRange.length - 1].until = adjustedUntil;
+    return splitRange;
   }
   const furthestDate = addInterval(new Date(), 'day', -maxRecency);
   const insightDateWithinLimit = latestInsight && latestInsight.date > furthestDate ? latestInsight.date : furthestDate;
+  const splitRange = splitTimeRange(maxRecency, furthestDate, new Date());
+
   const range = getDayPriorTillTomorrow(insightDateWithinLimit);
-  return splitTimeRange(maxRecency, range.since, range.until);
+  splitRange[0].since = range.since;
+  splitRange[splitRange.length - 1].until = range.until;
+
+  return splitRange;
 };
