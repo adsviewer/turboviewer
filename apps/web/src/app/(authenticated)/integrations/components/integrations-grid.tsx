@@ -13,14 +13,13 @@ import {
   type SettingsChannelsQuery,
 } from '@/graphql/generated/schema-server';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
-import LottieAnimation from '@/components/misc/lottie-animation';
 import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
 import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
 import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
 import googleLogo from '../../../../../public/integrations/google-logo-icon.svg';
 import snapchatLogo from '../../../../../public/integrations/snapchat-logo-icon.svg';
 import redditLogo from '../../../../../public/integrations/reddit-logo-icon.svg';
-import blocksAnimation from '../../../../../public/lotties/blocks.json';
+import Graphics from '../../insights/components/graphics';
 import IntegrationCard from './integration-card';
 
 interface IntegrationProps {
@@ -134,21 +133,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
 
   return (
     <>
-      <LottieAnimation
-        animationData={blocksAnimation}
-        speed={0.5}
-        loop
-        playAnimation
-        customStyles={{
-          position: 'absolute',
-          top: 20,
-          right: 34,
-          zIndex: -9999,
-          width: '18rem',
-          transform: 'rotate(-5deg)',
-          opacity: 0.2,
-        }}
-      />
+      <Graphics />
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
         {props.integrations.map((integration) => {
           const info = map.get(integration.type);
