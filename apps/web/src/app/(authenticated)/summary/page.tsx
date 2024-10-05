@@ -181,7 +181,7 @@ export default function Summary(): ReactNode {
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           maw={200}
-          disabled={isPendingChart}
+          disabled={isPendingChart || !insightsChart.length}
         />
       </Flex>
       <Flex align="flex-end" gap="md" wrap="wrap" mb="md">

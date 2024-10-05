@@ -72,6 +72,7 @@
       "adId": "Advertentie-ID",
       "adSetId": "Advertentieset-ID",
       "campaignId": "Campagne-ID",
+      "integratie": "Integratie",
       "device": "Apparaat",
       "date": "Datum",
       "publisher": "Uitgever",

@@ -4,11 +4,12 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AreaChart, type AreaChartSeries } from '@mantine/charts';
+import { Flex, LoadingOverlay } from '@mantine/core';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
 import { CurrencyEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
-import LoaderCentered from '@/components/misc/loader-centered';
 import { dateFormatOptions } from '@/util/format-utils';
+import { placeholderDatapoints } from '@/util/charts-utils';
 
 interface PropsType {
   isPending: boolean;
@@ -84,8 +85,32 @@ export default function Chart(props: PropsType): ReactNode {
   return (
     <>
       {/* Chart w/ loading state */}
-      {props.isPending ? (
-        <LoaderCentered type="dots" />
+      {props.isPending || !props.insights.length ? (
+        <Flex pos="relative" justify="center" align="center" w="100%" mih={120}>
+          <LoadingOverlay
+            visible
+            overlayProps={{ blur: 4 }}
+            color="#FFF"
+            loaderProps={!props.isPending ? { children: tInsights('noResultsFound') } : {}}
+          />
+          <AreaChart
+            h={300}
+            mx="md"
+            tooltipProps={{ wrapperStyle: { zIndex: 10 } }}
+            curveType="natural"
+            strokeWidth={1.5}
+            tooltipAnimationDuration={200}
+            withLegend
+            withRightYAxis
+            valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
+            dataKey="date"
+            data={placeholderDatapoints}
+            series={[
+              { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: tInsights('impressions') },
+              { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
+            ]}
+          />
+        </Flex>
       ) : (
         <AreaChart
           h={300}

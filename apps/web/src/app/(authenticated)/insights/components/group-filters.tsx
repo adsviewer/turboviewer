@@ -157,10 +157,10 @@ export default function GroupFilters(): ReactNode {
       if (isChecked) {
         const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.groupedBy, e.target.defaultValue);
         router.replace(newURL);
-      } else {
-        const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.groupedBy, e.target.defaultValue);
-        router.replace(newURL);
+        return;
       }
+      const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.groupedBy, e.target.defaultValue);
+      router.replace(newURL);
     });
   };
 
@@ -274,6 +274,14 @@ export default function GroupFilters(): ReactNode {
           onChange={handleCheckboxFilter}
           value={InsightsColumnsGroupBy.campaignId}
           checked={isChecked(InsightsColumnsGroupBy.campaignId)}
+        />
+        <Checkbox
+          disabled={isPending}
+          label={t('integration')}
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.integrationType}
+          checked={isChecked(InsightsColumnsGroupBy.integrationType)}
         />
         <Checkbox
           disabled={isPending}
