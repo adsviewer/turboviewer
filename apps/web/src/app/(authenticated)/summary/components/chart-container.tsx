@@ -45,6 +45,9 @@ export default function ChartContainer(): React.ReactNode {
   const [insightsChart, setInsightsChart] = useAtom(insightsChartAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
+  // Chart parameters that will re-render only the chart when url state changes
+  const chartMetricParam = searchParams.get(urlKeys.chartMetric);
+
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
   }, [setInsightsChart]);
@@ -73,7 +76,7 @@ export default function ChartContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [resetInsightsChart, setInsightsChart, tGeneric]);
+  }, [resetInsightsChart, setInsightsChart, tGeneric, chartMetricParam]);
 
   const getChartMetricValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))
@@ -89,7 +92,7 @@ export default function ChartContainer(): React.ReactNode {
     resetInsightsChart();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.chartMetric, option.value);
     startTransition(() => {
-      router.replace(newURL);
+      router.replace(newURL, { scroll: false });
     });
   };
 
