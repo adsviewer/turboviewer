@@ -1,4 +1,4 @@
-import { addInterval, getDayPriorTillTomorrow, getLastXMonths, getTomorrowStartOfDay } from '@repo/utils';
+import { addInterval, getDayPriorTillTomorrow, getLastXMonths } from '@repo/utils';
 import { prisma, Tier } from '@repo/database';
 import { tierConstraints } from '@repo/mappings';
 
@@ -21,23 +21,31 @@ export const timeRanges = async (initial: boolean, adAccountId: string): Promise
   return timeRangeHelper(initial, latestInsight ?? undefined);
 };
 
-export const splitTimeRange = (
-  maxTimePeriodDays: number,
-  since: Date,
-  until: Date = new Date(),
-): { since: Date; until: Date }[] => {
-  const maxTimePeriod = 1000 * 60 * 60 * 24 * maxTimePeriodDays;
+export const splitTimeRange = (maxRecency: number, since: Date, until: Date): { since: Date; until: Date }[] => {
   if (since.getTime() > new Date().getTime()) return [];
-
   const periods: { since: Date; until: Date }[] = [];
+  const diffDays = Math.floor((until.getTime() - since.getTime()) / (1000 * 3600 * 24));
 
-  const diff = until.getTime() - since.getTime();
-  if (diff < maxTimePeriod) return [{ since, until }];
+  if (diffDays <= maxRecency) {
+    periods.push({ since, until });
+  } else {
+    let currentSince = since;
+    while (Math.floor((until.getTime() - currentSince.getTime()) / (1000 * 3600 * 24)) > 0) {
+      const daysRemaining = Math.floor((until.getTime() - currentSince.getTime()) / (1000 * 3600 * 24));
+      let currentUntil;
+      if (daysRemaining >= maxRecency) {
+        currentUntil = addInterval(currentSince, 'day', Math.min(daysRemaining, maxRecency));
+      } else {
+        currentUntil = new Date(until);
+        currentUntil.setMinutes(until.getMinutes());
+        currentUntil.setSeconds(until.getSeconds());
+        currentUntil.setMilliseconds(until.getMilliseconds());
+      }
+      periods.push({ since: currentSince, until: currentUntil });
+      currentSince = currentUntil;
+    }
+  }
 
-  const newDateUntil = addInterval(since, 'day', maxTimePeriodDays - 1);
-  periods.push({ since, until: newDateUntil });
-  const newDateSince = getTomorrowStartOfDay(newDateUntil);
-  periods.push(...splitTimeRange(maxTimePeriodDays, newDateSince, until));
   return periods;
 };
 
