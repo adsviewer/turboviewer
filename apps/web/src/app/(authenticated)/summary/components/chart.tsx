@@ -89,6 +89,7 @@ export default function Chart(props: PropsType): ReactNode {
         <Flex pos="relative" justify="center" align="center" w="100%" mih={120}>
           <LoadingOverlay
             visible
+            zIndex={1}
             overlayProps={{ blur: 4 }}
             color="#FFF"
             loaderProps={!props.isPending ? { children: tInsights('noResultsFound') } : {}}
