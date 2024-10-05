@@ -19,6 +19,7 @@ import InsightsGrid from '@/components/insights/insights-grid';
 import { addOrReplaceURLParams, ChartMetricsEnum, isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
 import getInsights, { type InsightsParams } from '../insights/actions';
 import Chart from './components/chart';
+import Graphics from './components/graphics';
 
 const INITIAL_ORDER_BY_VALUE = InsightsColumnsOrderBy.impressions_abs;
 const TOP_ADS_INITIAL_PARAMS: InsightsParams = {
@@ -164,6 +165,7 @@ export default function Summary(): ReactNode {
 
   return (
     <Flex direction="column">
+      <Graphics />
       {/* Chart */}
       <Flex align="center" gap="md" wrap="wrap">
         <Select
