@@ -19,8 +19,8 @@ import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.
 import googleLogo from '../../../../../public/integrations/google-logo-icon.svg';
 import snapchatLogo from '../../../../../public/integrations/snapchat-logo-icon.svg';
 import redditLogo from '../../../../../public/integrations/reddit-logo-icon.svg';
-import Graphics from '../../insights/components/graphics';
 import IntegrationCard from './integration-card';
+import Graphics from './graphics';
 
 interface IntegrationProps {
   integrations: SettingsChannelsQuery['settingsChannels'];

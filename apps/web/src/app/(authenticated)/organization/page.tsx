@@ -10,6 +10,7 @@ import LoaderCentered from '@/components/misc/loader-centered';
 import NameEdit from './components/name-edit';
 import { UsersTable } from './components/users-table';
 import InviteUsersButton from './components/invite-users-button';
+import Graphics from './components/graphics';
 
 export default function Organization(): React.ReactNode {
   const userDetails = useAtomValue(userDetailsAtom);
@@ -19,6 +20,7 @@ export default function Organization(): React.ReactNode {
     <Flex direction="column" gap="md" w="100%">
       {!_.isEqual(userDetails, initialUserDetails) ? (
         <>
+          <Graphics />
           <NameEdit isPending={isPending} setIsPending={setIsPending} />
           <UsersTable />
           <InviteUsersButton isPending={isPending} />
