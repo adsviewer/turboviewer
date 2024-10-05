@@ -112,7 +112,7 @@ export const getOrganizationalInsights = (
   filter: FilterInsightsInputType,
   dataPointsPerInterval: number,
 ): string =>
-  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration_type
+  `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
