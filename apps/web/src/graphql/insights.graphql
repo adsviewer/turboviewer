@@ -67,6 +67,7 @@ query insights(
       device
       publisher
       position
+      integration
     }
   }
 }
