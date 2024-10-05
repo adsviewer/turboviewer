@@ -1024,6 +1024,7 @@ export type InsightsQuery = {
       device?: DeviceEnum | null;
       publisher?: PublisherEnum | null;
       position?: string | null;
+      integration?: IntegrationType | null;
       datapoints: Array<{
         __typename: 'InsightsDatapoints';
         date: Date;
@@ -1490,6 +1491,7 @@ export const InsightsDocument = gql`
         device
         publisher
         position
+        integration
       }
     }
   }

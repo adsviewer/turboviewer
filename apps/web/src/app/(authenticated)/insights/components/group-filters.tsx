@@ -280,8 +280,8 @@ export default function GroupFilters(): ReactNode {
           label={t('integration')}
           my={4}
           onChange={handleCheckboxFilter}
-          value={InsightsColumnsGroupBy.integrationType}
-          checked={isChecked(InsightsColumnsGroupBy.integrationType)}
+          value={InsightsColumnsGroupBy.integration}
+          checked={isChecked(InsightsColumnsGroupBy.integration)}
         />
         <Checkbox
           disabled={isPending}
