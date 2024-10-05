@@ -219,7 +219,6 @@ model AdAccount {
 
   integration    Integration    @relation(fields: [integrationId], references: [id])
   advertisements Ad[]
-  creatives      Creative[]
   insights       Insight[]
   organizations  Organization[]
   campaign       Campaign[]
@@ -264,14 +263,13 @@ model Ad {
   id          String  @id @default(cuid())
   adAccountId String  @map("ad_account_id")
   adSetId     String? @map("ad_set_id")
-  creativeId  String?
 
   externalId String    @map("external_id")
   name       String?
   adAccount  AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
   insights   Insight[]
-  creative   Creative? @relation(fields: [creativeId], references: [id])
   adSet      AdSet?    @relation(fields: [adSetId], references: [id])
+  creative   Creative?
 
   @@unique([adSetId, externalId])
   @@unique([adAccountId, externalId])
@@ -321,16 +319,20 @@ enum PublisherEnum {
 }
 
 model Creative {
-  id          String   @id @default(cuid())
-  adAccountId String   @map("ad_account_id")
-  name        String
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  id               String @id
+  externalId       String @map("external_id")
+  name             String
+  body             String
+  title            String
+  status           String
+  callToActionType String @map("call_to_action_type")
+  imageUrl         String @map("image_url")
 
-  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
-  ads       Ad[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@unique([adAccountId, name])
+  ad Ad @relation(fields: [id], references: [id])
+
   @@map("creatives")
 }
 

@@ -34,7 +34,6 @@ import {
   type ChannelAdAccount,
   type ChannelAdSet,
   type ChannelCampaign,
-  type ChannelCreative,
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
@@ -62,7 +61,7 @@ const apiVersion = 'v20.0';
 export const baseOauthFbUrl = `https://www.facebook.com/${apiVersion}`;
 export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
-const limit = 600;
+const limit = 2;
 
 class Meta implements ChannelInterface {
   private readonly insightFields = [
@@ -326,37 +325,176 @@ class Meta implements ChannelInterface {
     return await saveAccounts(channelAccounts, integration);
   }
 
-  private async getCreatives(
-    accounts: ChannelAdAccount[],
-    integration: Integration,
-  ): Promise<ChannelCreative[] | AError> {
+  async saveCreatives(integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const creatives: ChannelCreative[] = [];
-    const adsSchema = z.object({
-      id: z.string(),
-      account_id: z.string(),
-      creative: z.object({ id: z.string(), name: z.string() }),
-    });
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
-    const toCreative = (ad: z.infer<typeof adsSchema>) => ({
-      externalAdId: ad.id,
-      externalId: ad.creative.id,
-      name: ad.creative.name,
-      externalAdAccountId: ad.account_id,
-    });
+    for (const [adAccount, accountAds] of groupByAdAccount) {
+      const schema = z.object({
+        id: z.string(),
+        creative: z.object({
+          [AdCreative.Fields.id]: z.string(),
+          [AdCreative.Fields.name]: z.string(),
+          [AdCreative.Fields.title]: z.string(),
+          [AdCreative.Fields.body]: z.string(),
+          [AdCreative.Fields.status]: z.enum(['ACTIVE', 'IN_PROCESS', 'WITH_ISSUES', 'DELETED']),
+          [AdCreative.Fields.call_to_action_type]: z.enum([
+            'OPEN_LINK',
+            'LIKE_PAGE',
+            'SHOP_NOW',
+            'PLAY_GAME',
+            'INSTALL_APP',
+            'USE_APP',
+            'CALL',
+            'CALL_ME',
+            'VIDEO_CALL',
+            'INSTALL_MOBILE_APP',
+            'USE_MOBILE_APP',
+            'MOBILE_DOWNLOAD',
+            'BOOK_TRAVEL',
+            'LISTEN_MUSIC',
+            'WATCH_VIDEO',
+            'LEARN_MORE',
+            'SIGN_UP',
+            'DOWNLOAD',
+            'WATCH_MORE',
+            'NO_BUTTON',
+            'VISIT_PAGES_FEED',
+            'CALL_NOW',
+            'APPLY_NOW',
+            'CONTACT',
+            'BUY_NOW',
+            'GET_OFFER',
+            'GET_OFFER_VIEW',
+            'BUY_TICKETS',
+            'UPDATE_APP',
+            'GET_DIRECTIONS',
+            'BUY',
+            'SEND_UPDATES',
+            'MESSAGE_PAGE',
+            'DONATE',
+            'SUBSCRIBE',
+            'SAY_THANKS',
+            'SELL_NOW',
+            'SHARE',
+            'DONATE_NOW',
+            'GET_QUOTE',
+            'CONTACT_US',
+            'ORDER_NOW',
+            'START_ORDER',
+            'ADD_TO_CART',
+            'VIDEO_ANNOTATION',
+            'RECORD_NOW',
+            'INQUIRE_NOW',
+            'CONFIRM',
+            'REFER_FRIENDS',
+            'REQUEST_TIME',
+            'GET_SHOWTIMES',
+            'LISTEN_NOW',
+            'WOODHENGE_SUPPORT',
+            'SOTTO_SUBSCRIBE',
+            'FOLLOW_USER',
+            'RAISE_MONEY',
+            'EVENT_RSVP',
+            'WHATSAPP_MESSAGE',
+            'FOLLOW_NEWS_STORYLINE',
+            'SEE_MORE',
+            'BOOK_NOW',
+            'FIND_A_GROUP',
+            'FIND_YOUR_GROUPS',
+            'PAY_TO_ACCESS',
+            'PURCHASE_GIFT_CARDS',
+            'FOLLOW_PAGE',
+            'SEND_A_GIFT',
+            'SWIPE_UP_SHOP',
+            'SWIPE_UP_PRODUCT',
+            'SEND_GIFT_MONEY',
+            'PLAY_GAME_ON_FACEBOOK',
+            'GET_STARTED',
+            'OPEN_INSTANT_APP',
+            'AUDIO_CALL',
+            'GET_PROMOTIONS',
+            'JOIN_CHANNEL',
+            'MAKE_AN_APPOINTMENT',
+            'ASK_ABOUT_SERVICES',
+            'BOOK_A_CONSULTATION',
+            'GET_A_QUOTE',
+            'BUY_VIA_MESSAGE',
+            'ASK_FOR_MORE_INFO',
+            'CHAT_WITH_US',
+            'VIEW_PRODUCT',
+            'VIEW_CHANNE',
+          ]),
+        }),
+      });
+      const toCreative = (
+        ad: z.infer<typeof schema>,
+      ): {
+        adId: string;
+        id: string;
+        body: string;
+        title: string;
+        status: string;
+        callToActionType: string;
+      } => ({
+        adId: ad.id,
+        id: ad.creative.id,
+        body: ad.creative.body,
+        title: ad.creative.title,
+        status: ad.creative.status,
+        callToActionType: ad.creative.call_to_action_type,
+      });
 
-    for (const acc of accounts) {
-      const account = new AdAccount(`act_${acc.externalId}`, {}, undefined, undefined);
-      const getAdsFn = account.getAds(
-        [Ad.Fields.id, Ad.Fields.account_id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`],
-        {
-          limit,
-        },
-      );
-      const accountCreatives = await Meta.handlePagination(integration, getAdsFn, adsSchema, toCreative);
-      if (!isAError(accountCreatives)) creatives.push(...accountCreatives);
+      const processFn = async (
+        _creatives: {
+          adId: string;
+          id: string;
+          body: string;
+          title: string;
+          status: string;
+          callToActionType: string;
+        }[],
+      ): Promise<undefined> => {
+        const dbAds = prisma.ad.findMany({
+          where: {
+            adAccountId: adAccount.id,
+            externalId: {
+              in: _creatives.map((c) => c.adId),
+            },
+          },
+        });
+        // await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+      };
+
+      let start = 0;
+      let smallAccountAds = accountAds.slice(start, start + limit);
+      while (smallAccountAds.length > 0) {
+        const account = new AdAccount(`act_${adAccount.externalId}`);
+        const callFn = account.getAds(
+          [
+            Ad.Fields.id,
+            // Ad.Fields.creative,
+            `${Ad.Fields.creative}{${[AdCreative.Fields.id, AdCreative.Fields.name, AdCreative.Fields.image_url, AdCreative.Fields.body, AdCreative.Fields.title, AdCreative.Fields.status, AdCreative.Fields.call_to_action_type].join(',')}}`,
+          ],
+          {
+            limit,
+            effective_status: [
+              'ACTIVE',
+              'PAUSED',
+              'DISAPPROVED',
+              'PENDING_REVIEW',
+              'CAMPAIGN_PAUSED',
+              'ARCHIVED',
+              'ADSET_PAUSED',
+              'IN_PROCESS',
+              'WITH_ISSUES',
+            ],
+            filtering: [{ field: Ad.Fields.id, operator: 'IN', value: smallAccountAds.map((a) => a.externalId) }],
+          },
+        );
+        await Meta.handlePaginationFn(integration, callFn, schema, toCreative, processFn);
+        start += limit;
+        smallAccountAds = accountAds.slice(start, start + limit);
+      }
     }
-    return creatives;
   }
 
   async getReportStatus({ id, integration }: AdAccountWithIntegration, taskId: string): Promise<JobStatusEnum> {

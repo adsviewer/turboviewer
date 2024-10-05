@@ -98,6 +98,10 @@ export interface ChannelInterface {
     until: Date,
   ) => Promise<string | AError>;
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
+  saveCreatives: (
+    integration: Integration,
+    groupByAdAccount: Map<string, AdWithAdAccount[]>,
+  ) => Promise<void>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   getType: () => IntegrationTypeEnum;
   saveOldInsightsAdsAdsSetsCampaigns: (
