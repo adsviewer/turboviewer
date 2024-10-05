@@ -68,8 +68,7 @@ export default function OrderFilters(): React.ReactNode {
       return InsightsColumnsOrderBy.cpm_rel;
     else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
       return InsightsColumnsOrderBy.cpm_abs;
-
-    return InsightsColumnsOrderBy.impressions_abs; // default
+    return InsightsColumnsOrderBy.impressions_abs;
   };
 
   const getIntervalValue = (): string => {
@@ -221,7 +220,7 @@ export default function OrderFilters(): React.ReactNode {
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
-            maw={150}
+            maw={280}
             disabled={isPending}
           />
           <Select

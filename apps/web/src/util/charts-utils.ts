@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { DateTime } from 'luxon';
 
 export interface Datapoint {
@@ -56,3 +57,21 @@ export const placeholderSeries = [
   { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: 'Impressions' },
   { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
 ];
+
+// Merges datapoints that share the same date into one datapoint with the rest of the datapoints' values summed
+export const mergeByDate = (datapointsToMerge: Datapoint[]): Datapoint[] => {
+  return _.map(_.groupBy(datapointsToMerge, 'date'), (group) => {
+    const totalImpressions = _.sumBy(group, 'impressions');
+    const totalSpend = _.sumBy(group, 'spend');
+
+    // Weighted average CPM based on impressions
+    const weightedCpm = _.sumBy(group, (entry) => Number(entry.cpm) * Number(entry.impressions)) / totalImpressions;
+
+    return {
+      date: group[0].date,
+      impressions: totalImpressions,
+      spend: totalSpend,
+      cpm: weightedCpm,
+    };
+  });
+};

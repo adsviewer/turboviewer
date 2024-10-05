@@ -8,7 +8,7 @@ import TopAdsContainer from './components/top-ads-container';
 
 export default function Summary(): ReactNode {
   return (
-    <Flex direction="column">
+    <Flex direction="column" gap={50}>
       <Graphics />
       <ChartContainer />
       <TopAdsContainer />

@@ -5,22 +5,16 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AreaChart, type AreaChartSeries } from '@mantine/charts';
 import { Flex, LoadingOverlay } from '@mantine/core';
+import { logger } from '@repo/logger';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
 import { CurrencyEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
-import { placeholderDatapoints, placeholderSeries } from '@/util/charts-utils';
+import { type Datapoint, mergeByDate, placeholderDatapoints, placeholderSeries } from '@/util/charts-utils';
 
 interface PropsType {
   isPending: boolean;
   insights: InsightsQuery['insights']['edges'];
-}
-
-interface Datapoint {
-  date: string;
-  impressions: bigint;
-  spend: number;
-  cpm: bigint;
 }
 
 export default function Chart(props: PropsType): ReactNode {
@@ -32,6 +26,7 @@ export default function Chart(props: PropsType): ReactNode {
 
   const setupDatapoints = useCallback(() => {
     if (props.insights.length) {
+      logger.info(props.insights);
       const newDatapoints = props.insights.map((insight) => insight.datapoints).flat();
       const formattedDatapoints = [];
       setCurrency(props.insights[0].currency); // TEMPORARY SOLUTION
@@ -43,7 +38,8 @@ export default function Chart(props: PropsType): ReactNode {
           cpm: datapoint.cpm ?? 0n,
         });
       }
-      setDatapoints(formattedDatapoints);
+      const finalDatapoints = mergeByDate(formattedDatapoints);
+      setDatapoints(finalDatapoints);
     }
   }, [format, props.insights]);
 

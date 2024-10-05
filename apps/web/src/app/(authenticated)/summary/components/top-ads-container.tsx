@@ -53,9 +53,7 @@ export default function TopAdsContainer(): React.ReactNode {
 
     // Params
     const topAdsParams: InsightsParams = {
-      orderBy: searchParams.get(urlKeys.orderBy)
-        ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
-        : InsightsColumnsOrderBy.impressions_abs,
+      orderBy: currOrderByValue ? (currOrderByValue as InsightsColumnsOrderBy) : InsightsColumnsOrderBy.impressions_abs,
       pageSize: 3,
       groupedBy: [InsightsColumnsGroupBy.publisher, InsightsColumnsGroupBy.adId], // TODO: Change to per integration logic!
       order: OrderBy.desc,
@@ -91,10 +89,8 @@ export default function TopAdsContainer(): React.ReactNode {
     });
   };
   return (
-    <>
-      <Title mb="md" mt="xl">
-        {t('topAds')}
-      </Title>
+    <Flex direction="column">
+      <Title mb="md">{t('topAds')}</Title>
       <Flex align="flex-end" gap="md" wrap="wrap" mb="lg">
         <Select
           description={tInsights('orderBy')}
@@ -114,11 +110,11 @@ export default function TopAdsContainer(): React.ReactNode {
           allowDeselect={false}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
-          maw={150}
+          maw={280}
           disabled={isPending}
         />
       </Flex>
       <InsightsGrid insights={insightsTopAds} isPending={isPending} />
-    </>
+    </Flex>
   );
 }
