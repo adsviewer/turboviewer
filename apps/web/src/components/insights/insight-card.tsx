@@ -24,6 +24,7 @@ import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
 import { urlKeys, ChartMetricsEnum } from '@/util/url-query-utils';
+import { type Datapoint } from '@/util/charts-utils';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -39,13 +40,6 @@ interface InsightCardProps {
 interface RankType {
   label: 'GOOD' | 'CAUTION' | '-';
   color: 'green' | 'yellow' | 'gray';
-}
-
-interface Datapoint {
-  date: string;
-  impressions: bigint;
-  spend: number;
-  cpm: bigint;
 }
 
 export default function InsightCard(props: InsightCardProps): ReactNode {

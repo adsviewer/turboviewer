@@ -72,6 +72,7 @@
       "adId": "Ad ID",
       "adSetId": "Ad Set ID",
       "campaignId": "Campaign ID",
+      "integration": "Integration",
       "device": "Device",
       "date": "Date",
       "publisher": "Publisher",
