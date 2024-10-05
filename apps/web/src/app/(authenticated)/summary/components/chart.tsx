@@ -92,7 +92,7 @@ export default function Chart(props: PropsType): ReactNode {
             zIndex={1}
             overlayProps={{ blur: 4 }}
             color="#FFF"
-            loaderProps={!props.isPending ? { children: tInsights('noResultsFound') } : {}}
+            loaderProps={!props.isPending ? { children: tInsights('noResultsFound'), c: 'dimmed' } : {}}
           />
           <AreaChart
             h={300}
