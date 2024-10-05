@@ -25,6 +25,7 @@
     "@aws-sdk/client-sqs": "^3.658.1",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
+    "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
