@@ -56,7 +56,7 @@ export default function TopAdsContainer(): React.ReactNode {
         ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
         : InsightsColumnsOrderBy.impressions_abs,
       pageSize: 3,
-      groupedBy: [InsightsColumnsGroupBy.integration],
+      groupedBy: [InsightsColumnsGroupBy.adId],
       order: OrderBy.desc,
     };
 
