@@ -2,9 +2,9 @@ import { DateTime } from 'luxon';
 
 export interface Datapoint {
   date: string;
-  impressions: number;
+  impressions: number | bigint;
   spend: number;
-  cpm: number;
+  cpm: number | bigint;
 }
 
 export const placeholderDatapoints: Datapoint[] = [
