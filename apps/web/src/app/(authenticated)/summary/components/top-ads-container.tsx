@@ -8,12 +8,7 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { isParamInSearchParams, urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
-import {
-  InsightsColumnsGroupBy,
-  InsightsColumnsOrderBy,
-  OrderBy,
-  PublisherEnum,
-} from '@/graphql/generated/schema-server';
+import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, OrderBy } from '@/graphql/generated/schema-server';
 import InsightsGrid from '@/components/insights/insights-grid';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import getInsights, { type InsightsParams } from '../../insights/actions';
@@ -61,19 +56,8 @@ export default function TopAdsContainer(): React.ReactNode {
         ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
         : InsightsColumnsOrderBy.impressions_abs,
       pageSize: 3,
-      groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+      groupedBy: [InsightsColumnsGroupBy.integration],
       order: OrderBy.desc,
-      publisher: [
-        PublisherEnum.Facebook,
-        PublisherEnum.AudienceNetwork,
-        PublisherEnum.GlobalAppBundle,
-        PublisherEnum.Instagram,
-        PublisherEnum.LinkedIn,
-        PublisherEnum.Messenger,
-        PublisherEnum.Pangle,
-        PublisherEnum.TikTok,
-        PublisherEnum.Unknown,
-      ], // temporarily for ALL publishers, later we'll switch to a per integration logic once BE is done!
     };
 
     // Get top ads' insights
