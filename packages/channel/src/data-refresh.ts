@@ -69,7 +69,7 @@ export const refreshData = async ({
           orderBy: 'spend_abs',
           page: 1,
           pageSize: 3,
-          groupBy: ['integrationType'],
+          groupBy: ['integration'],
         },
         organizationId,
       );
