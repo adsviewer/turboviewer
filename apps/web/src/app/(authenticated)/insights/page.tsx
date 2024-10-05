@@ -37,9 +37,6 @@ export default function Insights(props: InsightsProps): ReactNode {
           });
           return;
         }
-
-        logger.info(res.data.insights.edges);
-
         setInsights(res.data.insights.edges);
         setHasNextInsightsPage(res.data.insights.hasNext);
       })

@@ -32,6 +32,7 @@ export default function ChartContainer(): React.ReactNode {
 
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
+    setIsPending(true);
   }, [setInsightsChart]);
 
   useEffect(() => {
@@ -61,7 +62,6 @@ export default function ChartContainer(): React.ReactNode {
 
     // Get chart's insights
     resetInsightsChart();
-    setIsPending(true);
     void getInsights(chartParams)
       .then((res) => {
         if (!res.success) {

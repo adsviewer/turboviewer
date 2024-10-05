@@ -51,3 +51,8 @@ export const placeholderDatapoints: Datapoint[] = [
     cpm: (1000 * 110) / 18500,
   },
 ];
+
+export const placeholderSeries = [
+  { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: 'Impressions' },
+  { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
+];
