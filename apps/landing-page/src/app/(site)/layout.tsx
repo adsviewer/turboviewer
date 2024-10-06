@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Lines from '@/components/Lines';
 import ScrollToTop from '@/components/ScrollToTop';
 import '../globals.css';
+import GoogleAnalytics from '@/components/google-analytics';
 import ToasterContext from '../context/toast-context';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -21,6 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <GoogleAnalytics />
       <body className={`dark:bg-black ${inter.className}`}>
         <ThemeProvider enableSystem attribute="class">
           <NextIntlClientProvider messages={messages}>
