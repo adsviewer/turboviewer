@@ -69,7 +69,7 @@ resource "aws_identitystore_user" "lefteris" {
   user_name = "lefteris"
 
   emails {
-    value = "lehy64@gmail.com"
+    value = "lefteris@adsviewer.io"
   }
 }
 resource "aws_identitystore_group_membership" "lefteris_developer" {
