@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  sassOptions: {
+    silenceDeprecations: ["legacy-js-api"],
+  },
   transpilePackages: ['@repo/mode'],
   reactStrictMode: true,
   experimental: {
