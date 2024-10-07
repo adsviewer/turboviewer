@@ -37,7 +37,6 @@ yarn-error.log*
 dist/
 
 # chatGPT
-.idea/copilot/chatSessions
+.idea/
 .vercel
 
-.idea/aws.xml
