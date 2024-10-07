@@ -101,7 +101,8 @@ module "environment" {
   public_subnet_ids                    = module.workspace.public_subnet_ids
   redis_url                            = var.redis_url
   service_subnet_ids                   = module.workspace.private_subnet_ids
-  slack_webhook_url                    = var.slack_webhook_url
+  slack_webhook_url_errors             = var.slack_webhook_url_errors
+  slack_webhook_url_public_feedback    = var.slack_webhook_url_public_feedback
   slack_workspace_id                   = var.slack_workspace_id
   tiktok_application_id                = var.tiktok_application_id
   tiktok_application_secret            = var.tiktok_application_secret
