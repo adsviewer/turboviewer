@@ -14,6 +14,7 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
+    "@next/third-parties": "^14.2.14",
     "@repo/logger": "workspace:*",
     "@repo/ui": "workspace:*",
     "@t3-oss/env-nextjs": "^0.11.1",
