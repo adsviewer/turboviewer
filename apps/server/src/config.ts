@@ -9,7 +9,7 @@ const schema = z
     GOOGLE_APPLICATION_ID: z.string().min(1),
     GOOGLE_APPLICATION_SECRET: z.string().min(1),
     EMAILABLE_API_KEY: z.string().min(1),
-    SLACK_WEBHOOK_URL_PUBLIC_FEEDBACK: z.string().url(),
+    SLACK_WEBHOOK_URL_PUBLIC_FEEDBACK: z.string().url().optional(),
     PORT: z
       .string()
       .min(1)
