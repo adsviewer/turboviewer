@@ -16,6 +16,7 @@ import {
   InsightsColumnsGroupBy,
   OrderBy,
   PublisherEnum,
+  InsightsInterval,
 } from '@/graphql/generated/schema-server';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 import Chart from './chart';
@@ -72,6 +73,7 @@ export default function ChartContainer(): React.ReactNode {
     const chartParams: InsightsParams = {
       dateFrom,
       dateTo,
+      interval: InsightsInterval.day,
       orderBy: InsightsColumnsOrderBy.impressions_abs,
       pageSize: Object.keys(PublisherEnum).length, // page size is the same as the publishers that we manage since we group per publisher
       groupedBy: [InsightsColumnsGroupBy.publisher],
