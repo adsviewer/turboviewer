@@ -10,7 +10,9 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { getMessages } from 'next-intl/server';
 import { headers } from 'next/headers';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import NotificationsHandler from '@/components/misc/notifications-handler';
+import { env } from '@/env.mjs';
 
 export const metadata: Metadata = {
   title: 'AdsViewer',
@@ -26,6 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={preferredLocale}>
       <body>
+        <GoogleAnalytics gaId={env.NEXT_PUBLIC_MEASUREMENT_ID} />
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages} locale={preferredLocale}>
           <MantineProvider defaultColorScheme="auto">
