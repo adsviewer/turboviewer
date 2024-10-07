@@ -5,7 +5,8 @@ locals {
     "fb_application_id" : var.fb_application_id, "fb_application_secret" : var.fb_application_secret,
     "linkedin_application_id" : var.linkedin_application_id,
     "linkedin_application_secret" : var.linkedin_application_secret,
-    "redis_url" : var.redis_url, slack_webhook_url : var.slack_webhook_url,
+    "redis_url" : var.redis_url, "slack_webhook_url_errors" : var.slack_webhook_url_errors,
+    "slack_webhook_url_public_feedback" : var.slack_webhook_url_public_feedback,
     "google_application_id" : var.google_application_id, "google_application_secret" : var.google_application_secret,
     "tiktok_application_id" : var.tiktok_application_id, "tiktok_application_secret" : var.tiktok_application_secret
   }

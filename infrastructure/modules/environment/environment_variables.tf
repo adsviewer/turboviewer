@@ -71,10 +71,12 @@ variable "service_subnet_ids" {
   type = list(string)
 }
 
-variable "slack_webhook_url" {
+variable "slack_webhook_url_public_feedback" {
   type = string
 }
-
+variable "slack_webhook_url_errors" {
+  type = string
+}
 variable "slack_workspace_id" {
   type = string
 }
