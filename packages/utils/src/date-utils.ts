@@ -129,8 +129,8 @@ const getFirstDayNextWeek = (dt: Date, locale: string): Date => {
 };
 
 export const getCalendarDateDiffIn = (interval: IntervalType, dateFrom: Date, dateTo: Date, locale: string): number => {
-  if (interval !== 'week') return Math.ceil(getDateDiffIn(interval, dateFrom, getTomorrowStartOfDay(dateTo)));
+  if (interval !== 'week') return Math.ceil(getDateDiffIn(interval, dateFrom, getTomorrowStartOfDay(dateTo))) - 1;
   const firstDayOfWeek = getFirstDayOfWeek(dateFrom, locale);
   const firstDayNextWeek = getFirstDayNextWeek(dateTo, locale);
-  return Math.ceil(getDateDiffIn(interval, firstDayOfWeek, firstDayNextWeek));
+  return Math.ceil(getDateDiffIn(interval, firstDayOfWeek, firstDayNextWeek)) - 1;
 };
