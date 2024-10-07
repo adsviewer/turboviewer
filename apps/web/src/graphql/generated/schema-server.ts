@@ -300,6 +300,8 @@ export type Error = {
 export type Feedback = {
   __typename: 'Feedback';
   createdAt: Scalars['Date']['output'];
+  currentOrganization?: Maybe<Organization>;
+  currentOrganizationId?: Maybe<Scalars['ID']['output']>;
   message: Scalars['String']['output'];
   type: FeedbackTypeEnum;
   user: User;

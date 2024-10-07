@@ -43,6 +43,7 @@ model Organization {
   parent          Organization?      @relation("children", fields: [parentId], references: [id])
   children        Organization[]     @relation("children")
   adAccounts      AdAccount[]
+  feedbacks       Feedback[]
 
   @@map("organizations")
 }
@@ -87,12 +88,14 @@ enum FeedbackTypeEnum {
 }
 
 model Feedback {
-  id        String           @id @default(cuid())
-  user      User             @relation(fields: [userId], references: [id])
-  userId    String           @map("user_id")
-  type      FeedbackTypeEnum
-  message   String
-  createdAt DateTime         @default(now()) @map("created_at")
+  id                    String           @id @default(cuid())
+  user                  User             @relation(fields: [userId], references: [id])
+  userId                String           @map("user_id")
+  type                  FeedbackTypeEnum
+  message               String
+  currentOrganization   Organization?    @relation(fields: [currentOrganizationId], references: [id])
+  currentOrganizationId String?          @map("current_organization_id")
+  createdAt             DateTime         @default(now()) @map("created_at")
 
   @@map("feedbacks")
 }
