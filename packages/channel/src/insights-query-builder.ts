@@ -124,7 +124,7 @@ export const getOrganizationalInsights = (
                                                 ${filter.adAccountIds ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.adIds ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, dataPointsPerInterval, filter.interval)}
-                                                ${filter.dateTo ? `AND i.date < TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
+                                                ${filter.dateTo ? `AND i.date <= TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
                                                 ${filter.devices ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${
                                                   filter.integrations
@@ -153,7 +153,7 @@ export const lastInterval = (
   return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
-                                        AND date < DATE_TRUNC('${interval}', ${date})
+                                        AND date <= DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}${relative})`;
 };
 
@@ -175,7 +175,7 @@ export const intervalBeforeLast = (
   return `interval_before_last AS (SELECT ${group}, ${sqlOrderColumn}
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${doubleIntervalInMonths}')
-                                               AND date < DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
+                                               AND date <= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
                                              GROUP BY ${group}
                                              ${orderColumn === 'cpm' ? 'HAVING SUM(i.impressions) > 0' : ''})`;
 };
@@ -226,7 +226,7 @@ export const orderColumnTrendAbsolute = (
   return `order_column_trend AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
-                                        AND date < DATE_TRUNC('${interval}', ${date})
+                                        AND date <= DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}
                                       ${orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : ''}
                                       ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
@@ -263,7 +263,7 @@ export const groupedInsights = (
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
-    AND i.date < DATE_TRUNC('${args.interval}', ${date})
+    AND i.date <= DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
   ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
 
