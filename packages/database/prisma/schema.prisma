@@ -93,9 +93,10 @@ model Feedback {
   userId                String           @map("user_id")
   type                  FeedbackTypeEnum
   message               String
-  currentOrganization   Organization?    @relation(fields: [currentOrganizationId], references: [id])
-  currentOrganizationId String?          @map("current_organization_id")
   createdAt             DateTime         @default(now()) @map("created_at")
+  currentOrganizationId String?          @map("current_organization_id")
+
+  currentOrganization Organization? @relation(fields: [currentOrganizationId], references: [id])
 
   @@map("feedbacks")
 }
