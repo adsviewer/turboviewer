@@ -33,7 +33,8 @@
     "PORT",
     "PUBLIC_URL",
     "REDIS_URL",
-    "SKIP_ENV_VALIDATION"
+    "SKIP_ENV_VALIDATION",
+    "SLACK_WEBHOOK_URL_PUBLIC_FEEDBACK"
   ],
   "tasks": {
     "build": {
