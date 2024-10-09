@@ -92,10 +92,10 @@ export default function ChartContainer(): React.ReactNode {
     };
 
     // Get chart's insights
-    logger.info(chartParams);
     resetInsightsChart();
     void getInsights(chartParams)
       .then((res) => {
+        logger.info(res);
         if (!res.success) {
           notifications.show({
             title: tGeneric('error'),
