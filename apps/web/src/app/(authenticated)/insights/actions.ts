@@ -8,6 +8,7 @@ import {
   InsightsInterval,
   type InsightsPosition,
   type InsightsQuery,
+  type IntegrationType,
   type OrderBy,
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
@@ -22,6 +23,7 @@ export interface InsightsParams {
   groupedBy?: InsightsColumnsGroupBy[];
   account?: string;
   adIds?: string;
+  integrations?: IntegrationType[];
   device?: DeviceEnum;
   publisher?: PublisherEnum[];
   position?: InsightsPosition;
