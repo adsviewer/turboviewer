@@ -321,6 +321,7 @@ export type FilterInsightsInput = {
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum>>;
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy>>;
+  integrations?: InputMaybe<IntegrationType>;
   interval: InsightsInterval;
   order?: InputMaybe<OrderBy>;
   orderBy?: InsightsColumnsOrderBy;

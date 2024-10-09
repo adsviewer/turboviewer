@@ -170,6 +170,7 @@ void describe('insights query builder tests', () => {
       pageSize: 10,
       groupBy: ['adId', 'publisher'],
       interval: 'week',
+      integrations: ['META'],
       order: 'desc',
       positions: ['feed'],
       publishers: [PublisherEnum.Facebook],
@@ -190,8 +191,36 @@ void describe('insights query builder tests', () => {
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '3 week')
                                                 AND i.date < TIMESTAMP '2024-05-28T00:00:00.000Z'
                                                 AND i.device IN ('MobileWeb', 'MobileApp')
+                                                AND aa.type IN ('META')
                                                 AND i.position IN ('feed')
                                                 AND i.publisher IN ('Facebook')
+                                              )`,
+    );
+  });
+  void it('get insights integration single filter', () => {
+    const args: FilterInsightsInputType = {
+      orderBy: 'spend_rel',
+      page: 1,
+      pageSize: 10,
+      groupBy: ['adId', 'publisher'],
+      interval: 'week',
+      integrations: 'META',
+      order: 'desc',
+    };
+
+    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
+    assertSql(
+      insights,
+      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+                                              FROM insights i
+                                                       JOIN ads a on i.ad_id = a.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+                                                AND aa.type IN ('META')
                                               )`,
     );
   });
