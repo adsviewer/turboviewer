@@ -46,6 +46,7 @@ export default async function getInsights(insightsParams: InsightsParams): Promi
     urqlClientSdk().insights({
       adAccountIds: insightsParams.account,
       adIds: insightsParams.adIds,
+      integrations: insightsParams.integrations,
       dateFrom: insightsParams.dateFrom ? new Date(Number(insightsParams.dateFrom)) : undefined,
       dateTo: insightsParams.dateTo ? new Date(Number(insightsParams.dateTo)) : undefined,
       devices: insightsParams.device,
