@@ -1,22 +1,18 @@
 'use client';
 
-import { Title, Flex, Select, type ComboboxItem } from '@mantine/core';
+import { Title, Flex, Text, Select, type ComboboxItem } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
+import uniqid from 'uniqid';
 import { isParamInSearchParams, urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
-import {
-  InsightsColumnsGroupBy,
-  InsightsColumnsOrderBy,
-  IntegrationType,
-  OrderBy,
-} from '@/graphql/generated/schema-server';
-import InsightsGrid from '@/components/insights/insights-grid';
+import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, OrderBy } from '@/graphql/generated/schema-server';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import InsightsGrid from '@/components/insights/insights-grid';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
 export default function TopAdsContainer(): React.ReactNode {
@@ -29,6 +25,7 @@ export default function TopAdsContainer(): React.ReactNode {
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const userDetails = useAtomValue(userDetailsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [finishedRequestsCount, setFinishedRequestsCount] = useState<number>(0);
 
   // Top ads parameters that will re-render only the top ads when url state changes
   const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
@@ -58,39 +55,55 @@ export default function TopAdsContainer(): React.ReactNode {
     if (currOrderByValue && orderByParamValue === currOrderByValue) return;
     setOrderByParamValue(currOrderByValue);
 
-    // Params
-    const topAdsParams: InsightsParams = {
-      orderBy: currOrderByValue ? (currOrderByValue as InsightsColumnsOrderBy) : InsightsColumnsOrderBy.impressions_abs,
-      order: OrderBy.desc,
-      pageSize: 3,
-      groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
-      integrations: [IntegrationType.META],
-    };
-
-    logger.info(userDetails.currentOrganization?.integrations);
-
     // Get top ads' insights
+    // Perform a request for each integration that the user has
     resetInsightsTopAds();
-    void getInsights(topAdsParams)
-      .then((res) => {
-        if (!res.success) {
-          notifications.show({
-            title: tGeneric('error'),
-            message: String(res.error),
-            color: 'red',
+    if (userDetails.currentOrganization) {
+      for (const integration of userDetails.currentOrganization.integrations) {
+        const TOP_ADS_PARAMAS: InsightsParams = {
+          orderBy: currOrderByValue
+            ? (currOrderByValue as InsightsColumnsOrderBy)
+            : InsightsColumnsOrderBy.impressions_abs,
+          order: OrderBy.desc,
+          pageSize: 3,
+          groupedBy: [
+            InsightsColumnsGroupBy.adId,
+            InsightsColumnsGroupBy.publisher,
+            InsightsColumnsGroupBy.integration,
+          ],
+          integrations: [integration.type],
+        };
+
+        void getInsights(TOP_ADS_PARAMAS)
+          .then((res) => {
+            if (!res.success) {
+              notifications.show({
+                title: tGeneric('error'),
+                message: String(res.error),
+                color: 'red',
+              });
+              return;
+            }
+            setInsightsTopAds((prevInsightsTopAds) => [...prevInsightsTopAds, res.data.insights.edges]);
+          })
+          .catch((error: unknown) => {
+            logger.error(error);
+          })
+          .finally(() => {
+            setIsPending(false);
+            setFinishedRequestsCount((prevValue) => prevValue + 1);
           });
-          return;
-        }
-        logger.info(res.data.insights);
-        setInsightsTopAds(res.data.insights.edges);
-      })
-      .catch((error: unknown) => {
-        logger.error(error);
-      })
-      .finally(() => {
-        setIsPending(false);
-      });
-  }, [orderByParamValue, resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric]);
+      }
+    }
+  }, [
+    finishedRequestsCount,
+    orderByParamValue,
+    resetInsightsTopAds,
+    searchParams,
+    setInsightsTopAds,
+    tGeneric,
+    userDetails.currentOrganization,
+  ]);
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsightsTopAds();
@@ -125,7 +138,21 @@ export default function TopAdsContainer(): React.ReactNode {
           disabled={isPending}
         />
       </Flex>
-      <InsightsGrid insights={insightsTopAds} isPending={isPending} />
+
+      <Flex direction="column" gap="xl">
+        {insightsTopAds.length ? (
+          insightsTopAds.map((integrationInsights) =>
+            integrationInsights.length ? (
+              <Flex key={uniqid()} direction="column" gap="sm">
+                <Title order={3}>{integrationInsights[0].integration}</Title>
+                <InsightsGrid insights={integrationInsights} isPending={isPending} />
+              </Flex>
+            ) : null,
+          )
+        ) : (
+          <Text ta="center">{tInsights('noResultsFound')}</Text>
+        )}
+      </Flex>
     </Flex>
   );
 }
