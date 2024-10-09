@@ -28,6 +28,8 @@
   },
   "navbar": {
     "insights": "Inzichten",
+    "summary": "Samenvatting",
+    "analytical": "Gedetailleerd",
     "integrations": "Integraties",
     "settings": "Instellingen",
     "organization": "Organisatie",
@@ -67,9 +69,10 @@
       "selectPublishers": "Selecteer uitgevers",
       "groupBy": "Groepeer op",
       "account": "Account",
-      "adId": "Advertentie-Id",
-      "adSetId": "Advertentieset-Id",
-      "campaignId": "Campagne-Id",
+      "adId": "Advertentie-ID",
+      "adSetId": "Advertentieset-ID",
+      "campaignId": "Campagne-ID",
+      "integratie": "Integratie",
       "device": "Apparaat",
       "date": "Datum",
       "publisher": "Uitgever",
@@ -90,6 +93,10 @@
       "searchTermsHint": "Begin met het toevoegen van zoektermen om uw zoekopdracht te personaliseren.",
       "clearSearch": "Zoekopdracht wissen"
     }
+  },
+  "summary": {
+    "title": "Samenvatting",
+    "topAds": "Topadvertenties"
   },
   "integrations": {
     "title": "Integraties",

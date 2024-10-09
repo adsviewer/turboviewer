@@ -68,8 +68,7 @@ export default function OrderFilters(): React.ReactNode {
       return InsightsColumnsOrderBy.cpm_rel;
     else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
       return InsightsColumnsOrderBy.cpm_abs;
-
-    return InsightsColumnsOrderBy.impressions_abs; // default
+    return InsightsColumnsOrderBy.impressions_abs;
   };
 
   const getIntervalValue = (): string => {
@@ -82,8 +81,9 @@ export default function OrderFilters(): React.ReactNode {
   };
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SPENT)) return ChartMetricsEnum.SPENT;
-    return ChartMetricsEnum.IMPRESSIONS;
+    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))
+      return ChartMetricsEnum.SpentCPM;
+    return ChartMetricsEnum.ImpressionsCPM;
   };
 
   const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
@@ -220,7 +220,7 @@ export default function OrderFilters(): React.ReactNode {
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
             scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
-            maw={150}
+            maw={280}
             disabled={isPending}
           />
           <Select
@@ -281,10 +281,10 @@ export default function OrderFilters(): React.ReactNode {
               description={t('chartMetric')}
               placeholder="Pick value"
               data={[
-                { value: ChartMetricsEnum.IMPRESSIONS, label: t('impressions') },
-                { value: ChartMetricsEnum.SPENT, label: t('spent') },
+                { value: ChartMetricsEnum.ImpressionsCPM, label: t('impressions') },
+                { value: ChartMetricsEnum.SpentCPM, label: t('spent') },
               ]}
-              defaultValue={ChartMetricsEnum.IMPRESSIONS}
+              defaultValue={ChartMetricsEnum.ImpressionsCPM}
               value={getChartMetricValue()}
               onChange={handleChartMetricChange}
               allowDeselect={false}
