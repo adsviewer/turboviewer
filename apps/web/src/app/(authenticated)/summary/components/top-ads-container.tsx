@@ -9,10 +9,17 @@ import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import uniqid from 'uniqid';
 import { isParamInSearchParams, urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
-import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, OrderBy } from '@/graphql/generated/schema-server';
+import {
+  InsightsColumnsGroupBy,
+  InsightsColumnsOrderBy,
+  type InsightsQuery,
+  OrderBy,
+} from '@/graphql/generated/schema-server';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import InsightsGrid from '@/components/insights/insights-grid';
+import { type UrqlResult } from '@/util/handle-urql-request';
+import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
 export default function TopAdsContainer(): React.ReactNode {
@@ -25,7 +32,6 @@ export default function TopAdsContainer(): React.ReactNode {
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const userDetails = useAtomValue(userDetailsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const [finishedRequestsCount, setFinishedRequestsCount] = useState<number>(0);
 
   // Top ads parameters that will re-render only the top ads when url state changes
   const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
@@ -59,6 +65,7 @@ export default function TopAdsContainer(): React.ReactNode {
     // Perform a request for each integration that the user has
     resetInsightsTopAds();
     if (userDetails.currentOrganization) {
+      let allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
       for (const integration of userDetails.currentOrganization.integrations) {
         const TOP_ADS_PARAMAS: InsightsParams = {
           orderBy: currOrderByValue
@@ -74,7 +81,7 @@ export default function TopAdsContainer(): React.ReactNode {
           integrations: [integration.type],
         };
 
-        void getInsights(TOP_ADS_PARAMAS)
+        const request = getInsights(TOP_ADS_PARAMAS)
           .then((res) => {
             if (!res.success) {
               notifications.show({
@@ -82,21 +89,36 @@ export default function TopAdsContainer(): React.ReactNode {
                 message: String(res.error),
                 color: 'red',
               });
-              return;
+              return null;
             }
-            setInsightsTopAds((prevInsightsTopAds) => [...prevInsightsTopAds, res.data.insights.edges]);
+            return res;
           })
           .catch((error: unknown) => {
             logger.error(error);
+            return null;
           })
           .finally(() => {
             setIsPending(false);
-            setFinishedRequestsCount((prevValue) => prevValue + 1);
           });
+        allRequests = [...allRequests, request];
       }
+
+      // Unwrap all the responses at the same time
+      void Promise.all(allRequests)
+        .then((responses) => {
+          const allTopAds: InsightsQuery['insights']['edges'][] = [];
+          if (responses.length) {
+            for (const res of responses) {
+              if (res?.success) allTopAds.push(res.data.insights.edges);
+            }
+            setInsightsTopAds(allTopAds);
+          }
+        })
+        .catch((err: unknown) => {
+          logger.error(err);
+        });
     }
   }, [
-    finishedRequestsCount,
     orderByParamValue,
     resetInsightsTopAds,
     searchParams,
@@ -140,19 +162,27 @@ export default function TopAdsContainer(): React.ReactNode {
       </Flex>
 
       <Flex direction="column" gap="xl">
-        {insightsTopAds.length ? (
+        {insightsTopAds.length && !isPending ? (
           insightsTopAds.map((integrationInsights) =>
             integrationInsights.length ? (
               <Flex key={uniqid()} direction="column" gap="sm">
-                <Title order={3}>{integrationInsights[0].integration}</Title>
+                <Title order={3} c="dimmed">
+                  {integrationInsights[0].integration}
+                </Title>
                 <InsightsGrid insights={integrationInsights} isPending={isPending} />
               </Flex>
             ) : null,
           )
         ) : (
-          <Text ta="center">{tInsights('noResultsFound')}</Text>
+          <LoaderCentered />
         )}
       </Flex>
+
+      {!isPending && !insightsTopAds.length ? (
+        <Text ta="center" c="dimmed">
+          {tInsights('noResultsFound')}
+        </Text>
+      ) : null}
     </Flex>
   );
 }
