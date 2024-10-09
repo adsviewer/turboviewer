@@ -292,6 +292,7 @@ input FilterInsightsInput {
   dateTo: Date
   devices: [DeviceEnum!]
   groupBy: [InsightsColumnsGroupBy!]
+  integrations: IntegrationType
   interval: InsightsInterval!
   order: OrderBy = desc
   orderBy: InsightsColumnsOrderBy! = cpm_rel

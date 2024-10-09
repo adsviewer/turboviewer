@@ -3,6 +3,7 @@ import {
   type CurrencyEnum,
   type DeviceEnum,
   type Integration,
+  type IntegrationTypeEnum,
   Prisma,
   prisma,
   type PublisherEnum,
@@ -341,6 +342,7 @@ export interface FilterInsightsInputType {
   devices?: DeviceEnum[] | null;
   groupBy?: InsightsColumnsGroupByType[] | null;
   interval: 'day' | 'week' | 'month' | 'quarter';
+  integrations?: IntegrationTypeEnum[] | IntegrationTypeEnum | null;
   order?: 'asc' | 'desc' | null;
   orderBy: InsightsColumnsOrderByType;
   page: number;

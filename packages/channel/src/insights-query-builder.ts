@@ -126,6 +126,11 @@ export const getOrganizationalInsights = (
                                                 ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, dataPointsPerInterval, filter.interval)}
                                                 ${filter.dateTo ? `AND i.date < TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
                                                 ${filter.devices ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}
+                                                ${
+                                                  filter.integrations
+                                                    ? `AND aa.type IN (${Array.isArray(filter.integrations) ? filter.integrations.map((i) => `'${i}'`).join(', ') : `'${filter.integrations}'`})`
+                                                    : ''
+                                                }
                                                 ${filter.positions ? `AND i.position IN (${filter.positions.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.publishers ? `AND i.publisher IN (${filter.publishers.map((i) => `'${i}'`).join(', ')})` : ''}
                                               )`;

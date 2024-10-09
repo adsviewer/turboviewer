@@ -347,6 +347,7 @@ export const FilterInsightsInputDto = builder.inputRef<FilterInsightsInputType>(
     dateTo: t.field({ type: 'Date', required: false }),
     devices: t.field({ type: [DeviceEnumDto], required: false }),
     groupBy: t.field({ type: [InsightsColumnsGroupByDto], required: false }),
+    integrations: t.field({ type: IntegrationTypeDto, required: false }),
     interval: t.field({ type: InsightsIntervalDto, required: true }),
     order: t.field({ type: OrderByDto, defaultValue: 'desc' }),
     orderBy: t.field({ type: InsightsColumnsOrderByDto, required: true, defaultValue: 'cpm_rel' }),
