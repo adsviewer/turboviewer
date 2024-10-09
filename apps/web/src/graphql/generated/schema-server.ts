@@ -994,6 +994,7 @@ export type AdAccountsQuery = {
 export type InsightsQueryVariables = Exact<{
   adAccountIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   adIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  integrations?: InputMaybe<Array<IntegrationType> | IntegrationType>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
   devices?: InputMaybe<Array<DeviceEnum> | DeviceEnum>;
@@ -1437,6 +1438,7 @@ export const InsightsDocument = gql`
   query insights(
     $adAccountIds: [String!]
     $adIds: [String!]
+    $integrations: [IntegrationType!]
     $dateFrom: Date
     $dateTo: Date
     $devices: [DeviceEnum!]
@@ -1454,6 +1456,7 @@ export const InsightsDocument = gql`
       filter: {
         adAccountIds: $adAccountIds
         adIds: $adIds
+        integrations: $integrations
         dateFrom: $dateFrom
         dateTo: $dateTo
         devices: $devices

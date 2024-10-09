@@ -1,16 +1,22 @@
 'use client';
 
 import { Title, Flex, Select, type ComboboxItem } from '@mantine/core';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import { isParamInSearchParams, urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
-import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, OrderBy } from '@/graphql/generated/schema-server';
+import {
+  InsightsColumnsGroupBy,
+  InsightsColumnsOrderBy,
+  IntegrationType,
+  OrderBy,
+} from '@/graphql/generated/schema-server';
 import InsightsGrid from '@/components/insights/insights-grid';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
 export default function TopAdsContainer(): React.ReactNode {
@@ -21,6 +27,7 @@ export default function TopAdsContainer(): React.ReactNode {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
+  const userDetails = useAtomValue(userDetailsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
   // Top ads parameters that will re-render only the top ads when url state changes
@@ -54,10 +61,13 @@ export default function TopAdsContainer(): React.ReactNode {
     // Params
     const topAdsParams: InsightsParams = {
       orderBy: currOrderByValue ? (currOrderByValue as InsightsColumnsOrderBy) : InsightsColumnsOrderBy.impressions_abs,
-      pageSize: 3,
-      groupedBy: [InsightsColumnsGroupBy.publisher, InsightsColumnsGroupBy.adId], // TODO: Change to per integration logic!
       order: OrderBy.desc,
+      pageSize: 3,
+      groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+      integrations: [IntegrationType.META],
     };
+
+    logger.info(userDetails.currentOrganization?.integrations);
 
     // Get top ads' insights
     resetInsightsTopAds();
@@ -71,6 +81,7 @@ export default function TopAdsContainer(): React.ReactNode {
           });
           return;
         }
+        logger.info(res.data.insights);
         setInsightsTopAds(res.data.insights.edges);
       })
       .catch((error: unknown) => {

@@ -15,8 +15,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconBuilding, IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useAtomValue } from 'jotai/index';
+import { useAtom } from 'jotai/index';
 import uniqid from 'uniqid';
+import { useCallback, useEffect, useState } from 'react';
+import { logger } from '@repo/logger';
+import { notifications } from '@mantine/notifications';
 import { LogoFull } from '@/components/misc/logo-full';
 import SettingsButton from '@/components/buttons/settings-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
@@ -27,12 +30,18 @@ import CreateOrganizationButton from '@/components/create-organization/create-or
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import FeedbackButton from '@/components/buttons/feedback-button';
 import SubNavlinkButton from '@/components/buttons/sub-navlink-button/sub-navlink-button';
+import { getUserDetails } from '@/app/(authenticated)/actions';
+import { type Integration, IntegrationStatus } from '@/graphql/generated/schema-server';
+import LoaderCentered from '@/components/misc/loader-centered';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
+  const tGeneric = useTranslations('generic');
+  const tIntegrations = useTranslations('integrations');
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
-  const userDetails = useAtomValue(userDetailsAtom);
+  const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const navLinksData = [
     {
@@ -58,6 +67,43 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
       isActive: pathname === '/organization',
     },
   ];
+
+  const checkIntegrationTokensForExpiration = useCallback(
+    (integrationsData: Integration[] | null): void => {
+      if (integrationsData) {
+        for (const integration of integrationsData) {
+          if (integration.status === IntegrationStatus.Expiring) {
+            notifications.show({
+              title: tGeneric('warning'),
+              message: `(${integration.type}) ${tIntegrations('tokenWarning')}`,
+              color: 'orange',
+              autoClose: false,
+            });
+          } else if (integration.status === IntegrationStatus.Errored) {
+            notifications.show({
+              title: tGeneric('error'),
+              message: `(${integration.type}) ${tIntegrations('erroredIntegrationWarning')}`,
+              color: 'red',
+              autoClose: false,
+            });
+          }
+        }
+      }
+    },
+    [tGeneric, tIntegrations],
+  );
+
+  useEffect(() => {
+    void getUserDetails()
+      .then((res) => {
+        setUserDetails(res);
+        checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
+        setIsDataLoaded(true);
+      })
+      .catch((error: unknown) => {
+        logger.error(error);
+      });
+  }, [checkIntegrationTokensForExpiration, setUserDetails]);
 
   return (
     <AppShell
@@ -141,7 +187,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           {/* User */}
           <Flex direction="column" justify="flex-end" gap="md" mt="auto">
             <Divider />
-            <UserButton />
+            <UserButton isDataLoaded={isDataLoaded} />
             <Divider />
             <NavLink
               label={t('signOut')}
@@ -151,7 +197,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
           </Flex>
         </Flex>
       </AppShellNavbar>
-      <AppShellMain>{children}</AppShellMain>
+      <AppShellMain>{isDataLoaded ? children : <LoaderCentered />}</AppShellMain>
     </AppShell>
   );
 }
