@@ -60,7 +60,7 @@ export const getInsightsDateFrom = (
     return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom.toISOString()}')`;
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
-  return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${mappedInterval}')`;
+  return `AND i.date >= GREATEST(TIMESTAMP '${dateFrom!.toISOString()}',DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${mappedInterval}'))`;
 };
 
 export const searchAdsToSQL = (expression: InsightsSearchExpression): string => {
