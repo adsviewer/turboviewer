@@ -1,6 +1,6 @@
 'use client';
 
-import { Title, Flex, Text, Select, type ComboboxItem } from '@mantine/core';
+import { Title, Flex, Select, type ComboboxItem } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
@@ -166,12 +166,6 @@ export default function TopAdsContainer(): React.ReactNode {
           <LoaderCentered />
         )}
       </Flex>
-
-      {!isPending && !insightsTopAds.length ? (
-        <Text ta="center" c="dimmed">
-          {tInsights('noResultsFound')}
-        </Text>
-      ) : null}
     </Flex>
   );
 }
