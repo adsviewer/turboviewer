@@ -143,15 +143,6 @@ export default function ChartContainer(): React.ReactNode {
         router.replace(newURL);
       });
     }
-    // Clear logic
-    else if (!dateFrom && !dateTo) {
-      newParams.delete(urlKeys.dateFrom);
-      newParams.delete(urlKeys.dateTo);
-      const newURL = `${pathname}?${newParams.toString()}`;
-      startTransition(() => {
-        router.replace(newURL);
-      });
-    }
   };
 
   return (
