@@ -66,7 +66,7 @@ export default function TopAdsContainer(): React.ReactNode {
     // Perform a request for each integration that the user has
     resetInsightsTopAds();
     if (userDetails.currentOrganization) {
-      let allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
+      const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
       for (const integration of userDetails.currentOrganization.integrations) {
         const TOP_ADS_PARAMS: InsightsParams = {
           orderBy: currOrderByValue
