@@ -25,6 +25,7 @@ import { getCurrencySymbol } from '@/util/currency-utils';
 import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
 import { urlKeys, ChartMetricsEnum } from '@/util/url-query-utils';
 import LoaderCentered from '@/components/misc/loader-centered';
+import { type Datapoint } from '@/util/charts-utils';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -42,14 +43,7 @@ interface RankType {
   color: 'green' | 'yellow' | 'gray';
 }
 
-interface Datapoint {
-  date: string;
-  impressions: bigint;
-  spend: number;
-  cpm: bigint;
-}
-
-export default function InsightsGrid(props: InsightCardProps): ReactNode {
+export default function InsightCard(props: InsightCardProps): ReactNode {
   const format = useFormatter();
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
@@ -140,7 +134,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   };
 
   const getChartSeries = (): AreaChartSeries[] => {
-    if (searchParams.get(urlKeys.chartMetric) === ChartMetricsEnum.SPENT) {
+    if (searchParams.get(urlKeys.chartMetric) === ChartMetricsEnum.SpentCPM) {
       return [
         {
           yAxisId: 'left',
