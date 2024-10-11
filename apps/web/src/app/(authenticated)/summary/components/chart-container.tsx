@@ -78,17 +78,6 @@ export default function ChartContainer(): React.ReactNode {
       pageSize: Object.keys(PublisherEnum).length, // page size is the same as the publishers that we manage since we group per publisher
       groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,
-      publisher: [
-        PublisherEnum.Facebook,
-        PublisherEnum.AudienceNetwork,
-        PublisherEnum.GlobalAppBundle,
-        PublisherEnum.Instagram,
-        PublisherEnum.LinkedIn,
-        PublisherEnum.Messenger,
-        PublisherEnum.Pangle,
-        PublisherEnum.TikTok,
-        PublisherEnum.Unknown,
-      ],
     };
 
     // Get chart's insights
