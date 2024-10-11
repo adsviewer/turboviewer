@@ -5,7 +5,7 @@ export interface SlackTransportOptions {
   webhookUrl: string;
 }
 
-const _options: Partial<SlackTransportOptions> = { webhookUrl: process.env.SLACK_WEBHOOK_URL };
+const _options: Partial<SlackTransportOptions> = { webhookUrl: process.env.SLACK_WEBHOOK_URL_ERRORS };
 const optionsOrStream: LoggerOptions = {
   base: undefined,
   transport: {
