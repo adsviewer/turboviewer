@@ -10,6 +10,7 @@ import Lines from '@/components/Lines';
 import ScrollToTop from '@/components/ScrollToTop';
 import '../globals.css';
 import CookiesConsent from '@/components/cookies-consent';
+import RB2B from '@/components/rb2b';
 import { env } from '@/env.mjs';
 import ToasterContext from '../context/toast-context';
 
@@ -26,6 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} suppressHydrationWarning>
       <GoogleAnalytics gaId={env.NEXT_PUBLIC_MEASUREMENT_ID} />
       <CookiesConsent />
+      <RB2B />
       <body className={`dark:bg-black ${inter.className}`}>
         <ThemeProvider enableSystem attribute="class">
           <NextIntlClientProvider messages={messages}>
