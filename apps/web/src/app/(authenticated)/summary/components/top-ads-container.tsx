@@ -8,7 +8,7 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import uniqid from 'uniqid';
-import { isParamInSearchParams, urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
+import { urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
 import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
@@ -21,6 +21,7 @@ import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import InsightsGrid from '@/components/insights/insights-grid';
 import { type UrqlResult } from '@/util/handle-urql-request';
 import LoaderCentered from '@/components/misc/loader-centered';
+import { getOrderByValue } from '@/util/insights-utils';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
 export default function TopAdsContainer(): React.ReactNode {
@@ -36,20 +37,6 @@ export default function TopAdsContainer(): React.ReactNode {
 
   // Top ads parameters that will re-render only the top ads when url state changes
   const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
-
-  const getOrderByValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
-      return InsightsColumnsOrderBy.impressions_rel;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel))
-      return InsightsColumnsOrderBy.spend_rel;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs))
-      return InsightsColumnsOrderBy.spend_abs;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel))
-      return InsightsColumnsOrderBy.cpm_rel;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
-      return InsightsColumnsOrderBy.cpm_abs;
-    return InsightsColumnsOrderBy.impressions_abs;
-  };
 
   const resetInsightsTopAds = useCallback((): void => {
     setInsightsTopAds([]);
@@ -153,7 +140,7 @@ export default function TopAdsContainer(): React.ReactNode {
             { value: InsightsColumnsOrderBy.impressions_abs, label: tInsights('impressions') },
             { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
           ]}
-          value={getOrderByValue()}
+          value={getOrderByValue(searchParams)}
           onChange={handleOrderByChange}
           allowDeselect={false}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}

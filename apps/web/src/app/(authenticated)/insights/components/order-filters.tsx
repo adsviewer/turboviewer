@@ -16,6 +16,7 @@ import {
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
+import { getOrderByValue } from '@/util/insights-utils';
 import Search from './search/search';
 
 export default function OrderFilters(): React.ReactNode {
@@ -55,20 +56,6 @@ export default function OrderFilters(): React.ReactNode {
 
   const getAdPreviewValue = (): boolean => {
     return isParamInSearchParams(searchParams, urlKeys.fetchPreviews, 'true');
-  };
-
-  const getOrderByValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
-      return InsightsColumnsOrderBy.impressions_rel;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel))
-      return InsightsColumnsOrderBy.spend_rel;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs))
-      return InsightsColumnsOrderBy.spend_abs;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel))
-      return InsightsColumnsOrderBy.cpm_rel;
-    else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
-      return InsightsColumnsOrderBy.cpm_abs;
-    return InsightsColumnsOrderBy.impressions_abs;
   };
 
   const getIntervalValue = (): string => {
@@ -215,7 +202,7 @@ export default function OrderFilters(): React.ReactNode {
               { value: InsightsColumnsOrderBy.impressions_abs, label: t('impressions') },
               { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
             ]}
-            value={getOrderByValue()}
+            value={getOrderByValue(searchParams)}
             onChange={handleOrderByChange}
             allowDeselect={false}
             comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
