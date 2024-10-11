@@ -28,6 +28,7 @@ export default function VideoCard(): React.ReactNode {
         <Button
           component={Link}
           href="/integrations"
+          target="_blank"
           leftSection={<IconPlugConnected />}
           variant="gradient"
           fullWidth
@@ -39,6 +40,7 @@ export default function VideoCard(): React.ReactNode {
         <Button
           component={Link}
           href="/organization"
+          target="_blank"
           leftSection={<IconBuilding />}
           variant="gradient"
           fullWidth
