@@ -1,4 +1,5 @@
-import { Flex } from '@mantine/core';
+'use client';
+import { Flex, Grid } from '@mantine/core';
 import React from 'react';
 import LottieAnimation from '@/components/misc/lottie-animation';
 import wavingPeopleAnimation from '../../../../public/lotties/waving-people.json';
@@ -21,7 +22,12 @@ export default function Introduction(): React.ReactNode {
           transform: 'rotate(-5deg)',
         }}
       />
-      <VideoCard />
+
+      <Grid justify="center" gutter="lg">
+        <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+          <VideoCard />
+        </Grid.Col>
+      </Grid>
     </Flex>
   );
 }
