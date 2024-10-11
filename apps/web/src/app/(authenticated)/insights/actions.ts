@@ -8,7 +8,6 @@ import {
   InsightsInterval,
   type InsightsPosition,
   type InsightsQuery,
-  type IntegrationType,
   type OrderBy,
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
@@ -22,10 +21,9 @@ export interface InsightsParams {
   pageSize?: number;
   groupedBy?: InsightsColumnsGroupBy[];
   account?: string;
-  adIds?: string;
-  integrations?: IntegrationType[];
+  adId?: string;
   device?: DeviceEnum;
-  publisher?: PublisherEnum[];
+  publisher?: PublisherEnum;
   position?: InsightsPosition;
   interval?: InsightsInterval;
   fetchPreviews?: string;
@@ -45,8 +43,7 @@ export default async function getInsights(insightsParams: InsightsParams): Promi
   return await handleUrqlRequest(
     urqlClientSdk().insights({
       adAccountIds: insightsParams.account,
-      adIds: insightsParams.adIds,
-      integrations: insightsParams.integrations,
+      adIds: insightsParams.adId,
       dateFrom: insightsParams.dateFrom ? new Date(Number(insightsParams.dateFrom)) : undefined,
       dateTo: insightsParams.dateTo ? new Date(Number(insightsParams.dateTo)) : undefined,
       devices: insightsParams.device,

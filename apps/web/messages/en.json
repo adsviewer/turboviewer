@@ -28,8 +28,6 @@
   },
   "navbar": {
     "insights": "Insights",
-    "summary": "Summary",
-    "analytical": "Analytical",
     "integrations": "Integrations",
     "settings": "Settings",
     "organization": "Organization",
@@ -69,10 +67,9 @@
       "selectPublishers": "Select publishers",
       "groupBy": "Group By",
       "account": "Account",
-      "adId": "Ad ID",
-      "adSetId": "Ad Set ID",
-      "campaignId": "Campaign ID",
-      "integration": "Integration",
+      "adId": "Ad Id",
+      "adSetId": "Ad Set Id",
+      "campaignId": "Campaign Id",
       "device": "Device",
       "date": "Date",
       "publisher": "Publisher",
@@ -93,10 +90,6 @@
       "searchTermsHint": "Start adding search terms to customize your search.",
       "clearSearch": "Clear search"
     }
-  },
-  "summary": {
-    "title": "Summary",
-    "topAds": "Top Ads"
   },
   "integrations": {
     "title": "Integrations",

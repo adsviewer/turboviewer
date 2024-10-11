@@ -4,7 +4,6 @@ import { useMantineTheme, useComputedColorScheme, em } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
-import { DEFAULT_HOME_PATH } from '@/middleware';
 
 export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement | null {
   const computedColorScheme = useComputedColorScheme();
@@ -36,7 +35,7 @@ export function LogoFull(props: React.ComponentProps<'svg'>): React.ReactElement
       xmlns="http://www.w3.org/2000/svg"
       {...props}
       onClick={() => {
-        router.push(DEFAULT_HOME_PATH);
+        router.push('/insights');
       }}
     >
       <line x1="9.19527" y1="2.28171" x2="1.28172" y2="24.024" strokeWidth="2" strokeLinecap="round" />

@@ -6,8 +6,8 @@ export default function Graphics(): React.ReactNode {
   return (
     <LottieAnimation
       animationData={peopleConnectedAnimation}
-      speed={1}
-      loop={false}
+      speed={0.5}
+      loop
       playAnimation
       customStyles={{
         position: 'absolute',

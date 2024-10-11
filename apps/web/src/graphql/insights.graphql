@@ -13,7 +13,6 @@ query adAccounts {
 query insights(
   $adAccountIds: [String!]
   $adIds: [String!]
-  $integrations: [IntegrationType!]
   $dateFrom: Date
   $dateTo: Date
   $devices: [DeviceEnum!]
@@ -31,7 +30,6 @@ query insights(
     filter: {
       adAccountIds: $adAccountIds
       adIds: $adIds
-      integrations: $integrations
       dateFrom: $dateFrom
       dateTo: $dateTo
       devices: $devices
@@ -66,7 +64,6 @@ query insights(
         height
         type
       }
-      integration
       device
       publisher
       position
