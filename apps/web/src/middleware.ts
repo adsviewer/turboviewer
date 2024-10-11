@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
 import { type AJwtPayload } from '@repo/shared-types';
+import { DateTime } from 'luxon';
 import { env } from './env.mjs';
 import { ChartMetricsEnum, urlKeys } from './util/url-query-utils';
 import {
@@ -105,7 +106,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Summary only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/summary' && !request.nextUrl.search) {
-    const newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}`;
+    const today = DateTime.now().toMillis().toString();
+    const prevWeek = DateTime.now().minus({ days: 7 }).toMillis().toString();
+    const newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}&dateFrom=${prevWeek}&dateTo=${today}`;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
