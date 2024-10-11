@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ResetPasswordSchema, type ResetPasswordSchemaType } from '@/util/schemas/login-schemas';
+import { DEFAULT_HOME_PATH } from '@/middleware';
 
 export default function ForgotPasswordForm(): React.JSX.Element {
   const t = useTranslations('authentication');
@@ -37,7 +38,7 @@ export default function ForgotPasswordForm(): React.JSX.Element {
       })
       .then((data: { success: true } | { success: false }) => {
         if (data.success) {
-          router.replace('/insights');
+          router.replace(DEFAULT_HOME_PATH);
         }
       })
       .catch((error: unknown) => {
