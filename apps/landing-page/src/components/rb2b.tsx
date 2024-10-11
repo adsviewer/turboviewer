@@ -33,7 +33,7 @@ export default function RB2B(): React.ReactNode {
                 first.parentNode.insertBefore(script, first);
               };
               reb2b.SNIPPET_VERSION = "1.0.1";
-              reb2b.load(${String(env.NEXT_PUBLIC_RB2B_ID)});
+              reb2b.load(${env.NEXT_PUBLIC_RB2B_ID});
             }();
           `,
         }}
