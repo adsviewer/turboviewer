@@ -3,7 +3,6 @@
 import { Text, SimpleGrid } from '@mantine/core';
 import { type Key, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
-import { sentenceCase } from 'change-case';
 import { motion } from 'framer-motion';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { type GroupedInsight, type InsightsQuery } from '@/graphql/generated/schema-server';
@@ -18,8 +17,8 @@ export default function InsightsGrid(props: PropsType): ReactNode {
   const t = useTranslations('insights');
 
   const getInsightHeading = (insight: GroupedInsight): string => {
-    if (insight.publisher) return sentenceCase(insight.publisher);
-    else if (insight.integration) return sentenceCase(insight.integration);
+    if (insight.publisher) return insight.publisher;
+    else if (insight.integration) return insight.integration;
     return t('insight');
   };
 
