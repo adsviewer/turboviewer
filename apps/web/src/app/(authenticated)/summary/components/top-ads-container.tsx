@@ -12,6 +12,7 @@ import { isParamInSearchParams, urlKeys, addOrReplaceURLParams } from '@/util/ur
 import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
+  InsightsInterval,
   type InsightsQuery,
   OrderBy,
 } from '@/graphql/generated/schema-server';
@@ -73,6 +74,7 @@ export default function TopAdsContainer(): React.ReactNode {
             : InsightsColumnsOrderBy.impressions_abs,
           order: OrderBy.desc,
           pageSize: 3,
+          interval: InsightsInterval.week,
           groupedBy: [
             InsightsColumnsGroupBy.adId,
             InsightsColumnsGroupBy.publisher,

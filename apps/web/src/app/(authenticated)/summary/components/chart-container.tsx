@@ -181,7 +181,7 @@ export default function ChartContainer(): React.ReactNode {
           maxDate={new Date()}
           placeholder={tGeneric('pickDateRange')}
           leftSection={<IconCalendarMonth />}
-          clearable
+          clearable={false}
           onChange={handleDateRangeChange}
           value={dateRangeValue}
         />
