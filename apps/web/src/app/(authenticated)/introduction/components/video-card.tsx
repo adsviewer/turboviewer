@@ -1,7 +1,8 @@
+/* eslint-disable jsx-a11y/media-has-caption -- no captions needed for now  */
 'use client';
 
 import Link from 'next/link';
-import { Button, Card, Flex, Group, Image, Text } from '@mantine/core';
+import { Button, Card, Flex, Group, Text } from '@mantine/core';
 import { IconBuilding, IconPlugConnected } from '@tabler/icons-react';
 import React from 'react';
 
@@ -9,11 +10,10 @@ export default function VideoCard(): React.ReactNode {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Card.Section>
-        <Image
-          src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
-          height={350}
-          alt="Norway"
-        />
+        <video width="100%" controls>
+          <source src="/videos/mock-video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </Card.Section>
 
       <Group justify="space-between" mt="md" mb="xs">
