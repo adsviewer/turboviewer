@@ -24,6 +24,7 @@ import { dateFormatOptions, truncateString } from '@/util/format-utils';
 import { getCurrencySymbol } from '@/util/currency-utils';
 import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
 import { urlKeys, ChartMetricsEnum } from '@/util/url-query-utils';
+import LoaderCentered from '@/components/misc/loader-centered';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -53,6 +54,7 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
   const searchParams = useSearchParams();
+  const [isLoadingIframe, setIsLoadingIframe] = useState<boolean>(true);
   const [rank, setRank] = useState<RankType>({
     label: 'GOOD',
     color: 'green',
@@ -121,7 +123,11 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       src: props.iframe.src,
       width: String(props.iframe.width),
       height: String(props.iframe.height),
+      onLoad: () => {
+        setIsLoadingIframe(false);
+      },
     };
+
     switch (props.iframe.type) {
       case IFrameType.EMBEDDED:
         return <Embed style={{ border: 'none' }} {...iFrameProps} />;
@@ -180,6 +186,11 @@ export default function InsightsGrid(props: InsightCardProps): ReactNode {
       ) : (
         // IFrame ad preview
         <Flex justify="center" align="center" mb="auto" h="100%">
+          {isLoadingIframe ? (
+            <Box pos="absolute">
+              <LoaderCentered type="bars" />
+            </Box>
+          ) : null}
           {getIFrameHtml()}
         </Flex>
       )}
