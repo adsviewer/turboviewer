@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import { env } from '@/env.mjs';
 
 export default function RB2B(): React.ReactNode {
   return (
@@ -32,7 +33,7 @@ export default function RB2B(): React.ReactNode {
                 first.parentNode.insertBefore(script, first);
               };
               reb2b.SNIPPET_VERSION = "1.0.1";
-              reb2b.load("LNKLDHMD2POJ");
+              reb2b.load(${String(env.NEXT_PUBLIC_RB2B_ID)});
             }();
           `,
         }}
