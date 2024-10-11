@@ -59,8 +59,25 @@ export const getInsightsDateFrom = (
     }
     return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom.toISOString()}')`;
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- dates are defined
-  return `AND i.date >= GREATEST(TIMESTAMP '${dateFrom!.toISOString()}',DATE_TRUNC('${interval}', TIMESTAMP '${dateTo!.toISOString()}' - INTERVAL '${mappedInterval}'))`;
+
+  if (!dateFrom || !dateTo) return '';
+
+  const startOfWeek = (date: Date): Date => {
+    const dayOfWeek = date.getUTCDay();
+    const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+    const monday = new Date(date);
+    monday.setUTCDate(monday.getUTCDate() + diff);
+    monday.setUTCHours(0, 0, 0, 0);
+    return monday;
+  };
+
+  const isSameWeek = startOfWeek(dateFrom).getTime() === startOfWeek(dateTo).getTime();
+
+  if (isSameWeek && dateFrom.getUTCDay() !== 1 && interval === 'week') {
+    return `AND i.date >= GREATEST(TIMESTAMP '${startOfWeek(dateFrom).toISOString()}',DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${mappedInterval}'))`;
+  }
+
+  return `AND i.date >= GREATEST(TIMESTAMP '${dateFrom.toISOString()}',DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${mappedInterval}'))`;
 };
 
 export const searchAdsToSQL = (expression: InsightsSearchExpression): string => {

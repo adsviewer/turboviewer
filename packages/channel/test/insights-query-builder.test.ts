@@ -606,6 +606,60 @@ void describe('insights query builder tests', () => {
     );
   });
 
+  void it('grouped insights where dateFrom and dateTo are within a week and dateFrom starts midweek', () => {
+    const args: FilterInsightsInputType = {
+      interval: 'week',
+      dateFrom: new Date('2024-09-24T00:00:00.000Z'),
+      dateTo: new Date('2024-09-29T00:00:00.000Z'),
+      orderBy: 'spend_rel',
+      pageSize: 10,
+      order: 'desc',
+      page: 1,
+      groupBy: ['publisher'],
+    };
+    const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
+    const organizationId = 'clwkdrdn7000008k708vfchyr';
+    const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
+    if (!args.dateFrom) return;
+    assertSql(
+      insights,
+      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+                                              FROM insights i
+                                                       JOIN ads a on i.ad_id = a.id
+                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
+                                                       JOIN campaigns c on ase.campaign_id = c.id
+                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                                AND i.date >= GREATEST(TIMESTAMP '2024-09-23T00:00:00.000Z',DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week'))
+                                                AND i.date <= TIMESTAMP '2024-09-29T00:00:00.000Z'
+                                              ), 
+  last_interval AS (SELECT publisher, currency, SUM(i.spend_eur) AS spend_eur
+                                      FROM organization_insights i
+                                      WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week')
+                                        AND date <= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z')
+                                      GROUP BY publisher, currency),
+  interval_before_last AS (SELECT publisher, currency, SUM(i.spend_eur) AS spend_eur
+                                             FROM organization_insights i
+                                             WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '2 week')
+                                               AND date <= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week')
+                                             GROUP BY publisher, currency
+                                             ),
+  order_column_trend AS (SELECT li.publisher, li.currency, li.spend_eur / ibl.spend_eur::decimal trend
+                                      FROM last_interval li JOIN interval_before_last ibl ON li.publisher = ibl.publisher AND li.currency = ibl.currency
+                                      WHERE ibl.spend_eur
+                                          > 0
+                                      ORDER BY trend DESC
+                                      LIMIT 11 OFFSET 0)
+  SELECT i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
+  FROM organization_insights i JOIN order_column_trend oct ON i.publisher = oct.publisher AND i.currency = oct.currency
+  WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week')
+    AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z')
+  GROUP BY i.publisher, i.currency, interval_start, oct.trend
+  ORDER BY oct.trend DESC, interval_start;`,
+    );
+  });
+
   void it('grouped insights with integrationGroupby filter', () => {
     const args: FilterInsightsInputType = {
       orderBy: 'spend_rel',
