@@ -36,6 +36,10 @@
     "signOut": "Sign Out",
     "noOrganizationData": "No organization data"
   },
+  "introduction": {
+    "title": "Welcome!",
+    "description": "Analyze your ad performance effortlessly. With real-time data insights, track key metrics, optimize campaigns, and boost ROI. Get started now to unlock the full potential of your advertising strategy!"
+  },
   "insights": {
     "title": "Insights",
     "insight": "Insight",
