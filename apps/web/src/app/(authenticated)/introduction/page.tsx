@@ -23,8 +23,8 @@ export default function Introduction(): React.ReactNode {
         }}
       />
 
-      <Grid justify="center" gutter="lg">
-        <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+      <Grid justify="center" align="center" gutter="lg">
+        <Grid.Col span={{ base: 12, lg: 6 }}>
           <VideoCard />
         </Grid.Col>
       </Grid>
