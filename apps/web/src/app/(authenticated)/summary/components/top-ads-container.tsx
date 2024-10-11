@@ -67,7 +67,7 @@ export default function TopAdsContainer(): React.ReactNode {
     if (userDetails.currentOrganization) {
       let allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
       for (const integration of userDetails.currentOrganization.integrations) {
-        const TOP_ADS_PARAMAS: InsightsParams = {
+        const TOP_ADS_PARAMS: InsightsParams = {
           orderBy: currOrderByValue
             ? (currOrderByValue as InsightsColumnsOrderBy)
             : InsightsColumnsOrderBy.impressions_abs,
@@ -81,7 +81,7 @@ export default function TopAdsContainer(): React.ReactNode {
           integrations: [integration.type],
         };
 
-        const request = getInsights(TOP_ADS_PARAMAS)
+        const request = getInsights(TOP_ADS_PARAMS)
           .then((res) => {
             if (!res.success) {
               notifications.show({
