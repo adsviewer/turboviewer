@@ -3,6 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
+      "@public/*": ["./public/*"],
     },
     "plugins": [{ "name": "next" }]
   },
