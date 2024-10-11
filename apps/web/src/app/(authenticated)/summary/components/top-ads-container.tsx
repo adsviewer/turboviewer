@@ -102,7 +102,7 @@ export default function TopAdsContainer(): React.ReactNode {
           .finally(() => {
             setIsPending(false);
           });
-        allRequests = [...allRequests, request];
+        allRequests.push(request);
       }
 
       // Unwrap all the responses at the same time
