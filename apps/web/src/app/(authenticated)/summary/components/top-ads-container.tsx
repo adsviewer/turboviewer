@@ -75,7 +75,11 @@ export default function TopAdsContainer(): React.ReactNode {
           order: OrderBy.desc,
           pageSize: 3,
           interval: InsightsInterval.week,
-          groupedBy: [ InsightsColumnsGroupBy.adId],
+          groupedBy: [
+            InsightsColumnsGroupBy.adId,
+            InsightsColumnsGroupBy.publisher,
+            InsightsColumnsGroupBy.integration,
+          ],
           integrations: [integration.type],
         };
 
