@@ -6,7 +6,18 @@ on:
       vercel_org_id:
         required: true
         type: string
+      app:
+        required: true
+        type: string
     secrets:
+      neon_api_key:
+        required: true
+      neon_database_name:
+        required: true
+      neon_database_username:
+        required: true
+      neon_project_id:
+        required: true
       sentry_auth_token:
         required: true
       turbo_token:
@@ -17,11 +28,15 @@ on:
         required: true
 
 env:
+  NEON_DATABASE_USERNAME: ${{ secrets.neon_database_username }}
+  NEON_DATABASE_NAME: ${{ secrets.neon_database_name }}
+  NEON_API_KEY: ${{ secrets.neon_api_key }}
+  NEON_PROJECT_ID: ${{ secrets.neon_project_id }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.sentry_auth_token }}
+  TURBO_TEAM: ${{ inputs.vercel_org_id }}
+  TURBO_TOKEN: ${{ secrets.turbo_token }}
   VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
   VERCEL_PROJECT_ID: ${{ secrets.vercel_project_id }}
-  TURBO_TOKEN: ${{ secrets.turbo_token }}
-  TURBO_TEAM: ${{ inputs.vercel_org_id }}
-  SENTRY_AUTH_TOKEN: ${{ secrets.sentry_auth_token }}
 
 jobs:
   deploy:
@@ -34,15 +49,64 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      - name: Create Neon Branch
+        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
+        id: create-branch
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ env.NEON_PROJECT_ID }}
+          # parent: dev # optional (defaults to your primary branch)
+          branch_name: preview/pr-${{ github.event.number }}-${{ steps.branch-name.outputs.current_branch }}
+          username: ${{ env.NEON_DATABASE_USERNAME }}
+          database: ${{ env.NEON_DATABASE_NAME }}
+          api_key: ${{ env.NEON_API_KEY }}
+
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.vercel_token }}
+        run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.vercel_token }}
       - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Migrations
+        id: migrations
+        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
         run: |
-          pnpm install
+          touch .env
+
+          echo DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler || env.DATABASE_URL }} >> packages/database/.env
+
           pnpm --filter=database generate
+          pnpm --filter=database db:migrate:deploy
+
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.vercel_token }}
+
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy
+        run: echo preview_url=$(vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.vercel_token }}) >> $GITHUB_OUTPUT
+
+      - name: Add PR Comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            Vercel landing URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Vercel webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Vercel backoffice URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
+          find: |
+            Vercel landing URL :rocket: :.*
+            Vercel webapp URL :rocket: :.*
+            Vercel backoffice URL :rocket: :.*
+            Neon branch :elephant: :.*
+          replace: |
+            Vercel landing URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Vercel webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Vercel backoffice URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
