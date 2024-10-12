@@ -96,17 +96,17 @@ jobs:
         uses: mshick/add-pr-comment@v2
         with:
           message: |
-            Vercel landing URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Vercel webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Vercel backoffice URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Landing URL :flight_arrival:  : ${{ steps.deploy.outputs.preview_url }}
+            Webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Backoffice URL :office: : ${{ steps.deploy.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
           find: |
-            Vercel landing URL :rocket: :.*
-            Vercel webapp URL :rocket: :.*
-            Vercel backoffice URL :rocket: :.*
+            Landing URL :flight_arrival:  :.*
+            Webapp URL :rocket: :.*
+            Backoffice URL :office: :.*
             Neon branch :elephant: :.*
           replace: |
-            Vercel landing URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Vercel webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Vercel backoffice URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Landing URL :flight_arrival:  : ${{ steps.deploy.outputs.preview_url }}
+            Webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+            Backoffice URL :office: : ${{ steps.deploy.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
