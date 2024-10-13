@@ -1,5 +1,6 @@
 import {
   LoginProviderEnum,
+  MilestoneEnum,
   OrganizationRoleEnum,
   prisma,
   RoleEnum,
@@ -57,6 +58,7 @@ export const UserDto = builder.prismaObject('User', {
     email: t.exposeString('email', { nullable: false, ...commonOrgFieldProps }),
     photoUrl: t.exposeString('photoUrl', { nullable: true, ...commonOrgFieldProps }),
     status: t.expose('status', { type: UserStatusDto, nullable: false }),
+    milestones: t.expose('milestones', { type: [MilestonesDto], nullable: false }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
     userRoles: t.stringList({
@@ -147,3 +149,4 @@ export type SignUpInput = typeof SignUpInputDto.$inferInput;
 export const LoginProviderEnumDto = builder.enumType(LoginProviderEnum, { name: 'LoginProviderEnum' });
 
 export const UserStatusDto = builder.enumType(UserStatus, { name: 'UserStatus' });
+export const MilestonesDto = builder.enumType(MilestoneEnum, { name: 'Milestones' });

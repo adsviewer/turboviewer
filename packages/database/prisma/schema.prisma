@@ -58,24 +58,31 @@ enum UserStatus {
   EMAIL_CONFIRMED
 }
 
-model User {
-  id                    String        @id @default(cuid())
-  firstName             String        @map("first_name")
-  lastName              String        @map("last_name")
-  email                 String        @unique @db.Citext
-  emailType             EmailType     @map("email_type")
-  password              String?
-  photoUrl              String?       @map("photo_url")
-  roles                 UserRole[]
-  currentOrganization   Organization? @relation(fields: [currentOrganizationId], references: [id])
-  currentOrganizationId String?       @map("current_organization_id")
-  createdAt             DateTime      @default(now()) @map("created_at")
-  updatedAt             DateTime      @default(now()) @updatedAt @map("updated_at")
-  status                UserStatus
-  feedbacks             Feedback[]
+enum MilestoneEnum {
+  Onboarding
+}
 
+model User {
+  id                    String          @id @default(cuid())
+  firstName             String          @map("first_name")
+  lastName              String          @map("last_name")
+  email                 String          @unique @db.Citext
+  emailType             EmailType       @map("email_type")
+  password              String?
+  photoUrl              String?         @map("photo_url")
+  currentOrganizationId String?         @map("current_organization_id")
+  status                UserStatus
+  milestones            MilestoneEnum[] @default([Onboarding])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  currentOrganization Organization? @relation(fields: [currentOrganizationId], references: [id])
+
+  feedbacks      Feedback[]
   loginProviders LoginProviderUser[]
   organizations  UserOrganization[]
+  roles          UserRole[]
 
   @@index([currentOrganizationId])
   @@map("users")
