@@ -97,9 +97,8 @@ jobs:
         uses: mshick/add-pr-comment@v2
         with:
           message: |
-            landing URL:
             webapp URL:
-            backoffice URL:
+            landing URL:
           message-id: vercel-urls
           find: |
             ${{inputs.app}} URL:.*
