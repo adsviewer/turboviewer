@@ -29,16 +29,15 @@ on:
 
 jobs:
   pr_comment:
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Add PR Comment
-        if: ${{ github.event_name == 'pull_request' }}
         uses: mshick/add-pr-comment@v2
         with:
           message: |
-            landing URL:
             webapp URL:
-            backoffice URL:
+            landing URL:
           message-id: vercel-urls
 
   deploy:
