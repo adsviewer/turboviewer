@@ -1,6 +1,6 @@
 'use client';
 
-import { type ComboboxItem, Flex, Select } from '@mantine/core';
+import { type ComboboxItem, Flex, MultiSelect, Select } from '@mantine/core';
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -18,11 +18,13 @@ import {
   PublisherEnum,
   InsightsInterval,
 } from '@/graphql/generated/schema-server';
+import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 import Chart from './chart';
 
 export default function ChartContainer(): React.ReactNode {
   const tInsights = useTranslations('insights');
+  const tInsightsFilters = useTranslations('insights.filters');
   const tGeneric = useTranslations('generic');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -70,6 +72,7 @@ export default function ChartContainer(): React.ReactNode {
       dateFrom = dateRangeValue[0].getTime();
       dateTo = dateRangeValue[1].getTime();
     }
+
     const chartParams: InsightsParams = {
       dateFrom,
       dateTo,
@@ -78,6 +81,7 @@ export default function ChartContainer(): React.ReactNode {
       pageSize: Object.keys(PublisherEnum).length, // page size is the same as the publishers that we manage since we group per publisher
       groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,
+      publisher: searchParams.getAll(urlKeys.publisher) as PublisherEnum[],
     };
 
     // Get chart's insights
@@ -145,11 +149,26 @@ export default function ChartContainer(): React.ReactNode {
     }
   };
 
+  const handleMultiFilterAdd = (key: string, value: string): void => {
+    resetInsightsChart();
+    startTransition(() => {
+      router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    });
+  };
+
+  const handleMultiFilterRemove = (key: string, value: string): void => {
+    resetInsightsChart();
+    startTransition(() => {
+      router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    });
+  };
+
   return (
     <Flex direction="column">
       <Flex align="center" gap="md" wrap="wrap" mb="md">
         <Select
           description={tInsights('chartMetric')}
+          disabled={isPending || !insightsChart.length}
           data={[
             { value: ChartMetricsEnum.Impressions, label: tInsights('impressions') },
             { value: ChartMetricsEnum.Spent, label: tInsights('spent') },
@@ -163,10 +182,26 @@ export default function ChartContainer(): React.ReactNode {
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           maw={280}
-          disabled={isPending || !insightsChart.length}
+        />
+        <MultiSelect
+          description={tInsightsFilters('publishers')}
+          disabled={isPending}
+          placeholder={`${tInsightsFilters('selectPublishers')}...`}
+          data={populatePublisherAvailableValues()}
+          value={getPublisherCurrentValues(searchParams)}
+          onOptionSubmit={(value) => {
+            handleMultiFilterAdd(urlKeys.publisher, value);
+          }}
+          onRemove={(value) => {
+            handleMultiFilterRemove(urlKeys.publisher, value);
+          }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+          my={4}
         />
         <DatePickerInput
-          mt="auto"
+          description={tGeneric('pickDateRange')}
+          disabled={isPending}
           ml="auto"
           type="range"
           maxDate={new Date()}

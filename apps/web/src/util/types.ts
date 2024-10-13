@@ -7,3 +7,8 @@ export const integrationTypeMap = new Map<IntegrationType, { image: string }>([
   [IntegrationType.META, { image: '/integrations/meta-logo-icon.svg' }],
   [IntegrationType.LINKEDIN, { image: '/integrations/linkedin-logo-icon.svg' }],
 ]);
+
+export interface MultiSelectDataType {
+  value: string;
+  label: string;
+}

@@ -14,6 +14,7 @@ import {
 import { type ReadonlyURLSearchParams } from 'next/navigation';
 import { DeviceEnum, InsightsColumnsOrderBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import { isParamInSearchParams, urlKeys } from './url-query-utils';
+import { type MultiSelectDataType } from './types';
 
 export const publisherToIconMap = new Map<PublisherEnum, React.FC>([
   [PublisherEnum.Facebook, IconBrandFacebook],
@@ -46,4 +47,24 @@ export const getOrderByValue = (searchParams: ReadonlyURLSearchParams): string =
   else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
     return InsightsColumnsOrderBy.cpm_abs;
   return InsightsColumnsOrderBy.impressions_abs;
+};
+
+export const populatePublisherAvailableValues = (): MultiSelectDataType[] => {
+  let data: MultiSelectDataType[] = [];
+  for (const key of Object.keys(PublisherEnum)) {
+    const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
+    data = [...data, { value: enumValue, label: enumValue }];
+  }
+  return data;
+};
+
+export const getPublisherCurrentValues = (searchParams: ReadonlyURLSearchParams): string[] => {
+  let values: string[] = [];
+  for (const key of Object.keys(PublisherEnum)) {
+    const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
+    if (isParamInSearchParams(searchParams, urlKeys.publisher, enumValue)) {
+      values = [...values, enumValue];
+    }
+  }
+  return values;
 };

@@ -54,6 +54,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
   }
 
+  // // If user has no integrations and attempts to navigate to any insights page, redirect them to introduction
+  // if (token) {
+  //   if (tokenData.org)
+  // }
+
   // In case of token in URL (e.g. during Google auth or email confirmation or org switch), set JWT token & redirect to insights
   if (request.nextUrl.searchParams.get(TOKEN_KEY) && request.nextUrl.searchParams.get(REFRESH_TOKEN_KEY)) {
     const redirectUrl = getDefaultRedirectURL(request, tokenData);

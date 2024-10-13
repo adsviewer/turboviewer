@@ -5,15 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 import { sentenceCase } from 'change-case';
 import { useSetAtom } from 'jotai/index';
-import { DeviceEnum, InsightsColumnsGroupBy, PublisherEnum } from '@/graphql/generated/schema-server';
+import { DeviceEnum, InsightsColumnsGroupBy } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, urlKeys, isParamInSearchParams, positions } from '@/util/url-query-utils';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
+import { type MultiSelectDataType } from '@/util/types';
+import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
 import getAccounts from '../../actions';
-
-interface MultiSelectDataType {
-  value: string;
-  label: string;
-}
 
 export default function GroupFilters(): ReactNode {
   const t = useTranslations('insights.filters');
@@ -86,27 +83,6 @@ export default function GroupFilters(): ReactNode {
       const value = position.value;
       if (isParamInSearchParams(searchParams, urlKeys.position, value)) {
         values = [...values, value];
-      }
-    }
-    return values;
-  };
-
-  // Publishers
-  const populatePublisherAvailableValues = (): MultiSelectDataType[] => {
-    let data: MultiSelectDataType[] = [];
-    for (const key of Object.keys(PublisherEnum)) {
-      const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
-      data = [...data, { value: enumValue, label: enumValue }];
-    }
-    return data;
-  };
-
-  const getPublisherCurrentValues = (): string[] => {
-    let values: string[] = [];
-    for (const key of Object.keys(PublisherEnum)) {
-      const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
-      if (isParamInSearchParams(searchParams, urlKeys.publisher, enumValue)) {
-        values = [...values, enumValue];
       }
     }
     return values;
@@ -237,7 +213,7 @@ export default function GroupFilters(): ReactNode {
           disabled={isPending}
           placeholder={`${t('selectPublishers')}...`}
           data={populatePublisherAvailableValues()}
-          value={getPublisherCurrentValues()}
+          value={getPublisherCurrentValues(searchParams)}
           onOptionSubmit={(value) => {
             handleMultiFilterAdd(urlKeys.publisher, value);
           }}
