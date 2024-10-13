@@ -45,8 +45,10 @@ export default function TopAdsContainer(): React.ReactNode {
 
   useEffect(() => {
     // Logic to allow re-render only for search params of this component
-    const currOrderByValue = searchParams.get(urlKeys.orderBy);
-    if (currOrderByValue && orderByParamValue === currOrderByValue) return;
+    const currOrderByValue = searchParams.get(urlKeys.orderBy)
+      ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
+      : InsightsColumnsOrderBy.impressions_abs;
+    if (orderByParamValue === currOrderByValue) return;
     setOrderByParamValue(currOrderByValue);
 
     // Get top ads' insights
@@ -56,10 +58,8 @@ export default function TopAdsContainer(): React.ReactNode {
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
       for (const integration of userDetails.currentOrganization.integrations) {
         const TOP_ADS_PARAMS: InsightsParams = {
-          orderBy: currOrderByValue
-            ? (currOrderByValue as InsightsColumnsOrderBy)
-            : InsightsColumnsOrderBy.impressions_abs,
-          order: OrderBy.desc,
+          orderBy: currOrderByValue,
+          order: getCorrectOrder(currOrderByValue),
           pageSize: 3,
           interval: InsightsInterval.week,
           groupedBy: [
@@ -115,6 +115,11 @@ export default function TopAdsContainer(): React.ReactNode {
     tGeneric,
     userDetails.currentOrganization,
   ]);
+
+  const getCorrectOrder = (orderBy: InsightsColumnsOrderBy): OrderBy => {
+    if (orderBy === InsightsColumnsOrderBy.cpm_abs || orderBy === InsightsColumnsOrderBy.cpm_rel) return OrderBy.asc;
+    return OrderBy.desc;
+  };
 
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsightsTopAds();
