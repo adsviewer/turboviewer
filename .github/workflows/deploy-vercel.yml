@@ -35,10 +35,10 @@ jobs:
         app_project_id: [ WEB_VERCEL_PROJECT_ID, LANDING_PAGE_VERCEL_PROJECT_ID, BACKOFFICE_VERCEL_PROJECT_ID ]
     uses: ./.github/workflows/deploy-vercel-fn.yml
     secrets:
-#      neon_api_key: ${{ secrets.NEON_API_KEY }}
-#      neon_database_name: ${{ secrets.NEON_DATABASE_NAME }}
-#      neon_database_username: ${{ secrets.NEON_DATABASE_USERNAME }}
-#      neon_project_id: ${{ secrets.NEON_PROJECT_ID }}
+      neon_api_key: ${{ secrets.NEON_API_KEY }}
+      neon_database_name: ${{ secrets.NEON_DATABASE_NAME }}
+      neon_database_username: ${{ secrets.NEON_DATABASE_USERNAME }}
+      neon_project_id: ${{ secrets.NEON_PROJECT_ID }}
       sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
       turbo_token: ${{ secrets.TURBO_TOKEN }}
       vercel_project_id: ${{ secrets[matrix.app_project_id] }}
