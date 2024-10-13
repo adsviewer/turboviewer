@@ -20,7 +20,7 @@ import { env } from '../../config';
 import { getInvitationRedis, handleLinkInvite, isConfirmInvitedUser } from '../../contexts/user/user-invite';
 import { userWithRoles } from '../../contexts/user/user-roles';
 import { validateEmail } from '../../emailable-helper';
-import { SignUpInputDto, TokensDto, UserDto } from './user-types';
+import { MilestonesDto, SignUpInputDto, TokensDto, UserDto } from './user-types';
 
 const usernameSchema = z.string().min(2).max(30);
 const emailSchema = z.string().email();
@@ -291,6 +291,27 @@ builder.mutationFields((t) => ({
       if (isAError(emailSent)) {
         throw new GraphQLError(emailSent.message);
       }
+      return true;
+    },
+  }),
+  removeUserMilestone: t.withAuth({ authenticated: true }).boolean({
+    nullable: false,
+    args: {
+      milestone: t.arg({ type: MilestonesDto, required: true }),
+    },
+    resolve: async (_root, args, ctx, _info) => {
+      const { milestones } = await prisma.user.findUniqueOrThrow({
+        where: { id: ctx.currentUserId },
+        select: { milestones: true },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This will go away once milestones have more values
+      const updatedMilestones = milestones.filter((m) => m !== args.milestone);
+      await prisma.user.update({
+        where: { id: ctx.currentUserId },
+        data: {
+          milestones: updatedMilestones,
+        },
+      });
       return true;
     },
   }),

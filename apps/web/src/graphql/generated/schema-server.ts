@@ -598,6 +598,10 @@ export type MetaError = Error & {
   message: Scalars['String']['output'];
 };
 
+export enum Milestones {
+  Onboarding = 'Onboarding',
+}
+
 export type Mutation = {
   __typename: 'Mutation';
   /** Use this mutation after the user has clicked on the non-personalized invite link and they have an account already */
@@ -616,6 +620,7 @@ export type Mutation = {
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
+  removeUserMilestone: Scalars['Boolean']['output'];
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
   sendFeedback: Feedback;
@@ -687,6 +692,10 @@ export type MutationRefreshDataArgs = {
 
 export type MutationRemoveUserFromOrganizationArgs = {
   userId: Scalars['String']['input'];
+};
+
+export type MutationRemoveUserMilestoneArgs = {
+  milestone: Milestones;
 };
 
 export type MutationResetPasswordArgs = {
@@ -935,6 +944,7 @@ export type User = {
   id: Scalars['ID']['output'];
   /** Caller is permitted to view this field if they are in a common organization */
   lastName: Scalars['String']['output'];
+  milestones: Array<Milestones>;
   organizations: Array<UserOrganization>;
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;

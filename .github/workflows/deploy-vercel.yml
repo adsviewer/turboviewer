@@ -3,6 +3,16 @@ name: Vercel Deployments
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - apps/web/**
+      - apps/landing-page/**
+      - apps/backoffice/**
+      - packages/logger/**
+      - packages/mappings/**
+      - packages/mode/**
+      - packages/ui/**
+      - packages/utils/**
+      - .github/workflows/**
   push:
     branches:
       - main
