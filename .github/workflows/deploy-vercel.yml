@@ -12,7 +12,7 @@ on:
       - packages/mode/**
       - packages/ui/**
       - packages/utils/**
-      - .github/workflows/**
+      - .github/workflows/deploy-vercel*.yml
   push:
     branches:
       - main
@@ -25,7 +25,7 @@ on:
       - packages/mode/**
       - packages/ui/**
       - packages/utils/**
-      - .github/workflows/**
+      - .github/workflows/deploy-vercel*.yml
 
 jobs:
   deploy:

@@ -97,17 +97,13 @@ jobs:
         uses: mshick/add-pr-comment@v2
         with:
           message: |
-            Landing URL :flight_arrival:  : ${{ steps.deploy.outputs.preview_url }}
-            Webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Backoffice URL :office: : ${{ steps.deploy.outputs.preview_url }}
-            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
+            landing URL:
+            webapp URL:
+            backoffice URL:
+            Neon branch :elephant: :
           find: |
-            Landing URL :flight_arrival:  :.*
-            Webapp URL :rocket: :.*
-            Backoffice URL :office: :.*
+            ${{inputs.app}} URL:.*
             Neon branch :elephant: :.*
           replace: |
-            Landing URL :flight_arrival:  : ${{ steps.deploy.outputs.preview_url }}
-            Webapp URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
-            Backoffice URL :office: : ${{ steps.deploy.outputs.preview_url }}
+            ${{inputs.app}} URL: ${{ steps.deploy.outputs.preview_url }}
             Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
