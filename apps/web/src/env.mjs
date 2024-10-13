@@ -10,8 +10,9 @@ export const env = createEnv({
    *  - env | grep -e EXAMPLE_1 -e EXAMPLE_2 >> apps/web/.env.production
    */
   server: {
-    NODE_ENV: z.enum(['development', 'test', 'production']),
     AUTH_SECRET: z.string().min(1).default('something'),
+    NODE_ENV: z.enum(['development', 'test', 'production']),
+    GRAPHQL_ENDPOINT: z.string().min(1),
     REFRESH_SECRET: z.string().min(1).default('refreshSecret'),
   },
 
@@ -25,7 +26,6 @@ export const env = createEnv({
     // Add `.min(1) on these if you want to make sure they're not empty
     NEXT_PUBLIC_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
     NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:3000/graphql'),
-    NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
     NEXT_PUBLIC_BACKOFFICE_URL: z.string().min(1).default('http://localhost:3001'),
     NEXT_PUBLIC_MEASUREMENT_ID: z.string().min(1).default('dont track')
   },
@@ -35,13 +35,13 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
-    NODE_ENV: process.env.NODE_ENV,
     AUTH_SECRET: process.env.AUTH_SECRET,
+    GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
+    NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_MEASUREMENT_ID: process.env.NEXT_PUBLIC_MEASUREMENT_ID,
     NEXT_PUBLIC_BACKOFFICE_URL: process.env.NEXT_PUBLIC_BACKOFFICE_URL,
     NEXT_PUBLIC_ENDPOINT: process.env.NEXT_PUBLIC_ENDPOINT,
     NEXT_PUBLIC_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
-    NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

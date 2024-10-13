@@ -26,10 +26,10 @@ A bunch of cool staff for viewing, optimizing and growing your digital ad portfo
    in the `apps/server` directory. Look at [Configuring aws-cli](#configuring-aws-cli) if you don't
    have access.
 
-5. Create a .env file in the `apps/web`, `apps/backoffice` and `apps/landing-page` directory with the following content:
+5. Create a .env file in the `apps/web`, `apps/backoffice` directory with the following content:
 
    ```env
-   NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT=http://localhost:4000/graphql
+   GRAPHQL_ENDPOINT=http://localhost:4000/graphql
    ```
 
 6. Run `pnpm i`

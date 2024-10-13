@@ -150,7 +150,7 @@ const tryRefreshToken = async (
         refreshToken: z.string(),
       }),
     });
-    const newRefreshToken = await fetch(env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT, {
+    const newRefreshToken = await fetch(env.GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

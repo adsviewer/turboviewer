@@ -12,7 +12,7 @@ const makeClient = (refresh?: boolean): Client => {
   const cookieStore = cookies();
   const token = refresh ? cookieStore.get(REFRESH_TOKEN_KEY)?.value : cookieStore.get(TOKEN_KEY)?.value;
   return createClient({
-    url: env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
+    url: env.GRAPHQL_ENDPOINT,
     fetchOptions: {
       headers: {
         'accept-language': headers().get('accept-language') ?? 'en-US',

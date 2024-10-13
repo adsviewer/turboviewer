@@ -22,7 +22,7 @@ const config = {
         // allows overriding page files
         {
           source: '/graphql:path*',
-          destination: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
+          destination: process.env.GRAPHQL_ENDPOINT,
         },
       ],
       afterFiles: [
@@ -30,7 +30,7 @@ const config = {
         // are checked but before dynamic routes
         {
           source: '/graphql:path*',
-          destination: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
+          destination: process.env.GRAPHQL_ENDPOINT,
         },
       ],
       fallback: [
@@ -38,7 +38,7 @@ const config = {
         // and dynamic routes are checked
         {
           source: '/graphql:path*',
-          destination: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
+          destination: process.env.GRAPHQL_ENDPOINT,
         },
       ],
     };
