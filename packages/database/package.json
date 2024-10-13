@@ -22,7 +22,7 @@
     "generate": "prisma generate",
     "generate:watch": "prisma generate --watch",
     "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint . --fix --max-warnings 0",
     "prebuild": "pnpm run generate",
     "predev": "pnpm run generate && pnpm run db:migrate:deploy",
     "studio": "prisma studio",

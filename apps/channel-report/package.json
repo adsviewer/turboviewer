@@ -9,7 +9,7 @@
     "build": "tsc && pnpm run sentry:sourcemaps",
     "start": "node --conditions=javascript --import=extensionless/register --import ./dist/instrument.js dist/index.js",
     "lint": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint . --fix --max-warnings 0",
     "clean": "rm -rf dist node_modules .turbo",
     "update": "pnpm update --latest && pnpm install",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project channel-report ./dist && sentry-cli sourcemaps upload --org adsviewer --project channel-report ./dist"

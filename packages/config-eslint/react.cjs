@@ -38,7 +38,7 @@ module.exports = {
     },
   },
   ignorePatterns: ['node_modules/', 'dist/', '.eslintrc.js', '**/*.css'],
-  // add rules configurations here
+  plugins: ['prefer-arrow'],
   rules: {
     'import/no-default-export': 'off',
     'prefer-arrow/prefer-arrow-functions': [
