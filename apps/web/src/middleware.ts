@@ -106,8 +106,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Summary only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/summary' && !request.nextUrl.search) {
-    const today = DateTime.now().toMillis().toString();
-    const prevWeek = DateTime.now().minus({ days: 7 }).toMillis().toString();
+    const today = DateTime.now().startOf('day').toMillis().toString();
+    const prevWeek = DateTime.now().startOf('day').minus({ days: 7 }).toMillis().toString();
     const newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}&dateFrom=${prevWeek}&dateTo=${today}`;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
