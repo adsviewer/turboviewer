@@ -18,7 +18,6 @@ import {
   intervalBeforeLast,
   lastInterval,
   orderColumnTrend,
-  orderColumnTrendAbsolute,
   searchAdsToSQL,
 } from '../src/insights-query-builder';
 
@@ -99,18 +98,18 @@ void describe('insights query builder tests', () => {
   });
   void it('getInsightsDateFrom no range', () => {
     const dateFrom = getInsightsDateFrom(undefined, undefined, 3, 'day');
-    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', CURRENT_DATE - INTERVAL '3 day')`);
+    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', CURRENT_DATE - INTERVAL '2 day')`);
   });
   void it('getInsightsDateFrom onlyDateTo', () => {
     const dateFrom = getInsightsDateFrom(undefined, new Date('2024-05-15'), 3, 'day');
     assert.strictEqual(
       dateFrom,
-      `AND i.date >= DATE_TRUNC('day', TIMESTAMP '2024-05-15T00:00:00.000Z' - INTERVAL '3 day')`,
+      `AND i.date >= DATE_TRUNC('day', TIMESTAMP '2024-05-15T00:00:00.000Z' - INTERVAL '2 day')`,
     );
   });
   void it('getInsightsDateFrom onlyDateFrom back in the past', () => {
     const dateFrom = getInsightsDateFrom(new Date('2024-05-15'), undefined, 3, 'day');
-    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', CURRENT_DATE - INTERVAL '3 day')`);
+    assert.strictEqual(dateFrom, `AND i.date >= DATE_TRUNC('day', TIMESTAMP '2024-05-15T00:00:00.000Z')`);
   });
   void it('getInsightsDateFrom onlyDateFrom recent past', () => {
     const date = addInterval(new Date(), 'day', -2);
@@ -122,7 +121,7 @@ void describe('insights query builder tests', () => {
     const dateFrom = getInsightsDateFrom(new Date('2024-01-15'), dateTo, 3, 'month');
     assert.strictEqual(
       dateFrom,
-      `AND i.date >= ${dateFrom ? `TIMESTAMP ${new Date('2024-01-15').toISOString()}` : `GREATEST(TIMESTAMP '${new Date('2024-01-15').toISOString()}',DATE_TRUNC('month', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '3 month'))`}`,
+      `AND i.date >= TIMESTAMP '${new Date('2024-01-15').toISOString()}'`,
     );
   });
   void it('getInsightsDateFrom bothDates recent past', () => {
@@ -131,7 +130,7 @@ void describe('insights query builder tests', () => {
     const res = getInsightsDateFrom(dateFrom, dateTo, 3, 'week');
     assert.strictEqual(
       res,
-      `AND i.date >= TIMESTAMP ${dateFrom.toISOString()}`,
+      `AND i.date >= TIMESTAMP '${dateFrom.toISOString()}'`,
     );
   });
 
@@ -156,7 +155,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                               )`,
     );
   });
@@ -189,7 +188,7 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= TIMESTAMP '${args.dateFrom.toISOString()}'
+                                                AND i.date >= TIMESTAMP '2024-04-01T00:00:00.000Z'
                                                 AND i.date <= TIMESTAMP '2024-05-28T00:00:00.000Z'
                                                 AND i.device IN ('MobileWeb', 'MobileApp')
                                                 AND aa.type IN ('META')
@@ -220,60 +219,12 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                                 AND aa.type IN ('META')
                                               )`,
     );
   });
-  void it('orderColumnTrendAbsolute', () => {
-    const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'spend_eur', 'desc', 10, 20);
-    assertSql(
-      insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS trend
-                                      FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
-                                        AND date <= DATE_TRUNC('week', CURRENT_DATE)
-                                      GROUP BY ad_id, publisher
-                                      ORDER BY trend DESC
-                                      LIMIT 10 OFFSET 20)`,
-    );
-  });
-  void it('orderColumnTrendAbsolute cpm', () => {
-    const insights = orderColumnTrendAbsolute('ad_id, publisher', 'week', 'cpm', 'asc', 10, 20);
-    assert.strictEqual(
-      insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend
-                                      FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
-                                        AND date <= DATE_TRUNC('week', CURRENT_DATE)
-                                      GROUP BY ad_id, publisher
-                                       HAVING SUM(i.impressions) > 0
-                                      ORDER BY trend
-                                      LIMIT 10 OFFSET 20)`,
-    );
-  });
-  void it('orderColumnTrendAbsolute cpm, dateTo', () => {
-    const insights = orderColumnTrendAbsolute(
-      'ad_id, publisher',
-      'week',
-      'cpm',
-      'desc',
-      10,
-      20,
-      new Date('2024-05-28'),
-    );
-    assert.strictEqual(
-      insights,
-      `order_column_trend AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend
-                                      FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '1 week')
-                                        AND date <= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
-                                      GROUP BY ad_id, publisher
-                                       HAVING SUM(i.impressions) > 0
-                                      ORDER BY trend DESC
-                                      LIMIT 10 OFFSET 20)`,
-    );
-  });
+
   void it('last interval and not order by it', () => {
     const insights = lastInterval('ad_id, publisher', 'week', 'spend_eur');
     assert.strictEqual(
@@ -281,7 +232,7 @@ void describe('insights query builder tests', () => {
       `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE')
-                                        AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                                        AND date <= TIMESTAMP CURRENT_DATE
                                       GROUP BY ad_id, publisher)`,
     );
   });
@@ -303,7 +254,7 @@ void describe('insights query builder tests', () => {
       `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z'')
-                                        AND date <= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
+                                        AND date <= TIMESTAMP '2024-05-28T00:00:00.000Z'
                                       GROUP BY ad_id, publisher)`,
     );
   });
@@ -378,12 +329,12 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                               ), 
   last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
-                                        AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                                         AND date <= CURRENT_DATE
                                       GROUP BY ad_id, publisher, currency),
   interval_before_last AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
@@ -427,11 +378,11 @@ void describe('insights query builder tests', () => {
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
-                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
                                               )
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i
-  WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+  WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
     AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start
   ORDER BY spend DESC, interval_start;`,
