@@ -21,7 +21,6 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_WEBAPP_ENDPOINT: z.string().min(1).default('http://localhost:3000'),
     NEXT_PUBLIC_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:3002/graphql'),
-    NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: z.string().min(1).default('http://localhost:4000/graphql'),
     NEXT_PUBLIC_MEASUREMENT_ID: z.string().min(1).default('dont track'),
     NEXT_PUBLIC_RB2B_ID: z.string().min(1).default('dont track'),
   },
@@ -36,7 +35,6 @@ export const env = createEnv({
     NEXT_PUBLIC_RB2B_ID: process.env.NEXT_PUBLIC_RB2B_ID,
     NEXT_PUBLIC_WEBAPP_ENDPOINT: process.env.NEXT_PUBLIC_WEBAPP_ENDPOINT,
     NEXT_PUBLIC_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
-    NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT: process.env.NEXT_PUBLIC_REAL_GRAPHQL_ENDPOINT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
