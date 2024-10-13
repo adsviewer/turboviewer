@@ -195,6 +195,7 @@ export default function ChartContainer(): React.ReactNode {
           onRemove={(value) => {
             handleMultiFilterRemove(urlKeys.publisher, value);
           }}
+          w={350}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           my={4}
