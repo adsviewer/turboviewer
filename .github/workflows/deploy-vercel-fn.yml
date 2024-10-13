@@ -71,7 +71,9 @@ jobs:
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.vercel_token }}
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm install
+          pnpm --filter=database generate
 
       - name: Run Migrations
         id: migrations
@@ -81,7 +83,6 @@ jobs:
 
           echo DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler || env.DATABASE_URL }} >> packages/database/.env
 
-          pnpm --filter=database generate
           pnpm --filter=database db:migrate:deploy
 
       - name: Build Project Artifacts

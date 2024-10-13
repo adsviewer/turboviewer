@@ -1,6 +1,6 @@
-const { resolve } = require("node:path");
+const { resolve } = require('node:path');
 
-const project = resolve(process.cwd(), "tsconfig.json");
+const project = resolve(process.cwd(), 'tsconfig.json');
 
 /*
  * This is a custom ESLint configuration for use with
@@ -13,9 +13,10 @@ const project = resolve(process.cwd(), "tsconfig.json");
 
 module.exports = {
   extends: [
-    "@vercel/style-guide/eslint/node",
-    "@vercel/style-guide/eslint/typescript",
-  ].map(require.resolve),
+    ...['@vercel/style-guide/eslint/node', '@vercel/style-guide/eslint/typescript'].map(require.resolve),
+    'plugin:deprecation/recommended',
+  ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     project,
   },
@@ -24,25 +25,29 @@ module.exports = {
     JSX: true,
   },
   settings: {
-    "import/resolver": {
+    'import/resolver': {
       typescript: {
         project,
       },
     },
   },
-  ignorePatterns: ["node_modules/", "dist/"],
+  ignorePatterns: ['node_modules/', 'dist/'],
+  plugins: ['prefer-arrow'],
   rules: {
-    "@typescript-eslint/no-unused-vars": [
-      "error",
+    'prefer-arrow/prefer-arrow-functions': [
+      'warn',
       {
-        "args": "all",
-        "argsIgnorePattern": "^_",
-        "caughtErrors": "all",
-        "caughtErrorsIgnorePattern": "^_",
-        "destructuredArrayIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "ignoreRestSiblings": true,
+        disallowPrototype: true,
+        singleReturnOnly: true,
       },
     ],
-  }
+  },
+  overrides: [
+    {
+      files: ['*.tsx'],
+      rules: {
+        'prefer-arrow/prefer-arrow-functions': 'off',
+      },
+    },
+  ],
 };

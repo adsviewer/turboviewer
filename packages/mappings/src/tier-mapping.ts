@@ -10,6 +10,5 @@ export const tierConstraints: Record<
   Scale: { maxUsers: 100, maxIntegrations: Infinity, maxRecency: 365, order: 4 },
 };
 
-export function canAddUser(tier: Tier, userOrganizationCount: number): boolean {
-  return userOrganizationCount < tierConstraints[tier].maxUsers;
-}
+export const canAddUser = (tier: Tier, userOrganizationCount: number): boolean =>
+  userOrganizationCount < tierConstraints[tier].maxUsers;

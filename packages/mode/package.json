@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint . --fix --max-warnings 0",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
     "clean": "rm -rf .turbo .next node_modules dist",

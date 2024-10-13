@@ -25,7 +25,7 @@
   "private": true,
   "scripts": {
     "lint": "eslint src/ --max-warnings 0",
-    "lint:fix": "eslint src/ --fix",
+    "lint:fix": "eslint src/ --fix --max-warnings 0",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf node_modules",
     "update": "pnpm update --latest"

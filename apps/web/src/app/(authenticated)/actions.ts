@@ -10,20 +10,14 @@ import {
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 
-export async function getUserDetails(): Promise<MeQuery['me']> {
-  return (await urqlClientSdk().me()).me;
-}
+export const getUserDetails = async (): Promise<MeQuery['me']> => (await urqlClientSdk().me()).me;
 
 export default async function getAccounts(): Promise<AdAccountsQuery> {
   return await urqlClientSdk().adAccounts();
 }
 
-export async function refreshJWTToken(): Promise<RefreshTokenQuery> {
-  return await urqlClientSdkRefresh().refreshToken();
-}
+export const refreshJWTToken = async (): Promise<RefreshTokenQuery> => await urqlClientSdkRefresh().refreshToken();
 
-export async function sendFeedback(
+export const sendFeedback = async (
   values: SendFeedbackMutationVariables,
-): Promise<UrqlResult<SendFeedbackMutation, string>> {
-  return await handleUrqlRequest(urqlClientSdk().sendFeedback(values));
-}
+): Promise<UrqlResult<SendFeedbackMutation, string>> => await handleUrqlRequest(urqlClientSdk().sendFeedback(values));

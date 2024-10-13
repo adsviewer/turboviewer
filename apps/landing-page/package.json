@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "lint:fix": "next lint --fix",
+    "lint:fix": "next lint --fix --max-warnings 0",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .next node_modules .turbo",
     "update": "pnpm update --latest"

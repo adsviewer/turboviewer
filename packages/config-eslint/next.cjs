@@ -13,15 +13,17 @@ const project = resolve(process.cwd(), 'tsconfig.json');
 
 module.exports = {
   extends: [
-    '@vercel/style-guide/eslint/node',
-    '@vercel/style-guide/eslint/typescript',
-    '@vercel/style-guide/eslint/browser',
-    '@vercel/style-guide/eslint/react',
-    '@vercel/style-guide/eslint/next',
-    // Turborepo custom eslint configuration configures the following rules:
-    //  - https://github.com/vercel/turbo/blob/main/packages/eslint-plugin-turbo/docs/rules/no-undeclared-env-vars.md
-    'eslint-config-turbo',
-  ].map(require.resolve),
+    ...[
+      '@vercel/style-guide/eslint/node',
+      '@vercel/style-guide/eslint/typescript',
+      '@vercel/style-guide/eslint/browser',
+      '@vercel/style-guide/eslint/react',
+      '@vercel/style-guide/eslint/next',
+    ].map(require.resolve),
+    'turbo',
+    'plugin:deprecation/recommended',
+  ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     project,
   },
@@ -37,8 +39,23 @@ module.exports = {
     },
   },
   ignorePatterns: ['node_modules/', 'dist/', 'src/graphql/generated/*.ts'],
-  // add rules configurations here
+  plugins: ['prefer-arrow'],
   rules: {
     'import/no-default-export': 'off',
+    'prefer-arrow/prefer-arrow-functions': [
+      'warn',
+      {
+        disallowPrototype: true,
+        singleReturnOnly: true,
+      },
+    ],
   },
+  overrides: [
+    {
+      files: ['*.tsx'],
+      rules: {
+        'prefer-arrow/prefer-arrow-functions': 'off',
+      },
+    },
+  ],
 };
