@@ -9,6 +9,7 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
+import _ from 'lodash';
 import { addOrReplaceURLParams, ChartMetricsEnum, isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
 import { insightsChartAtom } from '@/app/atoms/insights-atoms';
 import {
@@ -45,6 +46,7 @@ export default function ChartContainer(): React.ReactNode {
   const [chartMetricValue, setChartMetricValue] = useState<string | null>(null);
   const [dateFromValue, setDateFromValue] = useState<string | null>(null);
   const [dateToValue, setDateToValue] = useState<string | null>(null);
+  const [publishersValue, setPublishersValue] = useState<string[] | null>(null);
 
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
@@ -56,15 +58,18 @@ export default function ChartContainer(): React.ReactNode {
     const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
     const currDateFromValue = searchParams.get(urlKeys.dateFrom);
     const currDateToValue = searchParams.get(urlKeys.dateTo);
+    const currPublishersValue = searchParams.getAll(urlKeys.publisher);
     if (
       chartMetricValue === currChartMetricValue &&
       dateFromValue === currDateFromValue &&
-      dateToValue === currDateToValue
+      dateToValue === currDateToValue &&
+      _.isEqual(publishersValue, currPublishersValue)
     )
       return;
     setChartMetricValue(currChartMetricValue);
     setDateFromValue(currDateFromValue);
     setDateToValue(currDateToValue);
+    setPublishersValue(currPublishersValue);
 
     // Params
     let dateFrom, dateTo;
@@ -109,6 +114,7 @@ export default function ChartContainer(): React.ReactNode {
     dateFromValue,
     dateRangeValue,
     dateToValue,
+    publishersValue,
     resetInsightsChart,
     searchParams,
     setInsightsChart,
