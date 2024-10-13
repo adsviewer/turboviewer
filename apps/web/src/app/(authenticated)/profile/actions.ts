@@ -4,8 +4,6 @@ import { type UpdateUserMutation, type UpdateUserMutationVariables } from '@/gra
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 
-export async function updateUserDetails(
+export const updateUserDetails = async (
   values: UpdateUserMutationVariables,
-): Promise<UrqlResult<UpdateUserMutation, string>> {
-  return await handleUrqlRequest(urqlClientSdk().updateUser(values));
-}
+): Promise<UrqlResult<UpdateUserMutation, string>> => await handleUrqlRequest(urqlClientSdk().updateUser(values));
