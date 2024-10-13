@@ -10,14 +10,14 @@ on:
         required: true
         type: string
     secrets:
-      neon_api_key:
-        required: true
-      neon_database_name:
-        required: true
-      neon_database_username:
-        required: true
-      neon_project_id:
-        required: true
+#      neon_api_key:
+#        required: true
+#      neon_database_name:
+#        required: true
+#      neon_database_username:
+#        required: true
+#      neon_project_id:
+#        required: true
       sentry_auth_token:
         required: true
       turbo_token:
@@ -28,10 +28,10 @@ on:
         required: true
 
 env:
-  NEON_DATABASE_USERNAME: ${{ secrets.neon_database_username }}
-  NEON_DATABASE_NAME: ${{ secrets.neon_database_name }}
-  NEON_API_KEY: ${{ secrets.neon_api_key }}
-  NEON_PROJECT_ID: ${{ secrets.neon_project_id }}
+#  NEON_DATABASE_USERNAME: ${{ secrets.neon_database_username }}
+#  NEON_DATABASE_NAME: ${{ secrets.neon_database_name }}
+#  NEON_API_KEY: ${{ secrets.neon_api_key }}
+#  NEON_PROJECT_ID: ${{ secrets.neon_project_id }}
   SENTRY_AUTH_TOKEN: ${{ secrets.sentry_auth_token }}
   TURBO_TEAM: ${{ inputs.vercel_org_id }}
   TURBO_TOKEN: ${{ secrets.turbo_token }}
@@ -54,17 +54,17 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v8
 
-      - name: Create Neon Branch
-        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
-        id: create-branch
-        uses: neondatabase/create-branch-action@v5
-        with:
-          project_id: ${{ env.NEON_PROJECT_ID }}
-          # parent: dev # optional (defaults to your primary branch)
-          branch_name: preview/pr-${{ github.event.number }}-${{ steps.branch-name.outputs.current_branch }}
-          username: ${{ env.NEON_DATABASE_USERNAME }}
-          database: ${{ env.NEON_DATABASE_NAME }}
-          api_key: ${{ env.NEON_API_KEY }}
+#      - name: Create Neon Branch
+#        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
+#        id: create-branch
+#        uses: neondatabase/create-branch-action@v5
+#        with:
+#          project_id: ${{ env.NEON_PROJECT_ID }}
+#          # parent: dev # optional (defaults to your primary branch)
+#          branch_name: preview/pr-${{ github.event.number }}-${{ steps.branch-name.outputs.current_branch }}
+#          username: ${{ env.NEON_DATABASE_USERNAME }}
+#          database: ${{ env.NEON_DATABASE_NAME }}
+#          api_key: ${{ env.NEON_API_KEY }}
 
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
@@ -75,15 +75,15 @@ jobs:
           pnpm install
           pnpm --filter=database generate
 
-      - name: Run Migrations
-        id: migrations
-        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
-        run: |
-          touch .env
-
-          echo DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler || env.DATABASE_URL }} >> packages/database/.env
-
-          pnpm --filter=database db:migrate:deploy
+#      - name: Run Migrations
+#        id: migrations
+#        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
+#        run: |
+#          touch .env
+#
+#          echo DATABASE_URL=${{ steps.create-branch.outputs.db_url_with_pooler || env.DATABASE_URL }} >> packages/database/.env
+#
+#          pnpm --filter=database db:migrate:deploy
 
       - name: Build Project Artifacts
         run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.vercel_token }}
@@ -92,18 +92,33 @@ jobs:
         id: deploy
         run: echo preview_url=$(vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.vercel_token }}) >> $GITHUB_OUTPUT
 
-      - name: Add PR Comment
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Add PR Comment webapp
+        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'webapp') }}
         uses: mshick/add-pr-comment@v2
         with:
           message: |
-            landing URL:
-            webapp URL:
-            backoffice URL:
-            Neon branch :elephant: :
+            ${{inputs.app}} URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
           find: |
-            ${{inputs.app}} URL:.*
-            Neon branch :elephant: :.*
+            ${{inputs.app}} URL :rocket: :.*
           replace: |
-            ${{inputs.app}} URL: ${{ steps.deploy.outputs.preview_url }}
-            Neon branch :elephant: : https://console.neon.tech/app/projects/${{ env.NEON_PROJECT_ID }}/branches/${{ steps.create-branch.outputs.branch_id }}
+            ${{inputs.app}} URL :rocket: : ${{ steps.deploy.outputs.preview_url }}
+      - name: Add PR Comment landing
+        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'landing') }}
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ${{inputs.app}} URL :flight_arrival: : ${{ steps.deploy.outputs.preview_url }}
+          find: |
+            ${{inputs.app}} URL :flight_arrival: :.*
+          replace: |
+            ${{inputs.app}} URL :flight_arrival: : ${{ steps.deploy.outputs.preview_url }}
+      - name: Add PR Comment backoffice
+        if: ${{ (github.event_name == 'pull_request') && ( inputs.app == 'backoffice') }}
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ${{inputs.app}} URL :office: : ${{ steps.deploy.outputs.preview_url }}
+          find: |
+            ${{inputs.app}} URL :office: :.*
+          replace: |
+            ${{inputs.app}} URL :office: : ${{ steps.deploy.outputs.preview_url }}
