@@ -95,7 +95,7 @@ export default function TopAdsContainer(): React.ReactNode {
           const allTopAds: InsightsQuery['insights']['edges'][] = [];
           if (responses.length) {
             for (const res of responses) {
-              if (res?.success) allTopAds.push(res.data.insights.edges);
+              if (res?.success && res.data.insights.edges.length) allTopAds.push(res.data.insights.edges);
             }
             setInsightsTopAds(allTopAds);
           }
@@ -156,20 +156,21 @@ export default function TopAdsContainer(): React.ReactNode {
       </Flex>
 
       <Flex direction="column" gap="xl">
-        {insightsTopAds.length && !isPending ? (
-          insightsTopAds.map((integrationInsights) =>
-            integrationInsights.length ? (
-              <Flex key={uniqid()} direction="column" gap="sm">
-                <Title order={3} c="dimmed">
-                  {integrationInsights[0].integration}
-                </Title>
-                <InsightsGrid insights={integrationInsights} isPending={isPending} />
-              </Flex>
-            ) : null,
-          )
-        ) : (
-          <LoaderCentered />
-        )}
+        {insightsTopAds.length && !isPending
+          ? insightsTopAds.map((integrationInsights) =>
+              integrationInsights.length ? (
+                <Flex key={uniqid()} direction="column" gap="sm">
+                  <Title order={3} c="dimmed">
+                    {integrationInsights[0].integration}
+                  </Title>
+                  <InsightsGrid insights={integrationInsights} isPending={isPending} />
+                </Flex>
+              ) : null,
+            )
+          : null}
+
+        {/* Loading State */}
+        {isPending ? <LoaderCentered /> : null}
       </Flex>
 
       {!isPending && !insightsTopAds.length ? (
