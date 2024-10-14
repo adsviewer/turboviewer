@@ -366,6 +366,19 @@ model Insight {
   @@map("insights")
 }
 
+model SearchQueryString {
+  id             String   @id @default(cuid())
+  name           String
+  queryString    String
+  isOrganization Boolean  @map("is_organization")
+  parentId       String   @map("parent_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([parentId])
+  @@map("search_query_strings")
+}
+
 enum CurrencyEnum {
   AFN
   ALL
