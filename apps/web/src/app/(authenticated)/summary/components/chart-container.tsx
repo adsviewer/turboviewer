@@ -20,6 +20,7 @@ import {
   InsightsInterval,
 } from '@/graphql/generated/schema-server';
 import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
+import Search from '@/components/search/search';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 import Chart from './chart';
 
@@ -47,6 +48,7 @@ export default function ChartContainer(): React.ReactNode {
   const [dateFromValue, setDateFromValue] = useState<string | null>(null);
   const [dateToValue, setDateToValue] = useState<string | null>(null);
   const [publishersValue, setPublishersValue] = useState<string[] | null>(null);
+  const [searchValue, setSearchValue] = useState<string | null>(null);
 
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
@@ -59,17 +61,20 @@ export default function ChartContainer(): React.ReactNode {
     const currDateFromValue = searchParams.get(urlKeys.dateFrom);
     const currDateToValue = searchParams.get(urlKeys.dateTo);
     const currPublishersValue = searchParams.getAll(urlKeys.publisher);
+    const currSearchValue = searchParams.get(urlKeys.search);
     if (
       chartMetricValue === currChartMetricValue &&
       dateFromValue === currDateFromValue &&
       dateToValue === currDateToValue &&
-      _.isEqual(publishersValue, currPublishersValue)
+      _.isEqual(publishersValue, currPublishersValue) &&
+      searchValue === currSearchValue
     )
       return;
     setChartMetricValue(currChartMetricValue);
     setDateFromValue(currDateFromValue);
     setDateToValue(currDateToValue);
     setPublishersValue(currPublishersValue);
+    setSearchValue(currSearchValue);
 
     // Params
     let dateFrom, dateTo;
@@ -87,6 +92,7 @@ export default function ChartContainer(): React.ReactNode {
       groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,
       publisher: searchParams.getAll(urlKeys.publisher) as PublisherEnum[],
+      search: currSearchValue ? currSearchValue : undefined,
     };
 
     // Get chart's insights
@@ -117,6 +123,7 @@ export default function ChartContainer(): React.ReactNode {
     publishersValue,
     resetInsightsChart,
     searchParams,
+    searchValue,
     setInsightsChart,
     tGeneric,
   ]);
@@ -171,6 +178,9 @@ export default function ChartContainer(): React.ReactNode {
 
   return (
     <Flex direction="column">
+      <Flex align="center" gap="md" wrap="wrap" mb="md">
+        <Search isPending={isPending} startTransition={startTransition} />
+      </Flex>
       <Flex align="center" gap="md" wrap="wrap" mb="md">
         <Select
           description={tInsights('chartMetric')}
