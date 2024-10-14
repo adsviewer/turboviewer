@@ -85,6 +85,15 @@ export const addInterval = (date: Date, interval: IntervalType | 'seconds', numO
   return result;
 };
 
+export const getStartOfTheWeek = (date: Date): Date => {
+  const dayOfWeek = date.getUTCDay();
+  const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+  const monday = new Date(date);
+  monday.setUTCDate(monday.getUTCDate() + diff);
+  monday.setUTCHours(0, 0, 0, 0);
+  return monday;
+};
+
 export const isDateWithinInterval = (
   dateFrom: Date,
   interval: IntervalType,
@@ -92,7 +101,7 @@ export const isDateWithinInterval = (
   numOfIntervals: number,
 ): boolean => {
   const targetDate = addInterval(dateFrom, interval, numOfIntervals);
-  return targetDate < dateTo;
+  return targetDate > dateTo;
 };
 
 export const getDateDiffIn = (interval: IntervalType, dateFrom: Date, dateTo: Date): number => {

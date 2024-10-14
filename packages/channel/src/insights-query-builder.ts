@@ -1,5 +1,5 @@
 import * as changeCase from 'change-case';
-import { getCalendarDateDiffIn, type IntervalType, isDateWithinInterval } from '@repo/utils';
+import { getCalendarDateDiffIn, getStartOfTheWeek, type IntervalType, isDateWithinInterval } from '@repo/utils';
 import {
   type FilterInsightsInputType,
   type InsightsColumnsGroupByType,
@@ -42,7 +42,7 @@ export const getInsightsDateFrom = (
     if (interval === 'quarter') {
       return '3 months';
     }
-    return `${String(dataPointsPerInterval)} ${interval}`;
+    return `${String(dataPointsPerInterval - 1)} ${interval}`;
   };
 
   const mappedInterval = intervalMapping();
@@ -62,22 +62,13 @@ export const getInsightsDateFrom = (
 
   if (!dateFrom || !dateTo) return '';
 
-  const startOfWeek = (date: Date): Date => {
-    const dayOfWeek = date.getUTCDay();
-    const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-    const monday = new Date(date);
-    monday.setUTCDate(monday.getUTCDate() + diff);
-    monday.setUTCHours(0, 0, 0, 0);
-    return monday;
-  };
-
-  const isSameWeek = startOfWeek(dateFrom).getTime() === startOfWeek(dateTo).getTime();
+  const isSameWeek = getStartOfTheWeek(dateFrom).getTime() === getStartOfTheWeek(dateTo).getTime();
 
   if (isSameWeek && dateFrom.getUTCDay() !== 1 && interval === 'week') {
-    return `AND i.date >= GREATEST(TIMESTAMP '${startOfWeek(dateFrom).toISOString()}',DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${mappedInterval}'))`;
+    return `AND i.date >= DATE_TRUNC('${interval}', TIMESTAMP '${dateFrom.toISOString()}')`;
   }
 
-  return `AND i.date >= GREATEST(TIMESTAMP '${dateFrom.toISOString()}',DATE_TRUNC('${interval}', TIMESTAMP '${dateTo.toISOString()}' - INTERVAL '${mappedInterval}'))`;
+  return `AND i.date >= TIMESTAMP '${dateFrom.toISOString()}'`;
 };
 
 export const searchAdsToSQL = (expression: InsightsSearchExpression): string => {
@@ -165,12 +156,10 @@ export const lastInterval = (
       : `SUM(i.${orderColumn}) AS ${orderColumn}`;
   const relative = orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : '';
 
-  const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
-
   return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
-                                        AND date <= DATE_TRUNC('${interval}', ${date})
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date})
+                                        AND date <= ${dateTo ? date : `TIMESTAMP ${date}`}
                                       GROUP BY ${group}${relative})`;
 };
 
@@ -186,13 +175,12 @@ export const intervalBeforeLast = (
       ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
       : `SUM(i.${orderColumn}) AS ${orderColumn}`;
 
-  const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
-  const doubleIntervalInMonths = interval === 'quarter' ? '6 months' : `2 ${interval}`;
+  const doubleIntervalInMonths = `1 ${interval}`;
 
   return `interval_before_last AS (SELECT ${group}, ${sqlOrderColumn}
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${doubleIntervalInMonths}')
-                                               AND date <= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
+                                               AND date < DATE_TRUNC('${interval}', ${date})
                                              GROUP BY ${group}
                                              ${orderColumn === 'cpm' ? 'HAVING SUM(i.impressions) > 0' : ''})`;
 };
@@ -271,18 +259,25 @@ export const groupedInsights = (
   const limit = args.pageSize + 1;
   const offset = (args.page - 1) * args.pageSize;
   const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
-  const dateInterval = getInterval(args.interval, dataPointsPerInterval);
+  let adjustedDataPoints = dataPointsPerInterval;
 
-  const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)}, 
+  if (!isRelative && dataPointsPerInterval > 1) {
+    adjustedDataPoints = dataPointsPerInterval - 1;
+  }
+
+  const dateInterval = getInterval(args.interval, adjustedDataPoints);
+  const orderByAs = args.orderBy.slice(0, -4);
+
+  const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)}${isRelative ? ',' : ''}
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
-  ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
+  ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : ''}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i ${joinFn(snakeGroup, 'order_column_trend', 'i')}
+  FROM organization_insights i${isRelative ? ` ${joinFn(snakeGroup, 'order_column_trend', 'i')}` : ''}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
     AND i.date <= DATE_TRUNC('${args.interval}', ${date})
-  GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
-  ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
+  GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start${isRelative ? ', oct.trend' : ''}
+  ORDER BY ${isRelative ? 'oct.trend' : orderByAs}${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
 
   return sql.replace(/\n\s*\n/g, '\n');
 };
