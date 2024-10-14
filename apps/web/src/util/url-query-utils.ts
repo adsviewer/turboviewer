@@ -12,8 +12,7 @@ export interface GenericRequestResponseBody {
 export enum ChartMetricsEnum {
   Impressions = 'impressions',
   Spent = 'spent',
-  ImpressionsCPM = 'impressions_cpm',
-  SpentCPM = 'spent_cpm',
+  CPM = 'cpm',
 }
 
 export const urlKeys = {

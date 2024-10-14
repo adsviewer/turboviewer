@@ -129,12 +129,9 @@ export default function ChartContainer(): React.ReactNode {
   ]);
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))
-      return ChartMetricsEnum.SpentCPM;
-    else if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.ImpressionsCPM))
-      return ChartMetricsEnum.ImpressionsCPM;
-    else if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.Spent))
-      return ChartMetricsEnum.Spent;
+    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.Spent)) return ChartMetricsEnum.Spent;
+    else if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.CPM))
+      return ChartMetricsEnum.CPM;
     return ChartMetricsEnum.Impressions;
   };
 
@@ -188,10 +185,9 @@ export default function ChartContainer(): React.ReactNode {
           data={[
             { value: ChartMetricsEnum.Impressions, label: tInsights('impressions') },
             { value: ChartMetricsEnum.Spent, label: tInsights('spent') },
-            { value: ChartMetricsEnum.ImpressionsCPM, label: `${tInsights('impressions')} / CPM` },
-            { value: ChartMetricsEnum.SpentCPM, label: `${tInsights('spent')} / CPM` },
+            { value: ChartMetricsEnum.CPM, label: 'CPM' },
           ]}
-          defaultValue={ChartMetricsEnum.ImpressionsCPM}
+          defaultValue={ChartMetricsEnum.Impressions}
           value={getChartMetricValue()}
           onChange={handleChartMetricChange}
           allowDeselect={false}
