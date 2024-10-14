@@ -625,6 +625,7 @@ type Mutation {
   """
   deleteInvitationLink(role: OrganizationRoleEnum!): Boolean!
   deleteOrganization(organizationId: String): Organization!
+  deleteSearchQueryString(id: String!, isOrganization: Boolean!): SearchQueryString!
   emulateAdmin(organizationId: String!): Tokens!
   fillAdSetsAndCampaigns(integrationIds: [String!]): Boolean!
   forgetPassword(email: String!): Boolean!
@@ -650,6 +651,7 @@ type Mutation {
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
+  upsertSearchQueryString(id: String, isOrganization: Boolean!, name: String!, queryString: String!): SearchQueryString!
 }
 
 union MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDeAuthIntegrationSuccess
@@ -765,7 +767,18 @@ type Query {
   Uses the refresh token to generate a new token
   """
   refreshToken: String!
+  searchQueryStrings: [SearchQueryString!]!
   settingsChannels: [IntegrationListItem!]!
+}
+
+type SearchQueryString {
+  createdAt: Date!
+  id: ID!
+  isOrganization: Boolean!
+  name: String!
+  parentId: String!
+  queryString: String!
+  updatedAt: Date!
 }
 
 input SignUpInput {

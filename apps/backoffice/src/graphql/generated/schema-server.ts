@@ -613,6 +613,7 @@ export type Mutation = {
   /** Deletes the invitation link for the given role */
   deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
+  deleteSearchQueryString: SearchQueryString;
   emulateAdmin: Tokens;
   fillAdSetsAndCampaigns: Scalars['Boolean']['output'];
   forgetPassword: Scalars['Boolean']['output'];
@@ -635,6 +636,7 @@ export type Mutation = {
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
   updateUser: User;
+  upsertSearchQueryString: SearchQueryString;
 };
 
 export type MutationAcceptLinkInvitationExistingUserArgs = {
@@ -660,6 +662,11 @@ export type MutationDeleteInvitationLinkArgs = {
 
 export type MutationDeleteOrganizationArgs = {
   organizationId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationDeleteSearchQueryStringArgs = {
+  id: Scalars['String']['input'];
+  isOrganization: Scalars['Boolean']['input'];
 };
 
 export type MutationEmulateAdminArgs = {
@@ -755,6 +762,13 @@ export type MutationUpdateUserArgs = {
   lastName?: InputMaybe<Scalars['String']['input']>;
   newPassword?: InputMaybe<Scalars['String']['input']>;
   oldPassword?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationUpsertSearchQueryStringArgs = {
+  id?: InputMaybe<Scalars['String']['input']>;
+  isOrganization: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+  queryString: Scalars['String']['input'];
 };
 
 export type MutationDeAuthIntegrationResult = BaseError | MetaError | MutationDeAuthIntegrationSuccess;
@@ -858,6 +872,7 @@ export type Query = {
   organizations: Array<Organization>;
   /** Uses the refresh token to generate a new token */
   refreshToken: Scalars['String']['output'];
+  searchQueryStrings: Array<SearchQueryString>;
   settingsChannels: Array<IntegrationListItem>;
 };
 
@@ -894,6 +909,17 @@ export type QueryLoginProvidersArgs = {
 
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
+};
+
+export type SearchQueryString = {
+  __typename: 'SearchQueryString';
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  isOrganization: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  parentId: Scalars['String']['output'];
+  queryString: Scalars['String']['output'];
+  updatedAt: Scalars['Date']['output'];
 };
 
 export type SignUpInput = {
