@@ -260,6 +260,7 @@ export interface GroupedInsightWithDetails {
 
 export interface Datapoints {
   spend: bigint;
+  spendUsd?: bigint;
   impressions: bigint;
   cpm?: bigint | null;
   date: Date;

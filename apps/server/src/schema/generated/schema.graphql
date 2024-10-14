@@ -395,6 +395,11 @@ type InsightsDatapoints {
   In Cents
   """
   spend: BigInt!
+
+  """
+  In Cents
+  """
+  spendUsd: BigInt
 }
 
 input InsightsDatapointsInput {

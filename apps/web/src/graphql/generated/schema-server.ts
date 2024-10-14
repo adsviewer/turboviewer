@@ -421,6 +421,8 @@ export type InsightsDatapoints = {
   impressions: Scalars['BigInt']['output'];
   /** In Cents */
   spend: Scalars['BigInt']['output'];
+  /** In Cents */
+  spendUsd?: Maybe<Scalars['BigInt']['output']>;
 };
 
 export type InsightsDatapointsInput = {
