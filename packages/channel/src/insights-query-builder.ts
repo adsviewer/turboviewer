@@ -252,6 +252,7 @@ export const groupedInsights = (
   groupBy: (InsightsColumnsGroupByType | 'currency')[],
 ): string => {
   const dataPointsPerInterval = calculateDataPointsPerInterval(args.dateFrom, args.dateTo, args.interval, locale);
+  console.log(dataPointsPerInterval, 'THIS IS DATAPOINTS')
   const orderBy = getOrderByColumn(args.orderBy);
   const isRelative = args.orderBy === 'spend_rel' || args.orderBy === 'impressions_rel' || args.orderBy === 'cpm_rel';
   const snakeGroup = groupBy.map((group) => changeCase.snakeCase(group));
@@ -259,8 +260,10 @@ export const groupedInsights = (
   const limit = args.pageSize + 1;
   const offset = (args.page - 1) * args.pageSize;
   const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
+  let adjustedDatapoints = dataPointsPerInterval
+  if(!args.dateFrom && !args.dateTo) adjustedDatapoints = dataPointsPerInterval - 1
 
-  const dateInterval = getInterval(args.interval, dataPointsPerInterval);
+  const dateInterval = getInterval(args.interval, adjustedDatapoints);
 
   const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)},
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
