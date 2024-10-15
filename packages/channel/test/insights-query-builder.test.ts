@@ -343,7 +343,8 @@ void describe('insights query builder tests', () => {
                                       ORDER BY trend
                                       LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
+  FROM organization_insights i
+  JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
     AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
@@ -373,13 +374,21 @@ void describe('insights query builder tests', () => {
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
-                                              )
+                                              ),
+  order_column_trend AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                                      FROM organization_insights i
+                                      WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
+                                        AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                                      GROUP BY ad_id, publisher, currency
+                                      ORDER BY trend DESC
+                                      LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i
+  JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
     AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
-  GROUP BY i.ad_id, i.publisher, i.currency, interval_start
-  ORDER BY spend DESC, interval_start;`,
+  GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
+  ORDER BY oct.trend DESC, interval_start;`,
     );
   });
   void it('grouped insights with date filter', () => {
@@ -428,7 +437,8 @@ void describe('insights query builder tests', () => {
                                       ORDER BY trend DESC
                                       LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
+  FROM organization_insights i
+  JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
     AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
@@ -482,7 +492,8 @@ void describe('insights query builder tests', () => {
                                       ORDER BY trend DESC
                                       LIMIT 11 OFFSET 0)
   SELECT i.publisher, i.currency, DATE_TRUNC('day', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i JOIN order_column_trend oct ON i.publisher = oct.publisher AND i.currency = oct.currency
+  FROM organization_insights i
+  JOIN order_column_trend oct ON i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('day', TIMESTAMP '2024-09-30T00:00:00.000Z' - INTERVAL '4 day')
     AND i.date <= DATE_TRUNC('day', TIMESTAMP '2024-09-30T00:00:00.000Z')
   GROUP BY i.publisher, i.currency, interval_start, oct.trend
@@ -536,7 +547,8 @@ void describe('insights query builder tests', () => {
                                       ORDER BY trend DESC
                                       LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
+  FROM organization_insights i
+  JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-09-30T00:00:00.000Z' - INTERVAL '1 week')
     AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-09-30T00:00:00.000Z')
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
@@ -553,7 +565,7 @@ void describe('insights query builder tests', () => {
       pageSize: 10,
       order: 'desc',
       page: 1,
-      groupBy: ['publisher'],
+      groupBy: ['adId', 'publisher'],
     };
     const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
     const organizationId = 'clwkdrdn7000008k708vfchyr';
@@ -571,13 +583,21 @@ void describe('insights query builder tests', () => {
                                               WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
                                                 AND i.date >= DATE_TRUNC('week', TIMESTAMP '2024-09-24T00:00:00.000Z')
                                                 AND i.date <= TIMESTAMP '2024-09-29T00:00:00.000Z'
-                                              )
-  SELECT i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
+                                              ),
+  order_column_trend AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                                      FROM organization_insights i
+                                      WHERE date >= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week')
+                                        AND date <= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z')
+                                      GROUP BY ad_id, publisher, currency
+                                      ORDER BY trend DESC
+                                      LIMIT 11 OFFSET 0)
+  SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i
+  JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week')
     AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z')
-  GROUP BY i.publisher, i.currency, interval_start
-  ORDER BY spend DESC, interval_start;`,
+  GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
+  ORDER BY oct.trend DESC, interval_start;`,
     );
   });
 
@@ -627,7 +647,8 @@ void describe('insights query builder tests', () => {
                                       ORDER BY trend DESC
                                       LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.integration, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.integration = oct.integration AND i.currency = oct.currency
+  FROM organization_insights i
+  JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.integration = oct.integration AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
     AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
   GROUP BY i.ad_id, i.publisher, i.integration, i.currency, interval_start, oct.trend
