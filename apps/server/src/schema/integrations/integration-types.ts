@@ -384,6 +384,48 @@ export const FilterInsightsInputDto = builder.inputRef<FilterInsightsInputType>(
         ),
       { message: 'Day intervals cannot be more than 90 days' },
     ],
+    [
+      (args) => {
+        if (
+          (args.orderBy === 'spend_rel' || args.orderBy === 'impressions_rel' || args.orderBy === 'cpm_rel') &&
+          args.dateFrom &&
+          args.dateTo
+        ) {
+          const dateFrom = new Date(args.dateFrom);
+          const dateTo = new Date(args.dateTo);
+
+          if (args.interval === 'day') {
+            const minDayGapInMs = 2 * 24 * 60 * 60 * 1000;
+            return dateTo.getTime() - dateFrom.getTime() >= minDayGapInMs;
+          } else if (args.interval === 'week') {
+            const dayOfWeekFrom = dateFrom.getUTCDay();
+            const adjustedDateFrom = new Date(dateFrom);
+            adjustedDateFrom.setUTCDate(dateFrom.getUTCDate() - (dayOfWeekFrom === 0 ? 6 : dayOfWeekFrom - 1));
+
+            const dayOfWeekTo = dateTo.getUTCDay();
+            const adjustedDateTo = new Date(dateTo);
+            adjustedDateTo.setUTCDate(dateTo.getUTCDate() + (dayOfWeekTo === 0 ? 0 : 7 - dayOfWeekTo));
+
+            const minWeekGapInMs = 2 * 7 * 24 * 60 * 60 * 1000;
+            return adjustedDateTo.getTime() - adjustedDateFrom.getTime() >= minWeekGapInMs;
+          } else if (args.interval === 'month') {
+            const adjustedDateFrom = new Date(dateFrom);
+            const adjustedDateTo = new Date(dateTo);
+
+            const monthsDifference =
+              (adjustedDateTo.getUTCFullYear() - adjustedDateFrom.getUTCFullYear()) * 12 +
+              adjustedDateTo.getUTCMonth() -
+              adjustedDateFrom.getUTCMonth();
+
+            return monthsDifference >= 2;
+          }
+        }
+        return true;
+      },
+      {
+        message: 'Enter a valid date range',
+      },
+    ],
   ],
 });
 
