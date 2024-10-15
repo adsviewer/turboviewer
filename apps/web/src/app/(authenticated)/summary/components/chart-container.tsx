@@ -33,6 +33,9 @@ export default function ChartContainer(): React.ReactNode {
   const pathname = usePathname();
   const [insightsChart, setInsightsChart] = useAtom(insightsChartAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [prevTopAdsOrderByValue, setPrevTopAdsOrderByValue] = useState<InsightsColumnsOrderBy | null>(
+    () => searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy | null,
+  );
 
   // Date range values loading
   const paramsDateFrom = searchParams.get(urlKeys.dateFrom)
@@ -43,47 +46,27 @@ export default function ChartContainer(): React.ReactNode {
     : null;
   const [dateRangeValue, setDateRangeValue] = useState<[DateValue, DateValue]>([paramsDateFrom, paramsDateTo]);
 
-  // Chart parameters that will re-render only the chart when url state changes
-  const [chartMetricValue, setChartMetricValue] = useState<string | null>(null);
-  const [dateFromValue, setDateFromValue] = useState<string | null>(null);
-  const [dateToValue, setDateToValue] = useState<string | null>(null);
-  const [publishersValue, setPublishersValue] = useState<string[] | null>(null);
-  const [searchValue, setSearchValue] = useState<string | null>(null);
-
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
     setIsPending(true);
   }, [setInsightsChart]);
 
   useEffect(() => {
-    // Logic to allow re-render only for search params of this component
-    const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
-    const currDateFromValue = searchParams.get(urlKeys.dateFrom);
-    const currDateToValue = searchParams.get(urlKeys.dateTo);
-    const currPublishersValue = searchParams.getAll(urlKeys.publisher);
-    const currSearchValue = searchParams.get(urlKeys.search);
-    if (
-      chartMetricValue === currChartMetricValue &&
-      dateFromValue === currDateFromValue &&
-      dateToValue === currDateToValue &&
-      _.isEqual(publishersValue, currPublishersValue) &&
-      searchValue === currSearchValue
-    )
-      return;
-    setChartMetricValue(currChartMetricValue);
-    setDateFromValue(currDateFromValue);
-    setDateToValue(currDateToValue);
-    setPublishersValue(currPublishersValue);
-    setSearchValue(currSearchValue);
+    // Continue only when search params of this component are changed
+    const currTopAdsOrderByValue = searchParams.get(urlKeys.orderBy);
+    if (currTopAdsOrderByValue !== prevTopAdsOrderByValue) return;
+    setPrevTopAdsOrderByValue(currTopAdsOrderByValue);
 
-    // Params
+    const currSearchParamValue = searchParams.get(urlKeys.search);
+
+    // Date Params
     let dateFrom, dateTo;
-    if (dateRangeValue[0] && dateRangeValue[1]) {
-      dateFrom = dateRangeValue[0].getTime();
-      dateTo = dateRangeValue[1].getTime();
+    if (searchParams.get(urlKeys.dateFrom) && searchParams.get(urlKeys.dateTo)) {
+      dateFrom = Number(searchParams.get(urlKeys.dateFrom));
+      dateTo = Number(searchParams.get(urlKeys.dateTo));
     }
 
-    const chartParams: InsightsParams = {
+    const CHART_PARAMS: InsightsParams = {
       dateFrom,
       dateTo,
       interval: InsightsInterval.day,
@@ -92,12 +75,12 @@ export default function ChartContainer(): React.ReactNode {
       groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,
       publisher: searchParams.getAll(urlKeys.publisher) as PublisherEnum[],
-      search: currSearchValue ? currSearchValue : undefined,
+      search: currSearchParamValue ? currSearchParamValue : undefined,
     };
 
     // Get chart's insights
     resetInsightsChart();
-    void getInsights(chartParams)
+    void getInsights(CHART_PARAMS)
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -115,18 +98,7 @@ export default function ChartContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [
-    chartMetricValue,
-    dateFromValue,
-    dateRangeValue,
-    dateToValue,
-    publishersValue,
-    resetInsightsChart,
-    searchParams,
-    searchValue,
-    setInsightsChart,
-    tGeneric,
-  ]);
+  }, [prevTopAdsOrderByValue, resetInsightsChart, searchParams, setInsightsChart, tGeneric]);
 
   const getChartMetricValue = (): string => {
     const chartMetric = searchParams.get(urlKeys.chartMetric)

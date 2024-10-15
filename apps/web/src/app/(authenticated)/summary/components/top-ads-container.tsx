@@ -8,7 +8,7 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import uniqid from 'uniqid';
-import { urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
+import { urlKeys, addOrReplaceURLParams, type ChartMetricsEnum } from '@/util/url-query-utils';
 import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
@@ -35,9 +35,9 @@ export default function TopAdsContainer(): React.ReactNode {
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const userDetails = useAtomValue(userDetailsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
-
-  // Top ads parameters that will re-render only the top ads when url state changes
-  const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
+  const [prevChartMetricValue, setPrevChartMetricValue] = useState<ChartMetricsEnum | null>(
+    () => searchParams.get(urlKeys.chartMetric) as ChartMetricsEnum | null,
+  );
 
   const resetInsightsTopAds = useCallback((): void => {
     setInsightsTopAds([]);
@@ -45,26 +45,43 @@ export default function TopAdsContainer(): React.ReactNode {
   }, [setInsightsTopAds]);
 
   useEffect(() => {
-    // Logic to allow re-render only for search params of this component
+    // Continue only when search params of this component are changed
+    const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
+    if (currChartMetricValue !== prevChartMetricValue) return;
+    setPrevChartMetricValue(currChartMetricValue);
+
     const currOrderByValue = searchParams.get(urlKeys.orderBy)
       ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
       : InsightsColumnsOrderBy.impressions_abs;
-    if (orderByParamValue === currOrderByValue) return;
-    setOrderByParamValue(currOrderByValue);
+
+    const paramsPublishers = searchParams.getAll(urlKeys.publisher).length
+      ? (searchParams.getAll(urlKeys.publisher) as PublisherEnum[])
+      : Object.values(PublisherEnum);
+    const paramsSearchValue = searchParams.get(urlKeys.search);
+
+    // Date Params
+    let dateFrom, dateTo;
+    if (searchParams.get(urlKeys.dateFrom) && searchParams.get(urlKeys.dateTo)) {
+      dateFrom = Number(searchParams.get(urlKeys.dateFrom));
+      dateTo = Number(searchParams.get(urlKeys.dateTo));
+    }
 
     // Get top ads' insights
     // Perform a request for each integration that the user has
-    resetInsightsTopAds();
     if (userDetails.currentOrganization) {
+      resetInsightsTopAds();
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
-      for (const publisher of Object.values(PublisherEnum)) {
+      for (const publisher of paramsPublishers) {
         const TOP_ADS_PARAMS: InsightsParams = {
+          dateFrom,
+          dateTo,
           orderBy: currOrderByValue,
           order: getCorrectOrder(currOrderByValue),
           pageSize: 3,
           interval: InsightsInterval.week,
           groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
           publisher: [publisher],
+          search: paramsSearchValue ? paramsSearchValue : undefined,
         };
 
         const request = getInsights(TOP_ADS_PARAMS)
@@ -105,7 +122,7 @@ export default function TopAdsContainer(): React.ReactNode {
         });
     }
   }, [
-    orderByParamValue,
+    prevChartMetricValue,
     resetInsightsTopAds,
     searchParams,
     setInsightsTopAds,
