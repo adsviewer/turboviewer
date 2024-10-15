@@ -8,7 +8,7 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import uniqid from 'uniqid';
-import { urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
+import { urlKeys, addOrReplaceURLParams, type ChartMetricsEnum } from '@/util/url-query-utils';
 import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
@@ -35,28 +35,21 @@ export default function TopAdsContainer(): React.ReactNode {
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const userDetails = useAtomValue(userDetailsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
-  // Params
-  // const paramsPublishers = searchParams.getAll(urlKeys.publisher).length
-  //   ? (searchParams.getAll(urlKeys.publisher) as PublisherEnum[])
-  //   : Object.values(PublisherEnum);
-  // const paramsSearchValue = searchParams.get(urlKeys.search);
+  const [prevChartMetricValue, setPrevChartMetricValue] = useState<ChartMetricsEnum | null>(
+    () => searchParams.get(urlKeys.chartMetric) as ChartMetricsEnum | null,
+  );
 
-  // Date range values
-  // const paramsDateFrom = useMemo(() => {
-  //   return searchParams.get(urlKeys.dateFrom)
-  //     ? (new Date(Number(searchParams.get(urlKeys.dateFrom))) as DateValue)
-  //     : null;
-  // }, [searchParams]);
-  // const paramsDateTo = useMemo(() => {
-  //   return searchParams.get(urlKeys.dateTo) ? (new Date(Number(searchParams.get(urlKeys.dateTo))) as DateValue) : null;
-  // }, [searchParams]);
   const resetInsightsTopAds = useCallback((): void => {
     setInsightsTopAds([]);
     setIsPending(true);
   }, [setInsightsTopAds]);
 
   useEffect(() => {
-    // Logic to allow re-render only for search params of this component
+    // Continue only when search params of this component are changed
+    const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
+    if (currChartMetricValue !== prevChartMetricValue) return;
+    setPrevChartMetricValue(currChartMetricValue);
+
     const currOrderByValue = searchParams.get(urlKeys.orderBy)
       ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
       : InsightsColumnsOrderBy.impressions_abs;
@@ -90,7 +83,6 @@ export default function TopAdsContainer(): React.ReactNode {
           publisher: [publisher],
           search: paramsSearchValue ? paramsSearchValue : undefined,
         };
-        logger.info(TOP_ADS_PARAMS);
 
         const request = getInsights(TOP_ADS_PARAMS)
           .then((res) => {
@@ -129,7 +121,14 @@ export default function TopAdsContainer(): React.ReactNode {
           setIsPending(false);
         });
     }
-  }, [resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric, userDetails.currentOrganization]);
+  }, [
+    prevChartMetricValue,
+    resetInsightsTopAds,
+    searchParams,
+    setInsightsTopAds,
+    tGeneric,
+    userDetails.currentOrganization,
+  ]);
 
   const getCorrectOrder = (orderBy: InsightsColumnsOrderBy): OrderBy => {
     if (orderBy === InsightsColumnsOrderBy.cpm_abs || orderBy === InsightsColumnsOrderBy.cpm_rel) return OrderBy.asc;

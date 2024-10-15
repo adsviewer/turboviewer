@@ -33,6 +33,9 @@ export default function ChartContainer(): React.ReactNode {
   const pathname = usePathname();
   const [insightsChart, setInsightsChart] = useAtom(insightsChartAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [prevTopAdsOrderByValue, setPrevTopAdsOrderByValue] = useState<InsightsColumnsOrderBy | null>(
+    () => searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy | null,
+  );
 
   // Date range values loading
   const paramsDateFrom = searchParams.get(urlKeys.dateFrom)
@@ -49,7 +52,11 @@ export default function ChartContainer(): React.ReactNode {
   }, [setInsightsChart]);
 
   useEffect(() => {
-    // Logic to allow re-render only for search params of this component
+    // Continue only when search params of this component are changed
+    const currTopAdsOrderByValue = searchParams.get(urlKeys.orderBy);
+    if (currTopAdsOrderByValue !== prevTopAdsOrderByValue) return;
+    setPrevTopAdsOrderByValue(currTopAdsOrderByValue);
+
     const currSearchParamValue = searchParams.get(urlKeys.search);
 
     // Date Params
@@ -91,7 +98,7 @@ export default function ChartContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [resetInsightsChart, searchParams, setInsightsChart, tGeneric]);
+  }, [prevTopAdsOrderByValue, resetInsightsChart, searchParams, setInsightsChart, tGeneric]);
 
   const getChartMetricValue = (): string => {
     const chartMetric = searchParams.get(urlKeys.chartMetric)
