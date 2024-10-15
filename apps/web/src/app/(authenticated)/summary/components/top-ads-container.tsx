@@ -3,12 +3,11 @@
 import { Title, Flex, Select, Text, type ComboboxItem } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { startTransition, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import uniqid from 'uniqid';
-import { type DateValue } from '@mantine/dates';
 import { urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
 import {
   InsightsColumnsGroupBy,
@@ -36,21 +35,21 @@ export default function TopAdsContainer(): React.ReactNode {
   const [insightsTopAds, setInsightsTopAds] = useAtom(insightsTopAdsAtom);
   const userDetails = useAtomValue(userDetailsAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
-
-  // Top ads parameters that will re-render only the top ads when url state changes
-  const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
+  // Params
+  // const paramsPublishers = searchParams.getAll(urlKeys.publisher).length
+  //   ? (searchParams.getAll(urlKeys.publisher) as PublisherEnum[])
+  //   : Object.values(PublisherEnum);
+  // const paramsSearchValue = searchParams.get(urlKeys.search);
 
   // Date range values
-  const paramsDateFrom = useMemo(() => {
-    return searchParams.get(urlKeys.dateFrom)
-      ? (new Date(Number(searchParams.get(urlKeys.dateFrom))) as DateValue)
-      : null;
-  }, [searchParams]);
-
-  const paramsDateTo = useMemo(() => {
-    return searchParams.get(urlKeys.dateTo) ? (new Date(Number(searchParams.get(urlKeys.dateTo))) as DateValue) : null;
-  }, [searchParams]);
-
+  // const paramsDateFrom = useMemo(() => {
+  //   return searchParams.get(urlKeys.dateFrom)
+  //     ? (new Date(Number(searchParams.get(urlKeys.dateFrom))) as DateValue)
+  //     : null;
+  // }, [searchParams]);
+  // const paramsDateTo = useMemo(() => {
+  //   return searchParams.get(urlKeys.dateTo) ? (new Date(Number(searchParams.get(urlKeys.dateTo))) as DateValue) : null;
+  // }, [searchParams]);
   const resetInsightsTopAds = useCallback((): void => {
     setInsightsTopAds([]);
     setIsPending(true);
@@ -61,21 +60,25 @@ export default function TopAdsContainer(): React.ReactNode {
     const currOrderByValue = searchParams.get(urlKeys.orderBy)
       ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
       : InsightsColumnsOrderBy.impressions_abs;
-    if (orderByParamValue === currOrderByValue) return;
-    setOrderByParamValue(currOrderByValue);
 
+    const paramsPublishers = searchParams.getAll(urlKeys.publisher).length
+      ? (searchParams.getAll(urlKeys.publisher) as PublisherEnum[])
+      : Object.values(PublisherEnum);
+    const paramsSearchValue = searchParams.get(urlKeys.search);
+
+    // Date Params
     let dateFrom, dateTo;
-    if (paramsDateFrom && paramsDateTo) {
-      dateFrom = paramsDateFrom.getTime();
-      dateTo = paramsDateTo.getTime();
+    if (searchParams.get(urlKeys.dateFrom) && searchParams.get(urlKeys.dateTo)) {
+      dateFrom = Number(searchParams.get(urlKeys.dateFrom));
+      dateTo = Number(searchParams.get(urlKeys.dateTo));
     }
 
     // Get top ads' insights
     // Perform a request for each integration that the user has
-    resetInsightsTopAds();
     if (userDetails.currentOrganization) {
+      resetInsightsTopAds();
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
-      for (const publisher of Object.values(PublisherEnum)) {
+      for (const publisher of paramsPublishers) {
         const TOP_ADS_PARAMS: InsightsParams = {
           dateFrom,
           dateTo,
@@ -85,7 +88,9 @@ export default function TopAdsContainer(): React.ReactNode {
           interval: InsightsInterval.week,
           groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
           publisher: [publisher],
+          search: paramsSearchValue ? paramsSearchValue : undefined,
         };
+        logger.info(TOP_ADS_PARAMS);
 
         const request = getInsights(TOP_ADS_PARAMS)
           .then((res) => {
@@ -124,16 +129,7 @@ export default function TopAdsContainer(): React.ReactNode {
           setIsPending(false);
         });
     }
-  }, [
-    orderByParamValue,
-    paramsDateFrom,
-    paramsDateTo,
-    resetInsightsTopAds,
-    searchParams,
-    setInsightsTopAds,
-    tGeneric,
-    userDetails.currentOrganization,
-  ]);
+  }, [resetInsightsTopAds, searchParams, setInsightsTopAds, tGeneric, userDetails.currentOrganization]);
 
   const getCorrectOrder = (orderBy: InsightsColumnsOrderBy): OrderBy => {
     if (orderBy === InsightsColumnsOrderBy.cpm_abs || orderBy === InsightsColumnsOrderBy.cpm_rel) return OrderBy.asc;
