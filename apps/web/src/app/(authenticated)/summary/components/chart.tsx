@@ -88,7 +88,7 @@ export default function Chart(props: PropsType): ReactNode {
         color: getColor(index),
         label: `${publisher} ($)`,
       };
-      const cpmSerieData = { yAxisId: 'left', name: `cpm-${publisher}`, color: getColor(index), label: publisher };
+      const cpmSeriesData = { yAxisId: 'left', name: `cpm-${publisher}`, color: getColor(index), label: publisher };
       impressionsSeries = [...impressionsSeries, impressionSerieData];
       spendSeries = [...spendSeries, spendSerieData];
       cpmSeries = [...cpmSeries, cpmSerieData];
