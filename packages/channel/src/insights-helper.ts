@@ -83,7 +83,7 @@ export const getInsightsHelper = async (
     device?: DeviceEnum;
     publisher?: PublisherEnum;
     currency: CurrencyEnum;
-    datapoints: { spend: bigint; impressions: bigint; date: Date; cpm: bigint }[];
+    datapoints: { spend: bigint; spendUsd: bigint | null; impressions: bigint; date: Date; cpm: bigint }[];
     integration: IntegrationTypeEnum;
   }[] = [];
   const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
@@ -97,9 +97,10 @@ export const getInsightsHelper = async (
         id: groupBy.map((group) => value[0][group]).join('-'),
         datapoints: await Promise.all(
           value.map(async (v) => {
+            const usdSpent = await getUsdSpent(v.currency, v.spend);
             return {
               spend: BigInt(v.spend),
-              spendUsd: await getUsdSpent(v.currency, v.spend),
+              spendUsd: usdSpent ? BigInt(usdSpent) : null,
               impressions: BigInt(v.impressions),
               date: v.date,
               cpm: BigInt(Math.round(v.cpm)),
