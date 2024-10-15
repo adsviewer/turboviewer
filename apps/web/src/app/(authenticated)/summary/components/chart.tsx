@@ -5,9 +5,8 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AreaChart, type ChartData, type AreaChartSeries } from '@mantine/charts';
 import { Flex, LoadingOverlay } from '@mantine/core';
-import { getCurrencySymbol } from '@/util/currency-utils';
 import { ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
-import { CurrencyEnum, type PublisherEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
+import { type PublisherEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
 import { placeholderDatapoints, placeholderSeries } from '@/util/charts-utils';
 import { getColor } from '@/util/color-utils';
@@ -28,11 +27,9 @@ export default function Chart(props: PropsType): ReactNode {
   const searchParams = useSearchParams();
   const [datapoints, setDatapoints] = useState<unknown[]>([]);
   const [publishers, setPublishers] = useState<PublisherEnum[]>([]);
-  const [currency, setCurrency] = useState<CurrencyEnum>(CurrencyEnum.USD);
 
   const setupDatapoints = useCallback(() => {
     if (props.insights.length) {
-      setCurrency(props.insights[0].currency); // TEMPORARY SOLUTION
       // An object to hold the accumulated values
       const aggregatedData: AggregatedDataPoint[] = [];
       const uniquePublishersSet = new Set();
@@ -46,7 +43,7 @@ export default function Chart(props: PropsType): ReactNode {
           const perPublisherDatapoints = insight.datapoints.map((datapoint) => ({
             [`impressions-${publisher}`]: datapoint.impressions,
             date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
-            [`spend-${publisher}`]: Math.floor(Number(datapoint.spend) / 100),
+            [`spendUsd-${publisher}`]: Math.floor(Number(datapoint.spendUsd) / 100),
             [`cpm-${publisher}`]: datapoint.cpm ?? 0n,
           }));
 
@@ -87,9 +84,9 @@ export default function Chart(props: PropsType): ReactNode {
       };
       const spendSerieData = {
         yAxisId: 'left',
-        name: `spend-${publisher}`,
+        name: `spendUsd-${publisher}`,
         color: getColor(index),
-        label: `${publisher} (${getCurrencySymbol(currency)})`,
+        label: `${publisher} ($)`,
       };
       const cpmSerieData = { yAxisId: 'left', name: `cpm-${publisher}`, color: getColor(index), label: publisher };
       impressionsSeries = [...impressionsSeries, impressionSerieData];

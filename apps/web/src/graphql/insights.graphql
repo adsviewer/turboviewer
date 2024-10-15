@@ -57,6 +57,7 @@ query insights(
       datapoints {
         date
         spend
+        spendUsd
         impressions
         cpm
       }
