@@ -25,7 +25,7 @@ export default function Chart(props: PropsType): ReactNode {
   const tInsights = useTranslations('insights');
   const format = useFormatter();
   const searchParams = useSearchParams();
-  const [datapoints, setDatapoints] = useState<unknown[]>([]);
+  const [datapoints, setDatapoints] = useState<AggregatedDataPoint[]>([]);
   const [publishers, setPublishers] = useState<PublisherEnum[]>([]);
 
   const setupDatapoints = useCallback(() => {
@@ -71,12 +71,12 @@ export default function Chart(props: PropsType): ReactNode {
 
   const getChartSeries = (): AreaChartSeries[] => {
     // Figure out how many series (lines) we want, based on the amount of publishers that have datapoints
-    let impressionsSeries: AreaChartSeries[] = [];
-    let spendSeries: AreaChartSeries[] = [];
-    let cpmSeries: AreaChartSeries[] = [];
+    const impressionsSeries: AreaChartSeries[] = [];
+    const spendSeries: AreaChartSeries[] = [];
+    const cpmSeries: AreaChartSeries[] = [];
 
     for (const [index, publisher] of publishers.entries()) {
-      const impressionSerieData = {
+      const impressionSeriesData = {
         yAxisId: 'left',
         name: `impressions-${publisher}`,
         color: getColor(index),
@@ -89,9 +89,9 @@ export default function Chart(props: PropsType): ReactNode {
         label: `${publisher} ($)`,
       };
       const cpmSeriesData = { yAxisId: 'left', name: `cpm-${publisher}`, color: getColor(index), label: publisher };
-      impressionsSeries = [...impressionsSeries, impressionSerieData];
-      spendSeries = [...spendSeries, spendSerieData];
-      cpmSeries = [...cpmSeries, cpmSerieData];
+      impressionsSeries.push(impressionSeriesData);
+      spendSeries.push(spendSeriesData);
+      cpmSeries.push(cpmSeriesData);
     }
 
     switch (searchParams.get(urlKeys.chartMetric)) {
