@@ -13,6 +13,8 @@ export enum ChartMetricsEnum {
   Impressions = 'impressions',
   Spent = 'spent',
   CPM = 'cpm',
+  ImpressionsCPM = 'impressions_cpm',
+  SpentCPM = 'spent_cpm',
 }
 
 export const urlKeys = {
