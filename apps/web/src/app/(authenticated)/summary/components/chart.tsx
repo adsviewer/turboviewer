@@ -82,7 +82,7 @@ export default function Chart(props: PropsType): ReactNode {
         color: getColor(index),
         label: publisher,
       };
-      const spendSerieData = {
+      const spendSeriesData = {
         yAxisId: 'left',
         name: `spendUsd-${publisher}`,
         color: getColor(index),
