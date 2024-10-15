@@ -8,7 +8,7 @@ builder.queryFields((t) => ({
     type: [SearchQueryDto],
     nullable: false,
     resolve: async (query, _root, args, ctx, _info) => {
-      return prisma.searchQueryString.findMany({
+      return await prisma.searchQueryString.findMany({
         ...query,
         where: {
           OR: [{ parentId: ctx.currentUserId }, { parentId: ctx.organizationId }],

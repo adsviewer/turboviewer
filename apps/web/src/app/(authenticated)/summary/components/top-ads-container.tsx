@@ -1,6 +1,6 @@
 'use client';
 
-import { Title, Flex, Select, type ComboboxItem } from '@mantine/core';
+import { Title, Flex, Select, Text, type ComboboxItem } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ import {
   InsightsInterval,
   type InsightsQuery,
   OrderBy,
+  PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
@@ -45,8 +46,10 @@ export default function TopAdsContainer(): React.ReactNode {
 
   useEffect(() => {
     // Logic to allow re-render only for search params of this component
-    const currOrderByValue = searchParams.get(urlKeys.orderBy);
-    if (currOrderByValue && orderByParamValue === currOrderByValue) return;
+    const currOrderByValue = searchParams.get(urlKeys.orderBy)
+      ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
+      : InsightsColumnsOrderBy.impressions_abs;
+    if (orderByParamValue === currOrderByValue) return;
     setOrderByParamValue(currOrderByValue);
 
     // Get top ads' insights
@@ -54,20 +57,14 @@ export default function TopAdsContainer(): React.ReactNode {
     resetInsightsTopAds();
     if (userDetails.currentOrganization) {
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
-      for (const integration of userDetails.currentOrganization.integrations) {
+      for (const publisher of Object.values(PublisherEnum)) {
         const TOP_ADS_PARAMS: InsightsParams = {
-          orderBy: currOrderByValue
-            ? (currOrderByValue as InsightsColumnsOrderBy)
-            : InsightsColumnsOrderBy.impressions_abs,
-          order: OrderBy.desc,
+          orderBy: currOrderByValue,
+          order: getCorrectOrder(currOrderByValue),
           pageSize: 3,
           interval: InsightsInterval.week,
-          groupedBy: [
-            InsightsColumnsGroupBy.adId,
-            InsightsColumnsGroupBy.publisher,
-            InsightsColumnsGroupBy.integration,
-          ],
-          integrations: [integration.type],
+          groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+          publisher: [publisher],
         };
 
         const request = getInsights(TOP_ADS_PARAMS)
@@ -85,9 +82,6 @@ export default function TopAdsContainer(): React.ReactNode {
           .catch((error: unknown) => {
             logger.error(error);
             return null;
-          })
-          .finally(() => {
-            setIsPending(false);
           });
         allRequests.push(request);
       }
@@ -98,13 +92,16 @@ export default function TopAdsContainer(): React.ReactNode {
           const allTopAds: InsightsQuery['insights']['edges'][] = [];
           if (responses.length) {
             for (const res of responses) {
-              if (res?.success) allTopAds.push(res.data.insights.edges);
+              if (res?.success && res.data.insights.edges.length) allTopAds.push(res.data.insights.edges);
             }
             setInsightsTopAds(allTopAds);
           }
         })
         .catch((err: unknown) => {
           logger.error(err);
+        })
+        .finally(() => {
+          setIsPending(false);
         });
     }
   }, [
@@ -116,6 +113,11 @@ export default function TopAdsContainer(): React.ReactNode {
     userDetails.currentOrganization,
   ]);
 
+  const getCorrectOrder = (orderBy: InsightsColumnsOrderBy): OrderBy => {
+    if (orderBy === InsightsColumnsOrderBy.cpm_abs || orderBy === InsightsColumnsOrderBy.cpm_rel) return OrderBy.asc;
+    return OrderBy.desc;
+  };
+
   const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
     resetInsightsTopAds();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderBy, option.value);
@@ -123,6 +125,7 @@ export default function TopAdsContainer(): React.ReactNode {
       router.replace(newURL, { scroll: false });
     });
   };
+
   return (
     <Flex direction="column">
       <Title mb="md">{t('topAds')}</Title>
@@ -151,21 +154,26 @@ export default function TopAdsContainer(): React.ReactNode {
       </Flex>
 
       <Flex direction="column" gap="xl">
-        {insightsTopAds.length && !isPending ? (
-          insightsTopAds.map((integrationInsights) =>
-            integrationInsights.length ? (
-              <Flex key={uniqid()} direction="column" gap="sm">
-                <Title order={3} c="dimmed">
-                  {integrationInsights[0].integration}
-                </Title>
-                <InsightsGrid insights={integrationInsights} isPending={isPending} />
-              </Flex>
-            ) : null,
-          )
-        ) : (
-          <LoaderCentered />
-        )}
+        {insightsTopAds.length && !isPending
+          ? insightsTopAds.map((publisherInsights) =>
+              publisherInsights.length ? (
+                <Flex key={uniqid()} direction="column" gap="sm">
+                  <Title order={3}>{publisherInsights[0].publisher}</Title>
+                  <InsightsGrid insights={publisherInsights} isPending={isPending} hideCardHeadings />
+                </Flex>
+              ) : null,
+            )
+          : null}
+
+        {/* Loading State */}
+        {isPending ? <LoaderCentered /> : null}
       </Flex>
+
+      {!isPending && !insightsTopAds.length ? (
+        <Text c="dimmed" ta="center">
+          {tInsights('noResultsFound')}
+        </Text>
+      ) : null}
     </Flex>
   );
 }

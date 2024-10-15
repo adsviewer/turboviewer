@@ -1,6 +1,6 @@
 'use client';
 
-import { type ComboboxItem, Flex, Select } from '@mantine/core';
+import { type ComboboxItem, Flex, MultiSelect, Select } from '@mantine/core';
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -9,7 +9,8 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
-import { addOrReplaceURLParams, ChartMetricsEnum, isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
+import _ from 'lodash';
+import { addOrReplaceURLParams, ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
 import { insightsChartAtom } from '@/app/atoms/insights-atoms';
 import {
   InsightsColumnsOrderBy,
@@ -18,11 +19,14 @@ import {
   PublisherEnum,
   InsightsInterval,
 } from '@/graphql/generated/schema-server';
+import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
+import Search from '@/components/search/search';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 import Chart from './chart';
 
 export default function ChartContainer(): React.ReactNode {
   const tInsights = useTranslations('insights');
+  const tInsightsFilters = useTranslations('insights.filters');
   const tGeneric = useTranslations('generic');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -43,6 +47,8 @@ export default function ChartContainer(): React.ReactNode {
   const [chartMetricValue, setChartMetricValue] = useState<string | null>(null);
   const [dateFromValue, setDateFromValue] = useState<string | null>(null);
   const [dateToValue, setDateToValue] = useState<string | null>(null);
+  const [publishersValue, setPublishersValue] = useState<string[] | null>(null);
+  const [searchValue, setSearchValue] = useState<string | null>(null);
 
   const resetInsightsChart = useCallback((): void => {
     setInsightsChart([]);
@@ -54,15 +60,21 @@ export default function ChartContainer(): React.ReactNode {
     const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
     const currDateFromValue = searchParams.get(urlKeys.dateFrom);
     const currDateToValue = searchParams.get(urlKeys.dateTo);
+    const currPublishersValue = searchParams.getAll(urlKeys.publisher);
+    const currSearchValue = searchParams.get(urlKeys.search);
     if (
       chartMetricValue === currChartMetricValue &&
       dateFromValue === currDateFromValue &&
-      dateToValue === currDateToValue
+      dateToValue === currDateToValue &&
+      _.isEqual(publishersValue, currPublishersValue) &&
+      searchValue === currSearchValue
     )
       return;
     setChartMetricValue(currChartMetricValue);
     setDateFromValue(currDateFromValue);
     setDateToValue(currDateToValue);
+    setPublishersValue(currPublishersValue);
+    setSearchValue(currSearchValue);
 
     // Params
     let dateFrom, dateTo;
@@ -70,6 +82,7 @@ export default function ChartContainer(): React.ReactNode {
       dateFrom = dateRangeValue[0].getTime();
       dateTo = dateRangeValue[1].getTime();
     }
+
     const chartParams: InsightsParams = {
       dateFrom,
       dateTo,
@@ -78,6 +91,8 @@ export default function ChartContainer(): React.ReactNode {
       pageSize: Object.keys(PublisherEnum).length, // page size is the same as the publishers that we manage since we group per publisher
       groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,
+      publisher: searchParams.getAll(urlKeys.publisher) as PublisherEnum[],
+      search: currSearchValue ? currSearchValue : undefined,
     };
 
     // Get chart's insights
@@ -105,20 +120,19 @@ export default function ChartContainer(): React.ReactNode {
     dateFromValue,
     dateRangeValue,
     dateToValue,
+    publishersValue,
     resetInsightsChart,
     searchParams,
+    searchValue,
     setInsightsChart,
     tGeneric,
   ]);
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.SpentCPM))
-      return ChartMetricsEnum.SpentCPM;
-    else if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.ImpressionsCPM))
-      return ChartMetricsEnum.ImpressionsCPM;
-    else if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.Spent))
-      return ChartMetricsEnum.Spent;
-    return ChartMetricsEnum.Impressions;
+    const chartMetric = searchParams.get(urlKeys.chartMetric)
+      ? (searchParams.get(urlKeys.chartMetric) as ChartMetricsEnum)
+      : ChartMetricsEnum.Impressions;
+    return chartMetric;
   };
 
   const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
@@ -145,28 +159,62 @@ export default function ChartContainer(): React.ReactNode {
     }
   };
 
+  const handleMultiFilterAdd = (key: string, value: string): void => {
+    resetInsightsChart();
+    startTransition(() => {
+      router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    });
+  };
+
+  const handleMultiFilterRemove = (key: string, value: string): void => {
+    resetInsightsChart();
+    startTransition(() => {
+      router.replace(addOrReplaceURLParams(pathname, searchParams, key, value));
+    });
+  };
+
   return (
     <Flex direction="column">
       <Flex align="center" gap="md" wrap="wrap" mb="md">
+        <Search isPending={isPending} startTransition={startTransition} />
+      </Flex>
+      <Flex align="center" gap="md" wrap="wrap" mb="md">
         <Select
           description={tInsights('chartMetric')}
+          disabled={isPending || !insightsChart.length}
           data={[
             { value: ChartMetricsEnum.Impressions, label: tInsights('impressions') },
             { value: ChartMetricsEnum.Spent, label: tInsights('spent') },
-            { value: ChartMetricsEnum.ImpressionsCPM, label: `${tInsights('impressions')} / CPM` },
-            { value: ChartMetricsEnum.SpentCPM, label: `${tInsights('spent')} / CPM` },
+            { value: ChartMetricsEnum.CPM, label: 'CPM' },
           ]}
-          defaultValue={ChartMetricsEnum.ImpressionsCPM}
+          defaultValue={ChartMetricsEnum.Impressions}
           value={getChartMetricValue()}
           onChange={handleChartMetricChange}
           allowDeselect={false}
           comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           maw={280}
-          disabled={isPending || !insightsChart.length}
+        />
+        <MultiSelect
+          description={tInsightsFilters('publishers')}
+          disabled={isPending}
+          placeholder={`${tInsightsFilters('selectPublishers')}...`}
+          data={populatePublisherAvailableValues()}
+          value={getPublisherCurrentValues(searchParams)}
+          onOptionSubmit={(value) => {
+            handleMultiFilterAdd(urlKeys.publisher, value);
+          }}
+          onRemove={(value) => {
+            handleMultiFilterRemove(urlKeys.publisher, value);
+          }}
+          w={350}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+          my={4}
         />
         <DatePickerInput
-          mt="auto"
+          description={tGeneric('pickDateRange')}
+          disabled={isPending}
           ml="auto"
           type="range"
           maxDate={new Date()}

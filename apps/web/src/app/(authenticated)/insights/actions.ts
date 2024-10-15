@@ -13,7 +13,7 @@ import {
   type PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
-import { type SearchExpression } from './components/search/types-and-utils';
+import { type SearchExpression } from '../../../components/search/types-and-utils';
 
 export interface InsightsParams {
   orderBy?: InsightsColumnsOrderBy;

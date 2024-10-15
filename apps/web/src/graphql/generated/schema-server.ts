@@ -1068,6 +1068,7 @@ export type InsightsQuery = {
         __typename: 'InsightsDatapoints';
         date: Date;
         spend: bigint;
+        spendUsd?: bigint | null;
         impressions: bigint;
         cpm?: bigint | null;
       }>;
@@ -1520,6 +1521,7 @@ export const InsightsDocument = gql`
         datapoints {
           date
           spend
+          spendUsd
           impressions
           cpm
         }

@@ -3,43 +3,65 @@
 import { useFormatter, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AreaChart, type AreaChartSeries } from '@mantine/charts';
+import { AreaChart, type ChartData, type AreaChartSeries } from '@mantine/charts';
 import { Flex, LoadingOverlay } from '@mantine/core';
-import { logger } from '@repo/logger';
-import { getCurrencySymbol } from '@/util/currency-utils';
 import { ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
-import { CurrencyEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
+import { type PublisherEnum, type InsightsQuery } from '@/graphql/generated/schema-server';
 import { dateFormatOptions } from '@/util/format-utils';
-import { type Datapoint, mergeByDate, placeholderDatapoints, placeholderSeries } from '@/util/charts-utils';
+import { placeholderDatapoints, placeholderSeries } from '@/util/charts-utils';
+import { getColor } from '@/util/color-utils';
 
 interface PropsType {
   isPending: boolean;
   insights: InsightsQuery['insights']['edges'];
 }
 
+interface AggregatedDataPoint {
+  date: string;
+  [key: string]: unknown; // Allows for dynamic publisher-specific properties (e.g., impressions-publisher)
+}
+
 export default function Chart(props: PropsType): ReactNode {
   const tInsights = useTranslations('insights');
   const format = useFormatter();
   const searchParams = useSearchParams();
-  const [datapoints, setDatapoints] = useState<Datapoint[]>([]);
-  const [currency, setCurrency] = useState<CurrencyEnum>(CurrencyEnum.USD);
+  const [datapoints, setDatapoints] = useState<AggregatedDataPoint[]>([]);
+  const [publishers, setPublishers] = useState<PublisherEnum[]>([]);
 
   const setupDatapoints = useCallback(() => {
     if (props.insights.length) {
-      logger.info(props.insights);
-      const newDatapoints = props.insights.map((insight) => insight.datapoints).flat();
-      const formattedDatapoints = [];
-      setCurrency(props.insights[0].currency); // TEMPORARY SOLUTION
-      for (const datapoint of newDatapoints) {
-        formattedDatapoints.push({
-          date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
-          impressions: datapoint.impressions,
-          spend: Math.floor(Number(datapoint.spend) / 100),
-          cpm: datapoint.cpm ?? 0n,
-        });
+      // An object to hold the accumulated values
+      const aggregatedData: AggregatedDataPoint[] = [];
+      const uniquePublishersSet = new Set();
+
+      for (const insight of props.insights) {
+        if (insight.publisher) {
+          const publisher = insight.publisher;
+          uniquePublishersSet.add(publisher);
+
+          // Map datapoints for the current publisher
+          const perPublisherDatapoints = insight.datapoints.map((datapoint) => ({
+            [`impressions-${publisher}`]: datapoint.impressions,
+            date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
+            [`spendUsd-${publisher}`]: Math.floor(Number(datapoint.spendUsd) / 100),
+            [`cpm-${publisher}`]: datapoint.cpm ?? 0n,
+          }));
+
+          // Update the aggregatedData with the current publisher's datapoints
+          perPublisherDatapoints.forEach((datapoint) => {
+            const { date } = datapoint;
+            const existingEntry = aggregatedData.find((data) => data.date === date);
+
+            // If an entry for the same date exists, merge the current datapoint, else create it
+            if (existingEntry) Object.assign(existingEntry, datapoint);
+            else aggregatedData.push(datapoint);
+          });
+        }
       }
-      const finalDatapoints = mergeByDate(formattedDatapoints);
-      setDatapoints(finalDatapoints);
+
+      // At the end, aggregatedData will contain all the publishers' datapoints grouped by date
+      setDatapoints([...aggregatedData]);
+      setPublishers(Array.from(uniquePublishersSet) as PublisherEnum[]);
     }
   }, [format, props.insights]);
 
@@ -48,33 +70,37 @@ export default function Chart(props: PropsType): ReactNode {
   }, [setupDatapoints]);
 
   const getChartSeries = (): AreaChartSeries[] => {
+    // Figure out how many series (lines) we want, based on the amount of publishers that have datapoints
+    const impressionsSeries: AreaChartSeries[] = [];
+    const spendSeries: AreaChartSeries[] = [];
+    const cpmSeries: AreaChartSeries[] = [];
+
+    for (const [index, publisher] of publishers.entries()) {
+      const impressionSeriesData = {
+        yAxisId: 'left',
+        name: `impressions-${publisher}`,
+        color: getColor(index),
+        label: publisher,
+      };
+      const spendSeriesData = {
+        yAxisId: 'left',
+        name: `spendUsd-${publisher}`,
+        color: getColor(index),
+        label: `${publisher} ($)`,
+      };
+      const cpmSeriesData = { yAxisId: 'left', name: `cpm-${publisher}`, color: getColor(index), label: publisher };
+      impressionsSeries.push(impressionSeriesData);
+      spendSeries.push(spendSeriesData);
+      cpmSeries.push(cpmSeriesData);
+    }
+
     switch (searchParams.get(urlKeys.chartMetric)) {
-      case ChartMetricsEnum.SpentCPM:
-        return [
-          {
-            yAxisId: 'left',
-            name: 'spend',
-            color: 'teal.6',
-            label: `${tInsights('spent')} (${getCurrencySymbol(currency)})`,
-          },
-          { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
-        ];
-      case ChartMetricsEnum.ImpressionsCPM:
-        return [
-          { yAxisId: 'left', name: 'impressions', color: 'blue.6', label: tInsights('impressions') },
-          { yAxisId: 'right', name: 'cpm', color: 'orange', label: 'CPM' },
-        ];
+      case ChartMetricsEnum.CPM:
+        return cpmSeries;
       case ChartMetricsEnum.Spent:
-        return [
-          {
-            yAxisId: 'left',
-            name: 'spend',
-            color: 'teal.6',
-            label: `${tInsights('spent')} (${getCurrencySymbol(currency)})`,
-          },
-        ];
+        return spendSeries;
       default:
-        return [{ yAxisId: 'left', name: 'impressions', color: 'blue.6', label: tInsights('impressions') }];
+        return impressionsSeries;
     }
   };
 
@@ -117,7 +143,7 @@ export default function Chart(props: PropsType): ReactNode {
           withRightYAxis
           valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
           dataKey="date"
-          data={datapoints}
+          data={datapoints as ChartData}
           series={getChartSeries()}
         />
       )}

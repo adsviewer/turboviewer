@@ -14,6 +14,7 @@ import {
 import { type ReadonlyURLSearchParams } from 'next/navigation';
 import { DeviceEnum, InsightsColumnsOrderBy, PublisherEnum } from '@/graphql/generated/schema-server';
 import { isParamInSearchParams, urlKeys } from './url-query-utils';
+import { type MultiSelectDataType } from './types';
 
 export const publisherToIconMap = new Map<PublisherEnum, React.FC>([
   [PublisherEnum.Facebook, IconBrandFacebook],
@@ -35,15 +36,28 @@ export const deviceToIconMap = new Map<DeviceEnum, React.FC>([
 ]);
 
 export const getOrderByValue = (searchParams: ReadonlyURLSearchParams): string => {
-  if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.impressions_rel))
-    return InsightsColumnsOrderBy.impressions_rel;
-  else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_rel))
-    return InsightsColumnsOrderBy.spend_rel;
-  else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.spend_abs))
-    return InsightsColumnsOrderBy.spend_abs;
-  else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_rel))
-    return InsightsColumnsOrderBy.cpm_rel;
-  else if (isParamInSearchParams(searchParams, urlKeys.orderBy, InsightsColumnsOrderBy.cpm_abs))
-    return InsightsColumnsOrderBy.cpm_abs;
-  return InsightsColumnsOrderBy.impressions_abs;
+  const orderByValue = searchParams.get(urlKeys.orderBy)
+    ? (searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy)
+    : InsightsColumnsOrderBy.impressions_abs;
+  return orderByValue;
+};
+
+export const populatePublisherAvailableValues = (): MultiSelectDataType[] => {
+  let data: MultiSelectDataType[] = [];
+  for (const key of Object.keys(PublisherEnum)) {
+    const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
+    data = [...data, { value: enumValue, label: enumValue }];
+  }
+  return data;
+};
+
+export const getPublisherCurrentValues = (searchParams: ReadonlyURLSearchParams): string[] => {
+  let values: string[] = [];
+  for (const key of Object.keys(PublisherEnum)) {
+    const enumValue = PublisherEnum[key as keyof typeof PublisherEnum];
+    if (isParamInSearchParams(searchParams, urlKeys.publisher, enumValue)) {
+      values = [...values, enumValue];
+    }
+  }
+  return values;
 };
