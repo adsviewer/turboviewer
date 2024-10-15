@@ -3,11 +3,12 @@
 import { Title, Flex, Select, Text, type ComboboxItem } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { startTransition, useCallback, useEffect, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useMemo, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import uniqid from 'uniqid';
+import { type DateValue } from '@mantine/dates';
 import { urlKeys, addOrReplaceURLParams } from '@/util/url-query-utils';
 import {
   InsightsColumnsGroupBy,
@@ -39,6 +40,17 @@ export default function TopAdsContainer(): React.ReactNode {
   // Top ads parameters that will re-render only the top ads when url state changes
   const [orderByParamValue, setOrderByParamValue] = useState<string | null>(null);
 
+  // Date range values
+  const paramsDateFrom = useMemo(() => {
+    return searchParams.get(urlKeys.dateFrom)
+      ? (new Date(Number(searchParams.get(urlKeys.dateFrom))) as DateValue)
+      : null;
+  }, [searchParams]);
+
+  const paramsDateTo = useMemo(() => {
+    return searchParams.get(urlKeys.dateTo) ? (new Date(Number(searchParams.get(urlKeys.dateTo))) as DateValue) : null;
+  }, [searchParams]);
+
   const resetInsightsTopAds = useCallback((): void => {
     setInsightsTopAds([]);
     setIsPending(true);
@@ -52,6 +64,12 @@ export default function TopAdsContainer(): React.ReactNode {
     if (orderByParamValue === currOrderByValue) return;
     setOrderByParamValue(currOrderByValue);
 
+    let dateFrom, dateTo;
+    if (paramsDateFrom && paramsDateTo) {
+      dateFrom = paramsDateFrom.getTime();
+      dateTo = paramsDateTo.getTime();
+    }
+
     // Get top ads' insights
     // Perform a request for each integration that the user has
     resetInsightsTopAds();
@@ -59,6 +77,8 @@ export default function TopAdsContainer(): React.ReactNode {
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
       for (const publisher of Object.values(PublisherEnum)) {
         const TOP_ADS_PARAMS: InsightsParams = {
+          dateFrom,
+          dateTo,
           orderBy: currOrderByValue,
           order: getCorrectOrder(currOrderByValue),
           pageSize: 3,
@@ -106,6 +126,8 @@ export default function TopAdsContainer(): React.ReactNode {
     }
   }, [
     orderByParamValue,
+    paramsDateFrom,
+    paramsDateTo,
     resetInsightsTopAds,
     searchParams,
     setInsightsTopAds,
