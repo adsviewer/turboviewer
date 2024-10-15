@@ -1,17 +1,18 @@
 import {
-  type CurrencyEnum,
+  CurrencyEnum,
   type DeviceEnum,
   type Insight,
   type IntegrationTypeEnum,
   prisma,
   type PublisherEnum,
 } from '@repo/database';
-import { FireAndForget, groupBy as groupByUtil, Language } from '@repo/utils';
+import { FireAndForget, groupBy as groupByUtil, isAError, Language } from '@repo/utils';
 import * as changeCase from 'change-case';
 import {
   type FilterInsightsInputType,
   type InsightsColumnsGroupByType,
   type GroupedInsightsWithEdges,
+  currencyToEuro,
 } from '@repo/channel-utils';
 import { getInsightsCache, setInsightsCache } from './insights-cache';
 import { groupedInsights } from './insights-query-builder';
@@ -30,6 +31,18 @@ export interface FieldNode {
     }[];
   };
 }
+
+const getUsdSpent = async (currency: CurrencyEnum, spend: bigint): Promise<bigint | null> => {
+  if (currency === CurrencyEnum.USD) {
+    return spend;
+  }
+  const [currInEur, eurUsd] = await Promise.all([
+    currencyToEuro.getValue(currency, currency),
+    currencyToEuro.getValue(CurrencyEnum.USD, CurrencyEnum.USD),
+  ]);
+  if (isAError(currInEur) || isAError(eurUsd)) return null;
+  return BigInt(Math.round((Number(spend) / currInEur) * eurUsd));
+};
 
 export const getInsightsHelper = async (
   filter: FilterInsightsInputType,
@@ -82,12 +95,17 @@ export const getInsightsHelper = async (
       ret.push({
         ...valueWithoutDatapoints,
         id: groupBy.map((group) => value[0][group]).join('-'),
-        datapoints: value.map((v) => ({
-          spend: BigInt(v.spend),
-          impressions: BigInt(v.impressions),
-          date: v.date,
-          cpm: BigInt(Math.round(v.cpm)),
-        })),
+        datapoints: await Promise.all(
+          value.map(async (v) => {
+            return {
+              spend: BigInt(v.spend),
+              spendUsd: await getUsdSpent(v.currency, v.spend),
+              impressions: BigInt(v.impressions),
+              date: v.date,
+              cpm: BigInt(Math.round(v.cpm)),
+            };
+          }),
+        ),
       });
     }
   }

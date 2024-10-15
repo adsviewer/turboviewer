@@ -35,5 +35,5 @@ const getFn = async (currency: CurrencyEnum): Promise<number | AError> => {
 export const currencyToEuro = new Cacheable(
   (currency: CurrencyEnum) => getKey(currency),
   (currency: CurrencyEnum) => getFn(currency),
-  60 * 60 * 24 * 7,
+  60 * 60 * 24,
 );
