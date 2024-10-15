@@ -1,6 +1,6 @@
 # AdsViewer
 
-A bunch of cool staff for viewing, optimizing and growing your digital ad portfolio.
+A bunch of cool stuff for viewing, optimizing and growing your digital ad portfolio.
 
 ## Development Setup
 
