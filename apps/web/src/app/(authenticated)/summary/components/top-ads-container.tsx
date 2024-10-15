@@ -159,7 +159,7 @@ export default function TopAdsContainer(): React.ReactNode {
               publisherInsights.length ? (
                 <Flex key={uniqid()} direction="column" gap="sm">
                   <Title order={3}>{publisherInsights[0].publisher}</Title>
-                  <InsightsGrid insights={publisherInsights} isPending={isPending} hideHeading />
+                  <InsightsGrid insights={publisherInsights} isPending={isPending} hideCardHeadings />
                 </Flex>
               ) : null,
             )

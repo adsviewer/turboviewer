@@ -11,7 +11,7 @@ import InsightCard from './insight-card';
 interface PropsType {
   isPending: boolean;
   insights: InsightsQuery['insights']['edges'];
-  hideHeading?: boolean;
+  hideCardHeadings?: boolean;
 }
 
 export default function InsightsGrid(props: PropsType): ReactNode {
@@ -56,7 +56,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                   publisher={insight.publisher}
                   datapoints={insight.datapoints}
                   iframe={insight.iFrame}
-                  hideHeading={props.hideHeading}
+                  hideHeading={props.hideCardHeadings}
                 />
               </motion.div>
             ))
