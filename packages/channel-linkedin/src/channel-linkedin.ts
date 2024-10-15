@@ -396,7 +396,7 @@ class LinkedIn implements ChannelInterface {
         logger.error(body, 'Unknown linkedIn error');
         return new AError('Unknown linkedIn error');
       }
-      if (parsed.data.code === 'EXPIRED_ACCESS_TOKEN') {
+      if (['EXPIRED_ACCESS_TOKEN', 'REVOKED_ACCESS_TOKEN'].includes(parsed.data.code)) {
         await disConnectIntegrationOnError(integrationId, new Error(parsed.data.message), true);
         return new AError('Expired access token');
       }
