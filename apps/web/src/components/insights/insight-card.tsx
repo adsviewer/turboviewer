@@ -36,6 +36,7 @@ interface InsightCardProps {
   publisher: PublisherEnum | null | undefined;
   datapoints?: InsightsDatapoints[];
   iframe?: IFrame | null;
+  hideHeading?: boolean;
 }
 
 interface RankType {
@@ -154,11 +155,13 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
 
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Flex gap="sm" align="center">
-        <Title order={3} mb="md" fw={500} title={String(props.title)}>
-          {props.heading}
-        </Title>
-      </Flex>
+      {!props.hideHeading ? (
+        <Flex gap="sm" align="center">
+          <Title order={3} mb="md" fw={500} title={String(props.title)}>
+            {props.heading}
+          </Title>
+        </Flex>
+      ) : null}
 
       {!searchParams.has(urlKeys.fetchPreviews) ? (
         // Chart Analytics

@@ -15,6 +15,7 @@ import {
   InsightsInterval,
   type InsightsQuery,
   OrderBy,
+  PublisherEnum,
 } from '@/graphql/generated/schema-server';
 import { insightsTopAdsAtom } from '@/app/atoms/insights-atoms';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
@@ -56,18 +57,14 @@ export default function TopAdsContainer(): React.ReactNode {
     resetInsightsTopAds();
     if (userDetails.currentOrganization) {
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
-      for (const integration of userDetails.currentOrganization.integrations) {
+      for (const publisher of Object.values(PublisherEnum)) {
         const TOP_ADS_PARAMS: InsightsParams = {
           orderBy: currOrderByValue,
           order: getCorrectOrder(currOrderByValue),
           pageSize: 3,
           interval: InsightsInterval.week,
-          groupedBy: [
-            InsightsColumnsGroupBy.adId,
-            InsightsColumnsGroupBy.publisher,
-            InsightsColumnsGroupBy.integration,
-          ],
-          integrations: [integration.type],
+          groupedBy: [InsightsColumnsGroupBy.adId, InsightsColumnsGroupBy.publisher],
+          publisher: [publisher],
         };
 
         const request = getInsights(TOP_ADS_PARAMS)
@@ -128,6 +125,7 @@ export default function TopAdsContainer(): React.ReactNode {
       router.replace(newURL, { scroll: false });
     });
   };
+
   return (
     <Flex direction="column">
       <Title mb="md">{t('topAds')}</Title>
@@ -157,13 +155,11 @@ export default function TopAdsContainer(): React.ReactNode {
 
       <Flex direction="column" gap="xl">
         {insightsTopAds.length && !isPending
-          ? insightsTopAds.map((integrationInsights) =>
-              integrationInsights.length ? (
+          ? insightsTopAds.map((publisherInsights) =>
+              publisherInsights.length ? (
                 <Flex key={uniqid()} direction="column" gap="sm">
-                  <Title order={3} c="dimmed">
-                    {integrationInsights[0].integration}
-                  </Title>
-                  <InsightsGrid insights={integrationInsights} isPending={isPending} />
+                  <Title order={3}>{publisherInsights[0].publisher}</Title>
+                  <InsightsGrid insights={publisherInsights} isPending={isPending} hideHeading />
                 </Flex>
               ) : null,
             )
