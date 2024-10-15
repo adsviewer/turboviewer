@@ -226,7 +226,7 @@ void describe('insights query builder tests', () => {
       `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
-                                        AND date <= TIMESTAMP CURRENT_DATE
+                                        AND date <= CURRENT_DATE
                                       GROUP BY ad_id, publisher)`,
     );
   });
@@ -237,7 +237,7 @@ void describe('insights query builder tests', () => {
       `last_interval AS (SELECT ad_id, publisher, SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
-                                        AND date <= TIMESTAMP CURRENT_DATE
+                                        AND date <= CURRENT_DATE
                                       GROUP BY ad_id, publisher HAVING SUM(i.impressions) > 0)`,
     );
   });
@@ -328,7 +328,7 @@ void describe('insights query builder tests', () => {
   last_interval AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
-                                         AND date <= TIMESTAMP CURRENT_DATE
+                                         AND date <= CURRENT_DATE
                                       GROUP BY ad_id, publisher, currency),
   interval_before_last AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS spend_eur
                                              FROM organization_insights i
@@ -344,7 +344,7 @@ void describe('insights query builder tests', () => {
                                       LIMIT 11 OFFSET 0)
   SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
   FROM organization_insights i JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
-  WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '3 week')
+  WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
     AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend, interval_start;`,

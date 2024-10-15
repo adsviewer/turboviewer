@@ -159,7 +159,7 @@ export const lastInterval = (
   return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('${interval}', ${date})
-                                        AND date <= ${dateTo ? date : `TIMESTAMP ${date}`}
+                                        AND date <= ${date}
                                       GROUP BY ${group}${relative})`;
 };
 
@@ -266,18 +266,18 @@ export const groupedInsights = (
   }
 
   const dateInterval = getInterval(args.interval, adjustedDataPoints);
-  const orderByAs = args.orderBy.slice(0, -4);
 
-  const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)}${isRelative ? ',' : ''}
+  const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)},
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
-  ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : ''}
+  ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
-  FROM organization_insights i${isRelative ? ` ${joinFn(snakeGroup, 'order_column_trend', 'i')}` : ''}
+  FROM organization_insights i
+  ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
     AND i.date <= DATE_TRUNC('${args.interval}', ${date})
-  GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start${isRelative ? ', oct.trend' : ''}
-  ORDER BY ${isRelative ? 'oct.trend' : orderByAs}${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
+  GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
+  ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
 
   return sql.replace(/\n\s*\n/g, '\n');
 };
