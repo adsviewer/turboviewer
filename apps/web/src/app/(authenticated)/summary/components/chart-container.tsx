@@ -10,7 +10,7 @@ import { logger } from '@repo/logger';
 import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
 import _ from 'lodash';
-import { addOrReplaceURLParams, ChartMetricsEnum, isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
+import { addOrReplaceURLParams, ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
 import { insightsChartAtom } from '@/app/atoms/insights-atoms';
 import {
   InsightsColumnsOrderBy,
@@ -129,10 +129,10 @@ export default function ChartContainer(): React.ReactNode {
   ]);
 
   const getChartMetricValue = (): string => {
-    if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.Spent)) return ChartMetricsEnum.Spent;
-    else if (isParamInSearchParams(searchParams, urlKeys.chartMetric, ChartMetricsEnum.CPM))
-      return ChartMetricsEnum.CPM;
-    return ChartMetricsEnum.Impressions;
+    const chartMetric = searchParams.get(urlKeys.chartMetric)
+      ? (searchParams.get(urlKeys.chartMetric) as ChartMetricsEnum)
+      : ChartMetricsEnum.Impressions;
+    return chartMetric;
   };
 
   const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
