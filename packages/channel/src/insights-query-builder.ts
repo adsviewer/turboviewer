@@ -259,13 +259,8 @@ export const groupedInsights = (
   const limit = args.pageSize + 1;
   const offset = (args.page - 1) * args.pageSize;
   const date = args.dateTo ? `TIMESTAMP '${args.dateTo.toISOString()}'` : `CURRENT_DATE`;
-  let adjustedDataPoints = dataPointsPerInterval;
 
-  if (!isRelative && dataPointsPerInterval > 1) {
-    adjustedDataPoints = dataPointsPerInterval - 1;
-  }
-
-  const dateInterval = getInterval(args.interval, adjustedDataPoints);
+  const dateInterval = getInterval(args.interval, dataPointsPerInterval);
 
   const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)},
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
