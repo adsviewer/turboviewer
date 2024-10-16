@@ -1023,6 +1023,9 @@ importers:
       '@repo/backend-shared':
         specifier: workspace:*
         version: link:../backend-shared
+      '@repo/channel-google':
+        specifier: workspace:*
+        version: link:../channel-google
       '@repo/channel-linkedin':
         specifier: workspace:*
         version: link:../channel-linkedin
@@ -1093,6 +1096,64 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
+
+  packages/channel-google:
+    dependencies:
+      '@lifeomic/attempt':
+        specifier: ^3.1.0
+        version: 3.1.0
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../channel-utils
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      facebook-nodejs-business-sdk:
+        specifier: ^20.0.3
+        version: 20.0.3
+      google-auth-library:
+        specifier: ^9.14.1
+        version: 9.14.1
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.2
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.0
+      '@types/facebook-nodejs-business-sdk':
+        specifier: ^20.0.2
+        version: 20.0.2
+      '@types/jsonwebtoken':
+        specifier: ^9.0.7
+        version: 9.0.7
+      '@types/lodash':
+        specifier: ^4.17.9
+        version: 4.17.9
+      '@types/node':
+        specifier: ^22.7.4
+        version: 22.7.4
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
 
   packages/channel-linkedin:
     dependencies:
