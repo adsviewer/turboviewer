@@ -103,8 +103,8 @@ export const addOrReplaceURLParams = (
     // If it already exists, remove it!
     newParams.delete(key, newValue);
 
-    // (Special case) Don't allow preview fetching if adId is not in group filters!
-    if (!newParams.has(urlKeys.groupedBy, InsightsColumnsGroupBy.adId)) {
+    // (Special case) Don't allow preview fetching if adId is not in group filters (except in summary!)!
+    if (!newParams.has(urlKeys.groupedBy, InsightsColumnsGroupBy.adId) && pathname !== '/summary') {
       newParams.delete(urlKeys.fetchPreviews);
     }
 
