@@ -21,7 +21,7 @@ export interface InsightsParams {
   page?: number;
   pageSize?: number;
   groupedBy?: InsightsColumnsGroupBy[];
-  account?: string;
+  account?: string | string[];
   adIds?: string;
   integrations?: IntegrationType[];
   device?: DeviceEnum;

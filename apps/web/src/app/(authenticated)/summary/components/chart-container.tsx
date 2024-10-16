@@ -19,9 +19,16 @@ import {
   OrderBy,
   PublisherEnum,
 } from '@/graphql/generated/schema-server';
-import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
+import {
+  getAccountCurrentValues,
+  getPublisherCurrentValues,
+  populateAccountsAvailableValues,
+  populatePublisherAvailableValues,
+} from '@/util/insights-utils';
 import Search from '@/components/search/search';
+import { type MultiSelectDataType } from '@/util/types';
 import getInsights, { type InsightsParams } from '../../insights/actions';
+import getAccounts from '../../actions';
 import Chart from './chart';
 
 export default function ChartContainer(): React.ReactNode {
@@ -33,6 +40,7 @@ export default function ChartContainer(): React.ReactNode {
   const pathname = usePathname();
   const [insightsChart, setInsightsChart] = useAtom(insightsChartAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [accounts, setAccounts] = useState<MultiSelectDataType[]>([]);
   const [prevTopAdsOrderByValue, setPrevTopAdsOrderByValue] = useState<InsightsColumnsOrderBy | null>(
     () => searchParams.get(urlKeys.orderBy) as InsightsColumnsOrderBy | null,
   );
@@ -98,6 +106,23 @@ export default function ChartContainer(): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
+
+    // Accounts
+    // Get ad account for every integration!
+    void getAccounts().then((res) => {
+      const integrations = res.integrations;
+      let adAccounts: MultiSelectDataType[] = [];
+      for (const integration of integrations) {
+        for (const adAccount of integration.adAccounts) {
+          const newValue: MultiSelectDataType = {
+            value: adAccount.id,
+            label: adAccount.name,
+          };
+          adAccounts = [...adAccounts, newValue];
+        }
+      }
+      setAccounts(adAccounts);
+    });
   }, [prevTopAdsOrderByValue, resetInsightsChart, searchParams, setInsightsChart, tGeneric]);
 
   const getChartMetricValue = (): string => {
@@ -183,6 +208,23 @@ export default function ChartContainer(): React.ReactNode {
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
           my={4}
+        />
+        <MultiSelect
+          description={tInsightsFilters('selectAccounts')}
+          disabled={isPending}
+          searchable
+          placeholder={`${tInsightsFilters('selectAccounts')}...`}
+          data={populateAccountsAvailableValues(accounts)}
+          value={getAccountCurrentValues(searchParams, accounts)}
+          onOptionSubmit={(value) => {
+            handleMultiFilterAdd(urlKeys.account, value);
+          }}
+          onRemove={(value) => {
+            handleMultiFilterRemove(urlKeys.account, value);
+          }}
+          comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
+          my={4}
+          styles={{ pill: { width: 200 } }}
         />
         <DatePickerInput
           description={tGeneric('pickDateRange')}

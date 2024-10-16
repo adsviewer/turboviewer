@@ -9,7 +9,12 @@ import { DeviceEnum, InsightsColumnsGroupBy } from '@/graphql/generated/schema-s
 import { addOrReplaceURLParams, urlKeys, isParamInSearchParams, positions } from '@/util/url-query-utils';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import { type MultiSelectDataType } from '@/util/types';
-import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
+import {
+  getAccountCurrentValues,
+  getPublisherCurrentValues,
+  populateAccountsAvailableValues,
+  populatePublisherAvailableValues,
+} from '@/util/insights-utils';
 import getAccounts from '../../actions';
 
 export default function GroupFilters(): ReactNode {
@@ -46,25 +51,6 @@ export default function GroupFilters(): ReactNode {
   const resetInsights = (): void => {
     setInsights([]);
     setHasNextInsightsPageAtom(false);
-  };
-
-  const populateAccountsAvailableValues = (): MultiSelectDataType[] => {
-    let data: MultiSelectDataType[] = [];
-    for (const account of accounts) {
-      data = [...data, { value: account.value, label: account.label }];
-    }
-    return data;
-  };
-
-  const getAccountCurrentValues = (): string[] => {
-    let values: string[] = [];
-    for (const account of accounts) {
-      const value = account.value;
-      if (isParamInSearchParams(searchParams, urlKeys.account, value)) {
-        values = [...values, value];
-      }
-    }
-    return values;
   };
 
   // Positions (will be refactored to use the enum from schema-server when it is done)
@@ -155,8 +141,8 @@ export default function GroupFilters(): ReactNode {
               disabled={isPending}
               searchable
               placeholder={`${t('selectAccounts')}...`}
-              data={populateAccountsAvailableValues()}
-              value={getAccountCurrentValues()}
+              data={populateAccountsAvailableValues(accounts)}
+              value={getAccountCurrentValues(searchParams, accounts)}
               onOptionSubmit={(value) => {
                 handleMultiFilterAdd(urlKeys.account, value);
               }}

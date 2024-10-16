@@ -61,3 +61,25 @@ export const getPublisherCurrentValues = (searchParams: ReadonlyURLSearchParams)
   }
   return values;
 };
+
+export const populateAccountsAvailableValues = (accounts: MultiSelectDataType[]): MultiSelectDataType[] => {
+  let data: MultiSelectDataType[] = [];
+  for (const account of accounts) {
+    data = [...data, { value: account.value, label: account.label }];
+  }
+  return data;
+};
+
+export const getAccountCurrentValues = (
+  searchParams: ReadonlyURLSearchParams,
+  accounts: MultiSelectDataType[],
+): string[] => {
+  let values: string[] = [];
+  for (const account of accounts) {
+    const value = account.value;
+    if (isParamInSearchParams(searchParams, urlKeys.account, value)) {
+      values = [...values, value];
+    }
+  }
+  return values;
+};
