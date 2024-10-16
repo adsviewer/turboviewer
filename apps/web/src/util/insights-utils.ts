@@ -65,16 +65,7 @@ export const getPublisherCurrentValues = (searchParams: ReadonlyURLSearchParams)
 export const populateAccountsAvailableValues = (accounts: MultiSelectDataType[]): MultiSelectDataType[] =>
   accounts.map((account) => ({ value: account.value, label: account.label }));
 
-export const getAccountCurrentValues = (
-  searchParams: ReadonlyURLSearchParams,
-  accounts: MultiSelectDataType[],
-): string[] => {
-  let values: string[] = [];
-  for (const account of accounts) {
-    const value = account.value;
-    if (isParamInSearchParams(searchParams, urlKeys.adAccount, value)) {
-      values = [...values, value];
-    }
-  }
-  return values;
-};
+export const getAccountCurrentValues = (searchParams: ReadonlyURLSearchParams, accounts: MultiSelectDataType[]): string[] =>
+  accounts
+    .filter((a) => isParamInSearchParams(searchParams, urlKeys.adAccount, a.value))
+    .map((account) => account.value);
