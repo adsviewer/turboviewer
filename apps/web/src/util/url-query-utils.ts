@@ -23,7 +23,7 @@ export const urlKeys = {
   publisher: 'publisher',
   device: 'device',
   position: 'position',
-  account: 'account',
+  adAccount: 'adAccount',
   page: 'page',
   pageSize: 'pageSize',
   orderDirection: 'order',
@@ -87,7 +87,7 @@ export const addOrReplaceURLParams = (
   key: string,
   newValue?: string,
 ): string => {
-  const multiKeyParams = [urlKeys.groupedBy, urlKeys.publisher, urlKeys.device, urlKeys.position, urlKeys.account];
+  const multiKeyParams = [urlKeys.groupedBy, urlKeys.publisher, urlKeys.device, urlKeys.position, urlKeys.adAccount];
   const newParams = new URLSearchParams(searchParams.toString());
 
   // First, make sure to remove the 'page' param so that the new results start from the 1st page

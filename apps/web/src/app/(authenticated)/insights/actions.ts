@@ -21,7 +21,7 @@ export interface InsightsParams {
   page?: number;
   pageSize?: number;
   groupedBy?: InsightsColumnsGroupBy[];
-  account?: string;
+  adAccounts?: string | string[];
   adIds?: string;
   integrations?: IntegrationType[];
   device?: DeviceEnum;
@@ -44,7 +44,7 @@ export default async function getInsights(insightsParams: InsightsParams): Promi
 
   return await handleUrqlRequest(
     urqlClientSdk().insights({
-      adAccountIds: insightsParams.account,
+      adAccountIds: insightsParams.adAccounts,
       adIds: insightsParams.adIds,
       integrations: insightsParams.integrations,
       dateFrom: insightsParams.dateFrom ? new Date(Number(insightsParams.dateFrom)) : undefined,
