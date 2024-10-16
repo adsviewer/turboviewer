@@ -108,8 +108,7 @@ export default function ChartContainer(): React.ReactNode {
         setIsPending(false);
       });
 
-    // Accounts
-    // Get ad account for every integration!
+    // Get ad accounts for every integration!
     void getAccounts().then((res) => {
       const integrations = res.integrations;
       let adAccounts: MultiSelectDataType[] = [];

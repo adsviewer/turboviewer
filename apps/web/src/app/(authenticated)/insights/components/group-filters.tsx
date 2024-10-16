@@ -26,10 +26,7 @@ export default function GroupFilters(): ReactNode {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
-  // Dropdowns logic //
-
-  // Accounts
-  // Get ad account for every integration!
+  // Get ad accounts for every integration!
   const [accounts, setAccounts] = useState<MultiSelectDataType[]>([]);
   useEffect(() => {
     void getAccounts().then((res) => {
