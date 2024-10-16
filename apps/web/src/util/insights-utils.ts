@@ -62,13 +62,8 @@ export const getPublisherCurrentValues = (searchParams: ReadonlyURLSearchParams)
   return values;
 };
 
-export const populateAccountsAvailableValues = (accounts: MultiSelectDataType[]): MultiSelectDataType[] => {
-  let data: MultiSelectDataType[] = [];
-  for (const account of accounts) {
-    data = [...data, { value: account.value, label: account.label }];
-  }
-  return data;
-};
+export const populateAccountsAvailableValues = (accounts: MultiSelectDataType[]): MultiSelectDataType[] =>
+  accounts.map((account) => ({ value: account.value, label: account.label }));
 
 export const getAccountCurrentValues = (
   searchParams: ReadonlyURLSearchParams,
