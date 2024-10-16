@@ -77,7 +77,7 @@ export const getAccountCurrentValues = (
   let values: string[] = [];
   for (const account of accounts) {
     const value = account.value;
-    if (isParamInSearchParams(searchParams, urlKeys.account, value)) {
+    if (isParamInSearchParams(searchParams, urlKeys.adAccount, value)) {
       values = [...values, value];
     }
   }

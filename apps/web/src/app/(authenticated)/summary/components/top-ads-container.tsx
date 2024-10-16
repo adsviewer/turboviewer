@@ -73,6 +73,7 @@ export default function TopAdsContainer(): React.ReactNode {
       const allRequests: Promise<UrqlResult<InsightsQuery> | null>[] = [];
       for (const publisher of paramsPublishers) {
         const TOP_ADS_PARAMS: InsightsParams = {
+          adAccounts: searchParams.getAll(urlKeys.adAccount),
           dateFrom,
           dateTo,
           orderBy: currOrderByValue,

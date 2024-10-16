@@ -144,10 +144,10 @@ export default function GroupFilters(): ReactNode {
               data={populateAccountsAvailableValues(accounts)}
               value={getAccountCurrentValues(searchParams, accounts)}
               onOptionSubmit={(value) => {
-                handleMultiFilterAdd(urlKeys.account, value);
+                handleMultiFilterAdd(urlKeys.adAccount, value);
               }}
               onRemove={(value) => {
-                handleMultiFilterRemove(urlKeys.account, value);
+                handleMultiFilterRemove(urlKeys.adAccount, value);
               }}
               comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
               my={4}

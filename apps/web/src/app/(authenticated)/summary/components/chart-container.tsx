@@ -75,6 +75,7 @@ export default function ChartContainer(): React.ReactNode {
     }
 
     const CHART_PARAMS: InsightsParams = {
+      adAccounts: searchParams.getAll(urlKeys.adAccount),
       dateFrom,
       dateTo,
       interval: InsightsInterval.day,
@@ -211,17 +212,18 @@ export default function ChartContainer(): React.ReactNode {
         />
         <MultiSelect
           description={tInsightsFilters('selectAccounts')}
-          disabled={isPending}
+          disabled={isPending || !accounts.length}
           searchable
           placeholder={`${tInsightsFilters('selectAccounts')}...`}
           data={populateAccountsAvailableValues(accounts)}
           value={getAccountCurrentValues(searchParams, accounts)}
           onOptionSubmit={(value) => {
-            handleMultiFilterAdd(urlKeys.account, value);
+            handleMultiFilterAdd(urlKeys.adAccount, value);
           }}
           onRemove={(value) => {
-            handleMultiFilterRemove(urlKeys.account, value);
+            handleMultiFilterRemove(urlKeys.adAccount, value);
           }}
+          w={350}
           comboboxProps={{ shadow: 'sm', transitionProps: { transition: 'fade-down', duration: 200 } }}
           my={4}
           styles={{ pill: { width: 200 } }}
