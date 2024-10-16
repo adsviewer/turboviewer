@@ -1,8 +1,8 @@
 import { logger } from '@repo/logger';
-import { type Integration, prisma } from '@repo/database';
-import { decryptTokens, getAllConnectedIntegrations } from '@repo/channel-utils';
+import { type Integration, prisma, PublisherEnum } from '@repo/database';
+import { decryptTokens, getAllConnectedIntegrations, insightsColumnsOrderBy } from '@repo/channel-utils';
 import type { z } from 'zod';
-import { type AError, isAError } from '@repo/utils';
+import { addInterval, type AError, getTodayStartOfDay, isAError } from '@repo/utils';
 import { type channelIngressInput, type channelIngressOutput, invokeChannelIngressLambda } from '@repo/lambda-utils';
 import { Environment, MODE } from '@repo/mode';
 import _ from 'lodash';
@@ -62,17 +62,46 @@ export const refreshData = async ({
     }
 
     const organizationIds = new Set(integrations.map((integration) => integration.organizationId));
+    logger.info('Caching summary and top ads for all organizations');
     for (const organizationId of organizationIds) {
-      await getInsightsHelper(
-        {
-          interval: 'week',
-          orderBy: 'spend_abs',
-          page: 1,
-          pageSize: 3,
-          groupBy: ['integration'],
-        },
-        organizationId,
-      );
+      logger.info(`Caching summary for ${organizationId}`);
+      for (const orderBy of insightsColumnsOrderBy) {
+        const todayStartOfDay = getTodayStartOfDay();
+        await getInsightsHelper(
+          {
+            page: 1,
+            pageSize: 9,
+            search: {},
+            dateFrom: addInterval(todayStartOfDay, 'day', -7),
+            dateTo: todayStartOfDay,
+            groupBy: ['publisher'],
+            interval: 'day',
+            order: 'desc',
+            orderBy,
+            publishers: [],
+          },
+          organizationId,
+        );
+
+        logger.info(`Caching top ads for ${orderBy}`);
+        for (const publisher of Object.values(PublisherEnum)) {
+          await getInsightsHelper(
+            {
+              page: 1,
+              pageSize: 3,
+              search: {},
+              dateFrom: addInterval(todayStartOfDay, 'day', -7),
+              dateTo: todayStartOfDay,
+              groupBy: ['adId', 'publisher'],
+              interval: 'week',
+              order: 'desc',
+              orderBy,
+              publishers: [publisher],
+            },
+            organizationId,
+          );
+        }
+      }
     }
   } else {
     await refreshDataAll(initial);

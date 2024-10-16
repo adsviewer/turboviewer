@@ -9,15 +9,15 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
-import _ from 'lodash';
+import { getTodayStartOfDay } from '@repo/utils';
 import { addOrReplaceURLParams, ChartMetricsEnum, urlKeys } from '@/util/url-query-utils';
 import { insightsChartAtom } from '@/app/atoms/insights-atoms';
 import {
-  InsightsColumnsOrderBy,
   InsightsColumnsGroupBy,
+  InsightsColumnsOrderBy,
+  InsightsInterval,
   OrderBy,
   PublisherEnum,
-  InsightsInterval,
 } from '@/graphql/generated/schema-server';
 import { getPublisherCurrentValues, populatePublisherAvailableValues } from '@/util/insights-utils';
 import Search from '@/components/search/search';
@@ -122,8 +122,8 @@ export default function ChartContainer(): React.ReactNode {
     setDateRangeValue([dateFrom, dateTo]);
     // Perform new fetching only if both dates are given
     if (dateFrom && dateTo) {
-      newParams.set(urlKeys.dateFrom, String(dateFrom.getTime()));
-      newParams.set(urlKeys.dateTo, String(dateTo.getTime()));
+      newParams.set(urlKeys.dateFrom, String(getTodayStartOfDay(dateFrom).getTime()));
+      newParams.set(urlKeys.dateTo, String(getTodayStartOfDay(dateTo).getTime()));
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
@@ -189,7 +189,7 @@ export default function ChartContainer(): React.ReactNode {
           disabled={isPending}
           ml="auto"
           type="range"
-          maxDate={new Date()}
+          maxDate={getTodayStartOfDay(new Date())}
           placeholder={tGeneric('pickDateRange')}
           leftSection={<IconCalendarMonth />}
           clearable={false}

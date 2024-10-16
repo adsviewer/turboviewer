@@ -1,18 +1,19 @@
 'use client';
 
-import { Flex, Select, type ComboboxItem, Switch, Tooltip } from '@mantine/core';
+import { type ComboboxItem, Flex, Select, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { type ChangeEvent, useTransition, useState } from 'react';
+import { type ChangeEvent, useState, useTransition } from 'react';
 import { useSetAtom } from 'jotai/index';
-import { DatePickerInput, type DateValue, type DatesRangeValue } from '@mantine/dates';
+import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
+import { getTodayStartOfDay } from '@repo/utils';
 import {
-  OrderDirection,
   addOrReplaceURLParams,
-  isParamInSearchParams,
-  urlKeys,
   ChartMetricsEnum,
+  isParamInSearchParams,
+  OrderDirection,
+  urlKeys,
 } from '@/util/url-query-utils';
 import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from '@/graphql/generated/schema-server';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
@@ -121,8 +122,8 @@ export default function OrderFilters(): React.ReactNode {
     // Perform new fetching only if both dates are given
     if (dateFrom && dateTo) {
       resetInsights();
-      newParams.set(urlKeys.dateFrom, String(dateFrom.getTime()));
-      newParams.set(urlKeys.dateTo, String(dateTo.getTime()));
+      newParams.set(urlKeys.dateFrom, String(getTodayStartOfDay(dateFrom).getTime()));
+      newParams.set(urlKeys.dateTo, String(getTodayStartOfDay(dateTo).getTime()));
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
@@ -247,7 +248,7 @@ export default function OrderFilters(): React.ReactNode {
               <DatePickerInput
                 mt="auto"
                 type="range"
-                maxDate={new Date()}
+                maxDate={getTodayStartOfDay(new Date())}
                 placeholder={tGeneric('pickDateRange')}
                 leftSection={<IconCalendarMonth />}
                 clearable

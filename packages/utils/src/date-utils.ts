@@ -37,6 +37,12 @@ export const getDayPriorTillTomorrow = (date?: Date): { until: Date; since: Date
   };
 };
 
+export const getTodayStartOfDay = (date?: Date | null): Date => {
+  const today = new Date(date ?? new Date());
+  today.setUTCHours(0, 0, 0, 0);
+  return today;
+};
+
 export const getTomorrowStartOfDay = (date?: Date | null): Date => {
   const tomorrow = new Date(date ?? new Date());
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
