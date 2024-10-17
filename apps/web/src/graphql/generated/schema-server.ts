@@ -1349,6 +1349,15 @@ export type UpsertSearchQueryStringMutation = {
   };
 };
 
+export type DeleteSearchQueryStringMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+export type DeleteSearchQueryStringMutation = {
+  __typename: 'Mutation';
+  deleteSearchQueryString: { __typename: 'SearchQueryString'; id: string };
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1797,6 +1806,13 @@ export const UpsertSearchQueryStringDocument = gql`
     }
   }
 `;
+export const DeleteSearchQueryStringDocument = gql`
+  mutation deleteSearchQueryString($id: String!) {
+    deleteSearchQueryString(id: $id) {
+      id
+    }
+  }
+`;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -2048,6 +2064,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpsertSearchQueryStringMutation>;
+    },
+    deleteSearchQueryString(
+      variables: DeleteSearchQueryStringMutationVariables,
+      options?: C,
+    ): Promise<DeleteSearchQueryStringMutation> {
+      return requester<DeleteSearchQueryStringMutation, DeleteSearchQueryStringMutationVariables>(
+        DeleteSearchQueryStringDocument,
+        variables,
+        options,
+      ) as Promise<DeleteSearchQueryStringMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(

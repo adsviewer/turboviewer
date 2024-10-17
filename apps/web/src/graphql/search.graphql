@@ -16,3 +16,9 @@ mutation upsertSearchQueryString($id: String, $isOrganization: Boolean!, $name: 
     queryString
   }
 }
+
+mutation deleteSearchQueryString($id: String!) {
+  deleteSearchQueryString(id: $id) {
+    id
+  }
+}
