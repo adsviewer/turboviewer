@@ -11,6 +11,7 @@ import { OrganizationRoleEnum, type UserRolesInput } from '@/graphql/generated/s
 import { organizationAtom } from '@/app/atoms/organization-atoms';
 import getOrganization from '@/app/(authenticated)/organization/actions';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { type DropdownValueType } from '@/util/types';
 
 interface PropsType {
   setNewUsers: (users: UserRolesInput[]) => void;
@@ -20,12 +21,6 @@ interface SelectedUsersType {
   role: OrganizationRoleEnum;
   userId: string | null;
   key: string;
-}
-
-interface DropdownValueType {
-  label: string;
-  value: string;
-  disabled: boolean;
 }
 
 const INITIAL_USER_VALUE: SelectedUsersType = {
