@@ -64,10 +64,12 @@ builder.mutationFields((t) => ({
     nullable: false,
     args: {
       id: t.arg.string({ required: true }),
-      isOrganization: t.arg.boolean({ required: true }),
     },
     resolve: async (query, _root, args, ctx, _info) => {
-      if (args.isOrganization) {
+      const searchQuery = await prisma.searchQueryString.findUniqueOrThrow({
+        where: { id: args.id },
+      });
+      if (searchQuery.isOrganization) {
         const userOrganization = await prisma.userOrganization.findUniqueOrThrow({
           where: { userId_organizationId: { userId: ctx.currentUserId, organizationId: ctx.organizationId } },
         });
