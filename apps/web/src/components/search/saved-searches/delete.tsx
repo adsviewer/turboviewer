@@ -3,7 +3,11 @@ import { modals } from '@mantine/modals';
 import { logger } from '@repo/logger';
 import { IconTrash } from '@tabler/icons-react';
 
-export default function Delete(): React.ReactNode {
+interface PropsType {
+  isPending: boolean;
+}
+
+export default function Delete(props: PropsType): React.ReactNode {
   const openModal = (): void => {
     modals.openConfirmModal({
       title: 'Please confirm your action',
@@ -13,7 +17,7 @@ export default function Delete(): React.ReactNode {
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
+      confirmProps: { loading: props.isPending },
       onCancel: () => {
         logger.info('Cancel');
       },
@@ -25,7 +29,7 @@ export default function Delete(): React.ReactNode {
 
   return (
     <Tooltip label="Delete">
-      <ActionIcon color="red.4" variant="outline" size={34} onClick={openModal}>
+      <ActionIcon disabled={props.isPending} color="red.4" variant="outline" size={34} onClick={openModal}>
         <IconTrash />
       </ActionIcon>
     </Tooltip>

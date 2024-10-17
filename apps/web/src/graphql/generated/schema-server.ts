@@ -1330,6 +1330,7 @@ export type SearchQueryStringsQuery = {
   __typename: 'Query';
   searchQueryStrings: Array<{
     __typename: 'SearchQueryString';
+    id: string;
     name: string;
     isOrganization: boolean;
     queryString: string;
@@ -1348,8 +1349,8 @@ export type UpsertSearchQueryStringMutation = {
   upsertSearchQueryString: {
     __typename: 'SearchQueryString';
     id: string;
-    isOrganization: boolean;
     name: string;
+    isOrganization: boolean;
     queryString: string;
   };
 };
@@ -1785,6 +1786,7 @@ export const UpdateOrganizationAdAccountsDocument = gql`
 export const SearchQueryStringsDocument = gql`
   query searchQueryStrings {
     searchQueryStrings {
+      id
       name
       isOrganization
       queryString
@@ -1795,8 +1797,8 @@ export const UpsertSearchQueryStringDocument = gql`
   mutation upsertSearchQueryString($id: String, $isOrganization: Boolean!, $name: String!, $queryString: String!) {
     upsertSearchQueryString(id: $id, isOrganization: $isOrganization, name: $name, queryString: $queryString) {
       id
-      isOrganization
       name
+      isOrganization
       queryString
     }
   }

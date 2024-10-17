@@ -6,6 +6,9 @@ import {
   type AdAccountsQuery,
   type MeQuery,
   type RefreshTokenQuery,
+  type SearchQueryStringsQuery,
+  type MutationUpsertSearchQueryStringArgs,
+  type UpsertSearchQueryStringMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -21,3 +24,12 @@ export const refreshJWTToken = async (): Promise<RefreshTokenQuery> => await urq
 export const sendFeedback = async (
   values: SendFeedbackMutationVariables,
 ): Promise<UrqlResult<SendFeedbackMutation, string>> => await handleUrqlRequest(urqlClientSdk().sendFeedback(values));
+
+export const getSearchQueryStrings = async (): Promise<UrqlResult<SearchQueryStringsQuery>> => {
+  return await handleUrqlRequest(urqlClientSdk().searchQueryStrings());
+};
+
+export const upsertSearchQueryString = async (
+  values: MutationUpsertSearchQueryStringArgs,
+): Promise<UrqlResult<UpsertSearchQueryStringMutation, string>> =>
+  await handleUrqlRequest(urqlClientSdk().upsertSearchQueryString(values));
