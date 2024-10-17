@@ -152,6 +152,47 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
+  fillMetaCreatives: t.withAuth({ isAdmin: true }).field({
+    type: 'Boolean',
+    nullable: false,
+    args: {
+      integrationIds: t.arg.stringList({ required: false }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const integrations = await prisma.integration.findMany({
+        where: {
+          type: IntegrationTypeEnum.META,
+          id: { in: args.integrationIds ?? undefined },
+        },
+      });
+
+      for (const integration of integrations) {
+        logger.info(`Filling meta creatives for integration ${integration.id}`);
+        const decryptedIntegration = await getDecryptedIntegration(integration.id);
+        if (isAError(decryptedIntegration)) {
+          logger.error(`Failed to decrypt integration ${integration.id}`);
+          continue;
+        }
+
+        const dbAds = await prisma.ad.findMany({
+          where: {
+            adAccount: {
+              integration: {
+                id: decryptedIntegration.id,
+              },
+            },
+            creativeId: null,
+          },
+          ...adWithAdAccount,
+        });
+        const groupByAdAccount = groupByUtil(dbAds, (a) => a.adAccountId);
+        const channel = getChannel(integration.type);
+        await channel.saveCreatives(decryptedIntegration, groupByAdAccount);
+        logger.info(`Filled creatives for integration ${integration.id}`);
+      }
+      return true;
+    },
+  }),
 }));
 
 export const PaginationDto = builder.simpleInterface('Pagination', {

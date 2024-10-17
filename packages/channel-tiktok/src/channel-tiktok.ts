@@ -578,6 +578,8 @@ export class Tiktok implements ChannelInterface {
       externalAdSetToIdMap,
       ads,
       adExternalIdMap,
+      [],
+      new Map(),
       insights,
     );
   };
@@ -644,7 +646,18 @@ export class Tiktok implements ChannelInterface {
           adSets: ChannelAdSet[];
           campaigns: ChannelCampaign[];
         }): Promise<void> => {
-          await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+          await saveInsightsAdsAdsSetsCampaigns(
+            campaigns,
+            new Map(),
+            adAccount,
+            adSets,
+            new Map(),
+            ads,
+            new Map(),
+            [],
+            new Map(),
+            [],
+          );
         };
 
         await Tiktok.processPagination(integration.accessToken, url, schema, toCampaignAdSetAd, processFn);
@@ -718,6 +731,10 @@ export class Tiktok implements ChannelInterface {
         logger.error(nextParsed, 'Failed to parse paginated function');
       }
     }
+  }
+
+  saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
+    return Promise.reject(new AError('Not Implemented'));
   }
 }
 

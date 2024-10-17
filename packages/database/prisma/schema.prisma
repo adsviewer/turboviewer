@@ -321,16 +321,23 @@ enum PublisherEnum {
 }
 
 model Creative {
-  id          String   @id @default(cuid())
-  adAccountId String   @map("ad_account_id")
-  name        String
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  id               String  @id @default(cuid())
+  adAccountId      String  @map("ad_account_id")
+  externalId       String  @map("external_id")
+  name             String
+  body             String?
+  title            String?
+  status           String?
+  callToActionType String? @map("call_to_action_type")
+  imageUrl         String? @map("image_url")
 
-  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
   ads       Ad[]
+  adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
 
-  @@unique([adAccountId, name])
+  @@unique([externalId, adAccountId])
   @@map("creatives")
 }
 
