@@ -1324,6 +1324,18 @@ export type UpdateOrganizationAdAccountsMutation = {
   updateOrganizationAdAccounts: { __typename: 'Organization'; id: string };
 };
 
+export type SearchQueryStringsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type SearchQueryStringsQuery = {
+  __typename: 'Query';
+  searchQueryStrings: Array<{
+    __typename: 'SearchQueryString';
+    name: string;
+    isOrganization: boolean;
+    queryString: string;
+  }>;
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1752,6 +1764,15 @@ export const UpdateOrganizationAdAccountsDocument = gql`
     }
   }
 `;
+export const SearchQueryStringsDocument = gql`
+  query searchQueryStrings {
+    searchQueryStrings {
+      name
+      isOrganization
+      queryString
+    }
+  }
+`;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -1986,6 +2007,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpdateOrganizationAdAccountsMutation>;
+    },
+    searchQueryStrings(variables?: SearchQueryStringsQueryVariables, options?: C): Promise<SearchQueryStringsQuery> {
+      return requester<SearchQueryStringsQuery, SearchQueryStringsQueryVariables>(
+        SearchQueryStringsDocument,
+        variables,
+        options,
+      ) as Promise<SearchQueryStringsQuery>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(
