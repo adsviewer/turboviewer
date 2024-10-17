@@ -630,7 +630,7 @@ type Mutation {
   """
   deleteInvitationLink(role: OrganizationRoleEnum!): Boolean!
   deleteOrganization(organizationId: String): Organization!
-  deleteSearchQueryString(id: String!, isOrganization: Boolean!): SearchQueryString!
+  deleteSearchQueryString(id: String!): SearchQueryString!
   emulateAdmin(organizationId: String!): Tokens!
   fillMetaCreatives(integrationIds: [String!]): Boolean!
   forgetPassword(email: String!): Boolean!
