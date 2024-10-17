@@ -1,4 +1,5 @@
 'use client';
+
 import { Flex, Grid } from '@mantine/core';
 import React from 'react';
 import LottieAnimation from '@/components/misc/lottie-animation';
@@ -25,7 +26,11 @@ export default function Introduction(): React.ReactNode {
 
       <Grid justify="center" align="center" gutter="lg">
         <Grid.Col span={{ base: 12, lg: 6 }}>
-          <VideoCard />
+          <VideoCard
+            title="Welcome to AdsViewer!"
+            description="In order to use AdsViewer you need to set up your integrations and set up your organization."
+            videoSrc="/videos/onboarding-video.mp4"
+          />
         </Grid.Col>
       </Grid>
     </Flex>
