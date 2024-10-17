@@ -60,6 +60,10 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
     logger.info(isOrganization);
   };
 
+  const handleDelete = (id: string): void => {
+    logger.info(id);
+  };
+
   return (
     <Flex gap="sm" align="center">
       <Select
@@ -72,7 +76,12 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         data={savedSearches}
       />
       <Save isPending={isPending} handleSave={handleSave} />
-      <Delete isPending={isPending} />
+      <Delete
+        isPending={isPending}
+        handleDelete={() => {
+          handleDelete('placeholderID');
+        }}
+      />
     </Flex>
   );
 }
