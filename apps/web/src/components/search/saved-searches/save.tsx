@@ -1,4 +1,4 @@
-import { ActionIcon, Flex, Radio, Text, Tooltip } from '@mantine/core';
+import { ActionIcon, Flex, Radio, Text, TextInput, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { logger } from '@repo/logger';
 import { IconDeviceFloppy } from '@tabler/icons-react';
@@ -9,9 +9,10 @@ export default function Save(): React.ReactNode {
       title: 'Please confirm your action',
       children: (
         <Flex direction="column" gap="sm">
+          <TextInput description="Configuration Name" placeholder="Configuration Name" mb="sm" />
           <Text size="sm">
-            You are about to save this advanced search configuration. Please decide if you want it saved for your
-            current organization or just you.
+            You are about to save this search configuration. Please decide if you want it saved for your current
+            organization or just you.
           </Text>
           <Radio.Group>
             <Flex direction="column" gap="sm">
