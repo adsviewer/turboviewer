@@ -80,7 +80,6 @@ export default function Search(props: PropsType): React.ReactNode {
   const [searchTerms, setSearchTerms] = useState<SearchTermType[]>([]);
   const [loadedSearchData, setLoadedSearchData] = useState<SearchExpression>();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [encodedSearchData, setEncodedSearchData] = useState<string>('');
 
   const AND_OR_DATA = [
     {
@@ -274,7 +273,6 @@ export default function Search(props: PropsType): React.ReactNode {
         newSearchData.or = [adNameSearchData, adSetNameSearchData, campaignNameSearchData, adAccountNameSearchData];
 
         const currEncodedSearchData = btoa(JSON.stringify(newSearchData));
-        setEncodedSearchData(currEncodedSearchData);
 
         props.startTransition(() => {
           const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, currEncodedSearchData);
@@ -481,7 +479,6 @@ export default function Search(props: PropsType): React.ReactNode {
   const handleAdvancedSearch = (): void => {
     emptySearchBox();
     close();
-    setEncodedSearchData(getEncodedSearchData());
     props.startTransition(() => {
       const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, getEncodedSearchData());
       router.replace(newURL);
@@ -656,7 +653,6 @@ export default function Search(props: PropsType): React.ReactNode {
         title={tGeneric('advancedSearch')}
         size="xl"
       >
-        {encodedSearchData}
         <SavedSearches getEncodedSearchData={getEncodedSearchData} />
         <Flex direction="column" mb="sm">
           <ScrollArea.Autosize mah={500} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
