@@ -37,6 +37,7 @@ import {
   type InsightsSearchTerm,
 } from '@/graphql/generated/schema-server';
 import { AndOrEnum, isAndOrEnum, type SearchExpression, type SearchTermType } from './types-and-utils';
+import SavedSearches from './saved-searches/saved-searches';
 
 interface PropsType {
   isPending: boolean;
@@ -650,6 +651,7 @@ export default function Search(props: PropsType): React.ReactNode {
         title={tGeneric('advancedSearch')}
         size="xl"
       >
+        <SavedSearches />
         <Flex direction="column" mb="sm">
           <ScrollArea.Autosize mah={500} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
             {searchTerms.length ? (
