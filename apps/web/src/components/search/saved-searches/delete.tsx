@@ -5,6 +5,7 @@ import { IconTrash } from '@tabler/icons-react';
 
 interface PropsType {
   isPending: boolean;
+  handleDelete: () => void;
 }
 
 export default function Delete(props: PropsType): React.ReactNode {
@@ -22,6 +23,7 @@ export default function Delete(props: PropsType): React.ReactNode {
         logger.info('Cancel');
       },
       onConfirm: () => {
+        props.handleDelete();
         logger.info('Confirmed');
       },
     });
