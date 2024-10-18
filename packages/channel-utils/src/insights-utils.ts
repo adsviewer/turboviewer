@@ -166,9 +166,10 @@ export const saveCreatives = async (
   adExternalIdMap: Map<string, string>,
   creativeExternalIdMap: Map<string, string>,
 ): Promise<void> => {
-  logger.info('Saving %d creatives', creatives.length);
+  const uniqueCreatives = _.uniqBy(creatives, (creative) => creative.externalId);
+  logger.info('Saving %d creatives', uniqueCreatives.length);
   await Promise.all(
-    creatives.map((creative) =>
+    uniqueCreatives.map((creative) =>
       prisma.creative
         .upsert({
           where: { externalId_adAccountId: { externalId: creative.externalId, adAccountId } },

@@ -84,4 +84,6 @@ export const callToActionTypes = [
   'CHAT_WITH_US',
   'VIEW_PRODUCT',
   'VIEW_CHANNE',
+  'VIEW_INSTAGRAM_PROFILE',
+  'INSTAGRAM_MESSAGE',
 ] as const;
