@@ -27,6 +27,7 @@
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:*",
     "facebook-nodejs-business-sdk": "^20.0.3",
+    "google-ads-api": "17.1.0-rest-beta",
     "google-auth-library": "^9.14.1",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",

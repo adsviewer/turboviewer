@@ -6,8 +6,8 @@ const schema = z
   .object({
     API_ENDPOINT: z.string().url().default(`http://localhost:${defaultPort}/api`),
     CHANNEL_SECRET: z.string().min(1).default('channelSecret'),
-    GOOGLE_APPLICATION_ID: z.string().min(1),
-    GOOGLE_APPLICATION_SECRET: z.string().min(1),
+    GOOGLE_LOGIN_APPLICATION_ID: z.string().min(1),
+    GOOGLE_LOGIN_APPLICATION_SECRET: z.string().min(1),
     EMAILABLE_API_KEY: z.string().min(1),
     SLACK_WEBHOOK_URL_PUBLIC_FEEDBACK: z.string().url().optional(),
     PORT: z
