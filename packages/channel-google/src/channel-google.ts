@@ -56,6 +56,8 @@ import {
 } from '@repo/channel-utils';
 import { retry } from '@lifeomic/attempt';
 // import { decode } from 'jsonwebtoken';
+import { decode, type JwtPayload } from 'jsonwebtoken';
+import { GoogleAdsApi } from 'google-ads-api';
 import { env } from './config';
 
 const fireAndForget = new FireAndForget();
@@ -66,13 +68,30 @@ export const baseGraphFbUrl = `https://graph.facebook.com/${apiVersion}`;
 
 const limit = 600;
 
-const authLoginEndpoint = '/auth/login/callback';
+// const authLoginEndpoint = '/auth/login/callback';
 
 const client = new OAuth2Client(
-  env.GOOGLE_APPLICATION_ID,
-  env.GOOGLE_APPLICATION_SECRET,
-  `${env.API_ENDPOINT}${authLoginEndpoint}`,
+  env.GOOGLE_CHANNEL_APPLICATION_ID,
+  env.GOOGLE_CHANNEL_APPLICATION_SECRET,
+  `${env.API_ENDPOINT}${authEndpoint}`,
 );
+
+const adsAPi = new GoogleAdsApi({
+  client_id: env.GOOGLE_CHANNEL_APPLICATION_ID,
+  client_secret: env.GOOGLE_CHANNEL_APPLICATION_SECRET,
+  developer_token: env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
+});
+
+interface GoogleJwtPayload extends JwtPayload {
+  azp: string;
+  email: string;
+  email_verified: boolean;
+  at_hash: string;
+  name: string;
+  picture: string;
+  given_name: string | undefined;
+  family_name: string | undefined;
+}
 
 class Google implements ChannelInterface {
   private readonly insightFields = [
@@ -92,7 +111,11 @@ class Google implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const url = client.generateAuthUrl({
       access_type: 'offline',
-      scope: ['https://www.googleapis.com/auth/adwords'],
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/adwords',
+      ],
       state,
     });
 
@@ -107,63 +130,52 @@ class Google implements ChannelInterface {
       return new AError('No id_token in response');
     }
 
-    const params = new URLSearchParams({
-      client_id: env.GOOGLE_APPLICATION_ID,
-      client_secret: env.GOOGLE_APPLICATION_SECRET,
-      redirect_uri: `${env.API_ENDPOINT}${authEndpoint}`,
-      code,
-    });
-
-    const response = await fetch(`${baseGraphFbUrl}/oauth/access_token?${params.toString()}`).catch(
-      (error: unknown) => {
-        logger.error('Failed to exchange code for tokens %o', { error });
-        return error instanceof Error ? error : new AError(JSON.stringify(error));
-      },
-    );
-
-    if (response instanceof Error) return response;
-    if (!response.ok) {
-      return new AError(`Failed to exchange code for tokens: ${response.statusText}`);
+    const decoded = decode(getTokenResponse.tokens.id_token) as GoogleJwtPayload | null;
+    if (!decoded) {
+      return new AError('Could not decode id_token');
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
-    const body = await response.json().catch((_e: unknown) => null);
-    const tokenSchema = z.object({
-      access_token: z.string().min(2),
-      token_type: z.literal('bearer'),
-      expires_in: z.number().optional(),
-    });
-    const parsed = tokenSchema.safeParse(body);
-    if (!parsed.success) {
-      return new AError('Failed to parse token response');
-    }
+    if (!getTokenResponse.tokens.access_token) return new AError('Could not get access_token');
 
-    if (parsed.data.expires_in) {
+    if (getTokenResponse.tokens.expiry_date) {
       return {
-        accessToken: parsed.data.access_token,
-        accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
+        accessToken: getTokenResponse.tokens.access_token,
+        accessTokenExpiresAt: new Date(Date.now() + getTokenResponse.tokens.expiry_date * 1000),
+        refreshToken: env.GOOGLE_CHANNEL_REFRESH_TOKEN,
       };
     }
-    const accessTokenExpiresAt = await Google.getExpireAt(parsed.data.access_token);
+    const accessTokenExpiresAt = await Google.getExpireAt(getTokenResponse.tokens.id_token);
     if (isAError(accessTokenExpiresAt)) return accessTokenExpiresAt;
     return {
-      accessToken: parsed.data.access_token,
+      accessToken: getTokenResponse.tokens.access_token,
       accessTokenExpiresAt,
+      refreshToken: env.GOOGLE_CHANNEL_REFRESH_TOKEN,
     };
   }
 
   async getUserId(accessToken: string): Promise<string | AError> {
-    const response = await fetch(`${baseGraphFbUrl}/me?fields=id&access_token=${accessToken}`).catch((e: unknown) => {
-      logger.error('Error fetching fb user', e);
-      return null;
-    });
-    if (!response?.ok) {
-      return new AError('Failed to fetch user');
+    try {
+      const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        logger.error(`Failed to fetch Google user.`);
+        return new AError('Failed to fetch user');
+      }
+
+      const parsed = z.object({ id: z.string() }).safeParse(await response.json());
+      if (!parsed.success) {
+        logger.error('Failed to parse Google user response', parsed.error);
+        return new AError('Failed to fetch user');
+      }
+
+      return parsed.data.id; // Return the user's Google ID (substitute for externalId)
+    } catch (error) {
+      logger.error('Error fetching Google user', error);
+      return new AError('Network error while fetching user info');
     }
-    const parsed = z.object({ id: z.string() }).safeParse(await response.json());
-    if (!parsed.success) {
-      return new AError('Failed to fetch user');
-    }
-    return parsed.data.id;
   }
 
   signOutCallback(req: ExpressRequest, res: ExpressResponse): void {
@@ -174,7 +186,7 @@ class Google implements ChannelInterface {
       res.status(400).send('Failed to parse sign out request');
       return;
     }
-    const userId = Google.parseRequest(parsedBody.data.signed_request, env.GOOGLE_APPLICATION_SECRET);
+    const userId = Google.parseRequest(parsedBody.data.signed_request, env.GOOGLE_CHANNEL_APPLICATION_SECRET);
     if (isAError(userId)) {
       logger.error(userId.message);
       res.status(400).send(userId.message);
@@ -292,50 +304,49 @@ class Google implements ChannelInterface {
   }
 
   async saveAdAccounts(integration: Integration): Promise<DbAdAccount[] | AError> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const user = new User('me', {}, undefined, undefined);
+    try {
+      if (!integration.refreshToken) return new AError('No refresh token found');
+      const customer = adsAPi.Customer({
+        customer_id: integration.externalId,
+        refresh_token: integration.refreshToken,
+      });
 
-    const getAdAccountsFn = user.getAdAccounts(
-      [
-        AdAccount.Fields.account_status,
-        AdAccount.Fields.amount_spent,
-        AdAccount.Fields.id,
-        AdAccount.Fields.currency,
-        AdAccount.Fields.name,
-        `ads_volume{${AdAccountAdVolume.Fields.ads_running_or_in_review_count}}`,
-      ],
-      {
-        limit,
-      },
-    );
-    const accountSchema = z.object({
-      account_status: z.number(),
-      amount_spent: z.coerce.number(),
-      id: z.string().startsWith('act_'),
-      currency: z.nativeEnum(CurrencyEnum),
-      name: z.string(),
-      ads_volume: z.object({ data: z.array(z.object({ ads_running_or_in_review_count: z.number() })) }),
-    });
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
-    const toAccount = (acc: z.infer<typeof accountSchema>) => ({
-      accountStatus: acc.account_status,
-      amountSpent: acc.amount_spent,
-      hasAdsRunningOrInReview: acc.ads_volume.data.some((adVolume) => adVolume.ads_running_or_in_review_count > 0),
-      externalId: acc.id.slice(4),
-      currency: acc.currency,
-      name: acc.name,
-    });
+      const query = `
+      SELECT 
+        customer.id, 
+        customer.currency_code, 
+        customer.descriptive_name 
+      FROM 
+        customer
+      LIMIT 50
+    `;
 
-    const accounts = await Google.handlePagination(integration, getAdAccountsFn, accountSchema, toAccount);
-    if (isAError(accounts)) return accounts;
-    const activeAccounts = accounts.filter((acc) => acc.accountStatus === 1).filter((acc) => acc.amountSpent > 0);
-    const channelAccounts = activeAccounts.map((acc) => ({
-      name: acc.name,
-      currency: acc.currency,
-      externalId: acc.externalId,
-    })) satisfies ChannelAdAccount[];
+      const response = await customer.query(query);
 
-    return await saveAccounts(channelAccounts, integration);
+      const accountSchema = z.array(
+        z.object({
+          customer_id: z.string(),
+          currency_code: z.string(),
+          descriptive_name: z.string(),
+        }),
+      );
+
+      const parsed = accountSchema.safeParse(response);
+
+      if (!parsed.success) {
+        return new AError('Failed to parse Google Ads accounts data');
+      }
+
+      const channelAccounts = parsed.data.map((account) => ({
+        name: account.descriptive_name,
+        currency: account.currency_code,
+        externalId: account.customer_id,
+      })) satisfies ChannelAdAccount[];
+
+      return await saveAccounts(channelAccounts, integration);
+    } catch (err) {
+      logger.error(err);
+    }
   }
 
   private async getCreatives(
@@ -405,6 +416,26 @@ class Google implements ChannelInterface {
       ['Job Skipped', JobStatusEnum.CANCELED],
     ]);
     return goolgleJobStatusMap.get(parsed.data.async_status) ?? JobStatusEnum.FAILED;
+  }
+
+  async saveCreatives(integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
+    const creativeExternalIdMap = new Map<string, string>();
+    for (const [__, accountAds] of groupByAdAccount) {
+      const adExternalIdMap = new Map(accountAds.map((ad) => [ad.externalId, ad.id]));
+      const adAccount = accountAds[0].adAccount;
+      const chunkedAccountAds = _.chunk(accountAds, 100);
+      for (const chunk of chunkedAccountAds) {
+        const creatives = await this.getCreatives(
+          integration,
+          adAccount.id,
+          // adAccount.externalId,
+          // new Set(chunk.map((a) => a.externalId)),
+        );
+        const newCreatives = creatives.filter((c) => !creativeExternalIdMap.has(c.externalId));
+        await saveCreatives(newCreatives, adAccount.id, adExternalIdMap, creativeExternalIdMap);
+      }
+    }
   }
 
   async processReport(
@@ -785,7 +816,7 @@ class Google implements ChannelInterface {
 
   private static async getExpireAt(accessToken: string): Promise<AError | Date> {
     const debugToken = await fetch(
-      `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${env.GOOGLE_APPLICATION_ID}|${env.GOOGLE_APPLICATION_SECRET}`,
+      `${baseGraphFbUrl}/debug_token?input_token=${accessToken}&access_token=${env.GOOGLE_CHANNEL_APPLICATION_ID}|${env.GOOGLE_CHANNEL_APPLICATION_SECRET}`,
     ).catch((error: unknown) => {
       logger.error('Failed to debug token %o', { error });
       return error instanceof Error ? error : new Error(JSON.stringify(error));
