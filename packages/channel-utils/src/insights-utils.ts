@@ -11,7 +11,14 @@ import {
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
 import _ from 'lodash';
-import type { ChannelAd, ChannelAdAccount, ChannelAdSet, ChannelCampaign, ChannelInsight } from './channel-interface';
+import type {
+  ChannelAd,
+  ChannelAdAccount,
+  ChannelAdSet,
+  ChannelCampaign,
+  ChannelCreative,
+  ChannelInsight,
+} from './channel-interface';
 import { currencyToEuro } from './currency-to-eur-cacheable';
 
 export const saveAccounts = async (
@@ -46,7 +53,7 @@ export const saveAccounts = async (
     ),
   );
 
-export const saveCampaigns = async (
+const saveCampaigns = async (
   campaigns: ChannelCampaign[],
   adAccountId: string,
   externalCampaignToIdMap: Map<string, string>,
@@ -76,7 +83,7 @@ export const saveCampaigns = async (
   );
 };
 
-export const saveAdSets = async (
+const saveAdSets = async (
   adSets: ChannelAdSet[],
   externalCampaignToIdMap: Map<string, string>,
   externalAdSetToIdMap: Map<string, string>,
@@ -106,7 +113,7 @@ export const saveAdSets = async (
   );
 };
 
-export const saveAds = async (
+const saveAds = async (
   ads: ChannelAd[],
   adAccountId: string,
   adExternalIdMap: Map<string, string>,
@@ -153,7 +160,44 @@ export const saveAds = async (
   logger.info('Saved %d ads for %s', ads.length, adAccountId);
 };
 
-export const saveInsights = async (
+export const saveCreatives = async (
+  creatives: ChannelCreative[],
+  adAccountId: string,
+  adExternalIdMap: Map<string, string>,
+  creativeExternalIdMap: Map<string, string>,
+): Promise<void> => {
+  logger.info('Saving %d creatives', creatives.length);
+  await Promise.all(
+    creatives.map((creative) =>
+      prisma.creative
+        .upsert({
+          where: { externalId_adAccountId: { externalId: creative.externalId, adAccountId } },
+          create: {
+            externalId: creative.externalId,
+            adAccountId,
+            name: creative.name,
+            body: creative.body,
+            title: creative.title,
+            status: creative.status,
+            callToActionType: creative.callToActionType,
+            imageUrl: creative.imageUrl,
+            ads: { connect: { id: adExternalIdMap.get(creative.externalAdId) ?? '' } },
+          },
+          update: {
+            name: creative.name,
+            body: creative.body,
+            title: creative.title,
+            status: creative.status,
+            callToActionType: creative.callToActionType,
+            imageUrl: creative.imageUrl,
+          },
+        })
+        .then(({ id }) => creativeExternalIdMap.set(creative.externalId, id)),
+    ),
+  );
+};
+
+const saveInsights = async (
   insights: ChannelInsight[],
   adExternalIdMap: Map<string, string>,
   dbAccount: AdAccount,
@@ -221,6 +265,8 @@ export const saveInsightsAdsAdsSetsCampaigns = async (
   externalAdSetToIdMap: Map<string, string>,
   ads: ChannelAd[],
   adExternalIdMap: Map<string, string>,
+  creatives: ChannelCreative[],
+  creativeExternalIdMap: Map<string, string>,
   insights: ChannelInsight[],
 ): Promise<void> => {
   const uniqueCampaigns = _.uniqBy(campaigns, (campaign) => campaign.externalId);
@@ -234,6 +280,7 @@ export const saveInsightsAdsAdsSetsCampaigns = async (
   const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
   const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
   await saveAds(newAds, adAccount.id, adExternalIdMap, externalAdSetToIdMap);
+  await saveCreatives(creatives, adAccount.id, adExternalIdMap, creativeExternalIdMap);
 
   await saveInsights(insights, adExternalIdMap, adAccount);
 };
@@ -245,7 +292,7 @@ export interface GroupedInsightsWithEdges {
   edges: GroupedInsightWithDetails[];
 }
 
-export interface GroupedInsightWithDetails {
+interface GroupedInsightWithDetails {
   id: string;
   adId?: string | null;
   adAccountId?: string | null;
@@ -258,7 +305,7 @@ export interface GroupedInsightWithDetails {
   datapoints: Datapoints[];
 }
 
-export interface Datapoints {
+interface Datapoints {
   spend: bigint;
   spendUsd?: bigint | null;
   impressions: bigint;
@@ -275,8 +322,8 @@ export const insightsColumnsOrderBy = [
   'cpm_rel',
 ] as const;
 
-export type InsightsColumnsOrderByType = (typeof insightsColumnsOrderBy)[number];
-export type InsightsPositionType =
+type InsightsColumnsOrderByType = (typeof insightsColumnsOrderBy)[number];
+type InsightsPositionType =
   | 'an_classic'
   | 'biz_disco_feed'
   | 'facebook_reels'

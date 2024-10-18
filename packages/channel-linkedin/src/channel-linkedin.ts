@@ -151,6 +151,8 @@ class LinkedIn implements ChannelInterface {
           new Map<string, string>(),
           ads,
           new Map<string, string>(),
+          [],
+          new Map<string, string>(),
           analytics.insights,
         );
       }
@@ -246,6 +248,8 @@ class LinkedIn implements ChannelInterface {
         adSets,
         new Map<string, string>(),
         creatives,
+        new Map<string, string>(),
+        [],
         new Map<string, string>(),
         [],
       );
@@ -517,6 +521,9 @@ class LinkedIn implements ChannelInterface {
       name: c.name,
       externalCampaignId: c.campaignGroup.split(':')[3],
     }));
+  }
+  saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
+    return Promise.reject(new AError('Not Implemented'));
   }
 }
 

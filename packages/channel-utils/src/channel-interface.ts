@@ -52,9 +52,13 @@ export interface ChannelCampaign {
 
 export interface ChannelCreative {
   externalAdId: string;
-  externalAdAccountId: string;
   externalId: string;
   name: string;
+  body?: string;
+  title?: string;
+  status?: string;
+  callToActionType?: string;
+  imageUrl?: string;
 }
 
 export interface ChannelInsight {
@@ -98,6 +102,7 @@ export interface ChannelInterface {
     until: Date,
   ) => Promise<string | AError>;
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
+  saveCreatives: (integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>) => Promise<void>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   getType: () => IntegrationTypeEnum;
   saveOldInsightsAdsAdsSetsCampaigns: (

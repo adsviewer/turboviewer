@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "creatives" ALTER COLUMN "body" DROP NOT NULL,
+ALTER COLUMN "call_to_action_type" DROP NOT NULL,
+ALTER COLUMN "image_url" DROP NOT NULL,
+ALTER COLUMN "status" DROP NOT NULL,
+ALTER COLUMN "title" DROP NOT NULL;

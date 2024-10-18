@@ -9,6 +9,7 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
+import _ from 'lodash';
 import { AError, FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -50,11 +51,13 @@ import {
   MetaError,
   revokeIntegration,
   saveAccounts,
+  saveCreatives,
   saveInsightsAdsAdsSetsCampaigns,
   type TokensResponse,
 } from '@repo/channel-utils';
 import { retry } from '@lifeomic/attempt';
 import { env } from './config';
+import { callToActionTypes } from './meta-types';
 
 const fireAndForget = new FireAndForget();
 
@@ -326,37 +329,93 @@ class Meta implements ChannelInterface {
     return await saveAccounts(channelAccounts, integration);
   }
 
-  private async getCreatives(
-    accounts: ChannelAdAccount[],
+  async getCreatives(
     integration: Integration,
-  ): Promise<ChannelCreative[] | AError> {
+    adAccountId: string,
+    adAccountExternalId: string,
+    externalAdIdsSet: Set<string>,
+  ): Promise<ChannelCreative[]> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const creatives: ChannelCreative[] = [];
-    const adsSchema = z.object({
-      id: z.string(),
-      account_id: z.string(),
-      creative: z.object({ id: z.string(), name: z.string() }),
+    const dbAds = await prisma.ad.findMany({
+      where: { adAccountId, externalId: { in: Array.from(externalAdIdsSet) }, creativeId: null },
     });
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- to complicated
-    const toCreative = (ad: z.infer<typeof adsSchema>) => ({
+    const externalAdIds = dbAds.map((ad) => ad.externalId);
+    const schema = z.object({
+      id: z.string(),
+      creative: z.object({
+        [AdCreative.Fields.id]: z.string(),
+        [AdCreative.Fields.name]: z.string(),
+        [AdCreative.Fields.title]: z.string().optional(),
+        [AdCreative.Fields.body]: z.string().optional(),
+        [AdCreative.Fields.image_url]: z.string().optional(),
+        [AdCreative.Fields.status]: z.enum(['ACTIVE', 'IN_PROCESS', 'WITH_ISSUES', 'DELETED']).optional(),
+        [AdCreative.Fields.call_to_action_type]: z.enum(callToActionTypes).optional(),
+      }),
+    });
+    const toCreative = (ad: z.infer<typeof schema>): ChannelCreative => ({
       externalAdId: ad.id,
       externalId: ad.creative.id,
       name: ad.creative.name,
-      externalAdAccountId: ad.account_id,
+      body: ad.creative.body,
+      title: ad.creative.title,
+      status: ad.creative.status,
+      callToActionType: ad.creative.call_to_action_type,
+      imageUrl: ad.creative.image_url,
     });
 
-    for (const acc of accounts) {
-      const account = new AdAccount(`act_${acc.externalId}`, {}, undefined, undefined);
-      const getAdsFn = account.getAds(
-        [Ad.Fields.id, Ad.Fields.account_id, `creative{${AdCreative.Fields.id}, ${AdCreative.Fields.name}}`],
+    const creatives: ChannelCreative[] = [];
+    let start = 0;
+    let smallAccountAds = externalAdIds.slice(start, start + limit);
+    while (smallAccountAds.length > 0) {
+      const account = new AdAccount(`act_${adAccountExternalId}`);
+      const callFn = account.getAds(
+        [
+          Ad.Fields.id,
+          // Ad.Fields.creative,
+          `${Ad.Fields.creative}{${[AdCreative.Fields.id, AdCreative.Fields.name, AdCreative.Fields.image_url, AdCreative.Fields.body, AdCreative.Fields.title, AdCreative.Fields.status, AdCreative.Fields.call_to_action_type].join(',')}}`,
+        ],
         {
           limit,
+          effective_status: [
+            'ACTIVE',
+            'PAUSED',
+            'DISAPPROVED',
+            'PENDING_REVIEW',
+            'CAMPAIGN_PAUSED',
+            'ARCHIVED',
+            'ADSET_PAUSED',
+            'IN_PROCESS',
+            'WITH_ISSUES',
+          ],
+          filtering: [{ field: Ad.Fields.id, operator: 'IN', value: smallAccountAds }],
         },
       );
-      const accountCreatives = await Meta.handlePagination(integration, getAdsFn, adsSchema, toCreative);
-      if (!isAError(accountCreatives)) creatives.push(...accountCreatives);
+      const resp = await Meta.handlePagination(integration, callFn, schema, toCreative);
+      if (!isAError(resp)) creatives.push(...resp);
+      start += limit;
+      smallAccountAds = externalAdIds.slice(start, start + limit);
     }
     return creatives;
+  }
+
+  async saveCreatives(integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
+    adsSdk.FacebookAdsApi.init(integration.accessToken);
+    const creativeExternalIdMap = new Map<string, string>();
+    for (const [__, accountAds] of groupByAdAccount) {
+      const adExternalIdMap = new Map(accountAds.map((ad) => [ad.externalId, ad.id]));
+      const adAccount = accountAds[0].adAccount;
+      const chunkedAccountAds = _.chunk(accountAds, 100);
+      for (const chunk of chunkedAccountAds) {
+        const creatives = await this.getCreatives(
+          integration,
+          adAccount.id,
+          adAccount.externalId,
+          new Set(chunk.map((a) => a.externalId)),
+        );
+        const newCreatives = creatives.filter((c) => !creativeExternalIdMap.has(c.externalId));
+        await saveCreatives(newCreatives, adAccount.id, adExternalIdMap, creativeExternalIdMap);
+      }
+    }
   }
 
   async getReportStatus({ id, integration }: AdAccountWithIntegration, taskId: string): Promise<JobStatusEnum> {
@@ -404,6 +463,7 @@ class Meta implements ChannelInterface {
     adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
     const reportId = taskId;
     const adExternalIdMap = new Map<string, string>();
+    const creativeExternalIdMap = new Map<string, string>();
     const externalAdSetToIdMap = new Map<string, string>();
     const externalCampaignToIdMap = new Map<string, string>();
     const insightSchema = z.object({
@@ -470,16 +530,24 @@ class Meta implements ChannelInterface {
       },
     );
     const insightsProcessFn = async (
-      i: {
+      items: {
         insight: ChannelInsight;
         ad: ChannelAd;
         adSet: ChannelAdSet;
         campaign: ChannelCampaign;
       }[],
     ): Promise<undefined> => {
+      const creatives = await this.getCreatives(
+        adAccount.integration,
+        adAccount.id,
+        adAccount.externalId,
+        new Set(items.map((a) => a.ad.externalId)),
+      );
       await this.saveAdsAdSetsCampaignsAndInsights(
-        i,
+        items,
+        creatives,
         adExternalIdMap,
+        creativeExternalIdMap,
         externalAdSetToIdMap,
         externalCampaignToIdMap,
         adAccount,
@@ -540,7 +608,7 @@ class Meta implements ChannelInterface {
     groupByAdAccount: Map<string, AdWithAdAccount[]>,
   ): Promise<undefined | AError> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    for (const [_, accountAds] of groupByAdAccount) {
+    for (const [__, accountAds] of groupByAdAccount) {
       const adAccount = accountAds[0].adAccount;
 
       const schema = z.object({
@@ -601,7 +669,18 @@ class Meta implements ChannelInterface {
           },
           { ads: [], adSets: [], campaigns: [] },
         );
-        await saveInsightsAdsAdsSetsCampaigns(campaigns, new Map(), adAccount, adSets, new Map(), ads, new Map(), []);
+        await saveInsightsAdsAdsSetsCampaigns(
+          campaigns,
+          new Map(),
+          adAccount,
+          adSets,
+          new Map(),
+          ads,
+          new Map(),
+          [],
+          new Map(),
+          [],
+        );
       };
 
       let start = 0;
@@ -642,7 +721,9 @@ class Meta implements ChannelInterface {
 
   private async saveAdsAdSetsCampaignsAndInsights(
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; campaign: ChannelCampaign }[],
+    creatives: ChannelCreative[],
     adExternalIdMap: Map<string, string>,
+    creativeExternalIdMap: Map<string, string>,
     externalAdSetToIdMap: Map<string, string>,
     externalCampaignToIdMap: Map<string, string>,
     dbAccount: AdAccountWithIntegration,
@@ -665,6 +746,8 @@ class Meta implements ChannelInterface {
       externalAdSetToIdMap,
       ads,
       adExternalIdMap,
+      creatives,
+      creativeExternalIdMap,
       insights,
     );
   }
@@ -680,7 +763,7 @@ class Meta implements ChannelInterface {
     const arraySchema = z.array(schema);
     const parsed = arraySchema.safeParse(cursor);
     if (!parsed.success) {
-      logger.error('Failed to parse %o', cursor);
+      logger.error(parsed.error, 'Failed to parse paginated first');
       return new AError('Failed to parse meta paginated response');
     }
     const results = parsed.data.map(parseCallback);
