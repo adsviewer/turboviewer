@@ -3,9 +3,13 @@
 import { Flex, Select } from '@mantine/core';
 import React, { useCallback, useEffect, useState } from 'react';
 import { logger } from '@repo/logger';
-import { getSearchQueryStrings } from '@/app/(authenticated)/actions';
-import { type DropdownValueType } from '@/util/types';
+import { notifications } from '@mantine/notifications';
+import { useTranslations } from 'next-intl';
+import { useAtom } from 'jotai';
+import { deleteSearchQueryString, upsertSearchQueryString } from '@/app/(authenticated)/actions';
+import { type DropdownGroupsValueType } from '@/util/types';
 import { type SearchQueryStringsQuery } from '@/graphql/generated/schema-server';
+import { searchesAtom } from '@/app/atoms/searches-atoms';
 import Save from './save';
 import Delete from './delete';
 
@@ -14,8 +18,11 @@ interface PropsType {
 }
 
 export default function SavedSearches(props: PropsType): React.ReactNode {
+  const tGeneric = useTranslations('generic');
+  const [searches, setSearches] = useAtom(searchesAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const [savedSearches, setSavedSearches] = useState<DropdownValueType[]>([]);
+  const [savedSearches, setSavedSearches] = useState<DropdownGroupsValueType[]>([]);
+  const [selectedSearchID, setSelectedSearchID] = useState<string | null>(null);
 
   enum SearchGroups {
     User = 'User',
@@ -23,27 +30,54 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
   }
 
   const updateSavedSearches = useCallback(
-    (searchesData: SearchQueryStringsQuery['searchQueryStrings']): DropdownValueType[] => {
-      return searchesData.map((data) => {
-        return {
-          label: data.name,
-          value: data.id,
-          group: data.isOrganization ? SearchGroups.Organization : SearchGroups.User,
-        };
-      });
+    (searchesData: SearchQueryStringsQuery['searchQueryStrings']): DropdownGroupsValueType[] => {
+      const userSearches = searchesData.filter((data) => !data.isOrganization);
+      const organizationSearches = searchesData.filter((data) => data.isOrganization);
+      return [
+        {
+          group: SearchGroups.User,
+          items: userSearches.map((data) => ({
+            value: data.id,
+            label: data.name,
+          })),
+        },
+        {
+          group: SearchGroups.Organization,
+          items: organizationSearches.map((data) => ({
+            value: data.id,
+            label: data.name,
+          })),
+        },
+      ];
     },
     [SearchGroups.Organization, SearchGroups.User],
   );
 
   useEffect(() => {
+    const loadedSearches = updateSavedSearches(searches);
+    logger.info(loadedSearches);
+    setSavedSearches(loadedSearches);
+  }, [searches, updateSavedSearches]);
+
+  const handleSave = (name: string, isOrganization: boolean, id?: string): void => {
+    const payload = {
+      name,
+      isOrganization,
+      queryString: props.getEncodedSearchData(),
+      id,
+    };
     setIsPending(true);
-    void getSearchQueryStrings()
+    void upsertSearchQueryString(payload)
       .then((res) => {
         if (!res.success) {
-          logger.error(res.error);
+          notifications.show({
+            title: tGeneric('error'),
+            message: String(res.error),
+            color: 'red',
+          });
           return;
         }
-        setSavedSearches(updateSavedSearches(res.data.searchQueryStrings));
+        logger.info(res);
       })
       .catch((err: unknown) => {
         logger.error(err);
@@ -51,17 +85,31 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [updateSavedSearches]);
-
-  const handleSave = (name: string, isOrganization: boolean, id?: string): void => {
-    logger.info(props.getEncodedSearchData());
-    logger.info(id);
-    logger.info(name);
-    logger.info(isOrganization);
   };
 
   const handleDelete = (id: string): void => {
-    logger.info(id);
+    setIsPending(true);
+    void deleteSearchQueryString({ id })
+      .then((res) => {
+        if (!res.success) {
+          notifications.show({
+            title: tGeneric('error'),
+            message: String(res.error),
+            color: 'red',
+          });
+          return;
+        }
+        const newSearches = searches.filter((search) => search.id !== id);
+        setSearches([...newSearches]);
+        setSavedSearches(updateSavedSearches(newSearches));
+        setSelectedSearchID(null);
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
   };
 
   return (
@@ -73,13 +121,19 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         miw={200}
         maw={450}
         mb="lg"
+        comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+        scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
         data={savedSearches}
+        value={selectedSearchID}
+        onChange={(id) => {
+          if (id) setSelectedSearchID(id);
+        }}
       />
       <Save isPending={isPending} handleSave={handleSave} />
       <Delete
         isPending={isPending}
         handleDelete={() => {
-          handleDelete('placeholderID');
+          if (selectedSearchID) handleDelete(selectedSearchID);
         }}
       />
     </Flex>
