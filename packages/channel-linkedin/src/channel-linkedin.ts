@@ -14,7 +14,7 @@ import { logger } from '@repo/logger';
 import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
-  type AdAccountWithIntegration,
+  type AdAccountIntegration,
   type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
@@ -220,42 +220,6 @@ class LinkedIn implements ChannelInterface {
     return await saveAccounts(channelAccounts, integration);
   }
 
-  async saveOldInsightsAdsAdsSetsCampaigns(
-    integration: Integration,
-    groupByAdAccount: Map<string, AdWithAdAccount[]>,
-  ): Promise<undefined | AError> {
-    for (const [_, accountAds] of groupByAdAccount) {
-      const adAccount = accountAds[0].adAccount;
-      const creatives = await this.getCreativesAsAds(
-        integration,
-        new Set(accountAds.map((a) => a.externalId)),
-        adAccount.externalId,
-      );
-      if (isAError(creatives)) return creatives;
-      const adSetIds = new Set(creatives.map((c) => c.externalAdSetId));
-      const adSets = await this.getCampaignsAsAdSets(integration, adSetIds, adAccount);
-      if (isAError(adSets)) return adSets;
-      const campaigns = await this.getCampaignGroupsAsCampaigns(
-        integration,
-        new Set(adSets.map((a) => a.externalCampaignId)),
-        adAccount,
-      );
-      if (isAError(campaigns)) return campaigns;
-      await saveInsightsAdsAdsSetsCampaigns(
-        campaigns,
-        new Map<string, string>(),
-        adAccount,
-        adSets,
-        new Map<string, string>(),
-        creatives,
-        new Map<string, string>(),
-        [],
-        new Map<string, string>(),
-        [],
-      );
-    }
-  }
-
   private async getAdAnalytics(
     integration: Integration,
     range: { since: Date; until: Date },
@@ -321,26 +285,6 @@ class LinkedIn implements ChannelInterface {
       })
       .flatMap((i) => (i ? [i] : []));
     return { creativeIds, campaignIds, campaignGroupIds, insights };
-  }
-
-  private async getCreativesAsAds(
-    integration: Integration,
-    creativeIds: Set<string>,
-    externalAdAccountId: string,
-  ): Promise<AError | ChannelAd[]> {
-    const creatives = await LinkedIn.handlePagination(
-      integration,
-      `/adAccounts/${externalAdAccountId}/creatives?creatives=List(${Array.from(creativeIds)
-        .map((c) => `urn%3Ali%3AsponsoredCreative%3A${c}`)
-        .join(',')})&q=criteria`,
-      z.object({ id: z.string(), campaign: z.string() }),
-    );
-    if (isAError(creatives)) return creatives;
-    return creatives.map((c) => ({
-      externalId: c.id.split(':')[3],
-      externalAdSetId: c.campaign.split(':')[3],
-      externalAdAccountId,
-    }));
   }
 
   private static async handlePagination<T extends ZodTypeAny>(
@@ -453,12 +397,12 @@ class LinkedIn implements ChannelInterface {
     ['DESKTOP_WEB', DeviceEnum.Desktop],
   ]);
 
-  getReportStatus(_adAccount: AdAccountWithIntegration, _taskId: string): Promise<JobStatusEnum> {
+  getReportStatus(_adAccount: AdAccountIntegration, _taskId: string): Promise<JobStatusEnum> {
     return Promise.resolve(JobStatusEnum.FAILED);
   }
 
   processReport(
-    _adAccount: AdAccountWithIntegration,
+    _adAccount: AdAccountIntegration,
     _taskId: string,
     _since: Date,
     _until: Date,
@@ -522,6 +466,7 @@ class LinkedIn implements ChannelInterface {
       externalCampaignId: c.campaignGroup.split(':')[3],
     }));
   }
+
   saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
     return Promise.reject(new AError('Not Implemented'));
   }

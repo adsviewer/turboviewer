@@ -32,7 +32,7 @@ builder.queryFields((t) => ({
         ...query,
         distinct: 'id',
         where: {
-          adAccount: { integration: { organizationId: ctx.organizationId } },
+          adAccount: { integrations: { some: { organizationId: ctx.organizationId } } },
           insights: {
             some: {
               date: { gte: new Date(new Date().setMonth(new Date().getMonth() - 3)) },
@@ -78,7 +78,7 @@ builder.queryFields((t) => ({
     },
     resolve: async (_root, args, ctx, _info) => {
       const ad = await prisma.ad.findUnique({
-        where: { id: args.adId, adAccount: { integration: { organizationId: ctx.organizationId } } },
+        where: { id: args.adId, adAccount: { integrations: { some: { organizationId: ctx.organizationId } } } },
       });
       if (!ad) return null;
       const iFrame = await iFramePerInsight.getValue(
@@ -114,44 +114,6 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
-  fillAdSetsAndCampaigns: t.withAuth({ isAdmin: true }).field({
-    type: 'Boolean',
-    nullable: false,
-    args: {
-      integrationIds: t.arg.stringList({ required: false }),
-    },
-    resolve: async (_root, args, _ctx, _info) => {
-      const integrations = await prisma.integration.findMany({
-        where: {
-          id: { in: args.integrationIds ?? undefined },
-        },
-      });
-
-      for (const integration of integrations) {
-        const decryptedIntegration = await getDecryptedIntegration(integration.id);
-        if (isAError(decryptedIntegration)) {
-          logger.error(`Failed to decrypt integration ${integration.id}`);
-          continue;
-        }
-
-        const ads = await prisma.ad.findMany({
-          where: {
-            adSetId: null,
-            adAccount: {
-              integration: {
-                id: decryptedIntegration.id,
-              },
-            },
-          },
-          ...adWithAdAccount,
-        });
-        const groupByAdAccount = groupByUtil(ads, (a) => a.adAccountId);
-        const channel = getChannel(integration.type);
-        await channel.saveOldInsightsAdsAdsSetsCampaigns(decryptedIntegration, groupByAdAccount);
-      }
-      return true;
-    },
-  }),
   fillMetaCreatives: t.withAuth({ isAdmin: true }).field({
     type: 'Boolean',
     nullable: false,
@@ -177,8 +139,10 @@ builder.mutationFields((t) => ({
         const dbAds = await prisma.ad.findMany({
           where: {
             adAccount: {
-              integration: {
-                id: decryptedIntegration.id,
+              integrations: {
+                some: {
+                  id: decryptedIntegration.id,
+                },
               },
             },
             creativeId: null,

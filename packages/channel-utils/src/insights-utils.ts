@@ -37,12 +37,13 @@ export const saveAccounts = async (
         update: {
           currency: acc.currency,
           name: acc.name,
+          integrations: { connect: { id: integration.id } },
           organizations: {
             connect: { id: integration.organizationId },
           },
         },
         create: {
-          integrationId: integration.id,
+          integrations: { connect: { id: integration.id } },
           externalId: acc.externalId,
           currency: acc.currency,
           name: acc.name,
@@ -248,10 +249,10 @@ export const deleteOldInsights = async (adAccountId: string, since: Date, until:
   });
 };
 
-export const adAccountWithIntegration = Prisma.validator<Prisma.AdAccountDefaultArgs>()({
-  include: { integration: true },
-});
-export type AdAccountWithIntegration = Prisma.AdAccountGetPayload<typeof adAccountWithIntegration>;
+export interface AdAccountIntegration {
+  adAccount: AdAccount;
+  integration: Integration;
+}
 
 export const adWithAdAccount = Prisma.validator<Prisma.AdDefaultArgs>()({
   include: { adAccount: true },
@@ -365,6 +366,7 @@ export enum InsightsSearchField {
   AdSetName = 'ase.name',
   CampaignName = 'c.name',
 }
+
 export enum InsightsSearchOperator {
   Contains = 'contains',
   StartsWith = 'startsWith',

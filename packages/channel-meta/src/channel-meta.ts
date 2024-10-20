@@ -27,7 +27,7 @@ import {
 } from 'facebook-nodejs-business-sdk';
 import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import {
-  type AdAccountWithIntegration,
+  type AdAccountIntegration,
   adReportsStatusesToRedis,
   type AdWithAdAccount,
   authEndpoint,
@@ -418,7 +418,7 @@ class Meta implements ChannelInterface {
     }
   }
 
-  async getReportStatus({ id, integration }: AdAccountWithIntegration, taskId: string): Promise<JobStatusEnum> {
+  async getReportStatus({ adAccount, integration }: AdAccountIntegration, taskId: string): Promise<JobStatusEnum> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
     const reportId = taskId;
     const report = new AdReportRun(reportId, { report_run_id: reportId }, undefined, undefined);
@@ -440,7 +440,7 @@ class Meta implements ChannelInterface {
     });
     const parsed = reportSchema.safeParse(resp);
     if (!parsed.success) {
-      logger.error(parsed.error, `Failed to parse meta ad report for ${reportId} and ${id}`);
+      logger.error(parsed.error, `Failed to parse meta ad report for ${reportId} and ${adAccount.id}`);
       return JobStatusEnum.FAILED;
     }
     const metaJobStatusMap = new Map<z.infer<typeof metaJobStatusEnum>, JobStatusEnum>([
@@ -455,12 +455,12 @@ class Meta implements ChannelInterface {
   }
 
   async processReport(
-    adAccount: AdAccountWithIntegration,
+    accountIntegration: AdAccountIntegration,
     taskId: string,
     since: Date,
     until: Date,
   ): Promise<AError | undefined> {
-    adsSdk.FacebookAdsApi.init(adAccount.integration.accessToken);
+    adsSdk.FacebookAdsApi.init(accountIntegration.integration.accessToken);
     const reportId = taskId;
     const adExternalIdMap = new Map<string, string>();
     const creativeExternalIdMap = new Map<string, string>();
@@ -538,9 +538,9 @@ class Meta implements ChannelInterface {
       }[],
     ): Promise<undefined> => {
       const creatives = await this.getCreatives(
-        adAccount.integration,
-        adAccount.id,
-        adAccount.externalId,
+        accountIntegration.integration,
+        accountIntegration.adAccount.id,
+        accountIntegration.adAccount.externalId,
         new Set(items.map((a) => a.ad.externalId)),
       );
       await this.saveAdsAdSetsCampaignsAndInsights(
@@ -550,13 +550,13 @@ class Meta implements ChannelInterface {
         creativeExternalIdMap,
         externalAdSetToIdMap,
         externalCampaignToIdMap,
-        adAccount,
+        accountIntegration,
       );
       return undefined;
     };
-    await deleteOldInsights(adAccount.id, since, until);
+    await deleteOldInsights(accountIntegration.adAccount.id, since, until);
     const accountInsightsAndAds = await Meta.handlePaginationFn(
-      adAccount.integration,
+      accountIntegration.integration,
       getInsightsFn,
       insightSchema,
       toInsightAndAd,
@@ -603,122 +603,6 @@ class Meta implements ChannelInterface {
     return parsed.data.id;
   }
 
-  async saveOldInsightsAdsAdsSetsCampaigns(
-    integration: Integration,
-    groupByAdAccount: Map<string, AdWithAdAccount[]>,
-  ): Promise<undefined | AError> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
-    for (const [__, accountAds] of groupByAdAccount) {
-      const adAccount = accountAds[0].adAccount;
-
-      const schema = z.object({
-        id: z.string(),
-        campaign_id: z.string(),
-        campaign: z.object({ name: z.string() }),
-        adset_id: z.string(),
-        adset: z.object({ name: z.string() }),
-      });
-      const toAdSetAdAndCampaign = (
-        ad: z.infer<typeof schema>,
-      ): {
-        adId: string;
-        adSetId: string;
-        campaignId: string;
-        campaignName: string;
-        adSetName: string;
-      } => ({
-        adId: ad.id,
-        adSetId: ad.adset_id,
-        campaignId: ad.campaign_id,
-        campaignName: ad.campaign.name,
-        adSetName: ad.adset.name,
-      });
-
-      const processFn = async (
-        adSetAdAndCampaigns: {
-          adId: string;
-          adSetId: string;
-          campaignId: string;
-          campaignName: string;
-          adSetName: string;
-        }[],
-      ): Promise<undefined> => {
-        const { campaigns, adSets, ads } = adSetAdAndCampaigns.reduce<{
-          ads: ChannelAd[];
-          adSets: ChannelAdSet[];
-          campaigns: ChannelCampaign[];
-        }>(
-          (acc, row) => {
-            acc.ads.push({
-              externalAdSetId: String(row.adSetId),
-              externalAdAccountId: adAccount.externalId,
-              externalId: row.adId,
-              name: row.adSetName,
-            });
-            acc.adSets.push({
-              externalCampaignId: row.campaignId,
-              externalId: row.adSetId,
-              name: row.campaignName,
-            });
-            acc.campaigns.push({
-              externalAdAccountId: adAccount.externalId,
-              externalId: row.campaignId,
-              name: row.campaignName,
-            });
-            return acc;
-          },
-          { ads: [], adSets: [], campaigns: [] },
-        );
-        await saveInsightsAdsAdsSetsCampaigns(
-          campaigns,
-          new Map(),
-          adAccount,
-          adSets,
-          new Map(),
-          ads,
-          new Map(),
-          [],
-          new Map(),
-          [],
-        );
-      };
-
-      let start = 0;
-      let smallAccountAds = accountAds.slice(start, start + limit);
-      while (smallAccountAds.length > 0) {
-        const account = new AdAccount(`act_${adAccount.externalId}`, {}, undefined, undefined);
-        const callFn = account.getAds(
-          [
-            Ad.Fields.id,
-            Ad.Fields.campaign_id,
-            `${Ad.Fields.campaign}{name}`,
-            Ad.Fields.adset_id,
-            `${Ad.Fields.adset}{name}`,
-          ],
-          {
-            limit,
-            effective_status: [
-              'ACTIVE',
-              'PAUSED',
-              'DISAPPROVED',
-              'PENDING_REVIEW',
-              'CAMPAIGN_PAUSED',
-              'ARCHIVED',
-              'ADSET_PAUSED',
-              'IN_PROCESS',
-              'WITH_ISSUES',
-            ],
-            filtering: [{ field: Ad.Fields.id, operator: 'IN', value: smallAccountAds.map((a) => a.externalId) }],
-          },
-        );
-        await Meta.handlePaginationFn(integration, callFn, schema, toAdSetAdAndCampaign, processFn);
-        start += limit;
-        smallAccountAds = accountAds.slice(start, start + limit);
-      }
-    }
-    return Promise.resolve(undefined);
-  }
-
   private async saveAdsAdSetsCampaignsAndInsights(
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; campaign: ChannelCampaign }[],
     creatives: ChannelCreative[],
@@ -726,7 +610,7 @@ class Meta implements ChannelInterface {
     creativeExternalIdMap: Map<string, string>,
     externalAdSetToIdMap: Map<string, string>,
     externalCampaignToIdMap: Map<string, string>,
-    dbAccount: AdAccountWithIntegration,
+    accountIntegration: AdAccountIntegration,
   ): Promise<void> {
     const [insights, ads, adSets, campaigns] = accountInsightsAndAds.reduce(
       (acc, item) => {
@@ -741,7 +625,7 @@ class Meta implements ChannelInterface {
     await saveInsightsAdsAdsSetsCampaigns(
       campaigns,
       externalCampaignToIdMap,
-      dbAccount,
+      accountIntegration.adAccount,
       adSets,
       externalAdSetToIdMap,
       ads,

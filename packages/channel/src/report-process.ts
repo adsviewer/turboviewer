@@ -4,11 +4,11 @@ import { getAllSet, redisAddToSet, redisRemoveFromSet } from '@repo/redis';
 import { formatYYYMMDDDate, isAError } from '@repo/utils';
 import {
   activeReportRedisKey,
-  type AdAccountWithIntegration,
+  type AdAccountIntegration,
   adReportStatusToRedis,
   type ChannelInterface,
+  getAdAccountsWithIntegration,
   getAdAccountWithIntegration,
-  getDecryptedIntegration,
   JobStatusEnum,
   type ProcessReportReq,
   successExpirationSec,
@@ -59,11 +59,11 @@ const updateReports = (
   channelType: 'TIKTOK' | 'META',
 ): Promise<ProcessReportReq>[] =>
   processingReports.map(async (report) => {
-    const adAccount = await getAdAccountWithIntegration(report.adAccountId);
-    if (isAError(adAccount)) throw new Error(adAccount.message);
+    const adAccountIntegration = await getAdAccountWithIntegration(report.adAccountId);
+    if (isAError(adAccountIntegration)) throw new Error(adAccountIntegration.message);
     if (!('taskId' in report) || !report.taskId) throw new Error('TaskId is missing');
 
-    const status = await channel.getReportStatus(adAccount, report.taskId);
+    const status = await channel.getReportStatus(adAccountIntegration, report.taskId);
     logger.info(`Task ${report.taskId} status: ${String(status)}`);
     switch (status) {
       case JobStatusEnum.SUCCESS:
@@ -78,7 +78,7 @@ const updateReports = (
             { ...report } satisfies ProcessReportReq,
             successExpirationSec,
           );
-          await processReport(adAccount, report, channelType, channel);
+          await processReport(adAccountIntegration, report, channelType, channel);
         }
         break;
       case JobStatusEnum.FAILED:
@@ -97,22 +97,23 @@ const runAsyncReports = async (
   reports: ProcessReportReq[],
   channel: ChannelInterface,
 ): Promise<void> => {
-  const adAccounts = await prisma.adAccount.findMany({
-    where: { id: { in: reports.map((report) => report.adAccountId) } },
-  });
-  const adAccountIdAdAccountMap = new Map(adAccounts.map((account) => [account.id, account]));
+  const adAccountsIntegrations = await getAdAccountsWithIntegration(reports.map((report) => report.adAccountId));
+  const adAccountIdAdAccountMap = new Map(adAccountsIntegrations.map((ai) => [ai.adAccount.id, ai]));
   // eslint-disable-next-line @typescript-eslint/no-floating-promises -- we want to run all the reports in parallel
   await Promise.all(
     reports.map(async (report) => {
-      const account = adAccountIdAdAccountMap.get(report.adAccountId);
-      if (!account) throw new Error('AdAccount is missing');
-      const integration = await getDecryptedIntegration(account.integrationId);
-      if (isAError(integration)) throw new Error(integration.message);
+      const accountIntegration = adAccountIdAdAccountMap.get(report.adAccountId);
+      if (!accountIntegration) throw new Error('AdAccount is missing');
       return {
-        taskId: await channel.runAdInsightReport(account, integration, new Date(report.since), new Date(report.until)),
+        taskId: await channel.runAdInsightReport(
+          accountIntegration.adAccount,
+          accountIntegration.integration,
+          new Date(report.since),
+          new Date(report.until),
+        ),
         since: report.since,
         until: report.until,
-        adAccountId: account.id,
+        adAccountId: accountIntegration.adAccount.id,
       };
     }),
   ).then((taskIds) =>
@@ -124,7 +125,7 @@ const runAsyncReports = async (
 };
 
 const processReport = async (
-  adAccount: AdAccountWithIntegration,
+  accountIntegration: AdAccountIntegration,
   activeReport: ProcessReportReq,
   channelType: IntegrationTypeEnum,
   channel: ChannelInterface,
@@ -139,24 +140,27 @@ const processReport = async (
         jobQueue: process.env.CHANNEL_PROCESS_REPORT_JOB_QUEUE,
         containerOverrides: {
           environment: [
-            { name: AD_ACCOUNT_ID, value: adAccount.id },
+            { name: AD_ACCOUNT_ID, value: accountIntegration.adAccount.id },
             { name: TASK_ID, value: activeReport.taskId },
             { name: CHANNEL_TYPE, value: channelType },
             { name: SINCE, value: since.toISOString() },
             { name: UNTIL, value: until.toISOString() },
           ],
         },
-        jobName: `processReport-${channelType}-${activeReport.taskId}-${adAccount.id}-${formatYYYMMDDDate(since)}-${formatYYYMMDDDate(until)}`,
+        jobName: `processReport-${channelType}-${activeReport.taskId}-${accountIntegration.adAccount.id}-${formatYYYMMDDDate(since)}-${formatYYYMMDDDate(until)}`,
       }),
     );
   } else {
     await channel.processReport(
-      adAccount,
+      accountIntegration,
       activeReport.taskId,
       new Date(activeReport.since),
       new Date(activeReport.until),
     );
-    await prisma.integration.update({ where: { id: adAccount.integrationId }, data: { lastSyncedAt: new Date() } });
+    await prisma.integration.update({
+      where: { id: accountIntegration.integration.id },
+      data: { lastSyncedAt: new Date() },
+    });
   }
 };
 
