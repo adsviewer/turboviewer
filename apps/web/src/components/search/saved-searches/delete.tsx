@@ -18,7 +18,7 @@ export default function Delete(props: PropsType): React.ReactNode {
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { loading: props.isPending },
+      confirmProps: { loading: props.isPending, color: 'red' },
       onCancel: () => {
         logger.info('Cancel');
       },

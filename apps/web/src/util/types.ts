@@ -20,3 +20,8 @@ export interface DropdownValueType {
   disabled?: boolean;
   group?: string;
 }
+
+export interface DropdownGroupsValueType {
+  group: string;
+  items: DropdownValueType[];
+}

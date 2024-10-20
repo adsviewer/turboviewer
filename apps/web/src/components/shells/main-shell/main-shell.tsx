@@ -15,7 +15,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconBuilding, IconGraph, IconLogout, IconPlugConnected } from '@tabler/icons-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useAtom } from 'jotai/index';
+import { useAtom, useSetAtom } from 'jotai/index';
 import uniqid from 'uniqid';
 import { useCallback, useEffect, useState } from 'react';
 import { logger } from '@repo/logger';
@@ -30,9 +30,10 @@ import CreateOrganizationButton from '@/components/create-organization/create-or
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import FeedbackButton from '@/components/buttons/feedback-button';
 import SubNavlinkButton from '@/components/buttons/sub-navlink-button/sub-navlink-button';
-import { getUserDetails } from '@/app/(authenticated)/actions';
+import { getSearchQueryStrings, getUserDetails } from '@/app/(authenticated)/actions';
 import { type Integration, IntegrationStatus } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
+import { searchesAtom } from '@/app/atoms/searches-atoms';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -41,6 +42,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+  const setSearchesAtom = useSetAtom(searchesAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
   const navLinksData = [
@@ -93,17 +95,42 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     [tGeneric, tIntegrations],
   );
 
+  // All data that should already be fetched before the main shell is rendered!
   useEffect(() => {
-    void getUserDetails()
-      .then((res) => {
-        setUserDetails(res);
-        checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
+    const initialRequests = [];
+    initialRequests.push(
+      void getUserDetails()
+        .then((res) => {
+          setUserDetails(res);
+          checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
+        })
+        .catch((error: unknown) => {
+          logger.error(error);
+        }),
+    );
+
+    initialRequests.push(
+      void getSearchQueryStrings()
+        .then((res) => {
+          if (!res.success) {
+            logger.error(res.error);
+            return;
+          }
+          setSearchesAtom(res.data.searchQueryStrings);
+        })
+        .catch((err: unknown) => {
+          logger.error(err);
+        }),
+    );
+
+    Promise.all(initialRequests)
+      .then(() => {
         setIsDataLoaded(true);
       })
-      .catch((error: unknown) => {
-        logger.error(error);
+      .catch((err: unknown) => {
+        logger.error(err);
       });
-  }, [checkIntegrationTokensForExpiration, setUserDetails]);
+  }, [checkIntegrationTokensForExpiration, setSearchesAtom, setUserDetails]);
 
   return (
     <AppShell
