@@ -5,11 +5,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useTranslations } from 'next-intl';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { deleteSearchQueryString, upsertSearchQueryString } from '@/app/(authenticated)/actions';
 import { type DropdownGroupsValueType } from '@/util/types';
 import { type SearchQueryStringsQuery } from '@/graphql/generated/schema-server';
 import { searchesAtom } from '@/app/atoms/searches-atoms';
+import { isOperator, isOrgAdmin } from '@/util/access-utils';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import Save from './save';
 import Delete from './delete';
 
@@ -19,6 +21,7 @@ interface PropsType {
 
 export default function SavedSearches(props: PropsType): React.ReactNode {
   const tGeneric = useTranslations('generic');
+  const userDetails = useAtomValue(userDetailsAtom);
   const [searches, setSearches] = useAtom(searchesAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [savedSearches, setSavedSearches] = useState<DropdownGroupsValueType[]>([]);
@@ -59,7 +62,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
     setSavedSearches(loadedSearches);
   }, [searches, updateSavedSearches]);
 
-  const handleSave = (name: string, isOrganization: boolean, id?: string): void => {
+  const handleSave = (name: string, isOrganization: boolean, id: string | null): void => {
     const payload = {
       name,
       isOrganization,
@@ -77,7 +80,19 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
           });
           return;
         }
-        logger.info(res);
+        const responseID = res.data.upsertSearchQueryString.id;
+
+        // Update the selected search (if it's an update operation)
+        const newSearches = searches.map((search) =>
+          search.id === responseID ? res.data.upsertSearchQueryString : search,
+        );
+
+        // Check if no update was made, then push the new search (means it's a new search)
+        const isUpdateSearch = searches.some((search) => search.id === responseID);
+        if (!isUpdateSearch) newSearches.push(res.data.upsertSearchQueryString);
+        setSearches(newSearches);
+        setSavedSearches(updateSavedSearches(newSearches));
+        setSelectedSearchID(responseID);
       })
       .catch((err: unknown) => {
         logger.error(err);
@@ -100,7 +115,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
           return;
         }
         const newSearches = searches.filter((search) => search.id !== id);
-        setSearches([...newSearches]);
+        setSearches(newSearches);
         setSavedSearches(updateSavedSearches(newSearches));
         setSelectedSearchID(null);
       })
@@ -112,10 +127,17 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       });
   };
 
+  // Disable save and delete buttons if the selected search is organizational and the user isn't operator or org admin
+  const getCanUserAlter = (id: string | null): boolean => {
+    const isValidUserRole = isOrgAdmin(userDetails.allRoles) || isOperator(userDetails.allRoles);
+    return id ? searches.some((search) => search.isOrganization && isValidUserRole) : false;
+  };
+
   return (
     <Flex gap="sm" align="center">
       <Select
         disabled={isPending}
+        clearable
         description="Saved searches"
         placeholder="Saved searches"
         miw={200}
@@ -126,15 +148,22 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         data={savedSearches}
         value={selectedSearchID}
         onChange={(id) => {
-          if (id) setSelectedSearchID(id);
+          setSelectedSearchID(id);
         }}
       />
-      <Save isPending={isPending} handleSave={handleSave} />
+      <Save
+        isPending={isPending}
+        canUserAlter={getCanUserAlter(selectedSearchID)}
+        handleSave={handleSave}
+        selectedSearchID={selectedSearchID}
+      />
       <Delete
         isPending={isPending}
+        canUserAlter={getCanUserAlter(selectedSearchID)}
         handleDelete={() => {
           if (selectedSearchID) handleDelete(selectedSearchID);
         }}
+        selectedSearchID={selectedSearchID}
       />
     </Flex>
   );
