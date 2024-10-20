@@ -1,9 +1,10 @@
 import { ActionIcon, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { logger } from '@repo/logger';
 import { IconTrash } from '@tabler/icons-react';
 
 interface PropsType {
+  canUserAlter: boolean;
+  selectedSearchID: string | null;
   isPending: boolean;
   handleDelete: () => void;
 }
@@ -19,19 +20,21 @@ export default function Delete(props: PropsType): React.ReactNode {
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { loading: props.isPending, color: 'red' },
-      onCancel: () => {
-        logger.info('Cancel');
-      },
       onConfirm: () => {
         props.handleDelete();
-        logger.info('Confirmed');
       },
     });
   };
 
   return (
     <Tooltip label="Delete">
-      <ActionIcon disabled={props.isPending} color="red.4" variant="outline" size={34} onClick={openModal}>
+      <ActionIcon
+        disabled={props.isPending || !props.selectedSearchID || !props.canUserAlter}
+        color="red.4"
+        variant="outline"
+        size={34}
+        onClick={openModal}
+      >
         <IconTrash />
       </ActionIcon>
     </Tooltip>

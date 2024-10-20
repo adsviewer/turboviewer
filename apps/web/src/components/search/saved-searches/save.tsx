@@ -1,13 +1,14 @@
 import { ActionIcon, Flex, Radio, Text, TextInput, Tooltip } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { modals } from '@mantine/modals';
-import { logger } from '@repo/logger';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { z } from 'zod';
 
 interface PropsType {
+  canUserAlter: boolean;
+  selectedSearchID: string | null;
   isPending: boolean;
-  handleSave: (name: string, isOrganization: boolean, id?: string) => void;
+  handleSave: (name: string, isOrganization: boolean, id: string | null) => void;
 }
 
 enum SaveTypes {
@@ -34,11 +35,7 @@ export default function Save(props: PropsType): React.ReactNode {
     modals.openConfirmModal({
       title: 'Save Search Configuration',
       children: (
-        <form
-          onSubmit={form.onSubmit((values) => {
-            logger.info(values);
-          })}
-        >
+        <form>
           <Flex direction="column" gap="sm">
             <TextInput
               description="Configuration Name"
@@ -53,7 +50,11 @@ export default function Save(props: PropsType): React.ReactNode {
             </Text>
             <Radio.Group key={form.key('saveType')} {...form.getInputProps('saveType')}>
               <Flex direction="column" gap="sm">
-                <Radio value={SaveTypes.Update} label="Update selected search" />
+                <Radio
+                  disabled={!props.selectedSearchID || !props.canUserAlter}
+                  value={SaveTypes.Update}
+                  label="Update selected search"
+                />
                 <Radio value={SaveTypes.SaveAsNew} label="Save as new only for me" />
                 <Radio value={SaveTypes.SaveAsNewForOrg} label="Save as new for organization" />
               </Flex>
@@ -68,9 +69,9 @@ export default function Save(props: PropsType): React.ReactNode {
       },
       onConfirm: () => {
         const values = form.getValues();
-        logger.info(values);
         const isOrganization = values.saveType === SaveTypes.SaveAsNewForOrg;
-        props.handleSave(values.name, isOrganization);
+        const idToUpdate = values.saveType === SaveTypes.Update ? props.selectedSearchID : null;
+        props.handleSave(values.name, isOrganization, idToUpdate);
         form.reset();
       },
     });
