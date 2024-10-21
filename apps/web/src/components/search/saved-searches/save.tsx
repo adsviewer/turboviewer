@@ -10,6 +10,7 @@ import { z } from 'zod';
 
 interface PropsType {
   canUserAlter: boolean;
+  canSaveAsOrg: boolean;
   selectedSearchID: string | null;
   selectedSearchName: string;
   isSelectedSearchOrganization: boolean;
@@ -80,7 +81,7 @@ export default function Save(props: PropsType): React.ReactNode {
                 <Radio
                   value={SaveTypes.SaveAsNewForOrg}
                   label={tSearch('saveAsNewOrg')}
-                  disabled={!props.canUserAlter}
+                  disabled={!props.canSaveAsOrg}
                 />
               </Flex>
             </Radio.Group>

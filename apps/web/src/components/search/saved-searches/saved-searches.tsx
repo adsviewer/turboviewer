@@ -157,6 +157,10 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
     return id ? searches.some((search) => search.isOrganization && isValidUserRole) : false;
   };
 
+  const getCanSaveAsOrg = (): boolean => {
+    return isOrgAdmin(userDetails.allRoles) || isOperator(userDetails.allRoles);
+  };
+
   return (
     <Flex gap="sm" align="center">
       <Select
@@ -180,6 +184,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         selectedSearchID={selectedSearchID}
         selectedSearchName={getSelectedSearchName(selectedSearchID)}
         isSelectedSearchOrganization={getSelectedSearchIsOrganization(selectedSearchID)}
+        canSaveAsOrg={getCanSaveAsOrg()}
       />
       <Delete
         isPending={isPending}
