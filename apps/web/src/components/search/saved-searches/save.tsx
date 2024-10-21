@@ -4,6 +4,7 @@ import { ActionIcon, Flex, Radio, Text, TextInput, Tooltip } from '@mantine/core
 import { useForm, zodResolver } from '@mantine/form';
 import { modals } from '@mantine/modals';
 import { IconDeviceFloppy } from '@tabler/icons-react';
+import { useEffect, useRef } from 'react';
 import { z } from 'zod';
 
 interface PropsType {
@@ -25,6 +26,8 @@ const ValidationSchema = z.object({
 });
 
 export default function Save(props: PropsType): React.ReactNode {
+  const nameRef = useRef<HTMLInputElement>(null);
+
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
@@ -34,11 +37,20 @@ export default function Save(props: PropsType): React.ReactNode {
     validate: zodResolver(ValidationSchema),
   });
 
+  // Synchronize form name with selectedSearchName whenever props.selectedSearchName changes
+  useEffect(() => {
+    form.setFieldValue('name', props.selectedSearchName);
+  }, [form, props.selectedSearchName]);
+
   const openModal = (): void => {
     modals.openConfirmModal({
       title: 'Save Search Configuration',
       children: (
-        <form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
           <Flex direction="column" gap="sm">
             <TextInput
               description="Configuration Name"
@@ -46,6 +58,7 @@ export default function Save(props: PropsType): React.ReactNode {
               mb="sm"
               key={form.key('name')}
               {...form.getInputProps('name')}
+              ref={nameRef}
             />
             <Text size="sm">
               You are about to save this search configuration. Please decide if you want it saved for the entire
@@ -71,17 +84,19 @@ export default function Save(props: PropsType): React.ReactNode {
         form.reset();
       },
       onConfirm: () => {
+        if (!nameRef.current) return;
+        const name = nameRef.current.value;
         const values = form.getValues();
         const isOrganization = values.saveType === SaveTypes.SaveAsNewForOrg;
         const idToUpdate = values.saveType === SaveTypes.Update ? props.selectedSearchID : null;
-        props.handleSave(values.name, isOrganization, idToUpdate);
+        props.handleSave(name, isOrganization, idToUpdate);
         form.reset();
       },
     });
   };
 
   return (
-    <Tooltip label="Save">
+    <Tooltip label="Save / Save as">
       <ActionIcon disabled={props.isPending} variant="outline" size={34} onClick={openModal}>
         <IconDeviceFloppy />
       </ActionIcon>
