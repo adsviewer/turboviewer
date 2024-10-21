@@ -141,6 +141,14 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
     return '';
   };
 
+  const getSelectedSearchIsOrganization = (id: string | null): boolean => {
+    if (id) {
+      const selectedSearch = searches.find((search) => search.id === id);
+      if (selectedSearch) return selectedSearch.isOrganization;
+    }
+    return false;
+  };
+
   // Disable save and delete buttons if the selected search is organizational and the user isn't operator or org admin
   const getCanUserAlter = (id: string | null): boolean => {
     const isValidUserRole = isOrgAdmin(userDetails.allRoles) || isOperator(userDetails.allRoles);
@@ -153,8 +161,8 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       <Select
         disabled={isPending}
         clearable
-        description="Saved searches"
-        placeholder="Saved searches"
+        description="Search Presets"
+        placeholder="Select search preset"
         miw={200}
         maw={450}
         mb="lg"
@@ -170,6 +178,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         handleSave={handleSave}
         selectedSearchID={selectedSearchID}
         selectedSearchName={getSelectedSearchName(selectedSearchID)}
+        isSelectedSearchOrganization={getSelectedSearchIsOrganization(selectedSearchID)}
       />
       <Delete
         isPending={isPending}
