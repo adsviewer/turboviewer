@@ -1,6 +1,9 @@
+'use client';
+
 import { ActionIcon, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { IconTrash } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 interface PropsType {
   canUserAlter: boolean;
@@ -10,15 +13,13 @@ interface PropsType {
 }
 
 export default function Delete(props: PropsType): React.ReactNode {
+  const tSearch = useTranslations('insights.search');
+
   const openModal = (): void => {
     modals.openConfirmModal({
-      title: 'Please confirm your action',
-      children: (
-        <Text size="sm">
-          You are about to erase this advanced search configuration. Please confirm your action to proceed.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
+      title: tSearch('deleteSearchPresetTitle'),
+      children: <Text size="sm">{tSearch('deleteDescription')}</Text>,
+      labels: { confirm: tSearch('delete'), cancel: tSearch('cancel') },
       confirmProps: { loading: props.isPending, color: 'red' },
       onConfirm: () => {
         props.handleDelete();
@@ -27,7 +28,7 @@ export default function Delete(props: PropsType): React.ReactNode {
   };
 
   return (
-    <Tooltip label="Delete">
+    <Tooltip label={tSearch('delete')}>
       <ActionIcon
         disabled={props.isPending || !props.selectedSearchID || !props.canUserAlter}
         color="red.4"

@@ -4,6 +4,7 @@ import { ActionIcon, Flex, Radio, Text, TextInput, Tooltip } from '@mantine/core
 import { useForm, zodResolver } from '@mantine/form';
 import { modals } from '@mantine/modals';
 import { IconDeviceFloppy } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { z } from 'zod';
 
@@ -27,6 +28,7 @@ const ValidationSchema = z.object({
 });
 
 export default function Save(props: PropsType): React.ReactNode {
+  const tSearch = useTranslations('insights.search');
   const nameRef = useRef<HTMLInputElement>(null);
 
   const form = useForm({
@@ -45,7 +47,7 @@ export default function Save(props: PropsType): React.ReactNode {
 
   const openModal = (): void => {
     modals.openConfirmModal({
-      title: 'Save Search Configuration',
+      title: tSearch('saveSearchPresetTitle'),
       children: (
         <form
           onSubmit={(e) => {
@@ -54,32 +56,29 @@ export default function Save(props: PropsType): React.ReactNode {
         >
           <Flex direction="column" gap="sm">
             <TextInput
-              description="Configuration Name"
-              placeholder="Configuration Name"
+              description={tSearch('presetName')}
+              placeholder={tSearch('presetName')}
               mb="sm"
               key={form.key('name')}
               {...form.getInputProps('name')}
               ref={nameRef}
             />
-            <Text size="sm">
-              You are about to save this search configuration. Please decide if you want it saved for the entire
-              organization or just you.
-            </Text>
+            <Text size="sm">{tSearch('saveDescription')}</Text>
             <Radio.Group key={form.key('saveType')} {...form.getInputProps('saveType')}>
               <Flex direction="column" gap="sm">
                 <Radio
                   disabled={!props.selectedSearchID || !props.canUserAlter}
                   value={SaveTypes.Update}
-                  label="Update selected search"
+                  label={tSearch('updateSelectedSearch')}
                 />
-                <Radio value={SaveTypes.SaveAsNew} label="Save as new only for me" />
-                <Radio value={SaveTypes.SaveAsNewForOrg} label="Save as new for organization" />
+                <Radio value={SaveTypes.SaveAsNew} label={tSearch('saveAsNewUser')} />
+                <Radio value={SaveTypes.SaveAsNewForOrg} label={tSearch('saveAsNewOrg')} />
               </Flex>
             </Radio.Group>
           </Flex>
         </form>
       ),
-      labels: { confirm: 'Confirm', cancel: 'Cancel' },
+      labels: { confirm: 'Save', cancel: 'Cancel' },
       confirmProps: { loading: props.isPending },
       onCancel: () => {
         form.reset();
@@ -98,7 +97,7 @@ export default function Save(props: PropsType): React.ReactNode {
   };
 
   return (
-    <Tooltip label="Save / Save as">
+    <Tooltip label={tSearch('saveTooltip')}>
       <ActionIcon disabled={props.isPending} variant="outline" size={34} onClick={openModal}>
         <IconDeviceFloppy />
       </ActionIcon>

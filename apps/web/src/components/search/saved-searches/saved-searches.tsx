@@ -22,6 +22,7 @@ interface PropsType {
 
 export default function SavedSearches(props: PropsType): React.ReactNode {
   const tGeneric = useTranslations('generic');
+  const tSearch = useTranslations('insights.search');
   const userDetails = useAtomValue(userDetailsAtom);
   const [searches, setSearches] = useAtom(searchesAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -161,8 +162,8 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       <Select
         disabled={isPending}
         clearable
-        description="Search Presets"
-        placeholder="Select search preset"
+        description={tSearch('searchPresets')}
+        placeholder={tSearch('searchPresetHint')}
         miw={200}
         maw={450}
         mb="lg"
