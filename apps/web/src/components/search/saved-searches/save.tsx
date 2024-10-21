@@ -11,6 +11,7 @@ interface PropsType {
   canUserAlter: boolean;
   selectedSearchID: string | null;
   selectedSearchName: string;
+  isSelectedSearchOrganization: boolean;
   isPending: boolean;
   handleSave: (name: string, isOrganization: boolean, id: string | null) => void;
 }
@@ -87,7 +88,8 @@ export default function Save(props: PropsType): React.ReactNode {
         if (!nameRef.current) return;
         const name = nameRef.current.value;
         const values = form.getValues();
-        const isOrganization = values.saveType === SaveTypes.SaveAsNewForOrg;
+        let isOrganization = values.saveType === SaveTypes.SaveAsNewForOrg;
+        if (values.saveType === SaveTypes.Update) isOrganization = props.isSelectedSearchOrganization;
         const idToUpdate = values.saveType === SaveTypes.Update ? props.selectedSearchID : null;
         props.handleSave(name, isOrganization, idToUpdate);
         form.reset();
