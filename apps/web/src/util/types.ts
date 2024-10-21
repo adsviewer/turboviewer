@@ -11,7 +11,7 @@ export const integrationTypeMap = new Map<IntegrationType, { image: string }>([
 export interface MultiSelectDataType {
   value: string;
   label: string;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 export interface DropdownValueType {
