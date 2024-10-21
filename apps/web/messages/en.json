@@ -99,7 +99,23 @@
       "addSearchTerm": "Add search term",
       "addSearchSubTerm": "Add subterm",
       "searchTermsHint": "Start adding search terms to customize your search.",
-      "clearSearch": "Clear search"
+      "clearSearch": "Clear search",
+      "searchPresets": "Search Preset",
+      "searchPresetHint": "Select a search preset",
+      "saveSearchPresetTitle": "Save Search Preset",
+      "deleteSearchPresetTitle": "Delete Search Preset",
+      "presetName": "Preset Name",
+      "saveDescription": "You're about to save this search configuration. Please decide if you want it saved for the entire organization or just you.",
+      "deleteDescription": "You're about to erase this advanced search configuration. Please confirm your action to proceed.",
+      "updateSelectedSearch": "Update selected search",
+      "saveAsNewUser": "Save as new only for me",
+      "saveAsNewOrg": "Save as new for organization",
+      "groupUser": "User",
+      "groupOrganization": "Organization",
+      "save": "Save",
+      "saveTooltip": "Save / Save as",
+      "delete": "Delete",
+      "cancel": "Cancel"
     }
   },
   "summary": {
