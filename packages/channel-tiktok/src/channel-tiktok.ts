@@ -1,6 +1,7 @@
 import { URLSearchParams } from 'node:url';
 import { Readable } from 'node:stream';
 import {
+  type AdAccount as DbAdAccount,
   type AdAccount,
   CurrencyEnum,
   DeviceEnum,
@@ -175,10 +176,13 @@ export class Tiktok implements ChannelInterface {
     return await saveAccounts(activeAccounts, integration);
   }
 
-  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
-    const dbAccounts = await this.saveAdAccounts(integration);
-    if (isAError(dbAccounts)) return dbAccounts;
-    await adReportsStatusesToRedis(this.getType(), dbAccounts, initial);
+  async getAdAccountData(
+    _integration: Integration,
+    dbAccount: DbAdAccount,
+    initial: boolean,
+  ): Promise<AError | undefined> {
+    await adReportsStatusesToRedis(this.getType(), [dbAccount], initial);
+    return undefined;
   }
 
   async getAdPreview(

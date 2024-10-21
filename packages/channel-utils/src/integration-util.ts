@@ -75,6 +75,23 @@ export const getAllConnectedIntegrations = async (): Promise<Integration[]> => {
     );
 };
 
+export const getConnectedIntegrationsById = async (integrationIds: string[]): Promise<Integration[]> => {
+  return await prisma.integration
+    .findMany({
+      where: {
+        id: { in: integrationIds },
+        status: IntegrationStatus.CONNECTED,
+      },
+    })
+    .then((integrations) =>
+      integrations.map(decryptTokens).flatMap((integration) => {
+        if (!integration) return [];
+        if (isAError(integration)) return [];
+        return integration;
+      }),
+    );
+};
+
 export const decryptTokens = (integration: Integration | null): null | AError | Integration => {
   if (integration) {
     const accessToken = decryptAesGcm(integration.accessToken, env.CHANNEL_SECRET);
@@ -118,6 +135,17 @@ export const getConnectedIntegrationByAccountId = async (adAccountId: string): P
   if (!decryptedIntegration) return new AError('Failed to decrypt integration');
 
   return decryptedIntegration;
+};
+
+export const getConnectedIntegrationsByAccountId = async (adAccountId: string): Promise<Integration[]> => {
+  const encryptedIntegrations = await prisma.integration.findMany({
+    where: {
+      status: IntegrationStatus.CONNECTED,
+      adAccounts: { some: { id: adAccountId } },
+    },
+  });
+
+  return encryptedIntegrations.map((i) => decryptTokens(i)).flatMap((i) => (!isAError(i) && i !== null ? [i] : []));
 };
 
 export const getAdAccountWithIntegration = async (adAccountId: string): Promise<AdAccountIntegration | AError> => {

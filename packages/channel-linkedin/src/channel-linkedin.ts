@@ -1,5 +1,6 @@
 import { URLSearchParams } from 'node:url';
 import {
+  type AdAccount as DbAdAccount,
   type AdAccount,
   CurrencyEnum,
   DeviceEnum,
@@ -118,46 +119,44 @@ class LinkedIn implements ChannelInterface {
     return integration.externalId;
   }
 
-  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
-    const dbAccounts = await this.saveAdAccounts(integration);
-    if (isAError(dbAccounts)) return dbAccounts;
+  async getAdAccountData(
+    integration: Integration,
+    dbAccount: DbAdAccount,
+    initial: boolean,
+  ): Promise<AError | undefined> {
+    const ranges = await timeRanges(initial, dbAccount.id);
+    for (const range of ranges) {
+      const analytics = await this.getAdAnalytics(integration, range, dbAccount);
+      if (isAError(analytics)) return analytics;
 
-    for (const dbAccount of dbAccounts) {
-      const ranges = await timeRanges(initial, dbAccount.id);
-      for (const range of ranges) {
-        const analytics = await this.getAdAnalytics(integration, range, dbAccount);
-        if (isAError(analytics)) return analytics;
+      const campaigns = await this.getCampaignGroupsAsCampaigns(integration, analytics.campaignGroupIds, dbAccount);
+      if (isAError(campaigns)) return campaigns;
 
-        const campaigns = await this.getCampaignGroupsAsCampaigns(integration, analytics.campaignGroupIds, dbAccount);
-        if (isAError(campaigns)) return campaigns;
-
-        const adSets = await this.getCampaignsAsAdSets(
-          integration,
-          new Set(Array.from(analytics.campaignIds).map((c) => c.externalCampaignId)),
-          dbAccount,
-        );
-        if (isAError(adSets)) return adSets;
-        const ads: ChannelAd[] = Array.from(analytics.creativeIds).map((c) => ({
-          externalAdAccountId: dbAccount.externalId,
-          externalId: c.externalCreativeId,
-          externalAdSetId: c.externalCampaignId,
-        }));
-        await deleteOldInsights(dbAccount.id, range.since, range.until);
-        await saveInsightsAdsAdsSetsCampaigns(
-          campaigns,
-          new Map<string, string>(),
-          dbAccount,
-          adSets,
-          new Map<string, string>(),
-          ads,
-          new Map<string, string>(),
-          [],
-          new Map<string, string>(),
-          analytics.insights,
-        );
-      }
+      const adSets = await this.getCampaignsAsAdSets(
+        integration,
+        new Set(Array.from(analytics.campaignIds).map((c) => c.externalCampaignId)),
+        dbAccount,
+      );
+      if (isAError(adSets)) return adSets;
+      const ads: ChannelAd[] = Array.from(analytics.creativeIds).map((c) => ({
+        externalAdAccountId: dbAccount.externalId,
+        externalId: c.externalCreativeId,
+        externalAdSetId: c.externalCampaignId,
+      }));
+      await deleteOldInsights(dbAccount.id, range.since, range.until);
+      await saveInsightsAdsAdsSetsCampaigns(
+        campaigns,
+        new Map<string, string>(),
+        dbAccount,
+        adSets,
+        new Map<string, string>(),
+        ads,
+        new Map<string, string>(),
+        [],
+        new Map<string, string>(),
+        analytics.insights,
+      );
     }
-    return Promise.resolve(undefined);
   }
 
   async getAdPreview(integration: Integration, adId: string): Promise<ChannelIFrame | AError> {

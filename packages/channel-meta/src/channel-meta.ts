@@ -230,13 +230,13 @@ class Meta implements ChannelInterface {
     return integration.externalId;
   }
 
-  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const dbAccounts = await this.saveAdAccounts(integration);
-    if (isAError(dbAccounts)) return dbAccounts;
-    logger.info(`Organization ${integration.organizationId} has ${JSON.stringify(dbAccounts)} active accounts`);
-
-    await adReportsStatusesToRedis(this.getType(), dbAccounts, initial);
+  async getAdAccountData(
+    _integration: Integration,
+    adAccount: DbAdAccount,
+    initial: boolean,
+  ): Promise<AError | undefined> {
+    await adReportsStatusesToRedis(this.getType(), [adAccount], initial);
+    return undefined;
   }
 
   async getAdPreview(
@@ -563,6 +563,9 @@ class Meta implements ChannelInterface {
       insightsProcessFn,
     );
     if (isAError(accountInsightsAndAds)) return accountInsightsAndAds;
+    logger.info(
+      `Finished ${since.toISOString()} - ${until.toISOString()} ad ingress for adAccountId: ${accountIntegration.adAccount.id}`,
+    );
   }
 
   async runAdInsightReport(

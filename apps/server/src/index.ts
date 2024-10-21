@@ -31,7 +31,7 @@ process.on('uncaughtException', (reason) => {
 });
 
 const channelDataRefreshWebhook = (_req: Request, res: Response): void => {
-  fireAndForget.add(() => invokeChannelIngress({ initial: false }));
+  fireAndForget.add(() => invokeChannelIngress(false));
   res.send({
     statusCode: 200,
   });

@@ -7,7 +7,7 @@ import { env } from './config';
 
 export const channelIngressInput = z.object({
   initial: z.boolean(),
-  integrationIds: z.array(z.string()).optional(),
+  adAccountIds: z.array(z.string()),
 });
 
 export const channelIngressOutput = z.object({

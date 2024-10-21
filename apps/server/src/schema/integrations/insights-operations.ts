@@ -110,7 +110,7 @@ builder.mutationFields((t) => ({
       initial: t.arg.boolean({ required: true }),
     },
     resolve: async (_root, args, _ctx, _info) => {
-      await invokeChannelIngress({ initial: args.initial, integrationIds: args.integrationIds ?? undefined });
+      await invokeChannelIngress(args.initial, args.integrationIds ?? undefined);
       return true;
     },
   }),

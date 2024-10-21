@@ -85,7 +85,7 @@ export interface ChannelInterface {
     device?: DeviceEnum,
     position?: string,
   ) => Promise<ChannelIFrame | AError>;
-  getChannelData: (integration: Integration, initial: boolean) => Promise<AError | undefined>;
+  getAdAccountData: (integration: Integration, adAccount: AdAccount, initial: boolean) => Promise<AError | undefined>;
   getDefaultPublisher: () => PublisherEnum;
   getReportStatus: (adAccount: AdAccountIntegration, taskId: string) => Promise<JobStatusEnum>;
   getUserId: (accessToken: string) => Promise<string | AError>;
