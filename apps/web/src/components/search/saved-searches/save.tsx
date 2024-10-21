@@ -1,3 +1,5 @@
+'use client';
+
 import { ActionIcon, Flex, Radio, Text, TextInput, Tooltip } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { modals } from '@mantine/modals';
@@ -7,6 +9,7 @@ import { z } from 'zod';
 interface PropsType {
   canUserAlter: boolean;
   selectedSearchID: string | null;
+  selectedSearchName: string;
   isPending: boolean;
   handleSave: (name: string, isOrganization: boolean, id: string | null) => void;
 }
@@ -45,7 +48,7 @@ export default function Save(props: PropsType): React.ReactNode {
               {...form.getInputProps('name')}
             />
             <Text size="sm">
-              You are about to save this search configuration. Please decide if you want it saved for your current
+              You are about to save this search configuration. Please decide if you want it saved for the entire
               organization or just you.
             </Text>
             <Radio.Group key={form.key('saveType')} {...form.getInputProps('saveType')}>

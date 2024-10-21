@@ -476,6 +476,16 @@ export default function Search(props: PropsType): React.ReactNode {
     return currEncodedSearchData;
   };
 
+  const handleSavedSearchChange = (queryString: string): void => {
+    const parsedSearchData = queryString
+      ? (JSON.parse(Buffer.from(queryString, 'base64').toString('utf-8')) as SearchExpression)
+      : {};
+    if (parsedSearchData.clientSearchTerms) {
+      setLoadedSearchData(parsedSearchData);
+      setSearchTerms(parsedSearchData.clientSearchTerms);
+    }
+  };
+
   const handleAdvancedSearch = (): void => {
     emptySearchBox();
     close();
@@ -653,7 +663,7 @@ export default function Search(props: PropsType): React.ReactNode {
         title={tGeneric('advancedSearch')}
         size="xl"
       >
-        <SavedSearches getEncodedSearchData={getEncodedSearchData} />
+        <SavedSearches getEncodedSearchData={getEncodedSearchData} handleSavedSearchChange={handleSavedSearchChange} />
         <Flex direction="column" mb="sm">
           <ScrollArea.Autosize mah={500} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
             {searchTerms.length ? (

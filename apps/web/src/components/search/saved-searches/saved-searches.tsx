@@ -17,6 +17,7 @@ import Delete from './delete';
 
 interface PropsType {
   getEncodedSearchData: () => string;
+  handleSavedSearchChange: (queryString: string) => void;
 }
 
 export default function SavedSearches(props: PropsType): React.ReactNode {
@@ -58,7 +59,6 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
 
   useEffect(() => {
     const loadedSearches = updateSavedSearches(searches);
-    logger.info(loadedSearches);
     setSavedSearches(loadedSearches);
   }, [searches, updateSavedSearches]);
 
@@ -102,6 +102,12 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       });
   };
 
+  const handleChange = (id: string | null): void => {
+    setSelectedSearchID(id);
+    const selectedSearch = searches.find((search) => search.id === id);
+    if (selectedSearch) props.handleSavedSearchChange(selectedSearch.queryString);
+  };
+
   const handleDelete = (id: string): void => {
     setIsPending(true);
     void deleteSearchQueryString({ id })
@@ -127,9 +133,18 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       });
   };
 
+  const getSelectedSearchName = (id: string | null): string => {
+    if (id) {
+      const selectedSearch = searches.find((search) => search.id === id);
+      if (selectedSearch) return selectedSearch.name;
+    }
+    return '';
+  };
+
   // Disable save and delete buttons if the selected search is organizational and the user isn't operator or org admin
   const getCanUserAlter = (id: string | null): boolean => {
     const isValidUserRole = isOrgAdmin(userDetails.allRoles) || isOperator(userDetails.allRoles);
+    if (searches.find((search) => search.id === id && !search.isOrganization)) return true;
     return id ? searches.some((search) => search.isOrganization && isValidUserRole) : false;
   };
 
@@ -147,15 +162,14 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
         data={savedSearches}
         value={selectedSearchID}
-        onChange={(id) => {
-          setSelectedSearchID(id);
-        }}
+        onChange={handleChange}
       />
       <Save
         isPending={isPending}
         canUserAlter={getCanUserAlter(selectedSearchID)}
         handleSave={handleSave}
         selectedSearchID={selectedSearchID}
+        selectedSearchName={getSelectedSearchName(selectedSearchID)}
       />
       <Delete
         isPending={isPending}
