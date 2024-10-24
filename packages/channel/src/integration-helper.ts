@@ -121,6 +121,7 @@ const completeIntegration = async (
     logger.error(e, 'Failed to save tokens to database');
     return new AError('Failed to save tokens to database');
   });
+
   if (isAError(decryptedIntegration)) return decryptedIntegration;
 
   fireAndForget.add(async () => await invokeChannelIngress(false, [decryptedIntegration.id]));
@@ -170,6 +171,14 @@ const saveTokens = async (
     status: IntegrationStatus.CONNECTED,
     organizationId,
   };
+
+  function adjustDate(date: Date): Date {
+    const maxDate = new Date('9999-12-31T23:59:59.999Z'); // Prisma's max supported date
+    return date > maxDate ? maxDate : date;
+  }
+  integrationData.accessTokenExpiresAt = adjustDate(new Date(tokens.accessTokenExpiresAt ?? new Date()))
+  integrationData.refreshTokenExpiresAt = tokens.refreshTokenExpiresAt ? adjustDate(new Date(tokens.refreshTokenExpiresAt)) : undefined
+
   const integration = await prisma.integration.upsert({
     create: integrationData,
     update: integrationData,
