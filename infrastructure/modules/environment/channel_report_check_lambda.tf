@@ -87,7 +87,7 @@ resource "aws_cloudwatch_event_rule" "channel_data_report" {
 
 resource "aws_cloudwatch_event_target" "trigger_channel_report_check" {
   rule      = aws_cloudwatch_event_rule.channel_data_report.name
-  target_id = "check_foo"
+  target_id = "trigger_channel_report_check"
   arn       = aws_lambda_function.channel_report_check_lambda.arn
 }
 

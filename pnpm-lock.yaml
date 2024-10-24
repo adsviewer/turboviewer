@@ -255,6 +255,31 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
 
+  apps/cache-refresh:
+    dependencies:
+      '@repo/channel':
+        specifier: workspace:*
+        version: link:../../packages/channel
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/config-typescript
+      '@types/aws-lambda':
+        specifier: ^8.10.145
+        version: 8.10.145
+      '@types/node':
+        specifier: 22.7.4
+        version: 22.7.4
+      typescript:
+        specifier: 5.6.2
+        version: 5.6.2
+
   apps/channel-ingress:
     dependencies:
       '@repo/channel':

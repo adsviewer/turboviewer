@@ -19,19 +19,6 @@ import { groupedInsights } from './insights-query-builder';
 
 const fireAndForget = new FireAndForget();
 
-export interface FieldNode {
-  kind: string;
-  name: {
-    value: string;
-  };
-  selectionSet?: {
-    selections: {
-      kind: string;
-      name: { value: string };
-    }[];
-  };
-}
-
 const getUsdSpent = async (currency: CurrencyEnum, spend: bigint): Promise<bigint | null> => {
   if (currency === CurrencyEnum.USD) {
     return spend;

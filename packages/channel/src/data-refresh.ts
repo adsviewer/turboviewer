@@ -14,6 +14,7 @@ import _ from 'lodash';
 import { getChannel } from './channel-helper';
 import { asyncReportChannels } from './report-process';
 import { getInsightsHelper } from './insights-helper';
+import { deleteInsightsCache } from './insights-cache';
 
 const saveChannelData = async (
   integration: Integration,
@@ -31,10 +32,12 @@ const saveChannelData = async (
   }
 };
 
-const _cacheSummaryTopAds = async (integrations: Integration[]): Promise<void> => {
+export const cacheSummaryTopAds = async (ints?: Integration[]): Promise<void> => {
+  logger.info(`Caching summary and top ads for ${ints ? ints.map((i) => i.id).join(',') : 'all'} organizations`);
+  const integrations = ints ? ints : await getAllConnectedIntegrations();
   const organizationIds = new Set(integrations.map((integration) => integration.organizationId));
-  logger.info('Caching summary and top ads for all organizations');
   for (const organizationId of organizationIds) {
+    deleteInsightsCache(organizationId);
     logger.info(`Caching summary for ${organizationId}`);
     for (const orderBy of insightsColumnsOrderBy) {
       const todayStartOfDay = getTodayStartOfDay();
