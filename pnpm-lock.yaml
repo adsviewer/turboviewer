@@ -263,6 +263,15 @@ importers:
       '@repo/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@repo/mode':
+        specifier: workspace:*
+        version: link:../../packages/mode
+      '@sentry/aws-serverless':
+        specifier: ^8.33.0
+        version: 8.33.1(@opentelemetry/api@1.9.0)
+      '@sentry/profiling-node':
+        specifier: ^8.33.0
+        version: 8.33.1
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -270,6 +279,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config-typescript
+      '@sentry/cli':
+        specifier: ^2.36.4
+        version: 2.36.4
       '@types/aws-lambda':
         specifier: ^8.10.145
         version: 8.10.145
