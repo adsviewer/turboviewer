@@ -19,6 +19,11 @@ resource "aws_iam_role" "cache_refresh_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
+resource "aws_iam_role_policy_attachment" "cache_refresh_basic_policy_attachment" {
+  role       = aws_iam_role.cache_refresh_role.id
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 resource "aws_lambda_function" "cache_refresh_lambda" {
   architectures = ["arm64"]
   description   = "Refreshing insights cache."
@@ -100,6 +105,11 @@ data "aws_iam_policy_document" "cache_refresh_error_policy_document" {
 resource "aws_sns_topic" "cache_refresh_error_topic" {
   name   = "${local.cache_refresh_name}-error-topic"
   policy = data.aws_iam_policy_document.cache_refresh_error_policy_document.json
+}
+
+resource "aws_cloudwatch_log_group" "cache_refresh_log_group" {
+  name              = "/aws/lambda/${local.cache_refresh_name}"
+  retention_in_days = 30
 }
 
 resource "aws_cloudwatch_log_metric_filter" "cache_refresh_lambda_log_error_filter" {
