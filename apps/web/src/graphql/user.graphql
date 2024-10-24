@@ -21,6 +21,7 @@ fragment UserFields on User {
   email
   photoUrl
   allRoles
+  milestones
   organizations {
     organization {
       id

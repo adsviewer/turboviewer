@@ -1335,6 +1335,7 @@ export type UpdateUserMutation = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
+    milestones: Array<Milestones>;
     currentOrganizationId?: string | null;
     organizations: Array<{
       __typename: 'UserOrganization';
@@ -1369,6 +1370,7 @@ export type MeQuery = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
+    milestones: Array<Milestones>;
     currentOrganizationId?: string | null;
     organizations: Array<{
       __typename: 'UserOrganization';
@@ -1399,6 +1401,7 @@ export type UserFieldsFragment = {
   email: string;
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
+  milestones: Array<Milestones>;
   currentOrganizationId?: string | null;
   organizations: Array<{
     __typename: 'UserOrganization';
@@ -1438,6 +1441,7 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
+    milestones
     organizations {
       organization {
         id
