@@ -6,21 +6,26 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && pnpm run sentry:sourcemaps",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
     "clean": "rm -rf dist node_modules .turbo",
-    "update": "pnpm update --latest && pnpm install"
+    "update": "pnpm update --latest && pnpm install",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org adsviewer --project cache-refresh ./dist && sentry-cli sourcemaps upload --org adsviewer --project cache-refresh ./dist"
   },
   "author": "",
   "license": "UNLICENCED",
   "dependencies": {
     "@repo/channel": "workspace:*",
-    "@repo/logger": "workspace:*"
+    "@repo/logger": "workspace:*",
+    "@repo/mode": "workspace:*",
+    "@sentry/aws-serverless": "^8.33.0",
+    "@sentry/profiling-node": "^8.33.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@sentry/cli": "^2.36.4",
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "22.7.4",
     "typescript": "5.6.2"

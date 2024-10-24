@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "github_operating" {
     effect = "Allow"
     resources = [
       aws_ecr_repository.channel_ingress_ecr_repo.arn, aws_ecr_repository.channel_report_process_ecr_repo.arn,
-      aws_ecr_repository.channel_report_check_ecr_repo.arn
+      aws_ecr_repository.channel_report_check_ecr_repo.arn, aws_ecr_repository.cache_refresh_ecr_repo.arn
     ]
   }
   statement {
@@ -38,7 +38,8 @@ data "aws_iam_policy_document" "github_operating" {
     ]
     effect = "Allow"
     resources = [
-      aws_lambda_function.channel_ingress_lambda.arn, aws_lambda_function.channel_report_check_lambda.arn
+      aws_lambda_function.channel_ingress_lambda.arn, aws_lambda_function.channel_report_check_lambda.arn,
+      aws_lambda_function.cache_refresh_lambda.arn
     ]
   }
 }
