@@ -622,7 +622,7 @@ export type Mutation = {
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
-  removeUserMilestone: Scalars['Boolean']['output'];
+  removeUserMilestone: Tokens;
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
   sendFeedback: Feedback;
@@ -1434,7 +1434,10 @@ export type RemoveUserMilestoneMutationVariables = Exact<{
   milestone: Milestones;
 }>;
 
-export type RemoveUserMilestoneMutation = { __typename: 'Mutation'; removeUserMilestone: boolean };
+export type RemoveUserMilestoneMutation = {
+  __typename: 'Mutation';
+  removeUserMilestone: { __typename: 'Tokens'; token: string; refreshToken: string };
+};
 
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
@@ -1778,7 +1781,10 @@ export const SendFeedbackDocument = gql`
 `;
 export const RemoveUserMilestoneDocument = gql`
   mutation removeUserMilestone($milestone: Milestones!) {
-    removeUserMilestone(milestone: $milestone)
+    removeUserMilestone(milestone: $milestone) {
+      token
+      refreshToken
+    }
   }
 `;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;

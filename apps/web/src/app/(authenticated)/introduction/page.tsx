@@ -1,12 +1,31 @@
 'use client';
 
 import { Flex, Grid } from '@mantine/core';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { logger } from '@repo/logger';
 import LottieAnimation from '@/components/misc/lottie-animation';
+import { Milestones } from '@/graphql/generated/schema-server';
 import wavingPeopleAnimation from '../../../../public/lotties/waving-people.json';
+import { removeUserMilestoneAndGetJWT } from '../actions';
 import VideoCard from './components/video-card';
 
 export default function Introduction(): React.ReactNode {
+  useEffect(() => {
+    // On page load, remove the onboarding milestone from the user
+    // so that they can navigate the rest of the app
+    void removeUserMilestoneAndGetJWT({
+      milestone: Milestones.Onboarding,
+    })
+      .then((res) => {
+        if (!res.success) {
+          logger.error(res.error);
+        }
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      });
+  }, []);
+
   return (
     <Flex justify="center" align="center" gap="md">
       <LottieAnimation
