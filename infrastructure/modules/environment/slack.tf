@@ -4,7 +4,7 @@ resource "awscc_chatbot_slack_channel_configuration" "error_slack_channel_config
   logging_level      = "ERROR"
   slack_channel_id   = "errors"
   slack_workspace_id = var.slack_workspace_id
-  sns_topic_arns     = [module.server.sns_app_runner_error_topic_arn, aws_sns_topic.channel_ingress_error_topic.arn]
+  sns_topic_arns     = concat([module.server.sns_app_runner_error_topic_arn], values(aws_sns_topic.lambda_error_topics)[*].arn)
 
   tags = [
     for key, value in var.base_tags : {
