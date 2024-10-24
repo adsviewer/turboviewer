@@ -10,12 +10,12 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "~> 5.63.0"
+      version               = "~> 5.72.1"
       configuration_aliases = [aws.us_east_1]
     }
     vercel = {
       source  = "vercel/vercel"
-      version = "~> 1.12.0"
+      version = "~> 2.1.0"
     }
   }
 }
