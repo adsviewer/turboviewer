@@ -1,0 +1,24 @@
+query searchQueryStrings {
+  searchQueryStrings {
+    id
+    name
+    isOrganization
+    queryString
+  }
+}
+
+# Sending an ID updates, while not sending an ID creates a new entry
+mutation upsertSearchQueryString($id: String, $isOrganization: Boolean!, $name: String!, $queryString: String!) {
+  upsertSearchQueryString(id: $id, isOrganization: $isOrganization, name: $name, queryString: $queryString) {
+    id
+    name
+    isOrganization
+    queryString
+  }
+}
+
+mutation deleteSearchQueryString($id: String!) {
+  deleteSearchQueryString(id: $id) {
+    id
+  }
+}

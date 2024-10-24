@@ -11,6 +11,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { getMessages } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { ModalsProvider } from '@mantine/modals';
 import NotificationsHandler from '@/components/misc/notifications-handler';
 import { env } from '@/env.mjs';
 
@@ -32,10 +33,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages} locale={preferredLocale}>
           <MantineProvider defaultColorScheme="auto">
-            <NotificationsHandler />
-            {children}
-            <Analytics />
-            <SpeedInsights />
+            <ModalsProvider>
+              <NotificationsHandler />
+              {children}
+              <Analytics />
+              <SpeedInsights />
+            </ModalsProvider>
           </MantineProvider>
         </NextIntlClientProvider>
       </body>
