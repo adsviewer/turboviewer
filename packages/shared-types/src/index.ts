@@ -1,4 +1,4 @@
-import type { OrganizationRoleEnum, RoleEnum, UserStatus } from '@repo/database';
+import type { MilestoneEnum, OrganizationRoleEnum, RoleEnum, UserStatus } from '@repo/database';
 import { type JwtPayload } from 'jsonwebtoken';
 
 export interface AJwtPayload extends JwtPayload {
@@ -7,4 +7,5 @@ export interface AJwtPayload extends JwtPayload {
   organizationId?: string | null;
   type?: 'refresh';
   userStatus: UserStatus;
+  milestones: MilestoneEnum[];
 }
