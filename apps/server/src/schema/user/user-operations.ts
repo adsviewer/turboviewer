@@ -294,7 +294,8 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
-  removeUserMilestone: t.withAuth({ authenticated: true }).boolean({
+  removeUserMilestone: t.withAuth({ authenticated: true }).field({
+    type: TokensDto,
     nullable: false,
     args: {
       milestone: t.arg({ type: MilestonesDto, required: true }),
@@ -306,13 +307,14 @@ builder.mutationFields((t) => ({
       });
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This will go away once milestones have more values
       const updatedMilestones = milestones.filter((m) => m !== args.milestone);
-      await prisma.user.update({
+      const user = await prisma.user.update({
+        ...userWithRoles,
         where: { id: ctx.currentUserId },
         data: {
           milestones: updatedMilestones,
         },
       });
-      return true;
+      return createJwts(user);
     },
   }),
   emulateAdmin: t.withAuth({ isAdmin: true }).field({

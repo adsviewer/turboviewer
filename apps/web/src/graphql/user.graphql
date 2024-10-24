@@ -50,5 +50,8 @@ mutation sendFeedback($type: FeedbackTypeEnum!, $message: String!) {
 }
 
 mutation removeUserMilestone($milestone: Milestones!) {
-  removeUserMilestone(milestone: $milestone)
+  removeUserMilestone(milestone: $milestone) {
+    token
+    refreshToken
+  }
 }
