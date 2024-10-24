@@ -36,6 +36,10 @@
     "signOut": "Uitloggen",
     "noOrganizationData": "Geen organisatiegegevens"
   },
+  "introduction": {
+    "title": "Welkom!",
+    "description": "Analyseer moeiteloos de prestaties van uw advertenties. Met realtime data-inzichten kunt u belangrijke statistieken bijhouden, campagnes optimaliseren en uw ROI verhogen. Ga nu aan de slag om het volledige potentieel van uw advertentiestrategie te benutten!"
+  },
   "insights": {
     "title": "Inzichten",
     "insight": "In zicht",

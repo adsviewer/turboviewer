@@ -21,7 +21,6 @@ fragment UserFields on User {
   email
   photoUrl
   allRoles
-  milestones
   organizations {
     organization {
       id
@@ -47,5 +46,12 @@ mutation sendFeedback($type: FeedbackTypeEnum!, $message: String!) {
   sendFeedback(type: $type, message: $message) {
     type
     message
+  }
+}
+
+mutation removeUserMilestone($milestone: Milestones!) {
+  removeUserMilestone(milestone: $milestone) {
+    token
+    refreshToken
   }
 }

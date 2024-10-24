@@ -6,9 +6,11 @@ import {
   type AdAccountsQuery,
   type MeQuery,
   type RefreshTokenQuery,
+  type RemoveUserMilestoneMutationVariables,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
+import { changeJWT } from '../(unauthenticated)/actions';
 
 export const getUserDetails = async (): Promise<MeQuery['me']> => (await urqlClientSdk().me()).me;
 
@@ -21,3 +23,27 @@ export const refreshJWTToken = async (): Promise<RefreshTokenQuery> => await urq
 export const sendFeedback = async (
   values: SendFeedbackMutationVariables,
 ): Promise<UrqlResult<SendFeedbackMutation, string>> => await handleUrqlRequest(urqlClientSdk().sendFeedback(values));
+
+export const removeUserMilestoneAndGetJWT = async (
+  values: RemoveUserMilestoneMutationVariables,
+): Promise<UrqlResult> => {
+  try {
+    const res = await handleUrqlRequest(urqlClientSdk().removeUserMilestone(values));
+    if (!res.success) {
+      return {
+        success: false,
+        error: res.error,
+      };
+    }
+    await changeJWT(res.data.removeUserMilestone.token, res.data.removeUserMilestone.refreshToken);
+    return {
+      success: true,
+      data: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error,
+    };
+  }
+};

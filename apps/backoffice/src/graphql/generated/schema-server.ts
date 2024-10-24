@@ -622,7 +622,7 @@ export type Mutation = {
   login: Tokens;
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
-  removeUserMilestone: Scalars['Boolean']['output'];
+  removeUserMilestone: Tokens;
   resendEmailConfirmation: Scalars['Boolean']['output'];
   resetPassword: Tokens;
   sendFeedback: Feedback;

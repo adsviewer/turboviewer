@@ -11,11 +11,13 @@ import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
   InsightsInterval,
+  Milestones,
   UserStatus,
 } from './graphql/generated/schema-server';
 
 export const DEFAULT_HOME_PATH = '/summary';
 const DEFAULT_MISSING_ORG_PATH = '/organization-warning';
+const ONBOARDING_PATH = '/introduction';
 const publicPaths = [
   '/',
   '/sign-in',
@@ -129,6 +131,17 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const redirectUrl = new URL(DEFAULT_HOME_PATH, request.url);
     return NextResponse.redirect(redirectUrl);
   }
+
+  // If user has the "Onboarding" milestone, redirect them to the onboarding page
+  if (
+    tokenData &&
+    tokenData.milestones.includes(Milestones.Onboarding) &&
+    request.nextUrl.pathname !== ONBOARDING_PATH
+  ) {
+    const onboardingUrl = new URL(ONBOARDING_PATH, request.url);
+    return NextResponse.redirect(onboardingUrl);
+  }
+
   return NextResponse.next();
 }
 
@@ -175,11 +188,9 @@ const tryRefreshToken = async (
   return signOut(request);
 };
 
-// The default redirect is on insights, but if no current org exists then the user should be redirected to the org warning page
+// The default redirect is on summary, but if no current org exists then the user should be redirected to the org warning page
 const getDefaultRedirectURL = (request: NextRequest, tokenData: JWTPayload | undefined): URL => {
-  if (tokenData?.organizationId) {
-    return new URL(DEFAULT_HOME_PATH, request.url);
-  }
+  if (tokenData?.organizationId) return new URL(DEFAULT_HOME_PATH, request.url);
   return new URL(DEFAULT_MISSING_ORG_PATH, request.url);
 };
 
