@@ -1335,7 +1335,6 @@ export type UpdateUserMutation = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
-    milestones: Array<Milestones>;
     currentOrganizationId?: string | null;
     organizations: Array<{
       __typename: 'UserOrganization';
@@ -1370,7 +1369,6 @@ export type MeQuery = {
     email: string;
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
-    milestones: Array<Milestones>;
     currentOrganizationId?: string | null;
     organizations: Array<{
       __typename: 'UserOrganization';
@@ -1401,7 +1399,6 @@ export type UserFieldsFragment = {
   email: string;
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
-  milestones: Array<Milestones>;
   currentOrganizationId?: string | null;
   organizations: Array<{
     __typename: 'UserOrganization';
@@ -1433,6 +1430,12 @@ export type SendFeedbackMutation = {
   sendFeedback: { __typename: 'Feedback'; type: FeedbackTypeEnum; message: string };
 };
 
+export type RemoveUserMilestoneMutationVariables = Exact<{
+  milestone: Milestones;
+}>;
+
+export type RemoveUserMilestoneMutation = { __typename: 'Mutation'; removeUserMilestone: boolean };
+
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
@@ -1441,7 +1444,6 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
-    milestones
     organizations {
       organization {
         id
@@ -1774,6 +1776,11 @@ export const SendFeedbackDocument = gql`
     }
   }
 `;
+export const RemoveUserMilestoneDocument = gql`
+  mutation removeUserMilestone($milestone: Milestones!) {
+    removeUserMilestone(milestone: $milestone)
+  }
+`;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
@@ -2001,6 +2008,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<SendFeedbackMutation>;
+    },
+    removeUserMilestone(
+      variables: RemoveUserMilestoneMutationVariables,
+      options?: C,
+    ): Promise<RemoveUserMilestoneMutation> {
+      return requester<RemoveUserMilestoneMutation, RemoveUserMilestoneMutationVariables>(
+        RemoveUserMilestoneDocument,
+        variables,
+        options,
+      ) as Promise<RemoveUserMilestoneMutation>;
     },
   };
 }
