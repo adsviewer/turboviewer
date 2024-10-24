@@ -1,38 +1,30 @@
 import { logger } from '@repo/logger';
-import { type Integration, prisma, PublisherEnum } from '@repo/database';
-import { decryptTokens, getAllConnectedIntegrations, insightsColumnsOrderBy } from '@repo/channel-utils';
+import { type AdAccount, type Integration, prisma, PublisherEnum } from '@repo/database';
+import {
+  getAdAccountWithIntegration,
+  getAllConnectedIntegrations,
+  getConnectedIntegrationsById,
+  insightsColumnsOrderBy,
+} from '@repo/channel-utils';
 import type { z } from 'zod';
 import { addInterval, type AError, getTodayStartOfDay, isAError } from '@repo/utils';
 import { type channelIngressInput, type channelIngressOutput, invokeChannelIngressLambda } from '@repo/lambda-utils';
 import { Environment, MODE } from '@repo/mode';
 import _ from 'lodash';
-import { deleteInsightsCache } from './insights-cache';
 import { getChannel } from './channel-helper';
 import { asyncReportChannels } from './report-process';
 import { getInsightsHelper } from './insights-helper';
+import { deleteInsightsCache } from './insights-cache';
 
-const refreshDataOf = async (integration: Integration, initial: boolean): Promise<void> => {
-  await saveChannelData(integration, initial).catch((e: unknown) => {
-    const msg = e instanceof Error ? e.message : JSON.stringify(e);
-    logger.error(`Error refreshing channel data for ${integration.id}. Error: ${msg}`);
-  });
-};
-
-const refreshDataAll = async (initial?: boolean): Promise<void> => {
-  logger.info('Refreshing all channel data');
-  const integrations = await getAllConnectedIntegrations();
-
-  for (const integration of integrations) {
-    await refreshDataOf(integration, Boolean(initial));
-  }
-  logger.info('Refreshed all channel data');
-};
-
-const saveChannelData = async (integration: Integration, initial: boolean): Promise<AError | undefined> => {
-  logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for integrationId: ${integration.id}`);
+const saveChannelData = async (
+  integration: Integration,
+  adAccount: AdAccount,
+  initial: boolean,
+): Promise<AError | undefined> => {
+  logger.info(`Starting ${initial ? 'initial' : 'periodic'} ad ingress for adAccountId: ${adAccount.id}`);
 
   const channel = getChannel(integration.type);
-  const data = await channel.getChannelData(integration, initial);
+  const data = await channel.getAdAccountData(integration, adAccount, initial);
   if (isAError(data)) return data;
   // @ts-expect-error -- this is fine
   if (!asyncReportChannels.includes(integration.type)) {
@@ -40,75 +32,67 @@ const saveChannelData = async (integration: Integration, initial: boolean): Prom
   }
 };
 
-export const refreshData = async ({
-  initial,
-  integrationIds,
-}: z.infer<typeof channelIngressInput>): Promise<z.infer<typeof channelIngressOutput>> => {
-  if (integrationIds) {
-    const integrations = await prisma.integration
-      .findMany({
-        where: { id: { in: integrationIds } },
-      })
-      .then((ints) =>
-        ints.map(decryptTokens).flatMap((integration) => {
-          if (!integration) return [];
-          if (isAError(integration)) return [];
-          return integration;
-        }),
+export const cacheSummaryTopAds = async (ints?: Integration[]): Promise<void> => {
+  logger.info(`Caching summary and top ads for ${ints ? ints.map((i) => i.id).join(',') : 'all'} organizations`);
+  const integrations = ints ? ints : await getAllConnectedIntegrations();
+  const organizationIds = new Set(integrations.map((integration) => integration.organizationId));
+  for (const organizationId of organizationIds) {
+    deleteInsightsCache(organizationId);
+    logger.info(`Caching summary for ${organizationId}`);
+    for (const orderBy of insightsColumnsOrderBy) {
+      const todayStartOfDay = getTodayStartOfDay();
+      await getInsightsHelper(
+        {
+          page: 1,
+          pageSize: 9,
+          search: {},
+          adAccountIds: [],
+          dateFrom: addInterval(todayStartOfDay, 'day', -7),
+          dateTo: todayStartOfDay,
+          groupBy: ['publisher'],
+          interval: 'day',
+          order: 'desc',
+          orderBy,
+          publishers: [],
+        },
+        organizationId,
       );
-    for (const integration of integrations) {
-      await refreshDataOf(integration, initial);
-      deleteInsightsCache(integration.organizationId);
-    }
 
-    const organizationIds = new Set(integrations.map((integration) => integration.organizationId));
-    logger.info('Caching summary and top ads for all organizations');
-    for (const organizationId of organizationIds) {
-      logger.info(`Caching summary for ${organizationId}`);
-      for (const orderBy of insightsColumnsOrderBy) {
-        const todayStartOfDay = getTodayStartOfDay();
+      logger.info(`Caching top ads for ${orderBy}`);
+      for (const publisher of Object.values(PublisherEnum)) {
         await getInsightsHelper(
           {
             page: 1,
-            pageSize: 9,
+            pageSize: 3,
             search: {},
             adAccountIds: [],
             dateFrom: addInterval(todayStartOfDay, 'day', -7),
             dateTo: todayStartOfDay,
-            groupBy: ['publisher'],
-            interval: 'day',
+            groupBy: ['adId', 'publisher'],
+            interval: 'week',
             order: 'desc',
             orderBy,
-            publishers: [],
+            publishers: [publisher],
           },
           organizationId,
         );
-
-        logger.info(`Caching top ads for ${orderBy}`);
-        for (const publisher of Object.values(PublisherEnum)) {
-          await getInsightsHelper(
-            {
-              page: 1,
-              pageSize: 3,
-              search: {},
-              adAccountIds: [],
-              dateFrom: addInterval(todayStartOfDay, 'day', -7),
-              dateTo: todayStartOfDay,
-              groupBy: ['adId', 'publisher'],
-              interval: 'week',
-              order: 'desc',
-              orderBy,
-              publishers: [publisher],
-            },
-            organizationId,
-          );
-        }
       }
     }
-  } else {
-    await refreshDataAll(initial);
-    deleteInsightsCache();
   }
+};
+
+export const refreshData = async ({
+  initial,
+  adAccountIds,
+}: z.infer<typeof channelIngressInput>): Promise<z.infer<typeof channelIngressOutput>> => {
+  for (const adAccountId of adAccountIds) {
+    const adAccountIntegration = await getAdAccountWithIntegration(adAccountId);
+    if (isAError(adAccountIntegration)) {
+      continue;
+    }
+    await saveChannelData(adAccountIntegration.integration, adAccountIntegration.adAccount, initial);
+  }
+
   return {
     statusCode: 200,
     body: 'Success',
@@ -116,36 +100,44 @@ export const refreshData = async ({
 };
 
 export const invokeChannelIngress = async (
-  payload: z.infer<typeof channelIngressInput>,
+  initial: boolean,
+  integrationIds?: string[],
 ): Promise<(AError | z.infer<typeof channelIngressOutput>)[] | z.infer<typeof channelIngressOutput> | AError> => {
-  if (MODE === Environment.Local) {
-    return await refreshData(payload);
-  }
-  if (payload.integrationIds) {
-    return await invokeChannelIngressLambda(payload);
+  const integrations = integrationIds
+    ? await getConnectedIntegrationsById(integrationIds)
+    : await getAllConnectedIntegrations();
+
+  const adAccounts: AdAccount[] = [];
+  for (const integration of integrations) {
+    const channel = getChannel(integration.type);
+    const accounts = await channel.saveAdAccounts(integration);
+    if (!isAError(accounts)) adAccounts.push(...accounts);
   }
 
-  const connectedIntegrations = await getAllConnectedIntegrations();
-  const [asyncReportIntegrations, nonAsyncReportIntegrations] = _.partition(connectedIntegrations, (integration) =>
+  if (MODE === Environment.Local) {
+    return await refreshData({ initial: true, adAccountIds: adAccounts.map((adAccount) => adAccount.id) });
+  }
+
+  const [asyncReportAdAccounts, nonAsyncReportAdAccounts] = _.partition(adAccounts, (adAccount) =>
     // @ts-expect-error -- we are partitioning the integrations based on the type
-    asyncReportChannels.includes(integration.type),
+    asyncReportChannels.includes(adAccount.type),
   );
   const results: (AError | z.infer<typeof channelIngressOutput>)[] = [];
 
   results.push(
     await invokeChannelIngressLambda({
-      initial: payload.initial,
-      integrationIds: asyncReportIntegrations.map((integration) => integration.id),
+      initial,
+      adAccountIds: asyncReportAdAccounts.map((adAccount) => adAccount.id),
     } satisfies z.infer<typeof channelIngressInput>),
   );
 
-  const slicedIntegrations = _.chunk(nonAsyncReportIntegrations, 10);
-  for (const integrations of slicedIntegrations) {
+  const slicedAdAccounts = _.chunk(nonAsyncReportAdAccounts, 10);
+  for (const accounts of slicedAdAccounts) {
     const invocations = await Promise.all(
-      integrations.map((integration) =>
+      accounts.map((adAccount) =>
         invokeChannelIngressLambda({
-          initial: payload.initial,
-          integrationIds: [integration.id],
+          initial,
+          adAccountIds: [adAccount.id],
         } satisfies z.infer<typeof channelIngressInput>),
       ),
     );

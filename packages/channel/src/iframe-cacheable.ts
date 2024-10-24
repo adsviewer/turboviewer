@@ -1,7 +1,7 @@
 import { Cacheable } from '@repo/redis';
 import { type DeviceEnum, IntegrationTypeEnum, prisma, type PublisherEnum } from '@repo/database';
 import { AError, isAError } from '@repo/utils';
-import { decryptTokens, IFrameTypeEnum, type IFrameWithType } from '@repo/channel-utils';
+import { getConnectedIntegrationByAccountId, IFrameTypeEnum, type IFrameWithType } from '@repo/channel-utils';
 import { getChannel } from './channel-helper';
 
 const getKey = (adId: string, publisher?: PublisherEnum, device?: DeviceEnum, position?: string): string =>
@@ -23,22 +23,20 @@ const getFn =
     position?: string;
   }): Promise<IFrameWithType | AError> => {
     const ad = await prisma.ad.findUnique({
-      select: { adAccount: { select: { integration: true } } },
+      select: { adAccount: true },
       where: { id: adId },
     });
     if (!ad) return new AError('Ad not found');
 
-    const channel = getChannel(ad.adAccount.integration.type);
-    const decryptedIntegration = decryptTokens(ad.adAccount.integration);
-    if (!decryptedIntegration) return new AError('Integration not found');
-    if (isAError(decryptedIntegration)) return decryptedIntegration;
-    const iFrame = await channel.getAdPreview(decryptedIntegration, adId, publisher, device, position);
+    const integration = await getConnectedIntegrationByAccountId(ad.adAccount.id);
+    if (isAError(integration)) return integration;
+
+    const channel = getChannel(integration.type);
+    const iFrame = await channel.getAdPreview(integration, adId, publisher, device, position);
     if (isAError(iFrame)) return iFrame;
     return {
       ...iFrame,
-      type: embeddedFrameIntegrations.includes(ad.adAccount.integration.type)
-        ? IFrameTypeEnum.EMBEDDED
-        : IFrameTypeEnum.IFRAME,
+      type: embeddedFrameIntegrations.includes(ad.adAccount.type) ? IFrameTypeEnum.EMBEDDED : IFrameTypeEnum.IFRAME,
     };
   };
 

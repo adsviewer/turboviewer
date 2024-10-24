@@ -11,7 +11,7 @@ import {
 import { type MetaError } from './errors';
 import { type ChannelIFrame } from './iframe-helper';
 import { type JobStatusEnum } from './report-async-start';
-import { type AdAccountWithIntegration, type AdWithAdAccount } from './insights-utils';
+import { type AdAccountIntegration, type AdWithAdAccount } from './insights-utils';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -85,12 +85,12 @@ export interface ChannelInterface {
     device?: DeviceEnum,
     position?: string,
   ) => Promise<ChannelIFrame | AError>;
-  getChannelData: (integration: Integration, initial: boolean) => Promise<AError | undefined>;
+  getAdAccountData: (integration: Integration, adAccount: AdAccount, initial: boolean) => Promise<AError | undefined>;
   getDefaultPublisher: () => PublisherEnum;
-  getReportStatus: (adAccount: AdAccountWithIntegration, taskId: string) => Promise<JobStatusEnum>;
+  getReportStatus: (adAccount: AdAccountIntegration, taskId: string) => Promise<JobStatusEnum>;
   getUserId: (accessToken: string) => Promise<string | AError>;
   processReport: (
-    adAccount: AdAccountWithIntegration,
+    adAccount: AdAccountIntegration,
     taskId: string,
     since: Date,
     until: Date,
@@ -105,8 +105,4 @@ export interface ChannelInterface {
   saveCreatives: (integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>) => Promise<void>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   getType: () => IntegrationTypeEnum;
-  saveOldInsightsAdsAdsSetsCampaigns: (
-    integration: Integration,
-    groupByAdAccount: Map<string, AdWithAdAccount[]>,
-  ) => Promise<undefined | AError>;
 }

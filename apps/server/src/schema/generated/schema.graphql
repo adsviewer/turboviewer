@@ -28,7 +28,6 @@ type AdAccount {
   id: ID!
   insights: [Insight!]!
   integration: Integration!
-  integrationId: String!
 
   """
   Whether the ad account is connected to the current organization
@@ -632,7 +631,6 @@ type Mutation {
   deleteOrganization(organizationId: String): Organization!
   deleteSearchQueryString(id: String!, isOrganization: Boolean!): SearchQueryString!
   emulateAdmin(organizationId: String!): Tokens!
-  fillAdSetsAndCampaigns(integrationIds: [String!]): Boolean!
   fillMetaCreatives(integrationIds: [String!]): Boolean!
   forgetPassword(email: String!): Boolean!
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): MutationInviteUsersResult!

@@ -1,6 +1,7 @@
 import { URLSearchParams } from 'node:url';
 import { Readable } from 'node:stream';
 import {
+  type AdAccount as DbAdAccount,
   type AdAccount,
   CurrencyEnum,
   DeviceEnum,
@@ -14,7 +15,7 @@ import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
-  type AdAccountWithIntegration,
+  type AdAccountIntegration,
   adReportsStatusesToRedis,
   type AdWithAdAccount,
   authEndpoint,
@@ -175,10 +176,13 @@ export class Tiktok implements ChannelInterface {
     return await saveAccounts(activeAccounts, integration);
   }
 
-  async getChannelData(integration: Integration, initial: boolean): Promise<AError | undefined> {
-    const dbAccounts = await this.saveAdAccounts(integration);
-    if (isAError(dbAccounts)) return dbAccounts;
-    await adReportsStatusesToRedis(this.getType(), dbAccounts, initial);
+  async getAdAccountData(
+    _integration: Integration,
+    dbAccount: DbAdAccount,
+    initial: boolean,
+  ): Promise<AError | undefined> {
+    await adReportsStatusesToRedis(this.getType(), [dbAccount], initial);
+    return undefined;
   }
 
   async getAdPreview(
@@ -253,12 +257,9 @@ export class Tiktok implements ChannelInterface {
     return parsed.data.task_id;
   }
 
-  async getReportStatus(
-    { id, externalId, integration }: AdAccountWithIntegration,
-    taskId: string,
-  ): Promise<JobStatusEnum> {
+  async getReportStatus({ adAccount, integration }: AdAccountIntegration, taskId: string): Promise<JobStatusEnum> {
     const params = new URLSearchParams({
-      advertiser_id: externalId,
+      advertiser_id: adAccount.externalId,
       task_id: taskId,
     });
     const response = await Tiktok.tikTokFetch(
@@ -267,20 +268,20 @@ export class Tiktok implements ChannelInterface {
     );
     const data = await Tiktok.baseValidation(response);
     if (isAError(data)) {
-      logger.error(data, `Failed to get status for task ${taskId} and adAccount ${id}`);
+      logger.error(data, `Failed to get status for task ${taskId} and adAccount ${adAccount.id}`);
       return JobStatusEnum.FAILED;
     }
     const schema = z.object({ status: z.nativeEnum(JobStatusEnum) });
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
-      logger.error(parsed.error, `Failed to get status for task ${taskId} and adAccount ${id}`);
+      logger.error(parsed.error, `Failed to get status for task ${taskId} and adAccount ${adAccount.id}`);
       return JobStatusEnum.FAILED;
     }
     return parsed.data.status;
   }
 
   async processReport(
-    adAccount: AdAccountWithIntegration,
+    accountIntegration: AdAccountIntegration,
     taskId: string,
     since: Date,
     until: Date,
@@ -289,11 +290,11 @@ export class Tiktok implements ChannelInterface {
     const externalAdSetToIdMap = new Map<string, string>();
     const externalCampaignToIdMap = new Map<string, string>();
     const params = new URLSearchParams({
-      advertiser_id: adAccount.integration.externalId,
+      advertiser_id: accountIntegration.integration.externalId,
       task_id: taskId,
     });
     const response = await Tiktok.tikTokFetch(
-      adAccount.integration.accessToken,
+      accountIntegration.integration.accessToken,
       `${baseUrl}/report/task/download?${params.toString()}`,
     );
 
@@ -307,7 +308,7 @@ export class Tiktok implements ChannelInterface {
     const fn = (data: unknown[]): Promise<AError | undefined> =>
       Tiktok.processReportChunk(
         taskId,
-        adAccount,
+        accountIntegration.adAccount,
         data,
         placementPublisherMap,
         adExternalIdMap,
@@ -315,7 +316,7 @@ export class Tiktok implements ChannelInterface {
         externalCampaignToIdMap,
       );
     if (isAError(response)) return response;
-    await deleteOldInsights(adAccount.id, since, until);
+    await deleteOldInsights(accountIntegration.adAccount.id, since, until);
     const processed = await Tiktok.csvParseAndProcess(response, fn);
     if (processed) return processed[0];
     return undefined;
@@ -586,86 +587,6 @@ export class Tiktok implements ChannelInterface {
 
   getType(): IntegrationTypeEnum {
     return IntegrationTypeEnum.TIKTOK;
-  }
-
-  async saveOldInsightsAdsAdsSetsCampaigns(
-    integration: Integration,
-    groupByAdAccount: Map<string, AdWithAdAccount[]>,
-  ): Promise<AError | undefined> {
-    for (const [_, accountAds] of groupByAdAccount) {
-      const adAccount = accountAds[0].adAccount;
-
-      let start = 0;
-      const limit = 50;
-      let smallAccountAds = accountAds.slice(start, start + limit);
-      while (smallAccountAds.length > 0) {
-        const url = `${baseUrl}/ad/get/?advertiser_id=${adAccount.externalId}&filtering={"ad_ids":["${Array.from(new Set(smallAccountAds.map((a) => a.externalId))).join('","')}"]}&fields=["ad_id","ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name"]`;
-
-        const schema = z.object({
-          ad_id: z.coerce.number().int(),
-          ad_name: z.string(),
-          adgroup_id: z.coerce.number().int(),
-          adgroup_name: z.string(),
-          campaign_id: z.coerce.number().int(),
-          campaign_name: z.string(),
-        });
-
-        const toCampaignAdSetAd = (
-          data: z.infer<typeof schema>[],
-        ): { ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] } => {
-          return data.reduce<{ ads: ChannelAd[]; adSets: ChannelAdSet[]; campaigns: ChannelCampaign[] }>(
-            (acc, row) => {
-              acc.ads.push({
-                externalAdSetId: String(row.adgroup_id),
-                externalAdAccountId: adAccount.externalId,
-                externalId: row.ad_id.toString(),
-                name: row.ad_name,
-              });
-              acc.adSets.push({
-                externalCampaignId: row.campaign_id.toString(),
-                externalId: row.adgroup_id.toString(),
-                name: row.adgroup_name,
-              });
-              acc.campaigns.push({
-                externalAdAccountId: adAccount.externalId,
-                externalId: row.campaign_id.toString(),
-                name: row.campaign_name,
-              });
-              return acc;
-            },
-            { ads: [], adSets: [], campaigns: [] },
-          );
-        };
-
-        const processFn = async ({
-          ads,
-          adSets,
-          campaigns,
-        }: {
-          ads: ChannelAd[];
-          adSets: ChannelAdSet[];
-          campaigns: ChannelCampaign[];
-        }): Promise<void> => {
-          await saveInsightsAdsAdsSetsCampaigns(
-            campaigns,
-            new Map(),
-            adAccount,
-            adSets,
-            new Map(),
-            ads,
-            new Map(),
-            [],
-            new Map(),
-            [],
-          );
-        };
-
-        await Tiktok.processPagination(integration.accessToken, url, schema, toCampaignAdSetAd, processFn);
-        start += limit;
-        smallAccountAds = accountAds.slice(start, start + limit);
-      }
-    }
-    return undefined;
   }
 
   private static async handlePagination<T, U extends ZodTypeAny>(

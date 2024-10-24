@@ -160,7 +160,6 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
   authScopes: { isInOrg: true },
   fields: (t) => ({
     id: t.exposeID('id', { nullable: false }),
-    integrationId: t.exposeString('integrationId', { nullable: false }),
     externalId: t.exposeString('externalId', { nullable: false }),
 
     type: t.expose('type', { type: IntegrationTypeDto, nullable: false }),
@@ -182,7 +181,12 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
       nodeNullable: false,
     }),
     insights: t.relation('insights', { nullable: false }),
-    integration: t.relation('integration', { nullable: false }),
+    integration: t.field({
+      type: IntegrationDto,
+      nullable: false,
+      resolve: (root, _args, _ctx) =>
+        prisma.integration.findFirstOrThrow({ where: { adAccounts: { some: { id: root.id } } } }),
+    }),
     organizations: t.relation('organizations', {
       nullable: false,
       query: (_args, ctx) =>

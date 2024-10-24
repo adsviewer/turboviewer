@@ -206,8 +206,7 @@ model Integration {
 }
 
 model AdAccount {
-  id            String @id @default(cuid())
-  integrationId String @map("integration_id")
+  id String @id @default(cuid())
 
   type       IntegrationTypeEnum
   externalId String              @map("external_id")
@@ -217,7 +216,7 @@ model AdAccount {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  integration    Integration    @relation(fields: [integrationId], references: [id])
+  integrations   Integration[]
   advertisements Ad[]
   creatives      Creative[]
   insights       Insight[]

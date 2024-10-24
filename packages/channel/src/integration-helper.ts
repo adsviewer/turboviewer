@@ -123,9 +123,7 @@ const completeIntegration = async (
   });
   if (isAError(decryptedIntegration)) return decryptedIntegration;
 
-  fireAndForget.add(
-    async () => await invokeChannelIngress({ initial: false, integrationIds: [decryptedIntegration.id] }),
-  );
+  fireAndForget.add(async () => await invokeChannelIngress(false, [decryptedIntegration.id]));
 
   return integrationType;
 };

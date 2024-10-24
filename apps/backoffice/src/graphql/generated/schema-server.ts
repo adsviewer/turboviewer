@@ -56,7 +56,6 @@ export type AdAccount = {
   id: Scalars['ID']['output'];
   insights: Array<Insight>;
   integration: Integration;
-  integrationId: Scalars['String']['output'];
   /** Whether the ad account is connected to the current organization */
   isConnectedToCurrentOrg: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
@@ -617,7 +616,6 @@ export type Mutation = {
   deleteOrganization: Organization;
   deleteSearchQueryString: SearchQueryString;
   emulateAdmin: Tokens;
-  fillAdSetsAndCampaigns: Scalars['Boolean']['output'];
   fillMetaCreatives: Scalars['Boolean']['output'];
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
@@ -674,10 +672,6 @@ export type MutationDeleteSearchQueryStringArgs = {
 
 export type MutationEmulateAdminArgs = {
   organizationId: Scalars['String']['input'];
-};
-
-export type MutationFillAdSetsAndCampaignsArgs = {
-  integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type MutationFillMetaCreativesArgs = {
