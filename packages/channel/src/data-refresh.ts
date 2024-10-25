@@ -114,11 +114,13 @@ export const invokeChannelIngress = async (
     if (!isAError(accounts)) adAccounts.push(...accounts);
   }
 
+  const uniqueAdAccounts = _.uniqBy(adAccounts, (adAccount) => adAccount.id);
+
   if (MODE === Environment.Local) {
-    return await refreshData({ initial: true, adAccountIds: adAccounts.map((adAccount) => adAccount.id) });
+    return await refreshData({ initial: true, adAccountIds: uniqueAdAccounts.map((adAccount) => adAccount.id) });
   }
 
-  const [asyncReportAdAccounts, nonAsyncReportAdAccounts] = _.partition(adAccounts, (adAccount) =>
+  const [asyncReportAdAccounts, nonAsyncReportAdAccounts] = _.partition(uniqueAdAccounts, (adAccount) =>
     // @ts-expect-error -- we are partitioning the integrations based on the type
     asyncReportChannels.includes(adAccount.type),
   );
