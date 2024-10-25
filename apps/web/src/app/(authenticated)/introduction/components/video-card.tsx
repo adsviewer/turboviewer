@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button, Card, Flex, Group, Text } from '@mantine/core';
 import { IconBuilding, IconPlugConnected } from '@tabler/icons-react';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface PropsType {
   videoSrc: string;
@@ -13,6 +14,8 @@ interface PropsType {
 }
 
 export default function VideoCard(props: PropsType): React.ReactNode {
+  const tIntroduction = useTranslations('introduction');
+
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Card.Section>
@@ -41,7 +44,7 @@ export default function VideoCard(props: PropsType): React.ReactNode {
           mt="md"
           radius="md"
         >
-          Go to Integrations
+          {tIntroduction('goToIntegrations')}
         </Button>
         <Button
           component={Link}
@@ -53,7 +56,7 @@ export default function VideoCard(props: PropsType): React.ReactNode {
           mt="md"
           radius="md"
         >
-          Go to Organization
+          {tIntroduction('goToOrganization')}
         </Button>
       </Flex>
     </Card>

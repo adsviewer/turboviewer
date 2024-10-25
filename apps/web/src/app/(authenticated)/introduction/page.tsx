@@ -2,11 +2,14 @@
 
 import { Flex, Grid } from '@mantine/core';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import LottieAnimation from '@/components/misc/lottie-animation';
 import wavingPeopleAnimation from '../../../../public/lotties/waving-people.json';
 import VideoCard from './components/video-card';
 
 export default function Introduction(): React.ReactNode {
+  const tIntroduction = useTranslations('introduction');
+
   return (
     <Flex justify="center" align="center" gap="md">
       <LottieAnimation
@@ -27,8 +30,8 @@ export default function Introduction(): React.ReactNode {
       <Grid justify="center" align="center" gutter="lg">
         <Grid.Col span={{ base: 12, lg: 6 }}>
           <VideoCard
-            title="Welcome to AdsViewer!"
-            description="In order to use AdsViewer you need to set up your integrations and set up your organization."
+            title={tIntroduction('welcomeVideoTitle')}
+            description={tIntroduction('welcomeVideoDescription')}
             videoSrc="/videos/onboarding-video.mp4"
           />
         </Grid.Col>
