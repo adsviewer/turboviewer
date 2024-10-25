@@ -326,6 +326,10 @@ export class Tiktok implements ChannelInterface {
     return PublisherEnum.TikTok;
   }
 
+  async refreshAccessToken(_integration: Integration): Promise<Integration | AError> {
+    return Promise.reject(new AError('Not Implemented'));
+  }
+
   private static async getActiveAccounts(
     integration: Integration,
     advertiserIds: string[],
