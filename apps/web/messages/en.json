@@ -113,7 +113,7 @@
       "groupUser": "User",
       "groupOrganization": "Organization",
       "save": "Save",
-      "saveTooltip": "Save / Save as",
+      "saveTooltip": "Update / Save as new",
       "delete": "Delete",
       "cancel": "Cancel"
     }

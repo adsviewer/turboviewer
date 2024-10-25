@@ -6,6 +6,7 @@ import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useTranslations } from 'next-intl';
 import { useAtom, useAtomValue } from 'jotai';
+import _ from 'lodash';
 import { deleteSearchQueryString, upsertSearchQueryString } from '@/app/(authenticated)/actions';
 import { type DropdownGroupsValueType } from '@/util/types';
 import { type SearchQueryStringsQuery } from '@/graphql/generated/schema-server';
@@ -133,9 +134,10 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       });
   };
 
-const getSelectedSearchName = (id: string | null): string => searches.find((search) => search.id === id)?.name ?? '';
+  const getSelectedSearchName = (id: string | null): string => searches.find((search) => search.id === id)?.name ?? '';
 
-  const getSelectedSearchIsOrganization = (id: string | null): boolean => searches.find((search) => search.id === id)?.isOrganization ?? false;
+  const getSelectedSearchIsOrganization = (id: string | null): boolean =>
+    searches.find((search) => search.id === id)?.isOrganization ?? false;
 
   // Disable save and delete buttons if the selected search is organizational and the user isn't operator or org admin
   const getCanUserAlter = (id: string | null): boolean => {
