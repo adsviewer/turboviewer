@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { jwtVerify, decodeJwt, type JWTPayload } from 'jose';
+import { jwtVerify, decodeJwt } from 'jose';
 import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
@@ -132,17 +132,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If user has the "Onboarding" milestone, redirect them to the onboarding page
-  if (
-    tokenData &&
-     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- existing jwts will not have this field
-    tokenData.milestones?.includes(Milestones.Onboarding) &&
-    request.nextUrl.pathname !== ONBOARDING_PATH
-  ) {
-    const onboardingUrl = new URL(ONBOARDING_PATH, request.url);
-    return NextResponse.redirect(onboardingUrl);
-  }
-
   return NextResponse.next();
 }
 
@@ -158,7 +147,6 @@ const tryRefreshToken = async (
   request: NextRequest,
 ): Promise<NextResponse> => {
   if (err && typeof err === 'object' && 'code' in err && err.code === 'ERR_JWT_EXPIRED' && refreshToken) {
-    logger.info('Refreshing token');
     const schema = z.object({
       data: z.object({
         refreshToken: z.string(),
@@ -190,9 +178,13 @@ const tryRefreshToken = async (
 };
 
 // The default redirect is on summary, but if no current org exists then the user should be redirected to the org warning page
-const getDefaultRedirectURL = (request: NextRequest, tokenData: JWTPayload | undefined): URL => {
-  if (tokenData?.organizationId) return new URL(DEFAULT_HOME_PATH, request.url);
-  return new URL(DEFAULT_MISSING_ORG_PATH, request.url);
+const getDefaultRedirectURL = (request: NextRequest, tokenData: AJwtPayload | undefined): URL => {
+  let homePath = tokenData?.organizationID ? DEFAULT_HOME_PATH : DEFAULT_MISSING_ORG_PATH;
+  // If user has the "Onboarding" milestone, set the onboarding page as the home page
+  if (tokenData?.milestones.includes(Milestones.Onboarding)) {
+    homePath = ONBOARDING_PATH;
+  }
+  return new URL(homePath, request.url);
 };
 
 const isPublic = (path: string): boolean => {
