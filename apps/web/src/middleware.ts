@@ -135,7 +135,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // If user has the "Onboarding" milestone, redirect them to the onboarding page
   if (
     tokenData &&
-    tokenData.milestones.includes(Milestones.Onboarding) &&
+     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- existing jwts will not have this field
+    tokenData.milestones?.includes(Milestones.Onboarding) &&
     request.nextUrl.pathname !== ONBOARDING_PATH
   ) {
     const onboardingUrl = new URL(ONBOARDING_PATH, request.url);
