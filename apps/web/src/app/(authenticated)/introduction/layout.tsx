@@ -3,7 +3,7 @@ import { Title, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import LoaderCentered from '@/components/misc/loader-centered';
 
-export default function Layout({ children }: { children: React.ReactNode }): React.ReactNode {
+export default function IntroductionLayout({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('introduction');
   return (
     <>
