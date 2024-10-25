@@ -146,9 +146,8 @@ const getSelectedSearchName = (id: string | null): string => searches.find((sear
 
   // Disable save and delete buttons if the selected search is organizational and the user isn't operator or org admin
   const getCanUserAlter = (id: string | null): boolean => {
-    const isValidUserRole = isOrgAdmin(userDetails.allRoles) || isOperator(userDetails.allRoles);
     if (searches.find((search) => search.id === id && !search.isOrganization)) return true;
-    return id ? searches.some((search) => search.isOrganization && isValidUserRole) : false;
+    return id ? searches.some((search) => search.isOrganization && getCanSaveAsOrg()) : false;
   };
 
   const getCanSaveAsOrg = (): boolean => {
