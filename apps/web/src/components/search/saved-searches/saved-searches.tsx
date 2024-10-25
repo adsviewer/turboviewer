@@ -36,8 +36,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
 
   const updateSavedSearches = useCallback(
     (searchesData: SearchQueryStringsQuery['searchQueryStrings']): DropdownGroupsValueType[] => {
-      const userSearches = searchesData.filter((data) => !data.isOrganization);
-      const organizationSearches = searchesData.filter((data) => data.isOrganization);
+      const [organizationSearches, userSearches] = _.partition(searchesData, 'isOrganization');
       return [
         {
           group: SearchGroups.User,
