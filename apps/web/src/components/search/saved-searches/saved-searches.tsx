@@ -135,13 +135,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
 
 const getSelectedSearchName = (id: string | null): string => searches.find((search) => search.id === id)?.name ?? '';
 
-  const getSelectedSearchIsOrganization = (id: string | null): boolean => {
-    if (id) {
-      const selectedSearch = searches.find((search) => search.id === id);
-      if (selectedSearch) return selectedSearch.isOrganization;
-    }
-    return false;
-  };
+  const getSelectedSearchIsOrganization = (id: string | null): boolean => searches.find((search) => search.id === id)?.isOrganization ?? false;
 
   // Disable save and delete buttons if the selected search is organizational and the user isn't operator or org admin
   const getCanUserAlter = (id: string | null): boolean => {
