@@ -134,13 +134,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
       });
   };
 
-  const getSelectedSearchName = (id: string | null): string => {
-    if (id) {
-      const selectedSearch = searches.find((search) => search.id === id);
-      if (selectedSearch) return selectedSearch.name;
-    }
-    return '';
-  };
+const getSelectedSearchName = (id: string | null): string => searches.find((search) => search.id === id)?.name ?? '';
 
   const getSelectedSearchIsOrganization = (id: string | null): boolean => {
     if (id) {
