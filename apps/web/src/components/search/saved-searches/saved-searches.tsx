@@ -13,10 +13,12 @@ import { type SearchQueryStringsQuery } from '@/graphql/generated/schema-server'
 import { searchesAtom } from '@/app/atoms/searches-atoms';
 import { isOperator, isOrgAdmin } from '@/util/access-utils';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { type SearchTermType } from '../types-and-utils';
 import Save from './save';
 import Delete from './delete';
 
 interface PropsType {
+  searchTerms: SearchTermType[];
   getEncodedSearchData: () => string;
   handleSavedSearchChange: (queryString: string) => void;
 }
@@ -166,7 +168,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         onChange={handleChange}
       />
       <Save
-        isPending={isPending}
+        isPending={isPending || !props.searchTerms.length}
         canUserAlter={getCanUserAlter(selectedSearchID)}
         handleSave={handleSave}
         selectedSearchID={selectedSearchID}

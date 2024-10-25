@@ -663,7 +663,11 @@ export default function Search(props: PropsType): React.ReactNode {
         title={tGeneric('advancedSearch')}
         size="xl"
       >
-        <SavedSearches getEncodedSearchData={getEncodedSearchData} handleSavedSearchChange={handleSavedSearchChange} />
+        <SavedSearches
+          searchTerms={searchTerms}
+          getEncodedSearchData={getEncodedSearchData}
+          handleSavedSearchChange={handleSavedSearchChange}
+        />
         <Flex direction="column" mb="sm">
           <ScrollArea.Autosize mah={500} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
             {searchTerms.length ? (
