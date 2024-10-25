@@ -606,6 +606,10 @@ class Meta implements ChannelInterface {
     return parsed.data.id;
   }
 
+  async refreshAccessToken(_integration: Integration): Promise<Integration | AError> {
+    return Promise.reject(new AError('Not Implemented'));
+  }
+
   private async saveAdsAdSetsCampaignsAndInsights(
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; campaign: ChannelCampaign }[],
     creatives: ChannelCreative[],

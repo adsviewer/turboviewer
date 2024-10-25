@@ -88,6 +88,8 @@ class LinkedIn implements ChannelInterface {
     const integration = await getConnectedIntegrationByOrg(organizationId, IntegrationTypeEnum.LINKEDIN);
     if (!integration) return new AError('No integration found');
     if (isAError(integration)) return integration;
+    const refreshedIntegration = await LinkedIn.refreshedIntegration(integration);
+    if (isAError(refreshedIntegration)) return refreshedIntegration;
 
     const response = await fetch('https://www.linkedin.com/oauth/v2/revoke', {
       method: 'POST',
@@ -97,7 +99,7 @@ class LinkedIn implements ChannelInterface {
       body: new URLSearchParams({
         client_id: env.LINKEDIN_APPLICATION_ID,
         client_secret: env.LINKEDIN_APPLICATION_SECRET,
-        token: integration.accessToken,
+        token: refreshedIntegration.accessToken,
       }).toString(),
     }).catch((error: unknown) => {
       logger.error('Failed to de-authorize %o', { error });
@@ -110,13 +112,13 @@ class LinkedIn implements ChannelInterface {
       const json = await response.json();
       const error = LinkedIn.parseDeAuthRequest(json);
       logger.error(error, 'De-authorization request failed');
-      if (await disConnectIntegrationOnError(integration.id, error, false)) {
-        return integration.externalId;
+      if (await disConnectIntegrationOnError(refreshedIntegration.id, error, false)) {
+        return refreshedIntegration.externalId;
       }
       return error;
     }
 
-    return integration.externalId;
+    return refreshedIntegration.externalId;
   }
 
   async getAdAccountData(
@@ -219,6 +221,51 @@ class LinkedIn implements ChannelInterface {
     return await saveAccounts(channelAccounts, integration);
   }
 
+  async refreshAccessToken(integration: Integration): Promise<Integration | AError> {
+    if (!integration.refreshToken) throw new AError('No refresh token found');
+    const response = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: env.LINKEDIN_APPLICATION_ID,
+        client_secret: env.LINKEDIN_APPLICATION_SECRET,
+        refresh_token: integration.refreshToken,
+        grant_type: 'refresh_token',
+      }).toString(),
+    }).catch((error: unknown) => {
+      logger.error(error, 'Failed to refresh access token');
+      return error instanceof Error ? error : new Error(JSON.stringify(error));
+    });
+    if (response instanceof Error) return new AError(response.message);
+    const json: unknown = await response.json();
+    if (!response.ok) {
+      logger.error(json, 'Failed response to refresh access token');
+    }
+    const schema = z.object({
+      access_token: z.string(),
+      expires_in: z.number().int(),
+      refresh_token: z.string(),
+      refresh_token_expires_in: z.number().int(),
+      scope: z.literal('r_basicprofile'),
+    });
+    const parsed = schema.safeParse(json);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse refresh access token response');
+      return new AError('Failed to parse refresh access token response');
+    }
+    return await prisma.integration.update({
+      where: { id: integration.id },
+      data: {
+        accessToken: parsed.data.access_token,
+        accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
+        refreshToken: parsed.data.refresh_token,
+        refreshTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.refresh_token_expires_in),
+      },
+    });
+  }
+
   private async getAdAnalytics(
     integration: Integration,
     range: { since: Date; until: Date },
@@ -286,21 +333,33 @@ class LinkedIn implements ChannelInterface {
     return { creativeIds, campaignIds, campaignGroupIds, insights };
   }
 
+  private static async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
+    if (
+      integration.accessTokenExpiresAt &&
+      integration.accessTokenExpiresAt.getTime() < addInterval(new Date(), 'seconds', 60 * 5).getTime()
+    ) {
+      return await linkedIn.refreshAccessToken(integration);
+    }
+    return integration;
+  }
+
   private static async handlePagination<T extends ZodTypeAny>(
     integration: Integration,
     queryParams: string,
     schema: T,
   ): Promise<AError | z.infer<typeof schema>[]> {
+    const refreshedIntegration = await LinkedIn.refreshedIntegration(integration);
+    if (isAError(refreshedIntegration)) return refreshedIntegration;
     const headers = {
       'LinkedIn-Version': versionString,
       'X-Restli-Protocol-Version': '2.0.0',
-      Authorization: `Bearer ${integration.accessToken}`,
+      Authorization: `Bearer ${refreshedIntegration.accessToken}`,
     };
     const res: T[] = [];
     const responseP = fetch(`${baseUrl}/rest${queryParams}`, {
       headers,
     });
-    const response = await LinkedIn.parseLinkedInResponse(integration.id, responseP, schema);
+    const response = await LinkedIn.parseLinkedInResponse(refreshedIntegration.id, responseP, schema);
     if (isAError(response)) return response;
     res.push(...response.elements);
     let next = response.next;
@@ -308,7 +367,7 @@ class LinkedIn implements ChannelInterface {
       const nextResponse = fetch(`${baseUrl}${next.href}`, {
         headers,
       });
-      const nextResponseParsed = await LinkedIn.parseLinkedInResponse(integration.id, nextResponse, schema);
+      const nextResponseParsed = await LinkedIn.parseLinkedInResponse(refreshedIntegration.id, nextResponse, schema);
       if (isAError(nextResponseParsed)) return nextResponseParsed;
       res.push(...nextResponseParsed.elements);
       next = nextResponseParsed.next;

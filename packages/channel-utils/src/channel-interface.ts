@@ -95,6 +95,7 @@ export interface ChannelInterface {
     since: Date,
     until: Date,
   ) => Promise<AError | undefined>;
+  refreshAccessToken: (integration: Integration) => Promise<Integration | AError>;
   runAdInsightReport: (
     adAccount: AdAccount,
     integration: Integration,
