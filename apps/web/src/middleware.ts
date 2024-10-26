@@ -101,7 +101,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Insights only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
-    const newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
+    let newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
+    if (isUserOnboarding(tokenData)) newURL = ONBOARDING_PATH;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -110,7 +111,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (request.nextUrl.pathname === '/summary' && !request.nextUrl.search) {
     const today = DateTime.now().startOf('day').toMillis().toString();
     const prevWeek = DateTime.now().startOf('day').minus({ days: 7 }).toMillis().toString();
-    const newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}&dateFrom=${prevWeek}&dateTo=${today}`;
+    let newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}&dateFrom=${prevWeek}&dateTo=${today}`;
+    if (isUserOnboarding(tokenData)) newURL = ONBOARDING_PATH;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -181,11 +183,13 @@ const tryRefreshToken = async (
 const getDefaultRedirectURL = (request: NextRequest, tokenData: AJwtPayload | undefined): URL => {
   let homePath = tokenData?.organizationID ? DEFAULT_HOME_PATH : DEFAULT_MISSING_ORG_PATH;
   // If user has the "Onboarding" milestone, set the onboarding page as the home page
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- allow this for older JWT tokens
-  if (tokenData?.milestones?.includes(Milestones.Onboarding)) {
-    homePath = ONBOARDING_PATH;
-  }
+  if (isUserOnboarding(tokenData)) homePath = ONBOARDING_PATH;
   return new URL(homePath, request.url);
+};
+
+const isUserOnboarding = (tokenData: AJwtPayload | undefined): boolean => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- allow this for older JWT tokens
+  return tokenData?.milestones ? tokenData?.milestones?.includes(Milestones.Onboarding) : false;
 };
 
 const isPublic = (path: string): boolean => {
