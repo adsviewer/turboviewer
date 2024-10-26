@@ -786,6 +786,12 @@ export type MutationInviteUsersSuccess = {
   data: Scalars['Boolean']['output'];
 };
 
+export type NewIntegrationEvent = {
+  __typename: 'NewIntegrationEvent';
+  id: Scalars['String']['output'];
+  type: IntegrationType;
+};
+
 export type NewsletterSubscription = {
   __typename: 'NewsletterSubscription';
   email: Scalars['String']['output'];
@@ -934,6 +940,7 @@ export type SignUpInput = {
 export type Subscription = {
   __typename: 'Subscription';
   channelInitialSetupProgress: ChannelInitialProgressPayload;
+  newIntegration: NewIntegrationEvent;
 };
 
 export enum Tier {

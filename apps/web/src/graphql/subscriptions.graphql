@@ -1,0 +1,12 @@
+subscription channelInitialSetupProgress {
+  channelInitialSetupProgress {
+    progress
+    channel
+  }
+}
+
+subscription newIntegration {
+  newIntegration {
+    type
+  }
+}

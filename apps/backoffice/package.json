@@ -50,7 +50,6 @@
     "dayjs": "^1.11.13",
     "embla-carousel-react": "^8.3.0",
     "graphql": "^16.9.0",
-    "graphql-sse": "^2.5.3",
     "graphql-tag": "^2.12.6",
     "jose": "^5.9.3",
     "jotai": "^2.10.0",

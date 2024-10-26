@@ -19,10 +19,11 @@ import {
 } from '@repo/channel-utils';
 import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
-import { getRootOrganizationId } from '@repo/organization';
+import { getRootOrganizationId } from '@repo/backend-shared';
+import { type ChannelInitialProgressPayload } from '@repo/pubsub';
+import { type NewIntegrationEvent } from '@repo/shared-types';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
-import { type ChannelInitialProgressPayload } from '../pubsub';
 import type { GraphQLContext } from '../../context';
 
 export enum IntegrationStatusEnum {
@@ -151,6 +152,13 @@ export const ChannelInitialProgressPayloadDto = builder
       progress: t.exposeFloat('progress', { nullable: false }),
     }),
   });
+
+export const NewIntegrationEventDto = builder.objectRef<NewIntegrationEvent>('NewIntegrationEvent').implement({
+  fields: (t) => ({
+    id: t.exposeString('id', { nullable: false }),
+    type: t.expose('type', { type: IntegrationTypeDto, nullable: false }),
+  }),
+});
 
 export const CurrencyEnumDto = builder.enumType(CurrencyEnum, {
   name: 'CurrencyEnum',

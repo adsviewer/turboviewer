@@ -5,6 +5,7 @@ import { OrganizationRoleEnum, prisma } from '@repo/database';
 import { isAError, PasswordSchema } from '@repo/utils';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import { createId } from '@paralleldrive/cuid2';
+import { removeUserMilestone, userWithRoles } from '@repo/backend-shared';
 import { createJwts } from '../../auth';
 import {
   activateInvitedUser,
@@ -18,7 +19,6 @@ import { sendForgetPasswordEmail } from '../../email';
 import { builder } from '../builder';
 import { env } from '../../config';
 import { getInvitationRedis, handleLinkInvite, isConfirmInvitedUser } from '../../contexts/user/user-invite';
-import { userWithRoles } from '../../contexts/user/user-roles';
 import { validateEmail } from '../../emailable-helper';
 import { MilestonesDto, SignUpInputDto, TokensDto, UserDto } from './user-types';
 
@@ -295,25 +295,13 @@ builder.mutationFields((t) => ({
     },
   }),
   removeUserMilestone: t.withAuth({ authenticated: true }).field({
-    type: TokensDto,
     nullable: false,
+    type: TokensDto,
     args: {
       milestone: t.arg({ type: MilestonesDto, required: true }),
     },
     resolve: async (_root, args, ctx, _info) => {
-      const { milestones } = await prisma.user.findUniqueOrThrow({
-        where: { id: ctx.currentUserId },
-        select: { milestones: true },
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This will go away once milestones have more values
-      const updatedMilestones = milestones.filter((m) => m !== args.milestone);
-      const user = await prisma.user.update({
-        ...userWithRoles,
-        where: { id: ctx.currentUserId },
-        data: {
-          milestones: updatedMilestones,
-        },
-      });
+      const user = await removeUserMilestone(ctx.currentUserId, args.milestone);
       return createJwts(user);
     },
   }),

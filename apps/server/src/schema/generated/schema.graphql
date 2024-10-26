@@ -670,6 +670,11 @@ type MutationInviteUsersSuccess {
   data: Boolean!
 }
 
+type NewIntegrationEvent {
+  id: String!
+  type: IntegrationType!
+}
+
 type NewsletterSubscription {
   email: String!
   id: ID!
@@ -795,6 +800,7 @@ input SignUpInput {
 
 type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
+  newIntegration: NewIntegrationEvent!
 }
 
 enum Tier {

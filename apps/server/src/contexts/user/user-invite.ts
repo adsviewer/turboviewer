@@ -5,9 +5,9 @@ import { AError, inviteHashLabel, isAError } from '@repo/utils';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { logger } from '@repo/logger';
 import { canAddUser, tierConstraints } from '@repo/mappings';
+import { type UserWithRoles } from '@repo/backend-shared';
 import { createJwts, createJwtsFromUserId, type TokensType } from '../../auth';
 import { env } from '../../config';
-import { type UserWithRoles } from './user-roles';
 
 export const invitationExpirationInDays = 15;
 

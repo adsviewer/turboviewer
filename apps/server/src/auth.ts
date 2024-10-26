@@ -3,8 +3,8 @@ import { prisma, type RoleEnum } from '@repo/database';
 import { AError } from '@repo/utils';
 import { type AJwtPayload } from '@repo/shared-types';
 import { Environment, MODE } from '@repo/mode';
+import { userWithRoles, type UserWithRoles } from '@repo/backend-shared';
 import { env } from './config';
-import { type UserWithRoles, userWithRoles } from './contexts/user/user-roles';
 
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
 const { sign, verify } = jwt;

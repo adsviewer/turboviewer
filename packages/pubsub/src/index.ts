@@ -2,6 +2,7 @@ import { createPubSub } from 'graphql-yoga';
 import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import { ioredis } from '@repo/redis';
 import { type IntegrationTypeEnum } from '@repo/database';
+import { type NewIntegrationEvent } from '@repo/shared-types';
 
 const publishClient = ioredis;
 const subscribeClient = ioredis.duplicate();
@@ -19,4 +20,5 @@ export interface ChannelInitialProgressPayload {
 
 export const pubSub = createPubSub<{
   'user:channel:initial-progress': [userId: string, payload: ChannelInitialProgressPayload];
+  'organization:integration:new-integration': [organizationId: string, payload: NewIntegrationEvent];
 }>({ eventTarget });

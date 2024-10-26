@@ -4,6 +4,7 @@ import { OrganizationRoleEnum, prisma, UserOrganizationStatus, UserStatus } from
 import { logger } from '@repo/logger';
 import { redisDel, redisGet, redisGetKeys, redisSet } from '@repo/redis';
 import { canAddUser, tierConstraints } from '@repo/mappings';
+import { userWithRoles } from '@repo/backend-shared';
 import { builder } from '../builder';
 import { createPassword } from '../../contexts/user/user';
 import { createJwts } from '../../auth';
@@ -21,7 +22,6 @@ import {
   redisSetInvitationLink,
   setConfirmInvitedUserRedis,
 } from '../../contexts/user/user-invite';
-import { userWithRoles } from '../../contexts/user/user-roles';
 import { InviteLinkDto, InviteUsersErrors, OrganizationRoleEnumDto } from '../organization/org-types';
 import { env } from '../../config';
 import { sendOrganizationInviteConfirmEmail } from '../../email';

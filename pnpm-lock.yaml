@@ -151,9 +151,6 @@ importers:
       graphql:
         specifier: ^16.9.0
         version: 16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je)
-      graphql-sse:
-        specifier: ^2.5.3
-        version: 2.5.3(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
       graphql-tag:
         specifier: ^2.12.6
         version: 2.12.6(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
@@ -541,9 +538,6 @@ importers:
       '@graphql-yoga/plugin-disable-introspection':
         specifier: ^2.7.0
         version: 2.7.0(graphql-yoga@5.7.0(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je)))(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
-      '@graphql-yoga/redis-event-target':
-        specifier: ^3.0.1
-        version: 3.0.1(ioredis@5.4.1)
       '@paralleldrive/cuid2':
         specifier: ^2.2.2
         version: 2.2.2
@@ -568,6 +562,9 @@ importers:
       '@pothos/plugin-zod':
         specifier: ^4.1.0
         version: 4.1.0(@pothos/core@4.2.0(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je)))(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))(zod@3.23.8)
+      '@repo/backend-shared':
+        specifier: workspace:*
+        version: link:../../packages/backend-shared
       '@repo/channel':
         specifier: workspace:*
         version: link:../../packages/channel
@@ -589,9 +586,9 @@ importers:
       '@repo/mode':
         specifier: workspace:*
         version: link:../../packages/mode
-      '@repo/organization':
+      '@repo/pubsub':
         specifier: workspace:*
-        version: link:../../packages/organization
+        version: link:../../packages/pubsub
       '@repo/redis':
         specifier: workspace:*
         version: link:../../packages/redis
@@ -973,6 +970,34 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
 
+  packages/backend-shared:
+    dependencies:
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../channel-utils
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/mappings':
+        specifier: workspace:*
+        version: link:../mappings
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/node':
+        specifier: ^22.7.4
+        version: 22.7.4
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
+
   packages/channel:
     dependencies:
       '@aws-sdk/client-batch':
@@ -981,6 +1006,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.658.1
         version: 3.658.1
+      '@repo/backend-shared':
+        specifier: workspace:*
+        version: link:../backend-shared
       '@repo/channel-linkedin':
         specifier: workspace:*
         version: link:../channel-linkedin
@@ -1008,9 +1036,9 @@ importers:
       '@repo/mode':
         specifier: workspace:*
         version: link:../mode
-      '@repo/organization':
+      '@repo/pubsub':
         specifier: workspace:*
-        version: link:../organization
+        version: link:../pubsub
       '@repo/redis':
         specifier: workspace:*
         version: link:../redis
@@ -1434,20 +1462,26 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
 
-  packages/organization:
+  packages/pubsub:
     dependencies:
+      '@graphql-yoga/redis-event-target':
+        specifier: ^3.0.1
+        version: 3.0.1(ioredis@5.4.1)
       '@repo/channel-utils':
         specifier: workspace:*
         version: link:../channel-utils
       '@repo/database':
         specifier: workspace:*
         version: link:../database
-      '@repo/mappings':
+      '@repo/redis':
         specifier: workspace:*
-        version: link:../mappings
-      '@repo/utils':
+        version: link:../redis
+      '@repo/shared-types':
         specifier: workspace:*
-        version: link:../utils
+        version: link:../shared-types
+      graphql-yoga:
+        specifier: 5.7.0
+        version: 5.7.0(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
