@@ -36,6 +36,14 @@
     "signOut": "Sign Out",
     "noOrganizationData": "No organization data"
   },
+  "introduction": {
+    "title": "Welcome!",
+    "description": "Analyze your ad performance effortlessly. With real-time data insights, track key metrics, optimize campaigns, and boost ROI. Get started now to unlock the full potential of your advertising strategy!",
+    "goToIntegrations": "Go to Integrations",
+    "goToOrganization": "Go to Organization",
+    "welcomeVideoTitle": "Welcome to AdsViewer!",
+    "welcomeVideoDescription": "In order to use AdsViewer you need to set up your integrations and set up your organization."
+  },
   "insights": {
     "title": "Insights",
     "insight": "Insight",

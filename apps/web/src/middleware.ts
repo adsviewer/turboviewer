@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { jwtVerify, decodeJwt, type JWTPayload } from 'jose';
+import { jwtVerify, decodeJwt } from 'jose';
 import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@repo/logger';
 import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/utils';
@@ -11,11 +11,13 @@ import {
   InsightsColumnsGroupBy,
   InsightsColumnsOrderBy,
   InsightsInterval,
+  Milestones,
   UserStatus,
 } from './graphql/generated/schema-server';
 
 export const DEFAULT_HOME_PATH = '/summary';
 const DEFAULT_MISSING_ORG_PATH = '/organization-warning';
+const ONBOARDING_PATH = '/introduction';
 const publicPaths = [
   '/',
   '/sign-in',
@@ -99,7 +101,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // (Insights only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
-    const newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
+    let newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
+    if (isUserOnboarding(tokenData)) newURL = ONBOARDING_PATH;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -108,7 +111,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (request.nextUrl.pathname === '/summary' && !request.nextUrl.search) {
     const today = DateTime.now().startOf('day').toMillis().toString();
     const prevWeek = DateTime.now().startOf('day').minus({ days: 7 }).toMillis().toString();
-    const newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}&dateFrom=${prevWeek}&dateTo=${today}`;
+    let newURL = `/summary?${urlKeys.fetchPreviews}=true&${urlKeys.chartMetric}=${ChartMetricsEnum.Impressions}&${urlKeys.orderBy}=${InsightsColumnsOrderBy.impressions_abs}&dateFrom=${prevWeek}&dateTo=${today}`;
+    if (isUserOnboarding(tokenData)) newURL = ONBOARDING_PATH;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -129,6 +133,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const redirectUrl = new URL(DEFAULT_HOME_PATH, request.url);
     return NextResponse.redirect(redirectUrl);
   }
+
   return NextResponse.next();
 }
 
@@ -144,7 +149,6 @@ const tryRefreshToken = async (
   request: NextRequest,
 ): Promise<NextResponse> => {
   if (err && typeof err === 'object' && 'code' in err && err.code === 'ERR_JWT_EXPIRED' && refreshToken) {
-    logger.info('Refreshing token');
     const schema = z.object({
       data: z.object({
         refreshToken: z.string(),
@@ -175,12 +179,17 @@ const tryRefreshToken = async (
   return signOut(request);
 };
 
-// The default redirect is on insights, but if no current org exists then the user should be redirected to the org warning page
-const getDefaultRedirectURL = (request: NextRequest, tokenData: JWTPayload | undefined): URL => {
-  if (tokenData?.organizationId) {
-    return new URL(DEFAULT_HOME_PATH, request.url);
-  }
-  return new URL(DEFAULT_MISSING_ORG_PATH, request.url);
+// The default redirect is on summary, but if no current org exists then the user should be redirected to the org warning page
+const getDefaultRedirectURL = (request: NextRequest, tokenData: AJwtPayload | undefined): URL => {
+  let homePath = tokenData?.organizationID ? DEFAULT_HOME_PATH : DEFAULT_MISSING_ORG_PATH;
+  // If user has the "Onboarding" milestone, set the onboarding page as the home page
+  if (isUserOnboarding(tokenData)) homePath = ONBOARDING_PATH;
+  return new URL(homePath, request.url);
+};
+
+const isUserOnboarding = (tokenData: AJwtPayload | undefined): boolean => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- allow this for older JWT tokens
+  return tokenData?.milestones ? tokenData?.milestones?.includes(Milestones.Onboarding) : false;
 };
 
 const isPublic = (path: string): boolean => {

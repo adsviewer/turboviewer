@@ -637,7 +637,7 @@ type Mutation {
   login(email: String!, password: String!, token: String): Tokens!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
   removeUserFromOrganization(userId: String!): Boolean!
-  removeUserMilestone(milestone: Milestones!): Boolean!
+  removeUserMilestone(milestone: Milestones!): Tokens!
   resendEmailConfirmation: Boolean!
   resetPassword(password: String!, token: String!): Tokens!
   sendFeedback(message: String!, type: FeedbackTypeEnum!): Feedback!

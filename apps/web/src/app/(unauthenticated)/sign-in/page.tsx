@@ -13,7 +13,6 @@ import { type LoginProvidersQuery } from '@/graphql/generated/schema-server';
 import { addOrReplaceURLParams, urlKeys, type GenericRequestResponseBody } from '@/util/url-query-utils';
 import { env } from '@/env.mjs';
 import LottieAnimation from '@/components/misc/lottie-animation';
-import { DEFAULT_HOME_PATH } from '@/middleware';
 import LoginProviders from '../components/login-providers';
 import analyticalPersonAnimation from '../../../../public/lotties/analytical-person.json';
 import { getLoginProviders } from './actions';
@@ -61,7 +60,7 @@ export default function SignIn(): React.JSX.Element {
                 const redirectTo = `${env.NEXT_PUBLIC_BACKOFFICE_URL}/api/save-tokens?${TOKEN_KEY}=${data.token}&${REFRESH_TOKEN_KEY}=${data.refreshToken}`;
                 return redirect(redirectTo);
               }
-              router.push(redirectUrl ?? DEFAULT_HOME_PATH);
+              router.push(redirectUrl ?? '/');
             });
             return null;
           }

@@ -31,6 +31,7 @@ export const createJwts = async ({
   roles: userRoles,
   id: userId,
   status,
+  milestones,
 }: UserWithRoles): Promise<TokensType> => {
   const roles = userRoles.map((r) => r.role);
   if (organizationId) {
@@ -41,11 +42,15 @@ export const createJwts = async ({
     roles.push(role as RoleEnum);
   }
   return {
-    token: sign({ userId, organizationId, roles, userStatus: status } satisfies AJwtPayload, env.AUTH_SECRET, {
-      expiresIn,
-    }),
+    token: sign(
+      { userId, organizationId, roles, userStatus: status, milestones } satisfies AJwtPayload,
+      env.AUTH_SECRET,
+      {
+        expiresIn,
+      },
+    ),
     refreshToken: sign(
-      { userId, organizationId, userStatus: status, type: 'refresh' } satisfies AJwtPayload,
+      { userId, organizationId, userStatus: status, milestones, type: 'refresh' } satisfies AJwtPayload,
       env.REFRESH_SECRET,
       { expiresIn: '183d' },
     ),
