@@ -181,7 +181,8 @@ const tryRefreshToken = async (
 const getDefaultRedirectURL = (request: NextRequest, tokenData: AJwtPayload | undefined): URL => {
   let homePath = tokenData?.organizationID ? DEFAULT_HOME_PATH : DEFAULT_MISSING_ORG_PATH;
   // If user has the "Onboarding" milestone, set the onboarding page as the home page
-  if (tokenData?.milestones.includes(Milestones.Onboarding)) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- allow this for older JWT tokens
+  if (tokenData?.milestones?.includes(Milestones.Onboarding)) {
     homePath = ONBOARDING_PATH;
   }
   return new URL(homePath, request.url);
