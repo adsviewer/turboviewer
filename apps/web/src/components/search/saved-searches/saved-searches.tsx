@@ -83,19 +83,19 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
           });
           return;
         }
-        const responseID = res.data.upsertSearchQueryString.id;
+        const responseId = res.data.upsertSearchQueryString.id;
 
         // Update the selected search (if it's an update operation)
         const newSearches = searches.map((search) =>
-          search.id === responseID ? res.data.upsertSearchQueryString : search,
+          search.id === responseId ? res.data.upsertSearchQueryString : search,
         );
 
         // Check if no update was made, then push the new search (means it's a new search)
-        const isUpdateSearch = searches.some((search) => search.id === responseID);
+        const isUpdateSearch = searches.some((search) => search.id === responseId);
         if (!isUpdateSearch) newSearches.push(res.data.upsertSearchQueryString);
         setSearches(newSearches);
         setSavedSearches(updateSavedSearches(newSearches));
-        setSelectedSearchID(responseID);
+        setSelectedSearchID(responseId);
       })
       .catch((err: unknown) => {
         logger.error(err);
