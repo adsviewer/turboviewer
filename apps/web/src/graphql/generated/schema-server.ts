@@ -1127,24 +1127,6 @@ export type DeAuthIntegrationMutation = {
     | { __typename: 'MutationDeAuthIntegrationSuccess'; data: string };
 };
 
-export type ChannelInitialSetupProgressSubscriptionVariables = Exact<{ [key: string]: never }>;
-
-export type ChannelInitialSetupProgressSubscription = {
-  __typename: 'Subscription';
-  channelInitialSetupProgress: {
-    __typename: 'ChannelInitialProgressPayload';
-    progress: number;
-    channel: IntegrationType;
-  };
-};
-
-export type NewIntegrationSubscriptionVariables = Exact<{ [key: string]: never }>;
-
-export type NewIntegrationSubscription = {
-  __typename: 'Subscription';
-  newIntegration: { __typename: 'NewIntegrationEvent'; type: IntegrationType };
-};
-
 export type LoginMutationVariables = Exact<{
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -1605,21 +1587,6 @@ export const DeAuthIntegrationDocument = gql`
     }
   }
 `;
-export const ChannelInitialSetupProgressDocument = gql`
-  subscription channelInitialSetupProgress {
-    channelInitialSetupProgress {
-      progress
-      channel
-    }
-  }
-`;
-export const NewIntegrationDocument = gql`
-  subscription newIntegration {
-    newIntegration {
-      type
-    }
-  }
-`;
 export const LoginDocument = gql`
   mutation login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
@@ -1852,26 +1819,6 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<DeAuthIntegrationMutation>;
-    },
-    channelInitialSetupProgress(
-      variables?: ChannelInitialSetupProgressSubscriptionVariables,
-      options?: C,
-    ): AsyncIterable<ChannelInitialSetupProgressSubscription> {
-      return requester<ChannelInitialSetupProgressSubscription, ChannelInitialSetupProgressSubscriptionVariables>(
-        ChannelInitialSetupProgressDocument,
-        variables,
-        options,
-      ) as AsyncIterable<ChannelInitialSetupProgressSubscription>;
-    },
-    newIntegration(
-      variables?: NewIntegrationSubscriptionVariables,
-      options?: C,
-    ): AsyncIterable<NewIntegrationSubscription> {
-      return requester<NewIntegrationSubscription, NewIntegrationSubscriptionVariables>(
-        NewIntegrationDocument,
-        variables,
-        options,
-      ) as AsyncIterable<NewIntegrationSubscription>;
     },
     login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
       return requester<LoginMutation, LoginMutationVariables>(

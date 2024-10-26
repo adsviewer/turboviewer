@@ -41,7 +41,7 @@ const config: CodegenConfig = {
     '../backoffice/src/graphql/generated/schema-server.ts': {
       plugins: serverPlugins,
       config: serverConfig,
-      documents: ['../backoffice/src/graphql/*.graphql'],
+      documents: ['../backoffice/src/graphql/*.graphql', '!../web/src/graphql/subscriptions.graphql'],
     },
   },
   config: {
