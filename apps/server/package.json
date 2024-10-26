@@ -38,7 +38,7 @@
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
-    "@repo/organization": "workspace:*",
+    "@repo/backend-shared": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
     "@sentry/node": "^8.33.0",

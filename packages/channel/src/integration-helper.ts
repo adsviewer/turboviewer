@@ -1,7 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
-import { type Integration, IntegrationStatus, type IntegrationTypeEnum, Prisma, prisma } from '@repo/database';
-import { getTier } from '@repo/organization';
+import {
+  type Integration,
+  IntegrationStatus,
+  type IntegrationTypeEnum,
+  MilestoneEnum,
+  Prisma,
+  prisma,
+} from '@repo/database';
+import { getTier, removeUserMilestone } from '@repo/backend-shared';
 import { logger } from '@repo/logger';
 import { redisGet, redisSet } from '@repo/redis';
 import { AError, FireAndForget, isAError } from '@repo/utils';
@@ -170,16 +177,19 @@ const saveTokens = async (
     status: IntegrationStatus.CONNECTED,
     organizationId,
   };
-  const integration = await prisma.integration.upsert({
-    create: integrationData,
-    update: integrationData,
-    where: {
-      organizationId_type: {
-        organizationId,
-        type,
+  const [integration] = await Promise.all([
+    prisma.integration.upsert({
+      create: integrationData,
+      update: integrationData,
+      where: {
+        organizationId_type: {
+          organizationId,
+          type,
+        },
       },
-    },
-  });
+    }),
+    removeOnboardingMilestone(organizationId),
+  ]);
 
   const decryptedIntegration = {
     ...integration,
@@ -189,4 +199,9 @@ const saveTokens = async (
   const adAccounts = await getChannel(type).saveAdAccounts(decryptedIntegration);
   if (isAError(adAccounts)) return adAccounts;
   return decryptedIntegration;
+};
+
+const removeOnboardingMilestone = async (organizationId: string): Promise<void> => {
+  const usersWithOrg = await prisma.user.findMany({ where: { organizations: { some: { organizationId } } } });
+  await Promise.all(usersWithOrg.map(async (user) => removeUserMilestone(user.id, MilestoneEnum.Onboarding)));
 };

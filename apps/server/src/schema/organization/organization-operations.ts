@@ -2,12 +2,11 @@ import { EmailType, OrganizationRoleEnum, prisma, Tier, UserOrganizationStatus, 
 import { GraphQLError } from 'graphql';
 import { AError, FireAndForget, isAError } from '@repo/utils';
 import { deleteInsightsCache } from '@repo/channel';
-import { getTier, switchTierHelper } from '@repo/organization';
+import { getTier, switchTierHelper, userWithRoles } from '@repo/backend-shared';
 import { builder } from '../builder';
 import { createJwts } from '../../auth';
 import { TokensDto } from '../user/user-types';
 import { deleteRedisInvite } from '../../contexts/user/user-invite';
-import { userWithRoles } from '../../contexts/user/user-roles';
 import { AdAccountDto, IntegrationTypeDto } from '../integrations/integration-types';
 import { sendOrganizationAddedEmail } from '../../email';
 import { OrganizationDto, OrganizationRoleEnumDto, UserOrganizationDto, UserRolesInput } from './org-types';

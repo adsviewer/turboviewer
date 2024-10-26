@@ -2,7 +2,7 @@ import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, FireAndForget } from '@repo/utils';
 import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
-import { getRootOrganizationId, getTier } from '@repo/organization';
+import { getRootOrganizationId, getTier } from '@repo/backend-shared';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
 import { tierConstraints } from '@repo/mappings';

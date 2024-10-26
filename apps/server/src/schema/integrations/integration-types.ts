@@ -19,7 +19,7 @@ import {
 } from '@repo/channel-utils';
 import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
-import { getRootOrganizationId } from '@repo/organization';
+import { getRootOrganizationId } from '@repo/backend-shared';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
 import { type ChannelInitialProgressPayload } from '../pubsub';

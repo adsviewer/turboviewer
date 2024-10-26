@@ -16,6 +16,7 @@ import { logger } from '@repo/logger';
 import { createId } from '@paralleldrive/cuid2';
 import { redisDel, redisGet, redisSet } from '@repo/redis';
 import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { userWithRoles } from '@repo/backend-shared';
 import { validateEmail } from '../../emailable-helper';
 import { env } from '../../config';
 import { sendConfirmEmail } from '../../email';
@@ -28,7 +29,6 @@ import {
   type SignupDataProvider,
 } from '../login-provider/login-provider-types';
 import { deleteRedisInvite, redisGetInvitationLink } from './user-invite';
-import { userWithRoles } from './user-roles';
 
 const scryptAsync = promisify(scrypt);
 
