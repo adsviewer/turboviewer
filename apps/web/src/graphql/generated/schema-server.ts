@@ -786,6 +786,12 @@ export type MutationInviteUsersSuccess = {
   data: Scalars['Boolean']['output'];
 };
 
+export type NewIntegrationEvent = {
+  __typename: 'NewIntegrationEvent';
+  id: Scalars['String']['output'];
+  type: IntegrationType;
+};
+
 export type NewsletterSubscription = {
   __typename: 'NewsletterSubscription';
   email: Scalars['String']['output'];
@@ -934,6 +940,7 @@ export type SignUpInput = {
 export type Subscription = {
   __typename: 'Subscription';
   channelInitialSetupProgress: ChannelInitialProgressPayload;
+  newIntegration: NewIntegrationEvent;
 };
 
 export enum Tier {
@@ -1129,6 +1136,13 @@ export type ChannelInitialSetupProgressSubscription = {
     progress: number;
     channel: IntegrationType;
   };
+};
+
+export type NewIntegrationSubscriptionVariables = Exact<{ [key: string]: never }>;
+
+export type NewIntegrationSubscription = {
+  __typename: 'Subscription';
+  newIntegration: { __typename: 'NewIntegrationEvent'; type: IntegrationType };
 };
 
 export type LoginMutationVariables = Exact<{
@@ -1599,6 +1613,13 @@ export const ChannelInitialSetupProgressDocument = gql`
     }
   }
 `;
+export const NewIntegrationDocument = gql`
+  subscription newIntegration {
+    newIntegration {
+      type
+    }
+  }
+`;
 export const LoginDocument = gql`
   mutation login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
@@ -1841,6 +1862,16 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as AsyncIterable<ChannelInitialSetupProgressSubscription>;
+    },
+    newIntegration(
+      variables?: NewIntegrationSubscriptionVariables,
+      options?: C,
+    ): AsyncIterable<NewIntegrationSubscription> {
+      return requester<NewIntegrationSubscription, NewIntegrationSubscriptionVariables>(
+        NewIntegrationDocument,
+        variables,
+        options,
+      ) as AsyncIterable<NewIntegrationSubscription>;
     },
     login(variables: LoginMutationVariables, options?: C): Promise<LoginMutation> {
       return requester<LoginMutation, LoginMutationVariables>(

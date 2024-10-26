@@ -34,6 +34,7 @@
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
     "@repo/backend-shared": "workspace:*",
+    "@repo/pubsub": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
     "change-case": "^5.4.4",

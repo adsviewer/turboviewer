@@ -6,8 +6,9 @@ import { getRootOrganizationId, getTier } from '@repo/backend-shared';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
 import { tierConstraints } from '@repo/mappings';
+import { type ChannelInitialProgressPayload, pubSub } from '@repo/pubsub';
+import { type NewIntegrationEvent } from '@repo/shared-types';
 import { builder } from '../builder';
-import { type ChannelInitialProgressPayload, pubSub } from '../pubsub';
 import {
   ChannelInitialProgressPayloadDto,
   getIntegrationStatus,
@@ -15,6 +16,7 @@ import {
   IntegrationListItemDto,
   IntegrationStatusEnum,
   IntegrationTypeDto,
+  NewIntegrationEventDto,
   ShouldConnectIntegrationStatuses,
 } from './integration-types';
 
@@ -109,6 +111,12 @@ builder.subscriptionFields((t) => ({
     nullable: false,
     resolve: (root: ChannelInitialProgressPayload, _args, _ctx, _info) => root,
     subscribe: (_root, _args, ctx) => pubSub.subscribe('user:channel:initial-progress', ctx.currentUserId),
+  }),
+  newIntegration: t.withAuth({ isInOrg: true }).field({
+    type: NewIntegrationEventDto,
+    nullable: false,
+    resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => root,
+    subscribe: (_root, _args, ctx) => pubSub.subscribe('organization:integration:new-integration', ctx.organizationId),
   }),
 }));
 

@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { isMode, MODE } from '@repo/mode';
 import { tierConstraints } from '@repo/mappings';
+import { pubSub } from '@repo/pubsub';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import { invokeChannelIngress } from './data-refresh';
@@ -190,6 +191,7 @@ const saveTokens = async (
     }),
     removeOnboardingMilestone(organizationId),
   ]);
+  pubSub.publish('organization:integration:new-integration', organizationId, integration);
 
   const decryptedIntegration = {
     ...integration,

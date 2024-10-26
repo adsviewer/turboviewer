@@ -37,3 +37,9 @@ subscription channelInitialSetupProgress {
     channel
   }
 }
+
+subscription newIntegration {
+  newIntegration {
+    type
+  }
+}
