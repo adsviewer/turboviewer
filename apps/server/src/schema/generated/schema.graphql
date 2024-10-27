@@ -33,6 +33,7 @@ type AdAccount {
   Whether the ad account is connected to the current organization
   """
   isConnectedToCurrentOrg: Boolean!
+  lastSyncedAt: Date
   name: String!
   organizations: [Organization!]!
   type: IntegrationType!

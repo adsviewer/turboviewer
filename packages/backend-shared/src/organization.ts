@@ -117,7 +117,7 @@ export const switchTierHelper = async (
       children: {
         updateMany: {
           where: { parentId: organizationId },
-          data: { tier: newTier },
+          data: { tier: newTier, tierChangedAt: new Date() },
         },
       },
     },

@@ -157,10 +157,16 @@ const processReport = async (
       new Date(activeReport.since),
       new Date(activeReport.until),
     );
-    await prisma.integration.update({
-      where: { id: accountIntegration.integration.id },
-      data: { lastSyncedAt: new Date() },
-    });
+    await Promise.all([
+      prisma.integration.update({
+        where: { id: accountIntegration.integration.id },
+        data: { lastSyncedAt: new Date() },
+      }),
+      prisma.adAccount.update({
+        where: { id: accountIntegration.adAccount.id },
+        data: { lastSyncedAt: new Date() },
+      }),
+    ]);
   }
 };
 

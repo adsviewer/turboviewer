@@ -20,10 +20,16 @@ export const processReport = async (): Promise<void> => {
   logger.info(
     `Report processed ${isAError(report) ? 'un' : ''}successfully for ${env.CHANNEL_TYPE}, task ${env.TASK_ID}, ad account ${env.AD_ACCOUNT_ID}, since ${env.SINCE.toISOString()}, until ${env.UNTIL.toISOString()}`,
   );
-  await prisma.integration.update({
-    where: { id: adAccountIntegration.integration.id },
-    data: { lastSyncedAt: new Date() },
-  });
+  await Promise.all([
+    prisma.integration.update({
+      where: { id: adAccountIntegration.integration.id },
+      data: { lastSyncedAt: new Date() },
+    }),
+    prisma.adAccount.update({
+      where: { id: adAccountIntegration.adAccount.id },
+      data: { lastSyncedAt: new Date() },
+    }),
+  ]);
   process.exit(0);
 };
 

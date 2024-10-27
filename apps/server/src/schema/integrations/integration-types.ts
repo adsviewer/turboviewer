@@ -11,11 +11,11 @@ import {
   type FilterInsightsInputType,
   insightsColumnsGroupBy,
   insightsColumnsOrderBy,
-  MetaError,
   type InsightsSearchExpression,
   InsightsSearchField,
   InsightsSearchOperator,
   type InsightsSearchTerm,
+  MetaError,
 } from '@repo/channel-utils';
 import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/utils';
 import type { InputShapeFromFields } from '@pothos/core';
@@ -173,6 +173,7 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
     type: t.expose('type', { type: IntegrationTypeDto, nullable: false }),
     currency: t.expose('currency', { type: CurrencyEnumDto, nullable: false }),
     name: t.exposeString('name', { nullable: false }),
+    lastSyncedAt: t.expose('updatedAt', { type: 'Date', nullable: true }),
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
     adCount: t.int({

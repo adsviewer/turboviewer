@@ -28,7 +28,16 @@ const saveChannelData = async (
   if (isAError(data)) return data;
   // @ts-expect-error -- this is fine
   if (!asyncReportChannels.includes(integration.type)) {
-    await prisma.integration.update({ where: { id: integration.id }, data: { lastSyncedAt: new Date() } });
+    await Promise.all([
+      prisma.integration.update({
+        where: { id: integration.id },
+        data: { lastSyncedAt: new Date() },
+      }),
+      prisma.adAccount.update({
+        where: { id: adAccount.id },
+        data: { lastSyncedAt: new Date() },
+      }),
+    ]);
   }
 };
 

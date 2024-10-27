@@ -59,6 +59,7 @@ export type AdAccount = {
   integration: Integration;
   /** Whether the ad account is connected to the current organization */
   isConnectedToCurrentOrg: Scalars['Boolean']['output'];
+  lastSyncedAt?: Maybe<Scalars['Date']['output']>;
   name: Scalars['String']['output'];
   organizations: Array<Organization>;
   type: IntegrationType;
