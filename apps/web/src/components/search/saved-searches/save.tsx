@@ -11,7 +11,7 @@ import { z } from 'zod';
 interface PropsType {
   canUserAlter: boolean;
   canSaveAsOrg: boolean;
-  selectedSearchID: string | null;
+  selectedSearchId: string | null;
   selectedSearchName: string;
   isSelectedSearchOrganization: boolean;
   isPending: boolean;
@@ -73,7 +73,7 @@ export default function Save(props: PropsType): React.ReactNode {
             <Radio.Group key={form.key('saveType')} {...form.getInputProps('saveType')}>
               <Flex direction="column" gap="sm">
                 <Radio
-                  disabled={!props.selectedSearchID || !props.canUserAlter}
+                  disabled={!props.selectedSearchId || !props.canUserAlter}
                   value={SaveTypes.Update}
                   label={tSearch('updateSelectedSearch')}
                 />
@@ -98,7 +98,7 @@ export default function Save(props: PropsType): React.ReactNode {
         const values = form.getValues();
         let isOrganization = values.saveType === SaveTypes.SaveAsNewForOrg;
         if (values.saveType === SaveTypes.Update) isOrganization = props.isSelectedSearchOrganization;
-        const idToUpdate = values.saveType === SaveTypes.Update ? props.selectedSearchID : null;
+        const idToUpdate = values.saveType === SaveTypes.Update ? props.selectedSearchId : null;
         props.handleSave(name, isOrganization, idToUpdate);
         form.reset();
       },

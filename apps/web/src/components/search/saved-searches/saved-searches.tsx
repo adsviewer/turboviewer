@@ -30,7 +30,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
   const [searches, setSearches] = useAtom(searchesAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [savedSearches, setSavedSearches] = useState<DropdownGroupsValueType[]>([]);
-  const [selectedSearchID, setSelectedSearchID] = useState<string | null>(null);
+  const [selectedSearchId, setSelectedSearchId] = useState<string | null>(null);
 
   enum SearchGroups {
     User = 'User',
@@ -95,7 +95,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         if (!isUpdateSearch) newSearches.push(res.data.upsertSearchQueryString);
         setSearches(newSearches);
         setSavedSearches(updateSavedSearches(newSearches));
-        setSelectedSearchID(responseId);
+        setSelectedSearchId(responseId);
       })
       .catch((err: unknown) => {
         logger.error(err);
@@ -106,7 +106,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
   };
 
   const handleChange = (id: string | null): void => {
-    setSelectedSearchID(id);
+    setSelectedSearchId(id);
     const selectedSearch = searches.find((search) => search.id === id);
     if (selectedSearch) props.handleSavedSearchChange(selectedSearch.queryString);
   };
@@ -126,7 +126,7 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         const newSearches = searches.filter((search) => search.id !== id);
         setSearches(newSearches);
         setSavedSearches(updateSavedSearches(newSearches));
-        setSelectedSearchID(null);
+        setSelectedSearchId(null);
       })
       .catch((err: unknown) => {
         logger.error(err);
@@ -164,25 +164,25 @@ export default function SavedSearches(props: PropsType): React.ReactNode {
         comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
         scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
         data={savedSearches}
-        value={selectedSearchID}
+        value={selectedSearchId}
         onChange={handleChange}
       />
       <Save
         isPending={isPending || !props.searchTerms.length}
-        canUserAlter={getCanUserAlter(selectedSearchID)}
+        canUserAlter={getCanUserAlter(selectedSearchId)}
         handleSave={handleSave}
-        selectedSearchID={selectedSearchID}
-        selectedSearchName={getSelectedSearchName(selectedSearchID)}
-        isSelectedSearchOrganization={getSelectedSearchIsOrganization(selectedSearchID)}
+        selectedSearchId={selectedSearchId}
+        selectedSearchName={getSelectedSearchName(selectedSearchId)}
+        isSelectedSearchOrganization={getSelectedSearchIsOrganization(selectedSearchId)}
         canSaveAsOrg={getCanSaveAsOrg()}
       />
       <Delete
         isPending={isPending}
-        canUserAlter={getCanUserAlter(selectedSearchID)}
+        canUserAlter={getCanUserAlter(selectedSearchId)}
         handleDelete={() => {
-          if (selectedSearchID) handleDelete(selectedSearchID);
+          if (selectedSearchId) handleDelete(selectedSearchId);
         }}
-        selectedSearchID={selectedSearchID}
+        selectedSearchId={selectedSearchId}
       />
     </Flex>
   );

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 
 interface PropsType {
   canUserAlter: boolean;
-  selectedSearchID: string | null;
+  selectedSearchId: string | null;
   isPending: boolean;
   handleDelete: () => void;
 }
@@ -30,7 +30,7 @@ export default function Delete(props: PropsType): React.ReactNode {
   return (
     <Tooltip label={tSearch('delete')}>
       <ActionIcon
-        disabled={props.isPending || !props.selectedSearchID || !props.canUserAlter}
+        disabled={props.isPending || !props.selectedSearchId || !props.canUserAlter}
         color="red.4"
         variant="outline"
         size={34}
