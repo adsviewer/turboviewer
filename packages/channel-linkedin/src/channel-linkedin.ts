@@ -35,6 +35,7 @@ import {
   saveInsightsAdsAdsSetsCampaigns,
   timeRanges,
   type TokensResponse,
+  updateIntegrationTokens,
 } from '@repo/channel-utils';
 import { env } from './config';
 
@@ -242,27 +243,24 @@ class LinkedIn implements ChannelInterface {
     const json: unknown = await response.json();
     if (!response.ok) {
       logger.error(json, 'Failed response to refresh access token');
+      return new AError('Failed to refresh access token');
     }
     const schema = z.object({
       access_token: z.string(),
       expires_in: z.number().int(),
       refresh_token: z.string(),
       refresh_token_expires_in: z.number().int(),
-      scope: z.literal('r_basicprofile'),
     });
     const parsed = schema.safeParse(json);
     if (!parsed.success) {
       logger.error(parsed.error, 'Failed to parse refresh access token response');
       return new AError('Failed to parse refresh access token response');
     }
-    return await prisma.integration.update({
-      where: { id: integration.id },
-      data: {
-        accessToken: parsed.data.access_token,
-        accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
-        refreshToken: parsed.data.refresh_token,
-        refreshTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.refresh_token_expires_in),
-      },
+    return await updateIntegrationTokens(integration, {
+      accessToken: parsed.data.access_token,
+      accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
+      refreshToken: parsed.data.refresh_token,
+      refreshTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.refresh_token_expires_in),
     });
   }
 

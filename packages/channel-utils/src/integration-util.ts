@@ -3,8 +3,9 @@ import { IntegrationStatus, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
 import { env } from './config';
-import { decryptAesGcm } from './aes-util';
+import { decryptAesGcm, encryptAesGcm } from './aes-util';
 import { type AdAccountIntegration } from './insights-utils';
+import type { TokensResponse } from './channel-interface';
 
 export const authEndpoint = '/channel/auth';
 
@@ -22,14 +23,6 @@ export const revokeIntegration = async (externalId: string, type: IntegrationTyp
       status: IntegrationStatus.REVOKED,
     },
   });
-  // TODO: will be fixed as part of https://github.com/adsviewer/turboviewer/issues/351
-  // await prisma.adAccount.deleteMany({
-  //   where: {
-  //     id: {
-  //       in: adAccounts.map((adAccount) => adAccount.id),
-  //     },
-  //   },
-  // });
 };
 
 export const getConnectedIntegrationByOrg = async (
@@ -175,4 +168,33 @@ export const getDecryptedIntegration = async (integrationId: string): Promise<In
   const decryptedIntegration = decryptTokens(integration);
   if (!decryptedIntegration) return new AError('Failed to decrypt integration');
   return decryptedIntegration;
+};
+
+export const updateIntegrationTokens = async (
+  integration: Integration,
+  tokens: TokensResponse,
+): Promise<Integration> => {
+  const encryptedAccessToken = encryptAesGcm(tokens.accessToken, env.CHANNEL_SECRET);
+  if (!encryptedAccessToken) {
+    throw new Error('Failed to encrypt access token');
+  }
+  const encryptedRefreshToken = tokens.refreshToken
+    ? encryptAesGcm(tokens.refreshToken, env.CHANNEL_SECRET)
+    : undefined;
+
+  await prisma.integration.update({
+    where: { id: integration.id },
+    data: {
+      accessToken: encryptedAccessToken,
+      refreshToken: encryptedRefreshToken,
+      accessTokenExpiresAt: tokens.accessTokenExpiresAt,
+      refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
+    },
+  });
+  integration.accessToken = tokens.accessToken;
+  integration.accessTokenExpiresAt = tokens.accessTokenExpiresAt;
+  integration.refreshToken = tokens.refreshToken ?? null;
+  integration.refreshTokenExpiresAt = tokens.refreshTokenExpiresAt ?? null;
+
+  return integration;
 };
