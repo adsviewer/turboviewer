@@ -8,7 +8,7 @@ on:
       - !apps/web/src/graphql/generated/**
       - apps/landing-page/**
       - apps/backoffice/**
-      - !apps/web/src/graphql/generated/**
+      - !apps/backoffice/src/graphql/generated/**
       - packages/logger/**
       - packages/mappings/**
       - packages/mode/**
@@ -20,8 +20,10 @@ on:
       - main
     paths:
       - apps/web/**
+      - !apps/web/src/graphql/generated/**
       - apps/landing-page/**
       - apps/backoffice/**
+      - !apps/backoffice/src/graphql/generated/**
       - packages/logger/**
       - packages/mappings/**
       - packages/mode/**

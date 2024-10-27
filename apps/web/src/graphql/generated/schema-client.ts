@@ -669,7 +669,6 @@ export type MutationDeleteOrganizationArgs = {
 
 export type MutationDeleteSearchQueryStringArgs = {
   id: Scalars['String']['input'];
-  isOrganization: Scalars['Boolean']['input'];
 };
 
 export type MutationEmulateAdminArgs = {
