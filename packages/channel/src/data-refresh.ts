@@ -117,7 +117,7 @@ export const invokeChannelIngress = async (
   const uniqueAdAccounts = _.uniqBy(adAccounts, (adAccount) => adAccount.id);
 
   if (MODE === Environment.Local) {
-    return await refreshData({ initial: true, adAccountIds: uniqueAdAccounts.map((adAccount) => adAccount.id) });
+    return await refreshData({ initial, adAccountIds: uniqueAdAccounts.map((adAccount) => adAccount.id) });
   }
 
   const [asyncReportAdAccounts, nonAsyncReportAdAccounts] = _.partition(uniqueAdAccounts, (adAccount) =>
