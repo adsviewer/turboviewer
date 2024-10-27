@@ -37,6 +37,7 @@ import {
   type InsightsSearchTerm,
 } from '@/graphql/generated/schema-server';
 import { AndOrEnum, isAndOrEnum, type SearchExpression, type SearchTermType } from './types-and-utils';
+import SavedSearches from './saved-searches/saved-searches';
 
 interface PropsType {
   isPending: boolean;
@@ -271,10 +272,10 @@ export default function Search(props: PropsType): React.ReactNode {
         adAccountNameSearchData.term.operator = InsightsSearchOperator.Contains;
         newSearchData.or = [adNameSearchData, adSetNameSearchData, campaignNameSearchData, adAccountNameSearchData];
 
-        const encodedSearchData = btoa(JSON.stringify(newSearchData));
+        const currEncodedSearchData = btoa(JSON.stringify(newSearchData));
 
         props.startTransition(() => {
-          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, encodedSearchData);
+          const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, currEncodedSearchData);
           router.replace(newURL);
         });
       }, 1000);
@@ -394,10 +395,7 @@ export default function Search(props: PropsType): React.ReactNode {
     setSearchTerms(updatedTerms);
   };
 
-  const handleAdvancedSearch = (): void => {
-    emptySearchBox();
-    close();
-
+  const getEncodedSearchData = (): string => {
     const rootExpression = { ...INITIAL_SEARCH_EXPRESSION };
     rootExpression.isAdvancedSearch = true;
 
@@ -474,10 +472,25 @@ export default function Search(props: PropsType): React.ReactNode {
     }
 
     rootExpression.clientSearchTerms = searchTerms; // is used when loading data in the useEffect!
-    const encodedSearchData = btoa(JSON.stringify(rootExpression));
+    const currEncodedSearchData = btoa(JSON.stringify(rootExpression));
+    return currEncodedSearchData;
+  };
 
+  const handleSavedSearchChange = (queryString: string): void => {
+    const parsedSearchData = queryString
+      ? (JSON.parse(Buffer.from(queryString, 'base64').toString('utf-8')) as SearchExpression)
+      : {};
+    if (parsedSearchData.clientSearchTerms) {
+      setLoadedSearchData(parsedSearchData);
+      setSearchTerms(parsedSearchData.clientSearchTerms);
+    }
+  };
+
+  const handleAdvancedSearch = (): void => {
+    emptySearchBox();
+    close();
     props.startTransition(() => {
-      const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, encodedSearchData);
+      const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.search, getEncodedSearchData());
       router.replace(newURL);
     });
   };
@@ -650,6 +663,11 @@ export default function Search(props: PropsType): React.ReactNode {
         title={tGeneric('advancedSearch')}
         size="xl"
       >
+        <SavedSearches
+          searchTerms={searchTerms}
+          getEncodedSearchData={getEncodedSearchData}
+          handleSavedSearchChange={handleSavedSearchChange}
+        />
         <Flex direction="column" mb="sm">
           <ScrollArea.Autosize mah={500} offsetScrollbars type="always" viewportRef={scrollAreaRef}>
             {searchTerms.length ? (

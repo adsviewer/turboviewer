@@ -383,7 +383,7 @@ model SearchQueryString {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@index([parentId])
+  @@unique([parentId, name])
   @@map("search_query_strings")
 }
 

@@ -7,6 +7,11 @@ import {
   type MeQuery,
   type RefreshTokenQuery,
   type RemoveUserMilestoneMutationVariables,
+  type SearchQueryStringsQuery,
+  type MutationUpsertSearchQueryStringArgs,
+  type UpsertSearchQueryStringMutation,
+  type MutationDeleteSearchQueryStringArgs,
+  type DeleteSearchQueryStringMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -47,3 +52,17 @@ export const removeUserMilestoneAndGetJWT = async (
     };
   }
 };
+
+export const getSearchQueryStrings = async (): Promise<UrqlResult<SearchQueryStringsQuery>> => {
+  return await handleUrqlRequest(urqlClientSdk().searchQueryStrings());
+};
+
+export const upsertSearchQueryString = async (
+  values: MutationUpsertSearchQueryStringArgs,
+): Promise<UrqlResult<UpsertSearchQueryStringMutation, string>> =>
+  await handleUrqlRequest(urqlClientSdk().upsertSearchQueryString(values));
+
+export const deleteSearchQueryString = async (
+  values: MutationDeleteSearchQueryStringArgs,
+): Promise<UrqlResult<DeleteSearchQueryStringMutation, string>> =>
+  await handleUrqlRequest(urqlClientSdk().deleteSearchQueryString(values));

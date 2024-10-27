@@ -668,7 +668,6 @@ export type MutationDeleteOrganizationArgs = {
 
 export type MutationDeleteSearchQueryStringArgs = {
   id: Scalars['String']['input'];
-  isOrganization: Scalars['Boolean']['input'];
 };
 
 export type MutationEmulateAdminArgs = {
@@ -1315,6 +1314,46 @@ export type UpdateOrganizationAdAccountsMutation = {
   updateOrganizationAdAccounts: { __typename: 'Organization'; id: string };
 };
 
+export type SearchQueryStringsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type SearchQueryStringsQuery = {
+  __typename: 'Query';
+  searchQueryStrings: Array<{
+    __typename: 'SearchQueryString';
+    id: string;
+    name: string;
+    isOrganization: boolean;
+    queryString: string;
+  }>;
+};
+
+export type UpsertSearchQueryStringMutationVariables = Exact<{
+  id?: InputMaybe<Scalars['String']['input']>;
+  isOrganization: Scalars['Boolean']['input'];
+  name: Scalars['String']['input'];
+  queryString: Scalars['String']['input'];
+}>;
+
+export type UpsertSearchQueryStringMutation = {
+  __typename: 'Mutation';
+  upsertSearchQueryString: {
+    __typename: 'SearchQueryString';
+    id: string;
+    name: string;
+    isOrganization: boolean;
+    queryString: string;
+  };
+};
+
+export type DeleteSearchQueryStringMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+export type DeleteSearchQueryStringMutation = {
+  __typename: 'Mutation';
+  deleteSearchQueryString: { __typename: 'SearchQueryString'; id: string };
+};
+
 export type UpdateUserMutationVariables = Exact<{
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -1744,6 +1783,33 @@ export const UpdateOrganizationAdAccountsDocument = gql`
     }
   }
 `;
+export const SearchQueryStringsDocument = gql`
+  query searchQueryStrings {
+    searchQueryStrings {
+      id
+      name
+      isOrganization
+      queryString
+    }
+  }
+`;
+export const UpsertSearchQueryStringDocument = gql`
+  mutation upsertSearchQueryString($id: String, $isOrganization: Boolean!, $name: String!, $queryString: String!) {
+    upsertSearchQueryString(id: $id, isOrganization: $isOrganization, name: $name, queryString: $queryString) {
+      id
+      name
+      isOrganization
+      queryString
+    }
+  }
+`;
+export const DeleteSearchQueryStringDocument = gql`
+  mutation deleteSearchQueryString($id: String!) {
+    deleteSearchQueryString(id: $id) {
+      id
+    }
+  }
+`;
 export const UpdateUserDocument = gql`
   mutation updateUser($firstName: String, $lastName: String, $oldPassword: String, $newPassword: String) {
     updateUser(firstName: $firstName, lastName: $lastName, oldPassword: $oldPassword, newPassword: $newPassword) {
@@ -1976,6 +2042,33 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpdateOrganizationAdAccountsMutation>;
+    },
+    searchQueryStrings(variables?: SearchQueryStringsQueryVariables, options?: C): Promise<SearchQueryStringsQuery> {
+      return requester<SearchQueryStringsQuery, SearchQueryStringsQueryVariables>(
+        SearchQueryStringsDocument,
+        variables,
+        options,
+      ) as Promise<SearchQueryStringsQuery>;
+    },
+    upsertSearchQueryString(
+      variables: UpsertSearchQueryStringMutationVariables,
+      options?: C,
+    ): Promise<UpsertSearchQueryStringMutation> {
+      return requester<UpsertSearchQueryStringMutation, UpsertSearchQueryStringMutationVariables>(
+        UpsertSearchQueryStringDocument,
+        variables,
+        options,
+      ) as Promise<UpsertSearchQueryStringMutation>;
+    },
+    deleteSearchQueryString(
+      variables: DeleteSearchQueryStringMutationVariables,
+      options?: C,
+    ): Promise<DeleteSearchQueryStringMutation> {
+      return requester<DeleteSearchQueryStringMutation, DeleteSearchQueryStringMutationVariables>(
+        DeleteSearchQueryStringDocument,
+        variables,
+        options,
+      ) as Promise<DeleteSearchQueryStringMutation>;
     },
     updateUser(variables?: UpdateUserMutationVariables, options?: C): Promise<UpdateUserMutation> {
       return requester<UpdateUserMutation, UpdateUserMutationVariables>(
