@@ -3,7 +3,7 @@
 import { Title, Flex, Select, Text, type ComboboxItem } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { startTransition, useCallback, useEffect, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
@@ -26,7 +26,6 @@ import { getOrderByValue } from '@/util/insights-utils';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
 export default function TopAdsContainer(): React.ReactNode {
-  const hasMounted = useRef(false);
   const t = useTranslations('summary');
   const tGeneric = useTranslations('generic');
   const tInsights = useTranslations('insights');
@@ -46,11 +45,6 @@ export default function TopAdsContainer(): React.ReactNode {
   }, [setInsightsTopAds]);
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
     // Continue only when search params of this component are changed
     const currChartMetricValue = searchParams.get(urlKeys.chartMetric);
     if (currChartMetricValue !== prevChartMetricValue) return;
