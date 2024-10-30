@@ -421,8 +421,8 @@ export enum InsightsColumnsOrderBy {
 export type InsightsDatapoints = {
   __typename: 'InsightsDatapoints';
   clicks?: Maybe<Scalars['BigInt']['output']>;
-  cpc?: Maybe<Scalars['BigInt']['output']>;
-  cpm?: Maybe<Scalars['BigInt']['output']>;
+  cpc?: Maybe<Scalars['Float']['output']>;
+  cpm?: Maybe<Scalars['Float']['output']>;
   date: Scalars['Date']['output'];
   impressions: Scalars['BigInt']['output'];
   /** In Cents */
