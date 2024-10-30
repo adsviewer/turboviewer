@@ -190,7 +190,7 @@ export const orderColumnTrend = (
   const li = abbreviateSnakeCase(lastIntervalStr);
   const ibl = abbreviateSnakeCase(intervalBeforeLastStr);
   const join = joinFn(group, intervalBeforeLastStr, li);
-  return `order_column_trend AS (SELECT ${group.map((g) => `${li}.${g}`).join(', ')}, ${li}.${orderColumn} / ${ibl}.${orderColumn}::decimal trend
+  return `order_column_trend AS (SELECT ${group.map((g) => `${li}.${g}`).join(', ')}, ${li}.${orderColumn} / ${ibl}.${orderColumn} trend
                                       FROM last_interval ${li} ${join}
                                       WHERE ${ibl}.${orderColumn}
                                           > 0
@@ -256,7 +256,7 @@ export const groupedInsights = (
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
-  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.clicks) AS clicks, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm, SUM(i.spend) * 10 / NULLIF(SUM(i.clicks::decimal), 0) AS cpc 
+  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.clicks) AS clicks, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions), 0) AS cpm, SUM(i.spend) * 0.01 / NULLIF(SUM(i.clicks), 0) AS cpc 
   FROM organization_insights i
   ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
@@ -315,9 +315,9 @@ const getSqlOrderColumn = (
 ): string => {
   switch (orderColumn) {
     case 'cpm':
-      return `SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS ${columnName ?? 'cpm'}`;
+      return `SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions), 0) AS ${columnName ?? 'cpm'}`;
     case 'cpc':
-      return `SUM(i.spend_eur) * 10 / NULLIF(SUM(i.clicks::decimal), 0) AS ${columnName ?? 'cpc'}`;
+      return `SUM(i.spend_eur) * 0.01 / NULLIF(SUM(i.clicks), 0) AS ${columnName ?? 'cpc'}`;
     default:
       return `SUM(i.${orderColumn}) AS ${columnName ?? orderColumn}`;
   }

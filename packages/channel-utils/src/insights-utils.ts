@@ -312,9 +312,9 @@ interface Datapoints {
   spend: bigint;
   spendUsd?: bigint | null;
   impressions: bigint;
-  cpm?: bigint | null;
+  cpm?: number | null;
   clicks?: bigint | null;
-  cpc?: bigint | null;
+  cpc?: number | null;
   date: Date;
 }
 

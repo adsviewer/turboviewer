@@ -291,8 +291,8 @@ const InsightsDatapointsDto = builder.simpleObject('InsightsDatapoints', {
     spendUsd: t.field({ type: 'BigInt', nullable: true, description: 'In Cents' }),
     impressions: t.field({ type: 'BigInt', nullable: false }),
     clicks: t.field({ type: 'BigInt', nullable: true }),
-    cpm: t.field({ type: 'BigInt', nullable: true }),
-    cpc: t.field({ type: 'BigInt', nullable: true }),
+    cpm: t.float({ nullable: true }),
+    cpc: t.float({ nullable: true }),
     date: t.field({ type: 'Date', nullable: false }),
   }),
 });

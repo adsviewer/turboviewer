@@ -421,8 +421,8 @@ export enum InsightsColumnsOrderBy {
 export type InsightsDatapoints = {
   __typename: 'InsightsDatapoints';
   clicks?: Maybe<Scalars['BigInt']['output']>;
-  cpc?: Maybe<Scalars['BigInt']['output']>;
-  cpm?: Maybe<Scalars['BigInt']['output']>;
+  cpc?: Maybe<Scalars['Float']['output']>;
+  cpm?: Maybe<Scalars['Float']['output']>;
   date: Scalars['Date']['output'];
   impressions: Scalars['BigInt']['output'];
   /** In Cents */
@@ -1083,8 +1083,8 @@ export type InsightsQuery = {
         spendUsd?: bigint | null;
         impressions: bigint;
         clicks?: bigint | null;
-        cpm?: bigint | null;
-        cpc?: bigint | null;
+        cpm?: number | null;
+        cpc?: number | null;
       }>;
       iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number; type: IFrameType } | null;
     }>;

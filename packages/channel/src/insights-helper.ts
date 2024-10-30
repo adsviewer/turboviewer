@@ -76,9 +76,9 @@ export const getInsightsHelper = async (
       spendUsd: bigint | null;
       impressions: bigint;
       date: Date;
-      cpm: bigint;
+      cpm: number;
       clicks: bigint | null;
-      cpc: bigint | null;
+      cpc: number | null;
     }[];
     integration: IntegrationTypeEnum;
   }[] = [];
@@ -99,9 +99,9 @@ export const getInsightsHelper = async (
               spendUsd: usdSpent ? BigInt(usdSpent) : null,
               impressions: BigInt(v.impressions),
               date: v.date,
-              cpm: BigInt(Math.round(v.cpm)),
+              cpm: Number(v.cpm),
               clicks: v.clicks ? BigInt(v.clicks) : null,
-              cpc: v.cpc ? BigInt(Math.round(v.cpc)) : null,
+              cpc: v.cpc ? Number(v.cpc) : null,
             };
           }),
         ),

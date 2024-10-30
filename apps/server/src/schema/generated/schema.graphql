@@ -392,8 +392,8 @@ enum InsightsColumnsOrderBy {
 
 type InsightsDatapoints {
   clicks: BigInt
-  cpc: BigInt
-  cpm: BigInt
+  cpc: Float
+  cpm: Float
   date: Date!
   impressions: BigInt!
 
