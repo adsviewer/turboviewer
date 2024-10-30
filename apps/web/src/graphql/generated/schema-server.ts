@@ -412,10 +412,16 @@ export enum InsightsColumnsOrderBy {
   spend_rel = 'spend_rel',
   impressions_rel = 'impressions_rel',
   cpm_rel = 'cpm_rel',
+  clicks_abs = 'clicks_abs',
+  clicks_rel = 'clicks_rel',
+  cpc_abs = 'cpc_abs',
+  cpc_rel = 'cpc_rel',
 }
 
 export type InsightsDatapoints = {
   __typename: 'InsightsDatapoints';
+  clicks?: Maybe<Scalars['BigInt']['output']>;
+  cpc?: Maybe<Scalars['BigInt']['output']>;
   cpm?: Maybe<Scalars['BigInt']['output']>;
   date: Scalars['Date']['output'];
   impressions: Scalars['BigInt']['output'];
@@ -1076,7 +1082,9 @@ export type InsightsQuery = {
         spend: bigint;
         spendUsd?: bigint | null;
         impressions: bigint;
+        clicks?: bigint | null;
         cpm?: bigint | null;
+        cpc?: bigint | null;
       }>;
       iFrame?: { __typename: 'IFrame'; src: string; width: number; height: number; type: IFrameType } | null;
     }>;
@@ -1567,7 +1575,9 @@ export const InsightsDocument = gql`
           spend
           spendUsd
           impressions
+          clicks
           cpm
+          cpc
         }
         iFrame {
           src

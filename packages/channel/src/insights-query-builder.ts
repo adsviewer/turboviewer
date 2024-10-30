@@ -150,17 +150,11 @@ export const lastInterval = (
   dateTo?: Date | null,
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
-  const sqlOrderColumn =
-    orderColumn === 'cpm'
-      ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
-      : `SUM(i.${orderColumn}) AS ${orderColumn}`;
-  const relative = orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : '';
-
-  return `last_interval AS (SELECT ${group}, ${sqlOrderColumn}
+  return `last_interval AS (SELECT ${group}, ${getSqlOrderColumn(orderColumn)}
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('${interval}', ${date})
                                         AND date <= ${date}
-                                      GROUP BY ${group}${relative})`;
+                                      GROUP BY ${group}${addHavingOnComputed(orderColumn)})`;
 };
 
 export const intervalBeforeLast = (
@@ -170,19 +164,13 @@ export const intervalBeforeLast = (
   dateTo?: Date | null,
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
-  const sqlOrderColumn =
-    orderColumn === 'cpm'
-      ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm'
-      : `SUM(i.${orderColumn}) AS ${orderColumn}`;
-
   const doubleIntervalInMonths = `1 ${interval}`;
 
-  return `interval_before_last AS (SELECT ${group}, ${sqlOrderColumn}
+  return `interval_before_last AS (SELECT ${group}, ${getSqlOrderColumn(orderColumn)}
                                              FROM organization_insights i
                                              WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${doubleIntervalInMonths}')
                                                AND date < DATE_TRUNC('${interval}', ${date})
-                                             GROUP BY ${group}
-                                             ${orderColumn === 'cpm' ? 'HAVING SUM(i.impressions) > 0' : ''})`;
+                                             GROUP BY ${group}${addHavingOnComputed(orderColumn)})`;
 };
 
 const joinFn = (columns: string[], table: string, left: string): string => {
@@ -223,17 +211,13 @@ export const orderColumnTrendAbsolute = (
 
   const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
 
-  const sqlOrderColumn =
-    orderColumn === 'cpm'
-      ? 'SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS trend'
-      : `SUM(i.${orderColumn}) AS trend`;
+  const sqlOrderColumn = getSqlOrderColumn(orderColumn, 'trend');
 
   return `order_column_trend AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
                                       WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
                                         AND date <= DATE_TRUNC('${interval}', ${date})
-                                      GROUP BY ${group}
-                                      ${orderColumn === 'cpm' ? ' HAVING SUM(i.impressions) > 0' : ''}
+                                      GROUP BY ${group}${addHavingOnComputed(orderColumn)}
                                       ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
@@ -253,7 +237,11 @@ export const groupedInsights = (
 ): string => {
   const dataPointsPerInterval = calculateDataPointsPerInterval(args.dateFrom, args.dateTo, args.interval, locale);
   const orderBy = getOrderByColumn(args.orderBy);
-  const isRelative = args.orderBy === 'spend_rel' || args.orderBy === 'impressions_rel' || args.orderBy === 'cpm_rel';
+  const isRelative =
+    args.orderBy === 'spend_rel' ||
+    args.orderBy === 'impressions_rel' ||
+    args.orderBy === 'cpm_rel' ||
+    args.orderBy === 'cpc_rel';
   const snakeGroup = groupBy.map((group) => changeCase.snakeCase(group));
   const joinedSnakeGroup = snakeGroup.join(', ');
   const limit = args.pageSize + 1;
@@ -268,7 +256,7 @@ export const groupedInsights = (
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
-  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm 
+  SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.clicks) AS clicks, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS cpm, SUM(i.spend) * 10 / NULLIF(SUM(i.clicks::decimal), 0) AS cpc 
   FROM organization_insights i
   ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
@@ -285,7 +273,7 @@ const abbreviateSnakeCase = (snakeCaseString: string): string =>
     .map((word) => word[0])
     .join('');
 
-type OrderByColumn = 'cpm' | 'spend_eur' | 'impressions';
+type OrderByColumn = 'cpm' | 'spend_eur' | 'impressions' | 'cpc' | 'clicks';
 const getOrderByColumn = (orderBy: FilterInsightsInputType['orderBy']): OrderByColumn => {
   switch (orderBy) {
     case 'spend_abs': {
@@ -306,5 +294,42 @@ const getOrderByColumn = (orderBy: FilterInsightsInputType['orderBy']): OrderByC
     case 'cpm_rel': {
       return 'cpm';
     }
+    case 'cpc_abs': {
+      return 'cpc';
+    }
+    case 'cpc_rel': {
+      return 'cpc';
+    }
+    case 'clicks_abs': {
+      return 'clicks';
+    }
+    case 'clicks_rel': {
+      return 'clicks';
+    }
+  }
+};
+
+const getSqlOrderColumn = (
+  orderColumn: 'cpm' | 'spend_eur' | 'impressions' | 'cpc' | 'clicks',
+  columnName?: string,
+): string => {
+  switch (orderColumn) {
+    case 'cpm':
+      return `SUM(i.spend_eur) * 10 / NULLIF(SUM(i.impressions::decimal), 0) AS ${columnName ?? 'cpm'}`;
+    case 'cpc':
+      return `SUM(i.spend_eur) * 10 / NULLIF(SUM(i.clicks::decimal), 0) AS ${columnName ?? 'cpc'}`;
+    default:
+      return `SUM(i.${orderColumn}) AS ${columnName ?? orderColumn}`;
+  }
+};
+
+const addHavingOnComputed = (orderColumn: 'cpm' | 'spend_eur' | 'impressions' | 'cpc' | 'clicks'): string => {
+  switch (orderColumn) {
+    case 'cpm':
+      return ' HAVING SUM(i.impressions) > 0';
+    case 'cpc':
+      return ' HAVING SUM(i.clicks) > 0';
+    default:
+      return '';
   }
 };

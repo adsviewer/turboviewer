@@ -358,6 +358,7 @@ model Insight {
   device      DeviceEnum
   publisher   PublisherEnum
   position    String
+  clicks      BigInt?
 
   ad        Ad         @relation(fields: [adId], references: [id])
   adAccount AdAccount? @relation(fields: [adAccountId], references: [id], onDelete: Cascade)

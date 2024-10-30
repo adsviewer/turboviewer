@@ -412,10 +412,16 @@ export enum InsightsColumnsOrderBy {
   spend_rel = 'spend_rel',
   impressions_rel = 'impressions_rel',
   cpm_rel = 'cpm_rel',
+  clicks_abs = 'clicks_abs',
+  clicks_rel = 'clicks_rel',
+  cpc_abs = 'cpc_abs',
+  cpc_rel = 'cpc_rel',
 }
 
 export type InsightsDatapoints = {
   __typename: 'InsightsDatapoints';
+  clicks?: Maybe<Scalars['BigInt']['output']>;
+  cpc?: Maybe<Scalars['BigInt']['output']>;
   cpm?: Maybe<Scalars['BigInt']['output']>;
   date: Scalars['Date']['output'];
   impressions: Scalars['BigInt']['output'];
