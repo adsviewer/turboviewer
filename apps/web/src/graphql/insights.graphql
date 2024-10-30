@@ -59,7 +59,9 @@ query insights(
         spend
         spendUsd
         impressions
+        clicks
         cpm
+        cpc
       }
       iFrame {
         src

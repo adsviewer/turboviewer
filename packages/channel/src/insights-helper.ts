@@ -9,10 +9,10 @@ import {
 import { FireAndForget, groupBy as groupByUtil, isAError, Language } from '@repo/utils';
 import * as changeCase from 'change-case';
 import {
-  type FilterInsightsInputType,
-  type InsightsColumnsGroupByType,
-  type GroupedInsightsWithEdges,
   currencyToEuro,
+  type FilterInsightsInputType,
+  type GroupedInsightsWithEdges,
+  type InsightsColumnsGroupByType,
 } from '@repo/channel-utils';
 import { getInsightsCache, setInsightsCache } from './insights-cache';
 import { groupedInsights } from './insights-query-builder';
@@ -57,6 +57,7 @@ export const getInsightsHelper = async (
     return newObj;
   }) as unknown as (Insight & {
     cpm: number;
+    cpc: number | null;
     campaignId: string;
     adSetId: string;
     integration: IntegrationTypeEnum;
@@ -70,7 +71,15 @@ export const getInsightsHelper = async (
     device?: DeviceEnum;
     publisher?: PublisherEnum;
     currency: CurrencyEnum;
-    datapoints: { spend: bigint; spendUsd: bigint | null; impressions: bigint; date: Date; cpm: bigint }[];
+    datapoints: {
+      spend: bigint;
+      spendUsd: bigint | null;
+      impressions: bigint;
+      date: Date;
+      cpm: bigint;
+      clicks: bigint | null;
+      cpc: bigint | null;
+    }[];
     integration: IntegrationTypeEnum;
   }[] = [];
   const insightsGrouped = groupByUtil(insightsTransformed, (insight) => {
@@ -91,6 +100,8 @@ export const getInsightsHelper = async (
               impressions: BigInt(v.impressions),
               date: v.date,
               cpm: BigInt(Math.round(v.cpm)),
+              clicks: v.clicks ? BigInt(v.clicks) : null,
+              cpc: v.cpc ? BigInt(Math.round(v.cpc)) : null,
             };
           }),
         ),

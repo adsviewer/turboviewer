@@ -225,6 +225,7 @@ const saveInsights = async (
           publisher: insight.publisher,
           spend,
           spendEur: toEuro ? Math.floor(spend * toEuro) : null,
+          clicks: insight.clicks,
         };
       }),
     })
@@ -312,6 +313,8 @@ interface Datapoints {
   spendUsd?: bigint | null;
   impressions: bigint;
   cpm?: bigint | null;
+  clicks?: bigint | null;
+  cpc?: bigint | null;
   date: Date;
 }
 
@@ -322,6 +325,10 @@ export const insightsColumnsOrderBy = [
   'spend_rel',
   'impressions_rel',
   'cpm_rel',
+  'clicks_abs',
+  'clicks_rel',
+  'cpc_abs',
+  'cpc_rel',
 ] as const;
 
 type InsightsColumnsOrderByType = (typeof insightsColumnsOrderBy)[number];

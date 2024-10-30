@@ -384,9 +384,15 @@ enum InsightsColumnsOrderBy {
   spend_rel
   impressions_rel
   cpm_rel
+  clicks_abs
+  clicks_rel
+  cpc_abs
+  cpc_rel
 }
 
 type InsightsDatapoints {
+  clicks: BigInt
+  cpc: BigInt
   cpm: BigInt
   date: Date!
   impressions: BigInt!
