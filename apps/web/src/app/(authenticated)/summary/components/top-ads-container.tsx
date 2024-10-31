@@ -163,9 +163,11 @@ export default function TopAdsContainer(): React.ReactNode {
               label: `${tInsights('impressions')} (${tInsights('relative')})`,
             },
             { value: InsightsColumnsOrderBy.cpm_rel, label: `CPM (${tInsights('relative')})` },
+            { value: InsightsColumnsOrderBy.cpc_rel, label: `CPC (${tInsights('relative')})` },
             { value: InsightsColumnsOrderBy.spend_abs, label: tInsights('spent') },
             { value: InsightsColumnsOrderBy.impressions_abs, label: tInsights('impressions') },
             { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
+            { value: InsightsColumnsOrderBy.cpc_abs, label: 'CPC' },
           ]}
           value={getOrderByValue(searchParams)}
           onChange={handleOrderByChange}
