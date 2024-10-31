@@ -132,7 +132,13 @@ export default function TopAdsContainer(): React.ReactNode {
   ]);
 
   const getCorrectOrder = (orderBy: InsightsColumnsOrderBy): OrderBy => {
-    if (orderBy === InsightsColumnsOrderBy.cpm_abs || orderBy === InsightsColumnsOrderBy.cpm_rel) return OrderBy.asc;
+    if (
+      orderBy === InsightsColumnsOrderBy.cpm_abs ||
+      orderBy === InsightsColumnsOrderBy.cpm_rel ||
+      orderBy === InsightsColumnsOrderBy.cpc_abs ||
+      orderBy === InsightsColumnsOrderBy.cpc_rel
+    )
+      return OrderBy.asc;
     return OrderBy.desc;
   };
 
