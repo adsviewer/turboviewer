@@ -99,7 +99,7 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
           date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
           impressions: datapoint.impressions,
           spend: Math.floor(Number(datapoint.spend) / 100),
-          cpm: datapoint.cpm ? Number(datapoint.cpm.toFixed(2)) : 0,
+          cpm: datapoint.cpm ? Number(datapoint.cpm.toFixed(3)) : 0,
           cpc: datapoint.cpc ?? 0,
           clicks: datapoint.clicks ?? 0,
         });

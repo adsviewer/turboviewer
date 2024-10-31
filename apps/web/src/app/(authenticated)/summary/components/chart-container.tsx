@@ -61,12 +61,15 @@ export default function ChartContainer(): React.ReactNode {
       dateTo = Number(searchParams.get(urlKeys.dateTo));
     }
 
+    const currChartMetricValue = searchParams.get(urlKeys.chartMetric)
+      ? (searchParams.get(urlKeys.chartMetric) as InsightsColumnsOrderBy)
+      : InsightsColumnsOrderBy.impressions_abs;
     const CHART_PARAMS: InsightsParams = {
       adAccounts: searchParams.getAll(urlKeys.adAccount),
       dateFrom,
       dateTo,
       interval: InsightsInterval.day,
-      orderBy: InsightsColumnsOrderBy.impressions_abs,
+      orderBy: currChartMetricValue,
       pageSize: Object.keys(PublisherEnum).length, // page size is the same as the publishers that we manage since we group per publisher
       groupedBy: [InsightsColumnsGroupBy.publisher],
       order: OrderBy.desc,

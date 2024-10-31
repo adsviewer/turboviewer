@@ -96,6 +96,7 @@ export default function ChartFilters(props: PropsType): React.ReactNode {
             { value: ChartMetricsEnum.Impressions, label: tInsights('impressions') },
             { value: ChartMetricsEnum.Spent, label: tInsights('spent') },
             { value: ChartMetricsEnum.CPM, label: 'CPM' },
+            { value: ChartMetricsEnum.CPC, label: 'CPC' },
           ]}
           defaultValue={ChartMetricsEnum.Impressions}
           value={getChartMetricValue()}

@@ -10,9 +10,10 @@ export interface GenericRequestResponseBody {
 }
 
 export enum ChartMetricsEnum {
-  Impressions = 'impressions',
-  Spent = 'spent',
-  CPM = 'cpm',
+  Impressions = 'impressions_abs',
+  Spent = 'spend_abs',
+  CPM = 'cpm_abs',
+  CPC = 'cpc_abs',
   ImpressionsCPM = 'impressions_cpm',
   SpentCPM = 'spent_cpm',
 }
