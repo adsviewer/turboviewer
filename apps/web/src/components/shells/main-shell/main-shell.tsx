@@ -20,6 +20,7 @@ import uniqid from 'uniqid';
 import { useCallback, useEffect, useState } from 'react';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
+import _ from 'lodash';
 import { LogoFull } from '@/components/misc/logo-full';
 import SettingsButton from '@/components/buttons/settings-button';
 import GroupFilters from '@/app/(authenticated)/insights/components/group-filters';
@@ -27,7 +28,7 @@ import UserButton from '@/components/user-button/user-button';
 import NavlinkButton from '@/components/buttons/navlink-button/navlink-button';
 import OrganizationSelect from '@/components/dropdowns/organization-select/organization-select';
 import CreateOrganizationButton from '@/components/create-organization/create-organization-button';
-import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
 import FeedbackButton from '@/components/buttons/feedback-button';
 import SubNavlinkButton from '@/components/buttons/sub-navlink-button/sub-navlink-button';
 import { getSearchQueryStrings, getUserDetails } from '@/app/(authenticated)/actions';
@@ -123,14 +124,17 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         }),
     );
 
-    Promise.all(initialRequests)
-      .then(() => {
-        setIsDataLoaded(true);
-      })
-      .catch((err: unknown) => {
-        logger.error(err);
-      });
+    Promise.all(initialRequests).catch((err: unknown) => {
+      logger.error(err);
+    });
   }, [checkIntegrationTokensForExpiration, setSearchesAtom, setUserDetails]);
+
+  // Make sure that all the mandatory initial data are loaded
+  useEffect(() => {
+    if (!_.isEqual(userDetails, initialUserDetails)) {
+      setIsDataLoaded(true);
+    }
+  }, [userDetails]);
 
   return (
     <AppShell
