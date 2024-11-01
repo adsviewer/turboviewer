@@ -100,7 +100,7 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
           impressions: datapoint.impressions,
           spend: Math.floor(Number(datapoint.spend) / 100),
           cpm: datapoint.cpm ? Number(datapoint.cpm.toFixed(3)) : 0,
-          cpc: datapoint.cpc ?? 0,
+          cpc: datapoint.cpc ? Number(datapoint.cpc.toFixed(3)) : 0,
           clicks: datapoint.clicks ?? 0,
         });
       }
