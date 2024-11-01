@@ -14,6 +14,7 @@ export enum ChartMetricsEnum {
   Spent = 'spend_abs',
   CPM = 'cpm_abs',
   CPC = 'cpc_abs',
+  Clicks = 'clicks_abs',
   ImpressionsCPM = 'impressions_cpm',
   SpentCPM = 'spent_cpm',
 }
