@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }): Promise<React.ReactNode> {
-  const headersList = headers();
+  const headersList = await headers();
   const acceptLanguageHeaderValue = headersList.get('accept-language');
   const preferredLocale = acceptLanguageHeaderValue ? acceptLanguageHeaderValue.split(',')[0] : 'en';
   const messages = await getMessages();

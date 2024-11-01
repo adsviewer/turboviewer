@@ -6,7 +6,7 @@ import { urqlClientSdk } from '@/lib/urql/urql-client';
 export const deAuthIntegration = async (
   type: IntegrationType,
 ): Promise<Promise<DeAuthIntegrationMutation['deAuthIntegration']>> => {
-  const deAuthIntegrationMutation = await urqlClientSdk().deAuthIntegration({ type });
+  const deAuthIntegrationMutation = await (await urqlClientSdk()).deAuthIntegration({ type });
   const { deAuthIntegration: resp } = deAuthIntegrationMutation;
   return resp;
 };

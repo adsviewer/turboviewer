@@ -8,8 +8,9 @@ import { getSdk } from '@/graphql/generated/schema-server';
 import { env } from '@/env.mjs';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
-const makeClient = (refresh?: boolean): Client => {
-  const token = refresh ? cookies().get(REFRESH_TOKEN_KEY)?.value : cookies().get(TOKEN_KEY)?.value;
+const makeClient = async (refresh?: boolean): Promise<Client> => {
+  const cookiesStore = await cookies();
+  const token = refresh ? cookiesStore.get(REFRESH_TOKEN_KEY)?.value : cookiesStore.get(TOKEN_KEY)?.value;
   return createClient({
     url: env.GRAPHQL_ENDPOINT,
     exchanges: [cacheExchange, makeAuthExchange(token), fetchExchange],
@@ -18,5 +19,5 @@ const makeClient = (refresh?: boolean): Client => {
   });
 };
 
-export const urqlClientSdk = cache(() => getSdk(createUrqlRequester(makeClient())));
-export const urqlClientSdkRefresh = cache(() => getSdk(createUrqlRequester(makeClient(true))));
+export const urqlClientSdk = cache(async () => getSdk(createUrqlRequester(await makeClient())));
+export const urqlClientSdkRefresh = cache(async () => getSdk(createUrqlRequester(await makeClient(true))));

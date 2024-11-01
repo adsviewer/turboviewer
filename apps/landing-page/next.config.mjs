@@ -4,12 +4,9 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  productionBrowserSourceMaps: true,
   reactStrictMode: true,
-  experimental: {
-    serverComponentsExternalPackages: ['pino'],
-  },
-  swcMinify: true,
-  productionBrowserSourceMaps: true
+  serverExternalPackages: ['pino']
 };
 
 export default withNextIntl(nextConfig);

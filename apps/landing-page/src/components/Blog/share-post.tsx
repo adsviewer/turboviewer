@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import Link from 'next/link';
 
 function SharePost(): ReactNode {
   return (
@@ -8,7 +9,7 @@ function SharePost(): ReactNode {
           <p className="text-black dark:text-white">Share On:</p>
         </li>
         <li>
-          <a href="/" aria-label="social link">
+          <Link href="/" aria-label="social link">
             <svg
               className="fill-[#D1D8E0] transition-all duration-300 hover:fill-primary"
               width="24"
@@ -29,10 +30,10 @@ function SharePost(): ReactNode {
                 </clipPath>
               </defs>
             </svg>
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="/" aria-label="social link">
+          <Link href="/" aria-label="social link">
             <svg
               className="fill-[#D1D8E0] transition-all duration-300 hover:fill-primary"
               width="24"
@@ -53,10 +54,10 @@ function SharePost(): ReactNode {
                 </clipPath>
               </defs>
             </svg>
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="/" aria-label="social link">
+          <Link href="/" aria-label="social link">
             <svg
               className="fill-[#D1D8E0] transition-all duration-300 hover:fill-primary"
               width="24"
@@ -77,10 +78,10 @@ function SharePost(): ReactNode {
                 </clipPath>
               </defs>
             </svg>
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="/" aria-label="social link">
+          <Link href="/" aria-label="social link">
             <svg
               className="fill-[#D1D8E0] transition-all duration-300 hover:fill-primary"
               width="24"
@@ -97,7 +98,7 @@ function SharePost(): ReactNode {
                 </clipPath>
               </defs>
             </svg>
-          </a>
+          </Link>
         </li>
       </ul>
 
@@ -106,13 +107,13 @@ function SharePost(): ReactNode {
           <p className="text-black dark:text-white">Tags:</p>
         </li>
         <li>
-          <a href="/" className="pr-2 duration-300 ease-in-out hover:text-primary">
+          <Link href="/" className="pr-2 duration-300 ease-in-out hover:text-primary">
             #business
-          </a>
+          </Link>
 
-          <a href="/" className="duration-300 ease-in-out hover:text-primary">
+          <Link href="/" className="duration-300 ease-in-out hover:text-primary">
             #saas
-          </a>
+          </Link>
         </li>
       </ul>
     </div>

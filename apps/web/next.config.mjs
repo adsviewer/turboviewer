@@ -5,15 +5,15 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  experimental: {
+    optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
+  },
+  reactStrictMode: true,
   sassOptions: {
     silenceDeprecations: ["legacy-js-api"],
   },
+  serverExternalPackages: ['pino', 'import-in-the-middle'],
   transpilePackages: ['@repo/mode'],
-  reactStrictMode: true,
-  experimental: {
-    serverComponentsExternalPackages: ['pino'],
-    optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
-  },
   rewrites: async () => {
     return {
       beforeFiles: [

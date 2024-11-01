@@ -11,6 +11,7 @@ export const createEnv = <T extends ZodRawShape>(schema: z.ZodObject<T>) => {
     e.issues.forEach((issue: ZodIssue) => {
       logger.error(`${issue.message}: ${issue.path.join(',')}`);
     });
-    process.exit(-1);
+    throw e;
+    // process.exit(-1);
   }
 };

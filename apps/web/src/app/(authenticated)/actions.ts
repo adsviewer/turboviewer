@@ -17,23 +17,25 @@ import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '../(unauthenticated)/actions';
 
-export const getUserDetails = async (): Promise<MeQuery['me']> => (await urqlClientSdk().me()).me;
+export const getUserDetails = async (): Promise<MeQuery['me']> => (await (await urqlClientSdk()).me()).me;
 
 export default async function getAccounts(): Promise<AdAccountsQuery> {
-  return await urqlClientSdk().adAccounts();
+  return await (await urqlClientSdk()).adAccounts();
 }
 
-export const refreshJWTToken = async (): Promise<RefreshTokenQuery> => await urqlClientSdkRefresh().refreshToken();
+export const refreshJWTToken = async (): Promise<RefreshTokenQuery> =>
+  await (await urqlClientSdkRefresh()).refreshToken();
 
 export const sendFeedback = async (
   values: SendFeedbackMutationVariables,
-): Promise<UrqlResult<SendFeedbackMutation, string>> => await handleUrqlRequest(urqlClientSdk().sendFeedback(values));
+): Promise<UrqlResult<SendFeedbackMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).sendFeedback(values));
 
 export const removeUserMilestoneAndGetJWT = async (
   values: RemoveUserMilestoneMutationVariables,
 ): Promise<UrqlResult> => {
   try {
-    const res = await handleUrqlRequest(urqlClientSdk().removeUserMilestone(values));
+    const res = await handleUrqlRequest((await urqlClientSdk()).removeUserMilestone(values));
     if (!res.success) {
       return {
         success: false,
@@ -54,15 +56,15 @@ export const removeUserMilestoneAndGetJWT = async (
 };
 
 export const getSearchQueryStrings = async (): Promise<UrqlResult<SearchQueryStringsQuery>> => {
-  return await handleUrqlRequest(urqlClientSdk().searchQueryStrings());
+  return await handleUrqlRequest((await urqlClientSdk()).searchQueryStrings());
 };
 
 export const upsertSearchQueryString = async (
   values: MutationUpsertSearchQueryStringArgs,
 ): Promise<UrqlResult<UpsertSearchQueryStringMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().upsertSearchQueryString(values));
+  await handleUrqlRequest((await urqlClientSdk()).upsertSearchQueryString(values));
 
 export const deleteSearchQueryString = async (
   values: MutationDeleteSearchQueryStringArgs,
 ): Promise<UrqlResult<DeleteSearchQueryStringMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().deleteSearchQueryString(values));
+  await handleUrqlRequest((await urqlClientSdk()).deleteSearchQueryString(values));

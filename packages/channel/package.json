@@ -22,8 +22,9 @@
     "test": "cross-env EXCHANGE_RATES_API_KEY=test node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-batch": "^3.658.1",
-    "@aws-sdk/client-sqs": "^3.658.1",
+    "@aws-sdk/client-batch": "^3.684.0",
+    "@aws-sdk/client-sqs": "^3.682.0",
+    "@repo/backend-shared": "workspace:*",
     "@repo/channel-linkedin": "workspace:*",
     "@repo/channel-meta": "workspace:*",
     "@repo/channel-tiktok": "workspace:*",
@@ -33,7 +34,6 @@
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
-    "@repo/backend-shared": "workspace:*",
     "@repo/pubsub": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
@@ -46,10 +46,10 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.0",
-    "@types/lodash": "^4.17.9",
-    "@types/node": "^22.7.4",
+    "@types/lodash": "^4.17.13",
+    "@types/node": "^22.8.6",
     "@types/qs": "^6.9.16",
     "cross-env": "^7.0.3",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   }
 }

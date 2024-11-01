@@ -6,4 +6,5 @@ import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 
 export const updateUserDetails = async (
   values: UpdateUserMutationVariables,
-): Promise<UrqlResult<UpdateUserMutation, string>> => await handleUrqlRequest(urqlClientSdk().updateUser(values));
+): Promise<UrqlResult<UpdateUserMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).updateUser(values));

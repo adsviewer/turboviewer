@@ -1,11 +1,13 @@
 'use client';
 
-import { type ReactNode, Suspense, useEffect, useState } from 'react';
+import { type ReactNode, Suspense, useEffect, useState, use } from 'react';
 import { Box, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@mantine/notifications';
+// eslint-disable-next-line import/named -- This is a valid import remove it when React 19 is stable
+import { use } from 'react';
 import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
@@ -14,11 +16,10 @@ import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
 import Graphics from './components/graphics';
 
-interface InsightsProps {
-  searchParams: InsightsParams;
-}
+type InsightsProps = Promise<{ searchParams: InsightsParams }>;
 
-export default function Insights(props: InsightsProps): ReactNode {
+export default function Insights(props: { params: InsightsProps }): ReactNode {
+  const params = use(props.params);
   const tGeneric = useTranslations('generic');
   const [insights, setInsights] = useAtom(insightsAtom);
   const setHasNextInsightsPage = useSetAtom(hasNextInsightsPageAtom);
@@ -27,7 +28,7 @@ export default function Insights(props: InsightsProps): ReactNode {
   useEffect(() => {
     setIsPending(true);
     setInsights([]);
-    void getInsights(props.searchParams)
+    void getInsights(params.searchParams)
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -46,7 +47,7 @@ export default function Insights(props: InsightsProps): ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [props.searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
+  }, [params.searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
 
   return (
     <Box pos="relative">
