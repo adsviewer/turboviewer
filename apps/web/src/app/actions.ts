@@ -4,7 +4,6 @@ import { type ResponseCookies, type RequestCookie } from 'next/dist/compiled/@ed
 import { cookies } from 'next/headers';
 
 export const setCookie = async (name: string, value: string): Promise<ResponseCookies> =>
-  Promise.resolve(cookies().set(name, value));
+  (await cookies()).set(name, value);
 
-export const getCookie = async (name: string): Promise<RequestCookie | undefined> =>
-  Promise.resolve(cookies().get(name));
+export const getCookie = async (name: string): Promise<RequestCookie | undefined> => (await cookies()).get(name);

@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, Suspense, useEffect, useState } from 'react';
+import { type ReactNode, Suspense, use, useEffect, useState } from 'react';
 import { Box, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useAtom, useSetAtom } from 'jotai';
@@ -15,11 +15,13 @@ import PageControls from './components/page-controls';
 import Graphics from './components/graphics';
 
 interface InsightsProps {
-  searchParams: InsightsParams;
+  searchParams: Promise<InsightsParams>;
 }
 
+// export default function Insights(props: { params: InsightsProps }): ReactNode {
 export default function Insights(props: InsightsProps): ReactNode {
   const tGeneric = useTranslations('generic');
+  const searchParams = use(props.searchParams);
   const [insights, setInsights] = useAtom(insightsAtom);
   const setHasNextInsightsPage = useSetAtom(hasNextInsightsPageAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -27,7 +29,7 @@ export default function Insights(props: InsightsProps): ReactNode {
   useEffect(() => {
     setIsPending(true);
     setInsights([]);
-    void getInsights(props.searchParams)
+    void getInsights(searchParams)
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -46,7 +48,7 @@ export default function Insights(props: InsightsProps): ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [props.searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
+  }, [searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
 
   return (
     <Box pos="relative">

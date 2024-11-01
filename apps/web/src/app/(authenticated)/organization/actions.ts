@@ -29,33 +29,33 @@ import { changeJWT } from '@/app/(unauthenticated)/actions';
 import { refreshJWTToken } from '@/app/(authenticated)/actions';
 
 export default async function getOrganization(): Promise<UrqlResult<GetOrganizationQuery>> {
-  return await handleUrqlRequest(urqlClientSdk().getOrganization());
+  return await handleUrqlRequest((await urqlClientSdk()).getOrganization());
 }
 
 const createOrganization = async (
   values: CreateOrganizationMutationVariables,
 ): Promise<UrqlResult<CreateOrganizationMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().createOrganization(values));
+  await handleUrqlRequest((await urqlClientSdk()).createOrganization(values));
 
 export const updateOrganizationUser = async (
   values: UpdateOrganizationUserMutationVariables,
 ): Promise<UrqlResult<UpdateOrganizationUserMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().updateOrganizationUser(values));
+  await handleUrqlRequest((await urqlClientSdk()).updateOrganizationUser(values));
 
 export const updateOrganization = async (
   values: UpdateOrganizationMutationVariables,
 ): Promise<UrqlResult<UpdateOrganizationMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().updateOrganization(values));
+  await handleUrqlRequest((await urqlClientSdk()).updateOrganization(values));
 
 const switchOrganization = async (
   values: SwitchOrganizationMutationVariables,
 ): Promise<UrqlResult<SwitchOrganizationMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().switchOrganization(values));
+  await handleUrqlRequest((await urqlClientSdk()).switchOrganization(values));
 
 const deleteOrganization = async (
   values: DeleteOrganizationMutationVariables,
 ): Promise<UrqlResult<DeleteOrganizationMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().deleteOrganization(values));
+  await handleUrqlRequest((await urqlClientSdk()).deleteOrganization(values));
 
 export async function createAndSwitchOrganization(values: CreateOrganizationMutationVariables): Promise<UrqlResult> {
   try {
@@ -142,17 +142,17 @@ export async function switchOrganizationAndChangeJWT(values: SwitchOrganizationM
 export const getOrganizationAdAccounts = async (
   channel: IntegrationType,
 ): Promise<UrqlResult<OrganizationAdAccountsQuery>> =>
-  await handleUrqlRequest(urqlClientSdk().organizationAdAccounts({ channel }));
+  await handleUrqlRequest((await urqlClientSdk()).organizationAdAccounts({ channel }));
 
 export const getAvailableOrganizationAdAccounts = async (
   channel: IntegrationType,
 ): Promise<UrqlResult<AvailableOrganizationAdAccountsQuery>> =>
-  await handleUrqlRequest(urqlClientSdk().availableOrganizationAdAccounts({ channel }));
+  await handleUrqlRequest((await urqlClientSdk()).availableOrganizationAdAccounts({ channel }));
 
 export const updateOrganizationAdAccounts = async (
   values: UpdateOrganizationAdAccountsMutationVariables,
 ): Promise<UrqlResult<UpdateOrganizationAdAccountsMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().updateOrganizationAdAccounts(values));
+  await handleUrqlRequest((await urqlClientSdk()).updateOrganizationAdAccounts(values));
 
 type InviteUsersMutationError = Extract<
   InviteUsersMutation['inviteUsers'],
@@ -162,9 +162,9 @@ type InviteUsersMutationError = Extract<
 export const inviteUsers = async (
   values: InviteUsersMutationVariables,
 ): Promise<UrqlResult<InviteUsersMutation, InviteUsersMutationError | string>> =>
-  await handleUrqlRequest<InviteUsersMutation, InviteUsersMutationError>(urqlClientSdk().inviteUsers(values));
+  await handleUrqlRequest<InviteUsersMutation, InviteUsersMutationError>((await urqlClientSdk()).inviteUsers(values));
 
 export const removeUserFromOrganization = async (
   values: RemoveUserFromOrganizationMutationVariables,
 ): Promise<UrqlResult<RemoveUserFromOrganizationMutation, string>> =>
-  await handleUrqlRequest(urqlClientSdk().removeUserFromOrganization(values));
+  await handleUrqlRequest((await urqlClientSdk()).removeUserFromOrganization(values));

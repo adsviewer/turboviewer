@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { env } from '@/env.mjs';
 
-export function GET(request: NextRequest): void {
-  const cookieStore = cookies();
+export async function GET(request: NextRequest): Promise<void> {
+  const cookieStore = await cookies();
   cookieStore.delete(TOKEN_KEY);
   cookieStore.delete(REFRESH_TOKEN_KEY);
   const url = new URL(`${env.NEXT_PUBLIC_ENDPOINT}/sign-in`);

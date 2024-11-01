@@ -6,6 +6,7 @@ import React, { type ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { logger } from '@repo/logger';
 import { toast as toaster } from 'react-hot-toast';
+import Link from 'next/link';
 import { env } from '@/env.mjs';
 
 function Contact(): ReactNode {
@@ -229,13 +230,13 @@ function Contact(): ReactNode {
               <div className="5 mb-7">
                 <h3 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">{t('email')}</h3>
                 <p>
-                  <a href="/">hello@adsviewer.io</a>
+                  <Link href="/">hello@adsviewer.io</Link>
                 </p>
               </div>
               {/* <div>
                 <h4 className="mb-4 text-metatitle3 font-medium text-black dark:text-white">Phone Number</h4>
                 <p>
-                  <a href="/">+31 652 43 37 49</a>
+                  <Link href="/">+31 652 43 37 49</Link>
                 </p>
               </div> */}
             </motion.div>

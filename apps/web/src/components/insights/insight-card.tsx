@@ -10,8 +10,9 @@ import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
 import { IconChartLine, IconCoins, IconEye } from '@tabler/icons-react';
-import { Embed } from '@repo/ui/embed';
-import { IFrame as IFrameT } from '@repo/ui/iframe';
+// import Embed from '@repo/ui/embed';
+import IFrameComponent from '@repo/ui/iframe';
+import EmbedComponent from '@repo/ui/embed';
 import {
   type CurrencyEnum,
   type DeviceEnum,
@@ -114,20 +115,12 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
 
   const getIFrameHtml = (): ReactNode => {
     if (!props.iframe) return <Flex justify="center" />;
-    const iFrameProps: React.EmbedHTMLAttributes<HTMLEmbedElement> & React.IframeHTMLAttributes<HTMLIFrameElement> = {
-      src: props.iframe.src,
-      width: String(props.iframe.width),
-      height: String(props.iframe.height),
-      onLoad: () => {
-        setIsLoadingIframe(false);
-      },
-    };
 
     switch (props.iframe.type) {
       case IFrameType.EMBEDDED:
-        return <Embed style={{ border: 'none' }} {...iFrameProps} />;
+        return <EmbedComponent data={props.iframe} setIsLoadingIframe={setIsLoadingIframe} />;
       case IFrameType.IFRAME:
-        return <IFrameT scrolling="no" loading="lazy" style={{ border: 'none' }} {...iFrameProps} />;
+        return <IFrameComponent data={props.iframe} setIsLoadingIframe={setIsLoadingIframe} />;
       default:
         logger.error('Unknown iframe type');
         return <Flex justify="center" />;

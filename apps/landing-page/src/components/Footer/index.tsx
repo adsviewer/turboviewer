@@ -60,7 +60,7 @@ function Footer(): ReactNode {
               viewport={{ once: true }}
               className="animate_top w-1/2 lg:w-1/4"
             >
-              <a href="index.html" className="relative">
+              <Link href="index.html" className="relative">
                 <Image
                   width={0}
                   height={0}
@@ -77,14 +77,14 @@ function Footer(): ReactNode {
                   alt="Logo"
                   className="hidden dark:block"
                 />
-              </a>
+              </Link>
 
               <p className="mb-10 mt-5">{t('title')}</p>
 
               <p className="mb-1.5 text-sectiontitle uppercase tracking-[5px]">contact</p>
-              <a href="/" className="text-itemtitle font-medium text-black dark:text-white">
+              <Link href="/" className="text-itemtitle font-medium text-black dark:text-white">
                 hello@adsviewer.io
-              </a>
+              </Link>
             </motion.div>
 
             <div className="flex w-full flex-col gap-8 md:flex-row md:justify-between md:gap-0 lg:w-2/3 xl:w-7/12">
@@ -110,19 +110,19 @@ function Footer(): ReactNode {
 
                 <ul>
                   <li>
-                    <a href="/" className="mb-3 inline-block hover:text-primary">
+                    <Link href="/" className="mb-3 inline-block hover:text-primary">
                       {t('home')}
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a href="/#features" className="mb-3 inline-block hover:text-primary">
+                    <Link href="/#features" className="mb-3 inline-block hover:text-primary">
                       {t('features')}
-                    </a>
+                    </Link>
                   </li>
                   <li>
-                    <a href="/#pricing" className="mb-3 inline-block hover:text-primary">
+                    <Link href="/#pricing" className="mb-3 inline-block hover:text-primary">
                       {t('pricing')}
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </motion.div>
@@ -149,9 +149,9 @@ function Footer(): ReactNode {
 
                 <ul>
                   <li>
-                    <a href="/#support" className="mb-3 inline-block hover:text-primary">
+                    <Link href="/#support" className="mb-3 inline-block hover:text-primary">
                       {t('contactUs')}
-                    </a>
+                    </Link>
                   </li>
                 </ul>
               </motion.div>
@@ -252,9 +252,9 @@ function Footer(): ReactNode {
                 </Link>
               </li>
               <li>
-                <a href="/#support" className="hover:text-primary">
+                <Link href="/#support" className="hover:text-primary">
                   {t('support')}
-                </a>
+                </Link>
               </li>
             </ul>
           </motion.div>
@@ -302,7 +302,7 @@ function Footer(): ReactNode {
           >
             <ul className="flex items-center gap-5">
               <li>
-                <a
+                <Link
                   href="https://www.facebook.com/profile.php?id=100084738625118"
                   aria-label="social fb icon"
                   target="_blank"
@@ -328,10 +328,10 @@ function Footer(): ReactNode {
                       </clipPath>
                     </defs>
                   </svg>
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="https://www.linkedin.com/company/adsviewer-io/"
                   aria-label="social linkedIn icon"
                   target="_blank"
@@ -357,7 +357,7 @@ function Footer(): ReactNode {
                       </clipPath>
                     </defs>
                   </svg>
-                </a>
+                </Link>
               </li>
             </ul>
           </motion.div>

@@ -24,11 +24,11 @@ export async function POST(request: Request): Promise<NextResponse<{ success: tr
     });
   }
 
-  const result = await handleUrqlRequest(urqlClientSdk().login(parsed.data));
+  const result = await handleUrqlRequest((await urqlClientSdk()).login(parsed.data));
   if (!result.success) {
     return NextResponse.json({ success: false, error: { message: result.error } });
   }
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.set(TOKEN_KEY, result.data.login.token);
   cookieStore.set(REFRESH_TOKEN_KEY, result.data.login.refreshToken);
   return NextResponse.json({
@@ -39,7 +39,7 @@ export async function POST(request: Request): Promise<NextResponse<{ success: tr
 }
 
 // Check for auth tokens in url on page visit
-export function GET(request: NextRequest): NextResponse {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   const token = request.nextUrl.searchParams.get('token');
   const refreshToken = request.nextUrl.searchParams.get('refreshToken');
   if (!token || !refreshToken) {
@@ -48,7 +48,7 @@ export function GET(request: NextRequest): NextResponse {
       error: { message: 'No JWT data found in the URL. Not attempting authorization.' },
     });
   }
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.set(TOKEN_KEY, token);
   cookieStore.set(REFRESH_TOKEN_KEY, refreshToken);
   return NextResponse.redirect(env.NEXT_PUBLIC_ENDPOINT);

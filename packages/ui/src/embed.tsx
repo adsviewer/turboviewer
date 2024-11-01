@@ -1,11 +1,25 @@
-import * as React from 'react';
-import { cn } from './tailwind-utils';
+interface FrameData {
+  width: number;
+  height: number;
+  src: string;
+}
 
-const Embed = React.forwardRef<HTMLEmbedElement, React.EmbedHTMLAttributes<HTMLEmbedElement>>(
-  ({ className, ...props }, ref) => {
-    return <embed title={props.src} className={cn('', className)} ref={ref} {...props} />;
-  },
-);
-Embed.displayName = 'Embed';
+interface PropsType {
+  data: FrameData;
+  setIsLoadingIframe: (isLoading: boolean) => void;
+}
 
-export { Embed };
+export default function EmbedComponent(props: PropsType): React.ReactNode {
+  return (
+    <object
+      title="Embed"
+      style={{ border: 'none' }}
+      width={props.data.width}
+      height={props.data.height}
+      data={props.data.src}
+      onLoad={() => {
+        props.setIsLoadingIframe(false);
+      }}
+    />
+  );
+}

@@ -6,6 +6,6 @@ import { type MeQuery } from '@/graphql/generated/schema-server';
 import { urqlClientSdk } from '@/lib/urql/urql-client';
 
 export const setCookie = async (name: string, value: string): Promise<ResponseCookies> =>
-  Promise.resolve(cookies().set(name, value));
+  (await cookies()).set(name, value);
 
-export const getUserDetails = async (): Promise<MeQuery['me']> => (await urqlClientSdk().me()).me;
+export const getUserDetails = async (): Promise<MeQuery['me']> => (await (await urqlClientSdk()).me()).me;

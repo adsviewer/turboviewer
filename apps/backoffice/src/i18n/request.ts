@@ -12,10 +12,10 @@ const localesMap = new Map([
 ]);
 
 export default getRequestConfig(async () => {
-  const locale = cookies().get('NEXT_LOCALE')?.value ?? 'en-gb';
+  const locale = (await cookies()).get('NEXT_LOCALE')?.value ?? 'en-gb';
 
   return {
     locale,
-    messages: (await import(`../messages/${localesMap.get(locale) ?? 'en'}.json`)).default,
+    messages: (await import(`../../messages/${localesMap.get(locale) ?? 'en'}.json`)).default,
   };
 });

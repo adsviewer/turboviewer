@@ -43,7 +43,7 @@ export default async function getInsights(insightsParams: InsightsParams): Promi
   delete parsedSearchData.clientSearchTerms;
 
   return await handleUrqlRequest(
-    urqlClientSdk().insights({
+    (await urqlClientSdk()).insights({
       adAccountIds: insightsParams.adAccounts,
       adIds: insightsParams.adIds,
       integrations: insightsParams.integrations,

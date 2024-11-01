@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import FaqItem from './faq-item';
 import faqData from './faq-data';
 
@@ -56,7 +57,7 @@ function FAQ(): ReactNode {
                 </span>
               </h2>
 
-              <a
+              <Link
                 href="/"
                 className="group mt-7.5 inline-flex items-center gap-2.5 text-black hover:text-primary dark:text-white dark:hover:text-primary"
               >
@@ -67,7 +68,7 @@ function FAQ(): ReactNode {
                     fill="currentColor"
                   />
                 </svg>
-              </a>
+              </Link>
             </motion.div>
 
             <motion.div

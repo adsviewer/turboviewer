@@ -1,21 +1,19 @@
 import { cacheExchange, type Client, createClient, fetchExchange } from '@urql/core';
 import { cookies, headers } from 'next/headers';
-// eslint-disable-next-line import/named -- this should work
-import { cache } from 'react';
 import { REFRESH_TOKEN_KEY, TOKEN_KEY } from '@repo/utils';
 import { createUrqlRequester } from '@/util/create-urql-requester';
 import { getSdk } from '@/graphql/generated/schema-server';
 import { env } from '@/env.mjs';
 import { makeAuthExchange } from '@/lib/urql/urql-auth';
 
-const makeClient = (refresh?: boolean): Client => {
-  const cookieStore = cookies();
+const makeClient = async (refresh?: boolean): Promise<Client> => {
+  const cookieStore = await cookies();
   const token = refresh ? cookieStore.get(REFRESH_TOKEN_KEY)?.value : cookieStore.get(TOKEN_KEY)?.value;
   return createClient({
     url: env.GRAPHQL_ENDPOINT,
     fetchOptions: {
       headers: {
-        'accept-language': headers().get('accept-language') ?? 'en-US',
+        'accept-language': (await headers()).get('accept-language') ?? 'en-US',
       },
     },
     exchanges: [cacheExchange, makeAuthExchange(token), fetchExchange],
@@ -24,5 +22,7 @@ const makeClient = (refresh?: boolean): Client => {
   });
 };
 
-export const urqlClientSdk = cache(() => getSdk(createUrqlRequester(makeClient())));
-export const urqlClientSdkRefresh = cache(() => getSdk(createUrqlRequester(makeClient(true))));
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- too complicated to type
+export const urqlClientSdk = async () => getSdk(createUrqlRequester(await makeClient()));
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- too complicated to type
+export const urqlClientSdkRefresh = async () => getSdk(createUrqlRequester(await makeClient(true)));

@@ -26,11 +26,12 @@ export async function POST(request: Request): Promise<NextResponse<{ success: tr
     });
   }
 
-  const result = await handleUrqlRequest(urqlClientSdk().resetPassword(parsed.data));
+  const result = await handleUrqlRequest((await urqlClientSdk()).resetPassword(parsed.data));
   if (!result.success) {
     return NextResponse.json({ success: false, error: { message: result.error } });
   }
-  cookies().set(TOKEN_KEY, result.data.resetPassword.token);
-  cookies().set(REFRESH_TOKEN_KEY, result.data.resetPassword.refreshToken);
+  const cookiesStore = await cookies();
+  cookiesStore.set(TOKEN_KEY, result.data.resetPassword.token);
+  cookiesStore.set(REFRESH_TOKEN_KEY, result.data.resetPassword.refreshToken);
   return NextResponse.json({ success: true });
 }

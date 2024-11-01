@@ -27,7 +27,7 @@ export async function POST(
     });
   }
 
-  const result = await handleUrqlRequest(urqlClientSdk().forgetPassword(parsed.data));
+  const result = await handleUrqlRequest((await urqlClientSdk()).forgetPassword(parsed.data));
   if (!result.success) {
     return NextResponse.json({ success: false, error: { message: result.error } });
   }
