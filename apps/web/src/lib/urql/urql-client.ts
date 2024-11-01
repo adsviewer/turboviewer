@@ -22,5 +22,7 @@ const makeClient = async (refresh?: boolean): Promise<Client> => {
   });
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- too complicated to type
 export const urqlClientSdk = async () => getSdk(createUrqlRequester(await makeClient()));
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- too complicated to type
 export const urqlClientSdkRefresh = async () => getSdk(createUrqlRequester(await makeClient(true)));

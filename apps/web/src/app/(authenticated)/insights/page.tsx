@@ -1,13 +1,11 @@
 'use client';
 
-import { type ReactNode, Suspense, useEffect, useState, use } from 'react';
+import { type ReactNode, Suspense, use, useEffect, useState } from 'react';
 import { Box, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@mantine/notifications';
-// eslint-disable-next-line import/named -- This is a valid import remove it when React 19 is stable
-import { use } from 'react';
 import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
