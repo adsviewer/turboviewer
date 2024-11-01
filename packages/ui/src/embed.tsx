@@ -1,11 +1,10 @@
-import * as React from 'react';
+import React from 'react';
 import { cn } from './tailwind-utils';
 
-const Embed = React.forwardRef<HTMLEmbedElement, React.EmbedHTMLAttributes<HTMLEmbedElement>>(
-  ({ className, ...props }, ref) => {
-    return <embed title={props.src} className={cn('', className)} ref={ref} {...props} />;
-  },
-);
-Embed.displayName = 'Embed';
+type EmbedProps = React.EmbedHTMLAttributes<HTMLEmbedElement>;
 
-export { Embed };
+export default function Embed({ className, ...props }: EmbedProps): React.ReactElement {
+  return <embed title={props.src} className={cn('', className)} {...props} />;
+}
+
+Embed.displayName = 'Embed';

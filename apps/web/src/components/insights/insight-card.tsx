@@ -10,7 +10,7 @@ import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
 import { IconChartLine, IconCoins, IconEye } from '@tabler/icons-react';
-import { Embed } from '@repo/ui/embed';
+import Embed from '@repo/ui/embed';
 import { IFrame as IFrameT } from '@repo/ui/iframe';
 import {
   type CurrencyEnum,
