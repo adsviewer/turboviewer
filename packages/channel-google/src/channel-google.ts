@@ -349,11 +349,7 @@ class Google implements ChannelInterface {
       if (isAError(authToken)) throw new AError('Access token not generated');
 
       const url = `https://googleads.googleapis.com/v18/customers/${dbAccount.externalId}/googleAds:searchStream`;
-      const youtubeData = await getAllYoutubeAds(
-        dbAccount.externalId,
-        '2024-09-01',
-        '2024-09-02',
-      );
+      const youtubeData = await getAllYoutubeAds(dbAccount.externalId, '2024-09-01', '2024-09-02');
 
       const campaignGroup = youtubeData.map((el) => ({
         externalId: String(el.campaign.id),
@@ -375,7 +371,7 @@ class Google implements ChannelInterface {
 
       const creatives = [];
 
-      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
       for (const el of youtubeData) {
         if (el.adGroupAd.ad.videoResponsiveAd) {
@@ -421,7 +417,7 @@ class Google implements ChannelInterface {
           creatives.push(...flattenedCreatives);
         }
 
-        await delay(500)
+        await delay(500);
       }
 
       await saveInsightsAdsAdsSetsCampaigns(
@@ -454,9 +450,8 @@ class Google implements ChannelInterface {
       include: { adAccount: true },
       where: { id: adId },
     });
-  
+
     try {
-      console.log(externalId, adId, adAccount, 'GET AD PREVIEW')
       const query = `
          SELECT
           ad_group_ad.ad.id,
@@ -474,26 +469,24 @@ class Google implements ChannelInterface {
           ad_group_ad
         WHERE
           ad_group_ad.ad.id = '${externalId}'
-      `
-      const response = await fetchGoogleAdsData(query, adAccount.externalId)
-      console.log(response, 'THIS IS RESPONSE', response[0].results[0].adGroupAd)
-      // Check if ad data is available
+      `;
+      const response = await fetchGoogleAdsData(query, adAccount.externalId);
       if (!response[0].results[0].adGroupAd) {
         return new AError('getGoogleAdPreview: Ad not found or insufficient permissions.');
       }
-  
+
       const adData = response[0].results[0].adGroupAd;
-  
-      // Create the iFrame or HTML snippet based on ad data
+
       const previewHTML = `
-        <div class="ad-preview">
-          <h1>${adData.ad.name}</h1>
-          <p>${adData.ad.resourceName}</p>
-          <img src="${adData.ad.final_urls?.[0]}" alt="${adData.ad.name}" />
-        </div>
+      <iframe
+        title="${adData.ad.name}"
+        src="${adData.ad.finalUrls?.[0]}"
+        width="600"
+        height="400"
+        scrolling="no"
+      ></iframe>
       `;
-  
-      console.log(previewHTML, 'PREVIEW HTMLLL')
+
       return getIFrame(previewHTML); // getIFrame generates a structured iFrame response
     } catch (error) {
       return new AError(`getGoogleAdPreview: ${error.message}`);
@@ -505,38 +498,36 @@ class Google implements ChannelInterface {
   }
 
   async saveAdAccounts(integration: Integration): Promise<DbAdAccount[] | AError> {
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    console.log(integration, 'THIS IS INTEGRATION')
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     try {
       if (!integration.refreshToken) return new AError('No refresh token found');
 
       const response = await fetchGoogleAdsData();
-      console.log(response, 'FIRST RESPONSE')
       // if(response[0].error !== undefined) return new AError("Something went wrong with google")
-      const updatedCustomers = []
+      const updatedCustomers = [];
 
-      for( let customer of response?.[0].results ) {
+      for (let customer of response?.[0].results) {
         const currencyCodeQuery = `
           SELECT
             customer.id,
             customer.currency_code
           FROM
             customer
-        `
-        
-        const currencyCode = await fetchGoogleAdsData(currencyCodeQuery, customer.customerClient.clientCustomer.split('/')[1])
-        console.log(currencyCode, '2nd RESPONSE')
-        customer.customerClient.currencyCode = currencyCode?.[0]?.results?.[0].customer.currencyCode ?? 'USD'
-        customer.customerClient.id = customer.customerClient.clientCustomer.split('/')[1]
-        delete customer.customerClient.clientCustomer
-        delete customer.customerClient.manager
-        delete customer.customerClient.level
-        updatedCustomers.push(customer)
+        `;
 
-        await delay(1000)
+        const currencyCode = await fetchGoogleAdsData(
+          currencyCodeQuery,
+          customer.customerClient.clientCustomer.split('/')[1],
+        );
+        customer.customerClient.currencyCode = currencyCode?.[0]?.results?.[0].customer.currencyCode ?? 'USD';
+        customer.customerClient.id = customer.customerClient.clientCustomer.split('/')[1];
+        delete customer.customerClient.clientCustomer;
+        delete customer.customerClient.manager;
+        delete customer.customerClient.level;
+        updatedCustomers.push(customer);
+
+        await delay(1000);
       }
-
-      console.log(updatedCustomers, 'THIS IS UPDATED CUSTOMERS')
 
       const accountSchema = z.array(
         z.object({
@@ -560,7 +551,6 @@ class Google implements ChannelInterface {
         currency: account.customerClient.currencyCode,
         externalId: account.customerClient.id.toString(),
       })) satisfies ChannelAdAccount[];
-
 
       return await saveAccounts(channelAccounts, integration);
     } catch (err) {
