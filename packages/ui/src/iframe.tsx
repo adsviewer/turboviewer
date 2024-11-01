@@ -1,5 +1,3 @@
-// import { type IFrame } from '@/graphql/generated/schema-server';
-
 interface FrameData {
   width: number;
   height: number;

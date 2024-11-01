@@ -1,6 +1,3 @@
-// import React from 'react';
-// import { cn } from './tailwind-utils';
-
 interface FrameData {
   width: number;
   height: number;
