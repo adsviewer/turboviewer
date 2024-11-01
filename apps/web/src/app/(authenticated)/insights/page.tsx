@@ -14,11 +14,14 @@ import OrderFilters from './components/order-filters';
 import PageControls from './components/page-controls';
 import Graphics from './components/graphics';
 
-type InsightsProps = Promise<{ searchParams: InsightsParams }>;
+interface InsightsProps {
+  searchParams: Promise<InsightsParams>;
+}
 
-export default function Insights(props: { params: InsightsProps }): ReactNode {
-  const params = use(props.params);
+// export default function Insights(props: { params: InsightsProps }): ReactNode {
+export default function Insights(props: InsightsProps): ReactNode {
   const tGeneric = useTranslations('generic');
+  const searchParams = use(props.searchParams);
   const [insights, setInsights] = useAtom(insightsAtom);
   const setHasNextInsightsPage = useSetAtom(hasNextInsightsPageAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -26,7 +29,7 @@ export default function Insights(props: { params: InsightsProps }): ReactNode {
   useEffect(() => {
     setIsPending(true);
     setInsights([]);
-    void getInsights(params.searchParams)
+    void getInsights(searchParams)
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -45,7 +48,7 @@ export default function Insights(props: { params: InsightsProps }): ReactNode {
       .finally(() => {
         setIsPending(false);
       });
-  }, [params.searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
+  }, [searchParams, setHasNextInsightsPage, setInsights, tGeneric]);
 
   return (
     <Box pos="relative">
