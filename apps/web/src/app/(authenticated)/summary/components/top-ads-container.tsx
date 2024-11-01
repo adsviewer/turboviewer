@@ -132,7 +132,13 @@ export default function TopAdsContainer(): React.ReactNode {
   ]);
 
   const getCorrectOrder = (orderBy: InsightsColumnsOrderBy): OrderBy => {
-    if (orderBy === InsightsColumnsOrderBy.cpm_abs || orderBy === InsightsColumnsOrderBy.cpm_rel) return OrderBy.asc;
+    if (
+      orderBy === InsightsColumnsOrderBy.cpm_abs ||
+      orderBy === InsightsColumnsOrderBy.cpm_rel ||
+      orderBy === InsightsColumnsOrderBy.cpc_abs ||
+      orderBy === InsightsColumnsOrderBy.cpc_rel
+    )
+      return OrderBy.asc;
     return OrderBy.desc;
   };
 
@@ -157,9 +163,12 @@ export default function TopAdsContainer(): React.ReactNode {
               label: `${tInsights('impressions')} (${tInsights('relative')})`,
             },
             { value: InsightsColumnsOrderBy.cpm_rel, label: `CPM (${tInsights('relative')})` },
+            { value: InsightsColumnsOrderBy.cpc_rel, label: `CPC (${tInsights('relative')})` },
             { value: InsightsColumnsOrderBy.spend_abs, label: tInsights('spent') },
             { value: InsightsColumnsOrderBy.impressions_abs, label: tInsights('impressions') },
+            { value: InsightsColumnsOrderBy.clicks_abs, label: tInsights('clicks') },
             { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
+            { value: InsightsColumnsOrderBy.cpc_abs, label: 'CPC' },
           ]}
           value={getOrderByValue(searchParams)}
           onChange={handleOrderByChange}

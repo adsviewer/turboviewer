@@ -9,7 +9,7 @@ import { sentenceCase } from 'change-case';
 import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
-import { IconChartLine, IconCoins, IconEye } from '@tabler/icons-react';
+import { IconChartLine, IconClick, IconCoins, IconEye, IconZoomMoney } from '@tabler/icons-react';
 // import Embed from '@repo/ui/embed';
 import IFrameComponent from '@repo/ui/iframe';
 import EmbedComponent from '@repo/ui/embed';
@@ -99,7 +99,9 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
           date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
           impressions: datapoint.impressions,
           spend: Math.floor(Number(datapoint.spend) / 100),
-          cpm: datapoint.cpm ?? 0n,
+          cpm: datapoint.cpm ? Number(datapoint.cpm.toFixed(3)) : 0,
+          cpc: datapoint.cpc ? Number(datapoint.cpc.toFixed(3)) : 0,
+          clicks: datapoint.clicks ?? 0,
         });
       }
       setDatapoints(formattedDatapoints);
@@ -246,7 +248,7 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
       </Flex>
 
       {/* Stats */}
-      {props.datapoints ? (
+      {datapoints.length ? (
         <Flex gap="md" wrap="wrap">
           {/* Impressions */}
           <Tooltip label={t('impressions')}>
@@ -254,15 +256,13 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
               align="center"
               gap={3}
               onClick={() => {
-                if (props.datapoints) {
-                  void copyText(String(props.datapoints[props.datapoints.length - 1].impressions));
-                }
+                void copyText(String(datapoints[datapoints.length - 1].impressions));
               }}
               style={{ cursor: 'pointer' }}
             >
               <IconEye />
               <Text size="sm" c="dimmed">
-                {format.number(props.datapoints[props.datapoints.length - 1].impressions, { style: 'decimal' })}
+                {format.number(datapoints[datapoints.length - 1].impressions, { style: 'decimal' })}
               </Text>
             </Flex>
           </Tooltip>
@@ -272,15 +272,13 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
               align="center"
               gap="xs"
               onClick={() => {
-                if (props.datapoints) {
-                  void copyText(String(Number(props.datapoints[props.datapoints.length - 1].spend) / 100));
-                }
+                void copyText(String(Number(datapoints[datapoints.length - 1].spend) / 100));
               }}
               style={{ cursor: 'pointer' }}
             >
               <IconCoins />
               <Text size="sm" c="dimmed">
-                {format.number(Number(props.datapoints[props.datapoints.length - 1].spend) / 100, {
+                {format.number(Number(datapoints[datapoints.length - 1].spend) / 100, {
                   style: 'currency',
                   currency: props.currency,
                 })}
@@ -293,15 +291,45 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
               align="center"
               gap="xs"
               onClick={() => {
-                if (props.datapoints) {
-                  void copyText(String(props.datapoints[props.datapoints.length - 1].cpm));
-                }
+                void copyText(String(datapoints[datapoints.length - 1].cpm));
               }}
               style={{ cursor: 'pointer' }}
             >
               <IconChartLine />
               <Text size="sm" c="dimmed">
-                {props.datapoints[props.datapoints.length - 1].cpm}
+                {datapoints[datapoints.length - 1].cpm}
+              </Text>
+            </Flex>
+          </Tooltip>
+          {/* CPC */}
+          <Tooltip label="CPC">
+            <Flex
+              align="center"
+              gap="xs"
+              onClick={() => {
+                void copyText(String(datapoints[datapoints.length - 1].cpc));
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <IconZoomMoney />
+              <Text size="sm" c="dimmed">
+                {datapoints[datapoints.length - 1].cpc}
+              </Text>
+            </Flex>
+          </Tooltip>
+          {/* Clicks */}
+          <Tooltip label="Clicks">
+            <Flex
+              align="center"
+              gap="xs"
+              onClick={() => {
+                void copyText(String(datapoints[datapoints.length - 1].clicks));
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <IconClick />
+              <Text size="sm" c="dimmed">
+                {datapoints[datapoints.length - 1].clicks}
               </Text>
             </Flex>
           </Tooltip>
