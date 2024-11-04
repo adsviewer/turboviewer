@@ -56,13 +56,11 @@ export class Cacheable<
         );
         return data;
       }
-      if (data) {
-        await ioredis.psetex(
-          key,
-          this.ttlSec * 1000,
-          JSON.stringify({ expiresAt: Date.now() + this.ttlSec * 1000, payload: data }),
-        );
-      }
+      await ioredis.psetex(
+        key,
+        this.ttlSec * 1000,
+        JSON.stringify({ expiresAt: Date.now() + this.ttlSec * 1000, payload: data }),
+      );
       return data;
     } catch (e) {
       const message = e instanceof Error ? e.message : JSON.stringify(e);

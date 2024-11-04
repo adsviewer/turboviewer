@@ -84,7 +84,7 @@ export interface ChannelInterface {
     publisher?: PublisherEnum,
     device?: DeviceEnum,
     position?: string,
-  ) => Promise<ChannelIFrame | AError>;
+  ) => Promise<ChannelIFrame | AError | null>;
   getAdAccountData: (integration: Integration, adAccount: AdAccount, initial: boolean) => Promise<AError | undefined>;
   getDefaultPublisher: () => PublisherEnum;
   getReportStatus: (adAccount: AdAccountIntegration, taskId: string) => Promise<JobStatusEnum>;
