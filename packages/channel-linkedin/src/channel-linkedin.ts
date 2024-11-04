@@ -162,7 +162,7 @@ class LinkedIn implements ChannelInterface {
     }
   }
 
-  async getAdPreview(integration: Integration, adId: string): Promise<ChannelIFrame | AError> {
+  async getAdPreview(integration: Integration, adId: string): Promise<ChannelIFrame | AError | null> {
     const { externalId, adAccount } = await prisma.ad.findUniqueOrThrow({
       include: { adAccount: true },
       where: { id: adId },
@@ -178,7 +178,7 @@ class LinkedIn implements ChannelInterface {
       z.object({ preview: z.string() }),
     );
     if (isAError(adPreview)) return adPreview;
-    if (adPreview.length !== 1) return new AError('getAdPreview: Elements should contain only one element');
+    if (adPreview.length !== 1) return null;
     return getIFrame(adPreview[0].preview);
   }
 
@@ -391,7 +391,7 @@ class LinkedIn implements ChannelInterface {
     if (!response.ok) {
       const linkedInErrorSchema = z.object({
         status: z.number(),
-        serviceErrorCode: z.number(),
+        serviceErrorCode: z.number().optional(),
         code: z.string(),
         message: z.string(),
       });
@@ -403,6 +403,9 @@ class LinkedIn implements ChannelInterface {
       if (['EXPIRED_ACCESS_TOKEN', 'REVOKED_ACCESS_TOKEN'].includes(parsed.data.code)) {
         await disConnectIntegrationOnError(integrationId, new Error(parsed.data.message), true);
         return new AError('Expired access token');
+      }
+      if (parsed.data.code === 'UNSUPPORTED_CREATIVE_TYPE') {
+        return { next: undefined, elements: [] };
       }
       logger.error(body, 'Unknown error code in LinkedIn response');
       return new AError('Unknown error code in LinkedIn response');

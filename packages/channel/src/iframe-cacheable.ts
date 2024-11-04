@@ -33,6 +33,7 @@ const getFn =
 
     const channel = getChannel(integration.type);
     const iFrame = await channel.getAdPreview(integration, adId, publisher, device, position);
+    if (!iFrame) return new AError('iFrame not found');
     if (isAError(iFrame)) return iFrame;
     return {
       ...iFrame,
