@@ -184,8 +184,10 @@ const saveTokens = async (
     const maxDate = new Date('9999-12-31T23:59:59.999Z'); // Prisma's max supported date
     return date > maxDate ? maxDate : date;
   }
-  integrationData.accessTokenExpiresAt = adjustDate(new Date(tokens.accessTokenExpiresAt ?? new Date()))
-  integrationData.refreshTokenExpiresAt = tokens.refreshTokenExpiresAt ? adjustDate(new Date(tokens.refreshTokenExpiresAt)) : undefined
+  integrationData.accessTokenExpiresAt = adjustDate(new Date(tokens.accessTokenExpiresAt ?? new Date()));
+  integrationData.refreshTokenExpiresAt = tokens.refreshTokenExpiresAt
+    ? adjustDate(new Date(tokens.refreshTokenExpiresAt))
+    : undefined;
 
   const [integration] = await Promise.all([
     prisma.integration.upsert({
