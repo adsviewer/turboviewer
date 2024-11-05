@@ -1,10 +1,10 @@
 'use client';
 
-import { Flex, Text, Button, Modal, Alert, Input, useMantineTheme } from '@mantine/core';
+import { Alert, Button, Flex, Input, Modal, Text, useMantineTheme } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
 import { useDisclosure, useInputState } from '@mantine/hooks';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { logger } from '@repo/logger';
@@ -69,7 +69,7 @@ export default function DeleteOrganizationButton(props: PropsType): React.ReactN
           <Text ta="center">{t('deleteTip')}</Text>
           <Input
             value={deleteFieldValue}
-            onChange={(event) => {
+            onChange={(event: React.FormEvent<HTMLInputElement>) => {
               setDeleteFieldValue(event.currentTarget.value);
             }}
           />
