@@ -45,90 +45,6 @@ interface GenericResponse<T> {
   fieldMask?: string;
 }
 
-// interface Campaign {
-//   resourceName: string;
-//   advertisingChannelType: string;
-//   name: string;
-//   id: string;
-// }
-
-// interface AdGroup {
-//   resourceName: string;
-//   type: string;
-//   id: string;
-//   name: string;
-// }
-
-// interface Metrics {
-//   clicks: string;
-//   videoQuartileP100Rate: number;
-//   videoQuartileP25Rate: number;
-//   videoQuartileP50Rate: number;
-//   videoQuartileP75Rate: number;
-//   videoViewRate: number;
-//   videoViews: string;
-//   costMicros: string;
-//   impressions: string;
-// }
-
-// interface TextItem {
-//   text: string;
-// }
-
-// interface VideoAsset {
-//   asset: string;
-// }
-
-// interface VideoResponsiveAd {
-//   headlines: TextItem[];
-//   longHeadlines: TextItem[];
-//   descriptions: TextItem[];
-//   callToActions: TextItem[];
-//   videos: VideoAsset[];
-//   breadcrumb1: string;
-// }
-
-// interface Ad {
-//   type: string;
-//   resourceName: string;
-//   videoResponsiveAd?: VideoResponsiveAd;
-//   id: string;
-//   name: string;
-// }
-
-// interface AdGroupAd {
-//   resourceName: string;
-//   ad: Ad;
-// }
-
-// interface Video {
-//   resourceName: string;
-//   id: string;
-//   durationMillis: string;
-//   title: string;
-// }
-
-// interface Segments {
-//   date: string;
-//   adFormatType: string;
-// }
-
-// interface Result {
-//   campaign: Campaign;
-//   adGroup: AdGroup;
-//   metrics: Metrics;
-//   adGroupAd: AdGroupAd;
-//   video: Video;
-//   segments: Segments;
-// }
-
-// interface YoutubeAdsResponse {
-//   results: Result[];
-//   fieldMask: string;
-//   requestId: string;
-//   queryResourceConsumption: string;
-// }
-
 const VideoSchema = z.object({
   resourceName: z.string(),
   id: z.string(),
@@ -136,10 +52,40 @@ const VideoSchema = z.object({
   title: z.string(),
 });
 
+const videoResponsiveAdSchema = z.object({
+  headlines: z.array(
+    z.object({
+      text: z.string(),
+    }),
+  ),
+  longHeadlines: z.array(
+    z.object({
+      text: z.string(),
+    }),
+  ),
+  descriptions: z.array(
+    z.object({
+      text: z.string(),
+    }),
+  ),
+  callToActions: z.array(
+    z.object({
+      text: z.string(),
+    }),
+  ),
+  videos: z.array(
+    z.object({
+      asset: z.string(),
+    }),
+  ),
+  breadcrumb1: z.string().optional(), // Optional field
+  breadcrumb2: z.string().optional(), // Potentially optional for future cases
+});
+
 const YoutubeAdSchema = z.object({
   type: z.string(),
   resourceName: z.string(),
-  videoResponsiveAd: z.object({}).optional(),
+  videoResponsiveAd: videoResponsiveAdSchema.optional(),
   id: z.string(),
   name: z.string(),
 });
@@ -159,7 +105,7 @@ const AdGroupSchema = z.object({
 const CampaignSchema = z.object({
   resourceName: z.string(),
   advertisingChannelType: z.string(),
-  advertisingChannelSubType: z.string(),
+  advertisingChannelSubType: z.string().optional(),
   name: z.string(),
   id: z.string(),
 });
@@ -177,15 +123,17 @@ const MetricsSchema = z.object({
 });
 
 const VideoAdResponseSchema = z.object({
-  results: z.array(
-    z.object({
-      video: VideoSchema,
-      adGroupAd: YoutubeAdGroupAdSchema,
-      adGroup: AdGroupSchema,
-      campaign: CampaignSchema,
-      metrics: MetricsSchema,
-    }),
-  ).optional(),
+  results: z
+    .array(
+      z.object({
+        video: VideoSchema,
+        adGroupAd: YoutubeAdGroupAdSchema,
+        adGroup: AdGroupSchema,
+        campaign: CampaignSchema,
+        metrics: MetricsSchema,
+      }),
+    )
+    .optional(),
   fieldMask: z.string().optional(),
   requestId: z.string().optional(),
   queryResourceConsumption: z.string().optional(),
@@ -225,11 +173,13 @@ const DefaultQueryResponseSchema = z.object({
   requestId: z.string().optional(),
   queryResourceConsumption: z.string().optional(),
   fieldMask: z.string().optional(),
-  results: z.array(
-    z.object({
-      customerClient: CustomerClientSchema,
-    }),
-  ).optional(),
+  results: z
+    .array(
+      z.object({
+        customerClient: CustomerClientSchema,
+      }),
+    )
+    .optional(),
 });
 
 class Google implements ChannelInterface {
@@ -417,7 +367,10 @@ class Google implements ChannelInterface {
   }
 
   private static async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
-    if (true) {
+    if (
+      integration.accessTokenExpiresAt &&
+      integration.accessTokenExpiresAt.getTime() < addInterval(new Date(), 'seconds', 60 * 5).getTime()
+    ) {
       return await google.refreshAccessToken(integration);
     }
     return integration;
@@ -447,7 +400,9 @@ class Google implements ChannelInterface {
         '2024-09-02',
       );
 
-      if (isAError(youtubeData) || !youtubeData) throw new AError('Failed to fetch youtube data');
+      if (!youtubeData) return;
+
+      if (isAError(youtubeData)) return;
 
       const campaignGroup = youtubeData.map((el) => ({
         externalId: String(el.campaign.id),
@@ -473,7 +428,6 @@ class Google implements ChannelInterface {
 
       for (const el of youtubeData) {
         if (el.adGroupAd.ad.videoResponsiveAd !== undefined) {
-          console.log(el.adGroupAd.ad.videoResponsiveAd, 'THIS IS EL OF YOUTUBE DATA');
           const query = `
                 SELECT
                 asset.id,
@@ -504,14 +458,12 @@ class Google implements ChannelInterface {
             }),
           });
 
-          const AssetResponseSchema = z.array(
-            z.object({
-              results: z.array(AssetSchema),
-              fieldMask: z.string(),
-              requestId: z.string(),
-              queryResourceConsumption: z.string(),
-            }),
-          );
+          const AssetResponseSchema = z.object({
+            results: z.array(AssetSchema).optional(),
+            fieldMask: z.string().optional(),
+            requestId: z.string().optional(),
+            queryResourceConsumption: z.string().optional(),
+          });
 
           const response = await fetch(url, {
             method: 'POST',
@@ -532,7 +484,9 @@ class Google implements ChannelInterface {
 
           if (asset instanceof Error) return asset;
 
-          const flattenedCreatives: ChannelCreative[] = asset[0].results.map((c) => ({
+          if (!asset.results) continue;
+
+          const flattenedCreatives: ChannelCreative[] = asset.results.map((c) => ({
             externalAdId: '',
             externalId: c.asset.id,
             adAccountId: dbAccount.id,
@@ -611,14 +565,16 @@ class Google implements ChannelInterface {
       });
 
       const ResponseSchema = z.object({
-        requestId: z.string(),
-        queryResourceConsumption: z.string(),
-        fieldMask: z.string(),
-        results: z.array(
-          z.object({
-            adGroupAd: AdGroupAdSchema,
-          }),
-        ).optional(),
+        requestId: z.string().optional(),
+        queryResourceConsumption: z.string().optional(),
+        fieldMask: z.string().optional(),
+        results: z
+          .array(
+            z.object({
+              adGroupAd: AdGroupAdSchema,
+            }),
+          )
+          .optional(),
       });
 
       const query = `
@@ -649,7 +605,7 @@ class Google implements ChannelInterface {
       if (isAError(response)) throw new AError('Error while fetching google ad');
 
       const validatedResponse = ResponseSchema.parse(response);
-      if(!validatedResponse.results) throw new AError("No data found")
+      if (!validatedResponse.results) throw new AError('No data found');
 
       if (!validatedResponse.results[0].adGroupAd.resourceName) {
         return new AError('getGoogleAdPreview: Ad not found or insufficient permissions.');
@@ -689,7 +645,7 @@ class Google implements ChannelInterface {
 
     if (isAError(response)) throw new AError('Error fetching google customers');
 
-    if(!response.results) throw new AError('No data found')
+    if (!response.results) throw new AError('No data found');
     const updatedCustomers = [];
 
     for (const customer of response.results) {
@@ -703,11 +659,13 @@ class Google implements ChannelInterface {
         requestId: z.string().optional(),
         queryResourceConsumption: z.string().optional(),
         fieldMask: z.string().optional(),
-        results: z.array(
-          z.object({
-            customer: CustomerSchema,
-          }),
-        ).optional(),
+        results: z
+          .array(
+            z.object({
+              customer: CustomerSchema,
+            }),
+          )
+          .optional(),
       });
       const currencyCodeQuery = `
           SELECT
@@ -726,7 +684,7 @@ class Google implements ChannelInterface {
 
       if (isAError(currencyCode)) throw new AError('Error fetching currency code');
 
-      if(!currencyCode.results) throw new AError('No currency code found')
+      if (!currencyCode.results) throw new AError('No currency code found');
 
       const updatedCustomerClient = {
         resourceName: customer.customerClient.resourceName,
@@ -790,32 +748,31 @@ class Google implements ChannelInterface {
     return Promise.resolve(new AError('Not implemented'));
   }
 
-  private static async handlePagination<T, U extends ZodTypeAny>(
-    integration: Integration,
-    fetchFn: (pageToken?: string) => Promise<any>, // Function to fetch paginated data
-    schema: U,
-    parseCallback: (result: z.infer<U>) => T,
+  private static handlePagination<T, U extends ZodTypeAny>(
+    _integration: Integration,
+    _schema: U,
+    _parseCallback: (result: z.infer<U>) => T,
   ): Promise<AError | T[]> {
-    const results: T[] = [];
-    let nextPageToken: string | undefined = '';
+    // const results: T[] = [];
+    // let nextPageToken: string | undefined = '';
 
-    do {
-      const response = await fetchFn(nextPageToken);
-      if (isAError(response)) return response; // Handle errors during fetching
+    // do {
+    //   const response = await fetchFn(nextPageToken);
+    //   if (isAError(response)) return response; // Handle errors during fetching
 
-      const arraySchema = z.array(schema);
-      const parsed = arraySchema.safeParse(response.results || []);
+    //   const arraySchema = z.array(schema);
+    //   const parsed = arraySchema.safeParse(response.results || []);
 
-      if (!parsed.success) {
-        logger.error('Failed to parse response %o', response);
-        return new AError('Failed to parse Google Ads paginated response');
-      }
+    //   if (!parsed.success) {
+    //     logger.error('Failed to parse response %o', response);
+    //     return new AError('Failed to parse Google Ads paginated response');
+    //   }
 
-      results.push(...parsed.data.map(parseCallback));
-      nextPageToken = response.nextPageToken; // Update pageToken for next iteration
-    } while (nextPageToken);
+    //   results.push(...parsed.data.map(parseCallback));
+    //   nextPageToken = response.nextPageToken; // Update pageToken for next iteration
+    // } while (nextPageToken);
 
-    return results;
+    throw new AError('Failed to parse Google Ads paginated response');
   }
 
   private static parseRequest(signedRequest: string, secret: string): string | AError {
@@ -921,7 +878,7 @@ const fetchGoogleAdsData = async <T>(
 
   const validatedResponse = schema.parse(googleAdsResponse);
 
-  if(!validatedResponse.results) throw new AError("No data found")
+  if (!validatedResponse.results) throw new AError('No data found');
 
   return validatedResponse;
 };
@@ -981,7 +938,6 @@ const fetchYoutubeAds = async (
             metrics.video_views,
         segments.ad_format_type
       FROM video
-      LIMIT 2
     `;
 
   const response = await fetch(url, {
@@ -1000,7 +956,6 @@ const fetchYoutubeAds = async (
   if (response instanceof Error) throw new AError('Customer fetch failed');
 
   const youtubeData: unknown = await response.json();
-  console.log(youtubeData, 'THIS IS YOUTUBE DATA')
   const validatedData = VideoAdResponseSchema.parse(youtubeData);
 
   // if (!validatedData) {
