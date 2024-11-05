@@ -35,6 +35,13 @@ import {
 } from '@repo/channel-utils';
 import { decode, type JwtPayload } from 'jsonwebtoken';
 import { env } from './config';
+import {
+  AssetResponseSchema,
+  CustomerQueryResponseSchema,
+  DefaultQueryResponseSchema,
+  ResponseSchema,
+  VideoAdResponseSchema,
+} from './schema';
 
 const fireAndForget = new FireAndForget();
 
@@ -45,101 +52,6 @@ interface GenericResponse<T> {
   fieldMask?: string;
 }
 
-const VideoSchema = z.object({
-  resourceName: z.string(),
-  id: z.string(),
-  durationMillis: z.string(),
-  title: z.string(),
-});
-
-const videoResponsiveAdSchema = z.object({
-  headlines: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  longHeadlines: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  descriptions: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  callToActions: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  videos: z.array(
-    z.object({
-      asset: z.string(),
-    }),
-  ),
-  breadcrumb1: z.string().optional(), // Optional field
-  breadcrumb2: z.string().optional(), // Potentially optional for future cases
-});
-
-const YoutubeAdSchema = z.object({
-  type: z.string(),
-  resourceName: z.string(),
-  videoResponsiveAd: videoResponsiveAdSchema.optional(),
-  id: z.string(),
-  name: z.string(),
-});
-
-const YoutubeAdGroupAdSchema = z.object({
-  resourceName: z.string(),
-  ad: YoutubeAdSchema,
-});
-
-const AdGroupSchema = z.object({
-  resourceName: z.string(),
-  type: z.string(),
-  id: z.string(),
-  name: z.string(),
-});
-
-const CampaignSchema = z.object({
-  resourceName: z.string(),
-  advertisingChannelType: z.string(),
-  advertisingChannelSubType: z.string().optional(),
-  name: z.string(),
-  id: z.string(),
-});
-
-const MetricsSchema = z.object({
-  clicks: z.string(),
-  videoQuartileP100Rate: z.number(),
-  videoQuartileP25Rate: z.number(),
-  videoQuartileP50Rate: z.number(),
-  videoQuartileP75Rate: z.number(),
-  videoViewRate: z.number(),
-  videoViews: z.string(),
-  costMicros: z.string(),
-  impressions: z.string(),
-});
-
-const VideoAdResponseSchema = z.object({
-  results: z
-    .array(
-      z.object({
-        video: VideoSchema,
-        adGroupAd: YoutubeAdGroupAdSchema,
-        adGroup: AdGroupSchema,
-        campaign: CampaignSchema,
-        metrics: MetricsSchema,
-      }),
-    )
-    .optional(),
-  fieldMask: z.string().optional(),
-  requestId: z.string().optional(),
-  queryResourceConsumption: z.string().optional(),
-});
-
-// Infer the type from the schema
 type VideoAdResponse = z.infer<typeof VideoAdResponseSchema>;
 
 // const limit = 600;
@@ -160,27 +72,6 @@ interface GoogleJwtPayload extends JwtPayload {
   given_name: string | undefined;
   family_name: string | undefined;
 }
-
-const CustomerClientSchema = z.object({
-  resourceName: z.string(),
-  clientCustomer: z.string(),
-  level: z.string(),
-  manager: z.boolean(),
-  descriptiveName: z.string(),
-});
-
-const DefaultQueryResponseSchema = z.object({
-  requestId: z.string().optional(),
-  queryResourceConsumption: z.string().optional(),
-  fieldMask: z.string().optional(),
-  results: z
-    .array(
-      z.object({
-        customerClient: CustomerClientSchema,
-      }),
-    )
-    .optional(),
-});
 
 class Google implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
@@ -445,26 +336,6 @@ class Google implements ChannelInterface {
                 asset.resource_name IN (${el.adGroupAd.ad.videoResponsiveAd.videos.map((c) => `'${c.asset}'`).join(',')})
             `;
 
-          const AssetSchema = z.object({
-            asset: z.object({
-              id: z.string(),
-              resourceName: z.string(),
-              type: z.string(),
-              youtubeVideoAsset: z
-                .object({
-                  youtubeVideoId: z.string(),
-                })
-                .optional(),
-            }),
-          });
-
-          const AssetResponseSchema = z.object({
-            results: z.array(AssetSchema).optional(),
-            fieldMask: z.string().optional(),
-            requestId: z.string().optional(),
-            queryResourceConsumption: z.string().optional(),
-          });
-
           const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -532,50 +403,6 @@ class Google implements ChannelInterface {
     try {
       const refreshedIntegration = await Google.refreshedIntegration(integration);
       if (isAError(refreshedIntegration)) return refreshedIntegration;
-
-      const AdSchema = z.object({
-        id: z.string().optional(),
-        name: z.string().optional(),
-        type: z.string().optional(),
-        finalUrls: z.array(z.string()).optional(),
-        responsiveSearchAd: z
-          .object({
-            headlines: z.array(z.object({ text: z.string() })).optional(),
-            descriptions: z.array(z.object({ text: z.string() })).optional(),
-          })
-          .optional(),
-        responsiveDisplayAd: z
-          .object({
-            marketingImages: z.array(z.object({ url: z.string() })).optional(),
-            squareMarketingImages: z.array(z.object({ url: z.string() })).optional(),
-          })
-          .optional(),
-        videoResponsiveAd: z
-          .object({
-            headlines: z.array(z.object({ text: z.string() })).optional(),
-            descriptions: z.array(z.object({ text: z.string() })).optional(),
-            videos: z.array(z.object({ asset: z.string() })).optional(),
-          })
-          .optional(),
-      });
-
-      const AdGroupAdSchema = z.object({
-        resourceName: z.string(),
-        ad: AdSchema,
-      });
-
-      const ResponseSchema = z.object({
-        requestId: z.string().optional(),
-        queryResourceConsumption: z.string().optional(),
-        fieldMask: z.string().optional(),
-        results: z
-          .array(
-            z.object({
-              adGroupAd: AdGroupAdSchema,
-            }),
-          )
-          .optional(),
-      });
 
       const query = `
          SELECT
@@ -649,24 +476,6 @@ class Google implements ChannelInterface {
     const updatedCustomers = [];
 
     for (const customer of response.results) {
-      const CustomerSchema = z.object({
-        resourceName: z.string(),
-        id: z.string(),
-        currencyCode: z.string(),
-      });
-
-      const CustomerQueryResponseSchema = z.object({
-        requestId: z.string().optional(),
-        queryResourceConsumption: z.string().optional(),
-        fieldMask: z.string().optional(),
-        results: z
-          .array(
-            z.object({
-              customer: CustomerSchema,
-            }),
-          )
-          .optional(),
-      });
       const currencyCodeQuery = `
           SELECT
             customer.id,
@@ -895,8 +704,6 @@ const fetchYoutubeAds = async (
   const url = `https://googleads.googleapis.com/v18/customers/${customerId}/googleAds:search`;
 
   if (isAError(accessToken)) throw new AError('Access token not generated');
-
-  // const allResults: YoutubeAdsResponse = []
 
   const query = `
       SELECT 
