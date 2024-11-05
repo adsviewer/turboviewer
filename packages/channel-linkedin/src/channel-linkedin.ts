@@ -9,6 +9,7 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
+import _ from 'lodash';
 import { addInterval, AError, extractDate, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -127,7 +128,7 @@ class LinkedIn implements ChannelInterface {
     dbAccount: DbAdAccount,
     initial: boolean,
   ): Promise<AError | undefined> {
-    const ranges = await timeRanges(initial, dbAccount.id);
+    const ranges = await timeRanges(initial, dbAccount.id, 5);
     for (const range of ranges) {
       const analytics = await this.getAdAnalytics(integration, range, dbAccount);
       if (isAError(analytics)) return analytics;
@@ -317,7 +318,7 @@ class LinkedIn implements ChannelInterface {
         const device = a.pivotValues.find((v) => Array.from(LinkedIn.deviceEnumMap.keys()).includes(v));
         return {
           externalAdId: creativeExternalId,
-          date: new Date(a.dateRange.start.year, a.dateRange.start.month - 1, a.dateRange.start.day),
+          date: new Date(Date.UTC(a.dateRange.start.year, a.dateRange.start.month - 1, a.dateRange.start.day)),
           externalAccountId: dbAccount.externalId,
           impressions: a.impressions,
           clicks: a.clicks,
@@ -386,6 +387,13 @@ class LinkedIn implements ChannelInterface {
       return new AError('Failed to fetch data');
     });
     if (isAError(response)) return response;
+    const contentType = response.headers.get('content-type');
+    if (!contentType) return new AError('No content type');
+    if (!contentType.includes('application/json')) {
+      const responseTest = await response.text();
+      logger.error(responseTest, 'Failed to fetch data in parseLinkedInResponse');
+      return new AError('Failed to fetch');
+    }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
     const body = await response.json();
     if (!response.ok) {
@@ -506,6 +514,21 @@ class LinkedIn implements ChannelInterface {
   }
 
   private async getCampaignsAsAdSets(
+    integration: Integration,
+    campaignIds: Set<string>,
+    dbAccount: AdAccount,
+  ): Promise<ChannelAdSet[]> {
+    const ret: ChannelAdSet[] = [];
+    if (campaignIds.size === 0) return ret;
+    const chunkedCampaigns = _.chunk(Array.from(campaignIds), 7);
+    for (const chunk of chunkedCampaigns) {
+      const adSets = await this.getCampaignsAsAdSetsInner(integration, new Set(chunk), dbAccount);
+      if (!isAError(adSets)) ret.push(...adSets);
+    }
+    return ret;
+  }
+
+  private async getCampaignsAsAdSetsInner(
     integration: Integration,
     campaignIds: Set<string>,
     dbAccount: AdAccount,
