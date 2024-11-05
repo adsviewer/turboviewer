@@ -41,10 +41,12 @@ export default function Chart(props: PropsType): ReactNode {
 
           // Map datapoints for the current publisher
           const perPublisherDatapoints = insight.datapoints.map((datapoint) => ({
-            [`impressions-${publisher}`]: datapoint.impressions,
             date: format.dateTime(new Date(datapoint.date), dateFormatOptions),
+            [`impressions-${publisher}`]: datapoint.impressions,
             [`spendUsd-${publisher}`]: Math.floor(Number(datapoint.spendUsd) / 100),
             [`cpm-${publisher}`]: datapoint.cpm ?? 0n,
+            [`cpc-${publisher}`]: datapoint.cpc ?? 0n,
+            [`clicks-${publisher}`]: datapoint.clicks ?? 0,
           }));
 
           // Update the aggregatedData with the current publisher's datapoints
@@ -74,6 +76,8 @@ export default function Chart(props: PropsType): ReactNode {
     const impressionsSeries: AreaChartSeries[] = [];
     const spendSeries: AreaChartSeries[] = [];
     const cpmSeries: AreaChartSeries[] = [];
+    const cpcSeries: AreaChartSeries[] = [];
+    const clicksSeries: AreaChartSeries[] = [];
 
     for (const [index, publisher] of publishers.entries()) {
       const impressionSeriesData = {
@@ -89,16 +93,24 @@ export default function Chart(props: PropsType): ReactNode {
         label: `${publisher} ($)`,
       };
       const cpmSeriesData = { yAxisId: 'left', name: `cpm-${publisher}`, color: getColor(index), label: publisher };
+      const cpcSeriesData = { yAxisId: 'left', name: `cpc-${publisher}`, color: getColor(index), label: publisher };
+      const clicksData = { yAxisId: 'left', name: `clicks-${publisher}`, color: getColor(index), label: publisher };
       impressionsSeries.push(impressionSeriesData);
       spendSeries.push(spendSeriesData);
       cpmSeries.push(cpmSeriesData);
+      cpcSeries.push(cpcSeriesData);
+      clicksSeries.push(clicksData);
     }
 
     switch (searchParams.get(urlKeys.chartMetric)) {
-      case ChartMetricsEnum.CPM:
-        return cpmSeries;
       case ChartMetricsEnum.Spent:
         return spendSeries;
+      case ChartMetricsEnum.CPM:
+        return cpmSeries;
+      case ChartMetricsEnum.CPC:
+        return cpcSeries;
+      case ChartMetricsEnum.Clicks:
+        return clicksSeries;
       default:
         return impressionsSeries;
     }

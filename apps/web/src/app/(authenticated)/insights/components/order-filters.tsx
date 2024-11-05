@@ -196,16 +196,29 @@ export default function OrderFilters(): React.ReactNode {
             description={t('orderBy')}
             placeholder="Pick value"
             data={[
-              { value: InsightsColumnsOrderBy.spend_rel, label: `${t('spent')} (${t('relative')})` },
-              { value: InsightsColumnsOrderBy.impressions_rel, label: `${t('impressions')} (${t('relative')})` },
-              { value: InsightsColumnsOrderBy.cpm_rel, label: `CPM (${t('relative')})` },
-              { value: InsightsColumnsOrderBy.clicks_rel, label: `"Cicks" (${t('relative')})` },
-              { value: InsightsColumnsOrderBy.cpc_rel, label: `CPC (${t('relative')})` },
-              { value: InsightsColumnsOrderBy.spend_abs, label: t('spent') },
-              { value: InsightsColumnsOrderBy.impressions_abs, label: t('impressions') },
-              { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
-              { value: InsightsColumnsOrderBy.clicks_abs, label: 'Clicks' },
-              { value: InsightsColumnsOrderBy.cpc_abs, label: 'CPC' },
+              {
+                group: t('relative'),
+                items: [
+                  { value: InsightsColumnsOrderBy.spend_rel, label: `${t('spent')} (${t('relative')})` },
+                  {
+                    value: InsightsColumnsOrderBy.impressions_rel,
+                    label: `${t('impressions')} (${t('relative')})`,
+                  },
+                  { value: InsightsColumnsOrderBy.clicks_rel, label: `Clicks (${t('relative')})` },
+                  { value: InsightsColumnsOrderBy.cpm_rel, label: `CPM (${t('relative')})` },
+                  { value: InsightsColumnsOrderBy.cpc_rel, label: `CPC (${t('relative')})` },
+                ],
+              },
+              {
+                group: t('absolute'),
+                items: [
+                  { value: InsightsColumnsOrderBy.spend_abs, label: t('spent') },
+                  { value: InsightsColumnsOrderBy.impressions_abs, label: t('impressions') },
+                  { value: InsightsColumnsOrderBy.clicks_abs, label: 'Clicks' },
+                  { value: InsightsColumnsOrderBy.cpm_abs, label: 'CPM' },
+                  { value: InsightsColumnsOrderBy.cpc_abs, label: 'CPC' },
+                ],
+              },
             ]}
             value={getOrderByValue(searchParams)}
             onChange={handleOrderByChange}

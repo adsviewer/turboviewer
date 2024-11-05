@@ -15,7 +15,7 @@ import {
   Container,
 } from '@mantine/core';
 import { useDisclosure, useInputState } from '@mantine/hooks';
-import { useState, type ReactNode } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { IconAlertTriangle, IconExclamationCircle } from '@tabler/icons-react';
@@ -214,7 +214,7 @@ export default function IntegrationCard(props: IntegrationProps): ReactNode {
           <Text ta="center">{t('revokeTip')}</Text>
           <Input
             value={revokeFieldValue}
-            onChange={(event) => {
+            onChange={(event: React.FormEvent<HTMLInputElement>) => {
               setRevokeFieldValue(event.currentTarget.value);
             }}
           />

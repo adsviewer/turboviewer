@@ -34,6 +34,11 @@
   "pnpm": {
     "patchedDependencies": {
       "graphql@16.9.0": "patches/graphql@16.9.0.patch"
+    },
+    "overrides": {
+      "@types/react": "npm:types-react@19.0.0-rc.1",
+      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+      "react-is": "npm:react-is@19.0.0-rc-603e6108-20241029"
     }
   }
 }
