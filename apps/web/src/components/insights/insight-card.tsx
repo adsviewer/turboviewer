@@ -178,7 +178,7 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
       ) : (
         // IFrame ad preview
         <Flex justify="center" align="center" mb="auto" h="100%">
-          {isLoadingIframe ? (
+          {isLoadingIframe && props.iframe ? (
             <Box pos="absolute">
               <LoaderCentered type="bars" />
             </Box>
