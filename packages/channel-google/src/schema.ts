@@ -19,7 +19,7 @@ const createCommonResponseSchema = <T extends ZodTypeAny>(
 const VideoSchema = z.object({
   resourceName: z.string(),
   id: z.string(),
-  durationMillis: z.string(),
+  durationMillis: z.string().optional(),
   title: z.string(),
 });
 
@@ -83,11 +83,11 @@ const CampaignSchema = z.object({
 
 const MetricsSchema = z.object({
   clicks: z.string(),
-  videoQuartileP100Rate: z.number(),
-  videoQuartileP25Rate: z.number(),
-  videoQuartileP50Rate: z.number(),
-  videoQuartileP75Rate: z.number(),
-  videoViewRate: z.number(),
+  videoQuartileP100Rate: z.number().optional(),
+  videoQuartileP25Rate: z.number().optional(),
+  videoQuartileP50Rate: z.number().optional(),
+  videoQuartileP75Rate: z.number().optional(),
+  videoViewRate: z.number().optional(),
   videoViews: z.string(),
   costMicros: z.string(),
   impressions: z.string(),

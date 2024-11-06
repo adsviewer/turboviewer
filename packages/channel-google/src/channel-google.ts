@@ -10,7 +10,7 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
-import { addInterval, AError, FireAndForget, isAError } from '@repo/utils';
+import { addInterval, AError, FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
 import { z, type ZodSchema, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
@@ -30,6 +30,7 @@ import {
   revokeIntegration,
   saveAccounts,
   saveInsightsAdsAdsSetsCampaigns,
+  timeRanges,
   type TokensResponse,
   updateIntegrationTokens,
 } from '@repo/channel-utils';
@@ -270,119 +271,124 @@ class Google implements ChannelInterface {
   async getAdAccountData(
     integration: Integration,
     dbAccount: DbAdAccount,
-    _initial: boolean,
+    initial: boolean,
   ): Promise<AError | undefined> {
     const dbAccounts = await this.saveAdAccounts(integration);
     if (isAError(dbAccounts)) return dbAccounts;
     if (!integration.refreshToken) return new AError('Refresh token is required');
 
-    try {
-      const refreshedIntegration = await Google.refreshedIntegration(integration);
-      if (isAError(refreshedIntegration)) return refreshedIntegration;
-      const customers = await fetchGoogleAdsData(refreshedIntegration.accessToken, DefaultQueryResponseSchema);
+    const ranges = await timeRanges(initial, dbAccount.id);
 
-      if (isAError(customers)) throw new AError('Failed to fetch customers');
-      const url = `https://googleads.googleapis.com/v18/customers/${dbAccount.externalId}/googleAds:search`;
+    for (const range of ranges) {
+      try {
+        const refreshedIntegration = await Google.refreshedIntegration(integration);
+        if (isAError(refreshedIntegration)) return refreshedIntegration;
 
-      const youtubeData = await getAllYoutubeAds(
-        dbAccount.externalId,
-        refreshedIntegration.accessToken,
-        '2024-09-01',
-        '2024-09-02',
-      );
+        const customers = await fetchGoogleAdsData(refreshedIntegration.accessToken, DefaultQueryResponseSchema);
 
-      if (!youtubeData) return;
+        if (isAError(customers)) throw new AError('Failed to fetch customers');
+        const url = `https://googleads.googleapis.com/v18/customers/${dbAccount.externalId}/googleAds:search`;
 
-      if (isAError(youtubeData)) return;
+        const youtubeData = await getAllYoutubeAds(
+          dbAccount.externalId,
+          refreshedIntegration.accessToken,
+          formatYYYMMDDDate(new Date(range.since)),
+          formatYYYMMDDDate(new Date(range.until)),
+        );
 
-      const campaignGroup = youtubeData.map((el) => ({
-        externalId: String(el.campaign.id),
-        name: el.campaign.name,
-        externalAdAccountId: dbAccount.externalId,
-      }));
+        if (!youtubeData) return;
 
-      const adSets = youtubeData.map((el) => ({
-        externalId: String(el.adGroup.id),
-        name: el.adGroup.name,
-        externalCampaignId: el.campaign.id,
-      }));
+        if (isAError(youtubeData)) return;
 
-      const ads: ChannelAd[] = youtubeData.map((c) => ({
-        externalAdAccountId: dbAccount.externalId,
-        externalId: c.adGroupAd.ad.id,
-        externalAdSetId: String(c.adGroup.id),
-      }));
+        const campaignGroup = youtubeData.map((el) => ({
+          externalId: String(el.campaign.id),
+          name: el.campaign.name,
+          externalAdAccountId: dbAccount.externalId,
+        }));
 
-      const creatives: ChannelCreative[] = [];
+        const adSets = youtubeData.map((el) => ({
+          externalId: String(el.adGroup.id),
+          name: el.adGroup.name,
+          externalCampaignId: el.campaign.id,
+        }));
 
-      // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        const ads: ChannelAd[] = youtubeData.map((c) => ({
+          externalAdAccountId: dbAccount.externalId,
+          externalId: c.adGroupAd.ad.id,
+          externalAdSetId: String(c.adGroup.id),
+        }));
 
-      for (const el of youtubeData) {
-        if (el.adGroupAd.ad.videoResponsiveAd !== undefined) {
-          const query = `
-                SELECT
-                asset.id,
-                asset.name,
-                asset.type,
-                asset.resource_name,
-                asset.youtube_video_asset.youtube_video_id,
-                asset.image_asset.file_size,
-                asset.image_asset.full_size.url,
-                asset.image_asset.mime_type,
-                asset.text_asset.text
-              FROM
-                asset
-              WHERE
-                asset.resource_name IN (${el.adGroupAd.ad.videoResponsiveAd.videos.map((c) => `'${c.asset}'`).join(',')})
-            `;
+        const creatives: ChannelCreative[] = [];
 
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
-              'login-customer-id': env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID,
-              Authorization: `Bearer ${refreshedIntegration.accessToken}`,
-            },
-            body: JSON.stringify({ query }),
-          }).catch(() => {
-            throw new AError('Error fetching video ads');
-          });
+        // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-          const jsonResponse: unknown = await response.json();
+        for (const el of youtubeData) {
+          if (el.adGroupAd.ad.videoResponsiveAd !== undefined) {
+            const query = `
+                  SELECT
+                  asset.id,
+                  asset.name,
+                  asset.type,
+                  asset.resource_name,
+                  asset.youtube_video_asset.youtube_video_id,
+                  asset.image_asset.file_size,
+                  asset.image_asset.full_size.url,
+                  asset.image_asset.mime_type,
+                  asset.text_asset.text
+                FROM
+                  asset
+                WHERE
+                  asset.resource_name IN (${el.adGroupAd.ad.videoResponsiveAd.videos.map((c) => `'${c.asset}'`).join(',')})
+              `;
 
-          const asset = AssetResponseSchema.parse(jsonResponse);
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
+                'login-customer-id': env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID,
+                Authorization: `Bearer ${refreshedIntegration.accessToken}`,
+              },
+              body: JSON.stringify({ query }),
+            }).catch(() => {
+              throw new AError('Error fetching video ads');
+            });
 
-          if (asset instanceof Error) return asset;
+            const jsonResponse: unknown = await response.json();
 
-          if (!asset.results) continue;
+            const asset = AssetResponseSchema.parse(jsonResponse);
 
-          const flattenedCreatives: ChannelCreative[] = asset.results.map((c) => ({
-            externalAdId: '',
-            externalId: c.asset.id,
-            adAccountId: dbAccount.id,
-            name: c.asset.resourceName,
-            type: c.asset.type,
-          }));
+            if (asset instanceof Error) return asset;
 
-          creatives.push(...flattenedCreatives);
+            if (!asset.results) continue;
+
+            const flattenedCreatives: ChannelCreative[] = asset.results.map((c) => ({
+              externalAdId: el.adGroupAd.ad.id,
+              externalId: c.asset.id,
+              adAccountId: dbAccount.id,
+              name: c.asset.resourceName,
+              type: c.asset.type,
+            }));
+
+            creatives.push(...flattenedCreatives);
+          }
         }
-      }
 
-      await saveInsightsAdsAdsSetsCampaigns(
-        campaignGroup,
-        new Map<string, string>(),
-        dbAccount,
-        adSets,
-        new Map<string, string>(),
-        ads,
-        new Map<string, string>(),
-        creatives,
-        new Map<string, string>(),
-        [],
-      );
-    } catch (err) {
-      logger.error(err, 'GET CHANNEL DATA');
+        await saveInsightsAdsAdsSetsCampaigns(
+          campaignGroup,
+          new Map<string, string>(),
+          dbAccount,
+          adSets,
+          new Map<string, string>(),
+          ads,
+          new Map<string, string>(),
+          creatives,
+          new Map<string, string>(),
+          [],
+        );
+      } catch (err) {
+        logger.error(err, 'GET CHANNEL DATA');
+      }
     }
 
     return Promise.resolve(undefined);
@@ -504,7 +510,7 @@ class Google implements ChannelInterface {
 
       updatedCustomers.push(updatedCustomerClient);
 
-      await delay(1000);
+      await delay(100);
     }
 
     const accountSchema = z.array(
