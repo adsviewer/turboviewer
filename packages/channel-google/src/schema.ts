@@ -13,6 +13,7 @@ const createCommonResponseSchema = <T extends ZodTypeAny>(
     queryResourceConsumption: z.string().optional(),
     fieldMask: z.string().optional(),
     results: z.array(resultsSchema).optional(),
+    next_page_token: z.string().optional(),
   });
 };
 

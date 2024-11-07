@@ -46,14 +46,15 @@ import {
 
 const fireAndForget = new FireAndForget();
 
+const apiVersion = 'v18';
+
 interface GenericResponse<T> {
   requestId?: string;
   queryResourceConsumption?: string;
   results?: T[];
   fieldMask?: string;
+  nextPageToken?: string;
 }
-
-type VideoAdResponse = z.infer<typeof VideoAdResponseSchema>;
 
 // const limit = 600;
 
@@ -113,7 +114,7 @@ class Google implements ChannelInterface {
     if (getTokenResponse.tokens.expiry_date) {
       return {
         accessToken,
-        accessTokenExpiresAt: new Date(Date.now() + getTokenResponse.tokens.expiry_date * 1000),
+        accessTokenExpiresAt: new Date(getTokenResponse.tokens.expiry_date),
         refreshToken,
       };
     }
@@ -250,6 +251,7 @@ class Google implements ChannelInterface {
       logger.error(parsed.error, 'Failed to parse refresh access token response');
       return new AError('Failed to parse refresh access token response');
     }
+
     return await updateIntegrationTokens(integration, {
       accessToken: parsed.data.access_token,
       accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
@@ -259,12 +261,17 @@ class Google implements ChannelInterface {
   }
 
   private static async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
-    if (
-      integration.accessTokenExpiresAt &&
-      integration.accessTokenExpiresAt.getTime() < addInterval(new Date(), 'seconds', 60 * 5).getTime()
-    ) {
+    const expiresAt =
+      typeof integration.accessTokenExpiresAt === 'string'
+        ? new Date(integration.accessTokenExpiresAt)
+        : integration.accessTokenExpiresAt;
+
+    const oneHourFromNow = addInterval(new Date(), 'seconds', 60 * 60);
+
+    if (expiresAt && expiresAt.getTime() < oneHourFromNow.getTime()) {
       return await google.refreshAccessToken(integration);
     }
+
     return integration;
   }
 
@@ -284,16 +291,56 @@ class Google implements ChannelInterface {
         const refreshedIntegration = await Google.refreshedIntegration(integration);
         if (isAError(refreshedIntegration)) return refreshedIntegration;
 
-        const customers = await fetchGoogleAdsData(refreshedIntegration.accessToken, DefaultQueryResponseSchema);
+        const url = `https://googleads.googleapis.com/${apiVersion}/customers/${dbAccount.externalId}/googleAds:search`;
 
-        if (isAError(customers)) throw new AError('Failed to fetch customers');
-        const url = `https://googleads.googleapis.com/v18/customers/${dbAccount.externalId}/googleAds:search`;
+        const videoQuery = `
+      SELECT 
+            video.id,
+            video.title,
+            video.duration_millis,
+            
+            ad_group_ad.ad.id,
+            ad_group_ad.ad.name,
+            ad_group_ad.ad.type,
+            
+            ad_group_ad.ad.video_responsive_ad.breadcrumb1,
+            ad_group_ad.ad.video_responsive_ad.breadcrumb2,
+            ad_group_ad.ad.video_responsive_ad.call_to_actions,
+            ad_group_ad.ad.video_responsive_ad.companion_banners,
+            ad_group_ad.ad.video_responsive_ad.descriptions,
+            ad_group_ad.ad.video_responsive_ad.headlines,
+            ad_group_ad.ad.video_responsive_ad.long_headlines,
+            ad_group_ad.ad.video_responsive_ad.videos,
+            
+            ad_group.id,
+            ad_group.name,
+            ad_group.type,
+            
+            campaign.id,
+            campaign.name,
+            campaign.advertising_channel_type,
+            campaign.advertising_channel_sub_type,
 
-        const youtubeData = await getAllYoutubeAds(
+            metrics.impressions,
+            metrics.clicks,
+            metrics.cost_micros,
+            
+            metrics.video_quartile_p25_rate,
+            metrics.video_quartile_p50_rate,
+            metrics.video_quartile_p75_rate,
+            metrics.video_quartile_p100_rate,
+            metrics.video_view_rate,
+            metrics.video_views,
+        segments.ad_format_type
+      FROM video
+      WHERE segments.date BETWEEN '${formatYYYMMDDDate(new Date(range.since))}' AND '${formatYYYMMDDDate(new Date(range.until))}'
+    `;
+
+        const youtubeData = await Google.handlePagination(
+          integration,
+          videoQuery,
+          VideoAdResponseSchema,
           dbAccount.externalId,
-          refreshedIntegration.accessToken,
-          formatYYYMMDDDate(new Date(range.since)),
-          formatYYYMMDDDate(new Date(range.until)),
         );
 
         if (!youtubeData) return;
@@ -319,8 +366,6 @@ class Google implements ChannelInterface {
         }));
 
         const creatives: ChannelCreative[] = [];
-
-        // const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
         for (const el of youtubeData) {
           if (el.adGroupAd.ad.videoResponsiveAd !== undefined) {
@@ -472,16 +517,29 @@ class Google implements ChannelInterface {
         setTimeout(resolve, ms);
       });
     const refreshedIntegration = await Google.refreshedIntegration(integration);
+
     if (isAError(refreshedIntegration)) return refreshedIntegration;
 
-    const response = await fetchGoogleAdsData(refreshedIntegration.accessToken, DefaultQueryResponseSchema);
+    const defaultQuery = `
+    SELECT
+      customer_client.client_customer,
+      customer_client.level,
+      customer_client.manager,
+      customer_client.descriptive_name
+    FROM
+      customer_client
+    WHERE
+      customer_client.level <= 1
+  `;
+
+    const response = await Google.handlePagination(integration, defaultQuery, DefaultQueryResponseSchema);
 
     if (isAError(response)) throw new AError('Error fetching google customers');
 
-    if (!response.results) throw new AError('No data found');
+    if (!response) throw new AError('No data found');
     const updatedCustomers = [];
 
-    for (const customer of response.results) {
+    for (const customer of response) {
       const currencyCodeQuery = `
           SELECT
             customer.id,
@@ -563,31 +621,57 @@ class Google implements ChannelInterface {
     return Promise.resolve(new AError('Not implemented'));
   }
 
-  private static handlePagination<T, U extends ZodTypeAny>(
-    _integration: Integration,
-    _schema: U,
-    _parseCallback: (result: z.infer<U>) => T,
-  ): Promise<AError | T[]> {
-    // const results: T[] = [];
-    // let nextPageToken: string | undefined = '';
+  private static async handlePagination<T, U extends ZodTypeAny>(
+    integration: Integration,
+    query: string,
+    schema: ZodSchema<GenericResponse<T>>,
+    customerId?: string,
+    _parseCallback?: (result: z.infer<U>) => T,
+  ): Promise<AError | GenericResponse<T>['results']> {
+    const managerId = env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID;
 
-    // do {
-    //   const response = await fetchFn(nextPageToken);
-    //   if (isAError(response)) return response; // Handle errors during fetching
+    const refreshedIntegration = await Google.refreshedIntegration(integration);
 
-    //   const arraySchema = z.array(schema);
-    //   const parsed = arraySchema.safeParse(response.results || []);
+    if (isAError(refreshedIntegration)) return refreshedIntegration;
 
-    //   if (!parsed.success) {
-    //     logger.error('Failed to parse response %o', response);
-    //     return new AError('Failed to parse Google Ads paginated response');
-    //   }
+    const url = `https://googleads.googleapis.com/${apiVersion}/customers/${customerId ?? managerId}/googleAds:search`;
+    const baseHeaders = {
+      'Content-Type': 'application/json',
+      'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
+      'login-customer-id': env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID,
+      Authorization: `Bearer ${refreshedIntegration.accessToken}`,
+    };
 
-    //   results.push(...parsed.data.map(parseCallback));
-    //   nextPageToken = response.nextPageToken; // Update pageToken for next iteration
-    // } while (nextPageToken);
+    const res = [];
+    let nextPageToken: string | null = null;
 
-    throw new AError('Failed to parse Google Ads paginated response');
+    do {
+      const headers: Record<string, string> = {
+        ...baseHeaders,
+        ...(nextPageToken && { page_token: nextPageToken }),
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+
+        body: JSON.stringify({ query }),
+      }).catch(() => {
+        throw new AError('Error fetching video ads');
+      });
+
+      const adsResponse: unknown = await response.json();
+      if (isAError(adsResponse)) return adsResponse;
+      const validatedResponse = schema.parse(adsResponse);
+
+      if (validatedResponse.results) {
+        res.push(...validatedResponse.results);
+      }
+
+      nextPageToken = validatedResponse.nextPageToken ?? null;
+    } while (nextPageToken);
+
+    return res;
   }
 
   private static parseRequest(signedRequest: string, secret: string): string | AError {
@@ -625,33 +709,6 @@ class Google implements ChannelInterface {
   }
 }
 
-// const throttle = async (ms: number) => {
-//   return new Promise((resolve) => {
-//     setTimeout(resolve, ms);
-//   });
-// };
-
-// const splitDateRange = (start: string, end: string, chunkSize: number): { start: string; end: string }[] => {
-//   const startDate = new Date(start);
-//   const endDate = new Date(end);
-//   const ranges: { start: string; end: string }[] = [];
-
-//   const current = new Date(startDate);
-//   while (current <= endDate) {
-//     const chunkEnd = new Date(current);
-//     chunkEnd.setDate(current.getDate() + chunkSize - 1);
-
-//     ranges.push({
-//       start: current.toISOString().split('T')[0],
-//       end: chunkEnd > endDate ? endDate.toISOString().split('T')[0] : chunkEnd.toISOString().split('T')[0],
-//     });
-
-//     current.setDate(current.getDate() + chunkSize);
-//   }
-
-//   return ranges;
-// };
-
 const fetchGoogleAdsData = async <T>(
   accessToken: string,
   schema: ZodSchema<GenericResponse<T>>,
@@ -660,7 +717,7 @@ const fetchGoogleAdsData = async <T>(
 ): Promise<GenericResponse<T> | AError> => {
   const managerId = env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID;
 
-  const url = `https://googleads.googleapis.com/v18/customers/${customerId ?? managerId}/googleAds:search`;
+  const url = `https://googleads.googleapis.com/${apiVersion}/customers/${customerId ?? managerId}/googleAds:search`;
 
   const defaultQuery = `
     SELECT
@@ -696,117 +753,6 @@ const fetchGoogleAdsData = async <T>(
   if (!validatedResponse.results) throw new AError('No data found');
 
   return validatedResponse;
-};
-
-const fetchYoutubeAds = async (
-  accessToken: string,
-  customerId: string,
-  startDate: string,
-  endDate: string,
-  _delayMs = 1000,
-  _pageToken = '',
-): Promise<VideoAdResponse | AError> => {
-  if (env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID === customerId || customerId === '9300825796') [];
-  const url = `https://googleads.googleapis.com/v18/customers/${customerId}/googleAds:search`;
-
-  if (isAError(accessToken)) throw new AError('Access token not generated');
-
-  const query = `
-      SELECT 
-            video.id,
-            video.title,
-            video.duration_millis,
-            
-            ad_group_ad.ad.id,
-            ad_group_ad.ad.name,
-            ad_group_ad.ad.type,
-            
-            ad_group_ad.ad.video_responsive_ad.breadcrumb1,
-            ad_group_ad.ad.video_responsive_ad.breadcrumb2,
-            ad_group_ad.ad.video_responsive_ad.call_to_actions,
-            ad_group_ad.ad.video_responsive_ad.companion_banners,
-            ad_group_ad.ad.video_responsive_ad.descriptions,
-            ad_group_ad.ad.video_responsive_ad.headlines,
-            ad_group_ad.ad.video_responsive_ad.long_headlines,
-            ad_group_ad.ad.video_responsive_ad.videos,
-            
-            ad_group.id,
-            ad_group.name,
-            ad_group.type,
-            
-            campaign.id,
-            campaign.name,
-            campaign.advertising_channel_type,
-            campaign.advertising_channel_sub_type,
-
-            metrics.impressions,
-            metrics.clicks,
-            metrics.cost_micros,
-            
-            metrics.video_quartile_p25_rate,
-            metrics.video_quartile_p50_rate,
-            metrics.video_quartile_p75_rate,
-            metrics.video_quartile_p100_rate,
-            metrics.video_view_rate,
-            metrics.video_views,
-        segments.ad_format_type
-      FROM video
-    `;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
-      'login-customer-id': env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID,
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ query }),
-  }).catch(() => {
-    throw new AError('Error fetching video ads');
-  });
-
-  if (response instanceof Error) throw new AError('Customer fetch failed');
-
-  const youtubeData: unknown = await response.json();
-  const validatedData = VideoAdResponseSchema.parse(youtubeData);
-
-  // if (!validatedData) {
-  //   logger.error(validatedData.error, 'Failed to parse refresh access token response');
-  //   return new AError('Failed to parse refresh access token response');
-  // }
-  return validatedData;
-
-  // const days = this.splitDateRange(startDate, endDate, 1);
-  // return await fetchBatch(startDate, endDate);
-  // for (const { start, end } of days) {
-
-  //   // Throttle by introducing a delay between requests
-  // }
-  // await this.throttle(delayMs);
-  // return allResults;
-};
-
-const getAllYoutubeAds = async (
-  customerId: string,
-  accessToken: string,
-  startDate: string,
-  endDate: string,
-): Promise<z.infer<typeof VideoAdResponseSchema>['results'] | AError | undefined> => {
-  // const allAds: any[] = [];
-  const nextPageToken: string | undefined = '';
-
-  // do {
-  const response = await fetchYoutubeAds(accessToken, customerId, startDate, endDate, 1000, nextPageToken);
-  if (isAError(response)) return response;
-  // response.result/
-
-  if (Array.isArray(response.results)) return response.results;
-
-  // allAds = response.length ? [...allAds, ...response?.results] : [...allAds]
-  //   nextPageToken = response.nextPageToken; // Check if there is a next page
-  // } while (nextPageToken);
-  // return allAds;
 };
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
