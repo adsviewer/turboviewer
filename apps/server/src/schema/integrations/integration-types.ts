@@ -235,9 +235,11 @@ export const AdDto = builder.prismaObject('Ad', {
     id: t.exposeID('id', { nullable: false }),
     adAccountId: t.exposeString('adAccountId', { nullable: false }),
     externalId: t.exposeString('externalId', { nullable: false }),
+    creativeId: t.exposeString('creativeId', { nullable: true }),
     name: t.exposeString('name', { nullable: true }),
 
     adAccount: t.relation('adAccount', { nullable: false }),
+    creative: t.relation('creative', { nullable: true }),
     insights: t.relatedConnection('insights', {
       cursor: 'id',
       nullable: false,
@@ -264,6 +266,25 @@ export const AdDto = builder.prismaObject('Ad', {
         orderBy: args.highestFirst ? { [args.orderBy]: 'desc' } : { [args.orderBy]: 'asc' },
       }),
     }),
+  }),
+});
+
+export const CreativeDto = builder.prismaObject('Creative', {
+  fields: (t) => ({
+    id: t.exposeID('id', { nullable: false }),
+    adAccountId: t.exposeString('adAccountId', { nullable: false }),
+    externalId: t.exposeString('externalId', { nullable: false }),
+    name: t.exposeString('name', { nullable: false }),
+    body: t.exposeString('body', { nullable: true }),
+    title: t.exposeString('title', { nullable: true }),
+    status: t.exposeString('status', { nullable: true }),
+    callToActionType: t.exposeString('callToActionType', { nullable: true }),
+    imageUrl: t.exposeString('imageUrl', { nullable: true }),
+    createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
+    updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
+    ads: t.relation('ads', { nullable: false }),
+    adAccount: t.relation('adAccount', { nullable: false }),
+    comments: t.relation('comments', { nullable: false }),
   }),
 });
 
