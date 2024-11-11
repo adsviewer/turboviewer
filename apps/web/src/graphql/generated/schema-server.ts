@@ -1085,6 +1085,30 @@ export type ZodFieldError = {
   path: Array<Scalars['String']['output']>;
 };
 
+export type CommentsQueryVariables = Exact<{
+  creativeId: Scalars['String']['input'];
+}>;
+
+export type CommentsQuery = {
+  __typename: 'Query';
+  comments: Array<{
+    __typename: 'Comment';
+    id: string;
+    body: string;
+    createdAt: Date;
+    taggedUsers: Array<{ __typename: 'User'; id: string }>;
+  }>;
+};
+
+export type UpsertCommentMutationVariables = Exact<{
+  creativeId: Scalars['String']['input'];
+  body: Scalars['String']['input'];
+  taggedUsersIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  commentToUpdateId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type UpsertCommentMutation = { __typename: 'Mutation'; upsertComment: { __typename: 'Comment'; id: string } };
+
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AdAccountsQuery = {
@@ -1567,6 +1591,30 @@ export const UserFieldsFragmentDoc = gql`
     }
   }
 `;
+export const CommentsDocument = gql`
+  query comments($creativeId: String!) {
+    comments(creativeId: $creativeId) {
+      id
+      body
+      createdAt
+      taggedUsers {
+        id
+      }
+    }
+  }
+`;
+export const UpsertCommentDocument = gql`
+  mutation upsertComment($creativeId: String!, $body: String!, $taggedUsersIds: [String!], $commentToUpdateId: String) {
+    upsertComment(
+      creativeId: $creativeId
+      body: $body
+      taggedUsersIds: $taggedUsersIds
+      commentToUpdateId: $commentToUpdateId
+    ) {
+      id
+    }
+  }
+`;
 export const AdAccountsDocument = gql`
   query adAccounts {
     integrations {
@@ -1910,6 +1958,20 @@ export const RemoveUserMilestoneDocument = gql`
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
+    comments(variables: CommentsQueryVariables, options?: C): Promise<CommentsQuery> {
+      return requester<CommentsQuery, CommentsQueryVariables>(
+        CommentsDocument,
+        variables,
+        options,
+      ) as Promise<CommentsQuery>;
+    },
+    upsertComment(variables: UpsertCommentMutationVariables, options?: C): Promise<UpsertCommentMutation> {
+      return requester<UpsertCommentMutation, UpsertCommentMutationVariables>(
+        UpsertCommentDocument,
+        variables,
+        options,
+      ) as Promise<UpsertCommentMutation>;
+    },
     adAccounts(variables?: AdAccountsQueryVariables, options?: C): Promise<AdAccountsQuery> {
       return requester<AdAccountsQuery, AdAccountsQueryVariables>(
         AdAccountsDocument,

@@ -1,0 +1,21 @@
+query comments($creativeId: String!) {
+  comments(creativeId: $creativeId) {
+    id
+    body
+    createdAt
+    taggedUsers {
+      id
+    }
+  }
+}
+
+mutation upsertComment($creativeId: String!, $body: String!, $taggedUsersIds: [String!], $commentToUpdateId: String) {
+  upsertComment(
+    creativeId: $creativeId
+    body: $body
+    taggedUsersIds: $taggedUsersIds
+    commentToUpdateId: $commentToUpdateId
+  ) {
+    id
+  }
+}

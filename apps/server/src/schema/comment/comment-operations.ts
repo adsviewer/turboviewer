@@ -9,11 +9,14 @@ builder.queryFields((t) => ({
     args: {
       creativeId: t.arg.string({ required: true }),
     },
-    resolve: async (query, parent, args) =>
-      prisma.comment.findMany({
+    resolve: async (query, parent, args) => {
+      const data = await prisma.comment.findMany({
         ...query,
         where: { creativeId: args.creativeId },
-      }),
+      });
+
+      return data;
+    },
   }),
 }));
 
@@ -39,8 +42,8 @@ builder.mutationFields((t) => ({
       };
 
       return !args.commentToUpdateId
-        ? prisma.comment.create({ data })
-        : prisma.comment.update({ where: { id: args.commentToUpdateId }, data });
+        ? await prisma.comment.create({ data })
+        : await prisma.comment.update({ where: { id: args.commentToUpdateId }, data });
     },
   }),
   deleteComment: t.withAuth({ isInOrg: true }).prismaField({
