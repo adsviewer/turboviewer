@@ -267,7 +267,7 @@ model Ad {
   id          String  @id @default(cuid())
   adAccountId String  @map("ad_account_id")
   adSetId     String? @map("ad_set_id")
-  creativeId  String?
+  creativeId  String? @map("creative_id")
 
   externalId String    @map("external_id")
   name       String?
@@ -278,6 +278,7 @@ model Ad {
 
   @@unique([adSetId, externalId])
   @@unique([adAccountId, externalId])
+  @@index([creativeId])
   @@index([name])
   @@map("ads")
 }

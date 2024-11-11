@@ -382,6 +382,7 @@ export type GroupedInsight = {
   adSetName?: Maybe<Scalars['String']['output']>;
   campaignId?: Maybe<Scalars['String']['output']>;
   campaignName?: Maybe<Scalars['String']['output']>;
+  creativeId?: Maybe<Scalars['String']['output']>;
   currency: CurrencyEnum;
   datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;
@@ -432,6 +433,7 @@ export enum InsightsColumnsGroupBy {
   adId = 'adId',
   adSetId = 'adSetId',
   campaignId = 'campaignId',
+  creativeId = 'creativeId',
   device = 'device',
   position = 'position',
   publisher = 'publisher',

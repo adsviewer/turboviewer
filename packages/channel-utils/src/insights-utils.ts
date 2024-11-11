@@ -300,6 +300,7 @@ interface GroupedInsightWithDetails {
   adAccountId?: string | null;
   adSetId?: string | null;
   campaignId?: string | null;
+  creativeId?: string | null;
   currency: CurrencyEnum;
   device?: DeviceEnum | null;
   publisher?: PublisherEnum | null;
@@ -359,6 +360,7 @@ export const insightsColumnsGroupBy = [
   'adId',
   'adSetId',
   'campaignId',
+  'creativeId',
   'device',
   'position',
   'publisher',

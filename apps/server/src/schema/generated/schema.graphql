@@ -352,6 +352,7 @@ type GroupedInsight {
   adSetName: String
   campaignId: String
   campaignName: String
+  creativeId: String
   currency: CurrencyEnum!
   datapoints: [InsightsDatapoints!]!
   device: DeviceEnum
@@ -402,6 +403,7 @@ enum InsightsColumnsGroupBy {
   adId
   adSetId
   campaignId
+  creativeId
   device
   position
   publisher
