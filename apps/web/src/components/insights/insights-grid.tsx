@@ -62,6 +62,8 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                   publisher={insight.publisher}
                   datapoints={insight.datapoints}
                   iframe={insight.iFrame}
+                  creativeName={insight.creativeName}
+                  creativeId={insight.creativeId}
                   hideHeading={props.hideCardHeadings}
                 />
               </motion.div>

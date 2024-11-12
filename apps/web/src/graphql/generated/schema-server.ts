@@ -1098,6 +1098,7 @@ export type CommentsQuery = {
     body: string;
     createdAt: Date;
     taggedUsers: Array<{ __typename: 'User'; id: string }>;
+    user: { __typename: 'User'; id: string; firstName: string; lastName: string; photoUrl?: string | null };
   }>;
 };
 
@@ -1151,6 +1152,7 @@ export type InsightsQuery = {
       adAccountName?: string | null;
       adId?: string | null;
       adName?: string | null;
+      creativeId?: string | null;
       creativeName?: string | null;
       currency: CurrencyEnum;
       integration?: IntegrationType | null;
@@ -1602,6 +1604,12 @@ export const CommentsDocument = gql`
       taggedUsers {
         id
       }
+      user {
+        id
+        firstName
+        lastName
+        photoUrl
+      }
     }
   }
 `;
@@ -1674,6 +1682,7 @@ export const InsightsDocument = gql`
         adAccountName
         adId
         adName
+        creativeId
         creativeName
         currency
         datapoints {

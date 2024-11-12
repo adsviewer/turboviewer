@@ -66,6 +66,14 @@
     "showAdPreviews": "Advertenties weergeven",
     "adPreviewsTooltip": "Voorbeelden kunnen alleen worden bekeken via filteren op advertentie-ID",
     "chartMetric": "Grafiekmetriek",
+    "comments": {
+      "title": "Opmerkingen",
+      "newComment": "Nieuwe Opmerking",
+      "commentHint": "Voer uw opmerking in...",
+      "noCommentsFound": "Geen opmerkingen gevonden.",
+      "send": "Versturen",
+      "commentSuccess": "Reactie is succesvol geplaatst!"
+    },
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",

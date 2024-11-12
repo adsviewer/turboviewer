@@ -66,6 +66,14 @@
     "showAdPreviews": "Show ad previews",
     "adPreviewsTooltip": "Previews can be viewed only via filtering by Ad ID",
     "chartMetric": "Chart Metric",
+    "comments": {
+      "title": "Comments",
+      "newComment": "New Comment",
+      "commentHint": "Enter your comment...",
+      "noCommentsFound": "No comments found.",
+      "send": "Send",
+      "commentSuccess": "Your comment was posted successfully!"
+    },
     "filters": {
       "title": "Filters",
       "accounts": "Accounts",

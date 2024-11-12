@@ -6,6 +6,12 @@ query comments($creativeId: String!) {
     taggedUsers {
       id
     }
+    user {
+      id
+      firstName
+      lastName
+      photoUrl
+    }
   }
 }
 

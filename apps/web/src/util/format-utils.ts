@@ -8,3 +8,7 @@ export const dateFormatOptions: DateTimeFormatOptions = {
 export const truncateString = (text: string, maxLength: number): string => {
   return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
 };
+
+export const createFullName = (firstName: string, lastName: string): string => {
+  return `${firstName} ${lastName}`;
+};
