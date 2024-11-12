@@ -384,6 +384,7 @@ export type GroupedInsight = {
   campaignId?: Maybe<Scalars['String']['output']>;
   campaignName?: Maybe<Scalars['String']['output']>;
   creativeId?: Maybe<Scalars['String']['output']>;
+  creativeName?: Maybe<Scalars['String']['output']>;
   currency: CurrencyEnum;
   datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;

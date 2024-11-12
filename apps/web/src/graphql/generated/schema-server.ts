@@ -383,6 +383,7 @@ export type GroupedInsight = {
   campaignId?: Maybe<Scalars['String']['output']>;
   campaignName?: Maybe<Scalars['String']['output']>;
   creativeId?: Maybe<Scalars['String']['output']>;
+  creativeName?: Maybe<Scalars['String']['output']>;
   currency: CurrencyEnum;
   datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;
@@ -1150,6 +1151,7 @@ export type InsightsQuery = {
       adAccountName?: string | null;
       adId?: string | null;
       adName?: string | null;
+      creativeName?: string | null;
       currency: CurrencyEnum;
       integration?: IntegrationType | null;
       device?: DeviceEnum | null;
@@ -1672,6 +1674,7 @@ export const InsightsDocument = gql`
         adAccountName
         adId
         adName
+        creativeName
         currency
         datapoints {
           date

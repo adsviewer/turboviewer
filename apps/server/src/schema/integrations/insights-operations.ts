@@ -238,6 +238,12 @@ const GroupedInsightDto = builder.simpleObject(
         return null;
       },
     }),
+    creativeName: t.field({
+      type: 'String',
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) =>
+        root.creativeId ? (await prisma.creative.findUniqueOrThrow({ where: { id: root.creativeId } })).name : null,
+    }),
     adSetName: t.field({
       type: 'String',
       nullable: true,

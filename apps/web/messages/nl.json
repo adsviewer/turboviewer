@@ -81,6 +81,7 @@
       "adId": "Advertentie-ID",
       "adSetId": "Advertentieset-ID",
       "campaignId": "Campagne-ID",
+      "creativeId": "Creatieve-ID",
       "integratie": "Integratie",
       "device": "Apparaat",
       "date": "Datum",

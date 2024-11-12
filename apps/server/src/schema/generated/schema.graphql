@@ -353,6 +353,7 @@ type GroupedInsight {
   campaignId: String
   campaignName: String
   creativeId: String
+  creativeName: String
   currency: CurrencyEnum!
   datapoints: [InsightsDatapoints!]!
   device: DeviceEnum
