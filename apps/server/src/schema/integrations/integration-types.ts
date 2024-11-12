@@ -65,6 +65,12 @@ export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem'
   }),
 });
 
+export const TestingDto = builder.simpleObject('TetsingDTOItem', {
+  fields: (t) => ({
+    email: t.string({ nullable: true }),
+  }),
+});
+
 export const IntegrationDto = builder.prismaObject('Integration', {
   authScopes: (integration, ctx) => {
     const baseScopes = baseIntegrationDtoAuthScopes(integration, ctx);

@@ -202,6 +202,7 @@ model Integration {
 
   organization Organization @relation(fields: [organizationId], references: [id])
   adAccounts   AdAccount[]
+  adAccountIntegrations AdAccountIntegration[]
 
   @@unique([organizationId, type])
   @@unique([externalId, type])
@@ -226,11 +227,24 @@ model AdAccount {
   insights       Insight[]
   organizations  Organization[]
   campaign       Campaign[]
+  adAccountIntegrations AdAccountIntegration[]
 
   @@unique([externalId, type])
   @@index([name])
   @@map("ad_accounts")
 }
+
+model AdAccountIntegration {
+  id             Int         @id @default(autoincrement())
+  adAccountId    String
+  integrationId  String
+  selected       Boolean     @default(false)
+  AdAccount      AdAccount   @relation(fields: [adAccountId], references: [id])
+  Integration    Integration @relation(fields: [integrationId], references: [id])
+
+  @@unique([adAccountId, integrationId])
+}
+
 
 model Campaign {
   id          String   @id @default(cuid())

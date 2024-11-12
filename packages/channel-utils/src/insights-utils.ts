@@ -36,17 +36,12 @@ export const saveAccounts = async (
         update: {
           currency: acc.currency,
           name: acc.name,
-          integrations: { connect: { id: integration.id } },
-          organizations: { connect: { id: integration.organizationId } },
         },
         create: {
-          integrations: { connect: { id: integration.id } },
           externalId: acc.externalId,
           currency: acc.currency,
           name: acc.name,
-          type: integration.type,
-          organizations: { connect: { id: integration.organizationId } },
-        },
+          type: integration.type        },
       }),
     ),
   );
