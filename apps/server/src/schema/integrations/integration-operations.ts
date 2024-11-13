@@ -19,7 +19,7 @@ import {
   IntegrationTypeDto,
   NewIntegrationEventDto,
   ShouldConnectIntegrationStatuses,
-  TestingDto,
+  AdAccountIntegrationDto,
 } from './integration-types';
 
 const fireAndForget = new FireAndForget();
@@ -83,7 +83,7 @@ builder.queryFields((t) => ({
 
 builder.mutationFields((t) => ({
   updateIntegrationAdAccounts: t.withAuth({ isOrgAdmin: true }).field({
-    type: TestingDto,
+    type: [AdAccountIntegrationDto],
     nullable: false,
     args: {
       integrationType: t.arg({ type: IntegrationTypeDto, required: true }),
@@ -92,11 +92,11 @@ builder.mutationFields((t) => ({
     resolve: async (_root, args, _ctx, _info) => {
       const integration = await prisma.integration.findFirst({ where: { type: args.integrationType } })
 
-      if(isAError(integration) || !integration) throw new GraphQLError('Something went wrong')
+      if(isAError(integration) || !integration) throw new GraphQLError('No integration found')
 
       await prisma.adAccountIntegration.deleteMany({ where: { integrationId: integration.id } });
 
-      await Promise.all(
+      return await Promise.all(
         args.adAccountIds.map((adAccountId) =>
           prisma.adAccountIntegration.create({
             data: {
@@ -107,8 +107,6 @@ builder.mutationFields((t) => ({
           }),
         ),
       );
-
-      return {};
     },
   }),
 

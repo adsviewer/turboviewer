@@ -65,9 +65,12 @@ export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem'
   }),
 });
 
-export const TestingDto = builder.simpleObject('TetsingDTOItem', {
+export const AdAccountIntegrationDto = builder.simpleObject('AdAccountIntegration', {
   fields: (t) => ({
-    email: t.string({ nullable: true }),
+    id: t.field({ type: 'Int', nullable: true }),
+    integrationId: t.string({ nullable: true }),
+    adAccountId: t.string({ nullable: true }),
+    selected: t.boolean({ nullable: true }),
   }),
 });
 
