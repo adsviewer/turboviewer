@@ -7,10 +7,6 @@ import { type AJwtPayload } from '@repo/shared-types';
 import { env } from './env.mjs';
 import { AllRoles, UserStatus } from './graphql/generated/schema-server';
 
-export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-};
-
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const token = request.cookies.get(TOKEN_KEY)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_KEY)?.value;
