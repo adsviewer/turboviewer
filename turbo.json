@@ -67,7 +67,8 @@
         ".env",
         ".env.*"
       ],
-      "persistent": true
+      "persistent": true,
+      "cache": false
     },
     "clean": {
       "cache": false
