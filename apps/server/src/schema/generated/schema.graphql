@@ -474,8 +474,10 @@ enum InsightsSearchField {
 
 enum InsightsSearchOperator {
   Contains
+  NotContains
   StartsWith
   Equals
+  NotEquals
 }
 
 input InsightsSearchTerm {

@@ -78,10 +78,14 @@ export const searchAdsToSQL = (expression: InsightsSearchExpression): string => 
     switch (term.operator) {
       case InsightsSearchOperator.Contains:
         return `${field} ILIKE '%${value}%'`;
+      case InsightsSearchOperator.NotContains:
+        return `${field} NOT ILIKE '%${value}%'`;
       case InsightsSearchOperator.StartsWith:
         return `${field} ILIKE '${value}%'`;
       case InsightsSearchOperator.Equals:
         return `${field} = '${value}'`;
+      case InsightsSearchOperator.NotEquals:
+        return `${field} != '${value}'`;
       default:
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- intentional
         throw new Error(`Unknown operator: ${term.operator}`);

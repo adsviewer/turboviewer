@@ -376,8 +376,10 @@ export enum InsightsSearchField {
 
 export enum InsightsSearchOperator {
   Contains = 'contains',
+  NotContains = 'notContains',
   StartsWith = 'startsWith',
   Equals = 'equals',
+  NotEquals = 'notEquals',
 }
 
 export interface InsightsSearchTerm {

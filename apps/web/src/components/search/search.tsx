@@ -98,12 +98,20 @@ export default function Search(props: PropsType): React.ReactNode {
       value: InsightsSearchOperator.Contains,
     },
     {
+      label: tSearch('notContains'),
+      value: InsightsSearchOperator.NotContains,
+    },
+    {
       label: tSearch('startsWith'),
       value: InsightsSearchOperator.StartsWith,
     },
     {
       label: tSearch('equals'),
       value: InsightsSearchOperator.Equals,
+    },
+    {
+      label: tSearch('notEquals'),
+      value: InsightsSearchOperator.NotEquals,
     },
   ];
 
