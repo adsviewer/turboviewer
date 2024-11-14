@@ -147,6 +147,10 @@ class LinkedIn implements ChannelInterface {
         externalId: c.externalCreativeId,
         externalAdSetId: c.externalCampaignId,
       }));
+      const sponsoredMsgAdSets = new Set(
+        adSets.filter((a) => a.adType === 'SPONSORED_MESSAGE').map((a) => a.externalId),
+      );
+      const adsWOSponsoredMsg = ads.filter((a) => !sponsoredMsgAdSets.has(a.externalAdSetId));
       await deleteOldInsights(dbAccount.id, range.since, range.until);
       await saveInsightsAdsAdsSetsCampaigns(
         campaigns,
@@ -154,7 +158,7 @@ class LinkedIn implements ChannelInterface {
         dbAccount,
         adSets,
         new Map<string, string>(),
-        ads,
+        adsWOSponsoredMsg,
         new Map<string, string>(),
         [],
         new Map<string, string>(),
@@ -517,8 +521,8 @@ class LinkedIn implements ChannelInterface {
     integration: Integration,
     campaignIds: Set<string>,
     dbAccount: AdAccount,
-  ): Promise<ChannelAdSet[]> {
-    const ret: ChannelAdSet[] = [];
+  ): Promise<(ChannelAdSet & { adType: string })[]> {
+    const ret: (ChannelAdSet & { adType: string })[] = [];
     if (campaignIds.size === 0) return ret;
     const chunkedCampaigns = _.chunk(Array.from(campaignIds), 7);
     for (const chunk of chunkedCampaigns) {
@@ -532,20 +536,38 @@ class LinkedIn implements ChannelInterface {
     integration: Integration,
     campaignIds: Set<string>,
     dbAccount: AdAccount,
-  ): Promise<AError | ChannelAdSet[]> {
+  ): Promise<AError | (ChannelAdSet & { adType: string })[]> {
     if (campaignIds.size === 0) return [];
     const campaigns = await LinkedIn.handlePagination(
       integration,
       `/adAccounts/${dbAccount.externalId}/adCampaigns?q=search&search=(id:(values:List(${Array.from(campaignIds)
         .map((c) => `urn%3Ali%3AsponsoredCampaign%3A${c}`)
         .join(',')})))`,
-      z.object({ id: z.number().int(), name: z.string(), campaignGroup: z.string() }),
+      z.object({
+        id: z.number().int(),
+        name: z.string(),
+        campaignGroup: z.string(),
+        format: z.enum([
+          'CAROUSEL',
+          'FOLLOW_COMPANY',
+          'JOBS',
+          'SINGLE_VIDEO',
+          'SPONSORED_INMAIL',
+          'SPONSORED_MESSAGE',
+          'SPONSORED_UPDATE_EVENT',
+          'SPOTLIGHT',
+          'STANDARD_UPDATE',
+          'TEXT_AD',
+          'UNSUPPORTED',
+        ]),
+      }),
     );
     if (isAError(campaigns)) return campaigns;
     return campaigns.map((c) => ({
       externalId: String(c.id),
       name: c.name,
       externalCampaignId: c.campaignGroup.split(':')[3],
+      adType: c.format,
     }));
   }
 
