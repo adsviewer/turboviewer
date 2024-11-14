@@ -716,6 +716,86 @@ void describe('searchAdsToSQL tests', () => {
     assert.strictEqual(sql, "AND (a.name ILIKE '%test%' OR aa.name = 'account')");
   });
 
+  void it('should generate SQL for Contains operator', () => {
+    const expression: InsightsSearchExpression = {
+      or: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.Contains,
+            value: 'test',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name ILIKE '%test%')");
+  });
+
+  void it('should generate SQL for NotContains operator', () => {
+    const expression: InsightsSearchExpression = {
+      or: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.NotContains,
+            value: 'test',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name NOT ILIKE '%test%')");
+  });
+
+  void it('should generate SQL for Equals operator', () => {
+    const expression: InsightsSearchExpression = {
+      or: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.Equals,
+            value: 'test',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name = 'test')");
+  });
+
+  void it('should generate SQL for NotEquals operator', () => {
+    const expression: InsightsSearchExpression = {
+      or: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.NotEquals,
+            value: 'test',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name != 'test')");
+  });
+
+  void it('should generate SQL for StartsWith operator', () => {
+    const expression: InsightsSearchExpression = {
+      or: [
+        {
+          term: {
+            field: InsightsSearchField.AdName,
+            operator: InsightsSearchOperator.StartsWith,
+            value: 'test',
+          },
+        },
+      ],
+    };
+    const sql = searchAdsToSQL(expression);
+    assert.strictEqual(sql, "AND (a.name ILIKE 'test%')");
+  });
+
   void it('should generate SQL for nested expressions', () => {
     const expression: InsightsSearchExpression = {
       and: [
