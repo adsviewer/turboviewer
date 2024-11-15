@@ -90,9 +90,9 @@ builder.mutationFields((t) => ({
       adAccountIds: t.arg.stringList({ required: true }),
     },
     resolve: async (_root, args, _ctx, _info) => {
-      const integration = await prisma.integration.findFirst({ where: { type: args.integrationType } })
+      const integration = await prisma.integration.findFirst({ where: { type: args.integrationType } });
 
-      if(isAError(integration) || !integration) throw new GraphQLError('No integration found')
+      if (isAError(integration) || !integration) throw new GraphQLError('No integration found');
 
       await prisma.adAccountIntegration.deleteMany({ where: { integrationId: integration.id } });
 

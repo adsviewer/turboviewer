@@ -52,6 +52,13 @@ type AdAccountAdvertisementsConnectionEdge {
   node: Ad!
 }
 
+type AdAccountIntegration {
+  adAccountId: String
+  id: Int
+  integrationId: String
+  selected: Boolean
+}
+
 type AdInsightsConnection {
   edges: [AdInsightsConnectionEdge]!
   pageInfo: PageInfo!
@@ -711,6 +718,7 @@ type Mutation {
   subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
   switchTiers(organizationId: String!, tier: Tier!): Organization!
+  updateIntegrationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): [AdAccountIntegration!]!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!

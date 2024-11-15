@@ -41,7 +41,8 @@ export const saveAccounts = async (
           externalId: acc.externalId,
           currency: acc.currency,
           name: acc.name,
-          type: integration.type        },
+          type: integration.type,
+        },
       }),
     ),
   );

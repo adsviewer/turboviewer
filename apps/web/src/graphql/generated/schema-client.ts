@@ -87,6 +87,14 @@ export type AdAccountAdvertisementsConnectionEdge = {
   node: Ad;
 };
 
+export type AdAccountIntegration = {
+  __typename: 'AdAccountIntegration';
+  adAccountId?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['Int']['output']>;
+  integrationId?: Maybe<Scalars['String']['output']>;
+  selected?: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type AdInsightsConnection = {
   __typename: 'AdInsightsConnection';
   edges: Array<Maybe<AdInsightsConnectionEdge>>;
@@ -691,6 +699,7 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
+  updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
@@ -804,6 +813,11 @@ export type MutationSwitchOrganizationArgs = {
 export type MutationSwitchTiersArgs = {
   organizationId: Scalars['String']['input'];
   tier: Tier;
+};
+
+export type MutationUpdateIntegrationAdAccountsArgs = {
+  adAccountIds: Array<Scalars['String']['input']>;
+  integrationType: IntegrationType;
 };
 
 export type MutationUpdateOrganizationArgs = {
