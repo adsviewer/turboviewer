@@ -19,6 +19,8 @@ export const initialUserDetails: MeQuery['me'] = {
     integrations: [],
   },
   organizations: [],
+  comments: [],
+  taggedInComment: [],
 };
 
 export const userDetailsAtom = atom<MeQuery['me']>(initialUserDetails);

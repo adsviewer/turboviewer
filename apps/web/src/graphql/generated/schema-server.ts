@@ -1029,6 +1029,7 @@ export type Tokens = {
 export type User = {
   __typename: 'User';
   allRoles: Array<AllRoles>;
+  comments: Array<Comment>;
   createdAt: Scalars['Date']['output'];
   currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
@@ -1045,6 +1046,7 @@ export type User = {
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
   status: UserStatus;
+  taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
 };
@@ -1481,6 +1483,13 @@ export type UpdateUserMutation = {
         accessTokenExpiresAt?: Date | null;
       }>;
     } | null;
+    comments: Array<{
+      __typename: 'Comment';
+      id: string;
+      body: string;
+      taggedUsers: Array<{ __typename: 'User'; id: string }>;
+    }>;
+    taggedInComment: Array<{ __typename: 'Comment'; id: string }>;
   };
 };
 
@@ -1515,6 +1524,13 @@ export type MeQuery = {
         accessTokenExpiresAt?: Date | null;
       }>;
     } | null;
+    comments: Array<{
+      __typename: 'Comment';
+      id: string;
+      body: string;
+      taggedUsers: Array<{ __typename: 'User'; id: string }>;
+    }>;
+    taggedInComment: Array<{ __typename: 'Comment'; id: string }>;
   };
 };
 
@@ -1545,6 +1561,13 @@ export type UserFieldsFragment = {
       accessTokenExpiresAt?: Date | null;
     }>;
   } | null;
+  comments: Array<{
+    __typename: 'Comment';
+    id: string;
+    body: string;
+    taggedUsers: Array<{ __typename: 'User'; id: string }>;
+  }>;
+  taggedInComment: Array<{ __typename: 'Comment'; id: string }>;
 };
 
 export type SendFeedbackMutationVariables = Exact<{
@@ -1592,6 +1615,16 @@ export const UserFieldsFragmentDoc = gql`
         type
         accessTokenExpiresAt
       }
+    }
+    comments {
+      id
+      body
+      taggedUsers {
+        id
+      }
+    }
+    taggedInComment {
+      id
     }
   }
 `;

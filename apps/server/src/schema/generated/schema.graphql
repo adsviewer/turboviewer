@@ -877,6 +877,7 @@ Caller is permitted to view this type if is the user or an admin. Some fields ar
 """
 type User {
   allRoles: [AllRoles!]!
+  comments: [Comment!]!
   createdAt: Date!
   currentOrganization: Organization
   currentOrganizationId: String
@@ -908,6 +909,7 @@ type User {
   """
   photoUrl: String
   status: UserStatus!
+  taggedInComment: [Comment!]!
   updatedAt: Date!
   userRoles: [String!]!
 }

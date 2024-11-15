@@ -1030,6 +1030,7 @@ export type Tokens = {
 export type User = {
   __typename: 'User';
   allRoles: Array<AllRoles>;
+  comments: Array<Comment>;
   createdAt: Scalars['Date']['output'];
   currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
@@ -1046,6 +1047,7 @@ export type User = {
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
   status: UserStatus;
+  taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
 };
