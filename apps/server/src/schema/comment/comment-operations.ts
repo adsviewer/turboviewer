@@ -1,4 +1,5 @@
 import { prisma } from '@repo/database';
+import { commentBodySchema } from '@repo/utils';
 import { builder } from '../builder';
 import { CommentDto } from './comment-types';
 
@@ -26,7 +27,7 @@ builder.mutationFields((t) => ({
     type: CommentDto,
     args: {
       commentToUpdateId: t.arg.string({ required: false }),
-      body: t.arg.string({ required: true }),
+      body: t.arg.string({ required: true, validate: { schema: commentBodySchema } }),
       creativeId: t.arg.string({ required: true }),
       taggedUsersIds: t.arg.stringList({ required: true, defaultValue: [] }),
     },
