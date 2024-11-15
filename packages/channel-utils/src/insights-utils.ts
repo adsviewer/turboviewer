@@ -209,34 +209,33 @@ const saveInsights = async (
     .getValue(dbAccount.currency, dbAccount.currency)
     .then((rate) => (isAError(rate) ? null : 1 / rate));
 
-  const createInsights = await prisma.insight
-    .createMany({
-      data: insights.map((insight) => {
-        const spend = Math.floor(insight.spend);
-        return {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the external id exists
-          adId: adExternalIdMap.get(insight.externalAdId)!,
-          adAccountId: dbAccount.id,
-          currency: dbAccount.currency,
-          date: insight.date,
-          device: insight.device,
-          impressions: insight.impressions,
-          position: insight.position,
-          publisher: insight.publisher,
-          spend,
-          spendEur: toEuro ? Math.floor(spend * toEuro) : null,
-          clicks: insight.clicks,
-        };
-      }),
-    })
-    .catch((e: unknown) => {
-      logger.error(
-        e,
-        'Error saving insights with dates: %o',
-        insights.map((i) => i.date),
-      );
-      return new AError(`Error saving insights for ${dbAccount.id}`);
+  const mappedInsights = insights
+    .filter((insight) => adExternalIdMap.has(insight.externalAdId))
+    .map((insight) => {
+      const spend = Math.floor(insight.spend);
+      return {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the external id exists
+        adId: adExternalIdMap.get(insight.externalAdId)!,
+        adAccountId: dbAccount.id,
+        currency: dbAccount.currency,
+        date: insight.date,
+        device: insight.device,
+        impressions: insight.impressions,
+        position: insight.position,
+        publisher: insight.publisher,
+        spend,
+        spendEur: toEuro ? Math.floor(spend * toEuro) : null,
+        clicks: insight.clicks,
+      };
     });
+  const createInsights = await prisma.insight.createMany({ data: mappedInsights }).catch((e: unknown) => {
+    logger.error(
+      e,
+      'Error saving insights with dates: %o',
+      insights.map((i) => i.date),
+    );
+    return new AError(`Error saving insights for ${dbAccount.id}`);
+  });
   if (!isAError(createInsights)) logger.info('Saved %d insights for %s', insights.length, dbAccount.id);
 };
 
