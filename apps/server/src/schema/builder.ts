@@ -68,6 +68,7 @@ export const builder = new SchemaBuilder<{
     isOrgOperator: InOrganizationContext;
     isOrgMember: InOrganizationContext;
     isInOrg: InOrganizationContext;
+    isRootOrg: InOrganizationContext;
     refresh: RefreshContext;
     emailUnconfirmed: InOrganizationContext;
   };
