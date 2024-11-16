@@ -19,7 +19,8 @@
     "roleOperator": "Operator",
     "roleMember": "Member",
     "pickDateRange": "Pick a date range",
-    "add": "Add"
+    "add": "Add",
+    "edit": "Edit"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",
@@ -72,7 +73,8 @@
       "commentHint": "Enter your comment...",
       "noCommentsFound": "No comments found.",
       "send": "Send",
-      "commentSuccess": "Your comment was posted successfully!"
+      "commentSuccess": "Your comment was submitted successfully!",
+      "cancelEditing": "Cancel Editing"
     },
     "filters": {
       "title": "Filters",

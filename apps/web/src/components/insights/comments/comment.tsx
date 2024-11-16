@@ -1,13 +1,20 @@
+'use client';
+
 import React, { type ReactNode } from 'react';
 import { Avatar, Flex, Text } from '@mantine/core';
 import { timeAgo } from '@repo/utils';
+import { useAtomValue } from 'jotai';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import type { CommentItemType } from './comments';
+import CommentOptions from './comment-options';
 
 interface PropsType {
   data: CommentItemType;
 }
 
 export default function Comment(props: PropsType): ReactNode {
+  const userDetails = useAtomValue(userDetailsAtom);
+
   return (
     <Flex gap="sm">
       <Avatar src={props.data.photoUrl} radius="xl" />
@@ -20,11 +27,16 @@ export default function Comment(props: PropsType): ReactNode {
             {timeAgo(props.data.createdAt)}
           </Text>
         </Flex>
-
         <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
           {props.data.comment}
         </Text>
       </Flex>
+
+      {props.data.userId === userDetails.id ? (
+        <Flex ml="auto">
+          <CommentOptions data={props.data} />
+        </Flex>
+      ) : null}
     </Flex>
   );
 }

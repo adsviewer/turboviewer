@@ -1,0 +1,42 @@
+'use client';
+
+import { ActionIcon, Menu } from '@mantine/core';
+import { IconDotsVertical, IconPencil } from '@tabler/icons-react';
+import { useSetAtom } from 'jotai';
+import { useTranslations } from 'next-intl';
+import { type ReactNode } from 'react';
+import { editedCommentAtom } from '@/app/atoms/comment-atoms';
+import { type CommentItemType } from './comments';
+
+interface PropsType {
+  data: CommentItemType;
+}
+
+export default function CommentOptions(props: PropsType): ReactNode {
+  const tGeneric = useTranslations('generic');
+  const setEditedComment = useSetAtom(editedCommentAtom);
+
+  const handleEdit = (): void => {
+    setEditedComment({
+      id: props.data.id,
+      body: props.data.comment,
+    });
+  };
+
+  return (
+    <Menu width={200} shadow="md" withArrow>
+      <Menu.Target>
+        <ActionIcon variant="white" c="gray">
+          <IconDotsVertical />
+        </ActionIcon>
+      </Menu.Target>
+
+      {/* Options */}
+      <Menu.Dropdown>
+        <Menu.Item leftSection={<IconPencil />} onClick={handleEdit}>
+          {tGeneric('edit')}
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
+  );
+}

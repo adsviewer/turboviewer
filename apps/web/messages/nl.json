@@ -19,7 +19,8 @@
     "roleOperator": "Bediende",
     "roleMember": "Lid",
     "pickDateRange": "Kies een datumbereik",
-    "add": "Toevoegen"
+    "add": "Toevoegen",
+    "edit": "Bewerking"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -72,7 +73,8 @@
       "commentHint": "Voer uw opmerking in...",
       "noCommentsFound": "Geen opmerkingen gevonden.",
       "send": "Versturen",
-      "commentSuccess": "Reactie is succesvol geplaatst!"
+      "commentSuccess": "Reactie succesvol verzonden!",
+      "cancelEditing": "Bewerken annuleren"
     },
     "filters": {
       "title": "Filters",

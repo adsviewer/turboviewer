@@ -2,17 +2,19 @@
 
 import { Tooltip, ActionIcon, Modal, Text, Divider, Indicator, Textarea, Button, Flex } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, getHotkeyHandler } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { commentSchema } from '@repo/utils';
-import { IconMessage, IconSend2 } from '@tabler/icons-react';
+import { IconMessage, IconSend2, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import React, { useRef, useState, type ReactNode } from 'react';
+import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useAtom } from 'jotai';
 import { createFullName } from '@/util/format-utils';
 import { type CommentsQuery } from '@/graphql/generated/schema-server';
 import { getComments, upsertComment } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
+import { editedCommentAtom } from '@/app/atoms/comment-atoms';
 import CommentsList from './comments-list';
 
 interface PropsType {
@@ -35,6 +37,7 @@ export default function Comments(props: PropsType): ReactNode {
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
   const [opened, { open, close }] = useDisclosure(false);
+  const [editedComment, setEditedComment] = useAtom(editedCommentAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentItemType[]>([]);
@@ -46,6 +49,14 @@ export default function Comments(props: PropsType): ReactNode {
     },
     validate: zodResolver(commentSchema),
   });
+
+  useEffect(() => {
+    // Populate the comment input field if a comment is being edited
+    if (editedComment?.body && messageRef.current) {
+      form.setFieldValue('comment', editedComment.body);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form is not a dependency
+  }, [editedComment?.body]);
 
   const commentsToCommentsList = (fetchedComments: CommentsQuery['comments']): CommentItemType[] => {
     return fetchedComments.map((comment) => {
@@ -86,7 +97,7 @@ export default function Comments(props: PropsType): ReactNode {
 
   const sendComment = (commentBody: string): void => {
     setIsPending(true);
-    void upsertComment({ creativeId: props.creativeId, body: commentBody })
+    void upsertComment({ creativeId: props.creativeId, body: commentBody, commentToUpdateId: editedComment?.id })
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -111,13 +122,20 @@ export default function Comments(props: PropsType): ReactNode {
       });
   };
 
-  const handleSubmit = (values: { comment: string }): void => {
-    sendComment(values.comment);
+  const resetForm = (): void => {
+    setEditedComment(null);
     form.reset();
   };
 
+  const handleSubmit = (): void => {
+    if (messageRef.current) {
+      sendComment(messageRef.current.value);
+      resetForm();
+    }
+  };
+
   const closeModal = (): void => {
-    form.reset();
+    resetForm();
     close();
   };
 
@@ -152,8 +170,8 @@ export default function Comments(props: PropsType): ReactNode {
 
         {/* New Comment */}
         <form
-          onSubmit={form.onSubmit((values) => {
-            handleSubmit(values);
+          onSubmit={form.onSubmit(() => {
+            handleSubmit();
           })}
         >
           <Indicator
@@ -174,9 +192,16 @@ export default function Comments(props: PropsType): ReactNode {
               maxLength={MAX_COMMENT_LENGTH}
               disabled={isPending || isLoadingComments}
               my="md"
+              onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])}
             />
           </Indicator>
           <Flex w="100%">
+            {editedComment?.id ? (
+              <Button variant="transparent" rightSection={<IconX />} mr="auto" onClick={resetForm}>
+                {t('comments.cancelEditing')}
+              </Button>
+            ) : null}
+
             <Button
               type="submit"
               disabled={!form.isValid() || isLoadingComments}
