@@ -9,7 +9,6 @@ import {
   prisma,
   PublisherEnum,
 } from '@repo/database';
-import _ from 'lodash';
 import { AError, FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
 import { z, type ZodTypeAny } from 'zod';
 import { logger } from '@repo/logger';
@@ -29,7 +28,6 @@ import type Cursor from 'facebook-nodejs-business-sdk/src/cursor';
 import {
   type AdAccountIntegration,
   adReportsStatusesToRedis,
-  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -51,7 +49,6 @@ import {
   MetaError,
   revokeIntegration,
   saveAccounts,
-  saveCreatives,
   saveInsightsAdsAdsSetsCampaigns,
   type TokensResponse,
 } from '@repo/channel-utils';
@@ -396,26 +393,6 @@ class Meta implements ChannelInterface {
       smallAccountAds = externalAdIds.slice(start, start + limit);
     }
     return creatives;
-  }
-
-  async saveCreatives(integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
-    adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const creativeExternalIdMap = new Map<string, string>();
-    for (const [__, accountAds] of groupByAdAccount) {
-      const adExternalIdMap = new Map(accountAds.map((ad) => [ad.externalId, ad.id]));
-      const adAccount = accountAds[0].adAccount;
-      const chunkedAccountAds = _.chunk(accountAds, 100);
-      for (const chunk of chunkedAccountAds) {
-        const creatives = await this.getCreatives(
-          integration,
-          adAccount.id,
-          adAccount.externalId,
-          new Set(chunk.map((a) => a.externalId)),
-        );
-        const newCreatives = creatives.filter((c) => !creativeExternalIdMap.has(c.externalId));
-        await saveCreatives(newCreatives, adAccount.id, adExternalIdMap, creativeExternalIdMap);
-      }
-    }
   }
 
   async getReportStatus({ adAccount, integration }: AdAccountIntegration, taskId: string): Promise<JobStatusEnum> {

@@ -17,7 +17,6 @@ import { type Request as ExpressRequest, type Response as ExpressResponse } from
 import {
   type AdAccountIntegration,
   adReportsStatusesToRedis,
-  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -656,10 +655,6 @@ export class Tiktok implements ChannelInterface {
         logger.error(nextParsed, 'Failed to parse paginated function');
       }
     }
-  }
-
-  saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
-    return Promise.reject(new AError('Not Implemented'));
   }
 }
 

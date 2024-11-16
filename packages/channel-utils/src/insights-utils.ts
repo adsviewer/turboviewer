@@ -4,7 +4,6 @@ import {
   type DeviceEnum,
   type Integration,
   type IntegrationTypeEnum,
-  Prisma,
   prisma,
   type PublisherEnum,
 } from '@repo/database';
@@ -253,11 +252,6 @@ export interface AdAccountIntegration {
   adAccount: AdAccount;
   integration: Integration;
 }
-
-export const adWithAdAccount = Prisma.validator<Prisma.AdDefaultArgs>()({
-  include: { adAccount: true },
-});
-export type AdWithAdAccount = Prisma.AdGetPayload<typeof adWithAdAccount>;
 
 export const saveInsightsAdsAdsSetsCampaigns = async (
   campaigns: ChannelCampaign[],

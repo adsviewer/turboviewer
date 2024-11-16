@@ -626,7 +626,6 @@ export type Mutation = {
   deleteOrganization: Organization;
   deleteSearchQueryString: SearchQueryString;
   emulateAdmin: Tokens;
-  fillMetaCreatives: Scalars['Boolean']['output'];
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
@@ -681,10 +680,6 @@ export type MutationDeleteSearchQueryStringArgs = {
 
 export type MutationEmulateAdminArgs = {
   organizationId: Scalars['String']['input'];
-};
-
-export type MutationFillMetaCreativesArgs = {
-  integrationIds?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type MutationForgetPasswordArgs = {

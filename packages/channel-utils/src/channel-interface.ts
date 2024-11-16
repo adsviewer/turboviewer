@@ -11,7 +11,7 @@ import {
 import { type MetaError } from './errors';
 import { type ChannelIFrame } from './iframe-helper';
 import { type JobStatusEnum } from './report-async-start';
-import { type AdAccountIntegration, type AdWithAdAccount } from './insights-utils';
+import { type AdAccountIntegration } from './insights-utils';
 
 export interface GenerateAuthUrlResp {
   url: string;
@@ -103,7 +103,6 @@ export interface ChannelInterface {
     until: Date,
   ) => Promise<string | AError>;
   saveAdAccounts: (integration: Integration) => Promise<AdAccount[] | AError>;
-  saveCreatives: (integration: Integration, groupByAdAccount: Map<string, AdWithAdAccount[]>) => Promise<void>;
   signOutCallback: (req: ExpressRequest, res: ExpressResponse) => void;
   getType: () => IntegrationTypeEnum;
 }

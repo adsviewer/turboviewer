@@ -17,7 +17,6 @@ import { AuthClient, RestliClient } from 'linkedin-api-client';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountIntegration,
-  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelAdAccount,
@@ -569,10 +568,6 @@ class LinkedIn implements ChannelInterface {
       externalCampaignId: c.campaignGroup.split(':')[3],
       adType: c.format,
     }));
-  }
-
-  saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
-    return Promise.reject(new AError('Not Implemented'));
   }
 }
 
