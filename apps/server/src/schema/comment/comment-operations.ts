@@ -53,6 +53,6 @@ builder.mutationFields((t) => ({
     args: {
       commentId: t.arg.string({ required: true }),
     },
-    resolve: async (query, parent, args) => prisma.comment.delete({ ...query, where: { id: args.commentId } }),
+    resolve: async (query, parent, args) => await prisma.comment.delete({ ...query, where: { id: args.commentId } }),
   }),
 }));

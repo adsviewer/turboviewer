@@ -6,6 +6,7 @@ import Comment from './comment';
 
 interface PropsType {
   comments: CommentItemType[];
+  eraseComment: (commentToDeleteId: string) => void;
 }
 
 export default function CommentsList(props: PropsType): ReactNode {
@@ -34,7 +35,7 @@ export default function CommentsList(props: PropsType): ReactNode {
       {props.comments.length ? (
         <Flex direction="column" gap="lg">
           {props.comments.map((comment) => (
-            <Comment key={comment.id} data={comment} />
+            <Comment key={comment.id} data={comment} eraseComment={props.eraseComment} />
           ))}
         </Flex>
       ) : (

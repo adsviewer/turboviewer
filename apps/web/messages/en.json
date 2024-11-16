@@ -20,7 +20,8 @@
     "roleMember": "Member",
     "pickDateRange": "Pick a date range",
     "add": "Add",
-    "edit": "Edit"
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",

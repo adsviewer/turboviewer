@@ -16,6 +16,8 @@ import {
   type CommentsQueryVariables,
   type MutationUpsertCommentArgs,
   type UpsertCommentMutation,
+  type MutationDeleteCommentArgs,
+  type DeleteCommentMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -83,3 +85,8 @@ export const upsertComment = async (
   values: MutationUpsertCommentArgs,
 ): Promise<UrqlResult<UpsertCommentMutation, string>> =>
   await handleUrqlRequest((await urqlClientSdk()).upsertComment(values));
+
+export const deleteComment = async (
+  values: MutationDeleteCommentArgs,
+): Promise<UrqlResult<DeleteCommentMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).deleteComment(values));

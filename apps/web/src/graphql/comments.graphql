@@ -25,3 +25,9 @@ mutation upsertComment($creativeId: String!, $body: String!, $taggedUsersIds: [S
     id
   }
 }
+
+mutation deleteComment($commentId: String!) {
+  deleteComment(commentId: $commentId) {
+    id
+  }
+}

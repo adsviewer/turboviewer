@@ -10,6 +10,7 @@ import CommentOptions from './comment-options';
 
 interface PropsType {
   data: CommentItemType;
+  eraseComment: (commentToDeleteId: string) => void;
 }
 
 export default function Comment(props: PropsType): ReactNode {
@@ -34,7 +35,7 @@ export default function Comment(props: PropsType): ReactNode {
 
       {props.data.userId === userDetails.id ? (
         <Flex ml="auto">
-          <CommentOptions data={props.data} />
+          <CommentOptions data={props.data} eraseComment={props.eraseComment} />
         </Flex>
       ) : null}
     </Flex>

@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useAtom } from 'jotai';
 import { createFullName } from '@/util/format-utils';
 import { type CommentsQuery } from '@/graphql/generated/schema-server';
-import { getComments, upsertComment } from '@/app/(authenticated)/actions';
+import { deleteComment, getComments, upsertComment } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { editedCommentAtom } from '@/app/atoms/comment-atoms';
 import CommentsList from './comments-list';
@@ -122,6 +122,28 @@ export default function Comments(props: PropsType): ReactNode {
       });
   };
 
+  const eraseComment = (commentToDeleteId: string): void => {
+    setIsPending(true);
+    void deleteComment({ commentId: commentToDeleteId })
+      .then((res) => {
+        if (!res.success) {
+          notifications.show({
+            title: tGeneric('error'),
+            message: String(res.error),
+            color: 'red',
+          });
+          return;
+        }
+        loadComments();
+      })
+      .catch((err: unknown) => {
+        logger.error(err);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
+  };
+
   const resetForm = (): void => {
     setEditedComment(null);
     form.reset();
@@ -166,7 +188,7 @@ export default function Comments(props: PropsType): ReactNode {
         <Divider my="md" />
 
         {/* Comments List */}
-        {!isLoadingComments ? <CommentsList comments={comments} /> : <LoaderCentered />}
+        {!isLoadingComments ? <CommentsList comments={comments} eraseComment={eraseComment} /> : <LoaderCentered />}
 
         {/* New Comment */}
         <form

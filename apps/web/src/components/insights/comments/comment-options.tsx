@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionIcon, Menu } from '@mantine/core';
-import { IconDotsVertical, IconPencil } from '@tabler/icons-react';
+import { IconDotsVertical, IconPencil, IconTrash } from '@tabler/icons-react';
 import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { type ReactNode } from 'react';
@@ -10,6 +10,7 @@ import { type CommentItemType } from './comments';
 
 interface PropsType {
   data: CommentItemType;
+  eraseComment: (commentToDeleteId: string) => void;
 }
 
 export default function CommentOptions(props: PropsType): ReactNode {
@@ -21,6 +22,10 @@ export default function CommentOptions(props: PropsType): ReactNode {
       id: props.data.id,
       body: props.data.comment,
     });
+  };
+
+  const handleDelete = (): void => {
+    props.eraseComment(props.data.id);
   };
 
   return (
@@ -35,6 +40,9 @@ export default function CommentOptions(props: PropsType): ReactNode {
       <Menu.Dropdown>
         <Menu.Item leftSection={<IconPencil />} onClick={handleEdit}>
           {tGeneric('edit')}
+        </Menu.Item>
+        <Menu.Item leftSection={<IconTrash />} color="red" onClick={handleDelete}>
+          {tGeneric('delete')}
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>

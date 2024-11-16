@@ -1113,6 +1113,12 @@ export type UpsertCommentMutationVariables = Exact<{
 
 export type UpsertCommentMutation = { __typename: 'Mutation'; upsertComment: { __typename: 'Comment'; id: string } };
 
+export type DeleteCommentMutationVariables = Exact<{
+  commentId: Scalars['String']['input'];
+}>;
+
+export type DeleteCommentMutation = { __typename: 'Mutation'; deleteComment: { __typename: 'Comment'; id: string } };
+
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AdAccountsQuery = {
@@ -1658,6 +1664,13 @@ export const UpsertCommentDocument = gql`
     }
   }
 `;
+export const DeleteCommentDocument = gql`
+  mutation deleteComment($commentId: String!) {
+    deleteComment(commentId: $commentId) {
+      id
+    }
+  }
+`;
 export const AdAccountsDocument = gql`
   query adAccounts {
     integrations {
@@ -2016,6 +2029,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<UpsertCommentMutation>;
+    },
+    deleteComment(variables: DeleteCommentMutationVariables, options?: C): Promise<DeleteCommentMutation> {
+      return requester<DeleteCommentMutation, DeleteCommentMutationVariables>(
+        DeleteCommentDocument,
+        variables,
+        options,
+      ) as Promise<DeleteCommentMutation>;
     },
     adAccounts(variables?: AdAccountsQueryVariables, options?: C): Promise<AdAccountsQuery> {
       return requester<AdAccountsQuery, AdAccountsQueryVariables>(
