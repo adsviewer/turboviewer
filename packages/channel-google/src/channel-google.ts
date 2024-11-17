@@ -261,44 +261,22 @@ class Google implements ChannelInterface {
 
         const videoQuery = `
       SELECT 
-            video.id,
-            video.title,
-            video.duration_millis,
-            
-            ad_group_ad.ad.id,
-            ad_group_ad.ad.name,
-            ad_group_ad.ad.type,
-            
-            ad_group_ad.ad.video_responsive_ad.breadcrumb1,
-            ad_group_ad.ad.video_responsive_ad.breadcrumb2,
-            ad_group_ad.ad.video_responsive_ad.call_to_actions,
-            ad_group_ad.ad.video_responsive_ad.companion_banners,
-            ad_group_ad.ad.video_responsive_ad.descriptions,
-            ad_group_ad.ad.video_responsive_ad.headlines,
-            ad_group_ad.ad.video_responsive_ad.long_headlines,
-            ad_group_ad.ad.video_responsive_ad.videos,
-            
-            ad_group.id,
-            ad_group.name,
-            ad_group.type,
-            
-            campaign.id,
-            campaign.name,
-            campaign.advertising_channel_type,
-            campaign.advertising_channel_sub_type,
-
-            metrics.impressions,
-            metrics.clicks,
-            metrics.cost_micros,
-            
-            metrics.video_quartile_p25_rate,
-            metrics.video_quartile_p50_rate,
-            metrics.video_quartile_p75_rate,
-            metrics.video_quartile_p100_rate,
-            metrics.video_view_rate,
-            metrics.video_views,
-        segments.ad_format_type
-      FROM video
+      video.id,
+      video.title,
+      video.duration_millis,
+      
+      ad_group_ad.ad.id,
+      ad_group_ad.ad.name,
+      ad_group_ad.ad.video_responsive_ad.call_to_actions,
+      
+      ad_group.id,
+      ad_group.name,
+      
+      campaign.id,
+      campaign.name,
+      
+      segments.ad_format_type
+  FROM video
       WHERE segments.date BETWEEN '${formatYYYMMDDDate(range.since)}' AND '${formatYYYMMDDDate(range.until)}'
     `;
 
@@ -376,6 +354,10 @@ class Google implements ChannelInterface {
               externalId: c.asset.id,
               adAccountId: dbAccount.id,
               name: c.asset.resourceName,
+              body: el.adGroupAd.ad.videoResponsiveAd?.descriptions[0].text,
+              title: el.video.title,
+              callToActionType: el.adGroupAd.ad.videoResponsiveAd?.callToActions[0].text,
+              imageUrl: c.asset.youtubeVideoAsset?.youtubeVideoId,
             }));
 
             creatives.push(...flattenedCreatives);
@@ -478,8 +460,7 @@ class Google implements ChannelInterface {
       customer_client.descriptive_name
     FROM
       customer_client
-    WHERE
-      customer_client.level <= 1
+    WHERE customer_client.status = 'ENABLED'
   `;
 
     const response = await Google.handlePagination(refreshedIntegration, defaultQuery, defaultQueryResponseSchema);
@@ -706,16 +687,7 @@ class Google implements ChannelInterface {
 }
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
-  const metaErrorValidatingAccessTokenChangedSession =
-    'Error validating access token: The session has been invalidated because the user changed their password or Facebook has changed the session for security reasons.';
-  const metaErrorNotAuthenticated = 'Error validating access token: The user has not authorized application';
-  const metaErrorFollowInstructions =
-    'You cannot access the app till you log in to www.facebook.com and follow the instructions given.';
-  if (
-    error.message === metaErrorValidatingAccessTokenChangedSession ||
-    error.message === metaErrorFollowInstructions ||
-    error.message.startsWith(metaErrorNotAuthenticated)
-  ) {
+  if (error.message === 'invalid_token') {
     await markErrorIntegrationById(integrationId, notify);
     return true;
   }

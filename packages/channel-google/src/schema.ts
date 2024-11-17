@@ -18,7 +18,6 @@ const createCommonResponseSchema = <T extends ZodTypeAny>(
 };
 
 const videoSchema = z.object({
-  resourceName: z.string(),
   id: z.string(),
   durationMillis: z.string().optional(),
   title: z.string(),
@@ -55,11 +54,8 @@ const videoResponsiveAdSchema = z.object({
 });
 
 const youtubeAdSchema = z.object({
-  type: z.string(),
-  resourceName: z.string(),
   videoResponsiveAd: videoResponsiveAdSchema.optional(),
   id: z.string(),
-  name: z.string(),
 });
 
 const youtubeAdGroupAdSchema = z.object({
@@ -68,30 +64,13 @@ const youtubeAdGroupAdSchema = z.object({
 });
 
 const adGroupSchema = z.object({
-  resourceName: z.string(),
-  type: z.string(),
   id: z.string(),
   name: z.string(),
 });
 
 const campaignSchema = z.object({
-  resourceName: z.string(),
-  advertisingChannelType: z.string(),
-  advertisingChannelSubType: z.string().optional(),
   name: z.string(),
   id: z.string(),
-});
-
-const metricsSchema = z.object({
-  clicks: z.string(),
-  videoQuartileP100Rate: z.number().optional(),
-  videoQuartileP25Rate: z.number().optional(),
-  videoQuartileP50Rate: z.number().optional(),
-  videoQuartileP75Rate: z.number().optional(),
-  videoViewRate: z.number().optional(),
-  videoViews: z.string(),
-  costMicros: z.string(),
-  impressions: z.string(),
 });
 
 export const videoAdResponseSchema = createCommonResponseSchema(
@@ -100,7 +79,6 @@ export const videoAdResponseSchema = createCommonResponseSchema(
     adGroupAd: youtubeAdGroupAdSchema,
     adGroup: adGroupSchema,
     campaign: campaignSchema,
-    metrics: metricsSchema,
   }),
 );
 
