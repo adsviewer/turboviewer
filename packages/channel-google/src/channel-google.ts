@@ -25,7 +25,7 @@ import {
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   getIFrame,
-  JobStatusEnum,
+  type JobStatusEnum,
   markErrorIntegrationById,
   revokeIntegration,
   saveAccounts,
@@ -34,18 +34,18 @@ import {
   type TokensResponse,
   updateIntegrationTokens,
 } from '@repo/channel-utils';
-import { decode, type JwtPayload } from 'jsonwebtoken';
 import { env } from './config';
 import {
-  AssetResponseSchema,
-  CustomerQueryResponseSchema,
-  DefaultQueryResponseSchema,
-  ResponseSchema,
-  VideoAdResponseSchema,
+  assetResponseSchema,
+  customerQueryResponseSchema,
+  defaultQueryResponseSchema,
+  responseSchema,
+  videoAdResponseSchema,
 } from './schema';
 
 const fireAndForget = new FireAndForget();
 
+const baseUrl = 'https://googleads.googleapis.com';
 const apiVersion = 'v18';
 
 interface GenericResponse<T> {
@@ -56,24 +56,11 @@ interface GenericResponse<T> {
   nextPageToken?: string;
 }
 
-// const limit = 600;
-
 const client = new OAuth2Client(
   env.GOOGLE_CHANNEL_APPLICATION_ID,
   env.GOOGLE_CHANNEL_APPLICATION_SECRET,
   `${env.API_ENDPOINT}${authEndpoint}`,
 );
-
-interface GoogleJwtPayload extends JwtPayload {
-  azp: string;
-  email: string;
-  email_verified: boolean;
-  at_hash: string;
-  name: string;
-  picture: string;
-  given_name: string | undefined;
-  family_name: string | undefined;
-}
 
 class Google implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
@@ -95,63 +82,44 @@ class Google implements ChannelInterface {
 
   async exchangeCodeForTokens(code: string): Promise<TokensResponse | AError> {
     const getTokenResponse = await client.getToken(code);
-
-    const refreshToken = getTokenResponse.tokens.refresh_token;
-    const accessToken = getTokenResponse.tokens.access_token;
-    const idToken = getTokenResponse.tokens.id_token;
-
-    if (!idToken) {
-      return new AError('No id_token in response');
+    const {
+      refresh_token: refreshToken,
+      id_token: idToken,
+      access_token: accessToken,
+      expiry_date: expiryDate,
+    } = getTokenResponse.tokens;
+    if (!idToken || !accessToken || !refreshToken || !expiryDate) {
+      return new AError(`Failed to get tokens`);
     }
-
-    const decoded = decode(idToken) as GoogleJwtPayload | null;
-    if (!decoded) {
-      return new AError('Could not decode id_token');
-    }
-    if (!accessToken) return new AError('Could not get access_token');
-    if (!refreshToken) return new AError('Could not refresh token');
-
-    if (getTokenResponse.tokens.expiry_date) {
-      return {
-        accessToken,
-        accessTokenExpiresAt: new Date(getTokenResponse.tokens.expiry_date),
-        refreshToken,
-      };
-    }
-    const accessTokenExpiresAt = null;
-    if (isAError(accessTokenExpiresAt)) return accessTokenExpiresAt;
-
     return {
       accessToken,
-      accessTokenExpiresAt,
+      accessTokenExpiresAt: new Date(expiryDate),
       refreshToken,
     };
   }
 
   async getUserId(accessToken: string): Promise<string | AError> {
-    try {
-      const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+    const url = `${baseUrl}/v18/customers:listAccessibleCustomers`;
 
-      if (!response.ok) {
-        logger.error(`Failed to fetch Google user.`);
-        return new AError('Failed to fetch user');
-      }
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
+      },
+    });
 
-      const parsed = z.object({ id: z.string() }).safeParse(await response.json());
-      if (!parsed.success) {
-        logger.error('Failed to parse Google user response', parsed.error);
-        return new AError('Failed to fetch user');
-      }
+    const customers: unknown = await response.json();
 
-      return parsed.data.id;
-    } catch (error) {
-      logger.error('Error fetching Google user', error);
-      return new AError('Network error while fetching user info');
+    const parsed = z.object({ resourceNames: z.array(z.string()) }).safeParse(customers);
+    if (!parsed.success) {
+      logger.error(parsed.error, 'Failed to parse Google user response');
+      return new AError('Failed to fetch user');
     }
+
+    const rightManagerId = await Google.findManagerAccount(accessToken, parsed.data.resourceNames);
+
+    return rightManagerId;
   }
 
   signOutCallback(req: ExpressRequest, res: ExpressResponse): void {
@@ -177,7 +145,7 @@ class Google implements ChannelInterface {
     if (!integration) return new AError('No integration found');
     if (isAError(integration)) return integration;
 
-    const refreshedIntegration = await Google.refreshedIntegration(integration);
+    const refreshedIntegration = await this.refreshedIntegration(integration);
     if (isAError(refreshedIntegration)) return refreshedIntegration;
 
     const revokeUrl = `https://oauth2.googleapis.com/revoke?token=${refreshedIntegration.accessToken}`;
@@ -188,14 +156,14 @@ class Google implements ChannelInterface {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     }).catch((error: unknown) => {
-      logger.error('Failed to de-authorize %o', { error });
+      logger.error({ error }, 'Failed to de-authorize %o');
       return error instanceof Error ? error : new Error(JSON.stringify(error));
     });
 
     if (response instanceof Error) return response;
     if (!response.ok) {
       const error = new Error('De-authorization request failed');
-      logger.error('De-authorization request failed', { response });
+      logger.error({ response }, 'De-authorization request failed');
       if (await disConnectIntegrationOnError(integration.id, error, false)) {
         return integration.externalId;
       }
@@ -206,14 +174,14 @@ class Google implements ChannelInterface {
   }
 
   async refreshAccessToken(integration: Integration): Promise<Integration | AError> {
-    if (!integration.refreshToken) throw new AError('No refresh token found');
-    const url = 'https://www.googleapis.com/oauth2/v3/token';
+    if (!integration.refreshToken) return new AError('No refresh token found');
+    const url = `https://www.googleapis.com/oauth2/v3/token`;
 
     const params = new URLSearchParams();
     params.append('grant_type', 'refresh_token');
     params.append('client_id', env.GOOGLE_CHANNEL_APPLICATION_ID);
     params.append('client_secret', env.GOOGLE_CHANNEL_APPLICATION_SECRET);
-    params.append('refresh_token', env.GOOGLE_CHANNEL_REFRESH_TOKEN);
+    params.append('refresh_token', integration.refreshToken);
 
     interface ResponseData {
       access_token: string;
@@ -242,7 +210,7 @@ class Google implements ChannelInterface {
 
     const updatedToken = {
       ...response,
-      refresh_token: env.GOOGLE_CHANNEL_REFRESH_TOKEN,
+      refresh_token: integration.refreshToken,
       refresh_token_expires_in: null,
     };
 
@@ -260,7 +228,7 @@ class Google implements ChannelInterface {
     });
   }
 
-  private static async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
+  async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
     const expiresAt =
       typeof integration.accessTokenExpiresAt === 'string'
         ? new Date(integration.accessTokenExpiresAt)
@@ -280,18 +248,16 @@ class Google implements ChannelInterface {
     dbAccount: DbAdAccount,
     initial: boolean,
   ): Promise<AError | undefined> {
-    const dbAccounts = await this.saveAdAccounts(integration);
-    if (isAError(dbAccounts)) return dbAccounts;
     if (!integration.refreshToken) return new AError('Refresh token is required');
 
     const ranges = await timeRanges(initial, dbAccount.id);
 
     for (const range of ranges) {
       try {
-        const refreshedIntegration = await Google.refreshedIntegration(integration);
+        const refreshedIntegration = await this.refreshedIntegration(integration);
         if (isAError(refreshedIntegration)) return refreshedIntegration;
 
-        const url = `https://googleads.googleapis.com/${apiVersion}/customers/${dbAccount.externalId}/googleAds:search`;
+        const url = `${baseUrl}/${apiVersion}/customers/${dbAccount.externalId}/googleAds:search`;
 
         const videoQuery = `
       SELECT 
@@ -333,19 +299,17 @@ class Google implements ChannelInterface {
             metrics.video_views,
         segments.ad_format_type
       FROM video
-      WHERE segments.date BETWEEN '${formatYYYMMDDDate(new Date(range.since))}' AND '${formatYYYMMDDDate(new Date(range.until))}'
+      WHERE segments.date BETWEEN '${formatYYYMMDDDate(range.since)}' AND '${formatYYYMMDDDate(range.until)}'
     `;
 
         const youtubeData = await Google.handlePagination(
-          integration,
+          refreshedIntegration,
           videoQuery,
-          VideoAdResponseSchema,
+          videoAdResponseSchema,
           dbAccount.externalId,
         );
 
-        if (!youtubeData) return;
-
-        if (isAError(youtubeData)) return;
+        if (!youtubeData || isAError(youtubeData)) return;
 
         const campaignGroup = youtubeData.map((el) => ({
           externalId: String(el.campaign.id),
@@ -391,28 +355,27 @@ class Google implements ChannelInterface {
               headers: {
                 'Content-Type': 'application/json',
                 'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
-                'login-customer-id': env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID,
+                'login-customer-id': integration.externalId,
                 Authorization: `Bearer ${refreshedIntegration.accessToken}`,
               },
               body: JSON.stringify({ query }),
             }).catch(() => {
-              throw new AError('Error fetching video ads');
+              return new AError('Error fetching video ads');
             });
+
+            if (response instanceof Error) return response;
 
             const jsonResponse: unknown = await response.json();
 
-            const asset = AssetResponseSchema.parse(jsonResponse);
+            const asset = assetResponseSchema.safeParse(jsonResponse);
 
-            if (asset instanceof Error) return asset;
+            if (!asset.data?.results) continue;
 
-            if (!asset.results) continue;
-
-            const flattenedCreatives: ChannelCreative[] = asset.results.map((c) => ({
+            const flattenedCreatives: ChannelCreative[] = asset.data.results.map((c) => ({
               externalAdId: el.adGroupAd.ad.id,
               externalId: c.asset.id,
               adAccountId: dbAccount.id,
               name: c.asset.resourceName,
-              type: c.asset.type,
             }));
 
             creatives.push(...flattenedCreatives);
@@ -452,38 +415,25 @@ class Google implements ChannelInterface {
     });
 
     try {
-      const refreshedIntegration = await Google.refreshedIntegration(integration);
+      const refreshedIntegration = await this.refreshedIntegration(integration);
       if (isAError(refreshedIntegration)) return refreshedIntegration;
 
       const query = `
          SELECT
           ad_group_ad.ad.id,
           ad_group_ad.ad.name,
-          ad_group_ad.ad.type,
-          ad_group_ad.ad.final_urls,
-          ad_group_ad.ad.responsive_search_ad.headlines,
-          ad_group_ad.ad.responsive_search_ad.descriptions,
-          ad_group_ad.ad.responsive_display_ad.marketing_images,
-          ad_group_ad.ad.responsive_display_ad.square_marketing_images,
-          ad_group_ad.ad.video_responsive_ad.headlines,
-          ad_group_ad.ad.video_responsive_ad.descriptions,
-          ad_group_ad.ad.video_responsive_ad.videos
+          ad_group_ad.ad.final_urls
         FROM
           ad_group_ad
         WHERE
           ad_group_ad.ad.id = '${externalId}'
       `;
-      const response = await fetchGoogleAdsData(
-        refreshedIntegration.accessToken,
-        ResponseSchema,
-        query,
-        adAccount.externalId,
-      );
+      const response = await Google.handlePagination(refreshedIntegration, query, responseSchema, adAccount.externalId);
 
-      if (isAError(response)) throw new AError('Error while fetching google ad');
+      if (isAError(response)) return new AError('Error while fetching google ad');
 
-      const validatedResponse = ResponseSchema.parse(response);
-      if (!validatedResponse.results) throw new AError('No data found');
+      const validatedResponse = responseSchema.parse(response);
+      if (!validatedResponse.results) return new AError('No data found');
 
       if (!validatedResponse.results[0].adGroupAd.resourceName) {
         return new AError('getGoogleAdPreview: Ad not found or insufficient permissions.');
@@ -516,7 +466,7 @@ class Google implements ChannelInterface {
       new Promise((resolve) => {
         setTimeout(resolve, ms);
       });
-    const refreshedIntegration = await Google.refreshedIntegration(integration);
+    const refreshedIntegration = await this.refreshedIntegration(integration);
 
     if (isAError(refreshedIntegration)) return refreshedIntegration;
 
@@ -532,11 +482,12 @@ class Google implements ChannelInterface {
       customer_client.level <= 1
   `;
 
-    const response = await Google.handlePagination(integration, defaultQuery, DefaultQueryResponseSchema);
+    const response = await Google.handlePagination(refreshedIntegration, defaultQuery, defaultQueryResponseSchema);
 
-    if (isAError(response)) throw new AError('Error fetching google customers');
+    if (isAError(response)) return new AError('Error fetching google customers');
 
-    if (!response) throw new AError('No data found');
+    if (!response) return new AError('No data found');
+
     const updatedCustomers = [];
 
     for (const customer of response) {
@@ -548,20 +499,20 @@ class Google implements ChannelInterface {
             customer
         `;
 
-      const currencyCode = await fetchGoogleAdsData(
-        refreshedIntegration.accessToken,
-        CustomerQueryResponseSchema,
+      const currencyCode = await Google.handlePagination(
+        refreshedIntegration,
         currencyCodeQuery,
+        customerQueryResponseSchema,
         customer.customerClient.clientCustomer.split('/')[1],
       );
 
-      if (isAError(currencyCode)) throw new AError('Error fetching currency code');
+      if (isAError(currencyCode)) return new AError('Error fetching currency code');
 
-      if (!currencyCode.results) throw new AError('No currency code found');
+      if (!currencyCode) return new AError('No currency code found');
 
       const updatedCustomerClient = {
         resourceName: customer.customerClient.resourceName,
-        currencyCode: currencyCode.results[0].customer.currencyCode || 'USD',
+        currencyCode: currencyCode[0].customer.currencyCode || CurrencyEnum.USD,
         id: customer.customerClient.clientCustomer.split('/')[1],
         descriptiveName: customer.customerClient.descriptiveName,
       };
@@ -596,7 +547,7 @@ class Google implements ChannelInterface {
   }
 
   async getReportStatus(_adAccount: AdAccountIntegration, _taskId: string): Promise<JobStatusEnum> {
-    return Promise.resolve(JobStatusEnum.FAILED);
+    return Promise.reject(new AError('Not Implemented'));
   }
 
   async saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
@@ -628,18 +579,12 @@ class Google implements ChannelInterface {
     customerId?: string,
     _parseCallback?: (result: z.infer<U>) => T,
   ): Promise<AError | GenericResponse<T>['results']> {
-    const managerId = env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID;
-
-    const refreshedIntegration = await Google.refreshedIntegration(integration);
-
-    if (isAError(refreshedIntegration)) return refreshedIntegration;
-
-    const url = `https://googleads.googleapis.com/${apiVersion}/customers/${customerId ?? managerId}/googleAds:search`;
+    const url = `${baseUrl}/${apiVersion}/customers/${customerId ?? integration.externalId}/googleAds:search`;
     const baseHeaders = {
       'Content-Type': 'application/json',
       'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
-      'login-customer-id': env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID,
-      Authorization: `Bearer ${refreshedIntegration.accessToken}`,
+      'login-customer-id': integration.externalId,
+      Authorization: `Bearer ${integration.accessToken}`,
     };
 
     const res = [];
@@ -657,11 +602,13 @@ class Google implements ChannelInterface {
 
         body: JSON.stringify({ query }),
       }).catch(() => {
-        throw new AError('Error fetching video ads');
+        return new AError('Error fetching video ads');
       });
 
+      if (response instanceof Error) return response;
+
       const adsResponse: unknown = await response.json();
-      if (isAError(adsResponse)) return adsResponse;
+      if (isAError(adsResponse)) return res;
       const validatedResponse = schema.parse(adsResponse);
 
       if (validatedResponse.results) {
@@ -672,6 +619,55 @@ class Google implements ChannelInterface {
     } while (nextPageToken);
 
     return res;
+  }
+
+  private static async findManagerAccount(accessToken: string, customerIds: string[]): Promise<string | AError> {
+    for (const customerId of customerIds) {
+      const url = `${baseUrl}/v18/customers/${customerId.split('/')[1]}/googleAds:search`;
+
+      const query = `
+        SELECT
+          customer_client.client_customer,
+          customer_client.level,
+          customer_client.manager,
+          customer_client.descriptive_name
+        FROM
+          customer_client
+      `;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ query }),
+      }).catch(() => {
+        logger.error(`Failed to fetch for the following customer: ${customerId}`);
+        return new AError('Error fetching for the following customer');
+      });
+
+      if (response instanceof Error) return response;
+
+      const data: unknown = await response.json();
+
+      const validatedResponse = defaultQueryResponseSchema.parse(data);
+
+      if (validatedResponse.results) {
+        const managers = validatedResponse.results
+          .map((result) => result.customerClient)
+          .filter((custoemer) => custoemer.manager)
+          .map((customer) => ({
+            customerId: customer.clientCustomer.replace('customers/', ''),
+            descriptiveName: customer.descriptiveName,
+          }));
+
+        if (managers.length) return customerId.split('/')[1];
+      }
+    }
+    logger.error('No manager account found');
+    return new AError('No manager account found');
   }
 
   private static parseRequest(signedRequest: string, secret: string): string | AError {
@@ -708,52 +704,6 @@ class Google implements ChannelInterface {
     return IntegrationTypeEnum.GOOGLE;
   }
 }
-
-const fetchGoogleAdsData = async <T>(
-  accessToken: string,
-  schema: ZodSchema<GenericResponse<T>>,
-  query?: string,
-  customerId?: string,
-): Promise<GenericResponse<T> | AError> => {
-  const managerId = env.GOOGLE_CHANNEL_TEMP_CUSTOMER_ID;
-
-  const url = `https://googleads.googleapis.com/${apiVersion}/customers/${customerId ?? managerId}/googleAds:search`;
-
-  const defaultQuery = `
-    SELECT
-      customer_client.client_customer,
-      customer_client.level,
-      customer_client.manager,
-      customer_client.descriptive_name
-    FROM
-      customer_client
-    WHERE
-      customer_client.level <= 1
-  `;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
-      'login-customer-id': managerId,
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ query: query ?? defaultQuery }),
-  }).catch(() => {
-    throw new AError('Customer fetch failed');
-  });
-
-  if (response instanceof Error) throw new AError('Customer fetch failed');
-
-  const googleAdsResponse: unknown = await response.json();
-
-  const validatedResponse = schema.parse(googleAdsResponse);
-
-  if (!validatedResponse.results) throw new AError('No data found');
-
-  return validatedResponse;
-};
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
   const metaErrorValidatingAccessTokenChangedSession =

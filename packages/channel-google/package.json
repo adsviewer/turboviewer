@@ -21,25 +21,18 @@
     "update": "pnpm update --latest"
   },
   "dependencies": {
-    "@lifeomic/attempt": "^3.1.0",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:*",
-    "facebook-nodejs-business-sdk": "^20.0.3",
     "google-ads-api": "17.1.0-rest-beta",
     "google-auth-library": "^9.14.1",
     "jsonwebtoken": "^9.0.2",
-    "lodash": "^4.17.21",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/express": "^5.0.0",
-    "@types/facebook-nodejs-business-sdk": "^20.0.2",
-    "@types/jsonwebtoken": "^9.0.7",
-    "@types/lodash": "^4.17.9",
     "@types/node": "^22.7.4",
     "typescript": "^5.6.2"
   }

@@ -17,7 +17,7 @@ const createCommonResponseSchema = <T extends ZodTypeAny>(
   });
 };
 
-const VideoSchema = z.object({
+const videoSchema = z.object({
   resourceName: z.string(),
   id: z.string(),
   durationMillis: z.string().optional(),
@@ -54,7 +54,7 @@ const videoResponsiveAdSchema = z.object({
   breadcrumb2: z.string().optional(), // Potentially optional for future cases
 });
 
-const YoutubeAdSchema = z.object({
+const youtubeAdSchema = z.object({
   type: z.string(),
   resourceName: z.string(),
   videoResponsiveAd: videoResponsiveAdSchema.optional(),
@@ -62,19 +62,19 @@ const YoutubeAdSchema = z.object({
   name: z.string(),
 });
 
-const YoutubeAdGroupAdSchema = z.object({
+const youtubeAdGroupAdSchema = z.object({
   resourceName: z.string(),
-  ad: YoutubeAdSchema,
+  ad: youtubeAdSchema,
 });
 
-const AdGroupSchema = z.object({
+const adGroupSchema = z.object({
   resourceName: z.string(),
   type: z.string(),
   id: z.string(),
   name: z.string(),
 });
 
-const CampaignSchema = z.object({
+const campaignSchema = z.object({
   resourceName: z.string(),
   advertisingChannelType: z.string(),
   advertisingChannelSubType: z.string().optional(),
@@ -82,7 +82,7 @@ const CampaignSchema = z.object({
   id: z.string(),
 });
 
-const MetricsSchema = z.object({
+const metricsSchema = z.object({
   clicks: z.string(),
   videoQuartileP100Rate: z.number().optional(),
   videoQuartileP25Rate: z.number().optional(),
@@ -94,17 +94,17 @@ const MetricsSchema = z.object({
   impressions: z.string(),
 });
 
-export const VideoAdResponseSchema = createCommonResponseSchema(
+export const videoAdResponseSchema = createCommonResponseSchema(
   z.object({
-    video: VideoSchema,
-    adGroupAd: YoutubeAdGroupAdSchema,
-    adGroup: AdGroupSchema,
-    campaign: CampaignSchema,
-    metrics: MetricsSchema,
+    video: videoSchema,
+    adGroupAd: youtubeAdGroupAdSchema,
+    adGroup: adGroupSchema,
+    campaign: campaignSchema,
+    metrics: metricsSchema,
   }),
 );
 
-const CustomerClientSchema = z.object({
+const customerClientSchema = z.object({
   resourceName: z.string(),
   clientCustomer: z.string(),
   level: z.string(),
@@ -112,13 +112,13 @@ const CustomerClientSchema = z.object({
   descriptiveName: z.string(),
 });
 
-export const DefaultQueryResponseSchema = createCommonResponseSchema(
+export const defaultQueryResponseSchema = createCommonResponseSchema(
   z.object({
-    customerClient: CustomerClientSchema,
+    customerClient: customerClientSchema,
   }),
 );
 
-const AssetSchema = z.object({
+const assetSchema = z.object({
   asset: z.object({
     id: z.string(),
     resourceName: z.string(),
@@ -131,9 +131,9 @@ const AssetSchema = z.object({
   }),
 });
 
-export const AssetResponseSchema = createCommonResponseSchema(AssetSchema);
+export const assetResponseSchema = createCommonResponseSchema(assetSchema);
 
-const AdSchema = z.object({
+const adSchema = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
   type: z.string().optional(),
@@ -159,25 +159,25 @@ const AdSchema = z.object({
     .optional(),
 });
 
-const AdGroupAdSchema = z.object({
+const adGroupAdSchema = z.object({
   resourceName: z.string(),
-  ad: AdSchema,
+  ad: adSchema,
 });
 
-export const ResponseSchema = createCommonResponseSchema(
+export const responseSchema = createCommonResponseSchema(
   z.object({
-    adGroupAd: AdGroupAdSchema,
+    adGroupAd: adGroupAdSchema,
   }),
 );
 
-const CustomerSchema = z.object({
+const customerSchema = z.object({
   resourceName: z.string(),
   id: z.string(),
   currencyCode: z.string(),
 });
 
-export const CustomerQueryResponseSchema = createCommonResponseSchema(
+export const customerQueryResponseSchema = createCommonResponseSchema(
   z.object({
-    customer: CustomerSchema,
+    customer: customerSchema,
   }),
 );
