@@ -1099,9 +1099,6 @@ importers:
 
   packages/channel-google:
     dependencies:
-      '@lifeomic/attempt':
-        specifier: ^3.1.0
-        version: 3.1.0
       '@repo/channel-utils':
         specifier: workspace:*
         version: link:../channel-utils
@@ -1114,9 +1111,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
-      facebook-nodejs-business-sdk:
-        specifier: ^20.0.3
-        version: 20.0.3
       google-ads-api:
         specifier: 17.1.0-rest-beta
         version: 17.1.0-rest-beta
@@ -1126,9 +1120,6 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -1142,15 +1133,6 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.0
-      '@types/facebook-nodejs-business-sdk':
-        specifier: ^20.0.2
-        version: 20.0.2
-      '@types/jsonwebtoken':
-        specifier: ^9.0.7
-        version: 9.0.7
-      '@types/lodash':
-        specifier: ^4.17.9
-        version: 4.17.13
       '@types/node':
         specifier: ^22.7.4
         version: 22.8.6
@@ -6647,9 +6629,6 @@ packages:
   extract-files@11.0.0:
     resolution: {integrity: sha512-FuoE1qtbJ4bBVvv94CC7s0oTnKUGvQs+Rjf1L2SJFfS+HTVVjhPFtehPdQ0JiGPqVNfSSZvL5yzHHQq2Z4WNhQ==}
     engines: {node: ^12.20 || >= 14.13}
-
-  facebook-nodejs-business-sdk@20.0.3:
-    resolution: {integrity: sha512-P3S1NhWJiss8dlr5273WHxPM1C2wAqg9rl0sBCzEW1n0ZwcUZF0W7lU2VonB5Bbud12KjNIONFd8ZW40FiV0yQ==}
 
   facebook-nodejs-business-sdk@21.0.3:
     resolution: {integrity: sha512-I5PycDY1lTaVZe9Fhgrj0GWdUNsdW1QPgpuBzi+ncCey9PfA0JPd1kcqoUA3V75FOWNr06aKDQ0cDJ0WH1+Nhg==}
@@ -16324,16 +16303,6 @@ snapshots:
       tmp: 0.0.33
 
   extract-files@11.0.0: {}
-
-  facebook-nodejs-business-sdk@20.0.3:
-    dependencies:
-      axios: 1.7.7
-      currency-codes: 1.5.1
-      iso-3166-1: 2.1.1
-      js-sha256: 0.9.0
-      mixwith: 0.1.1
-    transitivePeerDependencies:
-      - debug
 
   facebook-nodejs-business-sdk@21.0.3:
     dependencies:
