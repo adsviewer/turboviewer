@@ -24,25 +24,27 @@ data "aws_iam_policy_document" "ecr_access_role_assume_policy" {
 resource "aws_iam_role" "ecr_access_role" {
   name               = "${local.name}-ecr-access-role"
   assume_role_policy = data.aws_iam_policy_document.ecr_access_role_assume_policy.json
-  inline_policy {
-    name = "ecr-access-policy"
-    policy = jsonencode({
-      Version = "2012-10-17",
-      Statement = [
-        {
-          Effect = "Allow",
-          Action = [
-            "ecr:BatchCheckLayerAvailability",
-            "ecr:BatchGetImage",
-            "ecr:DescribeImages",
-            "ecr:GetAuthorizationToken",
-            "ecr:GetDownloadUrlForLayer"
-          ],
-          Resource = ["*"]
-        }
-      ]
-    })
-  }
+}
+
+resource "aws_iam_role_policy" "ecr_access_policy" {
+  name = "${local.name}-ecr-access-policy"
+  role = aws_iam_role.ecr_access_role.name
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:BatchGetImage",
+          "ecr:DescribeImages",
+          "ecr:GetAuthorizationToken",
+          "ecr:GetDownloadUrlForLayer"
+        ],
+        Resource = ["*"]
+      }
+    ]
+  })
 }
 
 data "aws_iam_policy_document" "service_assume_role_policy" {
