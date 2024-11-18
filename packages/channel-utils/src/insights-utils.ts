@@ -37,9 +37,7 @@ export const saveAccounts = async (
           currency: acc.currency,
           name: acc.name,
           integrations: { connect: { id: integration.id } },
-          organizations: {
-            connect: { id: integration.organizationId },
-          },
+          organizations: { connect: { id: integration.organizationId } },
         },
         create: {
           integrations: { connect: { id: integration.id } },
@@ -164,36 +162,34 @@ export const saveCreatives = async (
   creatives: ChannelCreative[],
   adAccountId: string,
   adExternalIdMap: Map<string, string>,
-  creativeExternalIdMap: Map<string, string>,
 ): Promise<void> => {
   const uniqueCreatives = _.uniqBy(creatives, (creative) => creative.externalId);
   logger.info('Saving %d creatives', uniqueCreatives.length);
   await Promise.all(
     uniqueCreatives.map((creative) =>
-      prisma.creative
-        .upsert({
-          where: { externalId_adAccountId: { externalId: creative.externalId, adAccountId } },
-          create: {
-            externalId: creative.externalId,
-            adAccountId,
-            name: creative.name,
-            body: creative.body,
-            title: creative.title,
-            status: creative.status,
-            callToActionType: creative.callToActionType,
-            imageUrl: creative.imageUrl,
-            ads: { connect: { id: adExternalIdMap.get(creative.externalAdId) ?? '' } },
-          },
-          update: {
-            name: creative.name,
-            body: creative.body,
-            title: creative.title,
-            status: creative.status,
-            callToActionType: creative.callToActionType,
-            imageUrl: creative.imageUrl,
-          },
-        })
-        .then(({ id }) => creativeExternalIdMap.set(creative.externalId, id)),
+      prisma.creative.upsert({
+        where: { externalId_adAccountId: { externalId: creative.externalId, adAccountId } },
+        create: {
+          externalId: creative.externalId,
+          adAccountId,
+          name: creative.name,
+          body: creative.body,
+          title: creative.title,
+          status: creative.status,
+          callToActionType: creative.callToActionType,
+          imageUrl: creative.imageUrl,
+          ads: { connect: { id: adExternalIdMap.get(creative.externalAdId) ?? '' } },
+        },
+        update: {
+          name: creative.name,
+          body: creative.body,
+          title: creative.title,
+          status: creative.status,
+          callToActionType: creative.callToActionType,
+          imageUrl: creative.imageUrl,
+          ads: { connect: { id: adExternalIdMap.get(creative.externalAdId) ?? '' } },
+        },
+      }),
     ),
   );
 };
@@ -262,7 +258,6 @@ export const saveInsightsAdsAdsSetsCampaigns = async (
   ads: ChannelAd[],
   adExternalIdMap: Map<string, string>,
   creatives: ChannelCreative[],
-  creativeExternalIdMap: Map<string, string>,
   insights: ChannelInsight[],
 ): Promise<void> => {
   const uniqueCampaigns = _.uniqBy(campaigns, (campaign) => campaign.externalId);
@@ -276,7 +271,7 @@ export const saveInsightsAdsAdsSetsCampaigns = async (
   const uniqueAds = _.uniqBy(ads, (ad) => ad.externalId);
   const newAds = uniqueAds.filter((ad) => !adExternalIdMap.has(ad.externalId));
   await saveAds(newAds, adAccount.id, adExternalIdMap, externalAdSetToIdMap);
-  await saveCreatives(creatives, adAccount.id, adExternalIdMap, creativeExternalIdMap);
+  await saveCreatives(creatives, adAccount.id, adExternalIdMap);
 
   await saveInsights(insights, adExternalIdMap, adAccount);
 };

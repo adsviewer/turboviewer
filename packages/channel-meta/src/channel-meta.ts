@@ -333,10 +333,15 @@ class Meta implements ChannelInterface {
     externalAdIdsSet: Set<string>,
   ): Promise<ChannelCreative[]> {
     adsSdk.FacebookAdsApi.init(integration.accessToken);
-    const dbAds = await prisma.ad.findMany({
-      where: { adAccountId, externalId: { in: Array.from(externalAdIdsSet) }, creativeId: null },
+    const existingAds = await prisma.ad.findMany({
+      where: {
+        adAccountId,
+        externalId: { in: [...externalAdIdsSet] },
+        creativeId: { not: null },
+      },
     });
-    const externalAdIds = dbAds.map((ad) => ad.externalId);
+    const existingAdsByExternalId = new Map(existingAds.map((ad) => [ad.externalId, ad]));
+    const externalAdIdsWithoutCreative = [...externalAdIdsSet].filter((id) => !existingAdsByExternalId.has(id));
     const schema = z.object({
       id: z.string(),
       creative: z.object({
@@ -362,7 +367,7 @@ class Meta implements ChannelInterface {
 
     const creatives: ChannelCreative[] = [];
     let start = 0;
-    let smallAccountAds = externalAdIds.slice(start, start + limit);
+    let smallAccountAds = externalAdIdsWithoutCreative.slice(start, start + limit);
     while (smallAccountAds.length > 0) {
       const account = new AdAccount(`act_${adAccountExternalId}`);
       const callFn = account.getAds(
@@ -390,7 +395,7 @@ class Meta implements ChannelInterface {
       const resp = await Meta.handlePagination(integration, callFn, schema, toCreative);
       if (!isAError(resp)) creatives.push(...resp);
       start += limit;
-      smallAccountAds = externalAdIds.slice(start, start + limit);
+      smallAccountAds = externalAdIdsWithoutCreative.slice(start, start + limit);
     }
     return creatives;
   }
@@ -440,7 +445,6 @@ class Meta implements ChannelInterface {
     adsSdk.FacebookAdsApi.init(accountIntegration.integration.accessToken);
     const reportId = taskId;
     const adExternalIdMap = new Map<string, string>();
-    const creativeExternalIdMap = new Map<string, string>();
     const externalAdSetToIdMap = new Map<string, string>();
     const externalCampaignToIdMap = new Map<string, string>();
     const insightSchema = z.object({
@@ -524,7 +528,6 @@ class Meta implements ChannelInterface {
         items,
         creatives,
         adExternalIdMap,
-        creativeExternalIdMap,
         externalAdSetToIdMap,
         externalCampaignToIdMap,
         accountIntegration,
@@ -591,7 +594,6 @@ class Meta implements ChannelInterface {
     accountInsightsAndAds: { insight: ChannelInsight; ad: ChannelAd; adSet: ChannelAdSet; campaign: ChannelCampaign }[],
     creatives: ChannelCreative[],
     adExternalIdMap: Map<string, string>,
-    creativeExternalIdMap: Map<string, string>,
     externalAdSetToIdMap: Map<string, string>,
     externalCampaignToIdMap: Map<string, string>,
     accountIntegration: AdAccountIntegration,
@@ -615,7 +617,6 @@ class Meta implements ChannelInterface {
       ads,
       adExternalIdMap,
       creatives,
-      creativeExternalIdMap,
       insights,
     );
   }

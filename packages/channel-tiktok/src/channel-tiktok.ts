@@ -583,7 +583,6 @@ export class Tiktok implements ChannelInterface {
       ads,
       adExternalIdMap,
       [],
-      new Map(),
       insights,
     );
   };

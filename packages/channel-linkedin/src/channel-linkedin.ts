@@ -160,7 +160,6 @@ class LinkedIn implements ChannelInterface {
         adsWOSponsoredMsg,
         new Map<string, string>(),
         [],
-        new Map<string, string>(),
         analytics.insights,
       );
     }
