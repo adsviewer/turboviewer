@@ -16,7 +16,6 @@ import { logger } from '@repo/logger';
 import { type Request as ExpressRequest, type Response as ExpressResponse } from 'express';
 import {
   type AdAccountIntegration,
-  type AdWithAdAccount,
   authEndpoint,
   type ChannelAd,
   type ChannelCreative,
@@ -183,38 +182,27 @@ class Google implements ChannelInterface {
     params.append('client_secret', env.GOOGLE_CHANNEL_APPLICATION_SECRET);
     params.append('refresh_token', integration.refreshToken);
 
-    interface ResponseData {
-      access_token: string;
-      expires_in: number;
-    }
-
-    const response: ResponseData = await fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: params.toString(),
-    })
-      .then((res) => res.json() as Promise<ResponseData>)
-      .catch(() => {
-        throw new AError(`Failed to refresh token`);
-      });
+    }).catch(() => {
+      throw new AError(`Failed to refresh token`);
+    });
+
+    if (response instanceof Error) return response;
+
+    const tokenData: unknown = await response.json();
 
     const schema = z.object({
       access_token: z.string(),
       expires_in: z.number().int(),
-      refresh_token: z.string(),
-      refresh_token_expires_in: z.null(),
       scope: z.string(),
     });
 
-    const updatedToken = {
-      ...response,
-      refresh_token: integration.refreshToken,
-      refresh_token_expires_in: null,
-    };
-
-    const parsed = schema.safeParse(updatedToken);
+    const parsed = schema.safeParse(tokenData);
     if (!parsed.success) {
       logger.error(parsed.error, 'Failed to parse refresh access token response');
       return new AError('Failed to parse refresh access token response');
@@ -223,16 +211,13 @@ class Google implements ChannelInterface {
     return await updateIntegrationTokens(integration, {
       accessToken: parsed.data.access_token,
       accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
-      refreshToken: parsed.data.refresh_token,
-      refreshTokenExpiresAt: addInterval(new Date(), 'seconds', 7776000000), // TODO: Add dynamic expire time
+      refreshToken: integration.refreshToken,
+      refreshTokenExpiresAt: addInterval(new Date(), 'seconds', 7776000000),
     });
   }
 
   async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
-    const expiresAt =
-      typeof integration.accessTokenExpiresAt === 'string'
-        ? new Date(integration.accessTokenExpiresAt)
-        : integration.accessTokenExpiresAt;
+    const expiresAt = integration.accessTokenExpiresAt;
 
     const oneHourFromNow = addInterval(new Date(), 'seconds', 60 * 60);
 
@@ -268,6 +253,8 @@ class Google implements ChannelInterface {
       ad_group_ad.ad.id,
       ad_group_ad.ad.name,
       ad_group_ad.ad.video_responsive_ad.call_to_actions,
+      ad_group_ad.ad.video_responsive_ad.videos,
+      ad_group_ad.ad.video_responsive_ad.descriptions,
       
       ad_group.id,
       ad_group.name,
@@ -314,14 +301,8 @@ class Google implements ChannelInterface {
             const query = `
                   SELECT
                   asset.id,
-                  asset.name,
-                  asset.type,
                   asset.resource_name,
-                  asset.youtube_video_asset.youtube_video_id,
-                  asset.image_asset.file_size,
-                  asset.image_asset.full_size.url,
-                  asset.image_asset.mime_type,
-                  asset.text_asset.text
+                  asset.youtube_video_asset.youtube_video_id
                 FROM
                   asset
                 WHERE
@@ -354,9 +335,9 @@ class Google implements ChannelInterface {
               externalId: c.asset.id,
               adAccountId: dbAccount.id,
               name: c.asset.resourceName,
-              body: el.adGroupAd.ad.videoResponsiveAd?.descriptions[0].text,
+              body: el.adGroupAd.ad.videoResponsiveAd?.descriptions?.[0].text,
               title: el.video.title,
-              callToActionType: el.adGroupAd.ad.videoResponsiveAd?.callToActions[0].text,
+              callToActionType: el.adGroupAd.ad.videoResponsiveAd?.callToActions?.[0].text,
               imageUrl: c.asset.youtubeVideoAsset?.youtubeVideoId,
             }));
 
@@ -373,7 +354,6 @@ class Google implements ChannelInterface {
           ads,
           new Map<string, string>(),
           creatives,
-          new Map<string, string>(),
           [],
         );
       } catch (err) {
@@ -455,8 +435,6 @@ class Google implements ChannelInterface {
     const defaultQuery = `
     SELECT
       customer_client.client_customer,
-      customer_client.level,
-      customer_client.manager,
       customer_client.descriptive_name
     FROM
       customer_client
@@ -528,10 +506,6 @@ class Google implements ChannelInterface {
   }
 
   async getReportStatus(_adAccount: AdAccountIntegration, _taskId: string): Promise<JobStatusEnum> {
-    return Promise.reject(new AError('Not Implemented'));
-  }
-
-  async saveCreatives(_integration: Integration, _groupByAdAccount: Map<string, AdWithAdAccount[]>): Promise<void> {
     return Promise.reject(new AError('Not Implemented'));
   }
 
@@ -609,9 +583,7 @@ class Google implements ChannelInterface {
       const query = `
         SELECT
           customer_client.client_customer,
-          customer_client.level,
-          customer_client.manager,
-          customer_client.descriptive_name
+          customer_client.manager
         FROM
           customer_client
       `;

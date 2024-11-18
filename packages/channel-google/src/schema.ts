@@ -24,33 +24,25 @@ const videoSchema = z.object({
 });
 
 const videoResponsiveAdSchema = z.object({
-  headlines: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  longHeadlines: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  descriptions: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
-  callToActions: z.array(
-    z.object({
-      text: z.string(),
-    }),
-  ),
+  descriptions: z
+    .array(
+      z.object({
+        text: z.string(),
+      }),
+    )
+    .optional(),
+  callToActions: z
+    .array(
+      z.object({
+        text: z.string(),
+      }),
+    )
+    .optional(),
   videos: z.array(
     z.object({
       asset: z.string(),
     }),
   ),
-  breadcrumb1: z.string().optional(), // Optional field
-  breadcrumb2: z.string().optional(), // Potentially optional for future cases
 });
 
 const youtubeAdSchema = z.object({
@@ -83,10 +75,9 @@ export const videoAdResponseSchema = createCommonResponseSchema(
 );
 
 const customerClientSchema = z.object({
-  resourceName: z.string(),
+  resourceName: z.string().optional(),
   clientCustomer: z.string(),
-  level: z.string(),
-  manager: z.boolean(),
+  manager: z.boolean().optional(),
   descriptiveName: z.string(),
 });
 
@@ -100,7 +91,6 @@ const assetSchema = z.object({
   asset: z.object({
     id: z.string(),
     resourceName: z.string(),
-    type: z.string(),
     youtubeVideoAsset: z
       .object({
         youtubeVideoId: z.string(),
