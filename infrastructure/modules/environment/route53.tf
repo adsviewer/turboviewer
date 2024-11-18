@@ -116,6 +116,17 @@ resource "aws_route53_record" "google_verification" {
   ]
 }
 
+resource "aws_route53_record" "google_channel_verification" {
+  count   = var.environment == "prod" ? 1 : 0
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = "google-site-verification"
+  type    = "TXT"
+  ttl     = "300"
+  records = [
+    "1xf8Fol-UNNngJFy4kgzgg_jx131Pr19XYsLyXB3vmQ",
+  ]
+}
+
 resource "aws_route53_record" "dmarc" {
   count   = var.environment == "prod" ? 1 : 0
   zone_id = aws_route53_zone.zone.zone_id
