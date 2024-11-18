@@ -100,6 +100,7 @@ jobs:
           cache-to: type=registry,ref=ghcr.io/${{ inputs.github-organization }}/${{ inputs.service_name }}:${{ inputs.environment }}-${{ (contains(matrix.platform,'arm') && 'arm') || (contains(matrix.platform,'amd') && 'amd') }}-cache,mode=max
 
   db-migrate:
+    if: ${{ inputs.service_name == 'server' }}
 
     runs-on: ubuntu-latest
 
