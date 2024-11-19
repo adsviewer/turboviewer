@@ -53,6 +53,8 @@ query insights(
       adAccountName
       adId
       adName
+      creativeId
+      creativeName
       currency
       datapoints {
         date

@@ -14,7 +14,6 @@ export default function ColorSchemeToggle(): ReactNode {
         }}
         variant="default"
         size="xl"
-        aria-label="Toggle color scheme"
       >
         {computedColorScheme === 'light' ? <IconMoon /> : <IconSun />}
       </ActionIcon>

@@ -40,6 +40,16 @@ fragment UserFields on User {
       accessTokenExpiresAt
     }
   }
+  comments {
+    id
+    body
+    taggedUsers {
+      id
+    }
+  }
+  taggedInComment {
+    id
+  }
 }
 
 mutation sendFeedback($type: FeedbackTypeEnum!, $message: String!) {

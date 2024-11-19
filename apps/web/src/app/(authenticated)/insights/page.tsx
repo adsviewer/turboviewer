@@ -18,7 +18,6 @@ interface InsightsProps {
   searchParams: Promise<InsightsParams>;
 }
 
-// export default function Insights(props: { params: InsightsProps }): ReactNode {
 export default function Insights(props: InsightsProps): ReactNode {
   const tGeneric = useTranslations('generic');
   const searchParams = use(props.searchParams);

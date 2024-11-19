@@ -67,7 +67,7 @@ export default function ForgotPasswordForm(): React.JSX.Element {
             }}
           />
 
-          <ActionIcon component={Link} href="/sign-in" c="dimmed" variant="transparent" aria-label="Back">
+          <ActionIcon component={Link} href="/sign-in" c="dimmed" variant="transparent">
             <IconArrowLeft />
           </ActionIcon>
           <Flex direction="column" align="center" justify="center" mb="xl">

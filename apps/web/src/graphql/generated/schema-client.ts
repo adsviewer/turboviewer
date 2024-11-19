@@ -27,6 +27,8 @@ export type Ad = {
   __typename: 'Ad';
   adAccount: AdAccount;
   adAccountId: Scalars['String']['output'];
+  creative?: Maybe<Creative>;
+  creativeId?: Maybe<Scalars['String']['output']>;
   externalId: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insights: AdInsightsConnection;
@@ -114,6 +116,37 @@ export type ChannelInitialProgressPayload = {
   __typename: 'ChannelInitialProgressPayload';
   channel: IntegrationType;
   progress: Scalars['Float']['output'];
+};
+
+export type Comment = {
+  __typename: 'Comment';
+  body: Scalars['String']['output'];
+  createdAt: Scalars['Date']['output'];
+  creative: Creative;
+  creativeId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  taggedUsers: Array<User>;
+  updatedAt: Scalars['Date']['output'];
+  user: User;
+  userId: Scalars['ID']['output'];
+};
+
+export type Creative = {
+  __typename: 'Creative';
+  adAccount: AdAccount;
+  adAccountId: Scalars['String']['output'];
+  ads: Array<Ad>;
+  body?: Maybe<Scalars['String']['output']>;
+  callToActionType?: Maybe<Scalars['String']['output']>;
+  comments: Array<Comment>;
+  createdAt: Scalars['Date']['output'];
+  externalId: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  status?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['Date']['output'];
 };
 
 export enum CurrencyEnum {
@@ -350,6 +383,8 @@ export type GroupedInsight = {
   adSetName?: Maybe<Scalars['String']['output']>;
   campaignId?: Maybe<Scalars['String']['output']>;
   campaignName?: Maybe<Scalars['String']['output']>;
+  creativeId?: Maybe<Scalars['String']['output']>;
+  creativeName?: Maybe<Scalars['String']['output']>;
   currency: CurrencyEnum;
   datapoints: Array<InsightsDatapoints>;
   device?: Maybe<DeviceEnum>;
@@ -400,6 +435,7 @@ export enum InsightsColumnsGroupBy {
   adId = 'adId',
   adSetId = 'adSetId',
   campaignId = 'campaignId',
+  creativeId = 'creativeId',
   device = 'device',
   position = 'position',
   publisher = 'publisher',
@@ -621,6 +657,7 @@ export type Mutation = {
   createInvitationLink: Scalars['String']['output'];
   createOrganization: Organization;
   deAuthIntegration: MutationDeAuthIntegrationResult;
+  deleteComment: Comment;
   /** Deletes the invitation link for the given role */
   deleteInvitationLink: Scalars['Boolean']['output'];
   deleteOrganization: Organization;
@@ -646,6 +683,7 @@ export type Mutation = {
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
   updateUser: User;
+  upsertComment: Comment;
   upsertSearchQueryString: SearchQueryString;
 };
 
@@ -664,6 +702,10 @@ export type MutationCreateOrganizationArgs = {
 
 export type MutationDeAuthIntegrationArgs = {
   type: IntegrationType;
+};
+
+export type MutationDeleteCommentArgs = {
+  commentId: Scalars['String']['input'];
 };
 
 export type MutationDeleteInvitationLinkArgs = {
@@ -769,6 +811,13 @@ export type MutationUpdateUserArgs = {
   oldPassword?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type MutationUpsertCommentArgs = {
+  body: Scalars['String']['input'];
+  commentToUpdateId?: InputMaybe<Scalars['String']['input']>;
+  creativeId: Scalars['String']['input'];
+  taggedUsersIds?: Array<Scalars['String']['input']>;
+};
+
 export type MutationUpsertSearchQueryStringArgs = {
   id?: InputMaybe<Scalars['String']['input']>;
   isOrganization: Scalars['Boolean']['input'];
@@ -868,6 +917,7 @@ export type Query = {
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
+  comments: Array<Comment>;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsights;
@@ -893,6 +943,10 @@ export type QueryAvailableOrganizationAdAccountsArgs = {
 
 export type QueryCheckConfirmInvitedUserHashValidityArgs = {
   invitedHash: Scalars['String']['input'];
+};
+
+export type QueryCommentsArgs = {
+  creativeId: Scalars['String']['input'];
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -971,6 +1025,7 @@ export type Tokens = {
 export type User = {
   __typename: 'User';
   allRoles: Array<AllRoles>;
+  comments: Array<Comment>;
   createdAt: Scalars['Date']['output'];
   currentOrganization?: Maybe<Organization>;
   currentOrganizationId?: Maybe<Scalars['String']['output']>;
@@ -987,6 +1042,7 @@ export type User = {
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
   status: UserStatus;
+  taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
 };

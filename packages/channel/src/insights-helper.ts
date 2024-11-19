@@ -60,6 +60,7 @@ export const getInsightsHelper = async (
     cpc: number | null;
     campaignId: string;
     adSetId: string;
+    creativeId: string;
     integration: IntegrationTypeEnum;
   })[];
 

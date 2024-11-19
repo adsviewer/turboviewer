@@ -149,3 +149,31 @@ export const getCalendarDateDiffIn = (interval: IntervalType, dateFrom: Date, da
   const firstDayNextWeek = getFirstDayNextWeek(dateTo, locale);
   return Math.ceil(getDateDiffIn(interval, firstDayOfWeek, firstDayNextWeek));
 };
+
+export const timeAgo = (date: Date | string): string => {
+  // Convert the input to a Date object if it's a string
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  // Check if dateObj is a valid Date
+  if (isNaN(dateObj.getTime())) {
+    throw new Error('Invalid date passed to timeAgo function');
+  }
+
+  const now = new Date();
+  const diff = now.getTime() - dateObj.getTime();
+
+  // Calculate differences in seconds, minutes, hours, and days
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) {
+    return days === 1 ? '1 day ago' : `${String(days)} days ago`;
+  } else if (hours > 0) {
+    return hours === 1 ? '1 hour ago' : `${String(hours)} hours ago`;
+  } else if (minutes > 0) {
+    return minutes === 1 ? '1 minute ago' : `${String(minutes)} minutes ago`;
+  }
+  return 'less than one minute ago';
+};

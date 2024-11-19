@@ -10,7 +10,6 @@ import { logger } from '@repo/logger';
 import { notifications } from '@mantine/notifications';
 import { useSearchParams } from 'next/navigation';
 import { IconChartLine, IconClick, IconCoins, IconEye, IconZoomMoney } from '@tabler/icons-react';
-// import Embed from '@repo/ui/embed';
 import IFrameComponent from '@repo/ui/iframe';
 import EmbedComponent from '@repo/ui/embed';
 import {
@@ -27,6 +26,7 @@ import { deviceToIconMap, publisherToIconMap } from '@/util/insights-utils';
 import { urlKeys, ChartMetricsEnum } from '@/util/url-query-utils';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { type Datapoint } from '@/util/charts-utils';
+import Comments from './comments/comments';
 
 interface InsightCardProps {
   heading: string | null | undefined;
@@ -37,6 +37,8 @@ interface InsightCardProps {
   publisher: PublisherEnum | null | undefined;
   datapoints?: InsightsDatapoints[];
   iframe?: IFrame | null;
+  creativeId?: string | null;
+  creativeName?: string | null;
   hideHeading?: boolean;
 }
 
@@ -155,6 +157,13 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
           <Title order={3} mb="md" fw={500} title={String(props.title)}>
             {props.heading}
           </Title>
+
+          {/* Comments */}
+          {props.creativeId && props.creativeName ? (
+            <Flex mb="md" ml="auto" style={{ cursor: 'pointer' }}>
+              <Comments creativeId={props.creativeId} creativeName={props.creativeName} />
+            </Flex>
+          ) : null}
         </Flex>
       ) : null}
 
@@ -199,11 +208,11 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
                   void copyText(String(props.title));
                 }}
               >
-                {truncateString(String(props.title), 22)}
+                {truncateString(String(props.title), 30)}
               </Text>
             </Tooltip>
           ) : (
-            <Text fw={500}>{truncateString(String(props.title), 22)}</Text>
+            <Text fw={500}>{truncateString(String(props.title), 30)}</Text>
           )}
         </Flex>
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}

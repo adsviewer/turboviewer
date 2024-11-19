@@ -1,6 +1,8 @@
 type Ad {
   adAccount: AdAccount!
   adAccountId: String!
+  creative: Creative
+  creativeId: String
   externalId: String!
   id: ID!
   insights(
@@ -80,6 +82,35 @@ scalar BigInt
 type ChannelInitialProgressPayload {
   channel: IntegrationType!
   progress: Float!
+}
+
+type Comment {
+  body: String!
+  createdAt: Date!
+  creative: Creative!
+  creativeId: ID!
+  id: ID!
+  taggedUsers: [User!]!
+  updatedAt: Date!
+  user: User!
+  userId: ID!
+}
+
+type Creative {
+  adAccount: AdAccount!
+  adAccountId: String!
+  ads: [Ad!]!
+  body: String
+  callToActionType: String
+  comments: [Comment!]!
+  createdAt: Date!
+  externalId: String!
+  id: ID!
+  imageUrl: String
+  name: String!
+  status: String
+  title: String
+  updatedAt: Date!
 }
 
 enum CurrencyEnum {
@@ -321,6 +352,8 @@ type GroupedInsight {
   adSetName: String
   campaignId: String
   campaignName: String
+  creativeId: String
+  creativeName: String
   currency: CurrencyEnum!
   datapoints: [InsightsDatapoints!]!
   device: DeviceEnum
@@ -371,6 +404,7 @@ enum InsightsColumnsGroupBy {
   adId
   adSetId
   campaignId
+  creativeId
   device
   position
   publisher
@@ -632,6 +666,7 @@ type Mutation {
     users: [UserRolesInput!]
   ): Organization!
   deAuthIntegration(type: IntegrationType!): MutationDeAuthIntegrationResult!
+  deleteComment(commentId: String!): Comment!
 
   """
   Deletes the invitation link for the given role
@@ -663,6 +698,12 @@ type Mutation {
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
+  upsertComment(
+    body: String!
+    commentToUpdateId: String
+    creativeId: String!
+    taggedUsersIds: [String!]! = []
+  ): Comment!
   upsertSearchQueryString(id: String, isOrganization: Boolean!, name: String!, queryString: String!): SearchQueryString!
 }
 
@@ -760,6 +801,7 @@ type Query {
   """
   availableOrganizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
   checkConfirmInvitedUserHashValidity(invitedHash: String!): Boolean!
+  comments(creativeId: String!): [Comment!]!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsights!
@@ -834,6 +876,7 @@ Caller is permitted to view this type if is the user or an admin. Some fields ar
 """
 type User {
   allRoles: [AllRoles!]!
+  comments: [Comment!]!
   createdAt: Date!
   currentOrganization: Organization
   currentOrganizationId: String
@@ -865,6 +908,7 @@ type User {
   """
   photoUrl: String
   status: UserStatus!
+  taggedInComment: [Comment!]!
   updatedAt: Date!
   userRoles: [String!]!
 }

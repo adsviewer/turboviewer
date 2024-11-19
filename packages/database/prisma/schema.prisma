@@ -80,10 +80,12 @@ model User {
 
   currentOrganization Organization? @relation(fields: [currentOrganizationId], references: [id])
 
-  feedbacks      Feedback[]
-  loginProviders LoginProviderUser[]
-  organizations  UserOrganization[]
-  roles          UserRole[]
+  feedbacks       Feedback[]
+  loginProviders  LoginProviderUser[]
+  organizations   UserOrganization[]
+  roles           UserRole[]
+  comments        Comment[]
+  taggedInComment Comment[]           @relation(name: "COMMENT_TAGGED_USERS")
 
   @@index([currentOrganizationId])
   @@map("users")
@@ -265,7 +267,7 @@ model Ad {
   id          String  @id @default(cuid())
   adAccountId String  @map("ad_account_id")
   adSetId     String? @map("ad_set_id")
-  creativeId  String?
+  creativeId  String? @map("creative_id")
 
   externalId String    @map("external_id")
   name       String?
@@ -276,6 +278,7 @@ model Ad {
 
   @@unique([adSetId, externalId])
   @@unique([adAccountId, externalId])
+  @@index([creativeId])
   @@index([name])
   @@map("ads")
 }
@@ -321,6 +324,25 @@ enum PublisherEnum {
   Unknown
 }
 
+model Comment {
+  id         String @id @default(cuid())
+  creativeId String @map("creative_id")
+  userId     String @map("user_id")
+
+  body String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  taggedUsers User[]   @relation(name: "COMMENT_TAGGED_USERS")
+  creative    Creative @relation(fields: [creativeId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([creativeId])
+  @@index([userId])
+  @@map("comments")
+}
+
 model Creative {
   id               String  @id @default(cuid())
   adAccountId      String  @map("ad_account_id")
@@ -337,6 +359,7 @@ model Creative {
 
   ads       Ad[]
   adAccount AdAccount @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  comments  Comment[]
 
   @@unique([externalId, adAccountId])
   @@map("creatives")

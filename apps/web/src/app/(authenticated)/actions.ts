@@ -12,6 +12,12 @@ import {
   type UpsertSearchQueryStringMutation,
   type MutationDeleteSearchQueryStringArgs,
   type DeleteSearchQueryStringMutation,
+  type CommentsQuery,
+  type CommentsQueryVariables,
+  type MutationUpsertCommentArgs,
+  type UpsertCommentMutation,
+  type MutationDeleteCommentArgs,
+  type DeleteCommentMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -55,6 +61,7 @@ export const removeUserMilestoneAndGetJWT = async (
   }
 };
 
+// Search
 export const getSearchQueryStrings = async (): Promise<UrqlResult<SearchQueryStringsQuery>> => {
   return await handleUrqlRequest((await urqlClientSdk()).searchQueryStrings());
 };
@@ -68,3 +75,18 @@ export const deleteSearchQueryString = async (
   values: MutationDeleteSearchQueryStringArgs,
 ): Promise<UrqlResult<DeleteSearchQueryStringMutation, string>> =>
   await handleUrqlRequest((await urqlClientSdk()).deleteSearchQueryString(values));
+
+// Comments
+export const getComments = async (values: CommentsQueryVariables): Promise<UrqlResult<CommentsQuery>> => {
+  return await handleUrqlRequest((await urqlClientSdk()).comments(values));
+};
+
+export const upsertComment = async (
+  values: MutationUpsertCommentArgs,
+): Promise<UrqlResult<UpsertCommentMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).upsertComment(values));
+
+export const deleteComment = async (
+  values: MutationDeleteCommentArgs,
+): Promise<UrqlResult<DeleteCommentMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).deleteComment(values));

@@ -236,6 +236,14 @@ export default function GroupFilters(): ReactNode {
         />
         <Checkbox
           disabled={isPending}
+          label={t('creativeId')}
+          my={4}
+          onChange={handleCheckboxFilter}
+          value={InsightsColumnsGroupBy.creativeId}
+          checked={isChecked(InsightsColumnsGroupBy.creativeId)}
+        />
+        <Checkbox
+          disabled={isPending}
           label={t('integration')}
           my={4}
           onChange={handleCheckboxFilter}

@@ -100,6 +100,8 @@ export const UserDto = builder.prismaObject('User', {
     }),
     currentOrganizationId: t.exposeString('currentOrganizationId', { nullable: true }),
     currentOrganization: t.relation('currentOrganization', { nullable: true, type: OrganizationDto }),
+    comments: t.relation('comments', { nullable: false }),
+    taggedInComment: t.relation('taggedInComment', { nullable: false }),
   }),
 });
 

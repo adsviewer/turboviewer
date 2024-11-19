@@ -10,6 +10,7 @@ import './search-query/search-query-operations';
 import './user/social-login-operations';
 import './user/invite-operations';
 import './user/user-operations';
+import './comment/comment-operations';
 
 builder.queryType({
   fields: (_t) => ({}),

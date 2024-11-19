@@ -141,9 +141,10 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -174,9 +175,10 @@ void describe('insights query builder tests', () => {
     if (!args.dateFrom) return;
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -205,9 +207,10 @@ void describe('insights query builder tests', () => {
     const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
     assertSql(
       insights,
-      `organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -312,9 +315,10 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -361,9 +365,10 @@ void describe('insights query builder tests', () => {
     const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -404,9 +409,10 @@ void describe('insights query builder tests', () => {
     if (!args.dateFrom) return;
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -458,9 +464,10 @@ void describe('insights query builder tests', () => {
     if (!args.dateFrom) return;
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -512,9 +519,10 @@ void describe('insights query builder tests', () => {
     if (!args.dateFrom) return;
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -566,9 +574,10 @@ void describe('insights query builder tests', () => {
     if (!args.dateFrom) return;
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id
@@ -611,9 +620,10 @@ void describe('insights query builder tests', () => {
     if (!args.dateFrom) return;
     assertSql(
       insights,
-      `WITH organization_insights AS (SELECT i.*, campaign_id, ad_set_id, aa.type integration
+      `WITH organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
                                               FROM insights i
                                                        JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
                                                        JOIN ad_sets ase on a.ad_set_id = ase.id
                                                        JOIN campaigns c on ase.campaign_id = c.id
                                                        JOIN ad_accounts aa on c.ad_account_id = aa.id

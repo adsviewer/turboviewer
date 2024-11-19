@@ -23,6 +23,12 @@ export default function InsightsGrid(props: PropsType): ReactNode {
     return t('insight');
   };
 
+  const getInsightTitle = (insight: GroupedInsight): string => {
+    if (insight.creativeName) return insight.creativeName;
+    else if (insight.adName) return insight.adName;
+    return t('insight');
+  };
+
   return (
     <>
       {/* Loading */}
@@ -49,13 +55,15 @@ export default function InsightsGrid(props: PropsType): ReactNode {
                 <InsightCard
                   key={insight.id as Key}
                   heading={getInsightHeading(insight)}
-                  title={insight.adName ?? t('insight')}
+                  title={getInsightTitle(insight)}
                   description={insight.position}
                   device={insight.device}
                   currency={insight.currency}
                   publisher={insight.publisher}
                   datapoints={insight.datapoints}
                   iframe={insight.iFrame}
+                  creativeName={insight.creativeName}
+                  creativeId={insight.creativeId}
                   hideHeading={props.hideCardHeadings}
                 />
               </motion.div>

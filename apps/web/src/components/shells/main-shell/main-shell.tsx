@@ -102,6 +102,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     initialRequests.push(
       void getUserDetails()
         .then((res) => {
+          logger.info(res);
           setUserDetails(res);
           checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
         })

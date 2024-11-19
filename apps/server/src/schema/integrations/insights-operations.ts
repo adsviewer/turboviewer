@@ -153,6 +153,7 @@ const GroupedInsightDto = builder.simpleObject(
       adAccountId: t.string({ nullable: true }),
       adSetId: t.string({ nullable: true }),
       campaignId: t.string({ nullable: true }),
+      creativeId: t.string({ nullable: true }),
       currency: t.field({ type: CurrencyEnumDto, nullable: false }),
       device: t.field({ type: DeviceEnumDto, nullable: true }),
       publisher: t.field({ type: PublisherEnumDto, nullable: true }),
@@ -189,6 +190,12 @@ const GroupedInsightDto = builder.simpleObject(
         }
         return null;
       },
+    }),
+    creativeName: t.field({
+      type: 'String',
+      nullable: true,
+      resolve: async (root, _args, _ctx, _info) =>
+        root.creativeId ? (await prisma.creative.findUniqueOrThrow({ where: { id: root.creativeId } })).name : null,
     }),
     adSetName: t.field({
       type: 'String',
