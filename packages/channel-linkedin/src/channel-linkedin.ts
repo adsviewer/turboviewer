@@ -22,6 +22,7 @@ import {
   type ChannelAdAccount,
   type ChannelAdSet,
   type ChannelCampaign,
+  type ChannelCreative,
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
@@ -150,6 +151,14 @@ class LinkedIn implements ChannelInterface {
         adSets.filter((a) => a.adType === 'SPONSORED_MESSAGE').map((a) => a.externalId),
       );
       const adsWOSponsoredMsg = ads.filter((a) => !sponsoredMsgAdSets.has(a.externalAdSetId));
+      const creatives = ads.map(
+        (a) =>
+          ({
+            externalId: a.externalId,
+            name: a.name ?? '',
+            externalAdId: a.externalId,
+          }) satisfies ChannelCreative,
+      );
       await deleteOldInsights(dbAccount.id, range.since, range.until);
       await saveInsightsAdsAdsSetsCampaigns(
         campaigns,
@@ -159,7 +168,7 @@ class LinkedIn implements ChannelInterface {
         new Map<string, string>(),
         adsWOSponsoredMsg,
         new Map<string, string>(),
-        [],
+        creatives,
         analytics.insights,
       );
     }
