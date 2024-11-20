@@ -252,6 +252,11 @@ function Footer(): ReactNode {
                 </Link>
               </li>
               <li>
+                <Link href="/privacy-policy" className="hover:text-primary">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
                 <Link href="/#support" className="hover:text-primary">
                   {t('support')}
                 </Link>
