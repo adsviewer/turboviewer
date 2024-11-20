@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'adsViewer.io - Terms & Conditions',
 };
 
-function SupportPage(): ReactNode {
+function TermsAndConditionsPage(): ReactNode {
   return (
     <div className="flex w-full p-20 pt-40">
       <section className="text-justify">
@@ -116,4 +116,4 @@ function SupportPage(): ReactNode {
   );
 }
 
-export default SupportPage;
+export default TermsAndConditionsPage;
