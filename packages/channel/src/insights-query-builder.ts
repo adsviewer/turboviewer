@@ -4,6 +4,7 @@ import {
   type FilterInsightsInputType,
   type InsightsColumnsGroupByType,
   type InsightsSearchExpression,
+  InsightsSearchField,
   InsightsSearchOperator,
   type InsightsSearchTerm,
 } from '@repo/channel-utils';
@@ -119,18 +120,60 @@ export const searchAdsToSQL = (expression: InsightsSearchExpression): string => 
   return evaluatedExpr ? `AND ${evaluatedExpr}` : '';
 };
 
+export const getSearchFields = (expr?: InsightsSearchExpression | null): Set<InsightsSearchField> => {
+  if (!expr) {
+    return new Set<InsightsSearchField>();
+  }
+  const fields = new Set<InsightsSearchField>();
+  const evaluateTerm = (term: InsightsSearchTerm): void => {
+    fields.add(term.field);
+  };
+
+  const evaluateExpression = (expression: InsightsSearchExpression): void => {
+    if (expression.term) {
+      evaluateTerm(expression.term);
+    }
+    if (expression.and && expression.and.length !== 0) {
+      expression.and.forEach((subExpr) => {
+        evaluateExpression(subExpr);
+      });
+    }
+    if (expression.or && expression.or.length !== 0) {
+      expression.or.forEach((subExpr) => {
+        evaluateExpression(subExpr);
+      });
+    }
+  };
+
+  evaluateExpression(expr);
+  return fields;
+};
+
 export const getOrganizationalInsights = (
   organizationId: string,
   filter: FilterInsightsInputType,
   dataPointsPerInterval: number,
-): string =>
-  `organization_insights AS (SELECT i.*, campaign_id, creative_id, ad_set_id, aa.type integration
+): string => {
+  // ad table is needed if ad || creative || adSet || campaign is in groupBy or search
+  // creative table is needed if creative is in groupBy
+  // adSet table is needed if adSet || campaign is in groupBy or search
+  // campaign table is needed if campaign is in groupBy or search
+  /* eslint-disable @typescript-eslint/prefer-nullish-coalescing  -- fail the test */
+  const shouldIncludeAdTable =
+    filter.groupBy?.includes('adId') ||
+    filter.groupBy?.includes('adSetId') ||
+    filter.groupBy?.includes('creativeId') ||
+    filter.groupBy?.includes('campaignId') ||
+    getSearchFields(filter.search).has(InsightsSearchField.AdSetName) ||
+    getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ||
+    getSearchFields(filter.search).has(InsightsSearchField.AdName);
+  return `organization_insights AS (SELECT i.*, ${filter.groupBy?.includes('campaignId') ? 'campaign_id, ' : ''}${filter.groupBy?.includes('creativeId') ? 'creative_id, ' : ''}${filter.groupBy?.includes('adSetId') ? 'ad_set_id, ' : ''}aa.type integration
                                               FROM insights i
-                                                       JOIN ads a on i.ad_id = a.id
-                                                       JOIN creatives cr on cr.id = a.creative_id
-                                                       JOIN ad_sets ase on a.ad_set_id = ase.id
-                                                       JOIN campaigns c on ase.campaign_id = c.id
-                                                       JOIN ad_accounts aa on c.ad_account_id = aa.id
+                                                       ${shouldIncludeAdTable ? 'JOIN ads a on i.ad_id = a.id' : ''}
+                                                       ${filter.groupBy?.includes('creativeId') ? 'JOIN creatives cr on cr.id = a.creative_id' : ''}
+                                                       ${filter.groupBy?.includes('adSetId') || filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.AdSetName) || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ? 'JOIN ad_sets ase on a.ad_set_id = ase.id' : ''}
+                                                       ${filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ? 'JOIN campaigns c on ase.campaign_id = c.id' : ''}
+                                                       JOIN ad_accounts aa on i.ad_account_id = aa.id
                                                        JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
                                               WHERE ao."B" = '${organizationId}'
                                                 ${filter.search ? searchAdsToSQL(filter.search) : ''}
@@ -147,6 +190,7 @@ export const getOrganizationalInsights = (
                                                 ${filter.positions?.length ? `AND i.position IN (${filter.positions.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.publishers?.length ? `AND i.publisher IN (${filter.publishers.map((i) => `'${i}'`).join(', ')})` : ''}
                                               )`;
+};
 
 export const lastInterval = (
   group: string,
