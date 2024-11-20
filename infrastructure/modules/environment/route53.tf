@@ -113,17 +113,7 @@ resource "aws_route53_record" "google_verification" {
   ttl     = "300"
   records = [
     "v=spf1 include:_spf.google.com ~all",
-  ]
-}
-
-resource "aws_route53_record" "google_channel_verification" {
-  count   = var.environment == "prod" ? 1 : 0
-  zone_id = aws_route53_zone.zone.zone_id
-  name    = "google-site-verification"
-  type    = "TXT"
-  ttl     = "300"
-  records = [
-    "1xf8Fol-UNNngJFy4kgzgg_jx131Pr19XYsLyXB3vmQ",
+    "google-site-verification=1KzOXEjVdgax5iLB6UHcvAAP840fuVsE2P2H2OjvATg"
   ]
 }
 
