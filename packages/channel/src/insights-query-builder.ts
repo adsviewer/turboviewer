@@ -153,11 +153,23 @@ export const getOrganizationalInsights = (
   organizationId: string,
   filter: FilterInsightsInputType,
   dataPointsPerInterval: number,
-): string =>
+): string => {
+  // ad table is needed if ad || creative || adSet || campaign is in groupBy or search
+  // creative table is needed if creative is in groupBy
+  // adSet table is needed if adSet || campaign is in groupBy or search
+  // campaign table is needed if campaign is in groupBy or search
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing  -- fail the test */
-  `organization_insights AS (SELECT i.*, ${filter.groupBy?.includes('campaignId') ? 'campaign_id, ' : ''}${filter.groupBy?.includes('creativeId') ? 'creative_id, ' : ''}${filter.groupBy?.includes('adSetId') ? 'ad_set_id, ' : ''}aa.type integration
+  const shouldIncludeAdTable =
+    filter.groupBy?.includes('adId') ||
+    filter.groupBy?.includes('adSetId') ||
+    filter.groupBy?.includes('creativeId') ||
+    filter.groupBy?.includes('campaignId') ||
+    getSearchFields(filter.search).has(InsightsSearchField.AdSetName) ||
+    getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ||
+    getSearchFields(filter.search).has(InsightsSearchField.AdName);
+  return `organization_insights AS (SELECT i.*, ${filter.groupBy?.includes('campaignId') ? 'campaign_id, ' : ''}${filter.groupBy?.includes('creativeId') ? 'creative_id, ' : ''}${filter.groupBy?.includes('adSetId') ? 'ad_set_id, ' : ''}aa.type integration
                                               FROM insights i
-                                                       ${filter.groupBy?.includes('adId') || filter.groupBy?.includes('adSetId') || filter.groupBy?.includes('creativeId') || filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.AdSetName) || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) || getSearchFields(filter.search).has(InsightsSearchField.AdName) ? 'JOIN ads a on i.ad_id = a.id' : ''}
+                                                       ${shouldIncludeAdTable ? 'JOIN ads a on i.ad_id = a.id' : ''}
                                                        ${filter.groupBy?.includes('creativeId') ? 'JOIN creatives cr on cr.id = a.creative_id' : ''}
                                                        ${filter.groupBy?.includes('adSetId') || filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.AdSetName) || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ? 'JOIN ad_sets ase on a.ad_set_id = ase.id' : ''}
                                                        ${filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ? 'JOIN campaigns c on ase.campaign_id = c.id' : ''}
@@ -178,6 +190,7 @@ export const getOrganizationalInsights = (
                                                 ${filter.positions?.length ? `AND i.position IN (${filter.positions.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.publishers?.length ? `AND i.publisher IN (${filter.publishers.map((i) => `'${i}'`).join(', ')})` : ''}
                                               )`;
+};
 
 export const lastInterval = (
   group: string,
