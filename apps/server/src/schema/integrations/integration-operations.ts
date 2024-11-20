@@ -103,6 +103,21 @@ builder.mutationFields((t) => ({
       return authUrl;
     },
   }),
+  testPublish: t.withAuth({ isInOrg: true }).boolean({
+    args: {
+      type: t.arg({
+        type: IntegrationTypeDto,
+        required: true,
+      }),
+    },
+    resolve: (_root, args, ctx, _info) => {
+      pubSub.publish('organization:integration:new-integration', ctx.organizationId, {
+        id: 'hjrdtod92owx802rxcq92mzn',
+        type: args.type,
+      });
+      return true;
+    },
+  }),
 }));
 
 builder.subscriptionFields((t) => ({
@@ -115,8 +130,14 @@ builder.subscriptionFields((t) => ({
   newIntegration: t.withAuth({ isInOrg: true }).field({
     type: NewIntegrationEventDto,
     nullable: false,
-    resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => root,
-    subscribe: (_root, _args, ctx) => pubSub.subscribe('organization:integration:new-integration', ctx.organizationId),
+    resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => {
+      logger.info('New integration event received');
+      return root;
+    },
+    subscribe: (_root, _args, ctx) => {
+      logger.info('Subscribing to new integration event');
+      return pubSub.subscribe('organization:integration:new-integration', ctx.organizationId);
+    },
   }),
 }));
 

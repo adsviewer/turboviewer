@@ -694,6 +694,7 @@ type Mutation {
   subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
   switchTiers(organizationId: String!, tier: Tier!): Organization!
+  testPublish(type: IntegrationType!): Boolean
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!

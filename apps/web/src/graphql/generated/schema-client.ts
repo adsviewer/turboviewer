@@ -679,6 +679,7 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
+  testPublish?: Maybe<Scalars['Boolean']['output']>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
@@ -788,6 +789,10 @@ export type MutationSwitchOrganizationArgs = {
 export type MutationSwitchTiersArgs = {
   organizationId: Scalars['String']['input'];
   tier: Tier;
+};
+
+export type MutationTestPublishArgs = {
+  type: IntegrationType;
 };
 
 export type MutationUpdateOrganizationArgs = {

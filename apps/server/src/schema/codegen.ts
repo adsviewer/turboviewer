@@ -31,7 +31,7 @@ const config: CodegenConfig = {
     '../web/src/graphql/generated/schema-server.ts': {
       plugins: serverPlugins,
       config: serverConfig,
-      documents: ['../web/src/graphql/*.graphql', '!../web/src/graphql/subscriptions.graphql'],
+      documents: ['!../web/src/graphql/subscriptions.graphql', '../web/src/graphql/*.graphql'],
     },
     '../web/src/graphql/generated/schema-client.ts': {
       plugins: clientPlugins,
@@ -41,7 +41,7 @@ const config: CodegenConfig = {
     '../backoffice/src/graphql/generated/schema-server.ts': {
       plugins: serverPlugins,
       config: serverConfig,
-      documents: ['../backoffice/src/graphql/*.graphql', '!../web/src/graphql/subscriptions.graphql'],
+      documents: ['!../web/src/graphql/subscriptions.graphql', '../backoffice/src/graphql/*.graphql'],
     },
   },
   config: {
