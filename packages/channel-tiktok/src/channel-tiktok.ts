@@ -22,6 +22,7 @@ import {
   type ChannelAdAccount,
   type ChannelAdSet,
   type ChannelCampaign,
+  type ChannelCreative,
   type ChannelIFrame,
   type ChannelInsight,
   type ChannelInterface,
@@ -58,16 +59,18 @@ const insightsSchema = z.array(
   z.object({
     'Ad ID': z.string(),
     'Ad group ID': z.string(),
-    'Ad Group Name': z.string(),
-    'Ad Name': z.string(),
+    'Ad group name': z.string(),
+    'Ad name': z.string(),
     '﻿Campaign ID': z.string(),
     'Campaign name': z.string(),
-    Placements: z.nativeEnum(PlacementsEnum),
-    Date: z.coerce.date(),
+    'Call to action': z.string(),
+    'Clicks (destination)': z.coerce.number().int(),
+    Placement: z.nativeEnum(PlacementsEnum),
+    'By Day': z.coerce.date(),
     'Placements Types': z.string(),
-    Impression: z.coerce.number().int(),
+    Impressions: z.coerce.number().int(),
     Cost: z.coerce.number(),
-    'Clicks (Destination)': z.coerce.number().int(),
+    Text: z.string(),
   }),
 );
 
@@ -233,15 +236,16 @@ export class Tiktok implements ChannelInterface {
         metrics: [
           'ad_name',
           'ad_id',
+          'ad_text',
           'adgroup_id',
           'adgroup_name',
+          'call_to_action',
+          'clicks',
           'campaign_id',
           'campaign_name',
           'impressions',
           'placement_type',
           'spend',
-          'placement_type',
-          'clicks',
         ],
       }),
     });
@@ -541,38 +545,51 @@ export class Tiktok implements ChannelInterface {
       return new AError('Failed to parse report');
     }
 
-    const [insights, ads, adSets, campaigns] = parsed.data.reduce(
+    const [insights, creativeIds, ads, adSets, campaigns] = parsed.data.reduce(
       (acc, row) => {
         acc[0].push({
-          clicks: row['Clicks (Destination)'],
+          clicks: row['Clicks (destination)'],
           externalAdId: row['Ad ID'],
-          date: row.Date,
+          date: row['By Day'],
           externalAccountId: adAccount.externalId,
-          impressions: row.Impression,
+          impressions: row.Impressions,
           spend: Math.floor(row.Cost * 100),
           device: DeviceEnum.Unknown,
-          publisher: placementPublisherMap.get(row.Placements) ?? PublisherEnum.TikTok,
+          publisher: placementPublisherMap.get(row.Placement) ?? PublisherEnum.TikTok,
           position: row['Placements Types'],
         });
         acc[1].push({
+          title: row.Text,
+          externalAdId: row['Ad ID'],
+          externalId: row['Ad ID'],
+          name: row['Ad name'],
+          callToActionType: row['Call to action'],
+        });
+        acc[2].push({
           externalAdSetId: row['Ad group ID'],
           externalAdAccountId: adAccount.externalId,
           externalId: row['Ad ID'],
-          name: row['Ad Name'],
-        });
-        acc[2].push({
-          externalCampaignId: row['﻿Campaign ID'],
-          externalId: row['Ad group ID'],
-          name: row['Ad Group Name'],
+          name: row['Ad name'],
         });
         acc[3].push({
+          externalCampaignId: row['﻿Campaign ID'],
+          externalId: row['Ad group ID'],
+          name: row['Ad group name'],
+        });
+        acc[4].push({
           externalAdAccountId: adAccount.externalId,
           externalId: row['﻿Campaign ID'],
           name: row['Campaign name'],
         });
         return acc;
       },
-      [[] as ChannelInsight[], [] as ChannelAd[], [] as ChannelAdSet[], [] as ChannelCampaign[]],
+      [
+        [] as ChannelInsight[],
+        [] as ChannelCreative[],
+        [] as ChannelAd[],
+        [] as ChannelAdSet[],
+        [] as ChannelCampaign[],
+      ],
     );
     await saveInsightsAdsAdsSetsCampaigns(
       campaigns,
@@ -582,7 +599,7 @@ export class Tiktok implements ChannelInterface {
       externalAdSetToIdMap,
       ads,
       adExternalIdMap,
-      [],
+      creativeIds,
       insights,
     );
   };

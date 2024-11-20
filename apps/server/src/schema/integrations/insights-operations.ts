@@ -110,6 +110,45 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
+  fillCreatives: t.withAuth({ isAdmin: true }).field({
+    type: 'Boolean',
+    nullable: false,
+    args: {
+      integrationIds: t.arg.stringList({ required: false }),
+    },
+    resolve: async (_root, args, _ctx, _info) => {
+      const limit = 500;
+      let offset = 0;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition,no-constant-condition -- temporary
+      while (true) {
+        const ads = await prisma.ad.findMany({
+          take: limit,
+          skip: offset,
+          where: {
+            ...(args.integrationIds && { adAccount: { integrations: { some: { id: { in: args.integrationIds } } } } }),
+            creativeId: null,
+          },
+        });
+        await prisma.creative.createMany({
+          data: ads.map((ad) => ({
+            id: ad.id,
+            name: ad.name ?? '',
+            adAccountId: ad.adAccountId,
+            externalId: ad.externalId,
+          })),
+        });
+        for (const ad of ads) {
+          await prisma.ad.update({
+            where: { id: ad.id },
+            data: { creativeId: ad.id },
+          });
+        }
+        if (ads.length < limit) break;
+        offset += limit;
+      }
+      return true;
+    },
+  }),
 }));
 
 export const PaginationDto = builder.simpleInterface('Pagination', {
