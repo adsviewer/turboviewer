@@ -193,6 +193,12 @@ const saveTokens = async (
   ]);
   pubSub.publish('organization:integration:new-integration', organizationId, integration);
 
+  // Fire event for new integration to all subscribed entities
+  pubSub.publish('organization:integration:new-integration', organizationId, {
+    id: organizationId,
+    type,
+  });
+
   const decryptedIntegration = {
     ...integration,
     accessToken: tokens.accessToken,

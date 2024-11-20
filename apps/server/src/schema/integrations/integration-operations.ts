@@ -103,21 +103,6 @@ builder.mutationFields((t) => ({
       return authUrl;
     },
   }),
-  testPublish: t.withAuth({ isInOrg: true }).boolean({
-    args: {
-      type: t.arg({
-        type: IntegrationTypeDto,
-        required: true,
-      }),
-    },
-    resolve: (_root, args, ctx, _info) => {
-      pubSub.publish('organization:integration:new-integration', ctx.organizationId, {
-        id: 'hjrdtod92owx802rxcq92mzn',
-        type: args.type,
-      });
-      return true;
-    },
-  }),
 }));
 
 builder.subscriptionFields((t) => ({
@@ -131,7 +116,8 @@ builder.subscriptionFields((t) => ({
     type: NewIntegrationEventDto,
     nullable: false,
     resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => {
-      logger.info('New integration event received');
+      logger.info('New integration added event received');
+      // await removeUserMilestone(ctx.currentUserId, MilestoneEnum.Onboarding);
       return root;
     },
     subscribe: (_root, _args, ctx) => {

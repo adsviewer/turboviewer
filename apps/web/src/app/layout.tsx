@@ -15,7 +15,7 @@ import { TOKEN_KEY } from '@repo/utils';
 import React from 'react';
 import NotificationsHandler from '@/components/misc/notifications-handler';
 import { env } from '@/env.mjs';
-import { Subscriptions } from '@/app/subscriptions';
+import { AddIntegrationSubscription } from '@/app/subscriptions';
 import { UrqlProvider } from '@/app/urql-provider';
 
 export const metadata: Metadata = {
@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <MantineProvider defaultColorScheme="auto">
             <NotificationsHandler />
             <UrqlProvider token={token} acceptLanguage={acceptLanguageHeaderValue}>
-              <Subscriptions />
+              <AddIntegrationSubscription />
               {children}
             </UrqlProvider>
             <Analytics />

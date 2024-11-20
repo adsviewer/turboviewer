@@ -18,6 +18,7 @@ export interface ChannelInitialProgressPayload {
   progress: number;
 }
 
+// Subscription events
 export const pubSub = createPubSub<{
   'user:channel:initial-progress': [userId: string, payload: ChannelInitialProgressPayload];
   'organization:integration:new-integration': [organizationId: string, payload: NewIntegrationEvent];
