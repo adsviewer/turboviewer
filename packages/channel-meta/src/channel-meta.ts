@@ -1,4 +1,3 @@
-import { createHmac } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
 import {
   type AdAccount as DbAdAccount,
@@ -47,6 +46,7 @@ import {
   JobStatusEnum,
   markErrorIntegrationById,
   MetaError,
+  parseRequest,
   revokeIntegration,
   saveAccounts,
   saveInsightsAdsAdsSetsCampaigns,
@@ -162,7 +162,7 @@ class Meta implements ChannelInterface {
       res.status(400).send('Failed to parse sign out request');
       return;
     }
-    const userId = Meta.parseRequest(parsedBody.data.signed_request, env.FB_APPLICATION_SECRET);
+    const userId = parseRequest(parsedBody.data.signed_request, env.FB_APPLICATION_SECRET);
     if (isAError(userId)) {
       logger.error(userId.message);
       res.status(400).send(userId.message);
@@ -691,36 +691,6 @@ class Meta implements ChannelInterface {
       }
       return new AError(msg);
     }
-  }
-
-  private static parseRequest(signedRequest: string, secret: string): string | AError {
-    const [encodedSig, payload] = signedRequest.split('.');
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
-    const data = JSON.parse(Buffer.from(payload, 'base64').toString());
-    const signOutTokenSchema = z.object({
-      user_id: z.string(),
-      algorithm: z.literal('HMAC-SHA256'),
-      issued_at: z.number(),
-    });
-    const parsed = signOutTokenSchema.safeParse(data);
-    if (!parsed.success) {
-      return new AError('Failed to parse sign out token');
-    }
-    if (parsed.data.algorithm.toUpperCase() !== 'HMAC-SHA256')
-      return new AError('Failed to verify sign out token, wrong algorithm');
-
-    const hmac = createHmac('sha256', secret);
-    const encodedPayload = hmac
-      .update(payload)
-      .digest('base64')
-      .replace(/\//g, '_')
-      .replace(/\+/g, '-')
-      .replace(/={1,2}$/, '');
-
-    if (encodedSig !== encodedPayload) return new AError('Failed to verify sign out token');
-
-    return parsed.data.user_id;
   }
 
   private static async getExpireAt(accessToken: string): Promise<AError | Date> {

@@ -1,10 +1,9 @@
-import { createHmac } from 'node:crypto';
 import { URLSearchParams } from 'node:url';
 import { OAuth2Client } from 'google-auth-library';
 import {
   CurrencyEnum,
   type AdAccount as DbAdAccount,
-  type DeviceEnum,
+  DeviceEnum,
   type Integration,
   IntegrationTypeEnum,
   prisma,
@@ -20,12 +19,15 @@ import {
   type ChannelAd,
   type ChannelCreative,
   type ChannelIFrame,
+  type ChannelInsight,
   type ChannelInterface,
+  deleteOldInsights,
   type GenerateAuthUrlResp,
   getConnectedIntegrationByOrg,
   getIFrame,
   type JobStatusEnum,
   markErrorIntegrationById,
+  parseRequest,
   revokeIntegration,
   saveAccounts,
   saveInsightsAdsAdsSetsCampaigns,
@@ -44,8 +46,8 @@ import {
 
 const fireAndForget = new FireAndForget();
 
-const baseUrl = 'https://googleads.googleapis.com';
 const apiVersion = 'v18';
+const baseUrl = `https://googleads.googleapis.com/${apiVersion}`;
 
 interface GenericResponse<T> {
   requestId?: string;
@@ -98,7 +100,7 @@ class Google implements ChannelInterface {
   }
 
   async getUserId(accessToken: string): Promise<string | AError> {
-    const url = `${baseUrl}/v18/customers:listAccessibleCustomers`;
+    const url = `${baseUrl}/customers:listAccessibleCustomers`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -116,6 +118,8 @@ class Google implements ChannelInterface {
       return new AError('Failed to fetch user');
     }
 
+    if (parsed.data.resourceNames.length === 1) return parsed.data.resourceNames[0];
+
     const rightManagerId = await Google.findManagerAccount(accessToken, parsed.data.resourceNames);
 
     return rightManagerId;
@@ -129,7 +133,7 @@ class Google implements ChannelInterface {
       res.status(400).send('Failed to parse sign out request');
       return;
     }
-    const userId = Google.parseRequest(parsedBody.data.signed_request, env.GOOGLE_CHANNEL_APPLICATION_SECRET);
+    const userId = parseRequest(parsedBody.data.signed_request, env.GOOGLE_CHANNEL_APPLICATION_SECRET);
     if (isAError(userId)) {
       logger.error(userId.message);
       res.status(400).send(userId.message);
@@ -144,7 +148,7 @@ class Google implements ChannelInterface {
     if (!integration) return new AError('No integration found');
     if (isAError(integration)) return integration;
 
-    const refreshedIntegration = await this.refreshedIntegration(integration);
+    const refreshedIntegration = await Google.refreshedIntegration(integration);
     if (isAError(refreshedIntegration)) return refreshedIntegration;
 
     const revokeUrl = `https://oauth2.googleapis.com/revoke?token=${refreshedIntegration.accessToken}`;
@@ -189,17 +193,20 @@ class Google implements ChannelInterface {
       },
       body: params.toString(),
     }).catch(() => {
-      throw new AError(`Failed to refresh token`);
+      return new AError(`Failed to refresh token`);
     });
 
-    if (response instanceof Error) return response;
+    if (isAError(response)) {
+      return response;
+    }
 
     const tokenData: unknown = await response.json();
 
     const schema = z.object({
-      access_token: z.string(),
-      expires_in: z.number().int(),
-      scope: z.string(),
+      access_token: z.string().optional(),
+      expires_in: z.number().int().optional(),
+      scope: z.string().optional(),
+      error: z.string().optional(),
     });
 
     const parsed = schema.safeParse(tokenData);
@@ -208,20 +215,29 @@ class Google implements ChannelInterface {
       return new AError('Failed to parse refresh access token response');
     }
 
-    return await updateIntegrationTokens(integration, {
-      accessToken: parsed.data.access_token,
-      accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
-      refreshToken: integration.refreshToken,
-      refreshTokenExpiresAt: addInterval(new Date(), 'seconds', 7776000000),
-    });
+    if (parsed.data.access_token && parsed.data.expires_in) {
+      return await updateIntegrationTokens(integration, {
+        accessToken: parsed.data.access_token,
+        accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
+        refreshToken: integration.refreshToken,
+        refreshTokenExpiresAt: undefined,
+      });
+    }
+
+    if (parsed.data.error) {
+      const error = new Error(parsed.data.error);
+      if (await disConnectIntegrationOnError(integration.id, error, true)) return new AError('Invalid refresh token');
+    }
+
+    return new AError('Failed to refresh access token');
   }
 
-  async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
+  private static async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
     const expiresAt = integration.accessTokenExpiresAt;
 
-    const oneHourFromNow = addInterval(new Date(), 'seconds', 60 * 60);
+    const fiveMinsFromNow = addInterval(new Date(), 'seconds', 60 * 5);
 
-    if (expiresAt && expiresAt.getTime() < oneHourFromNow.getTime()) {
+    if (expiresAt && expiresAt.getTime() < fiveMinsFromNow.getTime()) {
       return await google.refreshAccessToken(integration);
     }
 
@@ -233,17 +249,10 @@ class Google implements ChannelInterface {
     dbAccount: DbAdAccount,
     initial: boolean,
   ): Promise<AError | undefined> {
-    if (!integration.refreshToken) return new AError('Refresh token is required');
-
     const ranges = await timeRanges(initial, dbAccount.id);
 
     for (const range of ranges) {
       try {
-        const refreshedIntegration = await this.refreshedIntegration(integration);
-        if (isAError(refreshedIntegration)) return refreshedIntegration;
-
-        const url = `${baseUrl}/${apiVersion}/customers/${dbAccount.externalId}/googleAds:search`;
-
         const videoQuery = `
       SELECT 
       video.id,
@@ -262,13 +271,18 @@ class Google implements ChannelInterface {
       campaign.id,
       campaign.name,
       
-      segments.ad_format_type
+      segments.device,
+      segments.date,
+
+      metrics.clicks,
+      metrics.impressions,
+      metrics.cost_micros 
   FROM video
       WHERE segments.date BETWEEN '${formatYYYMMDDDate(range.since)}' AND '${formatYYYMMDDDate(range.until)}'
     `;
 
         const youtubeData = await Google.handlePagination(
-          refreshedIntegration,
+          integration,
           videoQuery,
           videoAdResponseSchema,
           dbAccount.externalId,
@@ -292,11 +306,28 @@ class Google implements ChannelInterface {
           externalAdAccountId: dbAccount.externalId,
           externalId: c.adGroupAd.ad.id,
           externalAdSetId: String(c.adGroup.id),
+          name: c.video.title,
         }));
 
         const creatives: ChannelCreative[] = [];
 
-        for (const el of youtubeData) {
+        const uniqueExternalIds = [...new Set(youtubeData.map((c) => c.adGroupAd.ad.id))];
+
+        const adsWithoutCreatives = await prisma.ad.findMany({
+          where: {
+            externalId: { in: uniqueExternalIds },
+            creativeId: null,
+          },
+          select: {
+            externalId: true,
+          },
+        });
+
+        for (const externalId of adsWithoutCreatives) {
+          const el = youtubeData.find((c) => c.adGroupAd.ad.id === externalId.externalId);
+
+          if (!el) continue;
+
           if (el.adGroupAd.ad.videoResponsiveAd !== undefined) {
             const query = `
                   SELECT
@@ -309,28 +340,11 @@ class Google implements ChannelInterface {
                   asset.resource_name IN (${el.adGroupAd.ad.videoResponsiveAd.videos.map((c) => `'${c.asset}'`).join(',')})
               `;
 
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
-                'login-customer-id': integration.externalId,
-                Authorization: `Bearer ${refreshedIntegration.accessToken}`,
-              },
-              body: JSON.stringify({ query }),
-            }).catch(() => {
-              return new AError('Error fetching video ads');
-            });
+            const asset = await Google.handlePagination(integration, query, assetResponseSchema, dbAccount.externalId);
 
-            if (response instanceof Error) return response;
+            if (!asset || isAError(asset)) return;
 
-            const jsonResponse: unknown = await response.json();
-
-            const asset = assetResponseSchema.safeParse(jsonResponse);
-
-            if (!asset.data?.results) continue;
-
-            const flattenedCreatives: ChannelCreative[] = asset.data.results.map((c) => ({
+            const flattenedCreatives: ChannelCreative[] = asset.map((c) => ({
               externalAdId: el.adGroupAd.ad.id,
               externalId: c.asset.id,
               adAccountId: dbAccount.id,
@@ -338,13 +352,37 @@ class Google implements ChannelInterface {
               body: el.adGroupAd.ad.videoResponsiveAd?.descriptions?.[0].text,
               title: el.video.title,
               callToActionType: el.adGroupAd.ad.videoResponsiveAd?.callToActions?.[0].text,
-              imageUrl: c.asset.youtubeVideoAsset?.youtubeVideoId,
+              imageUrl: `https://youtube.com/watch?v=${c.asset.youtubeVideoAsset?.youtubeVideoId ?? ''}`,
             }));
 
             creatives.push(...flattenedCreatives);
           }
         }
 
+        const insights: ChannelInsight[] = youtubeData.map((el) => ({
+          clicks: Number(el.metrics.clicks),
+          impressions: Number(el.metrics.impressions),
+          spend: Number(el.metrics.costMicros) / 1000,
+          externalAdId: el.adGroupAd.ad.id,
+          date: new Date(el.segments.date),
+          externalAccountId: dbAccount.externalId,
+          device: el.segments.device
+            ? (Google.deviceEnumMap.get(el.segments.device) ?? DeviceEnum.Unknown)
+            : DeviceEnum.Unknown,
+          publisher: PublisherEnum.Google,
+          position: 'feed',
+        }));
+
+        const uniqueInsights = Array.from(
+          new Map(
+            insights.map((insight) => [
+              `${insight.externalAdId}-${insight.date.toISOString()}-${insight.device}-${insight.publisher}-${insight.position}`,
+              insight,
+            ]),
+          ).values(),
+        );
+
+        await deleteOldInsights(dbAccount.id, range.since, range.until);
         await saveInsightsAdsAdsSetsCampaigns(
           campaignGroup,
           new Map<string, string>(),
@@ -354,7 +392,11 @@ class Google implements ChannelInterface {
           ads,
           new Map<string, string>(),
           creatives,
-          [],
+          uniqueInsights,
+        );
+
+        logger.info(
+          `Finished ${range.since.toISOString()} - ${range.until.toISOString()} ad ingress for adAccountId: ${dbAccount.id}`,
         );
       } catch (err) {
         logger.error(err, 'GET CHANNEL DATA');
@@ -377,9 +419,6 @@ class Google implements ChannelInterface {
     });
 
     try {
-      const refreshedIntegration = await this.refreshedIntegration(integration);
-      if (isAError(refreshedIntegration)) return refreshedIntegration;
-
       const query = `
          SELECT
           ad_group_ad.ad.id,
@@ -390,7 +429,7 @@ class Google implements ChannelInterface {
         WHERE
           ad_group_ad.ad.id = '${externalId}'
       `;
-      const response = await Google.handlePagination(refreshedIntegration, query, responseSchema, adAccount.externalId);
+      const response = await Google.handlePagination(integration, query, responseSchema, adAccount.externalId);
 
       if (isAError(response)) return new AError('Error while fetching google ad');
 
@@ -424,15 +463,7 @@ class Google implements ChannelInterface {
   }
 
   async saveAdAccounts(integration: Integration): Promise<DbAdAccount[] | AError> {
-    const delay = (ms: number): Promise<void> =>
-      new Promise((resolve) => {
-        setTimeout(resolve, ms);
-      });
-    const refreshedIntegration = await this.refreshedIntegration(integration);
-
-    if (isAError(refreshedIntegration)) return refreshedIntegration;
-
-    const defaultQuery = `
+    const customerQuery = `
     SELECT
       customer_client.client_customer,
       customer_client.descriptive_name
@@ -441,7 +472,7 @@ class Google implements ChannelInterface {
     WHERE customer_client.status = 'ENABLED'
   `;
 
-    const response = await Google.handlePagination(refreshedIntegration, defaultQuery, defaultQueryResponseSchema);
+    const response = await Google.handlePagination(integration, customerQuery, defaultQueryResponseSchema);
 
     if (isAError(response)) return new AError('Error fetching google customers');
 
@@ -459,7 +490,7 @@ class Google implements ChannelInterface {
         `;
 
       const currencyCode = await Google.handlePagination(
-        refreshedIntegration,
+        integration,
         currencyCodeQuery,
         customerQueryResponseSchema,
         customer.customerClient.clientCustomer.split('/')[1],
@@ -477,8 +508,6 @@ class Google implements ChannelInterface {
       };
 
       updatedCustomers.push(updatedCustomerClient);
-
-      await delay(100);
     }
 
     const accountSchema = z.array(
@@ -534,7 +563,10 @@ class Google implements ChannelInterface {
     customerId?: string,
     _parseCallback?: (result: z.infer<U>) => T,
   ): Promise<AError | GenericResponse<T>['results']> {
-    const url = `${baseUrl}/${apiVersion}/customers/${customerId ?? integration.externalId}/googleAds:search`;
+    const refreshedIntegration = await Google.refreshedIntegration(integration);
+    if (isAError(refreshedIntegration)) return refreshedIntegration;
+
+    const url = `${baseUrl}/customers/${customerId ?? integration.externalId}/googleAds:search`;
     const baseHeaders = {
       'Content-Type': 'application/json',
       'developer-token': env.GOOGLE_CHANNEL_DEVELOPER_TOKEN,
@@ -565,7 +597,6 @@ class Google implements ChannelInterface {
       const adsResponse: unknown = await response.json();
       if (isAError(adsResponse)) return res;
       const validatedResponse = schema.parse(adsResponse);
-
       if (validatedResponse.results) {
         res.push(...validatedResponse.results);
       }
@@ -576,9 +607,15 @@ class Google implements ChannelInterface {
     return res;
   }
 
+  private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([
+    ['MOBILE_APP', DeviceEnum.MobileApp],
+    ['MOBILE_WEB', DeviceEnum.MobileWeb],
+    ['DESKTOP_WEB', DeviceEnum.Desktop],
+  ]);
+
   private static async findManagerAccount(accessToken: string, customerIds: string[]): Promise<string | AError> {
     for (const customerId of customerIds) {
-      const url = `${baseUrl}/v18/customers/${customerId.split('/')[1]}/googleAds:search`;
+      const url = `${baseUrl}/customers/${customerId.split('/')[1]}/googleAds:search`;
 
       const query = `
         SELECT
@@ -610,7 +647,7 @@ class Google implements ChannelInterface {
       if (validatedResponse.results) {
         const managers = validatedResponse.results
           .map((result) => result.customerClient)
-          .filter((custoemer) => custoemer.manager)
+          .filter((customer) => customer.manager)
           .map((customer) => ({
             customerId: customer.clientCustomer.replace('customers/', ''),
             descriptiveName: customer.descriptiveName,
@@ -623,43 +660,14 @@ class Google implements ChannelInterface {
     return new AError('No manager account found');
   }
 
-  private static parseRequest(signedRequest: string, secret: string): string | AError {
-    const [encodedSig, payload] = signedRequest.split('.');
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
-    const data = JSON.parse(Buffer.from(payload, 'base64').toString());
-    const signOutTokenSchema = z.object({
-      user_id: z.string(),
-      algorithm: z.literal('HMAC-SHA256'),
-      issued_at: z.number(),
-    });
-    const parsed = signOutTokenSchema.safeParse(data);
-    if (!parsed.success) {
-      return new AError('Failed to parse sign out token');
-    }
-    if (parsed.data.algorithm.toUpperCase() !== 'HMAC-SHA256')
-      return new AError('Failed to verify sign out token, wrong algorithm');
-
-    const hmac = createHmac('sha256', secret);
-    const encodedPayload = hmac
-      .update(payload)
-      .digest('base64')
-      .replace(/\//g, '_')
-      .replace(/\+/g, '-')
-      .replace(/={1,2}$/, '');
-
-    if (encodedSig !== encodedPayload) return new AError('Failed to verify sign out token');
-
-    return parsed.data.user_id;
-  }
-
   getType(): IntegrationTypeEnum {
     return IntegrationTypeEnum.GOOGLE;
   }
 }
 
 const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
-  if (error.message === 'invalid_token') {
+  // console.log(error.message, 'THIS IS ERROR')
+  if (error.message === 'invalid_grant') {
     await markErrorIntegrationById(integrationId, notify);
     return true;
   }

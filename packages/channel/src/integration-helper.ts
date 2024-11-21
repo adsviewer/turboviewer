@@ -129,7 +129,6 @@ const completeIntegration = async (
     logger.error(e, 'Failed to save tokens to database');
     return new AError('Failed to save tokens to database');
   });
-
   if (isAError(decryptedIntegration)) return decryptedIntegration;
 
   fireAndForget.add(async () => await invokeChannelIngress(false, [decryptedIntegration.id]));
@@ -179,11 +178,6 @@ const saveTokens = async (
     status: IntegrationStatus.CONNECTED,
     organizationId,
   };
-
-  integrationData.accessTokenExpiresAt = new Date(tokens.accessTokenExpiresAt ?? new Date());
-  integrationData.refreshTokenExpiresAt = tokens.refreshTokenExpiresAt
-    ? new Date(tokens.refreshTokenExpiresAt)
-    : undefined;
 
   const [integration] = await Promise.all([
     prisma.integration.upsert({

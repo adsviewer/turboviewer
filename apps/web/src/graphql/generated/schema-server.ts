@@ -913,6 +913,7 @@ export enum PublisherEnum {
   TikTok = 'TikTok',
   GlobalAppBundle = 'GlobalAppBundle',
   Pangle = 'Pangle',
+  Google = 'Google',
   Unknown = 'Unknown',
 }
 

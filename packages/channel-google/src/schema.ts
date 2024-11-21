@@ -65,12 +65,25 @@ const campaignSchema = z.object({
   id: z.string(),
 });
 
+const metricsSchema = z.object({
+  clicks: z.string(),
+  impressions: z.string(),
+  costMicros: z.string(),
+});
+
+const segmentsSchema = z.object({
+  date: z.string(),
+  device: z.string(),
+});
+
 export const videoAdResponseSchema = createCommonResponseSchema(
   z.object({
     video: videoSchema,
     adGroupAd: youtubeAdGroupAdSchema,
     adGroup: adGroupSchema,
     campaign: campaignSchema,
+    metrics: metricsSchema,
+    segments: segmentsSchema,
   }),
 );
 
@@ -78,7 +91,7 @@ const customerClientSchema = z.object({
   resourceName: z.string().optional(),
   clientCustomer: z.string(),
   manager: z.boolean().optional(),
-  descriptiveName: z.string(),
+  descriptiveName: z.string().optional(),
 });
 
 export const defaultQueryResponseSchema = createCommonResponseSchema(
