@@ -554,19 +554,7 @@ class LinkedIn implements ChannelInterface {
         id: z.number().int(),
         name: z.string(),
         campaignGroup: z.string(),
-        format: z.enum([
-          'CAROUSEL',
-          'FOLLOW_COMPANY',
-          'JOBS',
-          'SINGLE_VIDEO',
-          'SPONSORED_INMAIL',
-          'SPONSORED_MESSAGE',
-          'SPONSORED_UPDATE_EVENT',
-          'SPOTLIGHT',
-          'STANDARD_UPDATE',
-          'TEXT_AD',
-          'UNSUPPORTED',
-        ]),
+        format: z.string(),
       }),
     );
     if (isAError(campaigns)) return campaigns;
