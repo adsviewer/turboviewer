@@ -115,8 +115,12 @@ builder.subscriptionFields((t) => ({
   newIntegration: t.withAuth({ isInOrg: true }).field({
     type: NewIntegrationEventDto,
     nullable: false,
-    resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => root,
-    subscribe: (_root, _args, ctx) => pubSub.subscribe('organization:integration:new-integration', ctx.organizationId),
+    resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => {
+      return root;
+    },
+    subscribe: (_root, _args, ctx) => {
+      return pubSub.subscribe('organization:integration:new-integration', ctx.organizationId);
+    },
   }),
 }));
 

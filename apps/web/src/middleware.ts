@@ -99,6 +99,13 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(signInUrl);
   }
 
+  // (Introduction only) If user is attempting to visit the introduction page without the "Onboarding" milestone,
+  // redirect to default home page
+  if (request.nextUrl.pathname === ONBOARDING_PATH && tokenData && !isUserOnboarding(tokenData)) {
+    const redirectUrl = getDefaultRedirectURL(request, tokenData);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // (Insights only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
     let newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
