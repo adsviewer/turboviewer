@@ -116,12 +116,9 @@ builder.subscriptionFields((t) => ({
     type: NewIntegrationEventDto,
     nullable: false,
     resolve: (root: NewIntegrationEvent, _args, _ctx, _info) => {
-      logger.info('New integration added event received');
-      // await removeUserMilestone(ctx.currentUserId, MilestoneEnum.Onboarding);
       return root;
     },
     subscribe: (_root, _args, ctx) => {
-      logger.info('Subscribing to new integration event');
       return pubSub.subscribe('organization:integration:new-integration', ctx.organizationId);
     },
   }),
