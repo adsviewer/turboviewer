@@ -202,12 +202,20 @@ class Google implements ChannelInterface {
 
     const tokenData: unknown = await response.json();
 
+    const errorSchema = z.object({ error: z.string(), error_description: z.string() });
     const schema = z.object({
-      access_token: z.string().optional(),
-      expires_in: z.number().int().optional(),
-      scope: z.string().optional(),
-      error: z.string().optional(),
+      access_token: z.string(),
+      expires_in: z.number().int(),
+      scope: z.string(),
     });
+
+    const errorParsed = errorSchema.safeParse(tokenData);
+    if (errorParsed.success) {
+      if (errorParsed.data.error_description === 'Token has been expired or revoked') {
+        await markErrorIntegrationById(integration.id, true);
+      }
+      return new AError(`Failed to refresh token: ${errorParsed.data.error_description}`);
+    }
 
     const parsed = schema.safeParse(tokenData);
     if (!parsed.success) {
@@ -215,21 +223,11 @@ class Google implements ChannelInterface {
       return new AError('Failed to parse refresh access token response');
     }
 
-    if (parsed.data.access_token && parsed.data.expires_in) {
-      return await updateIntegrationTokens(integration, {
-        accessToken: parsed.data.access_token,
-        accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
-        refreshToken: integration.refreshToken,
-        refreshTokenExpiresAt: undefined,
-      });
-    }
-
-    if (parsed.data.error) {
-      const error = new Error(parsed.data.error);
-      if (await disConnectIntegrationOnError(integration.id, error, true)) return new AError('Invalid refresh token');
-    }
-
-    return new AError('Failed to refresh access token');
+    return await updateIntegrationTokens(integration, {
+      accessToken: parsed.data.access_token,
+      accessTokenExpiresAt: addInterval(new Date(), 'seconds', parsed.data.expires_in),
+      refreshToken: integration.refreshToken,
+    });
   }
 
   private static async refreshedIntegration(integration: Integration): Promise<Integration | AError> {
