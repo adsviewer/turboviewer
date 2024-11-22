@@ -91,8 +91,8 @@ module "environment" {
   endpoint_interface_security_group_id = module.workspace.endpoint_interface_security_group_id
   fb_application_id                    = var.fb_application_id
   fb_application_secret                = var.fb_application_secret
-  google_application_id                = var.google_application_id
-  google_application_secret            = var.google_application_secret
+  google_login_application_id          = var.google_application_id
+  google_login_application_secret      = var.google_application_secret
   google_channel_application_id        = var.google_channel_application_id
   google_channel_application_secret    = var.google_channel_application_secret
   linkedin_application_id              = var.linkedin_application_id

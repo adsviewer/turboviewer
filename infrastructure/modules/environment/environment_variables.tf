@@ -33,10 +33,10 @@ variable "fb_application_secret" {
   type = string
 }
 
-variable "google_application_id" {
+variable "google_login_application_id" {
   type = string
 }
-variable "google_application_secret" {
+variable "google_login_application_secret" {
   type = string
 }
 
