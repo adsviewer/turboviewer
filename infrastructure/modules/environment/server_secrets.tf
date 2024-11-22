@@ -9,8 +9,6 @@ locals {
     "slack_webhook_url_public_feedback" : var.slack_webhook_url_public_feedback,
     "google_login_application_id" : var.google_login_application_id,
     "google_login_application_secret" : var.google_login_application_secret,
-    "google_application_id" : var.google_login_application_id,
-    "google_application_secret" : var.google_login_application_secret,
     "google_channel_application_id" : var.google_channel_application_id,
     "google_channel_developer_token" : var.google_channel_developer_token,
     "google_channel_application_secret" : var.google_channel_application_secret,
