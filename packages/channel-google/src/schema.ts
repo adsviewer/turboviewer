@@ -52,6 +52,7 @@ const youtubeAdSchema = z.object({
 
 const youtubeAdGroupAdSchema = z.object({
   resourceName: z.string(),
+  status: z.string().optional(),
   ad: youtubeAdSchema,
 });
 

@@ -257,6 +257,7 @@ class Google implements ChannelInterface {
       video.title,
       video.duration_millis,
       
+      ad_group_ad.status,
       ad_group_ad.ad.id,
       ad_group_ad.ad.name,
       ad_group_ad.ad.video_responsive_ad.call_to_actions,
@@ -348,6 +349,7 @@ class Google implements ChannelInterface {
               adAccountId: dbAccount.id,
               name: c.asset.resourceName,
               body: el.adGroupAd.ad.videoResponsiveAd?.descriptions?.[0].text,
+              status: el.adGroupAd.status,
               title: el.video.title,
               callToActionType: el.adGroupAd.ad.videoResponsiveAd?.callToActions?.[0].text,
               imageUrl: `https://youtube.com/watch?v=${c.asset.youtubeVideoAsset?.youtubeVideoId ?? ''}`,
