@@ -46,6 +46,9 @@ variable "google_channel_application_id" {
 variable "google_channel_application_secret" {
   type = string
 }
+variable "google_channel_developer_token" {
+  type = string
+}
 
 variable "git_repository" {
   type = string

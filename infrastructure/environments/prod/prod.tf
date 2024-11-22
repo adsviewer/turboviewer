@@ -95,6 +95,7 @@ module "environment" {
   google_login_application_secret      = var.google_application_secret
   google_channel_application_id        = var.google_channel_application_id
   google_channel_application_secret    = var.google_channel_application_secret
+  google_channel_developer_token       = var.google_channel_developer_token
   linkedin_application_id              = var.linkedin_application_id
   linkedin_application_secret          = var.linkedin_application_secret
   git_repository                       = local.git_repository
