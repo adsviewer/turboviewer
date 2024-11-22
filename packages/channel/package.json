@@ -25,6 +25,7 @@
     "@aws-sdk/client-batch": "^3.684.0",
     "@aws-sdk/client-sqs": "^3.682.0",
     "@repo/backend-shared": "workspace:*",
+    "@repo/channel-google": "workspace:*",
     "@repo/channel-linkedin": "workspace:*",
     "@repo/channel-meta": "workspace:*",
     "@repo/channel-tiktok": "workspace:*",

@@ -1,0 +1,40 @@
+{
+  "name": "@repo/channel-google",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENCED",
+  "description": "Google channel business logic",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "exports": {
+    "javascript": "./dist/index.js",
+    "default": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
+    "prettier": "prettier . --check",
+    "prettier:fix": "prettier . --write",
+    "clean": "rm -rf .turbo .next node_modules dist",
+    "update": "pnpm update --latest"
+  },
+  "dependencies": {
+    "@repo/channel-utils": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "google-ads-api": "17.1.0-rest-beta",
+    "google-auth-library": "^9.14.1",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2"
+  }
+}
