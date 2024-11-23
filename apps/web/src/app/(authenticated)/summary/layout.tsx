@@ -1,7 +1,6 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Title } from '@mantine/core';
-import LoaderCentered from '@/components/misc/loader-centered';
 
 export default function SummaryLayout({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('summary');
@@ -9,7 +8,7 @@ export default function SummaryLayout({ children }: { children: React.ReactNode 
   return (
     <>
       <Title mb="md">{t('title')}</Title>
-      <Suspense fallback={<LoaderCentered />}>{children}</Suspense>
+      {children}
     </>
   );
 }
