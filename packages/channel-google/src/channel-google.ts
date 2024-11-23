@@ -8,6 +8,7 @@ import {
   IntegrationTypeEnum,
   prisma,
   PublisherEnum,
+  IntegrationStatus,
 } from '@repo/database';
 import { addInterval, AError, FireAndForget, formatYYYMMDDDate, isAError } from '@repo/utils';
 import { z, type ZodSchema, type ZodTypeAny } from 'zod';
@@ -26,7 +27,7 @@ import {
   getConnectedIntegrationByOrg,
   getIFrame,
   type JobStatusEnum,
-  markErrorIntegrationById,
+  markStatusIntegrationById,
   parseRequest,
   revokeIntegration,
   saveAccounts,
@@ -62,6 +63,8 @@ const client = new OAuth2Client(
   env.GOOGLE_CHANNEL_APPLICATION_SECRET,
   `${env.API_ENDPOINT}${authEndpoint}`,
 );
+
+const tokenHasBeenExpiredOrRevoked = 'Token has been expired or revoked.';
 
 class Google implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
@@ -149,7 +152,10 @@ class Google implements ChannelInterface {
     if (isAError(integration)) return integration;
 
     const refreshedIntegration = await Google.refreshedIntegration(integration);
-    if (isAError(refreshedIntegration)) return refreshedIntegration;
+    if (isAError(refreshedIntegration)) {
+      if (refreshedIntegration.message === tokenHasBeenExpiredOrRevoked) return integration.externalId;
+      return refreshedIntegration;
+    }
 
     const revokeUrl = `https://oauth2.googleapis.com/revoke?token=${refreshedIntegration.accessToken}`;
 
@@ -167,7 +173,7 @@ class Google implements ChannelInterface {
     if (!response.ok) {
       const error = new Error('De-authorization request failed');
       logger.error({ response }, 'De-authorization request failed');
-      if (await disConnectIntegrationOnError(integration.id, error, false)) {
+      if (await disConnectIntegrationOnError(integration.id, error)) {
         return integration.externalId;
       }
       return error;
@@ -211,8 +217,8 @@ class Google implements ChannelInterface {
 
     const errorParsed = errorSchema.safeParse(tokenData);
     if (errorParsed.success) {
-      if (errorParsed.data.error_description === 'Token has been expired or revoked') {
-        await markErrorIntegrationById(integration.id, true);
+      if (errorParsed.data.error_description === tokenHasBeenExpiredOrRevoked) {
+        await markStatusIntegrationById(integration.id, IntegrationStatus.REVOKED);
       }
       return new AError(`Failed to refresh token: ${errorParsed.data.error_description}`);
     }
@@ -665,10 +671,10 @@ class Google implements ChannelInterface {
   }
 }
 
-const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
+const disConnectIntegrationOnError = async (integrationId: string, error: Error): Promise<boolean> => {
   // console.log(error.message, 'THIS IS ERROR')
   if (error.message === 'invalid_grant') {
-    await markErrorIntegrationById(integrationId, notify);
+    await markStatusIntegrationById(integrationId, IntegrationStatus.ERRORED);
     return true;
   }
   return false;
