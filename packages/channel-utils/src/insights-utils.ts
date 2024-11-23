@@ -166,8 +166,10 @@ export const saveCreatives = async (
   const uniqueCreatives = _.uniqBy(creatives, (creative) => creative.externalId);
   logger.info('Saving %d creatives', uniqueCreatives.length);
   await Promise.all(
-    uniqueCreatives.map((creative) =>
-      prisma.creative.upsert({
+    uniqueCreatives.map((creative) => {
+      const adId = adExternalIdMap.get(creative.externalAdId);
+      if (!adId) return null;
+      return prisma.creative.upsert({
         where: { externalId_adAccountId: { externalId: creative.externalId, adAccountId } },
         create: {
           externalId: creative.externalId,
@@ -178,7 +180,7 @@ export const saveCreatives = async (
           status: creative.status,
           callToActionType: creative.callToActionType,
           imageUrl: creative.imageUrl,
-          ads: { connect: { id: adExternalIdMap.get(creative.externalAdId) ?? '' } },
+          ads: { connect: { id: adId } },
         },
         update: {
           name: creative.name,
@@ -187,10 +189,10 @@ export const saveCreatives = async (
           status: creative.status,
           callToActionType: creative.callToActionType,
           imageUrl: creative.imageUrl,
-          ads: { connect: { id: adExternalIdMap.get(creative.externalAdId) ?? '' } },
+          ads: { connect: { id: adId } },
         },
-      }),
-    ),
+      });
+    }),
   );
 };
 
