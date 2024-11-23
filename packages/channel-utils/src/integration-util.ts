@@ -1,9 +1,7 @@
-import { createHmac } from 'node:crypto';
 import type { Integration, IntegrationTypeEnum } from '@repo/database';
 import { IntegrationStatus, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
-import { z } from 'zod';
 import { env } from './config';
 import { decryptAesGcm, encryptAesGcm } from './aes-util';
 import { type AdAccountIntegration } from './insights-utils';
@@ -199,34 +197,4 @@ export const updateIntegrationTokens = async (
   integration.refreshTokenExpiresAt = tokens.refreshTokenExpiresAt ?? null;
 
   return integration;
-};
-
-export const parseRequest = (signedRequest: string, secret: string): string | AError => {
-  const [encodedSig, payload] = signedRequest.split('.');
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Will check with zod
-  const data = JSON.parse(Buffer.from(payload, 'base64').toString());
-  const signOutTokenSchema = z.object({
-    user_id: z.string(),
-    algorithm: z.literal('HMAC-SHA256'),
-    issued_at: z.number(),
-  });
-  const parsed = signOutTokenSchema.safeParse(data);
-  if (!parsed.success) {
-    return new AError('Failed to parse sign out token');
-  }
-  if (parsed.data.algorithm.toUpperCase() !== 'HMAC-SHA256')
-    return new AError('Failed to verify sign out token, wrong algorithm');
-
-  const hmac = createHmac('sha256', secret);
-  const encodedPayload = hmac
-    .update(payload)
-    .digest('base64')
-    .replace(/\//g, '_')
-    .replace(/\+/g, '-')
-    .replace(/={1,2}$/, '');
-
-  if (encodedSig !== encodedPayload) return new AError('Failed to verify sign out token');
-
-  return parsed.data.user_id;
 };

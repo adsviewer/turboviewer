@@ -793,7 +793,6 @@ enum PublisherEnum {
   TikTok
   GlobalAppBundle
   Pangle
-  Google
   Unknown
 }
 

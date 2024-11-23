@@ -18,8 +18,8 @@ interface GoogleJwtPayload extends JwtPayload {
 }
 
 const client = new OAuth2Client(
-  env.GOOGLE_LOGIN_APPLICATION_ID,
-  env.GOOGLE_LOGIN_APPLICATION_SECRET,
+  env.GOOGLE_APPLICATION_ID,
+  env.GOOGLE_APPLICATION_SECRET,
   `${env.API_ENDPOINT}${authLoginEndpoint}`,
 );
 
