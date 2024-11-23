@@ -178,6 +178,7 @@ const saveTokens = async (
     status: IntegrationStatus.CONNECTED,
     organizationId,
   };
+
   const [integration] = await Promise.all([
     prisma.integration.upsert({
       create: integrationData,
