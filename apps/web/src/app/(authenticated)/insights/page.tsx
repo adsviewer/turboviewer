@@ -1,12 +1,11 @@
 'use client';
 
-import { type ReactNode, Suspense, use, useEffect, useState } from 'react';
+import { type ReactNode, use, useEffect, useState } from 'react';
 import { Box, Flex } from '@mantine/core';
 import { logger } from '@repo/logger';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { notifications } from '@mantine/notifications';
-import LoaderCentered from '@/components/misc/loader-centered';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import InsightsGrid from '../../../components/insights/insights-grid';
@@ -53,12 +52,10 @@ export default function Insights(props: InsightsProps): ReactNode {
     <Box pos="relative">
       <Graphics />
       <OrderFilters />
-      <Suspense fallback={<LoaderCentered type="dots" />}>
-        <Flex direction="column">
-          <InsightsGrid insights={insights} isPending={isPending} />
-          <PageControls />
-        </Flex>
-      </Suspense>
+      <Flex direction="column">
+        <InsightsGrid insights={insights} isPending={isPending} />
+        <PageControls />
+      </Flex>
     </Box>
   );
 }
