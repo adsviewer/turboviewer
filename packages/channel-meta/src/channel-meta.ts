@@ -4,6 +4,7 @@ import {
   CurrencyEnum,
   DeviceEnum,
   type Integration,
+  IntegrationStatus,
   IntegrationTypeEnum,
   prisma,
   PublisherEnum,
@@ -44,7 +45,7 @@ import {
   getIFrameAdFormat,
   isMetaAdPosition,
   JobStatusEnum,
-  markErrorIntegrationById,
+  markStatusIntegrationById,
   MetaError,
   parseRequest,
   revokeIntegration,
@@ -211,7 +212,7 @@ class Meta implements ChannelInterface {
         parsed.data.error.fbtrace_id,
       );
       logger.error(metaError, 'De-authorization request failed');
-      if (await disConnectIntegrationOnError(integration.id, metaError, false)) {
+      if (await disConnectIntegrationOnError(integration.id, metaError)) {
         return integration.externalId;
       }
       return metaError;
@@ -687,7 +688,7 @@ class Meta implements ChannelInterface {
       const msg = 'Failed to complete fb sdk call';
       logger.error(error, msg);
       if (error instanceof Error) {
-        await disConnectIntegrationOnError(integration.id, error, true);
+        await disConnectIntegrationOnError(integration.id, error);
       }
       return new AError(msg);
     }
@@ -734,7 +735,7 @@ class Meta implements ChannelInterface {
   }
 }
 
-const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
+const disConnectIntegrationOnError = async (integrationId: string, error: Error): Promise<boolean> => {
   const metaErrorValidatingAccessTokenChangedSession =
     'Error validating access token: The session has been invalidated because the user changed their password or Facebook has changed the session for security reasons.';
   const metaErrorNotAuthenticated = 'Error validating access token: The user has not authorized application';
@@ -745,7 +746,7 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
     error.message === metaErrorFollowInstructions ||
     error.message.startsWith(metaErrorNotAuthenticated)
   ) {
-    await markErrorIntegrationById(integrationId, notify);
+    await markStatusIntegrationById(integrationId, IntegrationStatus.ERRORED);
     return true;
   }
   return false;

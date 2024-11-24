@@ -5,6 +5,7 @@ import {
   CurrencyEnum,
   DeviceEnum,
   type Integration,
+  IntegrationStatus,
   IntegrationTypeEnum,
   prisma,
   PublisherEnum,
@@ -31,7 +32,7 @@ import {
   getConnectedIntegrationByOrg,
   getIFrame,
   JobStatusEnum,
-  markErrorIntegrationById,
+  markStatusIntegrationById,
   saveAccounts,
   saveInsightsAdsAdsSetsCampaigns,
   timeRanges,
@@ -114,7 +115,7 @@ class LinkedIn implements ChannelInterface {
       const json = await response.json();
       const error = LinkedIn.parseDeAuthRequest(json);
       logger.error(error, 'De-authorization request failed');
-      if (await disConnectIntegrationOnError(refreshedIntegration.id, error, false)) {
+      if (await disConnectIntegrationOnError(refreshedIntegration.id, error)) {
         return refreshedIntegration.externalId;
       }
       return error;
@@ -443,7 +444,7 @@ class LinkedIn implements ChannelInterface {
   ): Promise<AError | { next: { rel: string; href: string } | undefined; elements: T[] }> {
     const response = await responseP.catch(async (error: unknown) => {
       if (error instanceof Error) {
-        await disConnectIntegrationOnError(integrationId, error, true);
+        await disConnectIntegrationOnError(integrationId, error);
       }
       logger.error(error, 'Failed to fetch data in parseLinkedInResponse');
       return new AError('Failed to fetch data');
@@ -471,7 +472,7 @@ class LinkedIn implements ChannelInterface {
         return new AError('Unknown linkedIn error');
       }
       if (['EXPIRED_ACCESS_TOKEN', 'REVOKED_ACCESS_TOKEN'].includes(parsed.data.code)) {
-        await disConnectIntegrationOnError(integrationId, new Error(parsed.data.message), true);
+        await disConnectIntegrationOnError(integrationId, new Error(parsed.data.message));
         return new AError('Expired access token');
       }
       if (parsed.data.code === 'UNSUPPORTED_CREATIVE_TYPE') {
@@ -624,7 +625,7 @@ class LinkedIn implements ChannelInterface {
   }
 }
 
-const disConnectIntegrationOnError = async (integrationId: string, error: Error, notify: boolean): Promise<boolean> => {
+const disConnectIntegrationOnError = async (integrationId: string, error: Error): Promise<boolean> => {
   const revocableMessages = [
     'Empty oauth2 access token',
     'The token used in the request has been revoked by the user',
@@ -632,7 +633,7 @@ const disConnectIntegrationOnError = async (integrationId: string, error: Error,
     'The provided authorization grant or refresh token is invalid, expired or revoked.',
   ];
   if (revocableMessages.includes(error.message)) {
-    await markErrorIntegrationById(integrationId, notify);
+    await markStatusIntegrationById(integrationId, IntegrationStatus.ERRORED);
     return true;
   }
   return false;

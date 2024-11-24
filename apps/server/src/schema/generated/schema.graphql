@@ -576,6 +576,11 @@ type IntegrationListItem {
   type: IntegrationType!
 }
 
+type IntegrationStatsUpdateEvent {
+  id: String!
+  status: IntegrationStatus!
+}
+
 enum IntegrationStatus {
   ComingSoon
   Connected
@@ -852,6 +857,7 @@ input SignUpInput {
 
 type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
+  integrationUpdateStatus: IntegrationStatsUpdateEvent!
   newIntegration: NewIntegrationEvent!
 }
 

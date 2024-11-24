@@ -7,13 +7,14 @@ import { MetaError, revokeIntegration } from '@repo/channel-utils';
 import { GraphQLError } from 'graphql/index';
 import { tierConstraints } from '@repo/mappings';
 import { type ChannelInitialProgressPayload, pubSub } from '@repo/pubsub';
-import { type NewIntegrationEvent } from '@repo/shared-types';
+import { type IntegrationStatsUpdateEvent, type NewIntegrationEvent } from '@repo/shared-types';
 import { builder } from '../builder';
 import {
   ChannelInitialProgressPayloadDto,
   getIntegrationStatus,
   IntegrationDto,
   IntegrationListItemDto,
+  IntegrationStatsUpdateEventDto,
   IntegrationStatusEnum,
   IntegrationTypeDto,
   NewIntegrationEventDto,
@@ -121,6 +122,12 @@ builder.subscriptionFields((t) => ({
     subscribe: (_root, _args, ctx) => {
       return pubSub.subscribe('organization:integration:new-integration', ctx.organizationId);
     },
+  }),
+  integrationUpdateStatus: t.withAuth({ isInOrg: true }).field({
+    type: IntegrationStatsUpdateEventDto,
+    nullable: false,
+    resolve: (root: IntegrationStatsUpdateEvent, _args, _ctx, _info) => root,
+    subscribe: (_root, _args, ctx) => pubSub.subscribe('organization:integration:status-update', ctx.organizationId),
   }),
 }));
 

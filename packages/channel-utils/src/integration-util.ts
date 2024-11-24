@@ -4,6 +4,7 @@ import { IntegrationStatus, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
 import { AError, isAError } from '@repo/utils';
 import { z } from 'zod';
+import { pubSub } from '@repo/pubsub';
 import { env } from './config';
 import { decryptAesGcm, encryptAesGcm } from './aes-util';
 import { type AdAccountIntegration } from './insights-utils';
@@ -46,7 +47,7 @@ export const getConnectedIntegrationByOrg = async (
 
   if (isAError(integration)) {
     if (encryptedIntegration.id) {
-      await markErrorIntegrationById(encryptedIntegration.id, false);
+      await markStatusIntegrationById(encryptedIntegration.id, IntegrationStatus.ERRORED);
     }
     return integration;
   }
@@ -107,13 +108,21 @@ export const decryptTokens = (integration: Integration | null): null | AError | 
   return integration;
 };
 
-export const markErrorIntegrationById = async (integrationId: string, notify: boolean): Promise<Integration> => {
-  if (notify) {
-    // TODO: notify the organization that the integration has been revoked
-  }
+export const markStatusIntegrationById = async (
+  integrationId: string,
+  status: IntegrationStatus,
+): Promise<Integration> => {
+  const organizations = await prisma.organization.findMany({
+    where: {
+      integrations: { some: { id: integrationId } },
+    },
+  });
+  organizations.forEach((o) => {
+    pubSub.publish('organization:integration:status-update', o.id, { id: integrationId, status });
+  });
   return await prisma.integration.update({
     where: { id: integrationId },
-    data: { status: IntegrationStatus.ERRORED },
+    data: { status },
   });
 };
 

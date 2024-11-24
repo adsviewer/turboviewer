@@ -21,7 +21,7 @@ import { getDateDiffIn, getTomorrowStartOfDay, type IntervalType } from '@repo/u
 import type { InputShapeFromFields } from '@pothos/core';
 import { getRootOrganizationId } from '@repo/backend-shared';
 import { type ChannelInitialProgressPayload } from '@repo/pubsub';
-import { type NewIntegrationEvent } from '@repo/shared-types';
+import { type IntegrationStatsUpdateEvent, type NewIntegrationEvent } from '@repo/shared-types';
 import { builder } from '../builder';
 import { ErrorInterface } from '../errors';
 import type { GraphQLContext } from '../../context';
@@ -159,6 +159,28 @@ export const NewIntegrationEventDto = builder.objectRef<NewIntegrationEvent>('Ne
     type: t.expose('type', { type: IntegrationTypeDto, nullable: false }),
   }),
 });
+
+export const IntegrationStatsUpdateEventDto = builder
+  .objectRef<IntegrationStatsUpdateEvent>('IntegrationStatsUpdateEvent')
+  .implement({
+    fields: (t) => ({
+      id: t.exposeString('id', { nullable: false }),
+      status: t.field({
+        type: IntegrationStatusDto,
+        nullable: false,
+        resolve: (root, _args, _ctx) => {
+          switch (root.status) {
+            case IntegrationStatus.CONNECTED:
+              return IntegrationStatusEnum.Connected;
+            case IntegrationStatus.ERRORED:
+              return IntegrationStatusEnum.Errored;
+            case IntegrationStatus.REVOKED:
+              return IntegrationStatusEnum.Revoked;
+          }
+        },
+      }),
+    }),
+  });
 
 export const CurrencyEnumDto = builder.enumType(CurrencyEnum, {
   name: 'CurrencyEnum',
@@ -488,13 +510,13 @@ export const getIntegrationStatus = (integration: Integration | undefined): Inte
   if (!integration.accessTokenExpiresAt) return IntegrationStatusEnum.Connected;
   if (
     (integration.refreshTokenExpiresAt && integration.refreshTokenExpiresAt < new Date()) ??
-    (!integration.refreshTokenExpiresAt && integration.accessTokenExpiresAt < new Date())
+    (!integration.refreshToken && integration.accessTokenExpiresAt < new Date())
   )
     return IntegrationStatusEnum.Expired;
   if (
     (integration.refreshTokenExpiresAt &&
       getDateDiffIn('day', new Date(), integration.refreshTokenExpiresAt) < EXPIRING_THRESHOLD_DAYS) ??
-    (!integration.refreshTokenExpiresAt &&
+    (!integration.refreshToken &&
       getDateDiffIn('day', new Date(), integration.accessTokenExpiresAt) < EXPIRING_THRESHOLD_DAYS)
   )
     return IntegrationStatusEnum.Expiring;

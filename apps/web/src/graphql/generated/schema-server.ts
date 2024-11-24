@@ -577,6 +577,12 @@ export type IntegrationListItem = {
   type: IntegrationType;
 };
 
+export type IntegrationStatsUpdateEvent = {
+  __typename: 'IntegrationStatsUpdateEvent';
+  id: Scalars['String']['output'];
+  status: IntegrationStatus;
+};
+
 export enum IntegrationStatus {
   ComingSoon = 'ComingSoon',
   Connected = 'Connected',
@@ -1003,6 +1009,7 @@ export type SignUpInput = {
 export type Subscription = {
   __typename: 'Subscription';
   channelInitialSetupProgress: ChannelInitialProgressPayload;
+  integrationUpdateStatus: IntegrationStatsUpdateEvent;
   newIntegration: NewIntegrationEvent;
 };
 

@@ -26,7 +26,6 @@
   "license": "UNLICENCED",
   "dependencies": {
     "@graphql-yoga/redis-event-target": "^3.0.1",
-    "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/shared-types": "workspace:*",

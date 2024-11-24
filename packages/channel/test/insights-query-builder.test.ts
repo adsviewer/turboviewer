@@ -10,6 +10,7 @@ import {
   InsightsSearchOperator,
 } from '@repo/channel-utils';
 import { redisQuit } from '@repo/redis';
+import { quitSubClient } from '@repo/pubsub';
 import {
   calculateDataPointsPerInterval,
   getSearchFields,
@@ -36,6 +37,11 @@ const assertSql = (actual: string, expected: string): void => {
 };
 
 void describe('insights query builder tests', () => {
+  after(async () => {
+    await redisQuit();
+    await quitSubClient();
+  });
+
   void it('calculateDataPointsPerInterval no date week', () => {
     const dataPointsPerInterval = calculateDataPointsPerInterval(undefined, undefined, 'week', 'en-GB');
     assert.equal(dataPointsPerInterval, 3);
@@ -768,6 +774,7 @@ void describe('insights query builder tests', () => {
 void describe('searchAdsToSQL tests', () => {
   after(async () => {
     await redisQuit();
+    await quitSubClient();
   });
   void it('should generate SQL for no expression', () => {
     const sql = searchAdsToSQL({});
@@ -1019,6 +1026,11 @@ void describe('searchAdsToSQL tests', () => {
 });
 
 void describe('getAllInsightsSearchFieldFromInsightsSearchExpression tests', () => {
+  after(async () => {
+    await redisQuit();
+    await quitSubClient();
+  });
+
   void it('should find campaign', () => {
     const expression: InsightsSearchExpression = {
       term: {
