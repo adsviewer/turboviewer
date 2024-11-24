@@ -63,6 +63,27 @@ enum MilestoneEnum {
   Onboarding
 }
 
+enum NotificationTypeEnum {
+  COMMENT_MENTION
+  NEW_INTEGRATION
+}
+
+model Notification {
+  id                       String               @id @default(cuid())
+  type                     NotificationTypeEnum @map("type")
+  userId                   String               @map("user_id")
+  commentMentionCreativeId String               @map("comment_mention_creative_id")
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([commentMentionCreativeId])
+  @@map("notifications")
+}
+
 model User {
   id                    String          @id @default(cuid())
   firstName             String          @map("first_name")
@@ -85,6 +106,7 @@ model User {
   organizations   UserOrganization[]
   roles           UserRole[]
   comments        Comment[]
+  notifications   Notification[]
   taggedInComment Comment[]           @relation(name: "COMMENT_TAGGED_USERS")
 
   @@index([currentOrganizationId])
