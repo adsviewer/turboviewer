@@ -678,6 +678,7 @@ export type Mutation = {
   acceptLinkInvitationExistingUser: Tokens;
   /** Creates a link for the signed in org for a specific role */
   createInvitationLink: Scalars['String']['output'];
+  createNotification: Notification;
   createOrganization: Organization;
   deAuthIntegration: MutationDeAuthIntegrationResult;
   deleteComment: Comment;
@@ -718,6 +719,12 @@ export type MutationAcceptLinkInvitationExistingUserArgs = {
 
 export type MutationCreateInvitationLinkArgs = {
   role: OrganizationRoleEnum;
+};
+
+export type MutationCreateNotificationArgs = {
+  commentMentionCreativeId?: InputMaybe<Scalars['String']['input']>;
+  receivingUserId: Scalars['String']['input'];
+  type: NotificationTypeEnum;
 };
 
 export type MutationCreateOrganizationArgs = {
@@ -885,6 +892,22 @@ export type NewsletterSubscription = {
   id: Scalars['ID']['output'];
 };
 
+export type Notification = {
+  __typename: 'Notification';
+  commentMentionCreativeId?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+  updatedAt: Scalars['Date']['output'];
+  user: User;
+};
+
+export enum NotificationTypeEnum {
+  COMMENT_MENTION = 'COMMENT_MENTION',
+  NEW_INTEGRATION = 'NEW_INTEGRATION',
+}
+
 export enum OrderBy {
   asc = 'asc',
   desc = 'desc',
@@ -1035,6 +1058,7 @@ export type Subscription = {
   channelInitialSetupProgress: ChannelInitialProgressPayload;
   integrationUpdateStatus: IntegrationStatsUpdateEvent;
   newIntegration: NewIntegrationEvent;
+  notificationEvent: Notification;
 };
 
 export enum Tier {

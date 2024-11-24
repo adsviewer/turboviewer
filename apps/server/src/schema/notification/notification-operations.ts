@@ -4,6 +4,10 @@ import { NotificationTypeEnum, prisma } from '@repo/database';
 import { builder } from '../builder';
 import { NotificationDto } from './notification-types';
 
+export const NotificationType = builder.enumType(NotificationTypeEnum, {
+  name: 'NotificationTypeEnum',
+});
+
 builder.subscriptionFields((t) => ({
   notificationEvent: t.withAuth({ isInOrg: true }).field({
     type: NotificationDto,
@@ -23,7 +27,7 @@ builder.mutationFields((t) => ({
     type: NotificationDto,
     args: {
       receivingUserId: t.arg.string({ required: true }),
-      type: t.arg({ type: NotificationTypeEnum, required: true }),
+      type: t.arg({ type: NotificationType, required: true }),
       commentMentionCreativeId: t.arg.string({ required: false }),
     },
     resolve: async (query, _root, args, _ctx) => {

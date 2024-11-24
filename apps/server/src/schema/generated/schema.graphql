@@ -681,6 +681,11 @@ type Mutation {
   Creates a link for the signed in org for a specific role
   """
   createInvitationLink(role: OrganizationRoleEnum!): String!
+  createNotification(
+    commentMentionCreativeId: String
+    receivingUserId: String!
+    type: NotificationTypeEnum!
+  ): Notification!
   createOrganization(
     name: String!
 
@@ -753,6 +758,21 @@ type NewIntegrationEvent {
 type NewsletterSubscription {
   email: String!
   id: ID!
+}
+
+type Notification {
+  commentMentionCreativeId: String
+  createdAt: Date!
+  id: ID!
+  receivingUserId: ID!
+  type: NotificationTypeEnum!
+  updatedAt: Date!
+  user: User!
+}
+
+enum NotificationTypeEnum {
+  COMMENT_MENTION
+  NEW_INTEGRATION
 }
 
 enum OrderBy {
@@ -879,6 +899,7 @@ type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
   integrationUpdateStatus: IntegrationStatsUpdateEvent!
   newIntegration: NewIntegrationEvent!
+  notificationEvent: Notification!
 }
 
 enum Tier {
