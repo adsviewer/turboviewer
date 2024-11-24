@@ -424,6 +424,16 @@ export const FilterInsightsInputDto = builder.inputRef<FilterInsightsInputType>(
     positions: t.field({ type: [InsightsPositionDto], required: false }),
     publishers: t.field({ type: [PublisherEnumDto], required: false }),
     search: t.field({ type: InsightsSearchExpressionDto, required: false }),
+    minThreshold: t.int({
+      required: false,
+      description:
+        'The minimum threshold in the orderBy column. Last datapoint is taken into account. For example if orderBy is impressions and the threshold is 100, then only the insights that had at least 100 impression on the last datapoint will show up.',
+    }),
+    maxThreshold: t.int({
+      required: false,
+      description:
+        'The maximum threshold in the orderBy column. Last datapoint is taken into account. For example if orderBy is impressions and the threshold is 900, then only the insights that had at most 900 impression on the last datapoint will show up.',
+    }),
   }),
   validate: [
     [

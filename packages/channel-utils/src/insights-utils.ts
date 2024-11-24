@@ -402,4 +402,6 @@ export interface FilterInsightsInputType {
   positions?: InsightsPositionType[] | null;
   publishers?: PublisherEnum[] | null;
   search?: InsightsSearchExpression | null;
+  minThreshold?: number | null;
+  maxThreshold?: number | null;
 }
