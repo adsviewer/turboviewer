@@ -91,6 +91,13 @@ variable "slack_workspace_id" {
   type = string
 }
 
+variable "stripe_public_key" {
+  type = string
+}
+variable "stripe_private_key" {
+  type = string
+}
+
 variable "tiktok_application_id" {
   type = string
 }

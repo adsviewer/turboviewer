@@ -107,6 +107,8 @@ module "environment" {
   slack_webhook_url_errors             = var.slack_webhook_url_errors
   slack_webhook_url_public_feedback    = var.slack_webhook_url_public_feedback
   slack_workspace_id                   = var.slack_workspace_id
+  stripe_private_key                   = var.stripe_private_key
+  stripe_public_key                    = var.stripe_public_key
   tiktok_application_id                = var.tiktok_application_id
   tiktok_application_secret            = var.tiktok_application_secret
   vercel_api_token                     = var.vercel_api_token
