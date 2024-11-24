@@ -21,6 +21,7 @@ import {
   lastInterval,
   orderColumnTrend,
   searchAdsToSQL,
+  thresholdColumn,
 } from '../src/insights-query-builder';
 
 const getNoEmptyLines = (str: string): string =>
@@ -434,6 +435,49 @@ void describe('insights query builder tests', () => {
                                       LIMIT 10 OFFSET 20)`,
     );
   });
+  void it('threshold column min', () => {
+    const insights = thresholdColumn('ad_id, publisher, currency', 'week', 'spend_eur', 'desc', 11, 0, 100, undefined);
+    assertSql(
+      insights,
+      `threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                       FROM organization_insights i
+                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                         AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                       GROUP BY ad_id, publisher, currency
+                       HAVING SUM(i.spend_eur) >= 100
+                       ORDER BY trend DESC
+                       LIMIT 11 OFFSET 0),`,
+    );
+  });
+  void it('threshold column max', () => {
+    const insights = thresholdColumn('ad_id, publisher, currency', 'week', 'spend_eur', 'desc', 11, 0, undefined, 900);
+    assertSql(
+      insights,
+      `threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                       FROM organization_insights i
+                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                         AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                       GROUP BY ad_id, publisher, currency
+                       HAVING SUM(i.spend_eur) < 900
+                       ORDER BY trend DESC
+                       LIMIT 11 OFFSET 0),`,
+    );
+  });
+  void it('threshold column min max', () => {
+    const insights = thresholdColumn('ad_id, publisher, currency', 'week', 'spend_eur', 'desc', 11, 0, 100, 900);
+    assertSql(
+      insights,
+      `threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                       FROM organization_insights i
+                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                         AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                       GROUP BY ad_id, publisher, currency
+                       HAVING SUM(i.spend_eur) >= 100 AND SUM(i.spend_eur) < 900
+                       ORDER BY trend DESC
+                       LIMIT 11 OFFSET 0),`,
+    );
+  });
+
   void it('grouped insights', () => {
     const args: FilterInsightsInputType = {
       orderBy: 'spend_rel',
@@ -518,6 +562,54 @@ void describe('insights query builder tests', () => {
     AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
+    );
+  });
+  void it('grouped insights absolute order with threshold', () => {
+    const args: FilterInsightsInputType = {
+      orderBy: 'spend_abs',
+      page: 1,
+      pageSize: 10,
+      groupBy: ['adId', 'publisher'],
+      interval: 'week',
+      order: 'desc',
+      minThreshold: 100,
+    };
+    const groupBy: (InsightsColumnsGroupByType | 'currency')[] = [...(args.groupBy ?? []), 'currency'];
+    const organizationId = 'clwkdrdn7000008k708vfchyr';
+    const insights = groupedInsights(args, organizationId, 'en-GB', groupBy);
+    assertSql(
+      insights,
+      `WITH organization_insights AS (SELECT i.*, aa.type integration
+                                      FROM insights i
+                                               JOIN ads a on i.ad_id = a.id
+                                               JOIN ad_accounts aa on i.ad_account_id = aa.id
+                                               JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                      WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                        AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
+      ),
+            threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                                   FROM organization_insights i
+                                   WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                                     AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                                   GROUP BY ad_id, publisher, currency
+                                   HAVING SUM(i.spend_eur) >= 100
+                                   ORDER BY trend DESC
+                                   LIMIT 11 OFFSET 0),
+            order_column_trend AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
+                                   FROM organization_insights i
+                                   WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
+                                     AND date <= DATE_TRUNC('week', CURRENT_DATE)
+                                   GROUP BY ad_id, publisher, currency
+                                   ORDER BY trend DESC
+                                   LIMIT 11 OFFSET 0)
+       SELECT i.ad_id, i.publisher, i.currency, DATE_TRUNC('week', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.clicks) AS clicks, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions), 0) AS cpm, SUM(i.spend) * 0.01 / NULLIF(SUM(i.clicks), 0) AS cpc 
+       FROM organization_insights i
+                JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
+                JOIN threshold_column tc ON i.ad_id = tc.ad_id AND i.publisher = tc.publisher AND i.currency = tc.currency
+       WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
+         AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
+       GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
+       ORDER BY oct.trend DESC, interval_start;`,
     );
   });
   void it('grouped insights with date filter', () => {

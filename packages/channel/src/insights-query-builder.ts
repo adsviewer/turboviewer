@@ -271,6 +271,36 @@ export const orderColumnTrendAbsolute = (
                                       LIMIT ${String(limit)} OFFSET ${String(offset)})`;
 };
 
+export const thresholdColumn = (
+  group: string,
+  interval: FilterInsightsInputType['interval'],
+  orderColumn: OrderByColumn,
+  trend: 'asc' | 'desc' | null | undefined,
+  limit: number,
+  offset: number,
+  minThreshold: number | undefined | null,
+  maxThreshold: number | undefined | null,
+  dateTo?: Date | null,
+): string => {
+  if (!minThreshold && !maxThreshold) return '';
+  const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
+
+  const thresholds = [];
+  if (minThreshold) thresholds.push(`SUM(i.${orderColumn}) >= ${String(minThreshold)}`);
+  if (maxThreshold) thresholds.push(`SUM(i.${orderColumn}) < ${String(maxThreshold)}`);
+
+  const sqlOrderColumn = getSqlOrderColumn(orderColumn, 'trend');
+
+  return `threshold_column AS (SELECT ${group}, ${sqlOrderColumn}
+                                      FROM organization_insights i
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date})
+                                        AND date <= DATE_TRUNC('${interval}', ${date})
+                                      GROUP BY ${group}${addHavingOnComputed(orderColumn)}
+                                      HAVING ${thresholds.join(' AND ')}
+                                      ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
+                                      LIMIT ${String(limit)} OFFSET ${String(offset)}),`;
+};
+
 const getInterval = (interval: string, dataPointsPerInterval: number): string => {
   if (interval === 'quarter') {
     return `${String(dataPointsPerInterval * 3)} months`;
@@ -304,10 +334,12 @@ export const groupedInsights = (
   const sql = `WITH ${getOrganizationalInsights(organizationId, args, dataPointsPerInterval)},
   ${isRelative ? `${lastInterval(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
   ${isRelative ? `${intervalBeforeLast(joinedSnakeGroup, args.interval, orderBy, args.dateTo)},` : ''}
+  ${args.minThreshold || args.maxThreshold ? thresholdColumn(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.minThreshold, args.maxThreshold, args.dateTo) : ''}
   ${isRelative ? orderColumnTrend(snakeGroup, orderBy, args.order, limit, offset) : orderColumnTrendAbsolute(joinedSnakeGroup, args.interval, orderBy, args.order, limit, offset, args.dateTo)}
   SELECT ${snakeGroup.map((g) => `i.${g}`).join(', ')}, DATE_TRUNC('${args.interval}', i.date) interval_start, SUM(i.spend) AS spend, SUM(i.impressions) AS impressions, SUM(i.clicks) AS clicks, SUM(i.spend) * 10 / NULLIF(SUM(i.impressions), 0) AS cpm, SUM(i.spend) * 0.01 / NULLIF(SUM(i.clicks), 0) AS cpc 
   FROM organization_insights i
   ${joinFn(snakeGroup, 'order_column_trend', 'i')}
+  ${args.minThreshold || args.maxThreshold ? joinFn(snakeGroup, 'threshold_column', 'i') : ''}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
     AND i.date <= DATE_TRUNC('${args.interval}', ${date})
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend

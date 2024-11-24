@@ -357,6 +357,10 @@ export type FilterInsightsInput = {
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy>>;
   integrations?: InputMaybe<Array<IntegrationType>>;
   interval: InsightsInterval;
+  /** The maximum threshold in the orderBy column. Last datapoint is taken into account. For example if orderBy is impressions and the threshold is 900, then only the insights that had at most 900 impression on the last datapoint will show up. */
+  maxThreshold?: InputMaybe<Scalars['Int']['input']>;
+  /** The minimum threshold in the orderBy column. Last datapoint is taken into account. For example if orderBy is impressions and the threshold is 100, then only the insights that had at least 100 impression on the last datapoint will show up. */
+  minThreshold?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<OrderBy>;
   orderBy?: InsightsColumnsOrderBy;
   /** Starting at 1 */
