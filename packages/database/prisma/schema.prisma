@@ -71,15 +71,15 @@ enum NotificationTypeEnum {
 model Notification {
   id                       String               @id @default(cuid())
   type                     NotificationTypeEnum @map("type")
-  userId                   String               @map("user_id")
+  receivingUserId          String               @map("receiving_user_id")
   commentMentionCreativeId String?              @map("comment_mention_creative_id")
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [receivingUserId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@index([userId])
+  @@index([receivingUserId])
   @@index([commentMentionCreativeId])
   @@map("notifications")
 }
