@@ -200,8 +200,8 @@ model Integration {
   createdAt    DateTime  @default(now()) @map("created_at")
   lastSyncedAt DateTime? @map("last_synced_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id])
-  adAccounts   AdAccount[]
+  organization          Organization           @relation(fields: [organizationId], references: [id])
+  // adAccounts   AdAccount[]
   adAccountIntegrations AdAccountIntegration[]
 
   @@unique([organizationId, type])
@@ -221,12 +221,12 @@ model AdAccount {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  integrations   Integration[]
-  advertisements Ad[]
-  creatives      Creative[]
-  insights       Insight[]
-  organizations  Organization[]
-  campaign       Campaign[]
+  // integrations   Integration[]
+  advertisements        Ad[]
+  creatives             Creative[]
+  insights              Insight[]
+  organizations         Organization[]
+  campaign              Campaign[]
   adAccountIntegrations AdAccountIntegration[]
 
   @@unique([externalId, type])
@@ -235,16 +235,14 @@ model AdAccount {
 }
 
 model AdAccountIntegration {
-  id             Int         @id @default(autoincrement())
-  adAccountId    String
-  integrationId  String
-  selected       Boolean     @default(false)
-  AdAccount      AdAccount   @relation(fields: [adAccountId], references: [id])
-  Integration    Integration @relation(fields: [integrationId], references: [id])
+  adAccountId   String
+  integrationId String
+  enabled       Boolean
+  AdAccount     AdAccount   @relation(fields: [adAccountId], references: [id])
+  Integration   Integration @relation(fields: [integrationId], references: [id])
 
-  @@unique([adAccountId, integrationId])
+  @@id([adAccountId, integrationId])
 }
-
 
 model Campaign {
   id          String   @id @default(cuid())

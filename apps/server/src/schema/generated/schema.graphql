@@ -22,6 +22,7 @@ type Ad {
 }
 
 type AdAccount {
+  adAccountIntegrations: [AdAccountIntegration!]
   adCount: Int!
   advertisements(after: String, before: String, first: Int, last: Int): AdAccountAdvertisementsConnection!
   createdAt: Date!
@@ -29,7 +30,6 @@ type AdAccount {
   externalId: String!
   id: ID!
   insights: [Insight!]!
-  integration: Integration!
 
   """
   Whether the ad account is connected to the current organization
@@ -54,9 +54,8 @@ type AdAccountAdvertisementsConnectionEdge {
 
 type AdAccountIntegration {
   adAccountId: String
-  id: Int
+  enabled: Boolean
   integrationId: String
-  selected: Boolean
 }
 
 type AdInsightsConnection {
@@ -543,11 +542,7 @@ type Integration {
   Caller is permitted to view this field if they are in an offspring organization
   """
   accessTokenExpiresAt: Date
-
-  """
-  Caller is permitted to view this field if they are in an offspring organization
-  """
-  adAccounts: [AdAccount!]!
+  adAccounts: [AdAccount!]
 
   """
   Caller is permitted to view this field if they are in an offspring organization
@@ -718,7 +713,7 @@ type Mutation {
   subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
   switchTiers(organizationId: String!, tier: Tier!): Organization!
-  updateIntegrationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): [AdAccountIntegration!]!
+  updateIntegrationAdAccounts(adAccountIds: [String!]!, integrationId: String!): [AdAccountIntegration!]!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!

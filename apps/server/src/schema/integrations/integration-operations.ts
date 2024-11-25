@@ -1,6 +1,6 @@
 import { type Integration, IntegrationTypeEnum, prisma } from '@repo/database';
 import { logger } from '@repo/logger';
-import { AError, FireAndForget, isAError } from '@repo/utils';
+import { AError, FireAndForget } from '@repo/utils';
 import { getChannel, getIntegrationAuthUrl } from '@repo/channel';
 import { getRootOrganizationId, getTier } from '@repo/backend-shared';
 import { MetaError, revokeIntegration } from '@repo/channel-utils';
@@ -82,27 +82,21 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
-  updateIntegrationAdAccounts: t.withAuth({ isOrgAdmin: true }).field({
+  updateIntegrationAdAccounts: t.withAuth({ isRootOrg: true }).field({
     type: [AdAccountIntegrationDto],
     nullable: false,
     args: {
-      integrationType: t.arg({ type: IntegrationTypeDto, required: true }),
+      integrationId: t.arg.string({ required: true }),
       adAccountIds: t.arg.stringList({ required: true }),
     },
     resolve: async (_root, args, _ctx, _info) => {
-      const integration = await prisma.integration.findFirst({ where: { type: args.integrationType } });
-
-      if (isAError(integration) || !integration) throw new GraphQLError('No integration found');
-
-      await prisma.adAccountIntegration.deleteMany({ where: { integrationId: integration.id } });
-
       return await Promise.all(
         args.adAccountIds.map((adAccountId) =>
           prisma.adAccountIntegration.create({
             data: {
-              integrationId: integration.id,
+              integrationId: args.integrationId,
               adAccountId,
-              selected: true,
+              enabled: true,
             },
           }),
         ),

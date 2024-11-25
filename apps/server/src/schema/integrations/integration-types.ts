@@ -65,12 +65,11 @@ export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem'
   }),
 });
 
-export const AdAccountIntegrationDto = builder.simpleObject('AdAccountIntegration', {
+export const AdAccountIntegrationDto = builder.prismaObject('AdAccountIntegration', {
   fields: (t) => ({
-    id: t.field({ type: 'Int', nullable: true }),
-    integrationId: t.string({ nullable: true }),
-    adAccountId: t.string({ nullable: true }),
-    selected: t.boolean({ nullable: true }),
+    adAccountId: t.exposeString('adAccountId'),
+    integrationId: t.exposeString('integrationId'),
+    enabled: t.exposeBoolean('enabled'),
   }),
 });
 
@@ -92,6 +91,18 @@ export const IntegrationDto = builder.prismaObject('Integration', {
       nullable: true,
       ...offspringOrgFieldProps,
     }),
+    adAccounts: t.field({
+      type: [AdAccountDto],
+      resolve: async (integration, _args, _ctx) => {
+        const adAccountIntegrations = await prisma.adAccountIntegration.findMany({
+          where: { integrationId: integration.id },
+        });
+        const adAccountIds = adAccountIntegrations.map((ai) => ai.adAccountId);
+        return prisma.adAccount.findMany({
+          where: { id: { in: adAccountIds } },
+        });
+      },
+    }),
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
@@ -105,19 +116,6 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     }),
 
     organization: t.relation('organization', { nullable: false }),
-    adAccounts: t.relation('adAccounts', {
-      nullable: false,
-      ...offspringOrgFieldProps,
-      query: (_args, ctx) =>
-        ctx.isAdmin
-          ? {}
-          : {
-              where: {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
-                organizations: { some: { id: ctx.organizationId! } },
-              },
-            },
-    }),
   }),
 });
 
@@ -220,13 +218,8 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
       edgesNullable: { list: false, items: true },
       nodeNullable: false,
     }),
+    adAccountIntegrations: t.relation('adAccountIntegrations'),
     insights: t.relation('insights', { nullable: false }),
-    integration: t.field({
-      type: IntegrationDto,
-      nullable: false,
-      resolve: (root, _args, _ctx) =>
-        prisma.integration.findFirstOrThrow({ where: { adAccounts: { some: { id: root.id } } } }),
-    }),
     organizations: t.relation('organizations', {
       nullable: false,
       query: (_args, ctx) =>

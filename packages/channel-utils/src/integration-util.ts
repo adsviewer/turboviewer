@@ -15,7 +15,18 @@ export const authEndpoint = '/channel/auth';
 export const revokeIntegration = async (externalId: string, type: IntegrationTypeEnum): Promise<void> => {
   /*const { adAccounts } = */
   await prisma.integration.update({
-    select: { adAccounts: true },
+    select: {
+      adAccountIntegrations: {
+        select: {
+          AdAccount: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
     where: {
       externalId_type: {
         externalId,
@@ -130,7 +141,11 @@ export const getConnectedIntegrationByAccountId = async (adAccountId: string): P
   const encryptedIntegration = await prisma.integration.findFirstOrThrow({
     where: {
       status: IntegrationStatus.CONNECTED,
-      adAccounts: { some: { id: adAccountId } },
+      adAccountIntegrations: {
+        some: {
+          adAccountId,
+        },
+      },
     },
   });
 
@@ -145,7 +160,11 @@ export const getConnectedIntegrationsByAccountId = async (adAccountId: string): 
   const encryptedIntegrations = await prisma.integration.findMany({
     where: {
       status: IntegrationStatus.CONNECTED,
-      adAccounts: { some: { id: adAccountId } },
+      adAccountIntegrations: {
+        some: {
+          adAccountId,
+        },
+      },
     },
   });
 
