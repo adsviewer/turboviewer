@@ -121,7 +121,7 @@ class Google implements ChannelInterface {
       return new AError('Failed to fetch user');
     }
 
-    if (parsed.data.resourceNames.length === 1) return parsed.data.resourceNames[0];
+    if (parsed.data.resourceNames.length === 1) return parsed.data.resourceNames[0].split('/')[1];
 
     const rightManagerId = await Google.findManagerAccount(accessToken, parsed.data.resourceNames);
 
