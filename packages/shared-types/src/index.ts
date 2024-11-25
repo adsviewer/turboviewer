@@ -19,7 +19,4 @@ export interface AJwtPayload extends JwtPayload {
 
 export type NewIntegrationEvent = Pick<Integration, 'id' | 'type'>;
 export type IntegrationStatsUpdateEvent = Pick<Integration, 'id' | 'status'>;
-export type NotificationEvent = Pick<
-  Notification,
-  'id' | 'type' | 'receivingUserId' | 'commentMentionCreativeId' | 'createdAt' | 'updatedAt'
->;
+export type NotificationEvent = Pick<Notification, 'type' | 'receivingUserId' | 'commentMentionCreativeId'>;

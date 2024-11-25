@@ -72,7 +72,7 @@ model Notification {
   id                       String               @id @default(cuid())
   type                     NotificationTypeEnum @map("type")
   receivingUserId          String               @map("receiving_user_id")
-  commentMentionCreativeId String?              @map("comment_mention_creative_id")
+  commentMentionCreativeId Json?                @map("comment_mention_creative_id")
 
   user User @relation(fields: [receivingUserId], references: [id])
 

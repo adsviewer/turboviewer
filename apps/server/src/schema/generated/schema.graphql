@@ -755,14 +755,10 @@ type NewsletterSubscription {
   id: ID!
 }
 
-type Notification {
+type NotificationEventPayload {
   commentMentionCreativeId: String
-  createdAt: Date!
-  id: ID!
   receivingUserId: ID!
   type: NotificationTypeEnum!
-  updatedAt: Date!
-  user: User!
 }
 
 enum NotificationTypeEnum {
@@ -894,7 +890,7 @@ type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
   integrationUpdateStatus: IntegrationStatsUpdateEvent!
   newIntegration: NewIntegrationEvent!
-  notificationEvent: Notification!
+  newNotification: NotificationEventPayload!
 }
 
 enum Tier {

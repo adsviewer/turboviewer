@@ -886,15 +886,11 @@ export type NewsletterSubscription = {
   id: Scalars['ID']['output'];
 };
 
-export type Notification = {
-  __typename: 'Notification';
+export type NotificationEventPayload = {
+  __typename: 'NotificationEventPayload';
   commentMentionCreativeId?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['Date']['output'];
-  id: Scalars['ID']['output'];
   receivingUserId: Scalars['ID']['output'];
   type: NotificationTypeEnum;
-  updatedAt: Scalars['Date']['output'];
-  user: User;
 };
 
 export enum NotificationTypeEnum {
@@ -1052,7 +1048,7 @@ export type Subscription = {
   channelInitialSetupProgress: ChannelInitialProgressPayload;
   integrationUpdateStatus: IntegrationStatsUpdateEvent;
   newIntegration: NewIntegrationEvent;
-  notificationEvent: Notification;
+  newNotification: NotificationEventPayload;
 };
 
 export enum Tier {

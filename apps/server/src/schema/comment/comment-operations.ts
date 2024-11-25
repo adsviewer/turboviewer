@@ -45,21 +45,20 @@ builder.mutationFields((t) => {
         };
 
         if (!args.commentToUpdateId) {
-          for (const userToNotifyId of args.taggedUsersIds) {
-            await prisma.notification.create({
-              data: {
-                type: NotificationTypeEnum.COMMENT_MENTION,
-                receivingUserId: userToNotifyId,
-                commentMentionCreativeId: args.creativeId,
-              },
-            });
-            pubSub.publish('user:notification:new-notification', ctx.currentUserId, {
-              id: '',
+          await prisma.notification.createMany({
+            data: args.taggedUsersIds.map((userToNotifyId) => ({
               receivingUserId: userToNotifyId,
               type: NotificationTypeEnum.COMMENT_MENTION,
               commentMentionCreativeId: args.creativeId,
               createdAt: new Date(),
               updatedAt: new Date(),
+            })),
+          });
+          for (const userToNotifyId of args.taggedUsersIds) {
+            pubSub.publish('user:notification:new-notification', ctx.currentUserId, {
+              receivingUserId: userToNotifyId,
+              type: NotificationTypeEnum.COMMENT_MENTION,
+              commentMentionCreativeId: args.creativeId,
             });
           }
           return await prisma.comment.create({ data });
