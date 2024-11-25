@@ -5,9 +5,8 @@ import { builder } from '../builder';
 export const NotificationEventDto = builder.objectRef<NotificationEvent>('NotificationEventPayload').implement({
   fields: (t) => ({
     type: t.expose('type', { type: NotificationTypeEnum, nullable: false }),
-    receivingUserId: t.exposeID('receivingUserId', { nullable: false }),
-    commentMentionCreativeId: t.exposeString('commentMentionCreativeId', {
-      nullable: true,
-    }),
+    receivingUserId: t.expose('receivingUserId', { type: 'ID', nullable: false }),
+    extraData: t.expose('extraData', { type: 'JSON', nullable: true }),
+    isRead: t.expose('isRead', { type: 'Boolean', nullable: false }),
   }),
 });

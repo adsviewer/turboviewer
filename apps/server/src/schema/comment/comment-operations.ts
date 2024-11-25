@@ -49,16 +49,22 @@ builder.mutationFields((t) => {
             data: args.taggedUsersIds.map((userToNotifyId) => ({
               receivingUserId: userToNotifyId,
               type: NotificationTypeEnum.COMMENT_MENTION,
-              commentMentionCreativeId: args.creativeId,
-              createdAt: new Date(),
-              updatedAt: new Date(),
+              extraData: {
+                commentMentionCreativeId: args.creativeId,
+              },
+              isRead: false,
             })),
           });
+
+          // Fire notification events to notify tagged users
           for (const userToNotifyId of args.taggedUsersIds) {
             pubSub.publish('user:notification:new-notification', ctx.currentUserId, {
               receivingUserId: userToNotifyId,
               type: NotificationTypeEnum.COMMENT_MENTION,
-              commentMentionCreativeId: args.creativeId,
+              extraData: {
+                commentMentionCreativeId: args.creativeId,
+              },
+              isRead: false,
             });
           }
           return await prisma.comment.create({ data });

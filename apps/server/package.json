@@ -56,6 +56,7 @@
     "graphql-yoga": "5.10.4",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "prisma-json-types-generator": "^3.1.1",
     "sns-validator": "^0.3.5",
     "zod": "^3.23.8"
   },

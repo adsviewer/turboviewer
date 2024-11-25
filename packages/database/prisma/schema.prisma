@@ -69,10 +69,12 @@ enum NotificationTypeEnum {
 }
 
 model Notification {
-  id                       String               @id @default(cuid())
-  type                     NotificationTypeEnum @map("type")
-  receivingUserId          String               @map("receiving_user_id")
-  commentMentionCreativeId Json?                @map("comment_mention_creative_id")
+  id              String               @id @default(cuid())
+  type            NotificationTypeEnum @map("type")
+  receivingUserId String               @map("receiving_user_id")
+  isRead          Boolean              @map("is_read")
+  /// [NotificationExtraData]
+  extraData       Json?                @map("extra_data")
 
   user User @relation(fields: [receivingUserId], references: [id])
 
@@ -80,7 +82,6 @@ model Notification {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@index([receivingUserId])
-  @@index([commentMentionCreativeId])
   @@map("notifications")
 }
 

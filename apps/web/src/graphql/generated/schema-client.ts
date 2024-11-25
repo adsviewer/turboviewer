@@ -888,7 +888,8 @@ export type NewsletterSubscription = {
 
 export type NotificationEventPayload = {
   __typename: 'NotificationEventPayload';
-  commentMentionCreativeId?: Maybe<Scalars['String']['output']>;
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  isRead: Scalars['Boolean']['output'];
   receivingUserId: Scalars['ID']['output'];
   type: NotificationTypeEnum;
 };

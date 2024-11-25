@@ -756,7 +756,8 @@ type NewsletterSubscription {
 }
 
 type NotificationEventPayload {
-  commentMentionCreativeId: String
+  extraData: JSON
+  isRead: Boolean!
   receivingUserId: ID!
   type: NotificationTypeEnum!
 }
