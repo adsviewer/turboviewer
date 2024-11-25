@@ -679,7 +679,6 @@ export type Mutation = {
   acceptLinkInvitationExistingUser: Tokens;
   /** Creates a link for the signed in org for a specific role */
   createInvitationLink: Scalars['String']['output'];
-  createNotification: Notification;
   createOrganization: Organization;
   deAuthIntegration: MutationDeAuthIntegrationResult;
   deleteComment: Comment;
@@ -720,12 +719,6 @@ export type MutationAcceptLinkInvitationExistingUserArgs = {
 
 export type MutationCreateInvitationLinkArgs = {
   role: OrganizationRoleEnum;
-};
-
-export type MutationCreateNotificationArgs = {
-  commentMentionCreativeId?: InputMaybe<Scalars['String']['input']>;
-  receivingUserId: Scalars['String']['input'];
-  type: NotificationTypeEnum;
 };
 
 export type MutationCreateOrganizationArgs = {

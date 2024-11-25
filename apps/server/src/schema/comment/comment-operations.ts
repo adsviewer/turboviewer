@@ -1,5 +1,6 @@
-import { prisma } from '@repo/database';
+import { NotificationTypeEnum, prisma } from '@repo/database';
 import { commentBodySchema } from '@repo/utils';
+import { pubSub } from '@repo/pubsub';
 import { builder } from '../builder';
 import { CommentDto } from './comment-types';
 
@@ -21,38 +22,59 @@ builder.queryFields((t) => ({
   }),
 }));
 
-builder.mutationFields((t) => ({
-  upsertComment: t.withAuth({ isInOrg: true }).prismaField({
-    nullable: false,
-    type: CommentDto,
-    args: {
-      commentToUpdateId: t.arg.string({ required: false }),
-      body: t.arg.string({ required: true, validate: { schema: commentBodySchema } }),
-      creativeId: t.arg.string({ required: true }),
-      taggedUsersIds: t.arg.stringList({ required: true, defaultValue: [] }),
-    },
-    resolve: async (query, parent, args, ctx) => {
-      const data = {
-        ...query,
-        body: args.body,
-        creativeId: args.creativeId,
-        userId: ctx.currentUserId,
-        taggedUsers: {
-          connect: args.taggedUsersIds.map((id) => ({ id })),
-        },
-      };
+builder.mutationFields((t) => {
+  return {
+    upsertComment: t.withAuth({ isInOrg: true }).prismaField({
+      nullable: false,
+      type: CommentDto,
+      args: {
+        commentToUpdateId: t.arg.string({ required: false }),
+        body: t.arg.string({ required: true, validate: { schema: commentBodySchema } }),
+        creativeId: t.arg.string({ required: true }),
+        taggedUsersIds: t.arg.stringList({ required: true, defaultValue: [] }),
+      },
+      resolve: async (query, _parent, args, ctx) => {
+        const data = {
+          ...query,
+          body: args.body,
+          creativeId: args.creativeId,
+          userId: ctx.currentUserId,
+          taggedUsers: {
+            connect: args.taggedUsersIds.map((id) => ({ id })),
+          },
+        };
 
-      return !args.commentToUpdateId
-        ? await prisma.comment.create({ data })
-        : await prisma.comment.update({ where: { id: args.commentToUpdateId }, data });
-    },
-  }),
-  deleteComment: t.withAuth({ isInOrg: true }).prismaField({
-    nullable: false,
-    type: CommentDto,
-    args: {
-      commentId: t.arg.string({ required: true }),
-    },
-    resolve: async (query, parent, args) => await prisma.comment.delete({ ...query, where: { id: args.commentId } }),
-  }),
-}));
+        if (!args.commentToUpdateId) {
+          for (const userToNotifyId of args.taggedUsersIds) {
+            await prisma.notification.create({
+              data: {
+                type: NotificationTypeEnum.COMMENT_MENTION,
+                receivingUserId: userToNotifyId,
+                commentMentionCreativeId: args.creativeId,
+              },
+            });
+            pubSub.publish('user:notification:new-notification', ctx.currentUserId, {
+              id: '',
+              receivingUserId: userToNotifyId,
+              type: NotificationTypeEnum.COMMENT_MENTION,
+              commentMentionCreativeId: args.creativeId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          }
+          return await prisma.comment.create({ data });
+        }
+        return await prisma.comment.update({ where: { id: args.commentToUpdateId }, data });
+      },
+    }),
+
+    deleteComment: t.withAuth({ isInOrg: true }).prismaField({
+      nullable: false,
+      type: CommentDto,
+      args: {
+        commentId: t.arg.string({ required: true }),
+      },
+      resolve: async (query, parent, args) => await prisma.comment.delete({ ...query, where: { id: args.commentId } }),
+    }),
+  };
+});

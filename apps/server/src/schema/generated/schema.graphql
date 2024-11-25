@@ -681,11 +681,6 @@ type Mutation {
   Creates a link for the signed in org for a specific role
   """
   createInvitationLink(role: OrganizationRoleEnum!): String!
-  createNotification(
-    commentMentionCreativeId: String
-    receivingUserId: String!
-    type: NotificationTypeEnum!
-  ): Notification!
   createOrganization(
     name: String!
 

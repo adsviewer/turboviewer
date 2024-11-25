@@ -1,18 +1,18 @@
 /*
   Warnings:
 
-  - You are about to drop the column `user_id` on the `notifications` table. All the data in the column will be lost.
+  - You are about to drop the column `receiving_user_ids` on the `notifications` table. All the data in the column will be lost.
   - Added the required column `receiving_user_id` to the `notifications` table without a default value. This is not possible if the table is not empty.
 
 */
 -- DropForeignKey
-ALTER TABLE "notifications" DROP CONSTRAINT "notifications_user_id_fkey";
+ALTER TABLE "notifications" DROP CONSTRAINT "notifications_receiving_user_ids_fkey";
 
 -- DropIndex
-DROP INDEX "notifications_user_id_idx";
+DROP INDEX "notifications_receiving_user_ids_idx";
 
 -- AlterTable
-ALTER TABLE "notifications" DROP COLUMN "user_id",
+ALTER TABLE "notifications" DROP COLUMN "receiving_user_ids",
 ADD COLUMN     "receiving_user_id" TEXT NOT NULL;
 
 -- CreateIndex
