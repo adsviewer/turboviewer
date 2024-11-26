@@ -91,17 +91,20 @@ export const IntegrationDto = builder.prismaObject('Integration', {
       nullable: true,
       ...offspringOrgFieldProps,
     }),
-    adAccounts: t.field({
-      type: [AdAccountDto],
-      resolve: async (integration, _args, _ctx) => {
-        const adAccountIntegrations = await prisma.adAccountIntegration.findMany({
-          where: { integrationId: integration.id },
-        });
-        const adAccountIds = adAccountIntegrations.map((ai) => ai.adAccountId);
-        return prisma.adAccount.findMany({
-          where: { id: { in: adAccountIds } },
-        });
-      },
+    adAccountIntegrations: t.relation('adAccountIntegrations', {
+      nullable: false,
+      ...offspringOrgFieldProps,
+      query: (_args, ctx) =>
+        ctx.isAdmin
+          ? {}
+          : {
+              where: {
+                adAccount: {
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+                  organizations: { some: { id: ctx.organizationId! } },
+                },
+              },
+            },
     }),
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
@@ -218,7 +221,20 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
       edgesNullable: { list: false, items: true },
       nodeNullable: false,
     }),
-    adAccountIntegrations: t.relation('adAccountIntegrations'),
+    adAccountIntegrations: t.relation('adAccountIntegrations', {
+      nullable: false,
+      query: (_args, ctx) =>
+        ctx.isAdmin
+          ? {}
+          : {
+              where: {
+                adAccount: {
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+                  organizations: { some: { id: ctx.organizationId! } },
+                },
+              },
+            },
+    }),
     insights: t.relation('insights', { nullable: false }),
     organizations: t.relation('organizations', {
       nullable: false,

@@ -31,7 +31,7 @@ builder.queryFields((t) => ({
           adAccount: {
             adAccountIntegrations: {
               some: {
-                Integration: {
+                integration: {
                   organizationId: ctx.organizationId,
                 },
               },
@@ -90,7 +90,7 @@ builder.queryFields((t) => ({
             include: {
               adAccountIntegrations: {
                 where: {
-                  Integration: {
+                  integration: {
                     organizationId: ctx.organizationId,
                   },
                 },

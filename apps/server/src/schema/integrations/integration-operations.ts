@@ -82,25 +82,23 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
-  updateIntegrationAdAccounts: t.withAuth({ isRootOrg: true }).field({
+  updateIntegrationAdAccounts: t.withAuth({ isRootOrg: true }).prismaField({
     type: [AdAccountIntegrationDto],
     nullable: false,
     args: {
       integrationId: t.arg.string({ required: true }),
       adAccountIds: t.arg.stringList({ required: true }),
     },
-    resolve: async (_root, args, _ctx, _info) => {
-      return await Promise.all(
-        args.adAccountIds.map((adAccountId) =>
-          prisma.adAccountIntegration.create({
-            data: {
-              integrationId: args.integrationId,
-              adAccountId,
-              enabled: true,
-            },
-          }),
-        ),
-      );
+    resolve: async (query, _root, args, _ctx, _info) => {
+      const data = args.adAccountIds.map((adAccountId) => ({
+        integrationId: args.integrationId,
+        adAccountId,
+        enabled: true,
+      }));
+
+      return await prisma.adAccountIntegration.createManyAndReturn({
+        data,
+      });
     },
   }),
 

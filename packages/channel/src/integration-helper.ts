@@ -37,12 +37,12 @@ export const authCallback = (req: ExpressRequest, res: ExpressResponse): void =>
 
   const error = errorDescription ?? channelError;
   completeIntegration(code, stateArg, error)
-    .then((response) => {
-      if (isAError(response)) {
-        logger.warn('Failed to complete integration %s:', response.message);
-        res.redirect(`${env.PUBLIC_URL}/integrations?error=${response.message}`);
+    .then((integrationType) => {
+      if (isAError(integrationType)) {
+        logger.warn('Failed to complete integration %s:', integrationType.message);
+        res.redirect(`${env.PUBLIC_URL}/integrations?error=${integrationType.message}`);
       } else {
-        res.redirect(`${env.PUBLIC_URL}/integrations?type=${response.type}&status=success`);
+        res.redirect(`${env.PUBLIC_URL}/integrations?type=${integrationType}&status=success`);
       }
     })
     .catch((_e: unknown) => {
@@ -61,7 +61,7 @@ const completeIntegration = async (
   code: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
   stateArg: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
   errorDescription: string | string[] | QueryString.ParsedQs | QueryString.ParsedQs[] | undefined,
-): Promise<AError | { type: IntegrationTypeEnum; adAccounts: { id: string; enabled: boolean; name: string }[] }> => {
+): Promise<AError | IntegrationTypeEnum> => {
   if (typeof errorDescription === 'string') {
     return new AError(errorDescription);
   }
@@ -133,27 +133,7 @@ const completeIntegration = async (
 
   fireAndForget.add(async () => await invokeChannelIngress(false, [decryptedIntegration.id]));
 
-  const adAccounts = await prisma.adAccountIntegration.findMany({
-    where: { integrationId: decryptedIntegration.id },
-    select: {
-      AdAccount: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      enabled: true,
-    },
-  });
-
-  return {
-    type: integrationType,
-    adAccounts: adAccounts.map((account) => ({
-      id: account.AdAccount.id,
-      enabled: account.enabled,
-      name: account.AdAccount.name,
-    })),
-  };
+  return integrationType
 };
 
 const integrationStateKey = (state: string): string => `integration-state:${state}`;

@@ -44,6 +44,12 @@ export const saveAccounts = async (
           name: acc.name,
           type: integration.type,
           organizations: { connect: { id: integration.organizationId } },
+          adAccountIntegrations: {
+            create: {
+              integrationId: integration.id,
+              enabled: true,
+            },
+          },
         },
       });
 

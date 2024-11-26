@@ -23,6 +23,3 @@ DROP COLUMN "id",
 DROP COLUMN "selected",
 ADD COLUMN     "enabled" BOOLEAN NOT NULL,
 ADD CONSTRAINT "AdAccountIntegration_pkey" PRIMARY KEY ("adAccountId", "integrationId");
-
--- DropTable
-DROP TABLE "_AdAccountToIntegration";
