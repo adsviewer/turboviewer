@@ -10,6 +10,7 @@ import { authCallback, getChannel, invokeChannelIngress } from '@repo/channel';
 import { authEndpoint } from '@repo/channel-utils';
 import * as Sentry from '@sentry/node';
 import { Environment, MODE } from '@repo/mode';
+import { useSentry } from '@envelop/sentry';
 import { env } from './config';
 import { createContext } from './context';
 import { schema } from './schema';
@@ -44,7 +45,7 @@ const index = (): void => {
     schema,
     context: createContext,
     graphiql: MODE !== Environment.Production,
-    plugins: MODE !== Environment.Production ? [] : [useDisableIntrospection()],
+    plugins: MODE !== Environment.Production ? [useSentry()] : [useSentry(), useDisableIntrospection()],
   });
 
   // heartbeat
