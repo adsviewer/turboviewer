@@ -691,6 +691,7 @@ export type Mutation = {
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markNotificationAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -767,6 +768,10 @@ export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationMarkNotificationAsReadArgs = {
+  id: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {
@@ -1362,9 +1367,11 @@ export type NotificationsQuery = {
   }>;
 };
 
-export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]: never }>;
+export type MarkNotificationAsReadMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
 
-export type MarkAllNotificationsAsReadMutation = { __typename: 'Mutation'; markAllNotificationsAsRead: boolean };
+export type MarkNotificationAsReadMutation = { __typename: 'Mutation'; markNotificationAsRead: boolean };
 
 export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1946,9 +1953,9 @@ export const NotificationsDocument = gql`
     }
   }
 `;
-export const MarkAllNotificationsAsReadDocument = gql`
-  mutation markAllNotificationsAsRead {
-    markAllNotificationsAsRead
+export const MarkNotificationAsReadDocument = gql`
+  mutation markNotificationAsRead($id: String!) {
+    markNotificationAsRead(id: $id)
   }
 `;
 export const GetOrganizationDocument = gql`
@@ -2242,15 +2249,15 @@ export function getSdk<C>(requester: Requester<C>) {
         options,
       ) as Promise<NotificationsQuery>;
     },
-    markAllNotificationsAsRead(
-      variables?: MarkAllNotificationsAsReadMutationVariables,
+    markNotificationAsRead(
+      variables: MarkNotificationAsReadMutationVariables,
       options?: C,
-    ): Promise<MarkAllNotificationsAsReadMutation> {
-      return requester<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>(
-        MarkAllNotificationsAsReadDocument,
+    ): Promise<MarkNotificationAsReadMutation> {
+      return requester<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>(
+        MarkNotificationAsReadDocument,
         variables,
         options,
-      ) as Promise<MarkAllNotificationsAsReadMutation>;
+      ) as Promise<MarkNotificationAsReadMutation>;
     },
     getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
       return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(

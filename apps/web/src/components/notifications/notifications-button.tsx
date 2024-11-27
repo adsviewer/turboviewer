@@ -9,7 +9,8 @@ import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
 import { getButtonColorBasedOnTheme } from '@/util/color-utils';
 import { notificationsDataAtom } from '@/app/atoms/notifications-atom';
-import { markAllNotificationsAsRead, notifications } from '@/app/(authenticated)/actions';
+import { markNotificationAsRead, notifications } from '@/app/(authenticated)/actions';
+import { type Notification } from '@/graphql/generated/schema-server';
 import LoaderCentered from '../misc/loader-centered';
 import NotificationsList from './notifications-list';
 
@@ -38,15 +39,18 @@ export default function NotificationsButton(): ReactNode {
       });
   }, [setNotificationsData]);
 
-  const markNotificationsAsRead = (): void => {
-    if (hasUnreadNotifications()) {
-      void markAllNotificationsAsRead()
+  const setNotificationAsRead = (notificationEntry: Notification): void => {
+    if (!notificationEntry.isRead) {
+      void markNotificationAsRead({ id: notificationEntry.id })
         .then((res) => {
           if (!res.success) {
             logger.error(res);
             return;
           }
-          setNotificationsData(notificationsData.map((notification) => ({ ...notification, isRead: true })));
+          const updatedNotificationsData = notificationsData.map((notification) =>
+            notification.id === notificationEntry.id ? { ...notification, isRead: true } : notification,
+          );
+          setNotificationsData(updatedNotificationsData);
         })
         .catch((error: unknown) => {
           logger.error(error);
@@ -60,15 +64,7 @@ export default function NotificationsButton(): ReactNode {
 
   return (
     <Group justify="center">
-      <Popover
-        width={350}
-        trapFocus
-        position="bottom"
-        withArrow
-        shadow="md"
-        offset={-5}
-        onOpen={markNotificationsAsRead}
-      >
+      <Popover width={350} trapFocus position="bottom" withArrow shadow="md" offset={-5}>
         <Popover.Target>
           <Indicator size={10} offset={7} color="red" disabled={!hasUnreadNotifications()}>
             <ActionIcon variant="transparent" c={getButtonColorBasedOnTheme(computedColorScheme)} size={35}>
@@ -79,7 +75,11 @@ export default function NotificationsButton(): ReactNode {
         <Popover.Dropdown>
           <Text>{t('title')}</Text>
           <Divider my="sm" />
-          {!isPending ? <NotificationsList notifications={notificationsData} /> : <LoaderCentered />}
+          {!isPending ? (
+            <NotificationsList notifications={notificationsData} setNotificationAsRead={setNotificationAsRead} />
+          ) : (
+            <LoaderCentered />
+          )}
         </Popover.Dropdown>
       </Popover>
     </Group>

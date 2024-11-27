@@ -10,3 +10,13 @@ subscription newIntegration {
     type
   }
 }
+
+subscription newNotification {
+  newNotification {
+    id
+    type
+    receivingUserId
+    isRead
+    createdAt
+  }
+}

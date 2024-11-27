@@ -10,6 +10,7 @@ import classes from './notification-entry.module.scss';
 
 interface PropsType {
   data: Notification;
+  setNotificationAsRead: () => void;
 }
 
 export default function NotificationEntry(props: PropsType): ReactNode {
@@ -29,7 +30,14 @@ export default function NotificationEntry(props: PropsType): ReactNode {
   };
 
   return (
-    <Flex h={50} w="100%" className={classes.container} gap="sm" onClick={onNotificationClick}>
+    <Flex
+      h={50}
+      w="100%"
+      className={classes.container}
+      gap="sm"
+      onClick={onNotificationClick}
+      onMouseEnter={props.setNotificationAsRead}
+    >
       <Flex w={10} justify="center" align="center" px="sm">
         <Indicator size={6} color={props.data.isRead ? 'dimmed' : 'blue'} />
       </Flex>

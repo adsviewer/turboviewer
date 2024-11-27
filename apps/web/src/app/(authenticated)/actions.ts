@@ -19,7 +19,8 @@ import {
   type MutationDeleteCommentArgs,
   type DeleteCommentMutation,
   type NotificationsQuery,
-  type MarkAllNotificationsAsReadMutation,
+  type MutationMarkNotificationAsReadArgs,
+  type MarkNotificationAsReadMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -98,5 +99,7 @@ export const notifications = async (): Promise<UrqlResult<NotificationsQuery>> =
   return await handleUrqlRequest((await urqlClientSdk()).notifications());
 };
 
-export const markAllNotificationsAsRead = async (): Promise<UrqlResult<MarkAllNotificationsAsReadMutation, string>> =>
-  await handleUrqlRequest((await urqlClientSdk()).markAllNotificationsAsRead());
+export const markNotificationAsRead = async (
+  values: MutationMarkNotificationAsReadArgs,
+): Promise<UrqlResult<MarkNotificationAsReadMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).markNotificationAsRead(values));

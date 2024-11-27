@@ -29,12 +29,27 @@ builder.queryFields((t) => ({
       return await prisma.notification.findMany({
         ...query,
         where: { receivingUserId: ctx.currentUserId },
+        orderBy: { createdAt: 'desc' },
       });
     },
   }),
 }));
 
 builder.mutationFields((t) => ({
+  markNotificationAsRead: t.withAuth({ isInOrg: true }).field({
+    type: 'Boolean',
+    nullable: false,
+    args: {
+      id: t.arg.string({ required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      await prisma.notification.update({
+        where: { id: args.id, receivingUserId: ctx.currentUserId },
+        data: { isRead: true },
+      });
+      return true;
+    },
+  }),
   markAllNotificationsAsRead: t.withAuth({ isInOrg: true }).field({
     type: 'Boolean',
     nullable: false,

@@ -8,6 +8,6 @@ query notifications {
   }
 }
 
-mutation markAllNotificationsAsRead {
-  markAllNotificationsAsRead
+mutation markNotificationAsRead($id: String!) {
+  markNotificationAsRead(id: $id)
 }

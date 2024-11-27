@@ -691,6 +691,7 @@ export type Mutation = {
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markNotificationAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -767,6 +768,10 @@ export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationMarkNotificationAsReadArgs = {
+  id: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {

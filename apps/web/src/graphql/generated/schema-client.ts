@@ -692,6 +692,7 @@ export type Mutation = {
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
   markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markNotificationAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -768,6 +769,10 @@ export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationMarkNotificationAsReadArgs = {
+  id: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {
@@ -1167,6 +1172,20 @@ export type NewIntegrationSubscription = {
   newIntegration: { __typename: 'NewIntegrationEvent'; type: IntegrationType };
 };
 
+export type NewNotificationSubscriptionVariables = Exact<{ [key: string]: never }>;
+
+export type NewNotificationSubscription = {
+  __typename: 'Subscription';
+  newNotification: {
+    __typename: 'NotificationEventPayload';
+    id: string;
+    type: NotificationTypeEnum;
+    receivingUserId: string;
+    isRead: boolean;
+    createdAt: Date;
+  };
+};
+
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {
     channelInitialSetupProgress {
@@ -1200,6 +1219,27 @@ export function useNewIntegrationSubscription<TData = NewIntegrationSubscription
 ) {
   return Urql.useSubscription<NewIntegrationSubscription, TData, NewIntegrationSubscriptionVariables>(
     { query: NewIntegrationDocument, ...options },
+    handler,
+  );
+}
+export const NewNotificationDocument = gql`
+  subscription newNotification {
+    newNotification {
+      id
+      type
+      receivingUserId
+      isRead
+      createdAt
+    }
+  }
+`;
+
+export function useNewNotificationSubscription<TData = NewNotificationSubscription>(
+  options?: Omit<Urql.UseSubscriptionArgs<NewNotificationSubscriptionVariables>, 'query'>,
+  handler?: Urql.SubscriptionHandler<NewNotificationSubscription, TData>,
+) {
+  return Urql.useSubscription<NewNotificationSubscription, TData, NewNotificationSubscriptionVariables>(
+    { query: NewNotificationDocument, ...options },
     handler,
   );
 }
