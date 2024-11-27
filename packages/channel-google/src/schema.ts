@@ -149,6 +149,10 @@ const adGroupAdSchema = z.object({
 export const responseSchema = createCommonResponseSchema(
   z.object({
     adGroupAd: adGroupAdSchema,
+    video: z.object({
+      id: z.string(),
+      resourceName: z.string(),
+    }),
   }),
 );
 
