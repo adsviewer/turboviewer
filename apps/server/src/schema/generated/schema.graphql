@@ -703,6 +703,7 @@ type Mutation {
   forgetPassword(email: String!): Boolean!
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): MutationInviteUsersResult!
   login(email: String!, password: String!, token: String): Tokens!
+  markAllNotificationsAsRead: Boolean!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
   removeUserFromOrganization(userId: String!): Boolean!
   removeUserMilestone(milestone: Milestones!): Tokens!
@@ -755,8 +756,19 @@ type NewsletterSubscription {
   id: ID!
 }
 
-type NotificationEventPayload {
+type Notification {
+  createdAt: Date!
   extraData: JSON
+  id: ID!
+  isRead: Boolean!
+  receivingUserId: ID!
+  type: NotificationTypeEnum!
+}
+
+type NotificationEventPayload {
+  createdAt: Date!
+  extraData: JSON
+  id: ID!
   isRead: Boolean!
   receivingUserId: ID!
   type: NotificationTypeEnum!
@@ -853,6 +865,7 @@ type Query {
   lastThreeMonthsAds: [Ad!]!
   loginProviders(inviteHash: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!
+  notifications: [Notification!]!
   organization: Organization!
 
   """

@@ -691,6 +691,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
+  markAllNotificationsAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -886,9 +887,21 @@ export type NewsletterSubscription = {
   id: Scalars['ID']['output'];
 };
 
+export type Notification = {
+  __typename: 'Notification';
+  createdAt: Scalars['Date']['output'];
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+};
+
 export type NotificationEventPayload = {
   __typename: 'NotificationEventPayload';
+  createdAt: Scalars['Date']['output'];
   extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];
   receivingUserId: Scalars['ID']['output'];
   type: NotificationTypeEnum;
@@ -976,6 +989,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
+  notifications: Array<Notification>;
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;

@@ -21,7 +21,8 @@
     "pickDateRange": "Επιλέξτε ένα εύρος ημερομηνιών",
     "add": "Προσθήκη",
     "edit": "Επεξεργασία",
-    "delete": "Διαγραφή"
+    "delete": "Διαγραφή",
+    "noResultsFound": "Δεν βρέθηκαν αποτελέσματα"
   },
   "errors": {
     "errorPageTitle": "Μόλις συνέβη κάτι κακό...",
@@ -36,7 +37,8 @@
     "settings": "Ρυθμίσεις",
     "organization": "Οργανισμός",
     "signOut": "Αποσύνδεση",
-    "noOrganizationData": "Δεν υπάρχουν δεδομένα οργανισμού."
+    "noOrganizationData": "Δεν υπάρχουν δεδομένα οργανισμού.",
+    "notifications": "Ειδοποιήσεις"
   },
   "introduction": {
     "title": "Καλώς ορίσατε!",

@@ -690,6 +690,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
+  markAllNotificationsAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -885,9 +886,21 @@ export type NewsletterSubscription = {
   id: Scalars['ID']['output'];
 };
 
+export type Notification = {
+  __typename: 'Notification';
+  createdAt: Scalars['Date']['output'];
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+};
+
 export type NotificationEventPayload = {
   __typename: 'NotificationEventPayload';
+  createdAt: Scalars['Date']['output'];
   extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];
   receivingUserId: Scalars['ID']['output'];
   type: NotificationTypeEnum;
@@ -975,6 +988,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
+  notifications: Array<Notification>;
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
@@ -1333,6 +1347,24 @@ export type LoginProvidersQuery = {
   __typename: 'Query';
   loginProviders: Array<{ __typename: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
+
+export type NotificationsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type NotificationsQuery = {
+  __typename: 'Query';
+  notifications: Array<{
+    __typename: 'Notification';
+    id: string;
+    type: NotificationTypeEnum;
+    receivingUserId: string;
+    isRead: boolean;
+    createdAt: Date;
+  }>;
+};
+
+export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]: never }>;
+
+export type MarkAllNotificationsAsReadMutation = { __typename: 'Mutation'; markAllNotificationsAsRead: boolean };
 
 export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1903,6 +1935,22 @@ export const LoginProvidersDocument = gql`
     }
   }
 `;
+export const NotificationsDocument = gql`
+  query notifications {
+    notifications {
+      id
+      type
+      receivingUserId
+      isRead
+      createdAt
+    }
+  }
+`;
+export const MarkAllNotificationsAsReadDocument = gql`
+  mutation markAllNotificationsAsRead {
+    markAllNotificationsAsRead
+  }
+`;
 export const GetOrganizationDocument = gql`
   query getOrganization {
     organization {
@@ -2186,6 +2234,23 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<LoginProvidersQuery>;
+    },
+    notifications(variables?: NotificationsQueryVariables, options?: C): Promise<NotificationsQuery> {
+      return requester<NotificationsQuery, NotificationsQueryVariables>(
+        NotificationsDocument,
+        variables,
+        options,
+      ) as Promise<NotificationsQuery>;
+    },
+    markAllNotificationsAsRead(
+      variables?: MarkAllNotificationsAsReadMutationVariables,
+      options?: C,
+    ): Promise<MarkAllNotificationsAsReadMutation> {
+      return requester<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>(
+        MarkAllNotificationsAsReadDocument,
+        variables,
+        options,
+      ) as Promise<MarkAllNotificationsAsReadMutation>;
     },
     getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
       return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(

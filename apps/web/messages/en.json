@@ -21,7 +21,8 @@
     "pickDateRange": "Pick a date range",
     "add": "Add",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "noResultsFound": "No results found"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",
@@ -36,7 +37,8 @@
     "settings": "Settings",
     "organization": "Organization",
     "signOut": "Sign Out",
-    "noOrganizationData": "No organization data"
+    "noOrganizationData": "No organization data",
+    "notifications": "Notifications"
   },
   "introduction": {
     "title": "Welcome!",

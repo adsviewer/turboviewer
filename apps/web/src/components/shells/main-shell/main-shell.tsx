@@ -35,6 +35,7 @@ import { getSearchQueryStrings, getUserDetails } from '@/app/(authenticated)/act
 import { type Integration, IntegrationStatus } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { searchesAtom } from '@/app/atoms/searches-atoms';
+import NotificationsButton from '@/components/notifications/notifications-button';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -150,6 +151,8 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             <LogoFull />
           </Flex>
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
+            <NotificationsButton />
+            <Divider orientation="vertical" />
             <OrganizationSelect />
             <CreateOrganizationButton />
             <SettingsButton />

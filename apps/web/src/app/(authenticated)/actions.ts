@@ -18,6 +18,8 @@ import {
   type UpsertCommentMutation,
   type MutationDeleteCommentArgs,
   type DeleteCommentMutation,
+  type NotificationsQuery,
+  type MarkAllNotificationsAsReadMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
@@ -90,3 +92,11 @@ export const deleteComment = async (
   values: MutationDeleteCommentArgs,
 ): Promise<UrqlResult<DeleteCommentMutation, string>> =>
   await handleUrqlRequest((await urqlClientSdk()).deleteComment(values));
+
+// Notifications
+export const notifications = async (): Promise<UrqlResult<NotificationsQuery>> => {
+  return await handleUrqlRequest((await urqlClientSdk()).notifications());
+};
+
+export const markAllNotificationsAsRead = async (): Promise<UrqlResult<MarkAllNotificationsAsReadMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).markAllNotificationsAsRead());

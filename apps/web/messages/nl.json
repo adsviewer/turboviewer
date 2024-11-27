@@ -21,7 +21,8 @@
     "pickDateRange": "Kies een datumbereik",
     "add": "Toevoegen",
     "edit": "Bewerking",
-    "delete": "Verwijderen"
+    "delete": "Verwijderen",
+    "noResultsFound": "Geen resultaten gevonden"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -36,7 +37,8 @@
     "settings": "Instellingen",
     "organization": "Organisatie",
     "signOut": "Uitloggen",
-    "noOrganizationData": "Geen organisatiegegevens"
+    "noOrganizationData": "Geen organisatiegegevens",
+    "notifications": "Notificaties"
   },
   "introduction": {
     "title": "Welkom!",

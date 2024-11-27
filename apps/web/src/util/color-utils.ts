@@ -12,3 +12,7 @@ export const uniqueColors = [
 ];
 
 export const getColor = (index: number): string => uniqueColors[index % uniqueColors.length];
+
+export const getButtonColorBasedOnTheme = (computedColorScheme: 'light' | 'dark'): string => {
+  return computedColorScheme === 'light' ? 'dark' : 'white';
+};

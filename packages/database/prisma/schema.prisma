@@ -73,7 +73,6 @@ model Notification {
   type            NotificationTypeEnum @map("type")
   receivingUserId String               @map("receiving_user_id")
   isRead          Boolean              @map("is_read")
-  /// [NotificationExtraData]
   extraData       Json?                @map("extra_data")
 
   user User @relation(fields: [receivingUserId], references: [id])

@@ -1,6 +1,7 @@
 import { NotificationTypeEnum, prisma } from '@repo/database';
 import { commentBodySchema } from '@repo/utils';
 import { pubSub } from '@repo/pubsub';
+import { createId } from '@paralleldrive/cuid2';
 import { builder } from '../builder';
 import { CommentDto } from './comment-types';
 
@@ -16,7 +17,6 @@ builder.queryFields((t) => ({
         ...query,
         where: { creativeId: args.creativeId },
       });
-
       return data;
     },
   }),
@@ -45,30 +45,36 @@ builder.mutationFields((t) => {
         };
 
         if (!args.commentToUpdateId) {
+          const notificationsData = args.taggedUsersIds.map((userToNotifyId) => ({
+            id: createId(),
+            receivingUserId: userToNotifyId,
+            type: NotificationTypeEnum.COMMENT_MENTION,
+            extraData: {
+              commentMentionCreativeId: args.creativeId,
+            },
+            isRead: false,
+          }));
+
           await prisma.notification.createMany({
-            data: args.taggedUsersIds.map((userToNotifyId) => ({
-              receivingUserId: userToNotifyId,
-              type: NotificationTypeEnum.COMMENT_MENTION,
-              extraData: {
-                commentMentionCreativeId: args.creativeId,
-              },
-              isRead: false,
-            })),
+            data: notificationsData,
           });
 
           // Fire notification events to notify tagged users
-          for (const userToNotifyId of args.taggedUsersIds) {
-            pubSub.publish('user:notification:new-notification', ctx.currentUserId, {
-              receivingUserId: userToNotifyId,
+          for (const notification of notificationsData) {
+            pubSub.publish('user:notification:new-notification', notification.receivingUserId, {
+              id: notification.id,
+              receivingUserId: notification.receivingUserId,
               type: NotificationTypeEnum.COMMENT_MENTION,
               extraData: {
                 commentMentionCreativeId: args.creativeId,
               },
               isRead: false,
+              createdAt: new Date(),
             });
           }
           return await prisma.comment.create({ data });
         }
+
         return await prisma.comment.update({ where: { id: args.commentToUpdateId }, data });
       },
     }),

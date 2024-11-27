@@ -1,0 +1,13 @@
+query notifications {
+  notifications {
+    id
+    type
+    receivingUserId
+    isRead
+    createdAt
+  }
+}
+
+mutation markAllNotificationsAsRead {
+  markAllNotificationsAsRead
+}
