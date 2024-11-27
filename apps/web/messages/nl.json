@@ -37,8 +37,12 @@
     "settings": "Instellingen",
     "organization": "Organisatie",
     "signOut": "Uitloggen",
-    "noOrganizationData": "Geen organisatiegegevens",
-    "notifications": "Notificaties"
+    "noOrganizationData": "Geen organisatiegegevens"
+  },
+  "notifications": {
+    "title": "Notificaties",
+    "mentioned": "U werd gementioned in een comment!",
+    "newIntegration": "Er is een nieuwe integratie toegevoegd!"
   },
   "introduction": {
     "title": "Welkom!",

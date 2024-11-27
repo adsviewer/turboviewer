@@ -37,8 +37,12 @@
     "settings": "Settings",
     "organization": "Organization",
     "signOut": "Sign Out",
-    "noOrganizationData": "No organization data",
-    "notifications": "Notifications"
+    "noOrganizationData": "No organization data"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mentioned": "You were mentioned in a comment!",
+    "newIntegration": "A new integration has been added!"
   },
   "introduction": {
     "title": "Welcome!",

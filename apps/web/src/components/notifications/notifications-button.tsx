@@ -14,7 +14,7 @@ import LoaderCentered from '../misc/loader-centered';
 import NotificationsList from './notifications-list';
 
 export default function NotificationsButton(): ReactNode {
-  const t = useTranslations('navbar');
+  const t = useTranslations('notifications');
   const computedColorScheme = useComputedColorScheme();
   const [notificationsData, setNotificationsData] = useAtom(notificationsDataAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -77,7 +77,7 @@ export default function NotificationsButton(): ReactNode {
           </Indicator>
         </Popover.Target>
         <Popover.Dropdown>
-          <Text>{t('notifications')}</Text>
+          <Text>{t('title')}</Text>
           <Divider my="sm" />
           {!isPending ? <NotificationsList notifications={notificationsData} /> : <LoaderCentered />}
         </Popover.Dropdown>

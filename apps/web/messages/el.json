@@ -37,8 +37,12 @@
     "settings": "Ρυθμίσεις",
     "organization": "Οργανισμός",
     "signOut": "Αποσύνδεση",
-    "noOrganizationData": "Δεν υπάρχουν δεδομένα οργανισμού.",
-    "notifications": "Ειδοποιήσεις"
+    "noOrganizationData": "Δεν υπάρχουν δεδομένα οργανισμού."
+  },
+  "notifications": {
+    "title": "Ειδοποιήσεις",
+    "mentioned": "Σας αναφέρανε σε ένα σχόλιο!",
+    "newIntegration": "Προστέθηκε μια νέα ενσωμάτωση!"
   },
   "introduction": {
     "title": "Καλώς ορίσατε!",
