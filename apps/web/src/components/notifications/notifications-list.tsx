@@ -14,7 +14,7 @@ export default function NotificationsList(props: PropsType): ReactNode {
   const tGeneric = useTranslations('generic');
 
   return (
-    <ScrollArea.Autosize offsetScrollbars scrollbars="y" type="always" mah={300} style={{ userSelect: 'text' }}>
+    <ScrollArea.Autosize offsetScrollbars scrollbars="y" type="always" mah={300}>
       {props.notifications.length ? (
         props.notifications.map((notification) => <NotificationEntry key={notification.id} data={notification} />)
       ) : (

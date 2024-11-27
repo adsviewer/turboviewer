@@ -2,7 +2,6 @@
   color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
   border-radius: var(--mantine-radius-md);
   cursor: pointer;
-  user-select: none;
   transition: all 0.2s;
 
   &:hover {
