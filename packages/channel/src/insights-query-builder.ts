@@ -164,13 +164,15 @@ export const getOrganizationalInsights = (
     filter.groupBy?.includes('adSetId') ||
     filter.groupBy?.includes('creativeId') ||
     filter.groupBy?.includes('campaignId') ||
+    filter.creativeIds?.length ||
+    filter.adIds?.length ||
     getSearchFields(filter.search).has(InsightsSearchField.AdSetName) ||
     getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ||
     getSearchFields(filter.search).has(InsightsSearchField.AdName);
   return `organization_insights AS (SELECT i.*, ${filter.groupBy?.includes('campaignId') ? 'campaign_id, ' : ''}${filter.groupBy?.includes('creativeId') ? 'creative_id, ' : ''}${filter.groupBy?.includes('adSetId') ? 'ad_set_id, ' : ''}aa.type integration
                                               FROM insights i
                                                        ${shouldIncludeAdTable ? 'JOIN ads a on i.ad_id = a.id' : ''}
-                                                       ${filter.groupBy?.includes('creativeId') ? 'JOIN creatives cr on cr.id = a.creative_id' : ''}
+                                                       ${filter.groupBy?.includes('creativeId') || filter.creativeIds?.length ? 'JOIN creatives cr on cr.id = a.creative_id' : ''}
                                                        ${filter.groupBy?.includes('adSetId') || filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.AdSetName) || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ? 'JOIN ad_sets ase on a.ad_set_id = ase.id' : ''}
                                                        ${filter.groupBy?.includes('campaignId') || getSearchFields(filter.search).has(InsightsSearchField.CampaignName) ? 'JOIN campaigns c on ase.campaign_id = c.id' : ''}
                                                        JOIN ad_accounts aa on i.ad_account_id = aa.id
@@ -179,6 +181,7 @@ export const getOrganizationalInsights = (
                                                 ${filter.search ? searchAdsToSQL(filter.search) : ''}
                                                 ${filter.adAccountIds?.length ? `AND aa.id IN (${filter.adAccountIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${filter.adIds?.length ? `AND a.id IN (${filter.adIds.map((i) => `'${i}'`).join(', ')})` : ''}
+                                                ${filter.creativeIds?.length ? `AND a.creative_id IN (${filter.creativeIds.map((i) => `'${i}'`).join(', ')})` : ''}
                                                 ${getInsightsDateFrom(filter.dateFrom, filter.dateTo, dataPointsPerInterval, filter.interval)}
                                                 ${filter.dateTo ? `AND i.date <= TIMESTAMP '${filter.dateTo.toISOString()}'` : ''}
                                                 ${filter.devices?.length ? `AND i.device IN (${filter.devices.map((i) => `'${i}'`).join(', ')})` : ''}

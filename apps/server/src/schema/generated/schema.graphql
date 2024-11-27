@@ -319,6 +319,7 @@ enum FeedbackTypeEnum {
 input FilterInsightsInput {
   adAccountIds: [String!]
   adIds: [String!]
+  creativeIds: [String!]
   dateFrom: Date
   dateTo: Date
   devices: [DeviceEnum!]

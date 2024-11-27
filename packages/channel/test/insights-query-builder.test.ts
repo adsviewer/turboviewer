@@ -160,6 +160,59 @@ void describe('insights query builder tests', () => {
     );
   });
 
+  void it('get insights filters by creativeId', () => {
+    const args: FilterInsightsInputType = {
+      orderBy: 'spend_rel',
+      page: 1,
+      pageSize: 10,
+      creativeIds: ['cm409k2pt000008l3ciffh2zw', 'cm409k8v5000108l31wwj7uze'],
+      groupBy: ['publisher'],
+      interval: 'week',
+      order: 'desc',
+    };
+
+    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
+    assertSql(
+      insights,
+      `organization_insights AS (SELECT i.*, aa.type integration
+                                              FROM insights i
+                                                       JOIN ads a on i.ad_id = a.id
+                                                       JOIN creatives cr on cr.id = a.creative_id
+                                                       JOIN ad_accounts aa on i.ad_account_id = aa.id
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                                AND a.creative_id IN ('cm409k2pt000008l3ciffh2zw', 'cm409k8v5000108l31wwj7uze')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
+                                              )`,
+    );
+  });
+
+  void it('get insights filters by adIds', () => {
+    const args: FilterInsightsInputType = {
+      orderBy: 'spend_rel',
+      page: 1,
+      pageSize: 10,
+      adIds: ['cm409k2pt000008l3ciffh2zw', 'cm409k8v5000108l31wwj7uze'],
+      groupBy: ['publisher'],
+      interval: 'week',
+      order: 'desc',
+    };
+
+    const insights = getOrganizationalInsights('clwkdrdn7000008k708vfchyr', args, 3);
+    assertSql(
+      insights,
+      `organization_insights AS (SELECT i.*, aa.type integration
+                                              FROM insights i
+                                                       JOIN ads a on i.ad_id = a.id
+                                                       JOIN ad_accounts aa on i.ad_account_id = aa.id
+                                                       JOIN "_AdAccountToOrganization" ao on ao."A" = aa.id
+                                              WHERE ao."B" = 'clwkdrdn7000008k708vfchyr'
+                                                AND a.id IN ('cm409k2pt000008l3ciffh2zw', 'cm409k8v5000108l31wwj7uze')
+                                                AND i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
+                                              )`,
+    );
+  });
+
   void it('group by creativeId', () => {
     const args: FilterInsightsInputType = {
       orderBy: 'spend_rel',
