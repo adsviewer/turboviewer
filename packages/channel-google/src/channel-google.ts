@@ -426,32 +426,20 @@ class Google implements ChannelInterface {
 
     try {
       const query = `
-         SELECT
-          ad_group_ad.ad.id,
-          ad_group_ad.ad.name,
-          ad_group_ad.ad.final_urls
-        FROM
-          ad_group_ad
-        WHERE
-          ad_group_ad.ad.id = '${externalId}'
+        SELECT video.id, ad_group_ad.ad.id, ad_group_ad.ad.name FROM video WHERE ad_group_ad.ad.id = ${externalId}
       `;
       const response = await Google.handlePagination(integration, query, responseSchema, adAccount.externalId);
 
       if (isAError(response)) return new AError('Error while fetching google ad');
 
-      const validatedResponse = responseSchema.parse(response);
-      if (!validatedResponse.results) return new AError('No data found');
+      if (!response?.length) return new AError('No data found');
 
-      if (!validatedResponse.results[0].adGroupAd.resourceName) {
-        return new AError('getGoogleAdPreview: Ad not found or insufficient permissions.');
-      }
-
-      const adData = validatedResponse.results[0].adGroupAd;
+      const adData = response[0];
 
       const previewHTML = `
       <iframe
-        title="${adData.ad.name ?? ''}"
-        src="${adData.ad.finalUrls?.[0] ?? ''}"
+        title="${adData.adGroupAd.ad.name ?? ''}"
+        src="https://youtube.com/watch?v=${adData.video.id}"
         width="600"
         height="400"
         scrolling="no"
@@ -601,6 +589,7 @@ class Google implements ChannelInterface {
       if (response instanceof Error) return response;
 
       const adsResponse: unknown = await response.json();
+
       if (isAError(adsResponse)) return res;
       const validatedResponse = schema.parse(adsResponse);
       if (validatedResponse.results) {
