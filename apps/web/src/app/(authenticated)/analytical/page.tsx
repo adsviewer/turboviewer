@@ -1,11 +1,13 @@
 'use client';
 
-import { Flex } from '@mantine/core';
+import { Flex, Text, Title } from '@mantine/core';
 import React, { useEffect, type ReactNode, use, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
+import { type GroupedInsight } from '@/graphql/generated/schema-server';
+import InsightCard from '@/components/insights/insight-card';
 
 interface InsightsProps {
   searchParams: Promise<InsightsParams>;
@@ -14,8 +16,21 @@ interface InsightsProps {
 export default function Analytical(props: InsightsProps): ReactNode {
   const tGeneric = useTranslations('generic');
   const searchParams = use(props.searchParams);
-  const [insightData, setInsightData] = useState({});
+  const [insightData, setInsightData] = useState<GroupedInsight | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const t = useTranslations('insights');
+
+  const getInsightHeading = (insight: GroupedInsight): string => {
+    if (insight.publisher) return insight.publisher;
+    else if (insight.integration) return insight.integration;
+    return t('insight');
+  };
+
+  const getInsightTitle = (insight: GroupedInsight): string => {
+    if (insight.creativeName) return insight.creativeName;
+    else if (insight.adName) return insight.adName;
+    return t('insight');
+  };
 
   useEffect(() => {
     setIsPending(true);
@@ -41,7 +56,33 @@ export default function Analytical(props: InsightsProps): ReactNode {
 
   return (
     <Flex>
-      {String(JSON.stringify(insightData))} {isPending}
+      {!isPending && insightData ? (
+        <Flex direction="column" gap="lg" w="100%">
+          <Title order={4}>{insightData.creativeName}</Title>
+          <Flex justify="space-evenly">
+            <InsightCard
+              key={insightData.id}
+              heading={getInsightHeading(insightData)}
+              title={getInsightTitle(insightData)}
+              description={insightData.position}
+              device={insightData.device}
+              currency={insightData.currency}
+              publisher={insightData.publisher}
+              datapoints={insightData.datapoints}
+              iframe={insightData.iFrame}
+              creativeName={insightData.creativeName}
+              creativeId={insightData.creativeId}
+            />
+          </Flex>
+        </Flex>
+      ) : null}
+
+      {/* No results found */}
+      {!isPending && !insightData ? (
+        <Text ta="center" c="dimmed" w="100%">
+          {tGeneric('noResultsFound')}
+        </Text>
+      ) : null}
     </Flex>
   );
 }

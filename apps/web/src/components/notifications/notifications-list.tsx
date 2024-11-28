@@ -9,6 +9,7 @@ import NotificationEntry from './notification-entry';
 interface PropsType {
   notifications: Notification[];
   setNotificationAsRead: (data: Notification) => void;
+  closeNotifications: () => void;
 }
 
 export default function NotificationsList(props: PropsType): ReactNode {
@@ -24,6 +25,7 @@ export default function NotificationsList(props: PropsType): ReactNode {
             setNotificationAsRead={() => {
               props.setNotificationAsRead(notification);
             }}
+            closeNotifications={props.closeNotifications}
           />
         ))
       ) : (

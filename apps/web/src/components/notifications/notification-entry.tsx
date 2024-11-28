@@ -5,16 +5,20 @@ import { Flex, Indicator, Text } from '@mantine/core';
 import { timeAgo } from '@repo/utils';
 import { useTranslations } from 'next-intl';
 import { logger } from '@repo/logger';
-import { type Notification, NotificationTypeEnum } from '@/graphql/generated/schema-server';
+import { useRouter } from 'next/navigation';
+import { InsightsColumnsGroupBy, type Notification, NotificationTypeEnum } from '@/graphql/generated/schema-server';
+import { urlKeys } from '@/util/url-query-utils';
 import classes from './notification-entry.module.scss';
 
 interface PropsType {
   data: Notification;
   setNotificationAsRead: () => void;
+  closeNotifications: () => void;
 }
 
 export default function NotificationEntry(props: PropsType): ReactNode {
   const t = useTranslations('notifications');
+  const router = useRouter();
 
   const getTitle = (type: NotificationTypeEnum): string => {
     switch (type) {
@@ -27,6 +31,10 @@ export default function NotificationEntry(props: PropsType): ReactNode {
 
   const onNotificationClick = (): void => {
     logger.info('cm3x8pl2v03ofbzosv5lcywrh');
+    router.replace(
+      `/analytical?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.creativeId}&${urlKeys.creativeIds}=cm3x8pl2v03ofbzosv5lcywrh&${urlKeys.showComments}=true`,
+    );
+    props.closeNotifications();
   };
 
   return (

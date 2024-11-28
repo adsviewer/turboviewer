@@ -7,6 +7,7 @@ import { type ReactNode, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
+import { useDisclosure, useClickOutside } from '@mantine/hooks';
 import { getButtonColorBasedOnTheme } from '@/util/color-utils';
 import { notificationsDataAtom } from '@/app/atoms/notifications-atom';
 import { markNotificationAsRead, notifications } from '@/app/(authenticated)/actions';
@@ -17,8 +18,11 @@ import NotificationsList from './notifications-list';
 export default function NotificationsButton(): ReactNode {
   const t = useTranslations('notifications');
   const computedColorScheme = useComputedColorScheme();
+  const [opened, { open, close }] = useDisclosure(false);
   const [notificationsData, setNotificationsData] = useAtom(notificationsDataAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
+
+  const ref = useClickOutside(close);
 
   useEffect(() => {
     setIsPending(true);
@@ -62,12 +66,30 @@ export default function NotificationsButton(): ReactNode {
     return notificationsData.some((notification) => !notification.isRead);
   };
 
+  const toggleNotifications = (): void => {
+    opened ? close() : open();
+  };
+
   return (
-    <Group justify="center">
-      <Popover width={350} trapFocus position="bottom" withArrow shadow="md" offset={-5}>
+    <Group justify="center" ref={ref}>
+      <Popover
+        width={350}
+        trapFocus
+        position="bottom"
+        withArrow
+        shadow="md"
+        offset={-5}
+        opened={opened}
+        closeOnClickOutside
+      >
         <Popover.Target>
           <Indicator size={10} offset={7} color="red" disabled={!hasUnreadNotifications()}>
-            <ActionIcon variant="transparent" c={getButtonColorBasedOnTheme(computedColorScheme)} size={35}>
+            <ActionIcon
+              variant="transparent"
+              c={getButtonColorBasedOnTheme(computedColorScheme)}
+              size={35}
+              onClick={toggleNotifications}
+            >
               {hasUnreadNotifications() ? <IconBellFilled /> : <IconBell />}
             </ActionIcon>
           </Indicator>
@@ -76,7 +98,11 @@ export default function NotificationsButton(): ReactNode {
           <Text>{t('title')}</Text>
           <Divider my="sm" />
           {!isPending ? (
-            <NotificationsList notifications={notificationsData} setNotificationAsRead={setNotificationAsRead} />
+            <NotificationsList
+              notifications={notificationsData}
+              setNotificationAsRead={setNotificationAsRead}
+              closeNotifications={close}
+            />
           ) : (
             <LoaderCentered />
           )}

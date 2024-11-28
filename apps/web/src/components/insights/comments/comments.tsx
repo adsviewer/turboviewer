@@ -10,11 +10,13 @@ import { IconMessage, IconSend2, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useAtom } from 'jotai';
+import { useSearchParams } from 'next/navigation';
 import { createFullName } from '@/util/format-utils';
 import { type CommentsQuery } from '@/graphql/generated/schema-server';
 import { deleteComment, getComments, upsertComment } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { editedCommentAtom } from '@/app/atoms/comment-atoms';
+import { isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
 import CommentsList from './comments-list';
 
 interface PropsType {
@@ -36,6 +38,7 @@ const MAX_COMMENT_LENGTH = 3000;
 export default function Comments(props: PropsType): ReactNode {
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
+  const searchParams = useSearchParams();
   const [opened, { open, close }] = useDisclosure(false);
   const [editedComment, setEditedComment] = useAtom(editedCommentAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -54,6 +57,11 @@ export default function Comments(props: PropsType): ReactNode {
     // Populate the comment input field if a comment is being edited
     if (editedComment?.body && messageRef.current) {
       form.setFieldValue('comment', editedComment.body);
+    }
+
+    // Open the comments modal if the "show comments" query param is present
+    if (isParamInSearchParams(searchParams, urlKeys.showComments, 'true')) {
+      openModal();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is not a dependency
   }, [editedComment?.body]);
