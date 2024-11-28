@@ -199,6 +199,17 @@ const saveTokens = async (
     type,
   });
 
+  // TODO: Fire event for new notification to all subscribed entities
+  // WE SOMEHOW NEED TO GET ALL ORG USERS HERE, LOOP THROUGH THEM AND CREATE A NOTIFICATION + PUBLISH NOTIFICATION
+  // FOR EACH ORG USER!
+  // pubSub.publish('user:notification:new-notification', notification.receivingUserId, {
+  //   id: notification.id,
+  //   receivingUserId: notification.receivingUserId,
+  //   type: NotificationTypeEnum.NEW_INTEGRATION,
+  //   isRead: false,
+  //   createdAt: new Date(),
+  // });
+
   const decryptedIntegration = {
     ...integration,
     accessToken: tokens.accessToken,
