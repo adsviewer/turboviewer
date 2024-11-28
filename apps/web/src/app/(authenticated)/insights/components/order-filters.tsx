@@ -163,9 +163,9 @@ export default function OrderFilters(): React.ReactNode {
           refProp="rootRef"
           position="top-start"
           disabled={
-            !isPending &&
-            (isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.creativeId) ||
-              isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId))
+            isPending ||
+            (!isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId) &&
+              !isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.creativeId))
           }
         >
           <Switch

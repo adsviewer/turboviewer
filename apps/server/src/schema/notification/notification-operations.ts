@@ -26,11 +26,12 @@ builder.queryFields((t) => ({
     type: [NotificationDto],
     nullable: false,
     resolve: async (query, _root, _args, ctx) => {
-      return await prisma.notification.findMany({
+      const data = await prisma.notification.findMany({
         ...query,
         where: { receivingUserId: ctx.currentUserId },
         orderBy: { createdAt: 'desc' },
       });
+      return data;
     },
   }),
 }));
