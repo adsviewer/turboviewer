@@ -439,7 +439,7 @@ class Google implements ChannelInterface {
       const previewHTML = `
       <iframe
         title="${adData.adGroupAd.ad.name ?? ''}"
-        src="https://youtube.com/watch?v=${adData.video.id}"
+        src="https://youtube.com/embed/${adData.video.id}"
         width="600"
         height="400"
         scrolling="no"
