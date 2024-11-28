@@ -15,6 +15,7 @@ subscription newNotification {
   newNotification {
     id
     type
+    extraData
     receivingUserId
     isRead
     createdAt

@@ -1363,6 +1363,7 @@ export type NotificationsQuery = {
     id: string;
     type: NotificationTypeEnum;
     receivingUserId: string;
+    extraData?: any | null;
     isRead: boolean;
     createdAt: Date;
   }>;
@@ -1951,6 +1952,7 @@ export const NotificationsDocument = gql`
       id
       type
       receivingUserId
+      extraData
       isRead
       createdAt
     }

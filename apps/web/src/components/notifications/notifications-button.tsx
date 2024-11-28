@@ -72,16 +72,7 @@ export default function NotificationsButton(): ReactNode {
 
   return (
     <Group justify="center" ref={ref}>
-      <Popover
-        width={350}
-        trapFocus
-        position="bottom"
-        withArrow
-        shadow="md"
-        offset={-5}
-        opened={opened}
-        closeOnClickOutside
-      >
+      <Popover width={350} trapFocus position="bottom" withArrow shadow="md" offset={-5} opened={opened}>
         <Popover.Target>
           <Indicator size={10} offset={7} color="red" disabled={!hasUnreadNotifications()}>
             <ActionIcon

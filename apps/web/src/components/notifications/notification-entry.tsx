@@ -30,11 +30,12 @@ export default function NotificationEntry(props: PropsType): ReactNode {
   };
 
   const onNotificationClick = (): void => {
+    logger.info(props.data);
     switch (props.data.type) {
       case NotificationTypeEnum.COMMENT_MENTION:
-        logger.info('cm3x8pl2v03ofbzosv5lcywrh');
         router.push(
-          `/analytical?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.creativeId}&${urlKeys.creativeIds}=cm3x8pl2v03ofbzosv5lcywrh&${urlKeys.showComments}=true`,
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access -- allow until we figure out prisma json types
+          `/analytical?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.creativeId}&${urlKeys.creativeIds}=${props.data.extraData.commentMentionCreativeId}&${urlKeys.showComments}=true`,
         );
         props.closeNotifications();
         break;

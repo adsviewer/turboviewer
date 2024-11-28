@@ -1180,6 +1180,7 @@ export type NewNotificationSubscription = {
     __typename: 'NotificationEventPayload';
     id: string;
     type: NotificationTypeEnum;
+    extraData?: any | null;
     receivingUserId: string;
     isRead: boolean;
     createdAt: Date;
@@ -1227,6 +1228,7 @@ export const NewNotificationDocument = gql`
     newNotification {
       id
       type
+      extraData
       receivingUserId
       isRead
       createdAt

@@ -3,6 +3,7 @@ query notifications {
     id
     type
     receivingUserId
+    extraData
     isRead
     createdAt
   }
