@@ -30,11 +30,18 @@ export default function NotificationEntry(props: PropsType): ReactNode {
   };
 
   const onNotificationClick = (): void => {
-    logger.info('cm3x8pl2v03ofbzosv5lcywrh');
-    router.replace(
-      `/analytical?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.creativeId}&${urlKeys.creativeIds}=cm3x8pl2v03ofbzosv5lcywrh&${urlKeys.showComments}=true`,
-    );
-    props.closeNotifications();
+    switch (props.data.type) {
+      case NotificationTypeEnum.COMMENT_MENTION:
+        logger.info('cm3x8pl2v03ofbzosv5lcywrh');
+        router.push(
+          `/analytical?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.creativeId}&${urlKeys.creativeIds}=cm3x8pl2v03ofbzosv5lcywrh&${urlKeys.showComments}=true`,
+        );
+        props.closeNotifications();
+        break;
+      case NotificationTypeEnum.NEW_INTEGRATION:
+        router.push(`/integrations`);
+        break;
+    }
   };
 
   return (
