@@ -5,6 +5,7 @@ import {
   IntegrationStatus,
   type IntegrationTypeEnum,
   MilestoneEnum,
+  NotificationTypeEnum,
   Prisma,
   prisma,
 } from '@repo/database';
@@ -18,6 +19,7 @@ import { encryptAesGcm, type TokensResponse } from '@repo/channel-utils';
 import { isMode, MODE } from '@repo/mode';
 import { tierConstraints } from '@repo/mappings';
 import { pubSub } from '@repo/pubsub';
+import { createId } from '@paralleldrive/cuid2';
 import { getChannel, isIntegrationTypeEnum } from './channel-helper';
 import { env } from './config';
 import { invokeChannelIngress } from './data-refresh';
@@ -199,16 +201,29 @@ const saveTokens = async (
     type,
   });
 
-  // TODO: Fire event for new notification to all subscribed entities
-  // WE SOMEHOW NEED TO GET ALL ORG USERS HERE, LOOP THROUGH THEM AND CREATE A NOTIFICATION + PUBLISH NOTIFICATION
-  // FOR EACH ORG USER!
-  // pubSub.publish('user:notification:new-notification', notification.receivingUserId, {
-  //   id: notification.id,
-  //   receivingUserId: notification.receivingUserId,
-  //   type: NotificationTypeEnum.NEW_INTEGRATION,
-  //   isRead: false,
-  //   createdAt: new Date(),
-  // });
+  // Fire event for new notification to all subscribed entities
+  const orgUsers = await prisma.user.findMany({ where: { organizations: { some: { organizationId } } } });
+  for (const user of orgUsers) {
+    const newNotificationId = createId();
+    await prisma.notification.create({
+      data: {
+        id: newNotificationId,
+        type: NotificationTypeEnum.NEW_INTEGRATION,
+        receivingUserId: user.id,
+        isRead: false,
+        createdAt: new Date(),
+      },
+    });
+
+    pubSub.publish('user:notification:new-notification', user.id, {
+      id: newNotificationId,
+      type: NotificationTypeEnum.NEW_INTEGRATION,
+      receivingUserId: user.id,
+      extraData: {},
+      isRead: false,
+      createdAt: new Date(),
+    });
+  }
 
   const decryptedIntegration = {
     ...integration,

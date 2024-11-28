@@ -51,15 +51,4 @@ builder.mutationFields((t) => ({
       return true;
     },
   }),
-  markAllNotificationsAsRead: t.withAuth({ isInOrg: true }).field({
-    type: 'Boolean',
-    nullable: false,
-    resolve: async (_root, _args, ctx) => {
-      await prisma.notification.updateMany({
-        where: { receivingUserId: ctx.currentUserId, isRead: false },
-        data: { isRead: true },
-      });
-      return true;
-    },
-  }),
 }));
