@@ -40,6 +40,9 @@ interface InsightCardProps {
   creativeId?: string | null;
   creativeName?: string | null;
   hideHeading?: boolean;
+  hideBody?: boolean;
+  hideTitleAndRank?: boolean;
+  hideDetails?: boolean;
 }
 
 interface RankType {
@@ -150,53 +153,56 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
     ];
   };
 
-  return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
-      {!props.hideHeading ? (
-        <Flex gap="sm" align="center">
-          <Title order={3} mb="md" fw={500} title={String(props.title)}>
-            {props.heading}
-          </Title>
+  const renderHeading = (): ReactNode => {
+    return (
+      <Flex gap="sm" align="center">
+        <Title order={3} mb="md" fw={500} title={String(props.title)}>
+          {props.heading}
+        </Title>
 
-          {/* Comments */}
-          {props.creativeId && props.creativeName ? (
-            <Flex mb="md" ml="auto" style={{ cursor: 'pointer' }}>
-              <Comments creativeId={props.creativeId} creativeName={props.creativeName} />
-            </Flex>
-          ) : null}
-        </Flex>
-      ) : null}
+        {/* Comments */}
+        {props.creativeId && props.creativeName ? (
+          <Flex mb="md" ml="auto" style={{ cursor: 'pointer' }}>
+            <Comments creativeId={props.creativeId} creativeName={props.creativeName} />
+          </Flex>
+        ) : null}
+      </Flex>
+    );
+  };
 
-      {!searchParams.has(urlKeys.fetchPreviews) ? (
-        // Chart Analytics
-        <Box>
-          <AreaChart
-            h={300}
-            tooltipProps={{ wrapperStyle: { zIndex: 10 } }}
-            curveType="natural"
-            strokeWidth={1.5}
-            tooltipAnimationDuration={200}
-            withLegend
-            withRightYAxis
-            valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
-            dataKey="date"
-            data={datapoints}
-            series={getChartSeries()}
-          />
-        </Box>
-      ) : (
-        // IFrame ad preview
-        <Flex justify="center" align="center" mb="auto" h="100%">
-          {isLoadingIframe && props.iframe ? (
-            <Box pos="absolute">
-              <LoaderCentered type="bars" />
-            </Box>
-          ) : null}
-          {getIFrameHtml()}
-        </Flex>
-      )}
+  const renderBody = (): ReactNode => {
+    return !searchParams.has(urlKeys.fetchPreviews) ? (
+      // Chart Analytics
+      <Box>
+        <AreaChart
+          h={300}
+          tooltipProps={{ wrapperStyle: { zIndex: 10 } }}
+          curveType="natural"
+          strokeWidth={1.5}
+          tooltipAnimationDuration={200}
+          withLegend
+          withRightYAxis
+          valueFormatter={(value) => new Intl.NumberFormat('en-US').format(value)}
+          dataKey="date"
+          data={datapoints}
+          series={getChartSeries()}
+        />
+      </Box>
+    ) : (
+      // IFrame ad preview
+      <Flex justify="center" align="center" mb="auto" h="100%">
+        {isLoadingIframe && props.iframe ? (
+          <Box pos="absolute">
+            <LoaderCentered type="bars" />
+          </Box>
+        ) : null}
+        {getIFrameHtml()}
+      </Flex>
+    );
+  };
 
-      {/* Title */}
+  const renderTitleAndRank = (): ReactNode => {
+    return (
       <Group justify="space-between" mt="md" mb="xs">
         <Flex gap="sm" align="center">
           {String(props.title) !== t('insight') ? (
@@ -217,133 +223,147 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
         </Flex>
         {props.datapoints ? <Badge color={rank.color}>{rank.label}</Badge> : null}
       </Group>
+    );
+  };
 
-      {/* Descriptions */}
-      <Flex justify="space-between">
-        <Text
-          size="sm"
-          c="dimmed"
-          onClick={() => {
-            if (props.description) {
-              void copyText(sentenceCase(props.description));
-            }
-          }}
-          style={{ cursor: 'pointer' }}
-        >
-          {sentenceCase(props.description ?? '')}
-        </Text>
-        <Flex>
-          {props.device ? (
-            <Tooltip label={String(props.device)}>
-              <div style={{ opacity: 0.3 }}>
-                {(() => {
-                  const DeviceIcon = deviceToIconMap.get(props.device);
-                  return DeviceIcon ? <DeviceIcon /> : null;
-                })()}
-              </div>
-            </Tooltip>
-          ) : null}
-          {props.publisher ? (
-            <Tooltip label={String(props.publisher)}>
-              <div style={{ opacity: 0.3 }}>
-                {(() => {
-                  const PublisherIcon = publisherToIconMap.get(props.publisher);
-                  return PublisherIcon ? <PublisherIcon /> : null;
-                })()}
-              </div>
-            </Tooltip>
-          ) : null}
+  const renderDetails = (): ReactNode => {
+    return (
+      <>
+        {/* Descriptions */}
+        <Flex justify="space-between">
+          <Text
+            size="sm"
+            c="dimmed"
+            onClick={() => {
+              if (props.description) {
+                void copyText(sentenceCase(props.description));
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            {sentenceCase(props.description ?? '')}
+          </Text>
+          <Flex>
+            {props.device ? (
+              <Tooltip label={String(props.device)}>
+                <div style={{ opacity: 0.3 }}>
+                  {(() => {
+                    const DeviceIcon = deviceToIconMap.get(props.device);
+                    return DeviceIcon ? <DeviceIcon /> : null;
+                  })()}
+                </div>
+              </Tooltip>
+            ) : null}
+            {props.publisher ? (
+              <Tooltip label={String(props.publisher)}>
+                <div style={{ opacity: 0.3 }}>
+                  {(() => {
+                    const PublisherIcon = publisherToIconMap.get(props.publisher);
+                    return PublisherIcon ? <PublisherIcon /> : null;
+                  })()}
+                </div>
+              </Tooltip>
+            ) : null}
+          </Flex>
         </Flex>
-      </Flex>
 
-      {/* Stats */}
-      {datapoints.length ? (
-        <Flex gap="md" wrap="wrap">
-          {/* Impressions */}
-          <Tooltip label={t('impressions')}>
-            <Flex
-              align="center"
-              gap={3}
-              onClick={() => {
-                void copyText(String(datapoints[datapoints.length - 1].impressions));
-              }}
-              style={{ cursor: 'pointer' }}
-            >
-              <IconEye />
-              <Text size="sm" c="dimmed">
-                {format.number(datapoints[datapoints.length - 1].impressions, { style: 'decimal' })}
-              </Text>
-            </Flex>
-          </Tooltip>
-          {/* Spend */}
-          <Tooltip label={t('spent')}>
-            <Flex
-              align="center"
-              gap="xs"
-              onClick={() => {
-                void copyText(String(Number(datapoints[datapoints.length - 1].spend)));
-              }}
-              style={{ cursor: 'pointer' }}
-            >
-              <IconCoins />
-              <Text size="sm" c="dimmed">
-                {format.number(Number(datapoints[datapoints.length - 1].spend), {
-                  style: 'currency',
-                  currency: props.currency,
-                })}
-              </Text>
-            </Flex>
-          </Tooltip>
-          {/* CPM */}
-          <Tooltip label="CPM">
-            <Flex
-              align="center"
-              gap="xs"
-              onClick={() => {
-                void copyText(String(datapoints[datapoints.length - 1].cpm));
-              }}
-              style={{ cursor: 'pointer' }}
-            >
-              <IconChartLine />
-              <Text size="sm" c="dimmed">
-                {datapoints[datapoints.length - 1].cpm}
-              </Text>
-            </Flex>
-          </Tooltip>
-          {/* CPC */}
-          <Tooltip label="CPC">
-            <Flex
-              align="center"
-              gap="xs"
-              onClick={() => {
-                void copyText(String(datapoints[datapoints.length - 1].cpc));
-              }}
-              style={{ cursor: 'pointer' }}
-            >
-              <IconZoomMoney />
-              <Text size="sm" c="dimmed">
-                {datapoints[datapoints.length - 1].cpc}
-              </Text>
-            </Flex>
-          </Tooltip>
-          {/* Clicks */}
-          <Tooltip label="Clicks">
-            <Flex
-              align="center"
-              gap="xs"
-              onClick={() => {
-                void copyText(String(datapoints[datapoints.length - 1].clicks));
-              }}
-              style={{ cursor: 'pointer' }}
-            >
-              <IconClick />
-              <Text size="sm" c="dimmed">
-                {datapoints[datapoints.length - 1].clicks}
-              </Text>
-            </Flex>
-          </Tooltip>
-        </Flex>
-      ) : null}
+        {datapoints.length ? (
+          <Flex gap="md" wrap="wrap">
+            {/* Impressions */}
+            <Tooltip label={t('impressions')}>
+              <Flex
+                align="center"
+                gap={3}
+                onClick={() => {
+                  void copyText(String(datapoints[datapoints.length - 1].impressions));
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <IconEye />
+                <Text size="sm" c="dimmed">
+                  {format.number(datapoints[datapoints.length - 1].impressions, { style: 'decimal' })}
+                </Text>
+              </Flex>
+            </Tooltip>
+            {/* Spend */}
+            <Tooltip label={t('spent')}>
+              <Flex
+                align="center"
+                gap="xs"
+                onClick={() => {
+                  void copyText(String(Number(datapoints[datapoints.length - 1].spend)));
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <IconCoins />
+                <Text size="sm" c="dimmed">
+                  {format.number(Number(datapoints[datapoints.length - 1].spend), {
+                    style: 'currency',
+                    currency: props.currency,
+                  })}
+                </Text>
+              </Flex>
+            </Tooltip>
+            {/* CPM */}
+            <Tooltip label="CPM">
+              <Flex
+                align="center"
+                gap="xs"
+                onClick={() => {
+                  void copyText(String(datapoints[datapoints.length - 1].cpm));
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <IconChartLine />
+                <Text size="sm" c="dimmed">
+                  {datapoints[datapoints.length - 1].cpm}
+                </Text>
+              </Flex>
+            </Tooltip>
+            {/* CPC */}
+            <Tooltip label="CPC">
+              <Flex
+                align="center"
+                gap="xs"
+                onClick={() => {
+                  void copyText(String(datapoints[datapoints.length - 1].cpc));
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <IconZoomMoney />
+                <Text size="sm" c="dimmed">
+                  {datapoints[datapoints.length - 1].cpc}
+                </Text>
+              </Flex>
+            </Tooltip>
+            {/* Clicks */}
+            <Tooltip label="Clicks">
+              <Flex
+                align="center"
+                gap="xs"
+                onClick={() => {
+                  void copyText(String(datapoints[datapoints.length - 1].clicks));
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <IconClick />
+                <Text size="sm" c="dimmed">
+                  {datapoints[datapoints.length - 1].clicks}
+                </Text>
+              </Flex>
+            </Tooltip>
+          </Flex>
+        ) : null}
+      </>
+    );
+  };
+
+  return (
+    <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
+      {!props.hideHeading ? renderHeading() : null}
+      {!props.hideBody ? renderBody() : null}
+      {!props.hideTitleAndRank ? renderTitleAndRank() : null}
+      {!props.hideDetails ? renderDetails() : null}
     </Card>
   );
 }

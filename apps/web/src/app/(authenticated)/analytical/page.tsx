@@ -5,6 +5,7 @@ import React, { useEffect, type ReactNode, use, useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { useTranslations } from 'next-intl';
+import uniqid from 'uniqid';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { type GroupedInsight } from '@/graphql/generated/schema-server';
 import InsightCard from '@/components/insights/insight-card';
@@ -61,7 +62,7 @@ export default function Analytical(props: InsightsProps): ReactNode {
           <Title order={4}>{insightData.creativeName}</Title>
           <Flex justify="space-evenly">
             <InsightCard
-              key={insightData.id}
+              key={uniqid()}
               heading={getInsightHeading(insightData)}
               title={getInsightTitle(insightData)}
               description={insightData.position}
