@@ -12,3 +12,7 @@ export const truncateString = (text: string, maxLength: number): string => {
 export const createFullName = (firstName: string, lastName: string): string => {
   return `${firstName} ${lastName}`;
 };
+
+export const removeHTMLTags = (str: string): string => {
+  return str.replace(/<\/?[^>]+(?<temp1>>|$)/g, '');
+};

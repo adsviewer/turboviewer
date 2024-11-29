@@ -14,7 +14,3 @@ export const sendFeedbackSchema = z.object({
   type: z.string(),
   message: messageSchema,
 });
-
-export const commentSchema = z.object({
-  comment: commentBodySchema,
-});

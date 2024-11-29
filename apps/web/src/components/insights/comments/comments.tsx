@@ -1,23 +1,22 @@
 'use client';
 
-import { Tooltip, ActionIcon, Modal, Text, Divider, Indicator, Textarea, Button, Flex } from '@mantine/core';
-import { useForm, zodResolver } from '@mantine/form';
-import { useDisclosure, getHotkeyHandler } from '@mantine/hooks';
+import { Tooltip, ActionIcon, Modal, Text, Divider, Indicator, Button, Flex } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
-import { commentSchema } from '@repo/utils';
 import { IconMessage, IconSend2, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import React, { useEffect, useRef, useState, type ReactNode } from 'react';
+import React, { useEffect, useState, type ReactNode } from 'react';
 import { useAtom } from 'jotai';
 import { useSearchParams } from 'next/navigation';
-import { createFullName } from '@/util/format-utils';
+import { createFullName, removeHTMLTags } from '@/util/format-utils';
 import { type CommentsQuery } from '@/graphql/generated/schema-server';
 import { deleteComment, getComments, upsertComment } from '@/app/(authenticated)/actions';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { editedCommentAtom } from '@/app/atoms/comment-atoms';
 import { isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
 import CommentsList from './comments-list';
+import CommentInput from './comment-input/comment-input';
 
 interface PropsType {
   creativeId: string;
@@ -44,19 +43,18 @@ export default function Comments(props: PropsType): ReactNode {
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentItemType[]>([]);
-  const messageRef = useRef<HTMLTextAreaElement>(null);
-  const form = useForm({
-    mode: 'controlled',
-    initialValues: {
-      comment: '',
-    },
-    validate: zodResolver(commentSchema),
-  });
+
+  // Comment Input params
+  const [commentInputContent, setCommentInputContent] = useState<string>('');
+  const [commentInputContentTemp, setCommentInputContentTemp] = useState<string>('');
+  const [commentInputContentLength, setCommentInputContentLength] = useState<number>(0);
 
   useEffect(() => {
-    // Populate the comment input field if a comment is being edited
-    if (editedComment?.body && messageRef.current) {
-      form.setFieldValue('comment', editedComment.body);
+    // Populate the comment input field and its params if a comment is being edited
+    if (editedComment?.body) {
+      setCommentInputContent(editedComment.body);
+      setCommentInputContentLength(removeHTMLTags(editedComment.body).length);
+      setCommentInputContentTemp(editedComment.body);
     }
 
     // Open the comments modal if the "show comments" query param is present
@@ -154,13 +152,16 @@ export default function Comments(props: PropsType): ReactNode {
 
   const resetForm = (): void => {
     setEditedComment(null);
-    form.reset();
+    setCommentInputContent('');
+    setCommentInputContentTemp('');
+    setCommentInputContentLength(0);
   };
 
-  const handleSubmit = (): void => {
-    if (messageRef.current) {
-      sendComment(messageRef.current.value);
+  const handleSubmit = (content: string): void => {
+    logger.info(content);
+    if (content.length > 0) {
       resetForm();
+      sendComment(content);
     }
   };
 
@@ -199,50 +200,44 @@ export default function Comments(props: PropsType): ReactNode {
         {!isLoadingComments ? <CommentsList comments={comments} eraseComment={eraseComment} /> : <LoaderCentered />}
 
         {/* New Comment */}
-        <form
-          onSubmit={form.onSubmit(() => {
-            handleSubmit();
-          })}
+        <Indicator
+          label={`${String(commentInputContentLength)} / ${String(MAX_COMMENT_LENGTH)}`}
+          size={16}
+          position="bottom-end"
+          offset={22}
         >
-          <Indicator
-            label={`${String(messageRef.current?.value.length ?? 0)} / ${String(MAX_COMMENT_LENGTH)}`}
-            size={16}
-            position="top-end"
-            offset={24}
-          >
-            <Textarea
-              ref={messageRef}
-              description={t('comments.commentHint')}
-              key={form.key('comment')}
-              {...form.getInputProps('comment')}
-              placeholder={t('comments.commentHint')}
-              autosize
-              minRows={6}
-              maxRows={3}
-              maxLength={MAX_COMMENT_LENGTH}
-              disabled={isPending || isLoadingComments}
-              my="md"
-              onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])}
-            />
-          </Indicator>
-          <Flex w="100%">
-            {editedComment?.id ? (
-              <Button variant="transparent" rightSection={<IconX />} mr="auto" onClick={resetForm}>
-                {t('comments.cancelEditing')}
-              </Button>
-            ) : null}
-
-            <Button
-              type="submit"
-              disabled={!form.isValid() || isLoadingComments}
-              loading={isPending}
-              rightSection={<IconSend2 />}
-              ml="auto"
-            >
-              {t('comments.send')}
+          <CommentInput
+            disabled={isPending || isLoadingComments}
+            placeholder={t('comments.commentHint')}
+            maxLength={MAX_COMMENT_LENGTH}
+            content={commentInputContent}
+            onContentChanged={setCommentInputContent}
+            onContentLengthChanged={setCommentInputContentLength}
+            onCtrlEnter={handleSubmit}
+            onSubmit={handleSubmit}
+            setCommentInputContentTemp={setCommentInputContentTemp}
+          />
+        </Indicator>
+        <Flex w="100%">
+          {editedComment?.id ? (
+            <Button variant="transparent" rightSection={<IconX />} mr="auto" onClick={resetForm}>
+              {t('comments.cancelEditing')}
             </Button>
-          </Flex>
-        </form>
+          ) : null}
+
+          <Button
+            type="submit"
+            disabled={commentInputContentLength === 0 || isLoadingComments}
+            loading={isPending}
+            rightSection={<IconSend2 />}
+            ml="auto"
+            onClick={() => {
+              handleSubmit(commentInputContentTemp);
+            }}
+          >
+            {t('comments.send')}
+          </Button>
+        </Flex>
       </Modal>
     </>
   );

@@ -31,7 +31,7 @@ export default function CommentOptions(props: PropsType): ReactNode {
   return (
     <Menu width={200} shadow="md" withArrow>
       <Menu.Target>
-        <ActionIcon variant="white" c="gray">
+        <ActionIcon variant="transparent" c="gray">
           <IconDotsVertical />
         </ActionIcon>
       </Menu.Target>
