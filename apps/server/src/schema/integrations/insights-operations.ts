@@ -262,16 +262,19 @@ const GroupedInsightDto = builder.simpleObject(
       type: IFrameDTO,
       nullable: true,
       resolve: async (root, _args, _ctx, _info) => {
-        if (!root.adId) return null;
+        if (!root.adId && !root.creativeId) return null;
+        const adId = root.adId
+          ? root.adId
+          : (await prisma.ad.findFirstOrThrow({ where: { creativeId: root.creativeId } })).id;
         const iFrame = await iFramePerInsight.getValue(
           {
-            adId: root.adId,
+            adId,
             publisher: root.publisher ?? undefined,
             position: root.position ?? undefined,
             device: root.device ?? undefined,
           },
           {
-            adId: root.adId,
+            adId,
             publisher: root.publisher ?? undefined,
             position: root.position ?? undefined,
             device: root.device ?? undefined,

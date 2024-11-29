@@ -66,7 +66,7 @@
     "prevPage": "Prev page",
     "noResultsFound": "No results found",
     "showAdPreviews": "Show ad previews",
-    "adPreviewsTooltip": "Previews can be viewed only via filtering by Ad ID",
+    "adPreviewsTooltip": "Previews can be viewed only via filtering by Ad ID or Creative ID",
     "chartMetric": "Chart Metric",
     "comments": {
       "title": "Comments",
