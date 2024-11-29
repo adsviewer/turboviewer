@@ -2,38 +2,30 @@
 import { ReactRenderer } from '@tiptap/react';
 import tippy from 'tippy.js';
 import MentionList from './mention-list';
+import { getDefaultStore } from 'jotai';
+import { organizationAtom } from '@/app/atoms/organization-atoms';
+import { logger } from '@repo/logger';
+import { userDetailsAtom } from '@/app/atoms/user-atoms';
+
+const store = getDefaultStore();
 
 export default {
   items: ({ query }) => {
-    return [
-      'Lea Thompson',
-      'Cyndi Lauper',
-      'Tom Cruise',
-      'Madonna',
-      'Jerry Hall',
-      'Joan Collins',
-      'Winona Ryder',
-      'Christina Applegate',
-      'Alyssa Milano',
-      'Molly Ringwald',
-      'Ally Sheedy',
-      'Debbie Harry',
-      'Olivia Newton-John',
-      'Elton John',
-      'Michael J. Fox',
-      'Axl Rose',
-      'Emilio Estevez',
-      'Ralph Macchio',
-      'Rob Lowe',
-      'Jennifer Grey',
-      'Mickey Rourke',
-      'John Cusack',
-      'Matthew Broderick',
-      'Justine Bateman',
-      'Lisa Bonet',
-    ]
-      .filter((item) => item.toLowerCase().startsWith(query.toLowerCase()))
-      .slice(0, 5);
+    const organization = store.get(organizationAtom);
+    const userDetails = store.get(userDetailsAtom);
+
+    // Make sure the current user is not included
+    const usersData = organization?.organization.userOrganizations
+      .filter((userOrganization) => userOrganization.userId !== userDetails.id)
+      .map((userOrganization) => {
+        return {
+          id: userOrganization.userId,
+          label: `${userOrganization.user.firstName} ${userOrganization.user.lastName}`,
+        };
+      });
+    logger.info(usersData);
+
+    return usersData.filter((item) => item.label.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5);
   },
 
   render: () => {

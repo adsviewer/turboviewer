@@ -43,6 +43,7 @@ export default function Comments(props: PropsType): ReactNode {
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentItemType[]>([]);
+  const [taggedUsersIds, setTaggedUsersIds] = useState<string[]>([]);
 
   // Comment Input params
   const [commentInputContent, setCommentInputContent] = useState<string>('');
@@ -103,7 +104,12 @@ export default function Comments(props: PropsType): ReactNode {
 
   const sendComment = (commentBody: string): void => {
     setIsPending(true);
-    void upsertComment({ creativeId: props.creativeId, body: commentBody, commentToUpdateId: editedComment?.id })
+    void upsertComment({
+      creativeId: props.creativeId,
+      body: commentBody,
+      commentToUpdateId: editedComment?.id,
+      taggedUsersIds,
+    })
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -158,10 +164,9 @@ export default function Comments(props: PropsType): ReactNode {
   };
 
   const handleSubmit = (content: string): void => {
-    logger.info(content);
     if (content.length > 0) {
-      resetForm();
       sendComment(content);
+      resetForm();
     }
   };
 
@@ -211,11 +216,13 @@ export default function Comments(props: PropsType): ReactNode {
             placeholder={t('comments.commentHint')}
             maxLength={MAX_COMMENT_LENGTH}
             content={commentInputContent}
+            contentTemp={commentInputContentTemp}
             onContentChanged={setCommentInputContent}
             onContentLengthChanged={setCommentInputContentLength}
             onCtrlEnter={handleSubmit}
             onSubmit={handleSubmit}
             setCommentInputContentTemp={setCommentInputContentTemp}
+            setTaggedUsersIds={setTaggedUsersIds}
           />
         </Indicator>
         <Flex w="100%">

@@ -10,10 +10,8 @@ export default forwardRef((props, ref) => {
 
   const selectItem = (index) => {
     const item = props.items[index];
-    console.log('Selected item:', item);
-
     if (item) {
-      props.command({ id: item });
+      props.command({ id: item.id, label: item.label }); // Pass the item's ID or full object if needed
     }
   };
 
@@ -65,7 +63,7 @@ export default forwardRef((props, ref) => {
               selectItem(index);
             }}
           >
-            {item}
+            {item.label}
           </button>
         ))
       ) : (

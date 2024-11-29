@@ -36,6 +36,8 @@ import { type Integration, IntegrationStatus } from '@/graphql/generated/schema-
 import LoaderCentered from '@/components/misc/loader-centered';
 import { searchesAtom } from '@/app/atoms/searches-atoms';
 import NotificationsButton from '@/components/notifications/notifications-button';
+import { organizationAtom } from '@/app/atoms/organization-atoms';
+import getOrganization from '@/app/(authenticated)/organization/actions';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -44,6 +46,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+  const setOrganization = useSetAtom(organizationAtom);
   const setSearchesAtom = useSetAtom(searchesAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
@@ -112,6 +115,18 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     );
 
     initialRequests.push(
+      void getOrganization()
+        .then((orgRes) => {
+          if (orgRes.data) {
+            setOrganization(orgRes.data);
+          }
+        })
+        .catch((err: unknown) => {
+          logger.error(err);
+        }),
+    );
+
+    initialRequests.push(
       void getSearchQueryStrings()
         .then((res) => {
           if (!res.success) {
@@ -128,7 +143,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     Promise.all(initialRequests).catch((err: unknown) => {
       logger.error(err);
     });
-  }, [checkIntegrationTokensForExpiration, setSearchesAtom, setUserDetails]);
+  }, [checkIntegrationTokensForExpiration, setOrganization, setSearchesAtom, setUserDetails]);
 
   // Make sure that all the mandatory initial data are loaded
   useEffect(() => {

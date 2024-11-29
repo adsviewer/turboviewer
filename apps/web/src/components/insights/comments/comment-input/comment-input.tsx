@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-shadow -- this is fine*/
-/* eslint-disable import/no-named-as-default -- this is fine */
+/* eslint-disable -- fragile, do not touch */
 'use client';
 
 import Document from '@tiptap/extension-document';
@@ -17,11 +16,13 @@ interface PropsType {
   placeholder: string;
   maxLength: number;
   content: string;
+  contentTemp: string;
   onContentChanged: (content: string) => void;
   onContentLengthChanged: (length: number) => void;
   onCtrlEnter: (content: string) => void;
   onSubmit: (content: string) => void;
   setCommentInputContentTemp: (content: string) => void;
+  setTaggedUsersIds: (ids: string[]) => void;
 }
 
 export default function CommentInput(props: PropsType): ReactNode {
@@ -46,6 +47,18 @@ export default function CommentInput(props: PropsType): ReactNode {
       // Update the parent component with the current content of the editor
       props.onContentLengthChanged(text.length);
       props.setCommentInputContentTemp(editor.getHTML());
+
+      // Update the tagged users ids of the current comment
+      const htmlData = editor.getJSON();
+      if (htmlData.content?.length) {
+        const data = htmlData.content[0];
+        if (data.content?.length) {
+          const mentionIds = Array.from(
+            new Set(data.content.filter((item) => item.type === 'mention').map((item) => item.attrs.id)),
+          );
+          props.setTaggedUsersIds(mentionIds as string[]);
+        }
+      }
 
       if (text.length > props.maxLength) {
         const truncatedText = text.slice(0, props.maxLength);

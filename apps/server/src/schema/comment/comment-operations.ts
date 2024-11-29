@@ -16,6 +16,7 @@ builder.queryFields((t) => ({
       const data = await prisma.comment.findMany({
         ...query,
         where: { creativeId: args.creativeId },
+        orderBy: { createdAt: 'asc' },
       });
       return data;
     },
