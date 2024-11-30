@@ -162,13 +162,21 @@ export default function OrderFilters(): React.ReactNode {
           label={t('adPreviewsTooltip')}
           refProp="rootRef"
           position="top-start"
-          disabled={!isPending && isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
+          disabled={
+            !isPending &&
+            (isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.creativeId) ||
+              isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId))
+          }
         >
           <Switch
             description={t('showAdPreviews')}
             checked={getAdPreviewValue()}
             onChange={handleAdPreviewChange}
-            disabled={isPending || !isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId)}
+            disabled={
+              isPending ||
+              (!isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.creativeId) &&
+                !isParamInSearchParams(searchParams, urlKeys.groupedBy, InsightsColumnsGroupBy.adId))
+            }
           />
         </Tooltip>
       </Flex>
