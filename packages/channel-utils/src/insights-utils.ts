@@ -47,7 +47,7 @@ export const saveAccounts = async (
           adAccountIntegrations: {
             create: {
               integrationId: integration.id,
-              enabled: true,
+              enabled: false,
             },
           },
         },
@@ -61,12 +61,11 @@ export const saveAccounts = async (
           },
         },
         update: {
-          enabled: true,
         },
         create: {
           adAccountId: adAccount.id,
           integrationId: integration.id,
-          enabled: true,
+          enabled: false,
         },
       });
       return adAccount;

@@ -70,6 +70,8 @@ export const AdAccountIntegrationDto = builder.prismaObject('AdAccountIntegratio
     adAccountId: t.exposeString('adAccountId'),
     integrationId: t.exposeString('integrationId'),
     enabled: t.exposeBoolean('enabled'),
+    adAccount: t.relation('adAccount'),
+    integration: t.relation('integration'),
   }),
 });
 
