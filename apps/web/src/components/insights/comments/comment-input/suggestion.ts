@@ -23,7 +23,6 @@ export default {
           label: `${userOrganization.user.firstName} ${userOrganization.user.lastName}`,
         };
       });
-    logger.info(usersData);
 
     return usersData.filter((item) => item.label.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5);
   },

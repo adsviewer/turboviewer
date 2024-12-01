@@ -5,10 +5,15 @@ import './mention-list.scss';
 
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
-export default forwardRef((props, ref) => {
+interface PropsType {
+  items: { id: string; label: string }[];
+  command: (item: { id: string; label: string }) => void;
+}
+
+export default forwardRef((props: PropsType, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const selectItem = (index) => {
+  const selectItem = (index: number) => {
     const item = props.items[index];
     if (item) {
       props.command({ id: item.id, label: item.label }); // Pass the item's ID or full object if needed
@@ -32,7 +37,7 @@ export default forwardRef((props, ref) => {
   }, [props.items]);
 
   useImperativeHandle(ref, () => ({
-    onKeyDown: ({ event }) => {
+    onKeyDown: ({ event }: { event: React.KeyboardEvent }) => {
       if (event.key === 'ArrowUp') {
         upHandler();
         return true;
