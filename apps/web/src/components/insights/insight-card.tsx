@@ -281,13 +281,13 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
               align="center"
               gap="xs"
               onClick={() => {
-                void copyText(String(Number(datapoints[datapoints.length - 1].spend) / 100));
+                void copyText(String(Number(datapoints[datapoints.length - 1].spend)));
               }}
               style={{ cursor: 'pointer' }}
             >
               <IconCoins />
               <Text size="sm" c="dimmed">
-                {format.number(Number(datapoints[datapoints.length - 1].spend) / 100, {
+                {format.number(Number(datapoints[datapoints.length - 1].spend), {
                   style: 'currency',
                   currency: props.currency,
                 })}
