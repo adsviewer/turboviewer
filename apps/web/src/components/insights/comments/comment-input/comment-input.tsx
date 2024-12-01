@@ -54,7 +54,15 @@ export default function CommentInput(props: PropsType): ReactNode {
         const data = htmlData.content[0];
         if (data.content?.length) {
           const mentionIds = Array.from(
-            new Set(data.content.filter((item) => item.type === 'mention').map((item) => item.attrs.id)),
+            new Set(
+              data.content
+                .filter((item) => item.type === 'mention')
+                .map((item) => {
+                  if (item.attrs) {
+                    return item.attrs.id;
+                  }
+                }),
+            ),
           );
           props.setTaggedUsersIds(mentionIds as string[]);
         }
