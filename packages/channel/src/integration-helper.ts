@@ -133,7 +133,7 @@ const completeIntegration = async (
 
   fireAndForget.add(async () => await invokeChannelIngress(false, [decryptedIntegration.id]));
 
-  return integrationType
+  return integrationType;
 };
 
 const integrationStateKey = (state: string): string => `integration-state:${state}`;

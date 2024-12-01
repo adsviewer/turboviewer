@@ -26,7 +26,7 @@
     "prebuild": "pnpm run generate",
     "predev": "pnpm run generate && pnpm run db:migrate:deploy",
     "studio": "prisma studio",
-    "clean": "rm -rf node_modules .turbo",
+    "clean": "rm -rf node_modules .turbo dist",
     "update": "pnpm update --latest"
   },
   "dependencies": {

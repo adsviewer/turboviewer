@@ -33,7 +33,7 @@ export default function GroupFilters(): ReactNode {
       const integrations = res.integrations;
       let adAccounts: MultiSelectDataType[] = [];
       for (const integration of integrations) {
-        for (const adAccount of integration.adAccounts) {
+        for (const adAccount of integration.adAccountIntegrations.map((i) => i.adAccount)) {
           const newValue: MultiSelectDataType = {
             value: adAccount.id,
             label: adAccount.name,

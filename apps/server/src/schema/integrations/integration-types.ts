@@ -67,11 +67,11 @@ export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem'
 
 export const AdAccountIntegrationDto = builder.prismaObject('AdAccountIntegration', {
   fields: (t) => ({
-    adAccountId: t.exposeString('adAccountId'),
-    integrationId: t.exposeString('integrationId'),
-    enabled: t.exposeBoolean('enabled'),
-    adAccount: t.relation('adAccount'),
-    integration: t.relation('integration'),
+    adAccountId: t.exposeString('adAccountId', { nullable: false }),
+    integrationId: t.exposeString('integrationId', { nullable: false }),
+    enabled: t.exposeBoolean('enabled', { nullable: false }),
+    adAccount: t.relation('adAccount', { nullable: false }),
+    integration: t.relation('integration', { nullable: false }),
   }),
 });
 
@@ -94,14 +94,16 @@ export const IntegrationDto = builder.prismaObject('Integration', {
       ...offspringOrgFieldProps,
     }),
     adAccountIntegrations: t.relation('adAccountIntegrations', {
+      args: { onlyEnabled: t.arg({ type: 'Boolean', required: false }) },
       nullable: false,
       ...offspringOrgFieldProps,
-      query: (_args, ctx) =>
+      query: (args, ctx) =>
         ctx.isAdmin
           ? {}
           : {
               where: {
                 adAccount: {
+                  enabled: args.onlyEnabled ? args.onlyEnabled : undefined,
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
                   organizations: { some: { id: ctx.organizationId! } },
                 },

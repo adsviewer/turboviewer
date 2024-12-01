@@ -50,7 +50,7 @@ export type AdInsightsArgs = {
 
 export type AdAccount = {
   __typename: 'AdAccount';
-  adAccountIntegrations?: Maybe<Array<AdAccountIntegration>>;
+  adAccountIntegrations: Array<AdAccountIntegration>;
   adCount: Scalars['Int']['output'];
   advertisements: AdAccountAdvertisementsConnection;
   createdAt: Scalars['Date']['output'];
@@ -88,9 +88,11 @@ export type AdAccountAdvertisementsConnectionEdge = {
 
 export type AdAccountIntegration = {
   __typename: 'AdAccountIntegration';
-  adAccountId?: Maybe<Scalars['String']['output']>;
-  enabled?: Maybe<Scalars['Boolean']['output']>;
-  integrationId?: Maybe<Scalars['String']['output']>;
+  adAccount: AdAccount;
+  adAccountId: Scalars['String']['output'];
+  enabled: Scalars['Boolean']['output'];
+  integration: Integration;
+  integrationId: Scalars['String']['output'];
 };
 
 export type AdInsightsConnection = {
@@ -561,7 +563,8 @@ export type Integration = {
   __typename: 'Integration';
   /** Caller is permitted to view this field if they are in an offspring organization */
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
-  adAccounts?: Maybe<Array<AdAccount>>;
+  /** Caller is permitted to view this field if they are in an offspring organization */
+  adAccountIntegrations: Array<AdAccountIntegration>;
   /** Caller is permitted to view this field if they are in an offspring organization */
   createdAt: Scalars['Date']['output'];
   externalId?: Maybe<Scalars['String']['output']>;
@@ -579,6 +582,10 @@ export type Integration = {
   type: IntegrationType;
   /** Caller is permitted to view this field if they are in an offspring organization */
   updatedAt: Scalars['Date']['output'];
+};
+
+export type IntegrationAdAccountIntegrationsArgs = {
+  onlyEnabled?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type IntegrationListItem = {

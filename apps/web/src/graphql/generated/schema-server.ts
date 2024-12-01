@@ -50,7 +50,7 @@ export type AdInsightsArgs = {
 
 export type AdAccount = {
   __typename: 'AdAccount';
-  adAccountIntegrations?: Maybe<Array<AdAccountIntegration>>;
+  adAccountIntegrations: Array<AdAccountIntegration>;
   adCount: Scalars['Int']['output'];
   advertisements: AdAccountAdvertisementsConnection;
   createdAt: Scalars['Date']['output'];
@@ -88,9 +88,11 @@ export type AdAccountAdvertisementsConnectionEdge = {
 
 export type AdAccountIntegration = {
   __typename: 'AdAccountIntegration';
-  adAccountId?: Maybe<Scalars['String']['output']>;
-  enabled?: Maybe<Scalars['Boolean']['output']>;
-  integrationId?: Maybe<Scalars['String']['output']>;
+  adAccount: AdAccount;
+  adAccountId: Scalars['String']['output'];
+  enabled: Scalars['Boolean']['output'];
+  integration: Integration;
+  integrationId: Scalars['String']['output'];
 };
 
 export type AdInsightsConnection = {
@@ -561,7 +563,8 @@ export type Integration = {
   __typename: 'Integration';
   /** Caller is permitted to view this field if they are in an offspring organization */
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
-  adAccounts?: Maybe<Array<AdAccount>>;
+  /** Caller is permitted to view this field if they are in an offspring organization */
+  adAccountIntegrations: Array<AdAccountIntegration>;
   /** Caller is permitted to view this field if they are in an offspring organization */
   createdAt: Scalars['Date']['output'];
   externalId?: Maybe<Scalars['String']['output']>;
@@ -579,6 +582,10 @@ export type Integration = {
   type: IntegrationType;
   /** Caller is permitted to view this field if they are in an offspring organization */
   updatedAt: Scalars['Date']['output'];
+};
+
+export type IntegrationAdAccountIntegrationsArgs = {
+  onlyEnabled?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type IntegrationListItem = {
@@ -1151,13 +1158,10 @@ export type AdAccountsQuery = {
   integrations: Array<{
     __typename: 'Integration';
     lastSyncedAt?: Date | null;
-    adAccounts?: Array<{
-      __typename: 'AdAccount';
-      id: string;
-      name: string;
-      currency: CurrencyEnum;
-      adCount: number;
-    }> | null;
+    adAccountIntegrations: Array<{
+      __typename: 'AdAccountIntegration';
+      adAccount: { __typename: 'AdAccount'; id: string; name: string; currency: CurrencyEnum; adCount: number };
+    }>;
   }>;
 };
 
@@ -1241,7 +1245,10 @@ export type IntegrationsQuery = {
     type: IntegrationType;
     lastSyncedAt?: Date | null;
     status: IntegrationStatus;
-    adAccounts?: Array<{ __typename: 'AdAccount'; adCount: number }> | null;
+    adAccountIntegrations: Array<{
+      __typename: 'AdAccountIntegration';
+      adAccount: { __typename: 'AdAccount'; adCount: number };
+    }>;
   }>;
 };
 
@@ -1706,11 +1713,13 @@ export const AdAccountsDocument = gql`
   query adAccounts {
     integrations {
       lastSyncedAt
-      adAccounts {
-        id
-        name
-        currency
-        adCount
+      adAccountIntegrations {
+        adAccount {
+          id
+          name
+          currency
+          adCount
+        }
       }
     }
   }
@@ -1808,8 +1817,10 @@ export const IntegrationsDocument = gql`
       type
       lastSyncedAt
       status
-      adAccounts {
-        adCount
+      adAccountIntegrations(onlyEnabled: true) {
+        adAccount {
+          adCount
+        }
       }
     }
   }

@@ -11,8 +11,10 @@ query integrations {
     type
     lastSyncedAt
     status
-    adAccounts {
-      adCount
+    adAccountIntegrations(onlyEnabled: true) {
+      adAccount {
+        adCount
+      }
     }
   }
 }

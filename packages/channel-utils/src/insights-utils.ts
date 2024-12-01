@@ -60,8 +60,7 @@ export const saveAccounts = async (
             integrationId: integration.id,
           },
         },
-        update: {
-        },
+        update: {},
         create: {
           adAccountId: adAccount.id,
           integrationId: integration.id,

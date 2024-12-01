@@ -90,9 +90,8 @@ builder.mutationFields((t) => ({
       adAccountIds: t.arg.stringList({ required: true }),
     },
     resolve: async (query, _root, args, _ctx, _info) => {
-
       return await prisma.adAccountIntegration.createManyAndReturn({
-        ...query, 
+        ...query,
         data: args.adAccountIds.map((adAccountId) => ({
           integrationId: args.integrationId,
           adAccountId,
