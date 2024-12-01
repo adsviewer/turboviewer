@@ -1,16 +1,15 @@
 /* eslint-disable -- fragile, do not touch */
 import { ReactRenderer } from '@tiptap/react';
-import tippy from 'tippy.js';
+import tippy, { Instance, Props } from 'tippy.js';
 import MentionList from './mention-list';
 import { getDefaultStore } from 'jotai';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
-import { logger } from '@repo/logger';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 
 const store = getDefaultStore();
 
 export default {
-  items: ({ query }) => {
+  items: ({ query }: { query: string }) => {
     const organization = store.get(organizationAtom);
     const userDetails = store.get(userDetailsAtom);
 
@@ -24,15 +23,16 @@ export default {
         };
       });
 
+    if (!usersData) return [];
     return usersData.filter((item) => item.label.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5);
   },
 
   render: () => {
-    let component;
-    let popup;
+    let component: ReactRenderer;
+    let popup: Instance<Props>[];
 
     return {
-      onStart: (props) => {
+      onStart: (props: Record<string, any>) => {
         component = new ReactRenderer(MentionList, {
           props,
           editor: props.editor,
@@ -53,7 +53,7 @@ export default {
         });
       },
 
-      onUpdate(props) {
+      onUpdate(props: Record<string, any>) {
         component.updateProps(props);
 
         if (!props.clientRect) {
@@ -65,14 +65,13 @@ export default {
         });
       },
 
-      onKeyDown(props) {
+      onKeyDown(props: Record<string, any>) {
         if (props.event.key === 'Escape') {
           popup[0].hide();
-
           return true;
         }
 
-        return component.ref?.onKeyDown(props);
+        return (component.ref as { onKeyDown: (props: Record<string, any>) => boolean })?.onKeyDown(props);
       },
 
       onExit() {
