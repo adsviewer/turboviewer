@@ -26,7 +26,7 @@
     "@repo/logger": "workspace:*",
     "@repo/utils": "workspace:*",
     "google-ads-api": "17.1.0-rest-beta",
-    "google-auth-library": "^9.14.1",
+    "google-auth-library": "^9.15.0",
     "jsonwebtoken": "^9.0.2",
     "zod": "^3.23.8"
   },
@@ -34,7 +34,7 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.7.4",
-    "typescript": "^5.6.2"
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
   }
 }
