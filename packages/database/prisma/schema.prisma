@@ -233,13 +233,14 @@ model AdAccount {
 }
 
 model AdAccountIntegration {
-  adAccountId   String
-  integrationId String
+  adAccountId   String      @map("ad_account_id")
+  integrationId String      @map("integration_id")
   enabled       Boolean
   adAccount     AdAccount   @relation(fields: [adAccountId], references: [id])
   integration   Integration @relation(fields: [integrationId], references: [id])
 
   @@id([adAccountId, integrationId])
+  @@map("ad_account_integrations")
 }
 
 model Campaign {
