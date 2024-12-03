@@ -80,10 +80,9 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     if (props.metadata.length) {
       for (const integration of props.metadata) {
         newIntegrationsData[integration.type].lastSyncedAt = integration.lastSyncedAt;
-        newIntegrationsData[integration.type].adCount = integration.adAccounts.reduce(
-          (acc, adAccount) => acc + adAccount.adCount,
-          0,
-        );
+        newIntegrationsData[integration.type].adCount = integration.adAccountIntegrations
+          .map((i) => i.adAccount)
+          .reduce((acc, adAccount) => acc + adAccount.adCount, 0);
         newIntegrationsData[integration.type].status = integration.status;
       }
       setIntegrationsData(newIntegrationsData);

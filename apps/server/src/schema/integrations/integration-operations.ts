@@ -19,6 +19,7 @@ import {
   IntegrationTypeDto,
   NewIntegrationEventDto,
   ShouldConnectIntegrationStatuses,
+  AdAccountIntegrationDto,
 } from './integration-types';
 
 const fireAndForget = new FireAndForget();
@@ -81,6 +82,25 @@ builder.queryFields((t) => ({
 }));
 
 builder.mutationFields((t) => ({
+  updateIntegrationAdAccounts: t.withAuth({ isRootOrg: true }).prismaField({
+    type: [AdAccountIntegrationDto],
+    nullable: false,
+    args: {
+      integrationId: t.arg.string({ required: true }),
+      adAccountIds: t.arg.stringList({ required: true }),
+    },
+    resolve: async (query, _root, args, _ctx, _info) => {
+      return await prisma.adAccountIntegration.createManyAndReturn({
+        ...query,
+        data: args.adAccountIds.map((adAccountId) => ({
+          integrationId: args.integrationId,
+          adAccountId,
+          enabled: true,
+        })),
+      });
+    },
+  }),
+
   deAuthIntegration: t.withAuth({ $all: { isRootOrg: true, isInOrg: true } }).field({
     type: 'String',
     nullable: false,

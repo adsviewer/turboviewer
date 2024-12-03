@@ -50,6 +50,7 @@ export type AdInsightsArgs = {
 
 export type AdAccount = {
   __typename: 'AdAccount';
+  adAccountIntegrations: Array<AdAccountIntegration>;
   adCount: Scalars['Int']['output'];
   advertisements: AdAccountAdvertisementsConnection;
   createdAt: Scalars['Date']['output'];
@@ -57,7 +58,6 @@ export type AdAccount = {
   externalId: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   insights: Array<Insight>;
-  integration: Integration;
   /** Whether the ad account is connected to the current organization */
   isConnectedToCurrentOrg: Scalars['Boolean']['output'];
   lastSyncedAt?: Maybe<Scalars['Date']['output']>;
@@ -84,6 +84,15 @@ export type AdAccountAdvertisementsConnectionEdge = {
   __typename: 'AdAccountAdvertisementsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Ad;
+};
+
+export type AdAccountIntegration = {
+  __typename: 'AdAccountIntegration';
+  adAccount: AdAccount;
+  adAccountId: Scalars['String']['output'];
+  enabled: Scalars['Boolean']['output'];
+  integration: Integration;
+  integrationId: Scalars['String']['output'];
 };
 
 export type AdInsightsConnection = {
@@ -555,7 +564,7 @@ export type Integration = {
   /** Caller is permitted to view this field if they are in an offspring organization */
   accessTokenExpiresAt?: Maybe<Scalars['Date']['output']>;
   /** Caller is permitted to view this field if they are in an offspring organization */
-  adAccounts: Array<AdAccount>;
+  adAccountIntegrations: Array<AdAccountIntegration>;
   /** Caller is permitted to view this field if they are in an offspring organization */
   createdAt: Scalars['Date']['output'];
   externalId?: Maybe<Scalars['String']['output']>;
@@ -573,6 +582,10 @@ export type Integration = {
   type: IntegrationType;
   /** Caller is permitted to view this field if they are in an offspring organization */
   updatedAt: Scalars['Date']['output'];
+};
+
+export type IntegrationAdAccountIntegrationsArgs = {
+  onlyEnabled?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type IntegrationListItem = {
@@ -690,6 +703,7 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
+  updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
@@ -803,6 +817,11 @@ export type MutationSwitchOrganizationArgs = {
 export type MutationSwitchTiersArgs = {
   organizationId: Scalars['String']['input'];
   tier: Tier;
+};
+
+export type MutationUpdateIntegrationAdAccountsArgs = {
+  adAccountIds: Array<Scalars['String']['input']>;
+  integrationId: Scalars['String']['input'];
 };
 
 export type MutationUpdateOrganizationArgs = {

@@ -15,7 +15,7 @@ export const authEndpoint = '/channel/auth';
 export const revokeIntegration = async (externalId: string, type: IntegrationTypeEnum): Promise<void> => {
   /*const { adAccounts } = */
   await prisma.integration.update({
-    select: { adAccounts: true },
+    select: { adAccountIntegrations: { select: { adAccount: true } } },
     where: {
       externalId_type: {
         externalId,
@@ -130,7 +130,7 @@ export const getConnectedIntegrationByAccountId = async (adAccountId: string): P
   const encryptedIntegration = await prisma.integration.findFirstOrThrow({
     where: {
       status: IntegrationStatus.CONNECTED,
-      adAccounts: { some: { id: adAccountId } },
+      adAccountIntegrations: { some: { adAccountId } },
     },
   });
 
@@ -139,17 +139,6 @@ export const getConnectedIntegrationByAccountId = async (adAccountId: string): P
   if (!decryptedIntegration) return new AError('Failed to decrypt integration');
 
   return decryptedIntegration;
-};
-
-export const getConnectedIntegrationsByAccountId = async (adAccountId: string): Promise<Integration[]> => {
-  const encryptedIntegrations = await prisma.integration.findMany({
-    where: {
-      status: IntegrationStatus.CONNECTED,
-      adAccounts: { some: { id: adAccountId } },
-    },
-  });
-
-  return encryptedIntegrations.map((i) => decryptTokens(i)).flatMap((i) => (!isAError(i) && i !== null ? [i] : []));
 };
 
 export const getAdAccountWithIntegration = async (adAccountId: string): Promise<AdAccountIntegration | AError> => {

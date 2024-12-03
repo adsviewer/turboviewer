@@ -28,10 +28,20 @@ builder.queryFields((t) => ({
         ...query,
         distinct: 'id',
         where: {
-          adAccount: { integrations: { some: { organizationId: ctx.organizationId } } },
+          adAccount: {
+            adAccountIntegrations: {
+              some: {
+                integration: {
+                  organizationId: ctx.organizationId,
+                },
+              },
+            },
+          },
           insights: {
             some: {
-              date: { gte: new Date(new Date().setMonth(new Date().getMonth() - 3)) },
+              date: {
+                gte: new Date(new Date().setMonth(new Date().getMonth() - 3)),
+              },
             },
           },
         },
@@ -74,7 +84,20 @@ builder.queryFields((t) => ({
     },
     resolve: async (_root, args, ctx, _info) => {
       const ad = await prisma.ad.findUnique({
-        where: { id: args.adId, adAccount: { integrations: { some: { organizationId: ctx.organizationId } } } },
+        where: { id: args.adId },
+        include: {
+          adAccount: {
+            include: {
+              adAccountIntegrations: {
+                where: {
+                  integration: {
+                    organizationId: ctx.organizationId,
+                  },
+                },
+              },
+            },
+          },
+        },
       });
       if (!ad) return null;
       const iFrame = await iFramePerInsight.getValue(
@@ -125,7 +148,15 @@ builder.mutationFields((t) => ({
           take: limit,
           skip: offset,
           where: {
-            ...(args.integrationIds && { adAccount: { integrations: { some: { id: { in: args.integrationIds } } } } }),
+            ...(args.integrationIds && {
+              adAccount: {
+                adAccountIntegrations: {
+                  some: {
+                    integrationId: { in: args.integrationIds },
+                  },
+                },
+              },
+            }),
             creativeId: null,
           },
         });

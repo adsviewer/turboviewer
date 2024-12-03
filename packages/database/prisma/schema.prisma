@@ -200,8 +200,8 @@ model Integration {
   createdAt    DateTime  @default(now()) @map("created_at")
   lastSyncedAt DateTime? @map("last_synced_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id])
-  adAccounts   AdAccount[]
+  organization          Organization           @relation(fields: [organizationId], references: [id])
+  adAccountIntegrations AdAccountIntegration[]
 
   @@unique([organizationId, type])
   @@unique([externalId, type])
@@ -220,16 +220,27 @@ model AdAccount {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  integrations   Integration[]
-  advertisements Ad[]
-  creatives      Creative[]
-  insights       Insight[]
-  organizations  Organization[]
-  campaign       Campaign[]
+  advertisements        Ad[]
+  creatives             Creative[]
+  insights              Insight[]
+  organizations         Organization[]
+  campaign              Campaign[]
+  adAccountIntegrations AdAccountIntegration[]
 
   @@unique([externalId, type])
   @@index([name])
   @@map("ad_accounts")
+}
+
+model AdAccountIntegration {
+  adAccountId   String      @map("ad_account_id")
+  integrationId String      @map("integration_id")
+  enabled       Boolean
+  adAccount     AdAccount   @relation(fields: [adAccountId], references: [id])
+  integration   Integration @relation(fields: [integrationId], references: [id])
+
+  @@id([adAccountId, integrationId])
+  @@map("ad_account_integrations")
 }
 
 model Campaign {

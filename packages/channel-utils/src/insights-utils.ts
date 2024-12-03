@@ -25,8 +25,8 @@ export const saveAccounts = async (
   integration: Integration,
 ): Promise<AdAccount[]> =>
   await Promise.all(
-    activeAccounts.map((acc) =>
-      prisma.adAccount.upsert({
+    activeAccounts.map(async (acc) => {
+      const adAccount = await prisma.adAccount.upsert({
         where: {
           externalId_type: {
             type: integration.type,
@@ -36,19 +36,39 @@ export const saveAccounts = async (
         update: {
           currency: acc.currency,
           name: acc.name,
-          integrations: { connect: { id: integration.id } },
           organizations: { connect: { id: integration.organizationId } },
         },
         create: {
-          integrations: { connect: { id: integration.id } },
           externalId: acc.externalId,
           currency: acc.currency,
           name: acc.name,
           type: integration.type,
           organizations: { connect: { id: integration.organizationId } },
+          adAccountIntegrations: {
+            create: {
+              integrationId: integration.id,
+              enabled: false,
+            },
+          },
         },
-      }),
-    ),
+      });
+
+      await prisma.adAccountIntegration.upsert({
+        where: {
+          adAccountId_integrationId: {
+            adAccountId: adAccount.id,
+            integrationId: integration.id,
+          },
+        },
+        update: {},
+        create: {
+          adAccountId: adAccount.id,
+          integrationId: integration.id,
+          enabled: false,
+        },
+      });
+      return adAccount;
+    }),
   );
 
 const saveCampaigns = async (

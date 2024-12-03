@@ -65,6 +65,16 @@ export const IntegrationListItemDto = builder.simpleObject('IntegrationListItem'
   }),
 });
 
+export const AdAccountIntegrationDto = builder.prismaObject('AdAccountIntegration', {
+  fields: (t) => ({
+    adAccountId: t.exposeString('adAccountId', { nullable: false }),
+    integrationId: t.exposeString('integrationId', { nullable: false }),
+    enabled: t.exposeBoolean('enabled', { nullable: false }),
+    adAccount: t.relation('adAccount', { nullable: false }),
+    integration: t.relation('integration', { nullable: false }),
+  }),
+});
+
 export const IntegrationDto = builder.prismaObject('Integration', {
   authScopes: (integration, ctx) => {
     const baseScopes = baseIntegrationDtoAuthScopes(integration, ctx);
@@ -83,6 +93,23 @@ export const IntegrationDto = builder.prismaObject('Integration', {
       nullable: true,
       ...offspringOrgFieldProps,
     }),
+    adAccountIntegrations: t.relation('adAccountIntegrations', {
+      args: { onlyEnabled: t.arg({ type: 'Boolean', required: false }) },
+      nullable: false,
+      ...offspringOrgFieldProps,
+      query: (args, ctx) =>
+        ctx.isAdmin
+          ? {}
+          : {
+              where: {
+                adAccount: {
+                  enabled: args.onlyEnabled ? args.onlyEnabled : undefined,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+                  organizations: { some: { id: ctx.organizationId! } },
+                },
+              },
+            },
+    }),
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     lastSyncedAt: t.expose('lastSyncedAt', { type: 'Date', nullable: true, ...offspringOrgFieldProps }),
@@ -96,19 +123,6 @@ export const IntegrationDto = builder.prismaObject('Integration', {
     }),
 
     organization: t.relation('organization', { nullable: false }),
-    adAccounts: t.relation('adAccounts', {
-      nullable: false,
-      ...offspringOrgFieldProps,
-      query: (_args, ctx) =>
-        ctx.isAdmin
-          ? {}
-          : {
-              where: {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
-                organizations: { some: { id: ctx.organizationId! } },
-              },
-            },
-    }),
   }),
 });
 
@@ -211,13 +225,21 @@ export const AdAccountDto = builder.prismaObject('AdAccount', {
       edgesNullable: { list: false, items: true },
       nodeNullable: false,
     }),
-    insights: t.relation('insights', { nullable: false }),
-    integration: t.field({
-      type: IntegrationDto,
+    adAccountIntegrations: t.relation('adAccountIntegrations', {
       nullable: false,
-      resolve: (root, _args, _ctx) =>
-        prisma.integration.findFirstOrThrow({ where: { adAccounts: { some: { id: root.id } } } }),
+      query: (_args, ctx) =>
+        ctx.isAdmin
+          ? {}
+          : {
+              where: {
+                adAccount: {
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+                  organizations: { some: { id: ctx.organizationId! } },
+                },
+              },
+            },
     }),
+    insights: t.relation('insights', { nullable: false }),
     organizations: t.relation('organizations', {
       nullable: false,
       query: (_args, ctx) =>
