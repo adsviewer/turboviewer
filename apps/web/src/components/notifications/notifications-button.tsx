@@ -45,7 +45,7 @@ export default function NotificationsButton(): ReactNode {
 
   const setNotificationAsRead = (notificationEntry: Notification): void => {
     if (!notificationEntry.isRead) {
-      void markNotificationAsRead({ id: notificationEntry.id })
+      void markNotificationAsRead({ notificationId: notificationEntry.id })
         .then((res) => {
           if (!res.success) {
             logger.error(res);

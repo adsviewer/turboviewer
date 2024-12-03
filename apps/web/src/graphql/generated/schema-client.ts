@@ -771,7 +771,7 @@ export type MutationLoginArgs = {
 };
 
 export type MutationMarkNotificationAsReadArgs = {
-  id: Scalars['String']['input'];
+  notificationId: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {

@@ -1,11 +1,15 @@
-import { NotificationTypeEnum } from '@repo/database';
 import { type NotificationEvent } from '@repo/shared-types';
+import { NotificationTypeEnum } from '@repo/database';
 import { builder } from '../builder';
+
+export const NotificationType = builder.enumType(NotificationTypeEnum, {
+  name: 'NotificationTypeEnum',
+});
 
 export const NotificationDto = builder.prismaObject('Notification', {
   fields: (t) => ({
     id: t.exposeID('id', { nullable: false }),
-    type: t.expose('type', { type: NotificationTypeEnum, nullable: false }),
+    type: t.expose('type', { type: NotificationType, nullable: false }),
     receivingUserId: t.exposeID('receivingUserId', { nullable: false }),
     extraData: t.expose('extraData', { type: 'JSON', nullable: true }),
     isRead: t.expose('isRead', { type: 'Boolean', nullable: false }),
@@ -16,7 +20,7 @@ export const NotificationDto = builder.prismaObject('Notification', {
 export const NotificationEventDto = builder.objectRef<NotificationEvent>('NotificationEventPayload').implement({
   fields: (t) => ({
     id: t.exposeID('id', { nullable: false }),
-    type: t.expose('type', { type: NotificationTypeEnum, nullable: false }),
+    type: t.expose('type', { type: NotificationType, nullable: false }),
     receivingUserId: t.exposeID('receivingUserId', { nullable: false }),
     extraData: t.expose('extraData', { type: 'JSON', nullable: true }),
     isRead: t.expose('isRead', { type: 'Boolean', nullable: false }),

@@ -770,7 +770,7 @@ export type MutationLoginArgs = {
 };
 
 export type MutationMarkNotificationAsReadArgs = {
-  id: Scalars['String']['input'];
+  notificationId: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {
@@ -1369,7 +1369,7 @@ export type NotificationsQuery = {
 };
 
 export type MarkNotificationAsReadMutationVariables = Exact<{
-  id: Scalars['String']['input'];
+  notificationId: Scalars['String']['input'];
 }>;
 
 export type MarkNotificationAsReadMutation = { __typename: 'Mutation'; markNotificationAsRead: boolean };
@@ -1958,8 +1958,8 @@ export const NotificationsDocument = gql`
   }
 `;
 export const MarkNotificationAsReadDocument = gql`
-  mutation markNotificationAsRead($id: String!) {
-    markNotificationAsRead(id: $id)
+  mutation markNotificationAsRead($notificationId: String!) {
+    markNotificationAsRead(notificationId: $notificationId)
   }
 `;
 export const GetOrganizationDocument = gql`

@@ -70,7 +70,7 @@ enum NotificationTypeEnum {
 
 model Notification {
   id              String               @id @default(cuid())
-  type            NotificationTypeEnum @map("type")
+  type            NotificationTypeEnum
   receivingUserId String               @map("receiving_user_id")
   isRead          Boolean              @map("is_read")
   extraData       Json?                @map("extra_data")

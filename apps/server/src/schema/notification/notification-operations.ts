@@ -1,12 +1,8 @@
 import { pubSub } from '@repo/pubsub';
 import { type NotificationEvent } from '@repo/shared-types';
-import { NotificationTypeEnum, prisma } from '@repo/database';
+import { prisma } from '@repo/database';
 import { builder } from '../builder';
 import { NotificationDto, NotificationEventDto } from './notification-types';
-
-export const NotificationType = builder.enumType(NotificationTypeEnum, {
-  name: 'NotificationTypeEnum',
-});
 
 builder.subscriptionFields((t) => ({
   newNotification: t.withAuth({ isInOrg: true }).field({
@@ -41,11 +37,11 @@ builder.mutationFields((t) => ({
     type: 'Boolean',
     nullable: false,
     args: {
-      id: t.arg.string({ required: true }),
+      notificationId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
       await prisma.notification.update({
-        where: { id: args.id, receivingUserId: ctx.currentUserId },
+        where: { id: args.notificationId, receivingUserId: ctx.currentUserId },
         data: { isRead: true },
       });
       return true;
