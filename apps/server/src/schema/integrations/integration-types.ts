@@ -97,18 +97,13 @@ export const IntegrationDto = builder.prismaObject('Integration', {
       args: { onlyEnabled: t.arg({ type: 'Boolean', required: false }) },
       nullable: false,
       ...offspringOrgFieldProps,
-      query: (args, ctx) =>
-        ctx.isAdmin
-          ? {}
-          : {
-              where: {
-                adAccount: {
-                  enabled: args.onlyEnabled ? args.onlyEnabled : undefined,
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
-                  organizations: { some: { id: ctx.organizationId! } },
-                },
-              },
-            },
+      query: (args, ctx) => ({
+        where: {
+          enabled: args.onlyEnabled ? args.onlyEnabled : undefined,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- is checked in baseScopes
+          ...(ctx.isAdmin ? {} : { adAccount: { organizations: { some: { id: ctx.organizationId! } } } }),
+        },
+      }),
     }),
     updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
     createdAt: t.expose('createdAt', { type: 'Date', nullable: false, ...offspringOrgFieldProps }),
