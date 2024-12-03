@@ -203,27 +203,20 @@ const saveTokens = async (
 
   // Fire event for new notification to all subscribed entities
   const orgUsers = await prisma.user.findMany({ where: { organizations: { some: { organizationId } } } });
-  for (const user of orgUsers) {
+  const newNotificationsData = orgUsers.map((user) => {
     const newNotificationId = createId();
-    await prisma.notification.create({
-      data: {
-        id: newNotificationId,
-        type: NotificationTypeEnum.NEW_INTEGRATION,
-        receivingUserId: user.id,
-        isRead: false,
-        createdAt: new Date(),
-      },
-    });
-
-    pubSub.publish('user:notification:new-notification', user.id, {
+    const data = {
       id: newNotificationId,
       type: NotificationTypeEnum.NEW_INTEGRATION,
       receivingUserId: user.id,
-      extraData: {},
       isRead: false,
       createdAt: new Date(),
-    });
-  }
+      extraData: {},
+    };
+    pubSub.publish('user:notification:new-notification', user.id, data);
+    return data;
+  });
+  await prisma.notification.createMany({ data: newNotificationsData });
 
   const decryptedIntegration = {
     ...integration,
