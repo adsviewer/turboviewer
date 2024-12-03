@@ -1,9 +1,9 @@
 {
-  "name": "@repo/channel",
+  "name": "@repo/channel-reddit",
   "version": "1.0.0",
   "private": true,
   "license": "UNLICENCED",
-  "description": "Channel business logic",
+  "description": "Reddit channel business logic",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "type": "module",
@@ -18,29 +18,13 @@
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
     "clean": "rm -rf .turbo .next node_modules dist",
-    "update": "pnpm update --latest",
-    "test": "cross-env EXCHANGE_RATES_API_KEY=test node --import tsx --test test/*.test.ts"
+    "update": "pnpm update --latest"
   },
   "dependencies": {
-    "@aws-sdk/client-batch": "^3.699.0",
-    "@aws-sdk/client-sqs": "^3.699.0",
-    "@repo/backend-shared": "workspace:*",
-    "@repo/channel-google": "workspace:*",
-    "@repo/channel-linkedin": "workspace:*",
-    "@repo/channel-meta": "workspace:*",
-    "@repo/channel-reddit": "workspace:*",
-    "@repo/channel-tiktok": "workspace:*",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
-    "@repo/lambda-utils": "workspace:*",
     "@repo/logger": "workspace:*",
-    "@repo/mappings": "workspace:*",
-    "@repo/mode": "workspace:*",
-    "@repo/pubsub": "workspace:*",
-    "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
-    "change-case": "^5.4.4",
-    "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
     "zod": "^3.23.8"
   },
@@ -50,8 +34,6 @@
     "@types/express": "^5.0.0",
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.10.1",
-    "@types/qs": "^6.9.17",
-    "cross-env": "^7.0.3",
     "typescript": "^5.7.2"
   }
 }

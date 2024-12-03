@@ -137,6 +137,7 @@ const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[
     IntegrationTypeEnum.TIKTOK,
     IntegrationTypeEnum.LINKEDIN,
     IntegrationTypeEnum.GOOGLE,
+    IntegrationTypeEnum.REDDIT
   ];
   if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 
