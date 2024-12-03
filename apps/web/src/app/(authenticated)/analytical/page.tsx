@@ -9,6 +9,7 @@ import uniqid from 'uniqid';
 import getInsights, { type InsightsParams } from '@/app/(authenticated)/insights/actions';
 import { type GroupedInsight } from '@/graphql/generated/schema-server';
 import InsightCard from '@/components/insights/insight-card';
+import { getInsightHeading, getInsightTitle } from '@/util/insights-utils';
 
 interface InsightsProps {
   searchParams: Promise<InsightsParams>;
@@ -16,22 +17,10 @@ interface InsightsProps {
 
 export default function Analytical(props: InsightsProps): ReactNode {
   const tGeneric = useTranslations('generic');
+  const t = useTranslations('insights');
   const searchParams = use(props.searchParams);
   const [insightData, setInsightData] = useState<GroupedInsight | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
-  const t = useTranslations('insights');
-
-  const getInsightHeading = (insight: GroupedInsight): string => {
-    if (insight.publisher) return insight.publisher;
-    else if (insight.integration) return insight.integration;
-    return t('insight');
-  };
-
-  const getInsightTitle = (insight: GroupedInsight): string => {
-    if (insight.creativeName) return insight.creativeName;
-    else if (insight.adName) return insight.adName;
-    return t('insight');
-  };
 
   useEffect(() => {
     setIsPending(true);
@@ -63,8 +52,8 @@ export default function Analytical(props: InsightsProps): ReactNode {
           <Flex justify="space-evenly">
             <InsightCard
               key={uniqid()}
-              heading={getInsightHeading(insightData)}
-              title={getInsightTitle(insightData)}
+              heading={getInsightHeading(insightData, t('insight'))}
+              title={getInsightTitle(insightData, t('insight'))}
               description={insightData.position}
               device={insightData.device}
               currency={insightData.currency}
