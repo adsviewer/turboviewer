@@ -3,7 +3,7 @@
 export {};
 declare global {
   namespace PrismaJson {
-    type NotificationExtraData = {
+    type NewCommentNotificationExtraData = {
       commentMentionCreativeId?: string;
     };
   }

@@ -893,6 +893,7 @@ export type NewsletterSubscription = {
 export type Notification = {
   __typename: 'Notification';
   createdAt: Scalars['Date']['output'];
+  /** [NewCommentNotificationExtraData] */
   extraData?: Maybe<Scalars['JSON']['output']>;
   id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];

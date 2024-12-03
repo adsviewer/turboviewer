@@ -758,6 +758,10 @@ type NewsletterSubscription {
 
 type Notification {
   createdAt: Date!
+
+  """
+  [NewCommentNotificationExtraData]
+  """
   extraData: JSON
   id: ID!
   isRead: Boolean!

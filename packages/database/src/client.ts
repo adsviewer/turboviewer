@@ -6,6 +6,7 @@ import { Environment, MODE } from '@repo/mode';
 // eslint-disable-next-line import/no-relative-packages -- we need to import from the generated client
 import { PrismaClient } from '../.prisma';
 import { env } from './config';
+import './types';
 
 neonConfig.webSocketConstructor = ws;
 const connectionString = env.DATABASE_URL;
