@@ -1068,6 +1068,9 @@ importers:
       '@repo/channel-meta':
         specifier: workspace:*
         version: link:../channel-meta
+      '@repo/channel-pinterest':
+        specifier: workspace:*
+        version: link:../channel-pinterest
       '@repo/channel-tiktok':
         specifier: workspace:*
         version: link:../channel-tiktok
@@ -1261,6 +1264,46 @@ importers:
       '@types/lodash':
         specifier: ^4.17.13
         version: 4.17.13
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
+
+  packages/channel-pinterest:
+    dependencies:
+      '@repo/channel-utils':
+        specifier: workspace:*
+        version: link:../channel-utils
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../database
+      '@repo/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
+      google-ads-api:
+        specifier: 17.1.0-rest-beta
+        version: 17.1.0-rest-beta
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.2
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../config-typescript
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@types/node':
         specifier: ^22.10.1
         version: 22.10.1

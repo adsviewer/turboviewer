@@ -621,6 +621,7 @@ enum IntegrationType {
   GOOGLE
   SNAPCHAT
   REDDIT
+  PINTEREST
 }
 
 type InviteLinks {
