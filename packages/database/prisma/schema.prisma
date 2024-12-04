@@ -373,7 +373,8 @@ model Comment {
   creative    Creative @relation(fields: [creativeId], references: [id])
   user        User     @relation(fields: [userId], references: [id])
 
-  @@index([creativeId, userId, createdAt])
+  @@index([userId])
+  @@index([creativeId, createdAt])
   @@map("comments")
 }
 
