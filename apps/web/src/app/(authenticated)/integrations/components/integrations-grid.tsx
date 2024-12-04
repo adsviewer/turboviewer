@@ -63,6 +63,11 @@ const initialIntegrationsData: IntegrationsDataType = {
     lastSyncedAt: null,
     status: IntegrationStatus.ComingSoon,
   },
+  [IntegrationType.PINTEREST]: {
+    adCount: 0,
+    lastSyncedAt: null,
+    status: IntegrationStatus.ComingSoon,
+  },
   [IntegrationType.SNAPCHAT]: {
     adCount: 0,
     lastSyncedAt: null,
@@ -128,6 +133,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     [IntegrationType.GOOGLE, { title: 'Google', imageSrc: googleLogo as string }],
     [IntegrationType.SNAPCHAT, { title: 'Snapchat', imageSrc: snapchatLogo as string }],
     [IntegrationType.REDDIT, { title: 'Reddit', imageSrc: redditLogo as string }],
+    [IntegrationType.PINTEREST, { title: 'Pinterest', imageSrc: redditLogo as string }],
   ]);
 
   return (

@@ -4,6 +4,7 @@ import type { ChannelInterface } from '@repo/channel-utils';
 import { linkedIn } from '@repo/channel-linkedin';
 import { tiktok } from '@repo/channel-tiktok';
 import { google } from '@repo/channel-google';
+import { pinterest } from '@repo/channel-pinterest';
 
 export const getChannel = (channel: IntegrationTypeEnum): ChannelInterface => {
   switch (channel) {
@@ -15,6 +16,8 @@ export const getChannel = (channel: IntegrationTypeEnum): ChannelInterface => {
       return tiktok;
     case IntegrationTypeEnum.GOOGLE:
       return google;
+    case IntegrationTypeEnum.PINTEREST:
+      return pinterest;
     default:
       throw new Error('Channel not found');
   }
