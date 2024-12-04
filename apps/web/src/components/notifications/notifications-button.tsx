@@ -33,7 +33,7 @@ export default function NotificationsButton(): ReactNode {
           logger.error(res);
           return;
         }
-        setNotificationsData(res.data.notifications);
+        setNotificationsData(res.data.notifications as Notification[]);
       })
       .catch((error: unknown) => {
         logger.error(error);

@@ -32,12 +32,11 @@ import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
 import FeedbackButton from '@/components/buttons/feedback-button';
 import SubNavlinkButton from '@/components/buttons/sub-navlink-button/sub-navlink-button';
 import { getSearchQueryStrings, getUserDetails } from '@/app/(authenticated)/actions';
-import { type Integration, IntegrationStatus } from '@/graphql/generated/schema-server';
+import { type Integration, IntegrationStatus, type Organization } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { searchesAtom } from '@/app/atoms/searches-atoms';
 import NotificationsButton from '@/components/notifications/notifications-button';
 import { organizationAtom } from '@/app/atoms/organization-atoms';
-import getOrganization from '@/app/(authenticated)/organization/actions';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -108,21 +107,10 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         .then((res) => {
           setUserDetails(res);
           checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
+          setOrganization(res.currentOrganization as Organization);
         })
         .catch((error: unknown) => {
           logger.error(error);
-        }),
-    );
-
-    initialRequests.push(
-      void getOrganization()
-        .then((orgRes) => {
-          if (orgRes.data) {
-            setOrganization(orgRes.data);
-          }
-        })
-        .catch((err: unknown) => {
-          logger.error(err);
         }),
     );
 

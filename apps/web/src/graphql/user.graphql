@@ -1,3 +1,5 @@
+#import "./fragments.graphql"
+
 query refreshToken {
   refreshToken
 }
@@ -29,16 +31,7 @@ fragment UserFields on User {
   }
   currentOrganizationId
   currentOrganization {
-    id
-    name
-    isRoot
-    parentId
-    tier
-    integrations {
-      status
-      type
-      accessTokenExpiresAt
-    }
+    ...CurrentOrganization
   }
   comments {
     id

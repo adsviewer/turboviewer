@@ -1185,6 +1185,35 @@ export type DeleteCommentMutationVariables = Exact<{
 
 export type DeleteCommentMutation = { __typename: 'Mutation'; deleteComment: { __typename: 'Comment'; id: string } };
 
+export type CurrentOrganizationFragment = {
+  __typename: 'Organization';
+  id: string;
+  name: string;
+  isRoot: boolean;
+  parentId?: string | null;
+  tier: Tier;
+  integrations: Array<{
+    __typename: 'Integration';
+    status: IntegrationStatus;
+    type: IntegrationType;
+    accessTokenExpiresAt?: Date | null;
+  }>;
+  userOrganizations: Array<{
+    __typename: 'UserOrganization';
+    userId: string;
+    role: OrganizationRoleEnum;
+    status: UserOrganizationStatus;
+    user: {
+      __typename: 'User';
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      photoUrl?: string | null;
+    };
+  }>;
+};
+
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AdAccountsQuery = {
@@ -1383,7 +1412,16 @@ export type GetOrganizationQuery = {
   organization: {
     __typename: 'Organization';
     id: string;
+    name: string;
+    isRoot: boolean;
+    parentId?: string | null;
     tier: Tier;
+    integrations: Array<{
+      __typename: 'Integration';
+      status: IntegrationStatus;
+      type: IntegrationType;
+      accessTokenExpiresAt?: Date | null;
+    }>;
     userOrganizations: Array<{
       __typename: 'UserOrganization';
       userId: string;
@@ -1582,6 +1620,20 @@ export type UpdateUserMutation = {
         type: IntegrationType;
         accessTokenExpiresAt?: Date | null;
       }>;
+      userOrganizations: Array<{
+        __typename: 'UserOrganization';
+        userId: string;
+        role: OrganizationRoleEnum;
+        status: UserOrganizationStatus;
+        user: {
+          __typename: 'User';
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          photoUrl?: string | null;
+        };
+      }>;
     } | null;
     comments: Array<{
       __typename: 'Comment';
@@ -1623,6 +1675,20 @@ export type MeQuery = {
         type: IntegrationType;
         accessTokenExpiresAt?: Date | null;
       }>;
+      userOrganizations: Array<{
+        __typename: 'UserOrganization';
+        userId: string;
+        role: OrganizationRoleEnum;
+        status: UserOrganizationStatus;
+        user: {
+          __typename: 'User';
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          photoUrl?: string | null;
+        };
+      }>;
     } | null;
     comments: Array<{
       __typename: 'Comment';
@@ -1660,6 +1726,20 @@ export type UserFieldsFragment = {
       type: IntegrationType;
       accessTokenExpiresAt?: Date | null;
     }>;
+    userOrganizations: Array<{
+      __typename: 'UserOrganization';
+      userId: string;
+      role: OrganizationRoleEnum;
+      status: UserOrganizationStatus;
+      user: {
+        __typename: 'User';
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        photoUrl?: string | null;
+      };
+    }>;
   } | null;
   comments: Array<{
     __typename: 'Comment';
@@ -1689,6 +1769,32 @@ export type RemoveUserMilestoneMutation = {
   removeUserMilestone: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
+export const CurrentOrganizationFragmentDoc = gql`
+  fragment CurrentOrganization on Organization {
+    id
+    name
+    isRoot
+    parentId
+    tier
+    integrations {
+      status
+      type
+      accessTokenExpiresAt
+    }
+    userOrganizations {
+      userId
+      role
+      status
+      user {
+        id
+        email
+        firstName
+        lastName
+        photoUrl
+      }
+    }
+  }
+`;
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
@@ -1705,16 +1811,7 @@ export const UserFieldsFragmentDoc = gql`
     }
     currentOrganizationId
     currentOrganization {
-      id
-      name
-      isRoot
-      parentId
-      tier
-      integrations {
-        status
-        type
-        accessTokenExpiresAt
-      }
+      ...CurrentOrganization
     }
     comments {
       id
@@ -1727,6 +1824,7 @@ export const UserFieldsFragmentDoc = gql`
       id
     }
   }
+  ${CurrentOrganizationFragmentDoc}
 `;
 export const CommentsDocument = gql`
   query comments($creativeId: String!) {
@@ -1967,22 +2065,10 @@ export const MarkNotificationAsReadDocument = gql`
 export const GetOrganizationDocument = gql`
   query getOrganization {
     organization {
-      id
-      tier
-      userOrganizations {
-        userId
-        role
-        status
-        user {
-          id
-          email
-          firstName
-          lastName
-          photoUrl
-        }
-      }
+      ...CurrentOrganization
     }
   }
+  ${CurrentOrganizationFragmentDoc}
 `;
 export const UpdateOrganizationUserDocument = gql`
   mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {

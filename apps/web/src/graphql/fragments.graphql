@@ -1,0 +1,24 @@
+fragment CurrentOrganization on Organization {
+  id
+  name
+  isRoot
+  parentId
+  tier
+  integrations {
+    status
+    type
+    accessTokenExpiresAt
+  }
+  userOrganizations {
+    userId
+    role
+    status
+    user {
+      id
+      email
+      firstName
+      lastName
+      photoUrl
+    }
+  }
+}
