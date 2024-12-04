@@ -765,6 +765,7 @@ type Notification {
   extraData: JSON
   id: ID!
   isRead: Boolean!
+  receivingUser: User!
   receivingUserId: ID!
   type: NotificationTypeEnum!
 }

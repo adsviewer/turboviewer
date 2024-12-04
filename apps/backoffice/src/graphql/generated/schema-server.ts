@@ -897,6 +897,7 @@ export type Notification = {
   extraData?: Maybe<Scalars['JSON']['output']>;
   id: Scalars['ID']['output'];
   isRead: Scalars['Boolean']['output'];
+  receivingUser: User;
   receivingUserId: Scalars['ID']['output'];
   type: NotificationTypeEnum;
 };
