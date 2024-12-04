@@ -107,7 +107,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
         .then((res) => {
           setUserDetails(res);
           checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
-          setOrganization(res.currentOrganization as Organization);
+          setOrganization({ organization: res.currentOrganization as Organization });
         })
         .catch((error: unknown) => {
           logger.error(error);
