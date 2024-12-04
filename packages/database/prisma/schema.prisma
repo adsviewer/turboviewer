@@ -175,6 +175,7 @@ enum IntegrationTypeEnum {
   GOOGLE
   SNAPCHAT
   REDDIT
+  PINTEREST
 }
 
 enum IntegrationStatus {
