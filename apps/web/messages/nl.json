@@ -42,7 +42,8 @@
   "notifications": {
     "title": "Notificaties",
     "mentioned": "U werd gementioned in een comment!",
-    "newIntegration": "Er is een nieuwe integratie toegevoegd!"
+    "newIntegration": "Er is een nieuwe integratie toegevoegd!",
+    "markAllAsRead": "Markeer als gelezen"
   },
   "introduction": {
     "title": "Welkom!",

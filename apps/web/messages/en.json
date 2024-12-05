@@ -42,7 +42,8 @@
   "notifications": {
     "title": "Notifications",
     "mentioned": "You were mentioned in a comment!",
-    "newIntegration": "A new integration has been added!"
+    "newIntegration": "A new integration has been added!",
+    "markAllAsRead": "Mark all as read"
   },
   "introduction": {
     "title": "Welcome!",

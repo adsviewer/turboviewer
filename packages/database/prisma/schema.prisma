@@ -81,7 +81,7 @@ model Notification {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@index([receivingUserId])
+  @@index([receivingUserId, isRead])
   @@map("notifications")
 }
 

@@ -42,7 +42,8 @@
   "notifications": {
     "title": "Ειδοποιήσεις",
     "mentioned": "Σας αναφέρανε σε ένα σχόλιο!",
-    "newIntegration": "Προστέθηκε μια νέα ενσωμάτωση!"
+    "newIntegration": "Προστέθηκε μια νέα ενσωμάτωση!",
+    "markAllAsRead": "Επισήμανση ως αναγνωσμένα"
   },
   "introduction": {
     "title": "Καλώς ορίσατε!",

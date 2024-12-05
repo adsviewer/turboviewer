@@ -690,6 +690,7 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
+  markAllNotificationsAsRead: Scalars['Boolean']['output'];
   markNotificationAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
@@ -704,6 +705,7 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
+  test: Scalars['Boolean']['output'];
   updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
@@ -1108,6 +1110,7 @@ export type User = {
   /** Caller is permitted to view this field if they are in a common organization */
   lastName: Scalars['String']['output'];
   milestones: Array<Milestones>;
+  notifications?: Maybe<UserNotificationsConnection>;
   organizations: Array<UserOrganization>;
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
@@ -1115,6 +1118,26 @@ export type User = {
   taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
+};
+
+/** Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization */
+export type UserNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type UserNotificationsConnection = {
+  __typename: 'UserNotificationsConnection';
+  edges?: Maybe<Array<Maybe<UserNotificationsConnectionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type UserNotificationsConnectionEdge = {
+  __typename: 'UserNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Notification>;
 };
 
 export type UserOrganization = {
@@ -1404,6 +1427,14 @@ export type MarkNotificationAsReadMutationVariables = Exact<{
 }>;
 
 export type MarkNotificationAsReadMutation = { __typename: 'Mutation'; markNotificationAsRead: boolean };
+
+export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]: never }>;
+
+export type MarkAllNotificationsAsReadMutation = { __typename: 'Mutation'; markAllNotificationsAsRead: boolean };
+
+export type TestMutationVariables = Exact<{ [key: string]: never }>;
+
+export type TestMutation = { __typename: 'Mutation'; test: boolean };
 
 export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -2062,6 +2093,16 @@ export const MarkNotificationAsReadDocument = gql`
     markNotificationAsRead(notificationId: $notificationId)
   }
 `;
+export const MarkAllNotificationsAsReadDocument = gql`
+  mutation markAllNotificationsAsRead {
+    markAllNotificationsAsRead
+  }
+`;
+export const TestDocument = gql`
+  mutation test {
+    test
+  }
+`;
 export const GetOrganizationDocument = gql`
   query getOrganization {
     organization {
@@ -2350,6 +2391,19 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<MarkNotificationAsReadMutation>;
+    },
+    markAllNotificationsAsRead(
+      variables?: MarkAllNotificationsAsReadMutationVariables,
+      options?: C,
+    ): Promise<MarkAllNotificationsAsReadMutation> {
+      return requester<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>(
+        MarkAllNotificationsAsReadDocument,
+        variables,
+        options,
+      ) as Promise<MarkAllNotificationsAsReadMutation>;
+    },
+    test(variables?: TestMutationVariables, options?: C): Promise<TestMutation> {
+      return requester<TestMutation, TestMutationVariables>(TestDocument, variables, options) as Promise<TestMutation>;
     },
     getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
       return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(

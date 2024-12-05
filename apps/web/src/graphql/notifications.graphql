@@ -12,3 +12,11 @@ query notifications {
 mutation markNotificationAsRead($notificationId: String!) {
   markNotificationAsRead(notificationId: $notificationId)
 }
+
+mutation markAllNotificationsAsRead {
+  markAllNotificationsAsRead
+}
+
+mutation test {
+  test
+}

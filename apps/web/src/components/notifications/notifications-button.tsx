@@ -1,6 +1,17 @@
 'use client';
 
-import { ActionIcon, Divider, Group, Indicator, Popover, Text, useComputedColorScheme } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  Container,
+  Divider,
+  Flex,
+  Group,
+  Indicator,
+  Popover,
+  Text,
+  useComputedColorScheme,
+} from '@mantine/core';
 import { IconBell, IconBellFilled } from '@tabler/icons-react';
 import React from 'react';
 import { type ReactNode, useState, useEffect } from 'react';
@@ -10,7 +21,7 @@ import { logger } from '@repo/logger';
 import { useDisclosure, useClickOutside } from '@mantine/hooks';
 import { getButtonColorBasedOnTheme } from '@/util/color-utils';
 import { notificationsDataAtom } from '@/app/atoms/notifications-atom';
-import { markNotificationAsRead, notifications } from '@/app/(authenticated)/actions';
+import { markAllNotificationsAsRead, markNotificationAsRead, notifications } from '@/app/(authenticated)/actions';
 import { type Notification } from '@/graphql/generated/schema-server';
 import LoaderCentered from '../misc/loader-centered';
 import NotificationsList from './notifications-list';
@@ -22,7 +33,16 @@ export default function NotificationsButton(): ReactNode {
   const [notificationsData, setNotificationsData] = useAtom(notificationsDataAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
 
-  const ref = useClickOutside(close);
+  // Use click outside data
+  const [dropdown, setDropdown] = useState<HTMLDivElement | null>(null);
+  const [control, setControl] = useState<HTMLDivElement | null>(null);
+  useClickOutside(
+    () => {
+      close();
+    },
+    null,
+    [control, dropdown],
+  );
 
   useEffect(() => {
     setIsPending(true);
@@ -70,8 +90,26 @@ export default function NotificationsButton(): ReactNode {
     opened ? close() : open();
   };
 
+  const markAllAsRead = (): void => {
+    setIsPending(true);
+    void markAllNotificationsAsRead()
+      .then((res) => {
+        if (!res.success) {
+          logger.error(res);
+          return;
+        }
+        setNotificationsData(notificationsData.map((notification) => ({ ...notification, isRead: true })));
+      })
+      .catch((e: unknown) => {
+        logger.error(e);
+      })
+      .finally(() => {
+        setIsPending(false);
+      });
+  };
+
   return (
-    <Group justify="center" ref={ref}>
+    <Group justify="center" ref={setControl}>
       <Popover width={350} trapFocus position="bottom" withArrow shadow="md" offset={-5} opened={opened}>
         <Popover.Target>
           <Indicator size={10} offset={7} color="red" disabled={!hasUnreadNotifications()}>
@@ -85,8 +123,13 @@ export default function NotificationsButton(): ReactNode {
             </ActionIcon>
           </Indicator>
         </Popover.Target>
-        <Popover.Dropdown>
-          <Text>{t('title')}</Text>
+        <Popover.Dropdown ref={setDropdown}>
+          <Flex align="center" justify="space-between">
+            <Text>{t('title')}</Text>
+            <Button variant="transparent" onClick={markAllAsRead} disabled={isPending}>
+              {t('markAllAsRead')}
+            </Button>
+          </Flex>
           <Divider my="sm" />
           {!isPending ? (
             <NotificationsList
@@ -95,7 +138,9 @@ export default function NotificationsButton(): ReactNode {
               closeNotifications={close}
             />
           ) : (
-            <LoaderCentered />
+            <Container m="md">
+              <LoaderCentered />
+            </Container>
           )}
         </Popover.Dropdown>
       </Popover>
