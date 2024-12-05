@@ -13,8 +13,8 @@ import {
   useComputedColorScheme,
 } from '@mantine/core';
 import { IconBell, IconBellFilled } from '@tabler/icons-react';
-import React from 'react';
-import { type ReactNode, useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAtom } from 'jotai';
 import { logger } from '@repo/logger';
@@ -44,28 +44,49 @@ export default function NotificationsButton(): ReactNode {
     [control, dropdown],
   );
 
-  useEffect(() => {
-    setIsPending(true);
+  const loadNotifications = useCallback(
+    (refreshData = false): void => {
+      setIsPending(true);
+      void notifications({ after: !refreshData ? notificationsData?.pageInfo.endCursor : null })
+        .then((res) => {
+          if (!res.success) {
+            logger.error(res);
+            return;
+          }
 
-    void notifications()
-      .then((res) => {
-        if (!res.success) {
-          logger.error(res);
-          return;
-        }
-        setNotificationsData({
-          notifications: res.data.notifications.edges.map((edge) => edge.node) as Notification[],
-          pageInfo: res.data.notifications.pageInfo,
-          totalUnreadNotifications: res.data.notifications.totalCount,
+          if (!refreshData && notificationsData) {
+            setNotificationsData({
+              notifications: [
+                ...notificationsData.notifications,
+                ...res.data.notifications.edges.map((edge) => edge.node),
+              ] as Notification[],
+              pageInfo: res.data.notifications.pageInfo,
+              totalUnreadNotifications: res.data.notifications.totalCount,
+            });
+            return;
+          }
+
+          // On refresh data
+          setNotificationsData({
+            notifications: res.data.notifications.edges.map((edge) => edge.node) as Notification[],
+            pageInfo: res.data.notifications.pageInfo,
+            totalUnreadNotifications: res.data.notifications.totalCount,
+          });
+        })
+        .catch((error: unknown) => {
+          logger.error(error);
+        })
+        .finally(() => {
+          setIsPending(false);
         });
-      })
-      .catch((error: unknown) => {
-        logger.error(error);
-      })
-      .finally(() => {
-        setIsPending(false);
-      });
-  }, [setNotificationsData]);
+    },
+    [notificationsData, setNotificationsData],
+  );
+
+  useEffect(() => {
+    loadNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- this is fine
+  }, []);
 
   const setNotificationAsRead = (notificationEntry: Notification): void => {
     if (!notificationEntry.isRead) {
@@ -98,7 +119,11 @@ export default function NotificationsButton(): ReactNode {
   };
 
   const toggleNotifications = (): void => {
-    opened ? close() : open();
+    opened ? close() : openNotificationsList();
+  };
+
+  const openNotificationsList = (): void => {
+    open();
   };
 
   const markAllAsRead = (): void => {
@@ -125,11 +150,25 @@ export default function NotificationsButton(): ReactNode {
     }
   };
 
+  const loadNextPage = (): void => {
+    if (notificationsData?.pageInfo.hasNextPage) loadNotifications();
+  };
+
+  const getNotificationsCount = (count: number): string => {
+    return count > 9 ? '9+' : count.toString();
+  };
+
   return (
     <Group justify="center" ref={setControl}>
       <Popover width={350} trapFocus position="bottom" withArrow shadow="md" offset={-5} opened={opened}>
         <Popover.Target>
-          <Indicator size={10} offset={7} color="red" disabled={!hasUnreadNotifications()}>
+          <Indicator
+            label={getNotificationsCount(notificationsData?.totalUnreadNotifications ?? 0)}
+            size={16}
+            offset={7}
+            color="red"
+            disabled={!hasUnreadNotifications()}
+          >
             <ActionIcon
               variant="transparent"
               c={getButtonColorBasedOnTheme(computedColorScheme)}
@@ -143,22 +182,27 @@ export default function NotificationsButton(): ReactNode {
         <Popover.Dropdown ref={setDropdown}>
           <Flex align="center" justify="space-between">
             <Text>{t('title')}</Text>
-            <Button variant="transparent" onClick={markAllAsRead} disabled={isPending}>
+            <Button
+              variant="transparent"
+              onClick={markAllAsRead}
+              disabled={isPending || !notificationsData?.notifications.length}
+            >
               {t('markAllAsRead')}
             </Button>
           </Flex>
           <Divider my="sm" />
-          {!isPending ? (
-            <NotificationsList
-              notifications={notificationsData?.notifications ?? null}
-              setNotificationAsRead={setNotificationAsRead}
-              closeNotifications={close}
-            />
-          ) : (
+
+          <NotificationsList
+            notificationsData={notificationsData ?? null}
+            setNotificationAsRead={setNotificationAsRead}
+            closeNotifications={close}
+            loadNextPage={loadNextPage}
+          />
+          {isPending ? (
             <Container m="md">
               <LoaderCentered />
             </Container>
-          )}
+          ) : null}
         </Popover.Dropdown>
       </Popover>
     </Group>

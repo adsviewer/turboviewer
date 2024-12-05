@@ -210,9 +210,7 @@ export default function Comments(props: PropsType): ReactNode {
   };
 
   const loadNextPage = (): void => {
-    if (commentsData?.pageInfo.hasNextPage) {
-      loadComments();
-    }
+    if (commentsData?.pageInfo.hasNextPage) loadComments();
   };
 
   return (

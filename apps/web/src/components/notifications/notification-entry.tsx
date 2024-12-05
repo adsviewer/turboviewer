@@ -4,7 +4,6 @@ import React, { type ReactNode } from 'react';
 import { Flex, Indicator, Text } from '@mantine/core';
 import { timeAgo } from '@repo/utils';
 import { useTranslations } from 'next-intl';
-import { logger } from '@repo/logger';
 import { useRouter } from 'next/navigation';
 import { InsightsColumnsGroupBy, type Notification, NotificationTypeEnum } from '@/graphql/generated/schema-server';
 import { urlKeys } from '@/util/url-query-utils';
@@ -30,7 +29,6 @@ export default function NotificationEntry(props: PropsType): ReactNode {
   };
 
   const onNotificationClick = (): void => {
-    logger.info(props.data);
     switch (props.data.type) {
       case NotificationTypeEnum.COMMENT_MENTION:
         router.push(

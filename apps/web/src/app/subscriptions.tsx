@@ -15,21 +15,28 @@ import { notificationsDataAtom } from './atoms/notifications-atom';
 
 export function Subscriptions(): null {
   const [notificationsData, setNotificationsData] = useAtom(notificationsDataAtom);
-  const [newNotification, setNewNotification] = useState<Notification | null>(null);
+  const [newNotificationData, setNewNotificationData] = useState<Notification | null>(null);
 
   // Notifications
   useNewNotificationSubscription({}, (_prev, data): NewNotificationSubscription => {
     const incomingNotification = data.newNotification as unknown as Notification;
-    setNewNotification(incomingNotification);
+    setNewNotificationData(incomingNotification);
     return data;
   });
 
   useEffect(() => {
-    if (newNotification) {
-      setNotificationsData([newNotification, ...notificationsData]);
-      setNewNotification(null);
+    if (newNotificationData) {
+      if (notificationsData) {
+        setNotificationsData({
+          notifications: [newNotificationData, ...notificationsData.notifications] as Notification[],
+          pageInfo: notificationsData.pageInfo,
+          totalUnreadNotifications: notificationsData.totalUnreadNotifications + 1,
+        });
+      }
+
+      setNewNotificationData(null);
     }
-  }, [newNotification, notificationsData, setNotificationsData]);
+  }, [newNotificationData, notificationsData, setNotificationsData]);
 
   // New Integration
   useNewIntegrationSubscription({}, (_prev, data): NewIntegrationSubscription => {
