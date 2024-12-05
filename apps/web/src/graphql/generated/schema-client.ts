@@ -997,7 +997,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
-  notifications: Array<Notification>;
+  notifications: QueryNotificationsConnection;
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
@@ -1047,6 +1047,13 @@ export type QueryLoginProvidersArgs = {
   inviteHash?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type QueryNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
 };
@@ -1062,6 +1069,19 @@ export type QueryCommentsConnectionEdge = {
   __typename: 'QueryCommentsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Comment;
+};
+
+export type QueryNotificationsConnection = {
+  __typename: 'QueryNotificationsConnection';
+  edges: Array<QueryNotificationsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryNotificationsConnectionEdge = {
+  __typename: 'QueryNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Notification;
 };
 
 export type SearchQueryString = {

@@ -18,9 +18,19 @@ builder.subscriptionFields((t) => ({
 }));
 
 builder.queryFields((t) => ({
-  notifications: t.withAuth({ isInOrg: true }).prismaField({
-    type: [NotificationDto],
+  notifications: t.withAuth({ isInOrg: true }).prismaConnection({
+    type: NotificationDto,
+    cursor: 'id',
+    defaultSize: 10,
+    edgesNullable: false,
+    nodeNullable: false,
     nullable: false,
+    // Total count of unread notifications only
+    totalCount: async (_parent, _args, ctx, _info) => {
+      return await prisma.notification.count({
+        where: { receivingUserId: ctx.currentUserId, isRead: false },
+      });
+    },
     resolve: async (query, _root, _args, ctx) => {
       const data = await prisma.notification.findMany({
         ...query,

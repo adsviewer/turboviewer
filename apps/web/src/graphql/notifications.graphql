@@ -1,11 +1,21 @@
-query notifications {
-  notifications {
-    id
-    type
-    receivingUserId
-    extraData
-    isRead
-    createdAt
+query notifications($after: String) {
+  notifications(after: $after) {
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        type
+        receivingUserId
+        extraData
+        isRead
+        createdAt
+      }
+    }
   }
 }
 

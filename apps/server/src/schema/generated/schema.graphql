@@ -872,7 +872,7 @@ type Query {
   lastThreeMonthsAds: [Ad!]!
   loginProviders(inviteHash: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!
-  notifications: [Notification!]!
+  notifications(after: String, before: String, first: Int, last: Int): QueryNotificationsConnection!
   organization: Organization!
 
   """
@@ -898,6 +898,17 @@ type QueryCommentsConnection {
 type QueryCommentsConnectionEdge {
   cursor: String!
   node: Comment!
+}
+
+type QueryNotificationsConnection {
+  edges: [QueryNotificationsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryNotificationsConnectionEdge {
+  cursor: String!
+  node: Notification!
 }
 
 type SearchQueryString {

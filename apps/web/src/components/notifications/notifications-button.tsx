@@ -53,7 +53,11 @@ export default function NotificationsButton(): ReactNode {
           logger.error(res);
           return;
         }
-        setNotificationsData(res.data.notifications as Notification[]);
+        setNotificationsData({
+          notifications: res.data.notifications.edges.map((edge) => edge.node) as Notification[],
+          pageInfo: res.data.notifications.pageInfo,
+          totalUnreadNotifications: res.data.notifications.totalCount,
+        });
       })
       .catch((error: unknown) => {
         logger.error(error);
@@ -71,10 +75,17 @@ export default function NotificationsButton(): ReactNode {
             logger.error(res);
             return;
           }
-          const updatedNotificationsData = notificationsData.map((notification) =>
+          const updatedNotifications = notificationsData?.notifications.map((notification) =>
             notification.id === notificationEntry.id ? { ...notification, isRead: true } : notification,
           );
-          setNotificationsData(updatedNotificationsData);
+
+          if (notificationsData?.notifications.length && updatedNotifications) {
+            setNotificationsData({
+              ...notificationsData,
+              notifications: updatedNotifications,
+              totalUnreadNotifications: notificationsData.totalUnreadNotifications - 1,
+            });
+          }
         })
         .catch((error: unknown) => {
           logger.error(error);
@@ -83,7 +94,7 @@ export default function NotificationsButton(): ReactNode {
   };
 
   const hasUnreadNotifications = (): boolean => {
-    return notificationsData.some((notification) => !notification.isRead);
+    return notificationsData?.notifications.some((notification) => !notification.isRead) ?? false;
   };
 
   const toggleNotifications = (): void => {
@@ -91,21 +102,27 @@ export default function NotificationsButton(): ReactNode {
   };
 
   const markAllAsRead = (): void => {
-    setIsPending(true);
-    void markAllNotificationsAsRead()
-      .then((res) => {
-        if (!res.success) {
-          logger.error(res);
-          return;
-        }
-        setNotificationsData(notificationsData.map((notification) => ({ ...notification, isRead: true })));
-      })
-      .catch((e: unknown) => {
-        logger.error(e);
-      })
-      .finally(() => {
-        setIsPending(false);
-      });
+    if (notificationsData?.notifications.length) {
+      setIsPending(true);
+      void markAllNotificationsAsRead()
+        .then((res) => {
+          if (!res.success) {
+            logger.error(res);
+            return;
+          }
+          setNotificationsData({
+            notifications: notificationsData.notifications.map((notification) => ({ ...notification, isRead: true })),
+            pageInfo: notificationsData.pageInfo,
+            totalUnreadNotifications: 0,
+          });
+        })
+        .catch((e: unknown) => {
+          logger.error(e);
+        })
+        .finally(() => {
+          setIsPending(false);
+        });
+    }
   };
 
   return (
@@ -133,7 +150,7 @@ export default function NotificationsButton(): ReactNode {
           <Divider my="sm" />
           {!isPending ? (
             <NotificationsList
-              notifications={notificationsData}
+              notifications={notificationsData?.notifications ?? null}
               setNotificationAsRead={setNotificationAsRead}
               closeNotifications={close}
             />

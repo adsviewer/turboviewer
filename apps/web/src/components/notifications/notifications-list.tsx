@@ -8,7 +8,7 @@ import { type Notification } from '@/graphql/generated/schema-server';
 import NotificationEntry from './notification-entry';
 
 interface PropsType {
-  notifications: Notification[];
+  notifications: Notification[] | null;
   setNotificationAsRead: (data: Notification) => void;
   closeNotifications: () => void;
 }
@@ -26,7 +26,7 @@ export default function NotificationsList(props: PropsType): ReactNode {
         logger.info('bottom reached!');
       }}
     >
-      {props.notifications.length ? (
+      {props.notifications?.length ? (
         props.notifications.map((notification) => (
           <NotificationEntry
             key={notification.id}

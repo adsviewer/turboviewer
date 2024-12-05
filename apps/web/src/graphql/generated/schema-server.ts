@@ -996,7 +996,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
-  notifications: Array<Notification>;
+  notifications: QueryNotificationsConnection;
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
@@ -1046,6 +1046,13 @@ export type QueryLoginProvidersArgs = {
   inviteHash?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type QueryNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
 };
@@ -1061,6 +1068,19 @@ export type QueryCommentsConnectionEdge = {
   __typename: 'QueryCommentsConnectionEdge';
   cursor: Scalars['String']['output'];
   node: Comment;
+};
+
+export type QueryNotificationsConnection = {
+  __typename: 'QueryNotificationsConnection';
+  edges: Array<QueryNotificationsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryNotificationsConnectionEdge = {
+  __typename: 'QueryNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Notification;
 };
 
 export type SearchQueryString = {
@@ -1434,19 +1454,30 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
-export type NotificationsQueryVariables = Exact<{ [key: string]: never }>;
+export type NotificationsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 export type NotificationsQuery = {
   __typename: 'Query';
-  notifications: Array<{
-    __typename: 'Notification';
-    id: string;
-    type: NotificationTypeEnum;
-    receivingUserId: string;
-    extraData?: any | null;
-    isRead: boolean;
-    createdAt: Date;
-  }>;
+  notifications: {
+    __typename: 'QueryNotificationsConnection';
+    totalCount: number;
+    pageInfo: { __typename: 'PageInfo'; endCursor?: string | null; hasNextPage: boolean };
+    edges: Array<{
+      __typename: 'QueryNotificationsConnectionEdge';
+      cursor: string;
+      node: {
+        __typename: 'Notification';
+        id: string;
+        type: NotificationTypeEnum;
+        receivingUserId: string;
+        extraData?: any | null;
+        isRead: boolean;
+        createdAt: Date;
+      };
+    }>;
+  };
 };
 
 export type MarkNotificationAsReadMutationVariables = Exact<{
@@ -2114,14 +2145,24 @@ export const LoginProvidersDocument = gql`
   }
 `;
 export const NotificationsDocument = gql`
-  query notifications {
-    notifications {
-      id
-      type
-      receivingUserId
-      extraData
-      isRead
-      createdAt
+  query notifications($after: String) {
+    notifications(after: $after) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      edges {
+        cursor
+        node {
+          id
+          type
+          receivingUserId
+          extraData
+          isRead
+          createdAt
+        }
+      }
     }
   }
 `;
