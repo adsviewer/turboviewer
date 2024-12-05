@@ -6,7 +6,7 @@ import { notifications } from '@mantine/notifications';
 import { logger } from '@repo/logger';
 import { IconMessage, IconSend2, IconX } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import React, { useEffect, useState, type ReactNode } from 'react';
+import React, { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useAtom } from 'jotai';
 import { useSearchParams } from 'next/navigation';
 import { createFullName, removeHTMLTags } from '@/util/format-utils';
@@ -15,7 +15,7 @@ import { deleteComment, getComments, upsertComment } from '@/app/(authenticated)
 import LoaderCentered from '@/components/misc/loader-centered';
 import { editedCommentAtom } from '@/app/atoms/comment-atoms';
 import { isParamInSearchParams, urlKeys } from '@/util/url-query-utils';
-import CommentsList from './comments-list';
+import CommentsList, { type CommentsListRef } from './comments-list';
 import CommentInput from './comment-input/comment-input';
 
 interface PropsType {
@@ -34,6 +34,12 @@ export interface CommentItemType {
 
 const MAX_COMMENT_LENGTH = 3000;
 
+export interface CommentsDataType {
+  comments: CommentItemType[];
+  pageInfo: CommentsQuery['comments']['pageInfo'];
+  totalComments: number;
+}
+
 export default function Comments(props: PropsType): ReactNode {
   const t = useTranslations('insights');
   const tGeneric = useTranslations('generic');
@@ -42,8 +48,9 @@ export default function Comments(props: PropsType): ReactNode {
   const [editedComment, setEditedComment] = useAtom(editedCommentAtom);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
-  const [comments, setComments] = useState<CommentItemType[]>([]);
+  const [commentsData, setCommentsData] = useState<CommentsDataType | null>(null);
   const [taggedUsersIds, setTaggedUsersIds] = useState<string[]>([]);
+  const commentsListRef = useRef<CommentsListRef>(null);
 
   // Comment Input params
   const [commentInputContent, setCommentInputContent] = useState<string>('');
@@ -65,23 +72,22 @@ export default function Comments(props: PropsType): ReactNode {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is not a dependency
   }, [editedComment?.body]);
 
-  const commentsToCommentsList = (fetchedComments: CommentsQuery['comments']): CommentItemType[] => {
+  const commentsToCommentsList = (fetchedComments: CommentsQuery['comments']['edges']): CommentItemType[] => {
     return fetchedComments.map((comment) => {
       return {
-        id: comment.id,
-        userId: comment.user.id,
-        name: createFullName(comment.user.firstName, comment.user.lastName),
-        photoUrl: comment.user.photoUrl,
-        comment: comment.body,
-        createdAt: comment.createdAt,
+        id: comment.node.id,
+        userId: comment.node.user.id,
+        name: createFullName(comment.node.user.firstName, comment.node.user.lastName),
+        photoUrl: comment.node.user.photoUrl,
+        comment: comment.node.body,
+        createdAt: comment.node.createdAt,
       };
     });
   };
 
-  const loadComments = (): void => {
+  const loadComments = (refreshData = false): void => {
     setIsLoadingComments(true);
-
-    void getComments({ creativeId: props.creativeId })
+    void getComments({ creativeId: props.creativeId, after: !refreshData ? commentsData?.pageInfo.endCursor : null })
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -92,7 +98,23 @@ export default function Comments(props: PropsType): ReactNode {
           });
           return;
         }
-        setComments(commentsToCommentsList(res.data.comments));
+
+        if (!refreshData) {
+          setCommentsData({
+            comments: [...(commentsData?.comments ?? []), ...commentsToCommentsList(res.data.comments.edges)],
+            pageInfo: res.data.comments.pageInfo,
+            totalComments: res.data.comments.totalCount,
+          });
+          return;
+        }
+
+        // On refresh data
+        setCommentsData({
+          comments: commentsToCommentsList(res.data.comments.edges),
+          pageInfo: res.data.comments.pageInfo,
+          totalComments: res.data.comments.totalCount,
+        });
+        if (commentsListRef.current) commentsListRef.current.scrollToTop();
       })
       .catch((err: unknown) => {
         logger.error(err);
@@ -124,7 +146,7 @@ export default function Comments(props: PropsType): ReactNode {
           message: t('comments.commentSuccess'),
           color: 'blue',
         });
-        loadComments();
+        loadComments(true);
       })
       .catch((err: unknown) => {
         logger.error(err);
@@ -171,18 +193,26 @@ export default function Comments(props: PropsType): ReactNode {
   };
 
   const closeModal = (): void => {
+    setCommentsData(null);
     resetForm();
     close();
   };
 
   const openModal = (): void => {
     open();
-    loadComments();
+    loadComments(true);
   };
 
   const getCommentsTitle = (): string => {
-    if (comments.length > 0) return `${t('comments.title')} (${String(comments.length)})`;
+    if (commentsData && commentsData.totalComments > 0)
+      return `${t('comments.title')} (${String(commentsData.totalComments)})`;
     return t('comments.title');
+  };
+
+  const loadNextPage = (): void => {
+    if (commentsData?.pageInfo.hasNextPage) {
+      loadComments();
+    }
   };
 
   return (
@@ -200,9 +230,6 @@ export default function Comments(props: PropsType): ReactNode {
           {props.creativeName}
         </Text>
         <Divider my="md" />
-
-        {/* Comments List */}
-        {!isLoadingComments ? <CommentsList comments={comments} eraseComment={eraseComment} /> : <LoaderCentered />}
 
         {/* New Comment */}
         <Indicator
@@ -225,7 +252,17 @@ export default function Comments(props: PropsType): ReactNode {
             setTaggedUsersIds={setTaggedUsersIds}
           />
         </Indicator>
-        <Flex w="100%">
+
+        {/* Comments List */}
+        <CommentsList
+          ref={commentsListRef}
+          commentsData={commentsData}
+          eraseComment={eraseComment}
+          loadNextPage={loadNextPage}
+        />
+        {isLoadingComments ? <LoaderCentered /> : null}
+
+        <Flex w="100%" mt="md">
           {editedComment?.id ? (
             <Button variant="transparent" rightSection={<IconX />} mr="auto" onClick={resetForm}>
               {t('comments.cancelEditing')}

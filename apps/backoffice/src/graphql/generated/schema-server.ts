@@ -986,7 +986,7 @@ export type Query = {
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
-  comments: Array<Comment>;
+  comments: QueryCommentsConnection;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsights;
@@ -1016,7 +1016,11 @@ export type QueryCheckConfirmInvitedUserHashValidityArgs = {
 };
 
 export type QueryCommentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   creativeId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -1044,6 +1048,19 @@ export type QueryLoginProvidersArgs = {
 
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
+};
+
+export type QueryCommentsConnection = {
+  __typename: 'QueryCommentsConnection';
+  edges: Array<QueryCommentsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryCommentsConnectionEdge = {
+  __typename: 'QueryCommentsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Comment;
 };
 
 export type SearchQueryString = {

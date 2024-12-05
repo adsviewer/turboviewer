@@ -1,27 +1,33 @@
-import React, { useEffect, useRef, type ReactNode } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Flex, ScrollArea, Text } from '@mantine/core';
-import { type CommentItemType } from './comments';
+import { motion } from 'framer-motion';
+import { type CommentsDataType } from './comments';
 import Comment from './comment';
 
-interface PropsType {
-  comments: CommentItemType[];
-  eraseComment: (commentToDeleteId: string) => void;
+export interface CommentsListRef {
+  scrollToTop: () => void;
 }
 
-export default function CommentsList(props: PropsType): ReactNode {
+interface PropsType {
+  commentsData: CommentsDataType | null;
+  eraseComment: (commentToDeleteId: string) => void;
+  loadNextPage: () => void;
+}
+
+const CommentsList = forwardRef<CommentsListRef, PropsType>((props, ref) => {
   const t = useTranslations('insights');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = (): void => {
+  const scrollToTop = (): void => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+      scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  useEffect(() => {
-    if (props.comments.length) scrollToBottom();
-  }, [props.comments.length]);
+  useImperativeHandle(ref, () => ({
+    scrollToTop,
+  }));
 
   return (
     <ScrollArea.Autosize
@@ -31,11 +37,20 @@ export default function CommentsList(props: PropsType): ReactNode {
       type="always"
       mah={300}
       style={{ userSelect: 'text' }}
+      onBottomReached={props.loadNextPage}
     >
-      {props.comments.length ? (
+      {props.commentsData?.comments.length ? (
         <Flex direction="column" gap="lg">
-          {props.comments.map((comment) => (
-            <Comment key={comment.id} data={comment} eraseComment={props.eraseComment} />
+          {props.commentsData.comments.map((comment) => (
+            <motion.div
+              key={comment.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 75, duration: 0.15 }}
+              exit={{ opacity: 0 }}
+            >
+              <Comment data={comment} eraseComment={props.eraseComment} />
+            </motion.div>
           ))}
         </Flex>
       ) : (
@@ -45,4 +60,8 @@ export default function CommentsList(props: PropsType): ReactNode {
       )}
     </ScrollArea.Autosize>
   );
-}
+});
+
+CommentsList.displayName = 'CommentsList';
+
+export default CommentsList;

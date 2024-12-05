@@ -986,7 +986,7 @@ export type Query = {
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
-  comments: Array<Comment>;
+  comments: QueryCommentsConnection;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsights;
@@ -1016,7 +1016,11 @@ export type QueryCheckConfirmInvitedUserHashValidityArgs = {
 };
 
 export type QueryCommentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   creativeId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -1044,6 +1048,19 @@ export type QueryLoginProvidersArgs = {
 
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
+};
+
+export type QueryCommentsConnection = {
+  __typename: 'QueryCommentsConnection';
+  edges: Array<QueryCommentsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryCommentsConnectionEdge = {
+  __typename: 'QueryCommentsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Comment;
 };
 
 export type SearchQueryString = {
@@ -1179,18 +1196,28 @@ export type ZodFieldError = {
 
 export type CommentsQueryVariables = Exact<{
   creativeId: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type CommentsQuery = {
   __typename: 'Query';
-  comments: Array<{
-    __typename: 'Comment';
-    id: string;
-    body: string;
-    createdAt: Date;
-    taggedUsers: Array<{ __typename: 'User'; id: string }>;
-    user: { __typename: 'User'; id: string; firstName: string; lastName: string; photoUrl?: string | null };
-  }>;
+  comments: {
+    __typename: 'QueryCommentsConnection';
+    totalCount: number;
+    pageInfo: { __typename: 'PageInfo'; endCursor?: string | null; hasNextPage: boolean };
+    edges: Array<{
+      __typename: 'QueryCommentsConnectionEdge';
+      cursor: string;
+      node: {
+        __typename: 'Comment';
+        id: string;
+        body: string;
+        createdAt: Date;
+        taggedUsers: Array<{ __typename: 'User'; id: string }>;
+        user: { __typename: 'User'; id: string; firstName: string; lastName: string; photoUrl?: string | null };
+      };
+    }>;
+  };
 };
 
 export type UpsertCommentMutationVariables = Exact<{
@@ -1858,19 +1885,29 @@ export const UserFieldsFragmentDoc = gql`
   ${CurrentOrganizationFragmentDoc}
 `;
 export const CommentsDocument = gql`
-  query comments($creativeId: String!) {
-    comments(creativeId: $creativeId) {
-      id
-      body
-      createdAt
-      taggedUsers {
-        id
+  query comments($creativeId: String!, $after: String) {
+    comments(creativeId: $creativeId, after: $after) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
       }
-      user {
-        id
-        firstName
-        lastName
-        photoUrl
+      edges {
+        cursor
+        node {
+          id
+          body
+          createdAt
+          taggedUsers {
+            id
+          }
+          user {
+            id
+            firstName
+            lastName
+            photoUrl
+          }
+        }
       }
     }
   }

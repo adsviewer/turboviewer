@@ -859,7 +859,7 @@ type Query {
   """
   availableOrganizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
   checkConfirmInvitedUserHashValidity(invitedHash: String!): Boolean!
-  comments(creativeId: String!): [Comment!]!
+  comments(after: String, before: String, creativeId: String!, first: Int, last: Int): QueryCommentsConnection!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsights!
@@ -887,6 +887,17 @@ type Query {
   refreshToken: String!
   searchQueryStrings: [SearchQueryString!]!
   settingsChannels: [IntegrationListItem!]!
+}
+
+type QueryCommentsConnection {
+  edges: [QueryCommentsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryCommentsConnectionEdge {
+  cursor: String!
+  node: Comment!
 }
 
 type SearchQueryString {

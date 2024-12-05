@@ -6,17 +6,26 @@ import { builder } from '../builder';
 import { CommentDto } from './comment-types';
 
 builder.queryFields((t) => ({
-  comments: t.withAuth({ isInOrg: true }).prismaField({
-    type: [CommentDto],
+  comments: t.withAuth({ isInOrg: true }).prismaConnection({
+    type: CommentDto,
+    cursor: 'id',
+    defaultSize: 10,
+    edgesNullable: false,
+    nodeNullable: false,
     nullable: false,
+    totalCount: async (_parent, args, _ctx, _info) => {
+      return await prisma.comment.count({
+        where: { creativeId: args.creativeId },
+      });
+    },
     args: {
       creativeId: t.arg.string({ required: true }),
     },
-    resolve: async (query, parent, args) => {
+    resolve: async (query, _parent, args) => {
       const data = await prisma.comment.findMany({
         ...query,
         where: { creativeId: args.creativeId },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
       });
       return data;
     },

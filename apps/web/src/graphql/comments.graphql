@@ -1,16 +1,26 @@
-query comments($creativeId: String!) {
-  comments(creativeId: $creativeId) {
-    id
-    body
-    createdAt
-    taggedUsers {
-      id
+query comments($creativeId: String!, $after: String) {
+  comments(creativeId: $creativeId, after: $after) {
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
     }
-    user {
-      id
-      firstName
-      lastName
-      photoUrl
+    edges {
+      cursor
+      node {
+        id
+        body
+        createdAt
+        taggedUsers {
+          id
+        }
+        user {
+          id
+          firstName
+          lastName
+          photoUrl
+        }
+      }
     }
   }
 }
