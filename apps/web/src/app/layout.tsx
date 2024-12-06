@@ -16,8 +16,8 @@ import React from 'react';
 import { ModalsProvider } from '@mantine/modals';
 import NotificationsHandler from '@/components/misc/notifications-handler';
 import { env } from '@/env.mjs';
-import { Subscriptions } from '@/app/subscriptions';
 import { UrqlProvider } from '@/app/urql-provider';
+import { Subscriptions } from './subscriptions';
 
 export const metadata: Metadata = {
   title: 'AdsViewer',

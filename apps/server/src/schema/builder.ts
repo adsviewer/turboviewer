@@ -8,11 +8,10 @@ import RelayPlugin from '@pothos/plugin-relay';
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import SimpleObjectsPlugin from '@pothos/plugin-simple-objects';
 import ZodPlugin from '@pothos/plugin-zod';
-import { prisma, Prisma } from '@repo/database';
+import { prisma } from '@repo/database';
 import { Environment, MODE } from '@repo/mode';
 import { getRootOrganizationId } from '@repo/backend-shared';
 import { type GraphQLContext } from '../context';
-import JsonValue = Prisma.JsonValue;
 
 export interface AuthenticatedContext extends GraphQLContext {
   currentUserId: NonNullable<GraphQLContext['currentUserId']>;
@@ -41,8 +40,8 @@ export const builder = new SchemaBuilder<{
       Output: Date;
     };
     JSON: {
-      Input: JsonValue;
-      Output: JsonValue;
+      Input: unknown;
+      Output: unknown;
     };
     BigInt: {
       Input: bigint;

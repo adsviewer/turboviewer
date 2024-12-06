@@ -12,7 +12,12 @@ import {
   IconHelpOctagon,
 } from '@tabler/icons-react';
 import { type ReadonlyURLSearchParams } from 'next/navigation';
-import { DeviceEnum, InsightsColumnsOrderBy, PublisherEnum } from '@/graphql/generated/schema-server';
+import {
+  DeviceEnum,
+  type GroupedInsight,
+  InsightsColumnsOrderBy,
+  PublisherEnum,
+} from '@/graphql/generated/schema-server';
 import { isParamInSearchParams, urlKeys } from './url-query-utils';
 import { type MultiSelectDataType } from './types';
 
@@ -72,3 +77,15 @@ export const getAccountCurrentValues = (
   accounts
     .filter((a) => isParamInSearchParams(searchParams, urlKeys.adAccount, a.value))
     .map((account) => account.value);
+
+export const getInsightHeading = (insight: GroupedInsight, defaultLabel: string): string => {
+  if (insight.publisher) return insight.publisher;
+  else if (insight.integration) return insight.integration;
+  return defaultLabel;
+};
+
+export const getInsightTitle = (insight: GroupedInsight, defaultLabel: string): string => {
+  if (insight.creativeName) return insight.creativeName;
+  else if (insight.adName) return insight.adName;
+  return defaultLabel;
+};

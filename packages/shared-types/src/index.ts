@@ -1,4 +1,11 @@
-import type { Integration, MilestoneEnum, OrganizationRoleEnum, RoleEnum, UserStatus } from '@repo/database';
+import type {
+  Integration,
+  MilestoneEnum,
+  Notification,
+  OrganizationRoleEnum,
+  RoleEnum,
+  UserStatus,
+} from '@repo/database';
 import { type JwtPayload } from 'jsonwebtoken';
 
 export interface AJwtPayload extends JwtPayload {
@@ -12,3 +19,7 @@ export interface AJwtPayload extends JwtPayload {
 
 export type NewIntegrationEvent = Pick<Integration, 'id' | 'type'>;
 export type IntegrationStatsUpdateEvent = Pick<Integration, 'id' | 'status'>;
+export type NotificationEvent = Pick<
+  Notification,
+  'id' | 'type' | 'receivingUserId' | 'extraData' | 'isRead' | 'createdAt'
+>;

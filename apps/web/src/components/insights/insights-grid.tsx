@@ -5,7 +5,8 @@ import { type Key, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import LoaderCentered from '@/components/misc/loader-centered';
-import { type GroupedInsight, type InsightsQuery } from '@/graphql/generated/schema-server';
+import { type InsightsQuery } from '@/graphql/generated/schema-server';
+import { getInsightHeading, getInsightTitle } from '@/util/insights-utils';
 import InsightCard from './insight-card';
 
 interface PropsType {
@@ -16,18 +17,6 @@ interface PropsType {
 
 export default function InsightsGrid(props: PropsType): ReactNode {
   const t = useTranslations('insights');
-
-  const getInsightHeading = (insight: GroupedInsight): string => {
-    if (insight.publisher) return insight.publisher;
-    else if (insight.integration) return insight.integration;
-    return t('insight');
-  };
-
-  const getInsightTitle = (insight: GroupedInsight): string => {
-    if (insight.creativeName) return insight.creativeName;
-    else if (insight.adName) return insight.adName;
-    return t('insight');
-  };
 
   return (
     <>
@@ -54,8 +43,8 @@ export default function InsightsGrid(props: PropsType): ReactNode {
               >
                 <InsightCard
                   key={insight.id as Key}
-                  heading={getInsightHeading(insight)}
-                  title={getInsightTitle(insight)}
+                  heading={getInsightHeading(insight, t('insight'))}
+                  title={getInsightTitle(insight, t('insight'))}
                   description={insight.position}
                   device={insight.device}
                   currency={insight.currency}

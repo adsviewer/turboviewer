@@ -21,7 +21,8 @@
     "pickDateRange": "Pick a date range",
     "add": "Add",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "noResultsFound": "No results found"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",
@@ -37,6 +38,12 @@
     "organization": "Organization",
     "signOut": "Sign Out",
     "noOrganizationData": "No organization data"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mentioned": "You were mentioned in a comment!",
+    "newIntegration": "A new integration has been added!",
+    "markAllAsRead": "Mark all as read"
   },
   "introduction": {
     "title": "Welcome!",

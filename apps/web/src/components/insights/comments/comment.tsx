@@ -7,6 +7,7 @@ import { useAtomValue } from 'jotai';
 import { userDetailsAtom } from '@/app/atoms/user-atoms';
 import type { CommentItemType } from './comments';
 import CommentOptions from './comment-options';
+import classes from './comment.module.scss';
 
 interface PropsType {
   data: CommentItemType;
@@ -28,9 +29,7 @@ export default function Comment(props: PropsType): ReactNode {
             {timeAgo(props.data.createdAt)}
           </Text>
         </Flex>
-        <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-          {props.data.comment}
-        </Text>
+        <div dangerouslySetInnerHTML={{ __html: props.data.comment }} className={classes.commentBody} />
       </Flex>
 
       {props.data.userId === userDetails.id ? (

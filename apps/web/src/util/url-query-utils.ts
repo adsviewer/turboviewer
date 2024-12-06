@@ -22,6 +22,7 @@ export enum ChartMetricsEnum {
 export const urlKeys = {
   error: 'error',
   groupedBy: 'groupedBy',
+  creativeIds: 'creativeIds',
   publisher: 'publisher',
   device: 'device',
   position: 'position',
@@ -37,6 +38,7 @@ export const urlKeys = {
   email: 'email',
   search: 'search',
   chartMetric: 'chartMetric',
+  showComments: 'showComments',
 };
 
 export const positions = [

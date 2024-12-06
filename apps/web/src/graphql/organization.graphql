@@ -1,19 +1,8 @@
+#import "./fragments.graphql"
+
 query getOrganization {
   organization {
-    id
-    tier
-    userOrganizations {
-      userId
-      role
-      status
-      user {
-        id
-        email
-        firstName
-        lastName
-        photoUrl
-      }
-    }
+    ...CurrentOrganization
   }
 }
 

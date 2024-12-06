@@ -11,6 +11,7 @@ import './user/social-login-operations';
 import './user/invite-operations';
 import './user/user-operations';
 import './comment/comment-operations';
+import './notification/notification-operations';
 
 builder.queryType({
   fields: (_t) => ({}),

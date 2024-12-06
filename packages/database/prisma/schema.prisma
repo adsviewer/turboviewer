@@ -63,6 +63,28 @@ enum MilestoneEnum {
   Onboarding
 }
 
+enum NotificationTypeEnum {
+  COMMENT_MENTION
+  NEW_INTEGRATION
+}
+
+model Notification {
+  id              String               @id @default(cuid())
+  type            NotificationTypeEnum
+  receivingUserId String               @map("receiving_user_id")
+  isRead          Boolean              @map("is_read")
+  /// [NewCommentNotificationExtraData]
+  extraData       Json?                @map("extra_data")
+
+  user User @relation(fields: [receivingUserId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([receivingUserId, isRead])
+  @@map("notifications")
+}
+
 model User {
   id                    String          @id @default(cuid())
   firstName             String          @map("first_name")
@@ -85,6 +107,7 @@ model User {
   organizations   UserOrganization[]
   roles           UserRole[]
   comments        Comment[]
+  notifications   Notification[]
   taggedInComment Comment[]           @relation(name: "COMMENT_TAGGED_USERS")
 
   @@index([currentOrganizationId])
@@ -350,8 +373,8 @@ model Comment {
   creative    Creative @relation(fields: [creativeId], references: [id])
   user        User     @relation(fields: [userId], references: [id])
 
-  @@index([creativeId])
   @@index([userId])
+  @@index([creativeId, createdAt])
   @@map("comments")
 }
 

@@ -32,9 +32,11 @@ import { initialUserDetails, userDetailsAtom } from '@/app/atoms/user-atoms';
 import FeedbackButton from '@/components/buttons/feedback-button';
 import SubNavlinkButton from '@/components/buttons/sub-navlink-button/sub-navlink-button';
 import { getSearchQueryStrings, getUserDetails } from '@/app/(authenticated)/actions';
-import { type Integration, IntegrationStatus } from '@/graphql/generated/schema-server';
+import { type Integration, IntegrationStatus, type Organization } from '@/graphql/generated/schema-server';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { searchesAtom } from '@/app/atoms/searches-atoms';
+import NotificationsButton from '@/components/notifications/notifications-button';
+import { organizationAtom } from '@/app/atoms/organization-atoms';
 
 export function MainAppShell({ children }: { children: React.ReactNode }): React.ReactNode {
   const t = useTranslations('navbar');
@@ -43,6 +45,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
+  const setOrganization = useSetAtom(organizationAtom);
   const setSearchesAtom = useSetAtom(searchesAtom);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
@@ -102,9 +105,9 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     initialRequests.push(
       void getUserDetails()
         .then((res) => {
-          logger.info(res);
           setUserDetails(res);
           checkIntegrationTokensForExpiration(res.currentOrganization?.integrations as Integration[] | null);
+          setOrganization({ organization: res.currentOrganization as Organization });
         })
         .catch((error: unknown) => {
           logger.error(error);
@@ -128,7 +131,7 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
     Promise.all(initialRequests).catch((err: unknown) => {
       logger.error(err);
     });
-  }, [checkIntegrationTokensForExpiration, setSearchesAtom, setUserDetails]);
+  }, [checkIntegrationTokensForExpiration, setOrganization, setSearchesAtom, setUserDetails]);
 
   // Make sure that all the mandatory initial data are loaded
   useEffect(() => {
@@ -150,6 +153,8 @@ export function MainAppShell({ children }: { children: React.ReactNode }): React
             <LogoFull />
           </Flex>
           <Flex align="center" justify="flex-end" ml="auto" gap="sm">
+            <NotificationsButton />
+            <Divider orientation="vertical" />
             <OrganizationSelect />
             <CreateOrganizationButton />
             <SettingsButton />

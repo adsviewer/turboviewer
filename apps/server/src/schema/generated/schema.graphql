@@ -703,6 +703,8 @@ type Mutation {
   forgetPassword(email: String!): Boolean!
   inviteUsers(emails: [String!]!, role: OrganizationRoleEnum!): MutationInviteUsersResult!
   login(email: String!, password: String!, token: String): Tokens!
+  markAllNotificationsAsRead: Boolean!
+  markNotificationAsRead(notificationId: String!): Boolean!
   refreshData(initial: Boolean!, integrationIds: [String!]): Boolean!
   removeUserFromOrganization(userId: String!): Boolean!
   removeUserMilestone(milestone: Milestones!): Tokens!
@@ -719,6 +721,7 @@ type Mutation {
   subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
   switchTiers(organizationId: String!, tier: Tier!): Organization!
+  test: Boolean!
   updateIntegrationAdAccounts(adAccountIds: [String!]!, integrationId: String!): [AdAccountIntegration!]!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
@@ -753,6 +756,34 @@ type NewIntegrationEvent {
 type NewsletterSubscription {
   email: String!
   id: ID!
+}
+
+type Notification {
+  createdAt: Date!
+
+  """
+  [NewCommentNotificationExtraData]
+  """
+  extraData: JSON
+  id: ID!
+  isRead: Boolean!
+  receivingUser: User!
+  receivingUserId: ID!
+  type: NotificationTypeEnum!
+}
+
+type NotificationEventPayload {
+  createdAt: Date!
+  extraData: JSON
+  id: ID!
+  isRead: Boolean!
+  receivingUserId: ID!
+  type: NotificationTypeEnum!
+}
+
+enum NotificationTypeEnum {
+  COMMENT_MENTION
+  NEW_INTEGRATION
 }
 
 enum OrderBy {
@@ -828,7 +859,7 @@ type Query {
   """
   availableOrganizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
   checkConfirmInvitedUserHashValidity(invitedHash: String!): Boolean!
-  comments(creativeId: String!): [Comment!]!
+  comments(after: String, before: String, creativeId: String!, first: Int, last: Int): QueryCommentsConnection!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsights!
@@ -841,6 +872,7 @@ type Query {
   lastThreeMonthsAds: [Ad!]!
   loginProviders(inviteHash: String): [GenerateGoogleAuthUrlResponse!]!
   me: User!
+  notifications(after: String, before: String, first: Int, last: Int): QueryNotificationsConnection!
   organization: Organization!
 
   """
@@ -855,6 +887,28 @@ type Query {
   refreshToken: String!
   searchQueryStrings: [SearchQueryString!]!
   settingsChannels: [IntegrationListItem!]!
+}
+
+type QueryCommentsConnection {
+  edges: [QueryCommentsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryCommentsConnectionEdge {
+  cursor: String!
+  node: Comment!
+}
+
+type QueryNotificationsConnection {
+  edges: [QueryNotificationsConnectionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type QueryNotificationsConnectionEdge {
+  cursor: String!
+  node: Notification!
 }
 
 type SearchQueryString {
@@ -879,6 +933,7 @@ type Subscription {
   channelInitialSetupProgress: ChannelInitialProgressPayload!
   integrationUpdateStatus: IntegrationStatsUpdateEvent!
   newIntegration: NewIntegrationEvent!
+  newNotification: NotificationEventPayload!
 }
 
 enum Tier {
@@ -929,6 +984,7 @@ type User {
   """
   lastName: String!
   milestones: [Milestones!]!
+  notifications(after: String, before: String, first: Int, last: Int): UserNotificationsConnection
   organizations: [UserOrganization!]!
 
   """
@@ -939,6 +995,16 @@ type User {
   taggedInComment: [Comment!]!
   updatedAt: Date!
   userRoles: [String!]!
+}
+
+type UserNotificationsConnection {
+  edges: [UserNotificationsConnectionEdge]
+  pageInfo: PageInfo!
+}
+
+type UserNotificationsConnectionEdge {
+  cursor: String!
+  node: Notification
 }
 
 type UserOrganization {

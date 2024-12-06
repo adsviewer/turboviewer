@@ -691,6 +691,8 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
+  markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markNotificationAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -704,6 +706,7 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
+  test: Scalars['Boolean']['output'];
   updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
@@ -767,6 +770,10 @@ export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationMarkNotificationAsReadArgs = {
+  notificationId: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {
@@ -886,6 +893,33 @@ export type NewsletterSubscription = {
   id: Scalars['ID']['output'];
 };
 
+export type Notification = {
+  __typename: 'Notification';
+  createdAt: Scalars['Date']['output'];
+  /** [NewCommentNotificationExtraData] */
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  receivingUser: User;
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+};
+
+export type NotificationEventPayload = {
+  __typename: 'NotificationEventPayload';
+  createdAt: Scalars['Date']['output'];
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+};
+
+export enum NotificationTypeEnum {
+  COMMENT_MENTION = 'COMMENT_MENTION',
+  NEW_INTEGRATION = 'NEW_INTEGRATION',
+}
+
 export enum OrderBy {
   asc = 'asc',
   desc = 'desc',
@@ -953,7 +987,7 @@ export type Query = {
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
-  comments: Array<Comment>;
+  comments: QueryCommentsConnection;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsights;
@@ -963,6 +997,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
+  notifications: QueryNotificationsConnection;
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
@@ -982,7 +1017,11 @@ export type QueryCheckConfirmInvitedUserHashValidityArgs = {
 };
 
 export type QueryCommentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   creativeId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -1008,8 +1047,41 @@ export type QueryLoginProvidersArgs = {
   inviteHash?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type QueryNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
+};
+
+export type QueryCommentsConnection = {
+  __typename: 'QueryCommentsConnection';
+  edges: Array<QueryCommentsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryCommentsConnectionEdge = {
+  __typename: 'QueryCommentsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Comment;
+};
+
+export type QueryNotificationsConnection = {
+  __typename: 'QueryNotificationsConnection';
+  edges: Array<QueryNotificationsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryNotificationsConnectionEdge = {
+  __typename: 'QueryNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Notification;
 };
 
 export type SearchQueryString = {
@@ -1036,6 +1108,7 @@ export type Subscription = {
   channelInitialSetupProgress: ChannelInitialProgressPayload;
   integrationUpdateStatus: IntegrationStatsUpdateEvent;
   newIntegration: NewIntegrationEvent;
+  newNotification: NotificationEventPayload;
 };
 
 export enum Tier {
@@ -1075,6 +1148,7 @@ export type User = {
   /** Caller is permitted to view this field if they are in a common organization */
   lastName: Scalars['String']['output'];
   milestones: Array<Milestones>;
+  notifications?: Maybe<UserNotificationsConnection>;
   organizations: Array<UserOrganization>;
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
@@ -1082,6 +1156,26 @@ export type User = {
   taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
+};
+
+/** Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization */
+export type UserNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type UserNotificationsConnection = {
+  __typename: 'UserNotificationsConnection';
+  edges?: Maybe<Array<Maybe<UserNotificationsConnectionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type UserNotificationsConnectionEdge = {
+  __typename: 'UserNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Notification>;
 };
 
 export type UserOrganization = {
@@ -1139,6 +1233,21 @@ export type NewIntegrationSubscription = {
   newIntegration: { __typename: 'NewIntegrationEvent'; type: IntegrationType };
 };
 
+export type NewNotificationSubscriptionVariables = Exact<{ [key: string]: never }>;
+
+export type NewNotificationSubscription = {
+  __typename: 'Subscription';
+  newNotification: {
+    __typename: 'NotificationEventPayload';
+    id: string;
+    type: NotificationTypeEnum;
+    extraData?: any | null;
+    receivingUserId: string;
+    isRead: boolean;
+    createdAt: Date;
+  };
+};
+
 export const ChannelInitialSetupProgressDocument = gql`
   subscription channelInitialSetupProgress {
     channelInitialSetupProgress {
@@ -1172,6 +1281,28 @@ export function useNewIntegrationSubscription<TData = NewIntegrationSubscription
 ) {
   return Urql.useSubscription<NewIntegrationSubscription, TData, NewIntegrationSubscriptionVariables>(
     { query: NewIntegrationDocument, ...options },
+    handler,
+  );
+}
+export const NewNotificationDocument = gql`
+  subscription newNotification {
+    newNotification {
+      id
+      type
+      extraData
+      receivingUserId
+      isRead
+      createdAt
+    }
+  }
+`;
+
+export function useNewNotificationSubscription<TData = NewNotificationSubscription>(
+  options?: Omit<Urql.UseSubscriptionArgs<NewNotificationSubscriptionVariables>, 'query'>,
+  handler?: Urql.SubscriptionHandler<NewNotificationSubscription, TData>,
+) {
+  return Urql.useSubscription<NewNotificationSubscription, TData, NewNotificationSubscriptionVariables>(
+    { query: NewNotificationDocument, ...options },
     handler,
   );
 }

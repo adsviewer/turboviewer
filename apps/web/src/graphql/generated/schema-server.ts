@@ -690,6 +690,8 @@ export type Mutation = {
   forgetPassword: Scalars['Boolean']['output'];
   inviteUsers: MutationInviteUsersResult;
   login: Tokens;
+  markAllNotificationsAsRead: Scalars['Boolean']['output'];
+  markNotificationAsRead: Scalars['Boolean']['output'];
   refreshData: Scalars['Boolean']['output'];
   removeUserFromOrganization: Scalars['Boolean']['output'];
   removeUserMilestone: Tokens;
@@ -703,6 +705,7 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
+  test: Scalars['Boolean']['output'];
   updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
@@ -766,6 +769,10 @@ export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
   token?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationMarkNotificationAsReadArgs = {
+  notificationId: Scalars['String']['input'];
 };
 
 export type MutationRefreshDataArgs = {
@@ -885,6 +892,33 @@ export type NewsletterSubscription = {
   id: Scalars['ID']['output'];
 };
 
+export type Notification = {
+  __typename: 'Notification';
+  createdAt: Scalars['Date']['output'];
+  /** [NewCommentNotificationExtraData] */
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  receivingUser: User;
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+};
+
+export type NotificationEventPayload = {
+  __typename: 'NotificationEventPayload';
+  createdAt: Scalars['Date']['output'];
+  extraData?: Maybe<Scalars['JSON']['output']>;
+  id: Scalars['ID']['output'];
+  isRead: Scalars['Boolean']['output'];
+  receivingUserId: Scalars['ID']['output'];
+  type: NotificationTypeEnum;
+};
+
+export enum NotificationTypeEnum {
+  COMMENT_MENTION = 'COMMENT_MENTION',
+  NEW_INTEGRATION = 'NEW_INTEGRATION',
+}
+
 export enum OrderBy {
   asc = 'asc',
   desc = 'desc',
@@ -952,7 +986,7 @@ export type Query = {
   /** Return all the adAccounts for that are available on the parent organization. If this is the root organization then it returns all the addAccounts of this channel. */
   availableOrganizationAdAccounts: Array<AdAccount>;
   checkConfirmInvitedUserHashValidity: Scalars['Boolean']['output'];
-  comments: Array<Comment>;
+  comments: QueryCommentsConnection;
   insightDatapoints: Array<InsightsDatapoints>;
   insightIFrame?: Maybe<IFrame>;
   insights: GroupedInsights;
@@ -962,6 +996,7 @@ export type Query = {
   lastThreeMonthsAds: Array<Ad>;
   loginProviders: Array<GenerateGoogleAuthUrlResponse>;
   me: User;
+  notifications: QueryNotificationsConnection;
   organization: Organization;
   /** Return the adAccounts for a channel that are associated with the organization. */
   organizationAdAccounts: Array<AdAccount>;
@@ -981,7 +1016,11 @@ export type QueryCheckConfirmInvitedUserHashValidityArgs = {
 };
 
 export type QueryCommentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   creativeId: Scalars['String']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type QueryInsightDatapointsArgs = {
@@ -1007,8 +1046,41 @@ export type QueryLoginProvidersArgs = {
   inviteHash?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type QueryNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type QueryOrganizationAdAccountsArgs = {
   channel: IntegrationType;
+};
+
+export type QueryCommentsConnection = {
+  __typename: 'QueryCommentsConnection';
+  edges: Array<QueryCommentsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryCommentsConnectionEdge = {
+  __typename: 'QueryCommentsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Comment;
+};
+
+export type QueryNotificationsConnection = {
+  __typename: 'QueryNotificationsConnection';
+  edges: Array<QueryNotificationsConnectionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryNotificationsConnectionEdge = {
+  __typename: 'QueryNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Notification;
 };
 
 export type SearchQueryString = {
@@ -1035,6 +1107,7 @@ export type Subscription = {
   channelInitialSetupProgress: ChannelInitialProgressPayload;
   integrationUpdateStatus: IntegrationStatsUpdateEvent;
   newIntegration: NewIntegrationEvent;
+  newNotification: NotificationEventPayload;
 };
 
 export enum Tier {
@@ -1074,6 +1147,7 @@ export type User = {
   /** Caller is permitted to view this field if they are in a common organization */
   lastName: Scalars['String']['output'];
   milestones: Array<Milestones>;
+  notifications?: Maybe<UserNotificationsConnection>;
   organizations: Array<UserOrganization>;
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
@@ -1081,6 +1155,26 @@ export type User = {
   taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
   userRoles: Array<Scalars['String']['output']>;
+};
+
+/** Caller is permitted to view this type if is the user or an admin. Some fields are also permitted if the caller and the user are in a common organization */
+export type UserNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type UserNotificationsConnection = {
+  __typename: 'UserNotificationsConnection';
+  edges?: Maybe<Array<Maybe<UserNotificationsConnectionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type UserNotificationsConnectionEdge = {
+  __typename: 'UserNotificationsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Notification>;
 };
 
 export type UserOrganization = {
@@ -1122,18 +1216,28 @@ export type ZodFieldError = {
 
 export type CommentsQueryVariables = Exact<{
   creativeId: Scalars['String']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type CommentsQuery = {
   __typename: 'Query';
-  comments: Array<{
-    __typename: 'Comment';
-    id: string;
-    body: string;
-    createdAt: Date;
-    taggedUsers: Array<{ __typename: 'User'; id: string }>;
-    user: { __typename: 'User'; id: string; firstName: string; lastName: string; photoUrl?: string | null };
-  }>;
+  comments: {
+    __typename: 'QueryCommentsConnection';
+    totalCount: number;
+    pageInfo: { __typename: 'PageInfo'; endCursor?: string | null; hasNextPage: boolean };
+    edges: Array<{
+      __typename: 'QueryCommentsConnectionEdge';
+      cursor: string;
+      node: {
+        __typename: 'Comment';
+        id: string;
+        body: string;
+        createdAt: Date;
+        taggedUsers: Array<{ __typename: 'User'; id: string }>;
+        user: { __typename: 'User'; id: string; firstName: string; lastName: string; photoUrl?: string | null };
+      };
+    }>;
+  };
 };
 
 export type UpsertCommentMutationVariables = Exact<{
@@ -1150,6 +1254,35 @@ export type DeleteCommentMutationVariables = Exact<{
 }>;
 
 export type DeleteCommentMutation = { __typename: 'Mutation'; deleteComment: { __typename: 'Comment'; id: string } };
+
+export type CurrentOrganizationFragment = {
+  __typename: 'Organization';
+  id: string;
+  name: string;
+  isRoot: boolean;
+  parentId?: string | null;
+  tier: Tier;
+  integrations: Array<{
+    __typename: 'Integration';
+    status: IntegrationStatus;
+    type: IntegrationType;
+    accessTokenExpiresAt?: Date | null;
+  }>;
+  userOrganizations: Array<{
+    __typename: 'UserOrganization';
+    userId: string;
+    role: OrganizationRoleEnum;
+    status: UserOrganizationStatus;
+    user: {
+      __typename: 'User';
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      photoUrl?: string | null;
+    };
+  }>;
+};
 
 export type AdAccountsQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1168,6 +1301,7 @@ export type AdAccountsQuery = {
 export type InsightsQueryVariables = Exact<{
   adAccountIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   adIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  creativeIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   integrations?: InputMaybe<Array<IntegrationType> | IntegrationType>;
   dateFrom?: InputMaybe<Scalars['Date']['input']>;
   dateTo?: InputMaybe<Scalars['Date']['input']>;
@@ -1320,6 +1454,46 @@ export type LoginProvidersQuery = {
   loginProviders: Array<{ __typename: 'GenerateGoogleAuthUrlResponse'; url: string; type: LoginProviderEnum }>;
 };
 
+export type NotificationsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type NotificationsQuery = {
+  __typename: 'Query';
+  notifications: {
+    __typename: 'QueryNotificationsConnection';
+    totalCount: number;
+    pageInfo: { __typename: 'PageInfo'; endCursor?: string | null; hasNextPage: boolean };
+    edges: Array<{
+      __typename: 'QueryNotificationsConnectionEdge';
+      cursor: string;
+      node: {
+        __typename: 'Notification';
+        id: string;
+        type: NotificationTypeEnum;
+        receivingUserId: string;
+        extraData?: any | null;
+        isRead: boolean;
+        createdAt: Date;
+      };
+    }>;
+  };
+};
+
+export type MarkNotificationAsReadMutationVariables = Exact<{
+  notificationId: Scalars['String']['input'];
+}>;
+
+export type MarkNotificationAsReadMutation = { __typename: 'Mutation'; markNotificationAsRead: boolean };
+
+export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]: never }>;
+
+export type MarkAllNotificationsAsReadMutation = { __typename: 'Mutation'; markAllNotificationsAsRead: boolean };
+
+export type TestMutationVariables = Exact<{ [key: string]: never }>;
+
+export type TestMutation = { __typename: 'Mutation'; test: boolean };
+
 export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetOrganizationQuery = {
@@ -1327,7 +1501,16 @@ export type GetOrganizationQuery = {
   organization: {
     __typename: 'Organization';
     id: string;
+    name: string;
+    isRoot: boolean;
+    parentId?: string | null;
     tier: Tier;
+    integrations: Array<{
+      __typename: 'Integration';
+      status: IntegrationStatus;
+      type: IntegrationType;
+      accessTokenExpiresAt?: Date | null;
+    }>;
     userOrganizations: Array<{
       __typename: 'UserOrganization';
       userId: string;
@@ -1526,6 +1709,20 @@ export type UpdateUserMutation = {
         type: IntegrationType;
         accessTokenExpiresAt?: Date | null;
       }>;
+      userOrganizations: Array<{
+        __typename: 'UserOrganization';
+        userId: string;
+        role: OrganizationRoleEnum;
+        status: UserOrganizationStatus;
+        user: {
+          __typename: 'User';
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          photoUrl?: string | null;
+        };
+      }>;
     } | null;
     comments: Array<{
       __typename: 'Comment';
@@ -1567,6 +1764,20 @@ export type MeQuery = {
         type: IntegrationType;
         accessTokenExpiresAt?: Date | null;
       }>;
+      userOrganizations: Array<{
+        __typename: 'UserOrganization';
+        userId: string;
+        role: OrganizationRoleEnum;
+        status: UserOrganizationStatus;
+        user: {
+          __typename: 'User';
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          photoUrl?: string | null;
+        };
+      }>;
     } | null;
     comments: Array<{
       __typename: 'Comment';
@@ -1604,6 +1815,20 @@ export type UserFieldsFragment = {
       type: IntegrationType;
       accessTokenExpiresAt?: Date | null;
     }>;
+    userOrganizations: Array<{
+      __typename: 'UserOrganization';
+      userId: string;
+      role: OrganizationRoleEnum;
+      status: UserOrganizationStatus;
+      user: {
+        __typename: 'User';
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        photoUrl?: string | null;
+      };
+    }>;
   } | null;
   comments: Array<{
     __typename: 'Comment';
@@ -1633,6 +1858,32 @@ export type RemoveUserMilestoneMutation = {
   removeUserMilestone: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
+export const CurrentOrganizationFragmentDoc = gql`
+  fragment CurrentOrganization on Organization {
+    id
+    name
+    isRoot
+    parentId
+    tier
+    integrations {
+      status
+      type
+      accessTokenExpiresAt
+    }
+    userOrganizations {
+      userId
+      role
+      status
+      user {
+        id
+        email
+        firstName
+        lastName
+        photoUrl
+      }
+    }
+  }
+`;
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
@@ -1649,16 +1900,7 @@ export const UserFieldsFragmentDoc = gql`
     }
     currentOrganizationId
     currentOrganization {
-      id
-      name
-      isRoot
-      parentId
-      tier
-      integrations {
-        status
-        type
-        accessTokenExpiresAt
-      }
+      ...CurrentOrganization
     }
     comments {
       id
@@ -1671,21 +1913,32 @@ export const UserFieldsFragmentDoc = gql`
       id
     }
   }
+  ${CurrentOrganizationFragmentDoc}
 `;
 export const CommentsDocument = gql`
-  query comments($creativeId: String!) {
-    comments(creativeId: $creativeId) {
-      id
-      body
-      createdAt
-      taggedUsers {
-        id
+  query comments($creativeId: String!, $after: String) {
+    comments(creativeId: $creativeId, after: $after) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
       }
-      user {
-        id
-        firstName
-        lastName
-        photoUrl
+      edges {
+        cursor
+        node {
+          id
+          body
+          createdAt
+          taggedUsers {
+            id
+          }
+          user {
+            id
+            firstName
+            lastName
+            photoUrl
+          }
+        }
       }
     }
   }
@@ -1728,6 +1981,7 @@ export const InsightsDocument = gql`
   query insights(
     $adAccountIds: [String!]
     $adIds: [String!]
+    $creativeIds: [String!]
     $integrations: [IntegrationType!]
     $dateFrom: Date
     $dateTo: Date
@@ -1746,6 +2000,7 @@ export const InsightsDocument = gql`
       filter: {
         adAccountIds: $adAccountIds
         adIds: $adIds
+        creativeIds: $creativeIds
         integrations: $integrations
         dateFrom: $dateFrom
         dateTo: $dateTo
@@ -1889,25 +2144,50 @@ export const LoginProvidersDocument = gql`
     }
   }
 `;
-export const GetOrganizationDocument = gql`
-  query getOrganization {
-    organization {
-      id
-      tier
-      userOrganizations {
-        userId
-        role
-        status
-        user {
+export const NotificationsDocument = gql`
+  query notifications($after: String) {
+    notifications(after: $after) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      edges {
+        cursor
+        node {
           id
-          email
-          firstName
-          lastName
-          photoUrl
+          type
+          receivingUserId
+          extraData
+          isRead
+          createdAt
         }
       }
     }
   }
+`;
+export const MarkNotificationAsReadDocument = gql`
+  mutation markNotificationAsRead($notificationId: String!) {
+    markNotificationAsRead(notificationId: $notificationId)
+  }
+`;
+export const MarkAllNotificationsAsReadDocument = gql`
+  mutation markAllNotificationsAsRead {
+    markAllNotificationsAsRead
+  }
+`;
+export const TestDocument = gql`
+  mutation test {
+    test
+  }
+`;
+export const GetOrganizationDocument = gql`
+  query getOrganization {
+    organization {
+      ...CurrentOrganization
+    }
+  }
+  ${CurrentOrganizationFragmentDoc}
 `;
 export const UpdateOrganizationUserDocument = gql`
   mutation updateOrganizationUser($userId: String!, $role: OrganizationRoleEnum) {
@@ -2172,6 +2452,36 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<LoginProvidersQuery>;
+    },
+    notifications(variables?: NotificationsQueryVariables, options?: C): Promise<NotificationsQuery> {
+      return requester<NotificationsQuery, NotificationsQueryVariables>(
+        NotificationsDocument,
+        variables,
+        options,
+      ) as Promise<NotificationsQuery>;
+    },
+    markNotificationAsRead(
+      variables: MarkNotificationAsReadMutationVariables,
+      options?: C,
+    ): Promise<MarkNotificationAsReadMutation> {
+      return requester<MarkNotificationAsReadMutation, MarkNotificationAsReadMutationVariables>(
+        MarkNotificationAsReadDocument,
+        variables,
+        options,
+      ) as Promise<MarkNotificationAsReadMutation>;
+    },
+    markAllNotificationsAsRead(
+      variables?: MarkAllNotificationsAsReadMutationVariables,
+      options?: C,
+    ): Promise<MarkAllNotificationsAsReadMutation> {
+      return requester<MarkAllNotificationsAsReadMutation, MarkAllNotificationsAsReadMutationVariables>(
+        MarkAllNotificationsAsReadDocument,
+        variables,
+        options,
+      ) as Promise<MarkAllNotificationsAsReadMutation>;
+    },
+    test(variables?: TestMutationVariables, options?: C): Promise<TestMutation> {
+      return requester<TestMutation, TestMutationVariables>(TestDocument, variables, options) as Promise<TestMutation>;
     },
     getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
       return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(
