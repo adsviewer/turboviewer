@@ -1,0 +1,19 @@
+.markAllAsReadButton {
+    color: var(--mantine-color-blue-filled);
+    transition: all .2s;
+
+    &:hover {
+        color: 	var(--mantine-color-blue-filled-hover);
+        transition: all .2s;
+    }
+
+    &:active {
+        scale: 0.95;
+        transition: all .2s;
+    }
+    &:disabled {
+        color: 	var(--mantine-color-dark-6);
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}

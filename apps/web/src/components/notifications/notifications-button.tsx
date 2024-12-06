@@ -2,7 +2,6 @@
 
 import {
   ActionIcon,
-  Button,
   Container,
   Divider,
   Flex,
@@ -10,6 +9,7 @@ import {
   Indicator,
   Popover,
   Text,
+  UnstyledButton,
   useComputedColorScheme,
 } from '@mantine/core';
 import { IconBell, IconBellFilled } from '@tabler/icons-react';
@@ -25,6 +25,7 @@ import { markAllNotificationsAsRead, markNotificationAsRead, notifications } fro
 import { type Notification } from '@/graphql/generated/schema-server';
 import LoaderCentered from '../misc/loader-centered';
 import NotificationsList from './notifications-list';
+import classes from './notifications-button.module.scss';
 
 export default function NotificationsButton(): ReactNode {
   const t = useTranslations('notifications');
@@ -182,13 +183,14 @@ export default function NotificationsButton(): ReactNode {
         <Popover.Dropdown ref={setDropdown}>
           <Flex align="center" justify="space-between">
             <Text>{t('title')}</Text>
-            <Button
+            <UnstyledButton
+              className={classes.markAllAsReadButton}
               variant="transparent"
               onClick={markAllAsRead}
               disabled={isPending || !notificationsData?.notifications.length}
             >
               {t('markAllAsRead')}
-            </Button>
+            </UnstyledButton>
           </Flex>
           <Divider my="sm" />
 
