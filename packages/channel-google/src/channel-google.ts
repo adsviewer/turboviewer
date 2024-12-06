@@ -41,6 +41,7 @@ import {
   assetResponseSchema,
   customerQueryResponseSchema,
   defaultQueryResponseSchema,
+  type GroupedAdData,
   responseSchema,
   videoAdResponseSchema,
 } from './schema';
@@ -295,13 +296,61 @@ class Google implements ChannelInterface {
 
         if (!youtubeData || isAError(youtubeData)) return;
 
-        const campaignGroup = youtubeData.map((el) => ({
+        const groupedData = youtubeData.reduce<GroupedAdData>((acc, item) => {
+          const date = item.segments.date;
+          const adId = item.adGroupAd.ad.id;
+          
+          if (!acc[date]) {
+            acc[date] = {};
+          }
+
+          if (!acc[date][adId]) {
+            acc[date][adId] = {
+              date,
+              adId,
+              campaign: {},
+              metrics: {
+                clicks: 0,
+                costMicros: 0,
+                impressions: 0,
+              },
+              videos: new Set(),
+              devices: new Set()
+            };
+          }
+
+          acc[date][adId].metrics.clicks += parseInt(item.metrics.clicks, 10);
+          acc[date][adId].metrics.costMicros += parseInt(item.metrics.costMicros, 10);
+          acc[date][adId].metrics.impressions += parseInt(item.metrics.impressions, 10);
+          acc[date][adId].adGroup = item.adGroup;
+          acc[date][adId].adGroupAd = item.adGroupAd;
+          acc[date][adId].campaign = item.campaign;
+
+          if (item.adGroupAd.ad.videoResponsiveAd) {
+            item.adGroupAd.ad.videoResponsiveAd.videos.forEach((video) => acc[date][adId].videos.add(video.asset));
+          }
+
+          acc[date][adId].devices.add(item.segments.device);
+          acc[date][adId].date = item.segments.date;
+
+          return acc;
+        }, {});
+
+        const result = Object.values(groupedData).flatMap((dateGroup) =>
+          Object.values(dateGroup).map((ad) => ({
+            ...ad,
+            videos: Array.from(ad.videos),
+            devices: Array.from(ad.devices),
+          })),
+        );
+
+        const campaignGroup = result.map((el) => ({
           externalId: String(el.campaign.id),
           name: el.campaign.name,
           externalAdAccountId: dbAccount.externalId,
         }));
 
-        const adSets = youtubeData.map((el) => ({
+        const adSets = result.map((el) => ({
           externalId: String(el.adGroup.id),
           name: el.adGroup.name,
           externalCampaignId: el.campaign.id,
@@ -325,7 +374,7 @@ class Google implements ChannelInterface {
           },
           select: {
             externalId: true,
-          },
+          }, 
         });
 
         for (const externalId of adsWithoutCreatives) {
@@ -365,18 +414,18 @@ class Google implements ChannelInterface {
           }
         }
 
-        const insights: ChannelInsight[] = youtubeData.map((el) => ({
+        const insights: ChannelInsight[] = result.map((el) => ({
           clicks: Number(el.metrics.clicks),
           impressions: Number(el.metrics.impressions),
           spend: Number(el.metrics.costMicros) / 1000,
-          externalAdId: el.adGroupAd.ad.id,
-          date: new Date(el.segments.date),
+          externalAdId: el.adId,
+          date: new Date(el.date),
           externalAccountId: dbAccount.externalId,
-          device: el.segments.device
-            ? (Google.deviceEnumMap.get(el.segments.device) ?? DeviceEnum.Unknown)
+          device: el.devices.length
+            ? (Google.deviceEnumMap.get(el.devices[0]) ?? DeviceEnum.Unknown)
             : DeviceEnum.Unknown,
           publisher: PublisherEnum.Google,
-          position: 'feed',
+          position: 'feed', // TODO: AD type
         }));
 
         const uniqueInsights = Array.from(
