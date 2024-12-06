@@ -13,6 +13,7 @@ import { cookies, headers } from 'next/headers';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { TOKEN_KEY } from '@repo/utils';
 import React from 'react';
+import { ModalsProvider } from '@mantine/modals';
 import NotificationsHandler from '@/components/misc/notifications-handler';
 import { env } from '@/env.mjs';
 import { Subscriptions } from '@/app/subscriptions';
@@ -38,13 +39,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ColorSchemeScript />
         <NextIntlClientProvider messages={messages} locale={preferredLocale}>
           <MantineProvider defaultColorScheme="auto">
-            <NotificationsHandler />
-            <UrqlProvider token={token} acceptLanguage={acceptLanguageHeaderValue}>
-              <Subscriptions />
-              {children}
-            </UrqlProvider>
-            <Analytics />
-            <SpeedInsights />
+            <ModalsProvider>
+              <NotificationsHandler />
+              <UrqlProvider token={token} acceptLanguage={acceptLanguageHeaderValue}>
+                <Subscriptions />
+                {children}
+              </UrqlProvider>
+              <Analytics />
+              <SpeedInsights />
+            </ModalsProvider>
           </MantineProvider>
         </NextIntlClientProvider>
       </body>
