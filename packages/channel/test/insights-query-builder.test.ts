@@ -574,7 +574,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
-    AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
+    AND i.date <= CURRENT_DATE
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend, interval_start;`,
     );
@@ -612,7 +612,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
-    AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
+    AND i.date <= CURRENT_DATE
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
@@ -660,7 +660,7 @@ void describe('insights query builder tests', () => {
                 JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
                 JOIN threshold_column tc ON i.ad_id = tc.ad_id AND i.publisher = tc.publisher AND i.currency = tc.currency
        WHERE i.date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '2 week')
-         AND i.date <= DATE_TRUNC('week', CURRENT_DATE)
+         AND i.date <= CURRENT_DATE
        GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
        ORDER BY oct.trend DESC, interval_start;`,
     );
@@ -711,7 +711,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
-    AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
+    AND i.date <= TIMESTAMP '2024-05-28T00:00:00.000Z'
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
@@ -762,7 +762,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('day', TIMESTAMP '2024-09-30T00:00:00.000Z' - INTERVAL '4 day')
-    AND i.date <= DATE_TRUNC('day', TIMESTAMP '2024-09-30T00:00:00.000Z')
+    AND i.date <= TIMESTAMP '2024-09-30T00:00:00.000Z'
   GROUP BY i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
@@ -814,7 +814,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-09-30T00:00:00.000Z' - INTERVAL '1 week')
-    AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-09-30T00:00:00.000Z')
+    AND i.date <= TIMESTAMP '2024-09-30T00:00:00.000Z'
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
@@ -857,7 +857,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z' - INTERVAL '1 week')
-    AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-09-29T00:00:00.000Z')
+    AND i.date <= TIMESTAMP '2024-09-29T00:00:00.000Z'
   GROUP BY i.ad_id, i.publisher, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
@@ -909,7 +909,7 @@ void describe('insights query builder tests', () => {
   FROM organization_insights i
   JOIN order_column_trend oct ON i.ad_id = oct.ad_id AND i.publisher = oct.publisher AND i.integration = oct.integration AND i.currency = oct.currency
   WHERE i.date >= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z' - INTERVAL '9 week')
-    AND i.date <= DATE_TRUNC('week', TIMESTAMP '2024-05-28T00:00:00.000Z')
+    AND i.date <= TIMESTAMP '2024-05-28T00:00:00.000Z'
   GROUP BY i.ad_id, i.publisher, i.integration, i.currency, interval_start, oct.trend
   ORDER BY oct.trend DESC, interval_start;`,
     );
