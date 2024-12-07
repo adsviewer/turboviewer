@@ -19,6 +19,7 @@ import { InsightsColumnsGroupBy, InsightsColumnsOrderBy, InsightsInterval } from
 import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atoms';
 import { getOrderByValue } from '@/util/insights-utils';
 import Search from '@/components/search/search';
+import { convertFromUTC } from '@/util/mantine-utils';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -122,8 +123,8 @@ export default function OrderFilters(): React.ReactNode {
     // Perform new fetching only if both dates are given
     if (dateFrom && dateTo) {
       resetInsights();
-      newParams.set(urlKeys.dateFrom, String(getTodayStartOfDay(dateFrom).getTime()));
-      newParams.set(urlKeys.dateTo, String(getTodayStartOfDay(dateTo).getTime()));
+      newParams.set(urlKeys.dateFrom, String(getTodayStartOfDay(convertFromUTC(dateFrom)).getTime()));
+      newParams.set(urlKeys.dateTo, String(getTodayStartOfDay(convertFromUTC(dateTo)).getTime()));
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
@@ -273,7 +274,7 @@ export default function OrderFilters(): React.ReactNode {
               <DatePickerInput
                 mt="auto"
                 type="range"
-                maxDate={getTodayStartOfDay(new Date())}
+                maxDate={getTodayStartOfDay(convertFromUTC(new Date()))}
                 placeholder={tGeneric('pickDateRange')}
                 leftSection={<IconCalendarMonth />}
                 clearable

@@ -17,6 +17,7 @@ import {
 import Search from '@/components/search/search';
 import { type InsightsQuery } from '@/graphql/generated/schema-server';
 import { type MultiSelectDataType } from '@/util/types';
+import { convertFromUTC } from '@/util/mantine-utils';
 
 interface PropsType {
   isPending: boolean;
@@ -60,8 +61,8 @@ export default function ChartFilters(props: PropsType): React.ReactNode {
     props.setDateRangeValue([dateFrom, dateTo]);
     // Perform new fetching only if both dates are given
     if (dateFrom && dateTo) {
-      newParams.set(urlKeys.dateFrom, String(getTodayStartOfDay(dateFrom).getTime()));
-      newParams.set(urlKeys.dateTo, String(getTodayStartOfDay(dateTo).getTime()));
+      newParams.set(urlKeys.dateFrom, String(getTodayStartOfDay(convertFromUTC(dateFrom)).getTime()));
+      newParams.set(urlKeys.dateTo, String(getTodayStartOfDay(convertFromUTC(dateTo)).getTime()));
       const newURL = `${pathname}?${newParams.toString()}`;
       startTransition(() => {
         router.replace(newURL);
@@ -147,7 +148,7 @@ export default function ChartFilters(props: PropsType): React.ReactNode {
           disabled={props.isPending}
           ml="auto"
           type="range"
-          maxDate={getTodayStartOfDay(new Date())}
+          maxDate={getTodayStartOfDay(convertFromUTC(new Date()))}
           placeholder={tGeneric('pickDateRange')}
           leftSection={<IconCalendarMonth />}
           clearable={false}
