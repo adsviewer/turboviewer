@@ -68,7 +68,7 @@ export default function Thresholds(props: PropsType): ReactNode {
     else newParams.delete(urlKeys.maxThreshold);
     const finalURL = `${pathname}?${newParams.toString()}`;
     props.startTransition(() => {
-      router.replace(finalURL);
+      router.replace(finalURL, { scroll: false });
       close();
     });
   };
@@ -79,7 +79,7 @@ export default function Thresholds(props: PropsType): ReactNode {
     newParams.delete(urlKeys.maxThreshold);
     const finalURL = `${pathname}?${newParams.toString()}`;
     props.startTransition(() => {
-      router.replace(finalURL);
+      router.replace(finalURL, { scroll: false });
       close();
     });
   };

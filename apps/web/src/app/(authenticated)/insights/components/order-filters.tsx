@@ -20,7 +20,7 @@ import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atom
 import { getOrderByValue } from '@/util/insights-utils';
 import Search from '@/components/search/search';
 import { convertFromUTC } from '@/util/mantine-utils';
-import Thresholds from './thresholds';
+import Thresholds from '@/components/thresholds/thresholds';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
