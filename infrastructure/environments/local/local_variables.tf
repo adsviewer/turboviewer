@@ -3,8 +3,22 @@ variable "aws_region" {
 }
 
 variable "developers" {
-  type        = set(string)
-  default     = ["aaryan", "dennis", "giorgos", "lefteris", "vlad"]
+  type = map(object({
+    stripe_bus = optional(string)
+  }))
+  default = {
+    aaryan = {
+    }
+    dennis = {
+    }
+    giorgos = {
+      stripe_bus = "aws.partner/stripe.com/ed_test_61Rd3Acj5TrfcW1Wx16Rd35wUILJ1UPPMONDwSKy8TU8"
+    }
+    lefteris = {
+    }
+    vlad = {
+    }
+  }
   description = "List of developers to be added to the team. This should be a list of aws usernames"
 }
 

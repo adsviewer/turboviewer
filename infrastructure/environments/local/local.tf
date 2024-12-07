@@ -17,7 +17,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.72.1"
+      version = "~> 5.80.0"
     }
   }
 
@@ -125,4 +125,5 @@ module "environment_potentially_local" {
   channel_ingress_lambda_name = "not_applicable"
   app_runner_arn              = "not_applicable"
   environment                 = "${var.environment}-${each.key}"
+  stripe_bus                  = each.value.stripe_bus
 }

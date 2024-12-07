@@ -10,12 +10,12 @@ terraform {
   required_providers {
     aws = {
       source                = "hashicorp/aws"
-      version               = "~> 5.72.1"
+      version               = "~> 5.80.0"
       configuration_aliases = [aws.us_east_1]
     }
     vercel = {
       source  = "vercel/vercel"
-      version = "~> 2.1.0"
+      version = "~> 2.5.0"
     }
   }
 }
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "sns_policy" {
 data "aws_iam_policy_document" "sqs_policy_document" {
   statement {
     actions   = module.environment_potentially_local.channel_lambda_queue_actions
-    resources = module.environment_potentially_local.channel_report_arns
+    resources = concat(module.environment_potentially_local.channel_report_arns, module.environment_potentially_local.stripe_queue_arn != null ? [module.environment_potentially_local.stripe_queue_arn] : [])
   }
 }
 resource "aws_iam_policy" "sqs_policy" {
