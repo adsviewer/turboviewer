@@ -120,6 +120,11 @@ export type BaseError = Error & {
   message: Scalars['String']['output'];
 };
 
+export enum BillingPeriodEnum {
+  Monthly = 'Monthly',
+  Yearly = 'Yearly',
+}
+
 export type ChannelInitialProgressPayload = {
   __typename: 'ChannelInitialProgressPayload';
   channel: IntegrationType;
@@ -676,6 +681,7 @@ export type Mutation = {
   __typename: 'Mutation';
   /** Use this mutation after the user has clicked on the non-personalized invite link and they have an account already */
   acceptLinkInvitationExistingUser: Tokens;
+  createCheckoutSession?: Maybe<Scalars['String']['output']>;
   /** Creates a link for the signed in org for a specific role */
   createInvitationLink: Scalars['String']['output'];
   createOrganization: Organization;
@@ -717,6 +723,13 @@ export type Mutation = {
 
 export type MutationAcceptLinkInvitationExistingUserArgs = {
   inviteHash: Scalars['String']['input'];
+};
+
+export type MutationCreateCheckoutSessionArgs = {
+  billingPeriod: BillingPeriodEnum;
+  currency: CurrencyEnum;
+  numberOfSeats: Scalars['Int']['input'];
+  tier: Tier;
 };
 
 export type MutationCreateInvitationLinkArgs = {

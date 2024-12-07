@@ -9,3 +9,7 @@ variable "app_runner_arn" {
 variable "environment" {
   type = string
 }
+
+variable "stripe_bus" {
+  type = string
+}

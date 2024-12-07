@@ -17,15 +17,15 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.72.1"
+      version = "~> 5.80.0"
     }
     vercel = {
       source  = "vercel/vercel"
-      version = "~> 2.1.0"
+      version = "~> 2.5.0"
     }
     awscc = {
       source  = "hashicorp/awscc"
-      version = "1.17.0"
+      version = "1.23.0"
     }
   }
 

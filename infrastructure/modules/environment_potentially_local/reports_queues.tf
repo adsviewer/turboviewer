@@ -1,7 +1,7 @@
 locals {
-  channel_report_queue         = "${var.environment}-report-requests"
-  channels                     = toset(["tiktok", "meta"]) # these need to be the same with `IntegrationTypeEnum` if capitalized
-  channel_lambda_queue_actions = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:DeleteMessageBatch"]
+  channel_report_queue = "${var.environment}-report-requests"
+  channels             = toset(["tiktok", "meta"]) # these need to be the same with `IntegrationTypeEnum` if capitalized
+  queue_actions        = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:DeleteMessageBatch"]
 }
 
 data "aws_iam_policy_document" "channel_report_policy_document" {
@@ -40,15 +40,18 @@ data "aws_iam_policy_document" "channel_report_policy_document" {
         identifiers = ["sqs.amazonaws.com"]
       }
 
-      actions = local.channel_lambda_queue_actions
+      actions = local.queue_actions
       resources = [
         "arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${local.channel_report_queue}-${statement.key}"
       ]
 
-      condition {
-        test     = "ArnEquals"
-        variable = "aws:SourceArn"
-        values   = [var.app_runner_arn]
+      dynamic "condition" {
+        for_each = var.app_runner_arn != "not_applicable" ? [var.app_runner_arn] : []
+        content {
+          test     = "ArnEquals"
+          variable = "aws:SourceArn"
+          values   = [condition.value]
+        }
       }
     }
   }
