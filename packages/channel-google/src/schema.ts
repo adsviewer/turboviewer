@@ -168,10 +168,17 @@ export const customerQueryResponseSchema = createCommonResponseSchema(
   }),
 );
 
-export type GroupedAdData = Record<string, Record<string, {
+export type GroupedAdData = Record<
+  string,
+  Record<
+    string,
+    {
       date: string;
       adId: string;
-      campaign: Record<string, unknown>;
+      campaign: {
+        name: string;
+        id: string;
+      };
       metrics: {
         clicks: number;
         costMicros: number;
@@ -179,6 +186,8 @@ export type GroupedAdData = Record<string, Record<string, {
       };
       videos: Set<string>;
       devices: Set<string>;
-      adGroup: typeof adGroupSchema["_type"];
-      adGroupAd: typeof youtubeAdGroupAdSchema["_type"];
-    }>>;;
+      adGroup: (typeof adGroupSchema)['_type'];
+      adGroupAd: (typeof youtubeAdGroupAdSchema)['_type'];
+    }
+  >
+>;

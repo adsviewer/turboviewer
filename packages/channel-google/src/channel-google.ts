@@ -18,6 +18,7 @@ import {
   type AdAccountIntegration,
   authEndpoint,
   type ChannelAd,
+  type ChannelCampaign,
   type ChannelCreative,
   type ChannelIFrame,
   type ChannelInsight,
@@ -299,54 +300,74 @@ class Google implements ChannelInterface {
         const groupedData = youtubeData.reduce<GroupedAdData>((acc, item) => {
           const date = item.segments.date;
           const adId = item.adGroupAd.ad.id;
-          
-          if (!acc[date]) {
-            acc[date] = {};
-          }
+          const device = item.segments.device;
 
-          if (!acc[date][adId]) {
-            acc[date][adId] = {
-              date,
-              adId,
-              campaign: {},
-              metrics: {
-                clicks: 0,
-                costMicros: 0,
-                impressions: 0,
-              },
-              videos: new Set(),
-              devices: new Set()
-            };
-          }
+          acc[date] = acc[date] ?? {};
+        
+          acc[date][adId] = acc[date][adId] ?? {};
+        
 
-          acc[date][adId].metrics.clicks += parseInt(item.metrics.clicks, 10);
-          acc[date][adId].metrics.costMicros += parseInt(item.metrics.costMicros, 10);
-          acc[date][adId].metrics.impressions += parseInt(item.metrics.impressions, 10);
-          acc[date][adId].adGroup = item.adGroup;
-          acc[date][adId].adGroupAd = item.adGroupAd;
-          acc[date][adId].campaign = item.campaign;
+          acc[date][adId][device] = acc[date][adId][device] ?? {
+            date,
+            adId,
+            campaign: {
+              name: '',
+              id: '',
+            },
+            metrics: {
+              clicks: 0,
+              costMicros: 0,
+              impressions: 0,
+            },
+            videos: new Set(),
+            device,
+            adGroup: item.adGroup,
+            adGroupAd: item.adGroupAd,
+          };
+
+          const adData = acc[date][adId][device];
+
+          adData.metrics.clicks += parseInt(item.metrics.clicks, 10);
+          adData.metrics.costMicros += parseInt(item.metrics.costMicros, 10);
+          adData.metrics.impressions += parseInt(item.metrics.impressions, 10);
+          adData.adGroup = item.adGroup;
+          adData.adGroupAd = item.adGroupAd;
+          adData.campaign = item.campaign;
 
           if (item.adGroupAd.ad.videoResponsiveAd) {
-            item.adGroupAd.ad.videoResponsiveAd.videos.forEach((video) => acc[date][adId].videos.add(video.asset));
+            item.adGroupAd.ad.videoResponsiveAd.videos.forEach((video) => adData.videos.add(video.asset));
           }
 
-          acc[date][adId].devices.add(item.segments.device);
-          acc[date][adId].date = item.segments.date;
+          // adData.devices.add(item.segments.device);
+          adData.date = item.segments.date;
 
           return acc;
         }, {});
 
+
         const result = Object.values(groupedData).flatMap((dateGroup) =>
-          Object.values(dateGroup).map((ad) => ({
-            ...ad,
-            videos: Array.from(ad.videos),
-            devices: Array.from(ad.devices),
-          })),
+          Object.values(dateGroup).flatMap((deviceGroup) =>
+            Object.values(deviceGroup).map((ad) => ({
+              ...ad,
+              // videos: Array.from(ad.videos),
+              // devices: Array.from(ad.devices),
+            }))
+          )
         );
 
-        const campaignGroup = result.map((el) => ({
+        // console.log(result, 'RESULT')
+
+        // const result = Object.values(groupedData).flatMap((dateGroup) =>
+        //   Object.values(dateGroup).map((ad) => ({
+        //     ...ad,
+        //     videos: Array.from(ad.videos),
+        //     devices: Array.from(ad.devices),
+        //   })),
+        // );
+
+        const campaignGroup: ChannelCampaign[] = result.map((el) => ({
           externalId: String(el.campaign.id),
-          name: el.campaign.name,
+          name: el.campaign.name.toString(),
           externalAdAccountId: dbAccount.externalId,
         }));
 
@@ -374,7 +395,7 @@ class Google implements ChannelInterface {
           },
           select: {
             externalId: true,
-          }, 
+          },
         });
 
         for (const externalId of adsWithoutCreatives) {
@@ -421,8 +442,8 @@ class Google implements ChannelInterface {
           externalAdId: el.adId,
           date: new Date(el.date),
           externalAccountId: dbAccount.externalId,
-          device: el.devices.length
-            ? (Google.deviceEnumMap.get(el.devices[0]) ?? DeviceEnum.Unknown)
+          device: el.device.length
+            ? (Google.deviceEnumMap.get(el.device) ?? DeviceEnum.Unknown)
             : DeviceEnum.Unknown,
           publisher: PublisherEnum.Google,
           position: 'feed', // TODO: AD type
@@ -652,9 +673,13 @@ class Google implements ChannelInterface {
   }
 
   private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([
-    ['MOBILE_APP', DeviceEnum.MobileApp],
-    ['MOBILE_WEB', DeviceEnum.MobileWeb],
-    ['DESKTOP_WEB', DeviceEnum.Desktop],
+    ['MOBILE', DeviceEnum.MobileApp],
+    ['TABLET', DeviceEnum.Tablet],
+    ['DESKTOP', DeviceEnum.Desktop],
+    ['CONNECTED_TV', DeviceEnum.ConnectedTv],
+    ['UNKNOWN', DeviceEnum.Unknown],
+    ['UNSPECIFIED', DeviceEnum.Unspacified],
+    ['OTHER', DeviceEnum.Other],
   ]);
 
   private static async findManagerAccount(accessToken: string, customerIds: string[]): Promise<string | AError> {
