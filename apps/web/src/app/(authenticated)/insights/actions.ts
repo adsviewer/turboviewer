@@ -16,6 +16,8 @@ import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { type SearchExpression } from '../../../components/search/types-and-utils';
 
 export interface InsightsParams {
+  minThreshold?: number;
+  maxThreshold?: number;
   orderBy?: InsightsColumnsOrderBy;
   order?: OrderBy;
   page?: number;
@@ -55,6 +57,8 @@ export default async function getInsights(insightsParams: InsightsParams): Promi
       groupBy: insightsParams.groupedBy,
       order: insightsParams.order,
       orderBy: insightsParams.orderBy ?? InsightsColumnsOrderBy.impressions_abs,
+      minThreshold: insightsParams.minThreshold ? Number(insightsParams.minThreshold) : undefined,
+      maxThreshold: insightsParams.maxThreshold ? Number(insightsParams.maxThreshold) : undefined,
       page: insightsParams.page ? Number(insightsParams.page) : 1,
       pageSize: insightsParams.pageSize ? Number(insightsParams.pageSize) : 12,
       positions: insightsParams.position,

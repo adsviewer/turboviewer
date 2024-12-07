@@ -31,6 +31,8 @@ export const urlKeys = {
   pageSize: 'pageSize',
   orderDirection: 'order',
   orderBy: 'orderBy',
+  minThreshold: 'minThreshold',
+  maxThreshold: 'maxThreshold',
   interval: 'interval',
   dateFrom: 'dateFrom',
   dateTo: 'dateTo',

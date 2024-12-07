@@ -20,6 +20,7 @@ import { hasNextInsightsPageAtom, insightsAtom } from '@/app/atoms/insights-atom
 import { getOrderByValue } from '@/util/insights-utils';
 import Search from '@/components/search/search';
 import { convertFromUTC } from '@/util/mantine-utils';
+import Thresholds from './thresholds';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -157,6 +158,8 @@ export default function OrderFilters(): React.ReactNode {
       <Flex wrap="wrap" align="center" gap="md">
         {/* Search */}
         <Search isPending={isPending} startTransition={startTransition} />
+        {/* Thresholds */}
+        <Thresholds isPending={isPending} startTransition={startTransition} />
         {/* Toggle ad previews */}
         <Tooltip
           withArrow

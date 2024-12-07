@@ -18,12 +18,12 @@ import {
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import {
   IconSearch,
-  IconAdjustmentsAlt,
   IconCodePlus,
   IconCornerDownRight,
   IconParentheses,
   IconTrash,
   IconCancel,
+  IconFilterSearch,
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useTranslations } from 'next-intl';
@@ -658,7 +658,7 @@ export default function Search(props: PropsType): React.ReactNode {
           variant={loadedSearchData?.isAdvancedSearch ? 'gradient' : 'default'}
           size={35}
         >
-          <IconAdjustmentsAlt />
+          <IconFilterSearch />
         </ActionIcon>
       </Tooltip>
 

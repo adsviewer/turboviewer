@@ -75,6 +75,7 @@
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
     "react-hook-form": "^7.53.2",
+    "react-icons": "^5.4.0",
     "react-is": "19.0.0-rc-603e6108-20241029",
     "react-toastify": "^10.0.6",
     "recharts": "2.13.3",

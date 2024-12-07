@@ -25,6 +25,8 @@ query insights(
   $positions: [InsightsPosition!]
   $order: OrderBy
   $orderBy: InsightsColumnsOrderBy!
+  $minThreshold: Int
+  $maxThreshold: Int
   $groupBy: [InsightsColumnsGroupBy!]
   $pageSize: Int!
   $page: Int!
@@ -44,6 +46,8 @@ query insights(
       positions: $positions
       order: $order
       orderBy: $orderBy
+      minThreshold: $minThreshold
+      maxThreshold: $maxThreshold
       groupBy: $groupBy
       pageSize: $pageSize
       page: $page
