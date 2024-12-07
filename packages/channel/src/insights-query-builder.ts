@@ -344,7 +344,7 @@ export const groupedInsights = (
   ${joinFn(snakeGroup, 'order_column_trend', 'i')}
   ${args.minThreshold || args.maxThreshold ? joinFn(snakeGroup, 'threshold_column', 'i') : ''}
   WHERE i.date >= DATE_TRUNC('${args.interval}', ${date} - INTERVAL '${dateInterval}')
-    AND i.date <= DATE_TRUNC('${args.interval}', ${date})
+    AND i.date <= ${date}
   GROUP BY ${snakeGroup.map((g) => `i.${g}`).join(', ')}, interval_start, oct.trend
   ORDER BY oct.trend${args.order === 'desc' ? ' DESC' : ''}, interval_start;`;
 
