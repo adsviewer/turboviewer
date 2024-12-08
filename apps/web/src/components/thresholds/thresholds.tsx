@@ -20,14 +20,14 @@ export default function Thresholds(props: PropsType): ReactNode {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [opened, { open, close }] = useDisclosure(false);
-  const [minValue, setMinValue] = useState<number | null>(null);
-  const [maxValue, setMaxValue] = useState<number | null>(null);
+  const [minValue, setMinValue] = useState<string | null>(null);
+  const [maxValue, setMaxValue] = useState<string | null>(null);
 
   useEffect(() => {
     const currMinValue = searchParams.get(urlKeys.minThreshold);
     const currMaxValue = searchParams.get(urlKeys.maxThreshold);
-    setMinValue(currMinValue ? Number(currMinValue) : null);
-    setMaxValue(currMaxValue ? Number(currMaxValue) : null);
+    setMinValue(currMinValue ? currMinValue : null);
+    setMaxValue(currMaxValue ? currMaxValue : null);
   }, [searchParams]);
 
   const getOrderByString = (): string => {
@@ -51,13 +51,11 @@ export default function Thresholds(props: PropsType): ReactNode {
   };
 
   const handleMinValueChange = (value: string | number): void => {
-    if (value || value === 0) setMinValue(Number(value));
-    else setMinValue(null);
+    setMinValue(String(value));
   };
 
   const handleMaxValueChange = (value: string | number): void => {
-    if (value || value === 0) setMaxValue(Number(value));
-    else setMaxValue(null);
+    setMaxValue(String(value));
   };
 
   const handleApply = (): void => {
