@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { awsSchema, channelSchema, commonSchema, createEnv } from '@repo/utils';
+import { awsSchema, channelSchema, commonSchema, createEnv, stripeSchema } from '@repo/utils';
 
 const defaultPort = '4000';
 const schema = z
@@ -20,6 +20,7 @@ const schema = z
   })
   .merge(channelSchema)
   .merge(commonSchema)
+  .merge(stripeSchema)
   .merge(awsSchema);
 
 export const env = createEnv(schema);
