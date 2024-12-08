@@ -5,6 +5,12 @@ export const commonSchema = z.object({
   REFRESH_SECRET: z.string().min(1).default('refreshSecret'),
 });
 
+export const stripeSchema = z.object({
+  STRIPE_PUBLIC_KEY: z.string().min(1),
+  STRIPE_SECRET_KEY: z.string().min(1),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1),
+});
+
 export const channelSchema = z.object({
   CHANNEL_SECRET: z.string().min(1).default('channelSecret'),
 });
