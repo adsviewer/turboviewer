@@ -268,6 +268,7 @@ class Google implements ChannelInterface {
       ad_group_ad.status,
       ad_group_ad.ad.id,
       ad_group_ad.ad.name,
+      ad_group_ad.ad.type,
       ad_group_ad.ad.video_responsive_ad.call_to_actions,
       ad_group_ad.ad.video_responsive_ad.videos,
       ad_group_ad.ad.video_responsive_ad.descriptions,
@@ -303,9 +304,8 @@ class Google implements ChannelInterface {
           const device = item.segments.device;
 
           acc[date] = acc[date] ?? {};
-        
+
           acc[date][adId] = acc[date][adId] ?? {};
-        
 
           acc[date][adId][device] = acc[date][adId][device] ?? {
             date,
@@ -338,32 +338,18 @@ class Google implements ChannelInterface {
             item.adGroupAd.ad.videoResponsiveAd.videos.forEach((video) => adData.videos.add(video.asset));
           }
 
-          // adData.devices.add(item.segments.device);
           adData.date = item.segments.date;
 
           return acc;
         }, {});
 
-
         const result = Object.values(groupedData).flatMap((dateGroup) =>
           Object.values(dateGroup).flatMap((deviceGroup) =>
             Object.values(deviceGroup).map((ad) => ({
               ...ad,
-              // videos: Array.from(ad.videos),
-              // devices: Array.from(ad.devices),
-            }))
-          )
+            })),
+          ),
         );
-
-        // console.log(result, 'RESULT')
-
-        // const result = Object.values(groupedData).flatMap((dateGroup) =>
-        //   Object.values(dateGroup).map((ad) => ({
-        //     ...ad,
-        //     videos: Array.from(ad.videos),
-        //     devices: Array.from(ad.devices),
-        //   })),
-        // );
 
         const campaignGroup: ChannelCampaign[] = result.map((el) => ({
           externalId: String(el.campaign.id),
@@ -442,11 +428,9 @@ class Google implements ChannelInterface {
           externalAdId: el.adId,
           date: new Date(el.date),
           externalAccountId: dbAccount.externalId,
-          device: el.device.length
-            ? (Google.deviceEnumMap.get(el.device) ?? DeviceEnum.Unknown)
-            : DeviceEnum.Unknown,
+          device: el.device.length ? (Google.deviceEnumMap.get(el.device) ?? DeviceEnum.Unknown) : DeviceEnum.Unknown,
           publisher: PublisherEnum.Google,
-          position: 'feed', // TODO: AD type
+          position: el.adGroupAd.ad.type ?? 'feed', // TODO: AD type
         }));
 
         const uniqueInsights = Array.from(
@@ -679,7 +663,7 @@ class Google implements ChannelInterface {
     ['CONNECTED_TV', DeviceEnum.ConnectedTv],
     ['UNKNOWN', DeviceEnum.Unknown],
     ['UNSPECIFIED', DeviceEnum.Unspacified],
-    ['OTHER', DeviceEnum.Other],
+    ['OTHER', DeviceEnum.Unknown],
   ]);
 
   private static async findManagerAccount(accessToken: string, customerIds: string[]): Promise<string | AError> {
