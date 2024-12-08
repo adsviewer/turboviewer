@@ -343,6 +343,9 @@ enum DeviceEnum {
   MobileWeb
   MobileApp
   Desktop
+  ConnectedTv
+  Tablet
+  Unspacified
   Unknown
 }
 
