@@ -333,6 +333,9 @@ export enum DeviceEnum {
   MobileWeb = 'MobileWeb',
   MobileApp = 'MobileApp',
   Desktop = 'Desktop',
+  ConnectedTv = 'ConnectedTv',
+  Tablet = 'Tablet',
+  Unspacified = 'Unspacified',
   Unknown = 'Unknown',
 }
 
@@ -506,6 +509,9 @@ export enum InsightsOrderBy {
   MobileWeb = 'MobileWeb',
   MobileApp = 'MobileApp',
   Desktop = 'Desktop',
+  ConnectedTv = 'ConnectedTv',
+  Tablet = 'Tablet',
+  Unspacified = 'Unspacified',
   Unknown = 'Unknown',
 }
 
