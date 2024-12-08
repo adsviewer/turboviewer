@@ -84,10 +84,8 @@ export default function Thresholds(props: PropsType): ReactNode {
     });
   };
 
-  const hasActiveThresholds = (): boolean => {
-    if (searchParams.get(urlKeys.minThreshold) ?? searchParams.get(urlKeys.maxThreshold)) return true;
-    return false;
-  };
+const hasActiveThresholds = (): boolean =>
+    Boolean(searchParams.get(urlKeys.minThreshold) ?? searchParams.get(urlKeys.maxThreshold));
 
   const closeModal = (): void => {
     setMinValue(null);
