@@ -9,6 +9,7 @@
     "copied": "Copied to clipboard",
     "search": "Search",
     "advancedSearch": "Advanced Search",
+    "thresholds": "Thresholds",
     "submit": "Submit",
     "remove": "Remove",
     "refresh": "Refresh",
@@ -22,7 +23,13 @@
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete",
-    "noResultsFound": "No results found"
+    "noResultsFound": "No results found",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "none": "None",
+    "reset": "Reset",
+    "apply": "Apply",
+    "cancel": "Cancel"
   },
   "errors": {
     "errorPageTitle": "Something bad just happened...",
@@ -75,6 +82,8 @@
     "showAdPreviews": "Show ad previews",
     "adPreviewsTooltip": "Previews can be viewed only via filtering by Ad ID or Creative ID",
     "chartMetric": "Chart Metric",
+    "thresholdsDescription": "You can set a custom range of min/max values for the selected metric that you're ordering by.",
+    "adjustingFor": "Adjusting for",
     "comments": {
       "title": "Comments",
       "newComment": "New Comment",

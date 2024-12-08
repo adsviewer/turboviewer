@@ -494,7 +494,7 @@ void describe('insights query builder tests', () => {
       insights,
       `threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
                        FROM organization_insights i
-                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                          AND date <= DATE_TRUNC('week', CURRENT_DATE)
                        GROUP BY ad_id, publisher, currency
                        HAVING SUM(i.spend_eur) >= 100
@@ -508,7 +508,7 @@ void describe('insights query builder tests', () => {
       insights,
       `threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
                        FROM organization_insights i
-                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                          AND date <= DATE_TRUNC('week', CURRENT_DATE)
                        GROUP BY ad_id, publisher, currency
                        HAVING SUM(i.spend_eur) < 900
@@ -522,7 +522,7 @@ void describe('insights query builder tests', () => {
       insights,
       `threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
                        FROM organization_insights i
-                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                       WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                          AND date <= DATE_TRUNC('week', CURRENT_DATE)
                        GROUP BY ad_id, publisher, currency
                        HAVING SUM(i.spend_eur) >= 100 AND SUM(i.spend_eur) < 900
@@ -642,7 +642,7 @@ void describe('insights query builder tests', () => {
       ),
             threshold_column AS (SELECT ad_id, publisher, currency, SUM(i.spend_eur) AS trend
                                    FROM organization_insights i
-                                   WHERE date >= DATE_TRUNC('week', CURRENT_DATE)
+                                   WHERE date >= DATE_TRUNC('week', CURRENT_DATE - INTERVAL '1 week')
                                      AND date <= DATE_TRUNC('week', CURRENT_DATE)
                                    GROUP BY ad_id, publisher, currency
                                    HAVING SUM(i.spend_eur) >= 100

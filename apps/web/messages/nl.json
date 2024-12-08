@@ -9,6 +9,7 @@
     "copied": "Kopiëren succesvol",
     "search": "Zoekopdracht",
     "advancedSearch": "Geavanceerd Ζoeken",
+    "thresholds": "Drempels",
     "submit": "Verzenden",
     "remove": "Verwijderen",
     "refresh": "Vernieuwen",
@@ -22,7 +23,13 @@
     "add": "Toevoegen",
     "edit": "Bewerking",
     "delete": "Verwijderen",
-    "noResultsFound": "Geen resultaten gevonden"
+    "noResultsFound": "Geen resultaten gevonden",
+    "minimum": "Minimaal",
+    "maximum": "Maximum",
+    "none": "Geen",
+    "reset": "Reset",
+    "apply": "Toepassen",
+    "cancel": "Annuleren"
   },
   "errors": {
     "errorPageTitle": "Er is iets fout gegaan...",
@@ -75,6 +82,8 @@
     "showAdPreviews": "Advertenties weergeven",
     "adPreviewsTooltip": "Voorbeelden kunnen alleen worden bekeken via filteren op advertentie-ID of creatieve ID",
     "chartMetric": "Grafiekmetriek",
+    "thresholdsDescription": "Het is mogelijk om de juiste keuze te maken voor het gebruik van producten Het is mogelijk om de juiste hoeveelheid geld te verdienen. Ja bedankt.",
+    "adjustingFor": "Aanpassen voor",
     "comments": {
       "title": "Opmerkingen",
       "newComment": "Nieuwe Opmerking",

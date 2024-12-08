@@ -1311,6 +1311,8 @@ export type InsightsQueryVariables = Exact<{
   positions?: InputMaybe<Array<InsightsPosition> | InsightsPosition>;
   order?: InputMaybe<OrderBy>;
   orderBy: InsightsColumnsOrderBy;
+  minThreshold?: InputMaybe<Scalars['Int']['input']>;
+  maxThreshold?: InputMaybe<Scalars['Int']['input']>;
   groupBy?: InputMaybe<Array<InsightsColumnsGroupBy> | InsightsColumnsGroupBy>;
   pageSize: Scalars['Int']['input'];
   page: Scalars['Int']['input'];
@@ -1991,6 +1993,8 @@ export const InsightsDocument = gql`
     $positions: [InsightsPosition!]
     $order: OrderBy
     $orderBy: InsightsColumnsOrderBy!
+    $minThreshold: Int
+    $maxThreshold: Int
     $groupBy: [InsightsColumnsGroupBy!]
     $pageSize: Int!
     $page: Int!
@@ -2010,6 +2014,8 @@ export const InsightsDocument = gql`
         positions: $positions
         order: $order
         orderBy: $orderBy
+        minThreshold: $minThreshold
+        maxThreshold: $maxThreshold
         groupBy: $groupBy
         pageSize: $pageSize
         page: $page

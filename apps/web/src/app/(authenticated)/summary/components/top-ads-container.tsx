@@ -23,6 +23,7 @@ import InsightsGrid from '@/components/insights/insights-grid';
 import { type UrqlResult } from '@/util/handle-urql-request';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { getOrderByValue } from '@/util/insights-utils';
+import Thresholds from '@/components/thresholds/thresholds';
 import getInsights, { type InsightsParams } from '../../insights/actions';
 
 export default function TopAdsContainer(): React.ReactNode {
@@ -77,6 +78,12 @@ export default function TopAdsContainer(): React.ReactNode {
           dateFrom,
           dateTo,
           orderBy: currOrderByValue,
+          minThreshold: searchParams.get(urlKeys.minThreshold)
+            ? Number(searchParams.get(urlKeys.minThreshold))
+            : undefined,
+          maxThreshold: searchParams.get(urlKeys.maxThreshold)
+            ? Number(searchParams.get(urlKeys.maxThreshold))
+            : undefined,
           order: getCorrectOrder(currOrderByValue),
           pageSize: 3,
           interval: InsightsInterval.week,
@@ -189,6 +196,7 @@ export default function TopAdsContainer(): React.ReactNode {
           maw={280}
           disabled={isPending}
         />
+        <Thresholds isPending={isPending} startTransition={startTransition} />
       </Flex>
 
       <Flex direction="column" gap="xl">
