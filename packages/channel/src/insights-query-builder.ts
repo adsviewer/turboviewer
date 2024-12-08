@@ -216,11 +216,10 @@ export const intervalBeforeLast = (
   dateTo?: Date | null,
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
-  const doubleIntervalInMonths = `1 ${interval}`;
 
   return `interval_before_last AS (SELECT ${group}, ${getSqlOrderColumn(orderColumn)}
                                              FROM organization_insights i
-                                             WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${doubleIntervalInMonths}')
+                                             WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${normalizedInterval(interval)}')
                                                AND date < DATE_TRUNC('${interval}', ${date})
                                              GROUP BY ${group}${addHavingOnComputed(orderColumn)})`;
 };
@@ -261,13 +260,11 @@ export const orderColumnTrendAbsolute = (
 ): string => {
   const date = dateTo ? `TIMESTAMP '${dateTo.toISOString()}'` : `CURRENT_DATE`;
 
-  const intervalInMonths = interval === 'quarter' ? '3 months' : `1 ${interval}`;
-
   const sqlOrderColumn = getSqlOrderColumn(orderColumn, 'trend');
 
   return `order_column_trend AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${intervalInMonths}')
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${normalizedInterval(interval)}')
                                         AND date <= DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}${addHavingOnComputed(orderColumn)}
                                       ORDER BY trend${trend === 'desc' ? ' DESC' : ''}
@@ -296,7 +293,7 @@ export const thresholdColumn = (
 
   return `threshold_column AS (SELECT ${group}, ${sqlOrderColumn}
                                       FROM organization_insights i
-                                      WHERE date >= DATE_TRUNC('${interval}', ${date})
+                                      WHERE date >= DATE_TRUNC('${interval}', ${date} - INTERVAL '${normalizedInterval(interval)}')
                                         AND date <= DATE_TRUNC('${interval}', ${date})
                                       GROUP BY ${group}${addHavingOnComputed(orderColumn)}
                                       HAVING ${thresholds.join(' AND ')}
@@ -310,6 +307,8 @@ const getInterval = (interval: string, dataPointsPerInterval: number): string =>
   }
   return `${String(dataPointsPerInterval)} ${interval}`; // Default case
 };
+
+const normalizedInterval = (interval: IntervalType): string => (interval === 'quarter' ? '3 months' : `1 ${interval}`);
 
 export const groupedInsights = (
   args: FilterInsightsInputType,
