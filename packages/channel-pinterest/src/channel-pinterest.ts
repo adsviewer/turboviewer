@@ -45,7 +45,20 @@ class Pinterest implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const clientId = env.PINTEREST_APP_ID;
     const redirectUri = `${env.API_ENDPOINT}${authEndpoint}`;
-    const scopes = ['ads:read'];
+    const scopes = [
+      'ads:read',
+      'boards:read',
+      'boards:read_secret',
+      'boards:write',
+      'boards:write_secret',
+      'pins:read',
+      'pins:read_secret',
+      'pins:write',
+      'pins:write_secret',
+      'user_accounts:read',
+      'catalogs:read',
+      'catalogs:write',
+    ];
 
     const url = `https://www.pinterest.com/oauth/?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes.join(',')}&state=${state}`;
 
@@ -56,19 +69,20 @@ class Pinterest implements ChannelInterface {
     const clientId = env.PINTEREST_APP_ID;
     const clientSecret = env.PINTEREST_APP_SECRET;
     const redirectUri = `${env.API_ENDPOINT}${authEndpoint}`;
+    const base64Credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: redirectUri,
+    });
 
     const response = await fetch(`${baseUrl}/oauth/token`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${base64Credentials}`,
       },
-      body: JSON.stringify({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
+      body,
     });
 
     const tokens: unknown = await response.json();
@@ -93,11 +107,36 @@ class Pinterest implements ChannelInterface {
       accessToken: parsed.data.access_token,
       refreshToken: parsed.data.refresh_token,
       accessTokenExpiresAt: new Date(Date.now() + parsed.data.expires_in * 1000),
+      refreshTokenExpiresAt: new Date(Date.now() + parsed.data.refresh_token_expires_in * 1000),
     };
   }
 
-  async getUserId(_accessToken: string): Promise<string | AError> {
-    return Promise.reject(new AError('Not Implemented'));
+  async getUserId(accessToken: string): Promise<string | AError> {
+    const response = await fetch(`https://api.pinterest.com/v5/user_account`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status !== 200) {
+      return new AError('Failed to fetch user');
+    }
+
+    const data: unknown = await response.json();
+
+    const schema = z.object({
+      id: z.string(),
+    });
+
+    const parsed = schema.safeParse(data);
+
+    if (!parsed.success) {
+      return new AError('Failed to fetch user');
+    }
+
+    return parsed.data.id;
   }
 
   signOutCallback(req: ExpressRequest, res: ExpressResponse): void {

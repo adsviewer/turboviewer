@@ -863,6 +863,7 @@ enum PublisherEnum {
   GlobalAppBundle
   Pangle
   Google
+  Pinterest
   Unknown
 }
 

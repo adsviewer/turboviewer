@@ -1285,9 +1285,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
-      google-ads-api:
-        specifier: 17.1.0-rest-beta
-        version: 17.1.0-rest-beta
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
