@@ -17,8 +17,9 @@ import metaLogo from '../../../../../public/integrations/meta-logo-icon.svg';
 import tiktokLogo from '../../../../../public/integrations/tiktok-logo-icon.svg';
 import linkedinLogo from '../../../../../public/integrations/linkedin-logo-icon.svg';
 import googleLogo from '../../../../../public/integrations/google-logo-icon.svg';
-import snapchatLogo from '../../../../../public/integrations/snapchat-logo-icon.svg';
+import pinterestLogo from '../../../../../public/integrations/pinterest-logo-icon.svg';
 import redditLogo from '../../../../../public/integrations/reddit-logo-icon.svg';
+import snapchatLogo from '../../../../../public/integrations/snapchat-logo-icon.svg';
 import IntegrationCard from './integration-card';
 import Graphics from './graphics';
 
@@ -133,7 +134,7 @@ export default function IntegrationsGrid(props: IntegrationProps): ReactNode {
     [IntegrationType.GOOGLE, { title: 'Google', imageSrc: googleLogo as string }],
     [IntegrationType.SNAPCHAT, { title: 'Snapchat', imageSrc: snapchatLogo as string }],
     [IntegrationType.REDDIT, { title: 'Reddit', imageSrc: redditLogo as string }],
-    [IntegrationType.PINTEREST, { title: 'Pinterest', imageSrc: redditLogo as string }],
+    [IntegrationType.PINTEREST, { title: 'Pinterest', imageSrc: pinterestLogo as string }],
   ]);
 
   return (

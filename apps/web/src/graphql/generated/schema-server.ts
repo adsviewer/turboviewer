@@ -979,6 +979,7 @@ export enum PublisherEnum {
   GlobalAppBundle = 'GlobalAppBundle',
   Pangle = 'Pangle',
   Google = 'Google',
+  Pinterest = 'Pinterest',
   Unknown = 'Unknown',
 }
 
