@@ -28,15 +28,17 @@ enum Tier {
 }
 
 model Organization {
-  id            String    @id @default(cuid())
-  name          String
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
-  randomString  String    @default(cuid())
-  domain        String?   @unique
-  parentId      String?   @map("parent_id")
-  tier          Tier
-  tierChangedAt DateTime? @map("tier_changed_at")
+  id                            String    @id @default(cuid())
+  name                          String
+  createdAt                     DateTime  @default(now()) @map("created_at")
+  updatedAt                     DateTime  @default(now()) @updatedAt @map("updated_at")
+  randomString                  String    @default(cuid())
+  domain                        String?   @unique
+  parentId                      String?   @map("parent_id")
+  tier                          Tier
+  tierChangedAt                 DateTime? @map("tier_changed_at")
+  paymentProviderCustomerId     String?   @map("payment_provider_customer_id")
+  paymentProviderSubscriptionId String?   @map("payment_provider_subscription_id")
 
   integrations    Integration[]
   users           UserOrganization[]

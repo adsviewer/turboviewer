@@ -81,3 +81,14 @@ export const redisDelPattern = (pattern: string): void => {
 export const redisQuit = async (): Promise<void> => {
   await ioredis.quit();
 };
+
+export const redisSingletonExists = async (key: string, ttlInSec: number): Promise<boolean> => {
+  const multi = ioredis.multi();
+  multi.exists(key);
+  multi.set(key, 'true', 'EX', ttlInSec);
+  const results = await multi.exec();
+
+  if (!results) return false;
+  const existsResult = results[0][1];
+  return existsResult === 1;
+};

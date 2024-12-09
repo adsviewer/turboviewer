@@ -537,6 +537,9 @@ importers:
       '@aws-sdk/client-ses':
         specifier: ^3.699.0
         version: 3.699.0
+      '@aws-sdk/client-sqs':
+        specifier: ^3.699.0
+        version: 3.699.0
       '@envelop/sentry':
         specifier: ^10.0.0
         version: 10.0.0(@envelop/core@5.0.2)(@sentry/node@8.41.0)(graphql@16.9.0(patch_hash=jry3qelthzltp4b752bkujt7je))
