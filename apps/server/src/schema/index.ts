@@ -12,6 +12,7 @@ import './user/invite-operations';
 import './user/user-operations';
 import './comment/comment-operations';
 import './notification/notification-operations';
+import './user/preferences/preferences-operations';
 
 builder.queryType({
   fields: (_t) => ({}),

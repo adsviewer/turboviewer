@@ -709,11 +709,11 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
-  test: Scalars['Boolean']['output'];
   updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
+  updatePreferences?: Maybe<Preferences>;
   updateUser: User;
   upsertComment: Comment;
   upsertSearchQueryString: SearchQueryString;
@@ -849,6 +849,11 @@ export type MutationUpdateOrganizationUserArgs = {
   userId: Scalars['String']['input'];
 };
 
+export type MutationUpdatePreferencesArgs = {
+  idToUpdate: Scalars['String']['input'];
+  insightsPerRow?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type MutationUpdateUserArgs = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -964,6 +969,15 @@ export type Pagination = {
   hasNext: Scalars['Boolean']['output'];
   page: Scalars['Int']['output'];
   pageSize: Scalars['Int']['output'];
+};
+
+export type Preferences = {
+  __typename: 'Preferences';
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  insightsPerRow: Scalars['Int']['output'];
+  updatedAt: Scalars['Date']['output'];
+  user: User;
 };
 
 export type PrismaClientKnownRequestError = Error & {
@@ -1155,6 +1169,7 @@ export type User = {
   organizations: Array<UserOrganization>;
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
+  preferences?: Maybe<Preferences>;
   status: UserStatus;
   taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];
@@ -1496,10 +1511,6 @@ export type MarkAllNotificationsAsReadMutationVariables = Exact<{ [key: string]:
 
 export type MarkAllNotificationsAsReadMutation = { __typename: 'Mutation'; markAllNotificationsAsRead: boolean };
 
-export type TestMutationVariables = Exact<{ [key: string]: never }>;
-
-export type TestMutation = { __typename: 'Mutation'; test: boolean };
-
 export type GetOrganizationQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetOrganizationQuery = {
@@ -1698,6 +1709,7 @@ export type UpdateUserMutation = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
+    preferences?: { __typename: 'Preferences'; id: string; insightsPerRow: number } | null;
     organizations: Array<{
       __typename: 'UserOrganization';
       organization: { __typename: 'Organization'; id: string; name: string };
@@ -1753,6 +1765,7 @@ export type MeQuery = {
     photoUrl?: string | null;
     allRoles: Array<AllRoles>;
     currentOrganizationId?: string | null;
+    preferences?: { __typename: 'Preferences'; id: string; insightsPerRow: number } | null;
     organizations: Array<{
       __typename: 'UserOrganization';
       organization: { __typename: 'Organization'; id: string; name: string };
@@ -1804,6 +1817,7 @@ export type UserFieldsFragment = {
   photoUrl?: string | null;
   allRoles: Array<AllRoles>;
   currentOrganizationId?: string | null;
+  preferences?: { __typename: 'Preferences'; id: string; insightsPerRow: number } | null;
   organizations: Array<{
     __typename: 'UserOrganization';
     organization: { __typename: 'Organization'; id: string; name: string };
@@ -1864,6 +1878,16 @@ export type RemoveUserMilestoneMutation = {
   removeUserMilestone: { __typename: 'Tokens'; token: string; refreshToken: string };
 };
 
+export type UpdatePreferencesMutationVariables = Exact<{
+  idToUpdate: Scalars['String']['input'];
+  insightsPerRow?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type UpdatePreferencesMutation = {
+  __typename: 'Mutation';
+  updatePreferences?: { __typename: 'Preferences'; id: string } | null;
+};
+
 export const CurrentOrganizationFragmentDoc = gql`
   fragment CurrentOrganization on Organization {
     id
@@ -1898,6 +1922,10 @@ export const UserFieldsFragmentDoc = gql`
     email
     photoUrl
     allRoles
+    preferences {
+      id
+      insightsPerRow
+    }
     organizations {
       organization {
         id
@@ -2186,11 +2214,6 @@ export const MarkAllNotificationsAsReadDocument = gql`
     markAllNotificationsAsRead
   }
 `;
-export const TestDocument = gql`
-  mutation test {
-    test
-  }
-`;
 export const GetOrganizationDocument = gql`
   query getOrganization {
     organization {
@@ -2345,6 +2368,13 @@ export const RemoveUserMilestoneDocument = gql`
     }
   }
 `;
+export const UpdatePreferencesDocument = gql`
+  mutation updatePreferences($idToUpdate: String!, $insightsPerRow: Int) {
+    updatePreferences(idToUpdate: $idToUpdate, insightsPerRow: $insightsPerRow) {
+      id
+    }
+  }
+`;
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
@@ -2489,9 +2519,6 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<MarkAllNotificationsAsReadMutation>;
-    },
-    test(variables?: TestMutationVariables, options?: C): Promise<TestMutation> {
-      return requester<TestMutation, TestMutationVariables>(TestDocument, variables, options) as Promise<TestMutation>;
     },
     getOrganization(variables?: GetOrganizationQueryVariables, options?: C): Promise<GetOrganizationQuery> {
       return requester<GetOrganizationQuery, GetOrganizationQueryVariables>(
@@ -2650,6 +2677,13 @@ export function getSdk<C>(requester: Requester<C>) {
         variables,
         options,
       ) as Promise<RemoveUserMilestoneMutation>;
+    },
+    updatePreferences(variables: UpdatePreferencesMutationVariables, options?: C): Promise<UpdatePreferencesMutation> {
+      return requester<UpdatePreferencesMutation, UpdatePreferencesMutationVariables>(
+        UpdatePreferencesDocument,
+        variables,
+        options,
+      ) as Promise<UpdatePreferencesMutation>;
     },
   };
 }

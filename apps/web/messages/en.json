@@ -84,6 +84,7 @@
     "chartMetric": "Chart Metric",
     "thresholdsDescription": "You can set a custom range of min/max values for the selected metric that you're ordering by.",
     "adjustingFor": "Adjusting for",
+    "insightsPerRow": "Insights per row",
     "comments": {
       "title": "Comments",
       "newComment": "New Comment",

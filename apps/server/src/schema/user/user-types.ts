@@ -12,6 +12,7 @@ import { type InputShapeFromFields } from '@pothos/core';
 import { builder } from '../builder';
 import { OrganizationDto } from '../organization/org-types';
 import { type GraphQLContext } from '../../context';
+import { PreferencesDto } from './preferences/preferences-types';
 
 const AllRolesEnum = { ...RoleEnum, ...OrganizationRoleEnum };
 const AllRolesDto = builder.enumType(AllRolesEnum, {
@@ -102,6 +103,7 @@ export const UserDto = builder.prismaObject('User', {
     currentOrganization: t.relation('currentOrganization', { nullable: true, type: OrganizationDto }),
     comments: t.relation('comments', { nullable: false }),
     taggedInComment: t.relation('taggedInComment', { nullable: false }),
+    preferences: t.relation('preferences', { nullable: true, type: PreferencesDto }),
     notifications: t.relatedConnection('notifications', { cursor: 'id' }),
   }),
 });
