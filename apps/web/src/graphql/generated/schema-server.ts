@@ -334,7 +334,6 @@ export enum DeviceEnum {
   Desktop = 'Desktop',
   ConnectedTv = 'ConnectedTv',
   Tablet = 'Tablet',
-  Unspacified = 'Unspacified',
   Unknown = 'Unknown',
 }
 
@@ -510,7 +509,6 @@ export enum InsightsOrderBy {
   Desktop = 'Desktop',
   ConnectedTv = 'ConnectedTv',
   Tablet = 'Tablet',
-  Unspacified = 'Unspacified',
   Unknown = 'Unknown',
 }
 

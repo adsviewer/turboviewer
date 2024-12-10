@@ -345,7 +345,6 @@ enum DeviceEnum {
   Desktop
   ConnectedTv
   Tablet
-  Unspacified
   Unknown
 }
 

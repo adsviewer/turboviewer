@@ -303,7 +303,6 @@ enum DeviceEnum {
   Desktop
   ConnectedTv
   Tablet
-  Unspacified
   Unknown
 }
 
@@ -490,7 +489,6 @@ enum InsightsOrderBy {
   Desktop
   ConnectedTv
   Tablet
-  Unspacified
   Unknown
 }
 

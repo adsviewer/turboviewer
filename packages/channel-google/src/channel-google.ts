@@ -303,6 +303,10 @@ class Google implements ChannelInterface {
           const adId = item.adGroupAd.ad.id;
           const device = item.segments.device;
 
+          if (adId === '__proto__' || adId === 'constructor' || adId === 'prototype') {
+            return acc;
+          }
+
           acc[date] = acc[date] ?? {};
 
           acc[date][adId] = acc[date][adId] ?? {};
@@ -430,7 +434,7 @@ class Google implements ChannelInterface {
           externalAccountId: dbAccount.externalId,
           device: el.device.length ? (Google.deviceEnumMap.get(el.device) ?? DeviceEnum.Unknown) : DeviceEnum.Unknown,
           publisher: PublisherEnum.Google,
-          position: el.adGroupAd.ad.type ?? 'feed', // TODO: AD type
+          position: el.adGroupAd.ad.type ?? 'feed',
         }));
 
         const uniqueInsights = Array.from(
@@ -662,7 +666,7 @@ class Google implements ChannelInterface {
     ['DESKTOP', DeviceEnum.Desktop],
     ['CONNECTED_TV', DeviceEnum.ConnectedTv],
     ['UNKNOWN', DeviceEnum.Unknown],
-    ['UNSPECIFIED', DeviceEnum.Unspacified],
+    ['UNSPECIFIED', DeviceEnum.Unknown],
     ['OTHER', DeviceEnum.Unknown],
   ]);
 
