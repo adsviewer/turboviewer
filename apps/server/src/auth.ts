@@ -3,7 +3,7 @@ import { prisma, type RoleEnum } from '@repo/database';
 import { AError } from '@repo/utils';
 import { type AJwtPayload } from '@repo/shared-types';
 import { Environment, MODE } from '@repo/mode';
-import { userWithRoles, type UserWithRoles } from '@repo/backend-shared';
+import { removeUserMilestone, userWithRoles, type UserWithRoles } from '@repo/backend-shared';
 import { env } from './config';
 
 // eslint-disable-next-line import/no-named-as-default-member -- This is a false positive
@@ -33,6 +33,17 @@ export const createJwts = async ({
   status,
   milestones,
 }: UserWithRoles): Promise<TokensType> => {
+  if (milestones.includes('Onboarding') && organizationId) {
+    const adAccountsCount = await prisma.adAccount.count({
+      where: { organizations: { some: { id: organizationId } } },
+    });
+    if (adAccountsCount > 0) {
+      await removeUserMilestone(userId, 'Onboarding');
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition,no-param-reassign -- the reassign is intended.
+      milestones = milestones.filter((milestone) => milestone !== 'Onboarding');
+    }
+  }
+
   const roles = userRoles.map((r) => r.role);
   if (organizationId) {
     const { role } = await prisma.userOrganization.findUniqueOrThrow({
