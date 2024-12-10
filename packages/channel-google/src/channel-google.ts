@@ -18,6 +18,7 @@ import {
   type AdAccountIntegration,
   authEndpoint,
   type ChannelAd,
+  type ChannelCampaign,
   type ChannelCreative,
   type ChannelIFrame,
   type ChannelInsight,
@@ -41,6 +42,7 @@ import {
   assetResponseSchema,
   customerQueryResponseSchema,
   defaultQueryResponseSchema,
+  type GroupedAdData,
   responseSchema,
   videoAdResponseSchema,
 } from './schema';
@@ -266,6 +268,7 @@ class Google implements ChannelInterface {
       ad_group_ad.status,
       ad_group_ad.ad.id,
       ad_group_ad.ad.name,
+      ad_group_ad.ad.type,
       ad_group_ad.ad.video_responsive_ad.call_to_actions,
       ad_group_ad.ad.video_responsive_ad.videos,
       ad_group_ad.ad.video_responsive_ad.descriptions,
@@ -295,13 +298,70 @@ class Google implements ChannelInterface {
 
         if (!youtubeData || isAError(youtubeData)) return;
 
-        const campaignGroup = youtubeData.map((el) => ({
+        const groupedData = youtubeData.reduce<GroupedAdData>((acc, item) => {
+          const date = item.segments.date;
+          const adId = item.adGroupAd.ad.id;
+          const device = item.segments.device;
+
+          if (adId === '__proto__' || adId === 'constructor' || adId === 'prototype') {
+            return acc;
+          }
+
+          acc[date] = acc[date] ?? {};
+
+          acc[date][adId] = acc[date][adId] ?? {};
+
+          acc[date][adId][device] = acc[date][adId][device] ?? {
+            date,
+            adId,
+            campaign: {
+              name: '',
+              id: '',
+            },
+            metrics: {
+              clicks: 0,
+              costMicros: 0,
+              impressions: 0,
+            },
+            videos: new Set(),
+            device,
+            adGroup: item.adGroup,
+            adGroupAd: item.adGroupAd,
+          };
+
+          const adData = acc[date][adId][device];
+
+          adData.metrics.clicks += parseInt(item.metrics.clicks, 10);
+          adData.metrics.costMicros += parseInt(item.metrics.costMicros, 10);
+          adData.metrics.impressions += parseInt(item.metrics.impressions, 10);
+          adData.adGroup = item.adGroup;
+          adData.adGroupAd = item.adGroupAd;
+          adData.campaign = item.campaign;
+
+          if (item.adGroupAd.ad.videoResponsiveAd) {
+            item.adGroupAd.ad.videoResponsiveAd.videos.forEach((video) => adData.videos.add(video.asset));
+          }
+
+          adData.date = item.segments.date;
+
+          return acc;
+        }, {});
+
+        const result = Object.values(groupedData).flatMap((dateGroup) =>
+          Object.values(dateGroup).flatMap((deviceGroup) =>
+            Object.values(deviceGroup).map((ad) => ({
+              ...ad,
+            })),
+          ),
+        );
+
+        const campaignGroup: ChannelCampaign[] = result.map((el) => ({
           externalId: String(el.campaign.id),
-          name: el.campaign.name,
+          name: el.campaign.name.toString(),
           externalAdAccountId: dbAccount.externalId,
         }));
 
-        const adSets = youtubeData.map((el) => ({
+        const adSets = result.map((el) => ({
           externalId: String(el.adGroup.id),
           name: el.adGroup.name,
           externalCampaignId: el.campaign.id,
@@ -365,18 +425,16 @@ class Google implements ChannelInterface {
           }
         }
 
-        const insights: ChannelInsight[] = youtubeData.map((el) => ({
+        const insights: ChannelInsight[] = result.map((el) => ({
           clicks: Number(el.metrics.clicks),
           impressions: Number(el.metrics.impressions),
           spend: Number(el.metrics.costMicros) / 1000,
-          externalAdId: el.adGroupAd.ad.id,
-          date: new Date(el.segments.date),
+          externalAdId: el.adId,
+          date: new Date(el.date),
           externalAccountId: dbAccount.externalId,
-          device: el.segments.device
-            ? (Google.deviceEnumMap.get(el.segments.device) ?? DeviceEnum.Unknown)
-            : DeviceEnum.Unknown,
+          device: el.device.length ? (Google.deviceEnumMap.get(el.device) ?? DeviceEnum.Unknown) : DeviceEnum.Unknown,
           publisher: PublisherEnum.Google,
-          position: 'feed',
+          position: el.adGroupAd.ad.type ?? 'feed',
         }));
 
         const uniqueInsights = Array.from(
@@ -603,9 +661,13 @@ class Google implements ChannelInterface {
   }
 
   private static deviceEnumMap: Map<string, DeviceEnum> = new Map<string, DeviceEnum>([
-    ['MOBILE_APP', DeviceEnum.MobileApp],
-    ['MOBILE_WEB', DeviceEnum.MobileWeb],
-    ['DESKTOP_WEB', DeviceEnum.Desktop],
+    ['MOBILE', DeviceEnum.MobileApp],
+    ['TABLET', DeviceEnum.Tablet],
+    ['DESKTOP', DeviceEnum.Desktop],
+    ['CONNECTED_TV', DeviceEnum.ConnectedTv],
+    ['UNKNOWN', DeviceEnum.Unknown],
+    ['UNSPECIFIED', DeviceEnum.Unknown],
+    ['OTHER', DeviceEnum.Unknown],
   ]);
 
   private static async findManagerAccount(accessToken: string, customerIds: string[]): Promise<string | AError> {
