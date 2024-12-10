@@ -109,9 +109,22 @@ model User {
   comments        Comment[]
   notifications   Notification[]
   taggedInComment Comment[]           @relation(name: "COMMENT_TAGGED_USERS")
+  preferences     Preferences?
 
   @@index([currentOrganizationId])
   @@map("users")
+}
+
+model Preferences {
+  id             String @id
+  insightsPerRow Int    @map("insights_per_row")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [id], references: [id])
+
+  @@map("preferences")
 }
 
 enum FeedbackTypeEnum {

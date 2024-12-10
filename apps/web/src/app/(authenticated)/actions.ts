@@ -23,12 +23,19 @@ import {
   type MarkNotificationAsReadMutation,
   type MarkAllNotificationsAsReadMutation,
   type NotificationsQueryVariables,
+  type MutationUpdatePreferencesArgs,
+  type UpdatePreferencesMutation,
 } from '@/graphql/generated/schema-server';
 import { urqlClientSdk, urqlClientSdkRefresh } from '@/lib/urql/urql-client';
 import { handleUrqlRequest, type UrqlResult } from '@/util/handle-urql-request';
 import { changeJWT } from '../(unauthenticated)/actions';
 
 export const getUserDetails = async (): Promise<MeQuery['me']> => (await (await urqlClientSdk()).me()).me;
+
+export const updatePreferences = async (
+  values: MutationUpdatePreferencesArgs,
+): Promise<UrqlResult<UpdatePreferencesMutation, string>> =>
+  await handleUrqlRequest((await urqlClientSdk()).updatePreferences(values));
 
 export default async function getAccounts(): Promise<AdAccountsQuery> {
   return await (await urqlClientSdk()).adAccounts();

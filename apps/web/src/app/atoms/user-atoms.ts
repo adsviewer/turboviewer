@@ -9,6 +9,7 @@ export const initialUserDetails: MeQuery['me'] = {
   email: '',
   photoUrl: '',
   allRoles: [],
+  preferences: null,
   currentOrganization: {
     __typename: 'Organization',
     id: '',

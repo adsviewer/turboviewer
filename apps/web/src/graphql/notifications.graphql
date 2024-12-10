@@ -26,7 +26,3 @@ mutation markNotificationAsRead($notificationId: String!) {
 mutation markAllNotificationsAsRead {
   markAllNotificationsAsRead
 }
-
-mutation test {
-  test
-}
