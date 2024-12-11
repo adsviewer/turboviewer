@@ -725,11 +725,11 @@ type Mutation {
   subscribeNewsletter(email: String!): NewsletterSubscription!
   switchOrganization(organizationId: String!): Tokens!
   switchTiers(organizationId: String!, tier: Tier!): Organization!
-  test: Boolean!
   updateIntegrationAdAccounts(adAccountIds: [String!]!, integrationId: String!): [AdAccountIntegration!]!
   updateOrganization(name: String!): Organization!
   updateOrganizationAdAccounts(adAccountIds: [String!]!, integrationType: IntegrationType!): Organization!
   updateOrganizationUser(role: OrganizationRoleEnum, userId: String!): UserOrganization!
+  updatePreferences(idToUpdate: String!, insightsPerRow: Int): Preferences
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
   upsertComment(
     body: String!
@@ -837,6 +837,14 @@ interface Pagination {
   hasNext: Boolean!
   page: Int!
   pageSize: Int!
+}
+
+type Preferences {
+  createdAt: Date!
+  id: ID!
+  insightsPerRow: Int!
+  updatedAt: Date!
+  user: User!
 }
 
 type PrismaClientKnownRequestError implements Error {
@@ -995,6 +1003,7 @@ type User {
   Caller is permitted to view this field if they are in a common organization
   """
   photoUrl: String
+  preferences: Preferences
   status: UserStatus!
   taggedInComment: [Comment!]!
   updatedAt: Date!

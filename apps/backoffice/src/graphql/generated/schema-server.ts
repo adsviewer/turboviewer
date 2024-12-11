@@ -709,11 +709,11 @@ export type Mutation = {
   subscribeNewsletter: NewsletterSubscription;
   switchOrganization: Tokens;
   switchTiers: Organization;
-  test: Scalars['Boolean']['output'];
   updateIntegrationAdAccounts: Array<AdAccountIntegration>;
   updateOrganization: Organization;
   updateOrganizationAdAccounts: Organization;
   updateOrganizationUser: UserOrganization;
+  updatePreferences?: Maybe<Preferences>;
   updateUser: User;
   upsertComment: Comment;
   upsertSearchQueryString: SearchQueryString;
@@ -849,6 +849,11 @@ export type MutationUpdateOrganizationUserArgs = {
   userId: Scalars['String']['input'];
 };
 
+export type MutationUpdatePreferencesArgs = {
+  idToUpdate: Scalars['String']['input'];
+  insightsPerRow?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type MutationUpdateUserArgs = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -964,6 +969,15 @@ export type Pagination = {
   hasNext: Scalars['Boolean']['output'];
   page: Scalars['Int']['output'];
   pageSize: Scalars['Int']['output'];
+};
+
+export type Preferences = {
+  __typename: 'Preferences';
+  createdAt: Scalars['Date']['output'];
+  id: Scalars['ID']['output'];
+  insightsPerRow: Scalars['Int']['output'];
+  updatedAt: Scalars['Date']['output'];
+  user: User;
 };
 
 export type PrismaClientKnownRequestError = Error & {
@@ -1155,6 +1169,7 @@ export type User = {
   organizations: Array<UserOrganization>;
   /** Caller is permitted to view this field if they are in a common organization */
   photoUrl?: Maybe<Scalars['String']['output']>;
+  preferences?: Maybe<Preferences>;
   status: UserStatus;
   taggedInComment: Array<Comment>;
   updatedAt: Scalars['Date']['output'];

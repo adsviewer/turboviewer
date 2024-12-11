@@ -4,9 +4,11 @@ import { Text, SimpleGrid } from '@mantine/core';
 import { type Key, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
+import { useAtomValue } from 'jotai';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { type InsightsQuery } from '@/graphql/generated/schema-server';
 import { getInsightHeading, getInsightTitle } from '@/util/insights-utils';
+import { DEFAULT_INSIGHTS_PER_ROW, userDetailsAtom } from '@/app/atoms/user-atoms';
 import InsightCard from './insight-card';
 
 interface PropsType {
@@ -17,6 +19,7 @@ interface PropsType {
 
 export default function InsightsGrid(props: PropsType): ReactNode {
   const t = useTranslations('insights');
+  const userDetails = useAtomValue(userDetailsAtom);
 
   return (
     <>
@@ -31,7 +34,10 @@ export default function InsightsGrid(props: PropsType): ReactNode {
       ) : null}
 
       {/* Render insights */}
-      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} style={{ display: 'relative' }}>
+      <SimpleGrid
+        cols={{ base: 1, sm: 2, lg: userDetails.preferences?.insightsPerRow ?? DEFAULT_INSIGHTS_PER_ROW }}
+        style={{ display: 'relative' }}
+      >
         {props.insights.length
           ? props.insights.map((insight, index) => (
               <motion.div

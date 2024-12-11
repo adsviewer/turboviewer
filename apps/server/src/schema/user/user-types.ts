@@ -102,6 +102,7 @@ export const UserDto = builder.prismaObject('User', {
     currentOrganization: t.relation('currentOrganization', { nullable: true, type: OrganizationDto }),
     comments: t.relation('comments', { nullable: false }),
     taggedInComment: t.relation('taggedInComment', { nullable: false }),
+    preferences: t.relation('preferences', { nullable: true }),
     notifications: t.relatedConnection('notifications', { cursor: 'id' }),
   }),
 });

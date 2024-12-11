@@ -1,13 +1,15 @@
 'use client';
 
-import { type ComboboxItem, Flex, Select, Switch, Tooltip } from '@mantine/core';
+import { type ComboboxItem, em, Flex, Select, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ChangeEvent, useState, useTransition } from 'react';
-import { useSetAtom } from 'jotai/index';
+import { useAtom, useSetAtom } from 'jotai/index';
 import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/dates';
 import { IconCalendarMonth } from '@tabler/icons-react';
 import { getTodayStartOfDay } from '@repo/utils';
+import { logger } from '@repo/logger';
+import { useMediaQuery } from '@mantine/hooks';
 import {
   addOrReplaceURLParams,
   ChartMetricsEnum,
@@ -21,6 +23,8 @@ import { getOrderByValue } from '@/util/insights-utils';
 import Search from '@/components/search/search';
 import { convertFromUTC } from '@/util/mantine-utils';
 import Thresholds from '@/components/thresholds/thresholds';
+import { DEFAULT_INSIGHTS_PER_ROW, userDetailsAtom } from '@/app/atoms/user-atoms';
+import { updatePreferences } from '../../actions';
 
 export default function OrderFilters(): React.ReactNode {
   const t = useTranslations('insights');
@@ -28,8 +32,10 @@ export default function OrderFilters(): React.ReactNode {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   const [isPending, startTransition] = useTransition();
   const setInsights = useSetAtom(insightsAtom);
+  const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
   const setHasNextInsightsPageAtom = useSetAtom(hasNextInsightsPageAtom);
 
   // Date range values loading
@@ -51,6 +57,9 @@ export default function OrderFilters(): React.ReactNode {
       return searchParams.get(urlKeys.pageSize) ?? '12';
     return '12';
   };
+
+  const getInsightsPerRowValue = (): string =>
+    userDetails.preferences ? String(userDetails.preferences.insightsPerRow) : String(DEFAULT_INSIGHTS_PER_ROW);
 
   const getOrderDirectionValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.orderDirection, OrderDirection.asc)) return OrderDirection.asc;
@@ -76,7 +85,7 @@ export default function OrderFilters(): React.ReactNode {
     return ChartMetricsEnum.ImpressionsCPM;
   };
 
-  const handleChartMetricChange = (value: string | null, option: ComboboxItem): void => {
+  const handleChartMetricChange = (_value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.chartMetric, option.value);
     startTransition(() => {
@@ -84,7 +93,7 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
-  const handlePageSizeChange = (value: string | null, option: ComboboxItem): void => {
+  const handlePageSizeChange = (_value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.pageSize, option.value);
     startTransition(() => {
@@ -92,7 +101,27 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
-  const handleOrderByChange = (value: string | null, option: ComboboxItem): void => {
+  const handleInsightsPerRowChange = (_value: string | null, option: ComboboxItem): void => {
+    if (userDetails.preferences) {
+      const updatedUserDetails = {
+        ...userDetails,
+        preferences: {
+          ...userDetails.preferences,
+          insightsPerRow: Number(option.value),
+        },
+      };
+      setUserDetails(updatedUserDetails);
+
+      void updatePreferences({
+        idToUpdate: userDetails.id,
+        insightsPerRow: Number(option.value),
+      }).catch((e: unknown) => {
+        logger.error(e);
+      });
+    }
+  };
+
+  const handleOrderByChange = (_value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderBy, option.value);
     startTransition(() => {
@@ -100,7 +129,7 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
-  const handleOrderDirectionChange = (value: string | null, option: ComboboxItem): void => {
+  const handleOrderDirectionChange = (_value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.orderDirection, option.value);
     startTransition(() => {
@@ -108,7 +137,7 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
-  const handleIntervalChange = (value: string | null, option: ComboboxItem): void => {
+  const handleIntervalChange = (_value: string | null, option: ComboboxItem): void => {
     resetInsights();
     const newURL = addOrReplaceURLParams(pathname, searchParams, urlKeys.interval, option.value);
     startTransition(() => {
@@ -201,6 +230,29 @@ export default function OrderFilters(): React.ReactNode {
             disabled={isPending}
           />
         </Flex>
+
+        {/* Insights per row setting */}
+        {!isMobile ? (
+          <Flex align="flex-end" mr="sm">
+            <Select
+              description={t('insightsPerRow')}
+              styles={{
+                description: {
+                  whiteSpace: 'nowrap',
+                },
+              }}
+              placeholder="Pick value"
+              data={['3', '4', '5', '6']}
+              value={getInsightsPerRowValue()}
+              onChange={handleInsightsPerRowChange}
+              allowDeselect={false}
+              comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+              maw={90}
+              scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+              disabled={isPending}
+            />
+          </Flex>
+        ) : null}
 
         {/* Order filter */}
         <Flex align="flex-end" gap="md" wrap="wrap">
