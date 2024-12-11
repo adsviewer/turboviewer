@@ -129,10 +129,12 @@ export type ChannelInitialProgressPayload = {
 
 export type Comment = {
   __typename: 'Comment';
+  ad?: Maybe<Ad>;
+  adId?: Maybe<Scalars['ID']['output']>;
   body: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
-  creative: Creative;
-  creativeId: Scalars['ID']['output'];
+  creative?: Maybe<Creative>;
+  creativeId?: Maybe<Scalars['ID']['output']>;
   id: Scalars['ID']['output'];
   taggedUsers: Array<User>;
   updatedAt: Scalars['Date']['output'];
@@ -863,9 +865,10 @@ export type MutationUpdateUserArgs = {
 };
 
 export type MutationUpsertCommentArgs = {
+  adId?: InputMaybe<Scalars['String']['input']>;
   body: Scalars['String']['input'];
   commentToUpdateId?: InputMaybe<Scalars['String']['input']>;
-  creativeId: Scalars['String']['input'];
+  creativeId?: InputMaybe<Scalars['String']['input']>;
   taggedUsersIds?: Array<Scalars['String']['input']>;
 };
 
@@ -1035,9 +1038,10 @@ export type QueryCheckConfirmInvitedUserHashValidityArgs = {
 };
 
 export type QueryCommentsArgs = {
+  adId?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  creativeId: Scalars['String']['input'];
+  creativeId?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };

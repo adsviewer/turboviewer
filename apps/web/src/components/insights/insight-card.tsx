@@ -39,6 +39,8 @@ interface InsightCardProps {
   iframe?: IFrame | null;
   creativeId?: string | null;
   creativeName?: string | null;
+  adId?: string | null;
+  adName?: string | null;
   hideHeading?: boolean;
   hideBody?: boolean;
   hideTitleAndRank?: boolean;
@@ -153,6 +155,9 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
     ];
   };
 
+  const canHaveComments = (): boolean =>
+    Boolean((props.creativeId && props.creativeName) ?? (props.adId && props.adName));
+
   const renderHeading = (): ReactNode => {
     return (
       <Flex gap="sm" align="center">
@@ -161,9 +166,14 @@ export default function InsightCard(props: InsightCardProps): ReactNode {
         </Title>
 
         {/* Comments */}
-        {props.creativeId && props.creativeName ? (
+        {canHaveComments() ? (
           <Flex mb="md" ml="auto" style={{ cursor: 'pointer' }}>
-            <Comments creativeId={props.creativeId} creativeName={props.creativeName} />
+            <Comments
+              creativeId={props.creativeId}
+              creativeName={props.creativeName}
+              adId={props.adId}
+              adName={props.adName}
+            />
           </Flex>
         ) : null}
       </Flex>

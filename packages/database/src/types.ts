@@ -5,6 +5,7 @@ declare global {
   namespace PrismaJson {
     type NewCommentNotificationExtraData = {
       commentMentionCreativeId?: string;
+      commentMentionAdId?: string;
     };
   }
 }

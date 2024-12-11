@@ -13,18 +13,19 @@ builder.queryFields((t) => ({
     edgesNullable: false,
     nodeNullable: false,
     nullable: false,
-    totalCount: async (_parent, args, _ctx, _info) => {
-      return await prisma.comment.count({
-        where: { creativeId: args.creativeId },
-      });
-    },
     args: {
-      creativeId: t.arg.string({ required: true }),
+      creativeId: t.arg.string({ required: false }),
+      adId: t.arg.string({ required: false }),
+    },
+    totalCount: async (_parent, args, _ctx, _info) => {
+      const where = args.creativeId ? { creativeId: args.creativeId } : { adId: args.adId };
+      return await prisma.comment.count({ where });
     },
     resolve: async (query, _parent, args) => {
+      const where = args.creativeId ? { creativeId: args.creativeId } : { adId: args.adId };
       const data = await prisma.comment.findMany({
         ...query,
-        where: { creativeId: args.creativeId },
+        where,
         orderBy: { createdAt: 'desc' },
       });
       return data;
@@ -39,13 +40,15 @@ builder.mutationFields((t) => ({
     args: {
       commentToUpdateId: t.arg.string({ required: false }),
       body: t.arg.string({ required: true, validate: { schema: commentBodySchema } }),
-      creativeId: t.arg.string({ required: true }),
+      creativeId: t.arg.string({ required: false }),
+      adId: t.arg.string({ required: false }),
       taggedUsersIds: t.arg.stringList({ required: true, defaultValue: [] }),
     },
     resolve: async (query, _parent, args, ctx) => {
       const data = {
         body: args.body,
         creativeId: args.creativeId,
+        adId: args.adId,
         userId: ctx.currentUserId,
         taggedUsers: {
           connect: args.taggedUsersIds.map((id) => ({ id })),
@@ -59,6 +62,7 @@ builder.mutationFields((t) => ({
           type: NotificationTypeEnum.COMMENT_MENTION,
           extraData: {
             commentMentionCreativeId: args.creativeId,
+            commentMentionAdId: args.adId,
           },
           isRead: false,
         }));
@@ -74,7 +78,8 @@ builder.mutationFields((t) => ({
             receivingUserId: notification.receivingUserId,
             type: NotificationTypeEnum.COMMENT_MENTION,
             extraData: {
-              commentMentionCreativeId: args.creativeId,
+              commentMentionCreativeId: args.creativeId ?? undefined,
+              commentMentionAdId: args.adId ?? undefined,
             },
             isRead: false,
             createdAt: new Date(),

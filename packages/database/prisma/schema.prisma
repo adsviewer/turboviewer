@@ -322,6 +322,7 @@ model Ad {
   insights   Insight[]
   creative   Creative? @relation(fields: [creativeId], references: [id])
   adSet      AdSet?    @relation(fields: [adSetId], references: [id])
+  Comment    Comment[]
 
   @@unique([adSetId, externalId])
   @@unique([adAccountId, externalId])
@@ -375,18 +376,20 @@ enum PublisherEnum {
 }
 
 model Comment {
-  id         String @id @default(cuid())
-  creativeId String @map("creative_id")
-  userId     String @map("user_id")
+  id         String  @id @default(cuid())
+  creativeId String? @map("creative_id")
+  adId       String? @map("ad_id")
+  userId     String  @map("user_id")
 
   body String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  taggedUsers User[]   @relation(name: "COMMENT_TAGGED_USERS")
-  creative    Creative @relation(fields: [creativeId], references: [id])
-  user        User     @relation(fields: [userId], references: [id])
+  taggedUsers User[]    @relation(name: "COMMENT_TAGGED_USERS")
+  creative    Creative? @relation(fields: [creativeId], references: [id])
+  ad          Ad?       @relation(fields: [adId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([creativeId, createdAt])

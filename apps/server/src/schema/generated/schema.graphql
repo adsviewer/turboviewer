@@ -93,10 +93,12 @@ type ChannelInitialProgressPayload {
 }
 
 type Comment {
+  ad: Ad
+  adId: ID
   body: String!
   createdAt: Date!
-  creative: Creative!
-  creativeId: ID!
+  creative: Creative
+  creativeId: ID
   id: ID!
   taggedUsers: [User!]!
   updatedAt: Date!
@@ -732,9 +734,10 @@ type Mutation {
   updatePreferences(idToUpdate: String!, insightsPerRow: Int): Preferences
   updateUser(firstName: String, lastName: String, newPassword: String, oldPassword: String): User!
   upsertComment(
+    adId: String
     body: String!
     commentToUpdateId: String
-    creativeId: String!
+    creativeId: String
     taggedUsersIds: [String!]! = []
   ): Comment!
   upsertSearchQueryString(id: String, isOrganization: Boolean!, name: String!, queryString: String!): SearchQueryString!
@@ -871,7 +874,14 @@ type Query {
   """
   availableOrganizationAdAccounts(channel: IntegrationType!): [AdAccount!]!
   checkConfirmInvitedUserHashValidity(invitedHash: String!): Boolean!
-  comments(after: String, before: String, creativeId: String!, first: Int, last: Int): QueryCommentsConnection!
+  comments(
+    adId: String
+    after: String
+    before: String
+    creativeId: String
+    first: Int
+    last: Int
+  ): QueryCommentsConnection!
   insightDatapoints(args: InsightsDatapointsInput!): [InsightsDatapoints!]!
   insightIFrame(adId: String!, device: DeviceEnum, position: String, publisher: PublisherEnum): IFrame
   insights(filter: FilterInsightsInput!): GroupedInsights!

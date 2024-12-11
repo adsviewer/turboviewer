@@ -128,10 +128,12 @@ export type ChannelInitialProgressPayload = {
 
 export type Comment = {
   __typename: 'Comment';
+  ad?: Maybe<Ad>;
+  adId?: Maybe<Scalars['ID']['output']>;
   body: Scalars['String']['output'];
   createdAt: Scalars['Date']['output'];
-  creative: Creative;
-  creativeId: Scalars['ID']['output'];
+  creative?: Maybe<Creative>;
+  creativeId?: Maybe<Scalars['ID']['output']>;
   id: Scalars['ID']['output'];
   taggedUsers: Array<User>;
   updatedAt: Scalars['Date']['output'];
@@ -862,9 +864,10 @@ export type MutationUpdateUserArgs = {
 };
 
 export type MutationUpsertCommentArgs = {
+  adId?: InputMaybe<Scalars['String']['input']>;
   body: Scalars['String']['input'];
   commentToUpdateId?: InputMaybe<Scalars['String']['input']>;
-  creativeId: Scalars['String']['input'];
+  creativeId?: InputMaybe<Scalars['String']['input']>;
   taggedUsersIds?: Array<Scalars['String']['input']>;
 };
 
@@ -1034,9 +1037,10 @@ export type QueryCheckConfirmInvitedUserHashValidityArgs = {
 };
 
 export type QueryCommentsArgs = {
+  adId?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  creativeId: Scalars['String']['input'];
+  creativeId?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -1234,7 +1238,8 @@ export type ZodFieldError = {
 };
 
 export type CommentsQueryVariables = Exact<{
-  creativeId: Scalars['String']['input'];
+  creativeId?: InputMaybe<Scalars['String']['input']>;
+  adId?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
@@ -1260,7 +1265,8 @@ export type CommentsQuery = {
 };
 
 export type UpsertCommentMutationVariables = Exact<{
-  creativeId: Scalars['String']['input'];
+  creativeId?: InputMaybe<Scalars['String']['input']>;
+  adId?: InputMaybe<Scalars['String']['input']>;
   body: Scalars['String']['input'];
   taggedUsersIds?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   commentToUpdateId?: InputMaybe<Scalars['String']['input']>;
@@ -1950,8 +1956,8 @@ export const UserFieldsFragmentDoc = gql`
   ${CurrentOrganizationFragmentDoc}
 `;
 export const CommentsDocument = gql`
-  query comments($creativeId: String!, $after: String) {
-    comments(creativeId: $creativeId, after: $after) {
+  query comments($creativeId: String, $adId: String, $after: String) {
+    comments(creativeId: $creativeId, adId: $adId, after: $after) {
       totalCount
       pageInfo {
         endCursor
@@ -1978,9 +1984,16 @@ export const CommentsDocument = gql`
   }
 `;
 export const UpsertCommentDocument = gql`
-  mutation upsertComment($creativeId: String!, $body: String!, $taggedUsersIds: [String!], $commentToUpdateId: String) {
+  mutation upsertComment(
+    $creativeId: String
+    $adId: String
+    $body: String!
+    $taggedUsersIds: [String!]
+    $commentToUpdateId: String
+  ) {
     upsertComment(
       creativeId: $creativeId
+      adId: $adId
       body: $body
       taggedUsersIds: $taggedUsersIds
       commentToUpdateId: $commentToUpdateId
@@ -2378,7 +2391,7 @@ export const UpdatePreferencesDocument = gql`
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>;
 export function getSdk<C>(requester: Requester<C>) {
   return {
-    comments(variables: CommentsQueryVariables, options?: C): Promise<CommentsQuery> {
+    comments(variables?: CommentsQueryVariables, options?: C): Promise<CommentsQuery> {
       return requester<CommentsQuery, CommentsQueryVariables>(
         CommentsDocument,
         variables,

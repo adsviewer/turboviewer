@@ -1,5 +1,5 @@
-query comments($creativeId: String!, $after: String) {
-  comments(creativeId: $creativeId, after: $after) {
+query comments($creativeId: String, $adId: String, $after: String) {
+  comments(creativeId: $creativeId, adId: $adId, after: $after) {
     totalCount
     pageInfo {
       endCursor
@@ -25,9 +25,16 @@ query comments($creativeId: String!, $after: String) {
   }
 }
 
-mutation upsertComment($creativeId: String!, $body: String!, $taggedUsersIds: [String!], $commentToUpdateId: String) {
+mutation upsertComment(
+  $creativeId: String
+  $adId: String
+  $body: String!
+  $taggedUsersIds: [String!]
+  $commentToUpdateId: String
+) {
   upsertComment(
     creativeId: $creativeId
+    adId: $adId
     body: $body
     taggedUsersIds: $taggedUsersIds
     commentToUpdateId: $commentToUpdateId

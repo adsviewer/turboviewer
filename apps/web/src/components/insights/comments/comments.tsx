@@ -19,8 +19,10 @@ import CommentsList, { type CommentsListRef } from './comments-list';
 import CommentInput from './comment-input/comment-input';
 
 interface PropsType {
-  creativeId: string;
-  creativeName: string;
+  creativeId: string | null | undefined;
+  creativeName: string | null | undefined;
+  adId: string | null | undefined;
+  adName: string | null | undefined;
 }
 
 export interface CommentItemType {
@@ -87,7 +89,11 @@ export default function Comments(props: PropsType): ReactNode {
 
   const loadComments = (refreshData = false): void => {
     setIsLoadingComments(true);
-    void getComments({ creativeId: props.creativeId, after: !refreshData ? commentsData?.pageInfo.endCursor : null })
+    void getComments({
+      creativeId: props.creativeId ?? null,
+      adId: props.adId ?? null,
+      after: !refreshData ? commentsData?.pageInfo.endCursor : null,
+    })
       .then((res) => {
         if (!res.success) {
           notifications.show({
@@ -128,6 +134,7 @@ export default function Comments(props: PropsType): ReactNode {
     setIsPending(true);
     void upsertComment({
       creativeId: props.creativeId,
+      adId: props.adId,
       body: commentBody,
       commentToUpdateId: editedComment?.id,
       taggedUsersIds,
@@ -224,8 +231,8 @@ export default function Comments(props: PropsType): ReactNode {
 
       {/* Comments Modal */}
       <Modal opened={opened} onClose={closeModal} title={getCommentsTitle()} size="md">
-        <Text size="sm" ta="center" c="dimmed">
-          {props.creativeName}
+        <Text size="sm" ta="center" c="dimmed" style={{ wordBreak: 'break-all' }}>
+          {props.creativeName ?? props.adName}
         </Text>
         <Divider my="md" />
 
