@@ -9,6 +9,7 @@ export interface ProcessReportReq {
   adAccountId: string;
   taskId?: string;
   status: JobStatusEnum;
+  retries: number;
 }
 
 export enum JobStatusEnum {
@@ -32,7 +33,7 @@ export const adReportsStatusesToRedis = async (
     const ranges = await timeRanges(initial, account.id);
     await Promise.all(
       ranges.map((range) =>
-        adReportStatusToRedis(channelType, account.id, range.since, range.until, JobStatusEnum.QUEUING),
+        adReportStatusToRedis(channelType, account.id, range.since, range.until, JobStatusEnum.QUEUING, 0),
       ),
     );
   }
@@ -44,24 +45,26 @@ export const adReportStatusToRedis = async (
   since: Date | string,
   until: Date | string,
   status: JobStatusEnum,
+  retries: number,
   taskId?: string,
 ): Promise<void> => {
   if (status !== JobStatusEnum.QUEUING) {
     logger.info(
-      `Should remove adAccountId: ${adAccountId}, status: ${status}, since: ${String(since)}, until: ${String(until)}`,
+      `Should remove adAccountId: ${adAccountId}, status: ${JobStatusEnum.QUEUING}, since: ${String(since)}, until: ${String(until)}`,
     );
     const removed = await redisRemoveFromSet(activeReportRedisKey(channelType), {
       since,
       until,
       adAccountId,
       status: JobStatusEnum.QUEUING,
+      retries,
     } satisfies ProcessReportReq);
     logger.info(`Removed ${String(removed)} items.`);
   }
   logger.info(`Adding adAccountId: ${adAccountId}, status: ${status}, taskId: ${String(taskId)}`);
   await redisAddToSet(
     activeReportRedisKey(channelType),
-    { since, until, adAccountId, taskId, status } satisfies ProcessReportReq,
+    { since, until, adAccountId, taskId, status, retries } satisfies ProcessReportReq,
     maxTimeToProcessSec,
   );
 };
