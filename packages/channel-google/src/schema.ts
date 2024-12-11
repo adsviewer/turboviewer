@@ -47,6 +47,7 @@ const videoResponsiveAdSchema = z.object({
 
 const youtubeAdSchema = z.object({
   videoResponsiveAd: videoResponsiveAdSchema.optional(),
+  type: z.string().optional(),
   id: z.string(),
 });
 
@@ -167,3 +168,30 @@ export const customerQueryResponseSchema = createCommonResponseSchema(
     customer: customerSchema,
   }),
 );
+
+export type GroupedAdData = Record<
+  string,
+  Record<
+    string,
+    Record<
+      string,
+      {
+        date: string;
+        adId: string;
+        campaign: {
+          name: string;
+          id: string;
+        };
+        metrics: {
+          clicks: number;
+          costMicros: number;
+          impressions: number;
+        };
+        videos: Set<string>;
+        device: string;
+        adGroup: (typeof adGroupSchema)['_type'];
+        adGroupAd: (typeof youtubeAdGroupAdSchema)['_type'];
+      }
+    >
+  >
+>;

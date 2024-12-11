@@ -301,6 +301,8 @@ enum DeviceEnum {
   MobileWeb
   MobileApp
   Desktop
+  ConnectedTv
+  Tablet
   Unknown
 }
 
@@ -485,6 +487,8 @@ enum InsightsOrderBy {
   MobileWeb
   MobileApp
   Desktop
+  ConnectedTv
+  Tablet
   Unknown
 }
 
