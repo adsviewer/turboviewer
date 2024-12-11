@@ -275,6 +275,7 @@ export default function OrderFilters(): React.ReactNode {
                 disabled={isPending}
               />
               <DatePickerInput
+                description={tGeneric('pickDateRange')}
                 mt="auto"
                 type="range"
                 maxDate={getTodayStartOfDay(convertFromUTC(new Date()))}
