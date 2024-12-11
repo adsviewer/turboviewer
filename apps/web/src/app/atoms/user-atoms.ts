@@ -1,6 +1,8 @@
 import { atom } from 'jotai';
 import { Tier, type MeQuery } from '@/graphql/generated/schema-server';
 
+export const DEFAULT_INSIGHTS_PER_ROW = 3;
+
 export const initialUserDetails: MeQuery['me'] = {
   __typename: 'User',
   id: '',

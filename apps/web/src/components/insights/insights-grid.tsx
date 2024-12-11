@@ -8,7 +8,7 @@ import { useAtomValue } from 'jotai';
 import LoaderCentered from '@/components/misc/loader-centered';
 import { type InsightsQuery } from '@/graphql/generated/schema-server';
 import { getInsightHeading, getInsightTitle } from '@/util/insights-utils';
-import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { DEFAULT_INSIGHTS_PER_ROW, userDetailsAtom } from '@/app/atoms/user-atoms';
 import InsightCard from './insight-card';
 
 interface PropsType {
@@ -35,7 +35,7 @@ export default function InsightsGrid(props: PropsType): ReactNode {
 
       {/* Render insights */}
       <SimpleGrid
-        cols={{ base: 1, sm: 2, lg: userDetails.preferences?.insightsPerRow ?? 3 }}
+        cols={{ base: 1, sm: 2, lg: userDetails.preferences?.insightsPerRow ?? DEFAULT_INSIGHTS_PER_ROW }}
         style={{ display: 'relative' }}
       >
         {props.insights.length

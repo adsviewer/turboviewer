@@ -10,14 +10,12 @@ builder.mutationFields((t) => ({
       insightsPerRow: t.arg.int({ required: false }),
     },
     resolve: async (query, _parent, args, _ctx) => {
-      const dataToBeUpdated = {
-        insightsPerRow: args.insightsPerRow ?? undefined,
-      };
-
       return await prisma.preferences.update({
         ...query,
         where: { id: args.idToUpdate },
-        data: dataToBeUpdated,
+        data: {
+          insightsPerRow: args.insightsPerRow ?? undefined,
+        },
       });
     },
   }),

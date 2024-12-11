@@ -1,6 +1,6 @@
 'use client';
 
-import { type ComboboxItem, Flex, Select, Switch, Tooltip } from '@mantine/core';
+import { type ComboboxItem, em, Flex, Select, Switch, Tooltip } from '@mantine/core';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type ChangeEvent, useState, useTransition } from 'react';
@@ -9,6 +9,7 @@ import { DatePickerInput, type DatesRangeValue, type DateValue } from '@mantine/
 import { IconCalendarMonth } from '@tabler/icons-react';
 import { getTodayStartOfDay } from '@repo/utils';
 import { logger } from '@repo/logger';
+import { useMediaQuery } from '@mantine/hooks';
 import {
   addOrReplaceURLParams,
   ChartMetricsEnum,
@@ -22,7 +23,7 @@ import { getOrderByValue } from '@/util/insights-utils';
 import Search from '@/components/search/search';
 import { convertFromUTC } from '@/util/mantine-utils';
 import Thresholds from '@/components/thresholds/thresholds';
-import { userDetailsAtom } from '@/app/atoms/user-atoms';
+import { DEFAULT_INSIGHTS_PER_ROW, userDetailsAtom } from '@/app/atoms/user-atoms';
 import { updatePreferences } from '../../actions';
 
 export default function OrderFilters(): React.ReactNode {
@@ -31,6 +32,7 @@ export default function OrderFilters(): React.ReactNode {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isMobile = useMediaQuery(`(max-width: ${em(750)})`);
   const [isPending, startTransition] = useTransition();
   const setInsights = useSetAtom(insightsAtom);
   const [userDetails, setUserDetails] = useAtom(userDetailsAtom);
@@ -56,10 +58,8 @@ export default function OrderFilters(): React.ReactNode {
     return '12';
   };
 
-  const getInsightsPerRowValue = (): string => {
-    if (userDetails.preferences) return String(userDetails.preferences.insightsPerRow);
-    return '3';
-  };
+  const getInsightsPerRowValue = (): string =>
+    userDetails.preferences ? String(userDetails.preferences.insightsPerRow) : String(DEFAULT_INSIGHTS_PER_ROW);
 
   const getOrderDirectionValue = (): string => {
     if (isParamInSearchParams(searchParams, urlKeys.orderDirection, OrderDirection.asc)) return OrderDirection.asc;
@@ -101,7 +101,7 @@ export default function OrderFilters(): React.ReactNode {
     });
   };
 
-  const hanleInsightsPerRowChange = (_value: string | null, option: ComboboxItem): void => {
+  const handleInsightsPerRowChange = (_value: string | null, option: ComboboxItem): void => {
     if (userDetails.preferences) {
       const updatedUserDetails = {
         ...userDetails,
@@ -232,20 +232,27 @@ export default function OrderFilters(): React.ReactNode {
         </Flex>
 
         {/* Insights per row setting */}
-        <Flex align="flex-end" mr="sm">
-          <Select
-            description={t('insightsPerRow')}
-            placeholder="Pick value"
-            data={['3', '4', '5', '6']}
-            value={getInsightsPerRowValue()}
-            onChange={hanleInsightsPerRowChange}
-            allowDeselect={false}
-            comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
-            maw={90}
-            scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
-            disabled={isPending}
-          />
-        </Flex>
+        {!isMobile ? (
+          <Flex align="flex-end" mr="sm">
+            <Select
+              description={t('insightsPerRow')}
+              styles={{
+                description: {
+                  whiteSpace: 'nowrap',
+                },
+              }}
+              placeholder="Pick value"
+              data={['3', '4', '5', '6']}
+              value={getInsightsPerRowValue()}
+              onChange={handleInsightsPerRowChange}
+              allowDeselect={false}
+              comboboxProps={{ transitionProps: { transition: 'fade-down', duration: 200 } }}
+              maw={90}
+              scrollAreaProps={{ type: 'always', offsetScrollbars: 'y' }}
+              disabled={isPending}
+            />
+          </Flex>
+        ) : null}
 
         {/* Order filter */}
         <Flex align="flex-end" gap="md" wrap="wrap">
