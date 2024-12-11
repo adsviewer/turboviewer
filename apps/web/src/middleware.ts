@@ -106,9 +106,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // (Insights only) If page is loaded without any query params, set the following initial params
+  // (Insights (analytical) only) If page is loaded without any query params, set the following initial params
   if (request.nextUrl.pathname === '/insights' && !request.nextUrl.search) {
-    let newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}`;
+    const today = DateTime.now().startOf('day').toMillis().toString();
+    const prevWeek = DateTime.now().startOf('day').minus({ days: 7 }).toMillis().toString();
+    let newURL = `/insights?${urlKeys.groupedBy}=${InsightsColumnsGroupBy.adId}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.device}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.publisher}&${urlKeys.groupedBy}=${InsightsColumnsGroupBy.position}&${urlKeys.fetchPreviews}=true&${urlKeys.interval}=${InsightsInterval.week}&dateFrom=${prevWeek}&dateTo=${today}`;
     if (isUserOnboarding(tokenData)) newURL = ONBOARDING_PATH;
     const redirectUrl = new URL(newURL, request.url);
     return NextResponse.redirect(redirectUrl);
