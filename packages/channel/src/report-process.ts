@@ -82,10 +82,22 @@ const updateReports = (
         }
         break;
       case JobStatusEnum.FAILED:
-      case JobStatusEnum.CANCELED:
-        logger.error(`Report ${JSON.stringify(report)} was canceled/failed`);
-        await redisRemoveFromSet(activeReportRedisKey(channelType), report);
+      case JobStatusEnum.CANCELED: {
+        if (report.retries === 2) {
+          logger.error(`Report ${JSON.stringify(report)} was canceled/failed`);
+          await redisRemoveFromSet(activeReportRedisKey(channelType), report);
+        } else {
+          report.retries += 1;
+          logger.info(
+            `Report ${JSON.stringify(report)} was canceled/failed. Will be retried.(${String(report.retries)})`,
+          );
+          await Promise.all([
+            redisRemoveFromSet(activeReportRedisKey(channelType), report),
+            runAsyncReports(channelType, [report], channel),
+          ]);
+        }
         break;
+      }
       default:
         break;
     }
@@ -114,12 +126,13 @@ const runAsyncReports = async (
         since: report.since,
         until: report.until,
         adAccountId: accountIntegration.adAccount.id,
+        retries: report.retries,
       };
     }),
   ).then((taskIds) =>
-    taskIds.map(({ taskId, adAccountId, since, until }) => {
+    taskIds.map(({ taskId, adAccountId, since, until, retries }) => {
       if (isAError(taskId)) return;
-      return adReportStatusToRedis(channelType, adAccountId, since, until, JobStatusEnum.PROCESSING, taskId);
+      return adReportStatusToRedis(channelType, adAccountId, since, until, JobStatusEnum.PROCESSING, retries, taskId);
     }),
   );
 };
