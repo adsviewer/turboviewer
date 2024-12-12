@@ -45,20 +45,7 @@ class Pinterest implements ChannelInterface {
   generateAuthUrl(state: string): GenerateAuthUrlResp {
     const clientId = env.PINTEREST_APP_ID;
     const redirectUri = `${env.API_ENDPOINT}${authEndpoint}`;
-    const scopes = [
-      'ads:read',
-      'boards:read',
-      'boards:read_secret',
-      'boards:write',
-      'boards:write_secret',
-      'pins:read',
-      'pins:read_secret',
-      'pins:write',
-      'pins:write_secret',
-      'user_accounts:read',
-      'catalogs:read',
-      'catalogs:write',
-    ];
+    const scopes = ['ads:read', 'user_accounts:read'];
 
     const url = `https://www.pinterest.com/oauth/?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes.join(',')}&state=${state}`;
 
