@@ -33,6 +33,7 @@
     "NEXT_WEBAPP_ENDPOINT",
     "NODE_ENV",
     "PORT",
+    "POSTHOG_API_KEY",
     "PUBLIC_URL",
     "REDIS_URL",
     "SKIP_ENV_VALIDATION",

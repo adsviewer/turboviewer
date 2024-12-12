@@ -17,8 +17,21 @@ jobs:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+    permissions:
+      id-token: write
 
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_AWS_ACCOUNT_ID }}:role/prod-github
+          role-session-name: prod
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - uses: dkershner6/aws-ssm-getparameters-action@v2
+        with:
+          parameterPairs: "/prod/server/posthog_api_key = POSTHOG_API_KEY"
+
       - name: Check out code
         uses: actions/checkout@v4
         with:

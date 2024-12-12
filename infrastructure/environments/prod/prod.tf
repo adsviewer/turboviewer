@@ -101,6 +101,7 @@ module "environment" {
   git_repository                       = local.git_repository
   github_role_name                     = module.workspace.github_role_name
   organization                         = local.organization
+  posthog_api_key                      = var.posthog_api_key
   public_subnet_ids                    = module.workspace.public_subnet_ids
   redis_url                            = var.redis_url
   service_subnet_ids                   = module.workspace.private_subnet_ids

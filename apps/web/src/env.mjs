@@ -13,6 +13,7 @@ export const env = createEnv({
     AUTH_SECRET: z.string().min(1).default('something'),
     NODE_ENV: z.enum(['development', 'test', 'production']),
     GRAPHQL_ENDPOINT: z.string().min(1),
+    POSTHOG_API_KEY: z.string().min(1),
     REFRESH_SECRET: z.string().min(1).default('refreshSecret'),
   },
 
@@ -37,6 +38,7 @@ export const env = createEnv({
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
     GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
+    POSTHOG_API_KEY: process.env.POSTHOG_API_KEY,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_MEASUREMENT_ID: process.env.NEXT_PUBLIC_MEASUREMENT_ID,
     NEXT_PUBLIC_BACKOFFICE_URL: process.env.NEXT_PUBLIC_BACKOFFICE_URL,
