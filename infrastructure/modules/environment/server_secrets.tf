@@ -15,7 +15,8 @@ locals {
     "google_channel_developer_token" : var.google_channel_developer_token,
     "google_channel_application_secret" : var.google_channel_application_secret,
     "stripe_public_key" : var.stripe_public_key, "stripe_private_key" : var.stripe_private_key,
-    "tiktok_application_id" : var.tiktok_application_id, "tiktok_application_secret" : var.tiktok_application_secret
+    "tiktok_application_id" : var.tiktok_application_id, "tiktok_application_secret" : var.tiktok_application_secret,
+    "posthog_api_key" : var.posthog_api_key,
   }
 }
 

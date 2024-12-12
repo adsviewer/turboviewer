@@ -61,6 +61,10 @@ variable "linkedin_application_secret" {
   type = string
 }
 
+variable "posthog_api_key" {
+  type = string
+}
+
 variable "redis_url" {
   type = string
 }

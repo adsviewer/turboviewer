@@ -69,6 +69,10 @@ variable "organization" {
   type = string
 }
 
+variable "posthog_api_key" {
+  type = string
+}
+
 variable "public_subnet_ids" {
   type = list(string)
 }

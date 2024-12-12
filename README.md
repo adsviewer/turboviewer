@@ -26,15 +26,18 @@ A bunch of cool stuff for viewing, optimizing and growing your digital ad portfo
    in the `apps/server` directory. Look at [Configuring aws-cli](#configuring-aws-cli) if you don't
    have access.
 
-5. Create a .env file in the `apps/web`, `apps/backoffice` directory with the following content:
+5. Copy the [.env](https://eu-central-1.console.aws.amazon.com/s3/object/local-adsviewer?region=eu-central-1&bucketType=general&prefix=web/.env)
+   in the `apps/web` directory.
+
+6. Create a .env file in the `apps/backoffice` directory with the following content:
 
    ```env
    GRAPHQL_ENDPOINT=http://localhost:4000/graphql
    ```
 
-6. Run `pnpm i`
-7. `pnpm dev`
-8. Open [http://localhost:3000](http://localhost:3000)
+7. Run `pnpm i`
+8. `pnpm dev`
+9. Open [http://localhost:3000](http://localhost:3000)
 
 ### Configuring aws-cli
 

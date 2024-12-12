@@ -38,6 +38,7 @@
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
+    "@repo/posthog": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "@sentry/nextjs": "^8.41.0",

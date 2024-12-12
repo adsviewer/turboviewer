@@ -39,6 +39,7 @@
     "@repo/logger": "workspace:*",
     "@repo/mappings": "workspace:*",
     "@repo/mode": "workspace:*",
+    "@repo/posthog": "workspace:*",
     "@repo/pubsub": "workspace:*",
     "@repo/redis": "workspace:*",
     "@repo/utils": "workspace:*",
