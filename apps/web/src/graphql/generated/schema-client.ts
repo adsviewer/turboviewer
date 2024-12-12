@@ -623,6 +623,7 @@ export enum IntegrationType {
   GOOGLE = 'GOOGLE',
   SNAPCHAT = 'SNAPCHAT',
   REDDIT = 'REDDIT',
+  PINTEREST = 'PINTEREST',
 }
 
 export type InviteLinks = {
@@ -997,6 +998,7 @@ export enum PublisherEnum {
   GlobalAppBundle = 'GlobalAppBundle',
   Pangle = 'Pangle',
   Google = 'Google',
+  Pinterest = 'Pinterest',
   Unknown = 'Unknown',
 }
 

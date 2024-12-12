@@ -8,6 +8,7 @@ import { GraphQLError } from 'graphql/index';
 import { tierConstraints } from '@repo/mappings';
 import { type ChannelInitialProgressPayload, pubSub } from '@repo/pubsub';
 import { type IntegrationStatsUpdateEvent, type NewIntegrationEvent } from '@repo/shared-types';
+import { FeatureFlags, isFeatureEnabled } from '@repo/posthog';
 import { builder } from '../builder';
 import {
   ChannelInitialProgressPayloadDto,
@@ -62,21 +63,29 @@ builder.queryFields((t) => ({
 
       const tierAllowIntegration = currentIntegrations < maxIntegrations;
 
-      return Object.values(IntegrationTypeEnum).map((channel) => {
-        const status = integrationStatus(channel, integrations);
-        const authUrl =
-          ShouldConnectIntegrationStatuses.includes(status) && tierAllowIntegration
-            ? getIntegrationAuthUrl(channel, ctx.organizationId, ctx.currentUserId)
-            : null;
+      const pinterestEnabled = await isFeatureEnabled(FeatureFlags.Pinterest, ctx.currentUserId);
+      return Object.values(IntegrationTypeEnum)
+        .filter((channel) => {
+          if (pinterestEnabled) {
+            return true;
+          }
+          return channel !== IntegrationTypeEnum.PINTEREST;
+        })
+        .map((channel) => {
+          const status = integrationStatus(channel, integrations);
+          const authUrl =
+            ShouldConnectIntegrationStatuses.includes(status) && tierAllowIntegration
+              ? getIntegrationAuthUrl(channel, ctx.organizationId, ctx.currentUserId)
+              : null;
 
-        authUrl && logger.info(`Integration ${channel} authUrl: ${authUrl}`);
-        return {
-          type: channel,
-          status,
-          authUrl,
-          tierAllowIntegration,
-        };
-      });
+          authUrl && logger.info(`Integration ${channel} authUrl: ${authUrl}`);
+          return {
+            type: channel,
+            status,
+            authUrl,
+            tierAllowIntegration,
+          };
+        });
     },
   }),
 }));
@@ -157,6 +166,7 @@ const integrationStatus = (type: IntegrationTypeEnum, integrations: Integration[
     IntegrationTypeEnum.TIKTOK,
     IntegrationTypeEnum.LINKEDIN,
     IntegrationTypeEnum.GOOGLE,
+    IntegrationTypeEnum.PINTEREST,
   ];
   if (!SUPPORTED_INTEGRATIONS.includes(type)) return IntegrationStatusEnum.ComingSoon;
 

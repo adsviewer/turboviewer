@@ -621,6 +621,7 @@ enum IntegrationType {
   GOOGLE
   SNAPCHAT
   REDDIT
+  PINTEREST
 }
 
 type InviteLinks {
@@ -862,6 +863,7 @@ enum PublisherEnum {
   GlobalAppBundle
   Pangle
   Google
+  Pinterest
   Unknown
 }
 

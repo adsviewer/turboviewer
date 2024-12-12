@@ -61,6 +61,13 @@ variable "linkedin_application_secret" {
   type = string
 }
 
+variable "pinterest_app_id" {
+  type = string
+}
+variable "pinterest_app_secret" {
+  type = string
+}
+
 variable "posthog_api_key" {
   type = string
 }

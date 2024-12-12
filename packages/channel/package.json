@@ -29,6 +29,7 @@
     "@repo/channel-google": "workspace:*",
     "@repo/channel-linkedin": "workspace:*",
     "@repo/channel-meta": "workspace:*",
+    "@repo/channel-pinterest": "workspace:*",
     "@repo/channel-tiktok": "workspace:*",
     "@repo/channel-utils": "workspace:*",
     "@repo/database": "workspace:*",
